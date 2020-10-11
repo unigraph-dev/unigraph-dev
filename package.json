@@ -1,0 +1,19 @@
+{
+  "name": "unigraph-dev",
+  "version": "0.1.0",
+  "description": "",
+  "main": "dist/index.js",
+  "engines": {
+    "node": "^12.11.1",
+    "npm": "^6.11.3"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "github:ssalka/unigraph-dev",
+  "homepage": "https://github.com/ssalka/unigraph-dev#readme",
+  "devDependencies": {
+    "@types/node": "^12.11",
+    "typescript": "^4.0.3"
+  }
+}

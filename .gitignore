@@ -1,0 +1,11 @@
+# System files
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# Directories
+node_modules
+dist
+.ignore
