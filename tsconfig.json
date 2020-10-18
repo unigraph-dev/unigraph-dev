@@ -5,6 +5,7 @@
     "lib": [
       "ESNext"
     ],
+    "module": "CommonJS",
     "moduleResolution": "node",
     "outDir": "dist",
     "paths": {
@@ -16,6 +17,10 @@
     "sourceMap": true,
     "strict": true,
     "target": "ES2015",
+    "typeRoots": [
+      "src/custom.d.ts",
+      "node_modules/@types"
+    ]
   },
   "include": [
     "src"

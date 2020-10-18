@@ -14,9 +14,10 @@
   yarn
   ```
 
-* Build project
+* Run the project
   ```
-  yarn tsc
+  yarn start
+  # or, for a simple example script (create + read)
+  yarn example
   ```
-
-- [ ] TODO npm script for running dev server
+  
