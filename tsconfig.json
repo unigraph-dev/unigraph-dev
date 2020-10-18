@@ -5,6 +5,7 @@
     "lib": [
       "ESNext"
     ],
+    "module": "CommonJS",
     "moduleResolution": "node",
     "outDir": "dist",
     "paths": {

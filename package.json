@@ -8,6 +8,9 @@
     "npm": "^6.11.3"
   },
   "scripts": {
+    "build": "tsc",
+    "start": "yarn build && node dist",
+    "example": "yarn build && node dist/example",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": "github:ssalka/unigraph-dev",
