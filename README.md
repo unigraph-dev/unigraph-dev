@@ -20,5 +20,4 @@
   # or, for a simple example script (create + read)
   yarn example
   ```
-
-- [ ] TODO npm script for running dev server
+  

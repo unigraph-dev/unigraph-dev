@@ -1,16 +1,16 @@
-import { DgraphClient, DgraphClientStub, Operation, Mutation } from 'dgraph-js';
+import { DgraphClient as ActualDgraphClient, DgraphClientStub, Operation, Mutation } from 'dgraph-js';
 
 /**
  * Example client, adapted from:
  *   https://github.com/dgraph-io/dgraph-js/blob/master/examples/simple/index.js
  */
-export default class Client {
-  dgraphClient: DgraphClient;
-  dgraphClientStub: DgraphClientStub;
+export default class DgraphClient {
+  private dgraphClient: ActualDgraphClient;
+  private dgraphClientStub: DgraphClientStub;
 
   constructor(connectionUri: string) {
     this.dgraphClientStub = new DgraphClientStub(connectionUri);
-    this.dgraphClient = new DgraphClient(this.dgraphClientStub);
+    this.dgraphClient = new ActualDgraphClient(this.dgraphClientStub);
   }
 
   async dropAll() {
