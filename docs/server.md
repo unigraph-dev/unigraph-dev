@@ -25,11 +25,11 @@ For more information on the various events and subscriptions, check out the docu
 To send an event, use `"type": "event"` and `"event": "<name of the event to send>"`. Here is a list of available events:
 
 - Database operations
-    * query_by_string_with_vars
-    * set_schema
+    * query_by_string_with_vars `{"query": "<query string>", "vars": {<maps of all vars>}}`
+    * set_schema `{"schema": "<a schema string>"}`
     * create_data_by_json
-    * drop_data
-    * drop_all
+    * drop_data (no parameters needed)
+    * drop_all (no parameters needed)
 - Administrative events
 - Statistics and logging 
 

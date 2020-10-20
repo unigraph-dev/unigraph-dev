@@ -17,33 +17,44 @@ export default async function startServer(client: Client) {
     "event": string
   };
 
+  const makeResponse = (event: {id: number}, success: boolean, body: object) => {
+    return JSON.stringify({
+      type: "response",
+      success: success,
+      id: event.id,
+      ...body
+    })
+  }
+
   const eventRouter: Record<string, Function> = {
-    "query_by_string_with_vars": async function (event: EventMessage & {query: string, vars: Object, id: number}, ws: {send: Function}) {
-      let res = await dgraphClient.queryData<any[]>(event.query, event.vars)
-      console.log(res)
+    "query_by_string_with_vars": function (event: EventMessage & {query: string, vars: object, id: number}, ws: {send: Function}) {
       dgraphClient.queryData<any[]>(event.query, event.vars).then(res => {
-        ws.send(JSON.stringify({"type": "response", "id": event.id, "foo": "bar", "result": res}))
-      }).catch(e => console.log(e));
+        ws.send(makeResponse(event, true, {"result": res}));
+      }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
     },
 
-    "set_schema": function (event: EventMessage, ws: {send: Function}) {
-
+    "set_schema": function (event: EventMessage & {schema: string, id: number}, ws: {send: Function}) {
+      dgraphClient.setSchema(event.schema).then(_ => {
+        ws.send(makeResponse(event, true, {}));
+      }).catch(e => ws.send(makeResponse(event, false, {"error": e})))
     },
 
-    "create_data_by_json": function (event: EventMessage, ws: {send: Function}) {
-
+    "create_data_by_json": function (event: EventMessage & {data: object, id: number}, ws: {send: Function}) {
+      dgraphClient.createData(event.data).then(_ => {
+        ws.send(makeResponse(event, true, {}));
+      }).catch(e => ws.send(makeResponse(event, false, {"error": e})))
     },
 
     "drop_data": function (event: EventMessage & {id: number}, ws: {send: Function}) {
       dgraphClient.dropData().then(_ => {
-        ws.send(JSON.stringify({"type": "response", "id": event.id, "success": true}))
-      }).catch(e => ws.send(JSON.stringify({"type": "response", "id": event.id, "success": false, "error": e})))
+        ws.send(makeResponse(event, true, {}))
+      }).catch(e => ws.send(makeResponse(event, false, {"error": e})))
     },
   
     "drop_all": function (event: EventMessage & {id: number}, ws: {send: Function}) {
       dgraphClient.dropAll().then(_ => {
-        ws.send(JSON.stringify({"type": "response", "id": event.id, "success": true}))
-      }).catch(e => ws.send(JSON.stringify({"type": "response", "id": event.id, "success": false, "error": e})))
+        ws.send(makeResponse(event, true, {}))
+      }).catch(e => ws.send(makeResponse(event, false, {"error": e})))
     },
   };
 
