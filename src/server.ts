@@ -18,9 +18,11 @@ export default async function startServer(client: Client) {
   };
 
   const eventRouter: Record<string, Function> = {
-    "query_by_string_with_vars": function (event: EventMessage & {query: string, vars: Object}, ws: {send: Function}) {
+    "query_by_string_with_vars": async function (event: EventMessage & {query: string, vars: Object, id: number}, ws: {send: Function}) {
+      let res = await dgraphClient.queryData<any[]>(event.query, event.vars)
+      console.log(res)
       dgraphClient.queryData<any[]>(event.query, event.vars).then(res => {
-        ws.send(JSON.stringify({"type": "response", "id": 1, "foo": "bar", "result": res}))
+        ws.send(JSON.stringify({"type": "response", "id": event.id, "foo": "bar", "result": res}))
       }).catch(e => console.log(e));
     },
 
@@ -32,12 +34,16 @@ export default async function startServer(client: Client) {
 
     },
 
-    "drop_data": function (event: EventMessage, ws: {send: Function}) {
-
+    "drop_data": function (event: EventMessage & {id: number}, ws: {send: Function}) {
+      dgraphClient.dropData().then(_ => {
+        ws.send(JSON.stringify({"type": "response", "id": event.id, "success": true}))
+      }).catch(e => ws.send(JSON.stringify({"type": "response", "id": event.id, "success": false, "error": e})))
     },
   
-    "drop_all": function (event: EventMessage, ws: {send: Function}) {
-
+    "drop_all": function (event: EventMessage & {id: number}, ws: {send: Function}) {
+      dgraphClient.dropAll().then(_ => {
+        ws.send(JSON.stringify({"type": "response", "id": event.id, "success": true}))
+      }).catch(e => ws.send(JSON.stringify({"type": "response", "id": event.id, "success": false, "error": e})))
     },
   };
 
