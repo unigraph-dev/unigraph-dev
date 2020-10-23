@@ -1,8 +1,11 @@
 {
   "private": true,
   "name": "unigraph-dev",
-  "workspaces": ["packages/backend"],
-  "scripts": {},
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "backend-start": "yarn workspace unigraph-dev-backend start",
+    "explorer-start": "yarn workspace unigraph-dev-explorer start"
+  },
   "engines": {
     "node": "^12.11.1",
     "npm": "^6.11.3"
