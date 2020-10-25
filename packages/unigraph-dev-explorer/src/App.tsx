@@ -14,6 +14,7 @@ import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
 import About from './components/About';
 import { Home, Info } from '@material-ui/icons';
 import ExplorerHome from './components/ExplorerHome';
+import unigraph, { Unigraph } from './unigraph';
 
 const drawerWidth = 240;
 
@@ -68,10 +69,6 @@ function DrawerRouter() {
   </Drawer>
 }
 
-// @ts-ignore
-window.backendConnection = new WebSocket("ws://localhost:3001"); window.backendMessages = []
-
-
 function AppLayout() {
   const classes = useStyles();
 
@@ -103,6 +100,8 @@ function AppLayout() {
 }
 
 function App() {
+  window.unigraph = unigraph("ws://localhost:3001");
+
   return (
     <div className="App">
       <AppLayout/>
