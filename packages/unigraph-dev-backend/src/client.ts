@@ -1,4 +1,4 @@
-import { DgraphClient as ActualDgraphClient, DgraphClientStub, Operation, Mutation } from 'dgraph-js';
+import { DgraphClient as ActualDgraphClient, DgraphClientStub, Operation, Mutation, Check } from 'dgraph-js';
 
 /**
  * Example client, adapted from:
@@ -10,6 +10,9 @@ export default class DgraphClient {
 
   constructor(connectionUri: string) {
     this.dgraphClientStub = new DgraphClientStub(connectionUri);
+    this.dgraphClientStub.checkVersion(new Check()).catch(e => {if (e.code === 14) {
+      throw new Error("Could not establish connection to Dgraph client, exiting...");
+    }})
     this.dgraphClient = new ActualDgraphClient(this.dgraphClientStub);
   }
 

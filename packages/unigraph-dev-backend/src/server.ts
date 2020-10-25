@@ -5,7 +5,7 @@ import { isJsonString } from './utils';
 import Client from './client';
 import { EventEmitter } from 'ws';
 
-const PORT = 3000;
+const PORT = 3001;
 const verbose = 1;
 
 export default async function startServer(client: Client) {
@@ -74,6 +74,9 @@ export default async function startServer(client: Client) {
           if (verbose >= 2) console.log(msgObject);
         }
       });
+      ws.send(JSON.stringify({
+        "type": "hello"
+      }))
       console.log('opened socket connection');
     });
 
