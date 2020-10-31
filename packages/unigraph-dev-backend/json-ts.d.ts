@@ -11,13 +11,14 @@ type PrimitiveType = {
 // We say this is a Field "indexed by" T
 type Field<T extends ComposerObjectIndexs> = {
     key: PrimitiveType[T],
-    value: Definition
+    definition: Definition
 }
 
 type ComposerObject<T extends ComposerObjectIndexs> = {
     type: {"uid": "_:composer/Object"},
     parameters?: {
-        indexedBy: UidType<T>
+        indexedBy: UidType<T>,
+        indexes: PrimitiveType[T][]
     },
     properties: Field<T>[]
 }
@@ -50,7 +51,9 @@ export type Definition = Types
 
 export type Entity<T extends string> = {
     "uid": string,
-    type: {"uid": `_:schema/${T}`}
+    type: {"uid": `_:schema/${T}`},
+    value: any,
+    indexes: any
 }
 
-export type EntityDgraph<T extends string> = Entity<T> | {"dgraph.type": "Entity"} | Record<string, any>
+export type EntityDgraph<T extends string> = Entity<T> | {"dgraph.type": "Entity"}

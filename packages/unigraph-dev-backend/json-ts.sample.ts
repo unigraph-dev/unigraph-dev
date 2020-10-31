@@ -9,23 +9,24 @@ let todoSchema: SchemaDgraph = {
         "type": uid("_:composer/Object"),
         "parameters": {
             "indexedBy": uid("_:primitive/string"),
+            "indexes": ["name"]
         },
         "properties": [
             {
                 "key": "name",
-                "value": {
+                "definition": {
                     "type": uid("_:primitive/string")
                 }
             },
             {
                 "key": "done",
-                "value": {
+                "definition": {
                     "type": uid("_:primitive/boolean")
                 }
             },
             {
                 "key": "users",
-                "value": {
+                "definition": {
                     "type": uid("_:composer/Array"),
                     "parameters": {
                         "element": {"type": uid("_:schema/user")}
@@ -40,12 +41,15 @@ let todoItem: EntityDgraph<"todo"> = {
     "uid": "0x01",
     "dgraph.type": "Entity",
     "type": uid("_:schema/todo"),
-    "properties": { // When the Object composer is indexed by string, we write it like a JSON object for performance
+    "value": { // When the Object composer is indexed by string, we write it like a JSON object for performance
         "name": "Write initial definitions of JSON-TS",
         "done": false,
         "users": [
-            {"properties": {"name": "Haoji Xu"}, "type": uid("_:schema/user")}
+            {"value": {"name": "Haoji Xu"}, "type": uid("_:schema/user")}
         ]
+    },
+    "indexes": {
+        "name": "Write initial definitions of JSON-TS"
     }
 }
 
@@ -55,7 +59,7 @@ let todoItemAbstract: EntityDgraphAbstract = {
     "uid": "0x01",
     "dgraph.type": "Entity",
     "type": uid("_:schema/todo"),
-    "properties": [
+    "value": [
         {
             "key": "name",
             "value": "Write initial definitions of JSON-TS"
@@ -67,7 +71,7 @@ let todoItemAbstract: EntityDgraphAbstract = {
         {
             "key": "users",
             "value": [
-                {"properties": {"name": "Haoji Xu"}, "type": uid("_:schema/user")}
+                {"value": {"name": "Haoji Xu"}, "type": uid("_:schema/user")}
             ]
         }
     ]
