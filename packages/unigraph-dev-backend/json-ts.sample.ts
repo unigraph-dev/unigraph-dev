@@ -42,14 +42,14 @@ let todoItem: EntityDgraph<"todo"> = {
     "dgraph.type": "Entity",
     "type": uid("_:schema/todo"),
     "value": { // When the Object composer is indexed by string, we write it like a JSON object for performance
-        "name": "Write initial definitions of JSON-TS",
-        "done": false,
-        "users": [
-            {"value": {"name": "Haoji Xu"}, "type": uid("_:schema/user")}
-        ]
+        "name": {"uid": "_uidname", "value": "Write initial definitions of JSON-TS"},
+        "done": {"value": false},
+        "users": {"value": [
+            {"value": {"name": {"value": "Haoji Xu"}}, "type": uid("_:schema/user")}
+        ]}
     },
     "indexes": {
-        "name": "Write initial definitions of JSON-TS"
+        "name": uid("_uidname")
     }
 }
 
