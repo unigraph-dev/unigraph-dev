@@ -52,7 +52,7 @@ export type Definition = Types
 export type Entity<T extends string> = {
     "uid": string,
     type: {"uid": `_:schema/${T}`},
-    value: any,
+    "_value": any,
     indexes: any
 }
 

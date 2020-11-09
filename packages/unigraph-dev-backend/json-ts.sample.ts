@@ -41,15 +41,12 @@ let todoItem: EntityDgraph<"todo"> = {
     "uid": "0x01",
     "dgraph.type": "Entity",
     "type": uid("_:schema/todo"),
-    "value": { // When the Object composer is indexed by string, we write it like a JSON object for performance
-        "name": {"uid": "_uidname", "value": "Write initial definitions of JSON-TS"},
-        "done": {"value": false},
-        "users": {"value": [
-            {"value": {"name": {"value": "Haoji Xu"}}, "type": uid("_:schema/user")}
+    "_value": { // When the Object composer is indexed by string, we write it like a JSON object for performance
+        "name": {"_value": "Write initial definitions of JSON-TS"},
+        "done": {"_value": false},
+        "users": {"_value": [
+            {"_value": {"name": {"_value": "Haoji Xu"}}, "type": uid("_:schema/user")}
         ]}
-    },
-    "indexes": {
-        "name": uid("_uidname")
     }
 }
 
@@ -59,19 +56,19 @@ let todoItemAbstract: EntityDgraphAbstract = {
     "uid": "0x01",
     "dgraph.type": "Entity",
     "type": uid("_:schema/todo"),
-    "value": [
+    "_value": [
         {
             "key": "name",
-            "value": "Write initial definitions of JSON-TS"
+            "_value": "Write initial definitions of JSON-TS"
         },
         {
             "key": "done",
-            "value": false
+            "_value": false
         },
         {
             "key": "users",
-            "value": [
-                {"value": {"name": "Haoji Xu"}, "type": uid("_:schema/user")}
+            "_value": [
+                {"_value": {"name": "Haoji Xu"}, "type": uid("_:schema/user")}
             ]
         }
     ]
