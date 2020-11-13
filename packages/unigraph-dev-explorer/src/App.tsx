@@ -58,11 +58,11 @@ function App() {
         <main className={classes.content}>
           <div className={classes.toolbar} />
           <Switch>
-            <Route path="/">
-              <ExplorerHome />
-            </Route>
             <Route path="/about">
               <About />
+            </Route>
+            <Route path="/">
+              <ExplorerHome />
             </Route>
           </Switch>
         </main>
