@@ -1,15 +1,28 @@
-import React from "react";
-import { useMount } from 'react-use';
+import React from 'react';
+import { useEvent } from 'react-use';
+
+import Box from '@material-ui/core/Box';
+import { makeStyles } from '@material-ui/core/styles';
+import { red } from '@material-ui/core/colors';
+
+const useStyles = makeStyles(() => ({
+  code: {
+    backgroundColor: red[50],
+    color: red[500],
+    border: `1px solid ${red[100]}`,
+    borderRadius: 4,
+    padding: '2px 4px',
+  }
+}))
 
 export default function ExplorerHome() {
+  const classes = useStyles();
   const [messages, setMessages] = React.useState(window.unigraph.backendMessages);
 
-  useMount(() => {
-    window.unigraph.backendConnection.onmessage = msg => {
-      window.unigraph.backendMessages = [msg.data, ...messages];
-      setMessages(window.unigraph.backendMessages);
-    }
-  });
+  useEvent<WebSocket>('message', msg => {
+    window.unigraph.backendMessages = [(msg as MessageEvent).data, ...messages];
+    setMessages(window.unigraph.backendMessages);
+  }, window.unigraph.backendConnection);
 
   return (
     <div>
@@ -17,7 +30,9 @@ export default function ExplorerHome() {
       <p>Connection readyState (connecting=0, open=1, closing=2, closed=3): {window.unigraph.backendConnection.readyState}</p>
       <p>Connected to: {window.unigraph.backendConnection.url}</p>
       <h1>Messages</h1>
-      {messages.map(message => <code>{message}</code>)}
+      <Box display="grid" gridGap={8} justifyContent="start">
+        {messages.map((message, i) => <code key={i} className={classes.code}>{message}</code>)}
+      </Box>
     </div>
   );
 }
