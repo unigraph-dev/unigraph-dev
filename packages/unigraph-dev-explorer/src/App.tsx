@@ -12,6 +12,7 @@ import About from './pages/About';
 import ExplorerHome from './pages/ExplorerHome';
 import unigraph from './unigraph';
 
+// TODO: custom theme
 const useStyles = makeStyles(theme => ({
   root: {
     display: 'flex',
@@ -31,9 +32,13 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+// REVIEW: use react state? why is window.unigraph needed?
+// must keep single reference to this, otherwise react
+// mounting the app causes a 2nd connection to be created
+window.unigraph = unigraph("ws://localhost:3001");
+
 function App() {
   const classes = useStyles();
-  window.unigraph = unigraph("ws://localhost:3001");
 
   return (
     <div className={classes.root}>
