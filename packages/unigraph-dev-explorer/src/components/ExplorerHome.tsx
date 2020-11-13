@@ -1,19 +1,23 @@
 import React from "react";
+import { useMount } from 'react-use';
 
-export default function ExplorerHome(){
-    const [messages, setMessages]: [string[], Function] = React.useState(window.unigraph.backendMessages);
-    window.unigraph.backendConnection.onmessage = (msg) => {
-        window.unigraph.backendMessages = [msg.data, ...messages]
-        setMessages(window.unigraph.backendMessages)
+export default function ExplorerHome() {
+  const [messages, setMessages] = React.useState(window.unigraph.backendMessages);
+
+  useMount(() => {
+    window.unigraph.backendConnection.onmessage = msg => {
+      window.unigraph.backendMessages = [msg.data, ...messages];
+      setMessages(window.unigraph.backendMessages);
     }
+  });
 
-    return <div>
-        <h1>Connection status</h1>
-        <p>Connection readyState (connecting=0, open=1, closing=2, closed=3): {window.unigraph.backendConnection.readyState}</p>
-        <p>Connected to: {window.unigraph.backendConnection.url}</p>
-        <h1>Messages</h1>
-        {messages.map(message => {
-            return <code>{message}</code>
-        })}
+  return (
+    <div>
+      <h1>Connection status</h1>
+      <p>Connection readyState (connecting=0, open=1, closing=2, closed=3): {window.unigraph.backendConnection.readyState}</p>
+      <p>Connected to: {window.unigraph.backendConnection.url}</p>
+      <h1>Messages</h1>
+      {messages.map(message => <code>{message}</code>)}
     </div>
+  );
 }
