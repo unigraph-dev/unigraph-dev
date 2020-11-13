@@ -1,110 +1,66 @@
 import React from 'react';
-import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
-import Drawer from '@material-ui/core/Drawer';
-import CssBaseline from '@material-ui/core/CssBaseline';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+
 import AppBar from '@material-ui/core/AppBar';
+import CssBaseline from '@material-ui/core/CssBaseline';
 import Toolbar from '@material-ui/core/Toolbar';
-import List from '@material-ui/core/List';
 import Typography from '@material-ui/core/Typography';
-import Divider from '@material-ui/core/Divider';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
-import About from './components/About';
-import { Home, Info } from '@material-ui/icons';
-import ExplorerHome from './components/ExplorerHome';
-import unigraph, { Unigraph } from './unigraph';
+import { makeStyles } from '@material-ui/core/styles';
 
-const drawerWidth = 240;
+import { AppDrawer } from './components';
+import About from './pages/About';
+import ExplorerHome from './pages/ExplorerHome';
+import unigraph from './unigraph';
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex',
-    },
-    appBar: {
-      width: `calc(100% - ${drawerWidth}px)`,
-      marginLeft: drawerWidth,
-    },
-    drawer: {
-      width: drawerWidth,
-      flexShrink: 0,
-    },
-    drawerPaper: {
-      width: drawerWidth,
-    },
-    // necessary for content to be below app bar
-    toolbar: theme.mixins.toolbar,
-    content: {
-      flexGrow: 1,
-      backgroundColor: theme.palette.background.default,
-      padding: theme.spacing(3),
-    },
-  }),
-);
+const useStyles = makeStyles(theme => ({
+  root: {
+    display: 'flex',
+  },
+  appBar: {
+    width: '100vw',
+    zIndex: theme.zIndex.drawer + 1,
+  },
+  // necessary for content to be below app bar
+  toolbar: {
+    minHeight: '48px !important'
+  },
+  content: {
+    flexGrow: 1,
+    backgroundColor: theme.palette.background.default,
+    padding: theme.spacing(3),
+  },
+}));
 
-function DrawerRouter() {
+function App() {
   const classes = useStyles();
-  return <Drawer
-    className={classes.drawer}
-    variant="permanent"
-    classes={{
-      paper: classes.drawerPaper,
-    }}
-    anchor="left"
-  >
-    <div className={classes.toolbar} />
-    <Divider />
-    <List>
-      <ListItem button key="home" component={Link} to="/">
-        <ListItemIcon><Home/></ListItemIcon>
-        <ListItemText primary="Home" />
-      </ListItem>
-      <ListItem button key="about" component={Link} to="/about">
-        <ListItemIcon><Info/></ListItemIcon>
-        <ListItemText primary="About" />
-      </ListItem>
-    </List>
-  </Drawer>
-}
-
-function AppLayout() {
-  const classes = useStyles();
+  window.unigraph = unigraph("ws://localhost:3001");
 
   return (
     <div className={classes.root}>
       <CssBaseline />
       <Router>
         <AppBar position="fixed" className={classes.appBar}>
-          <Toolbar>
+          <Toolbar variant="dense">
             <Typography variant="h6" noWrap>
               unigraph-dev-explorer
             </Typography>
           </Toolbar>
         </AppBar>
 
-        <DrawerRouter/>
+        <AppDrawer />
 
         <main className={classes.content}>
           <div className={classes.toolbar} />
-            <Switch>
-              <Route path="/about"><About/></Route>
-              <Route path="/"><ExplorerHome/></Route>
-            </Switch>
-
+          <Switch>
+            <Route path="/">
+              <ExplorerHome />
+            </Route>
+            <Route path="/about">
+              <About />
+            </Route>
+          </Switch>
         </main>
       </Router>
-    </div>
-  );
-}
-
-function App() {
-  window.unigraph = unigraph("ws://localhost:3001");
-
-  return (
-    <div className="App">
-      <AppLayout/>
     </div>
   );
 }
