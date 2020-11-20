@@ -2,10 +2,8 @@ import React from "react";
 
 export default function ExplorerHome(){
     const [messages, setMessages]: [string[], Function] = React.useState(window.unigraph.backendMessages);
-    window.unigraph.backendConnection.onmessage = (msg) => {
-        window.unigraph.backendMessages = [msg.data, ...messages]
-        setMessages(window.unigraph.backendMessages)
-    }
+
+    window.unigraph.addMessageListener((array: string[]) => setMessages(array))
 
     return <div>
         <h1>Connection status</h1>

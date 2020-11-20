@@ -12,10 +12,12 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import { BrowserRouter as Router, Link, Route, Switch } from 'react-router-dom';
 import About from './components/About';
-import { Home, Info } from '@material-ui/icons';
+import { Comment, Home, Info } from '@material-ui/icons';
 import ExplorerHome from './components/ExplorerHome';
 import unigraph, { Unigraph } from './unigraph';
+import RequestFrame from './components/Request';
 
+require('codemirror/lib/codemirror.css');
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -65,6 +67,10 @@ function DrawerRouter() {
         <ListItemIcon><Info/></ListItemIcon>
         <ListItemText primary="About" />
       </ListItem>
+      <ListItem button key="request" component={Link} to="/request">
+        <ListItemIcon><Comment/></ListItemIcon>
+        <ListItemText primary="Request" />
+      </ListItem>
     </List>
   </Drawer>
 }
@@ -90,6 +96,7 @@ function AppLayout() {
           <div className={classes.toolbar} />
             <Switch>
               <Route path="/about"><About/></Route>
+              <Route path="/request"><RequestFrame/></Route>
               <Route path="/"><ExplorerHome/></Route>
             </Switch>
 
