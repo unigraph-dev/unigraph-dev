@@ -1,4 +1,4 @@
-import DgraphClient from './client';
+import DgraphClient from './dgraphClient';
 
 declare global {
   namespace Express {

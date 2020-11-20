@@ -1,4 +1,4 @@
-import Client from './client';
+import Client from './dgraphClient';
 
 async function main() {
   const client = new Client('localhost:9080');

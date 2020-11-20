@@ -1,12 +1,12 @@
 import express, { Request } from 'express';
 import { Server } from 'http';
 import expressWs, { Application } from 'express-ws';
-import { isJsonString } from './utils';
-import Client from './client';
+import { isJsonString } from './utils/utils';
+import Client from './dgraphClient';
 import { EventEmitter } from 'ws';
 
 const PORT = 3001;
-const verbose = 1;
+const verbose = 5;
 
 export default async function startServer(client: Client) {
   let app: Application;
@@ -56,6 +56,10 @@ export default async function startServer(client: Client) {
         ws.send(makeResponse(event, true, {}))
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})))
     },
+
+    "create_unigraph_schema": function (event: EventMessage & {id: number}, ws: {send: Function}) {
+
+    }
   };
 
   const server = await new Promise<Server>(res => {

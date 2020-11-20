@@ -1,35 +1,37 @@
-import { SchemaDgraph, UidType, EntityDgraph } from "./json-ts";
+import { SchemaDgraph, UidType, EntityDgraph, UnigraphIdType, RefUnigraphIdType } from "./json-ts";
 
 function uid<idType extends string>(id: idType): UidType<idType> {return {"uid": id}}
+function makeUnigraphId<idType extends string>(id: idType): UnigraphIdType<idType> {return {"unigraph.id": id}}
+function makeRefUnigraphId<idType extends string>(id: idType): RefUnigraphIdType<idType> {return {"_ref":{"unigraph.id": id}}}
 
 let todoSchema: SchemaDgraph = {
-    ...uid("_:schema/todo"),
+    ...makeUnigraphId("$/schema/todo"),
     "dgraph.type": "Type",
     "definition": {
-        "type": uid("_:composer/Object"),
+        "type": makeRefUnigraphId("$/composer/Object"),
         "parameters": {
-            "indexedBy": uid("_:primitive/string"),
+            "indexedBy": makeRefUnigraphId("$/primitive/string"),
             "indexes": ["name"]
         },
         "properties": [
             {
                 "key": "name",
                 "definition": {
-                    "type": uid("_:primitive/string")
+                    "type": makeRefUnigraphId("$/primitive/string")
                 }
             },
             {
                 "key": "done",
                 "definition": {
-                    "type": uid("_:primitive/boolean")
+                    "type": makeRefUnigraphId("$/primitive/boolean")
                 }
             },
             {
                 "key": "users",
                 "definition": {
-                    "type": uid("_:composer/Array"),
+                    "type": makeRefUnigraphId("$/composer/Array"),
                     "parameters": {
-                        "element": {"type": uid("_:schema/user")}
+                        "element": {"type": makeRefUnigraphId("$/schema/user")}
                     }
                 }
             }
@@ -40,12 +42,16 @@ let todoSchema: SchemaDgraph = {
 let todoItem: EntityDgraph<"todo"> = {
     "uid": "0x01",
     "dgraph.type": "Entity",
-    "type": uid("_:schema/todo"),
+    "type": makeRefUnigraphId("$/schema/todo"),
     "_value": { // When the Object composer is indexed by string, we write it like a JSON object for performance
         "name": {"_value": "Write initial definitions of JSON-TS"},
         "done": {"_value": false},
         "users": {"_value": [
-            {"_value": {"name": {"_value": "Haoji Xu"}}, "type": uid("_:schema/user")}
+            {
+                "_value": {"name": {"_value": "Haoji Xu"}}, 
+                "dgraph.type": "Entity", 
+                "type": makeRefUnigraphId("$/schema/user")
+            }
         ]}
     }
 }
@@ -55,7 +61,7 @@ type EntityDgraphAbstract = any; // TODO
 let todoItemAbstract: EntityDgraphAbstract = {
     "uid": "0x01",
     "dgraph.type": "Entity",
-    "type": uid("_:schema/todo"),
+    "type": makeRefUnigraphId("$/schema/todo"),
     "_value": [
         {
             "key": "name",
@@ -68,8 +74,13 @@ let todoItemAbstract: EntityDgraphAbstract = {
         {
             "key": "users",
             "_value": [
-                {"_value": {"name": "Haoji Xu"}, "type": uid("_:schema/user")}
+                {
+                    "_value": {"name": "Haoji Xu"}, 
+                    "dgraph.type": "Entity", 
+                    "type": makeRefUnigraphId("$/schema/user")
+                }
             ]
         }
     ]
 }
+
