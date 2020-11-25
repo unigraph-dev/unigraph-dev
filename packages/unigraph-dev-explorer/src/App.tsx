@@ -12,6 +12,7 @@ import { AppDrawer } from './components';
 import About from './pages/About';
 import ExplorerHome from './pages/ExplorerHome';
 import unigraph from './unigraph';
+import Request from './pages/Request';
 
 // TODO: custom theme
 const useStyles = makeStyles(theme => ({
@@ -58,6 +59,9 @@ function App() {
         <main className={classes.content}>
           <div className={classes.toolbar} />
           <Switch>
+            <Route path="/request">
+              <Request />
+            </Route>
             <Route path="/about">
               <About />
             </Route>

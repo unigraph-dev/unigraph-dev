@@ -8,7 +8,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import { makeStyles } from '@material-ui/core/styles';
-import { Home, Info } from '@material-ui/icons';
+import { Comment, Home, Info } from '@material-ui/icons';
 
 const drawerWidth = 240;
 
@@ -47,6 +47,10 @@ export default function DrawerRouter() {
         <ListItem button component={Link} to="/about">
           <ListItemIcon><Info /></ListItemIcon>
           <ListItemText primary="About" />
+        </ListItem>
+        <ListItem button component={Link} to="/request">
+          <ListItemIcon><Comment /></ListItemIcon>
+          <ListItemText primary="Request" />
         </ListItem>
       </List>
     </Drawer>
