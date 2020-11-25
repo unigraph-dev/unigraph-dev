@@ -4,6 +4,9 @@ import expressWs, { Application } from 'express-ws';
 import { isJsonString } from './utils/utils';
 import Client from './dgraphClient';
 import { EventEmitter } from 'ws';
+import dgraph from 'dgraph-js';
+import { insertsToUpsert } from './utils/txnWrapper';
+import { UnigraphUpsert } from './custom';
 
 const PORT = 3001;
 const verbose = 5;
@@ -57,9 +60,18 @@ export default async function startServer(client: Client) {
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})))
     },
 
-    "create_unigraph_schema": function (event: EventMessage & {id: number}, ws: {send: Function}) {
-
-    }
+    /**
+     * Creates unigraph schema(s) entity in dgraph.
+     * @param event The event for creating the schema
+     * @param ws Websocket connection
+     */
+    "create_unigraph_schema": function (event: EventMessage & {data: object | object[], id: number}, ws: {send: Function}) {
+      let schema = (Array.isArray(event.data) ? event.data : [event.data]);
+      let upsert: UnigraphUpsert = insertsToUpsert(schema);
+      dgraphClient.createUnigraphUpsert(upsert).then(_ => {
+        ws.send(makeResponse(event, true, {}))
+      }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
+    },
   };
 
   const server = await new Promise<Server>(res => {

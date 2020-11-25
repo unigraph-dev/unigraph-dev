@@ -7,3 +7,8 @@ declare global {
     }
   }
 }
+
+declare type UnigraphUpsert = {
+  queries: string[],
+  mutations: any[]
+}

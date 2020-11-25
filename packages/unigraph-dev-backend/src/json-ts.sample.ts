@@ -2,7 +2,7 @@ import { SchemaDgraph, UidType, EntityDgraph, UnigraphIdType, RefUnigraphIdType 
 
 function uid<idType extends string>(id: idType): UidType<idType> {return {"uid": id}}
 function makeUnigraphId<idType extends string>(id: idType): UnigraphIdType<idType> {return {"unigraph.id": id}}
-function makeRefUnigraphId<idType extends string>(id: idType): RefUnigraphIdType<idType> {return {"_ref":{"unigraph.id": id}}}
+function makeRefUnigraphId<idType extends string>(id: idType): RefUnigraphIdType<idType> {return {"$ref":{"unigraph.id": id}}}
 
 let todoSchema: SchemaDgraph = {
     ...makeUnigraphId("$/schema/todo"),

@@ -30,8 +30,20 @@ To send an event, use `"type": "event"` and `"event": "<name of the event to sen
     * create_data_by_json
     * drop_data (no parameters needed)
     * drop_all (no parameters needed)
+    * create_unigraph_schema
 - Administrative events
-- Statistics and logging 
+- Statistics and logging
+
+```json
+{
+    "type": "event",
+    "event": "create_unigraph_schema",
+    "data": {
+        // Your schema here, use an array id there are multiple
+    },
+    "id": 1
+}
+```
 
 For more detailed info regarding each of the events, TODO
 
