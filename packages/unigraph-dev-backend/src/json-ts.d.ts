@@ -2,9 +2,9 @@ type UidType<uid extends string> = {"uid": uid}
 type UnigraphIdType<uid extends string> = {"unigraph.id": uid}
 type RefUnigraphIdType<uid extends string> = {"$ref": {"unigraph.id": uid}}
 
-declare function uid<idType extends string>(id: idType): UidType<idType>
-declare function makeUnigraphId<idType extends string>(id: idType): UnigraphIdType<idType>
-declare function makeRefUnigraphId<idType extends string>(id: idType): RefUnigraphIdType<idType>
+declare function uid<IdType extends string>(id: IdType): UidType<IdType>
+declare function makeUnigraphId<IdType extends string>(id: IdType): UnigraphIdType<IdType>
+declare function makeRefUnigraphId<IdType extends string>(id: IdType): RefUnigraphIdType<IdType>
 
 type ComposerObjectIndexs = "$/primitive/string"
 
@@ -46,7 +46,7 @@ export type Schema = {
 export type SchemaDgraph = Schema | {"dgraph.type": "Type"}
 
 interface SchemaRef<T extends string> {
-    type: {"$ref": {"unigraph.id": `$/schema/${T}`}}
+    type: RefUnigraphIdType<`$/schema/${T}`>
 }
 
 type Types = Composers | Primitive | Schema | SchemaRef<string>
