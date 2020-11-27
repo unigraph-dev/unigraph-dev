@@ -1,8 +1,6 @@
+import { assert } from "console";
 import { SchemaDgraph, UidType, EntityDgraph, UnigraphIdType, RefUnigraphIdType } from "./json-ts";
-
-function uid<IdType extends string>(id: IdType): UidType<IdType> {return {"uid": id}}
-function makeUnigraphId<IdType extends string>(id: IdType): UnigraphIdType<IdType> {return {"unigraph.id": id}}
-function makeRefUnigraphId<IdType extends string>(id: IdType): RefUnigraphIdType<IdType> {return {"$ref":{"unigraph.id": id}}}
+import { buildUnigraphEntity, makeRefUnigraphId, makeUnigraphId } from "./utils/entityUtils";
 
 let todoSchema: SchemaDgraph = {
     ...makeUnigraphId("$/schema/todo"),
@@ -39,8 +37,19 @@ let todoSchema: SchemaDgraph = {
     }
 }
 
+// This is the entity before the `buildUngiraphEntity` operation, similar to most Object-Relation Mapping representations.
+let todoItemRaw = {
+    name: "Write initial definitions of JSON-TS",
+    done: false,
+    users: [
+        {
+            name: "Haoji Xu",
+        }
+    ]
+}
+
+// This is the entity after the `buildUnigraphEntity` operation.
 let todoItem: EntityDgraph<"todo"> = {
-    "uid": "0x01",
     "dgraph.type": "Entity",
     "type": makeRefUnigraphId("$/schema/todo"),
     "_value": { // When the Object composer is indexed by string, we write it like a JSON object for performance
@@ -55,6 +64,11 @@ let todoItem: EntityDgraph<"todo"> = {
         ]}
     }
 }
+
+// The operation should successfully yield the above result.
+// TODO: Find an elegant way to deal with nested objects (maybe via schema verification?) 
+// Currently this assertion fails because nested objects doens't get dgraph metadata.
+assert(todoItem === buildUnigraphEntity(todoItemRaw, "todo"), JSON.stringify(buildUnigraphEntity(todoItemRaw, "todo"), null, 4));
 
 type EntityDgraphAbstract = any; // TODO
 

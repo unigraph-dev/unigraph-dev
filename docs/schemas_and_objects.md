@@ -10,7 +10,6 @@ We believe that our data structure should allow users to integrate all their per
 function makeRefUnigraphId<IdType extends string>(id: IdType): RefUnigraphIdType<IdType> {return {"$ref":{"unigraph.id": id}}}
 
 let todoItem: EntityDgraph<"todo"> = {
-    "uid": "0x01",
     "dgraph.type": "Entity",
     "type": makeRefUnigraphId("$/schema/todo"),
     "_value": { // `_value` predicate can be stripped away if predicate-properties don't exist
