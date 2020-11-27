@@ -56,8 +56,7 @@ export type Definition = Types
 export type Entity<T extends string> = {
     "uid"?: string,
     type?: RefUnigraphIdType<`$/schema/${T}`>,
-    "_value": any,
-    indexes?: any
+    "_value": any
 }
 
 export type EntityDgraph<T extends string> = Entity<T> | {"dgraph.type": "Entity"}
