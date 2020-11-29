@@ -2,7 +2,7 @@ import { EntityDgraph, RefUnigraphIdType, UidType, UnigraphIdType } from "@/json
 
 function uid<IdType extends string>(id: IdType): UidType<IdType> {return {"uid": id}}
 export function makeUnigraphId<IdType extends string>(id: IdType): UnigraphIdType<IdType> {return {"unigraph.id": id}}
-export function makeRefUnigraphId<IdType extends string>(id: IdType): RefUnigraphIdType<IdType> {return {"$ref":{"unigraph.id": id}}}
+export function makeRefUnigraphId<IdType extends string>(id: IdType): RefUnigraphIdType<IdType> {return {"$ref":{"key": "unigraph.id", "query": id}}}
 
 
 function buildUnigraphEntityPart (rawPart: any, makeAbstract: boolean = false): {"_value": any} {

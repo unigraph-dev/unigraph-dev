@@ -44,7 +44,8 @@ A reference in the data model might look like this:
     "earnings": {
         "2015-Q2": { // This is the reference object
             "$ref": {
-                "name": "annual-report-2015"
+                "key": "name",
+                "query": "annual-report-2015"
             }
         } // Above is the reference object
     }

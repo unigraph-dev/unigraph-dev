@@ -1,6 +1,6 @@
 type UidType<uid extends string> = {"uid": uid}
 type UnigraphIdType<uid extends string> = {"unigraph.id": uid}
-type RefUnigraphIdType<uid extends string> = {"$ref": {"unigraph.id": uid}}
+type RefUnigraphIdType<uid extends string> = {"$ref": {"key": "unigraph.id", "query": uid}}
 
 declare function uid<IdType extends string>(id: IdType): UidType<IdType>
 declare function makeUnigraphId<IdType extends string>(id: IdType): UnigraphIdType<IdType>
