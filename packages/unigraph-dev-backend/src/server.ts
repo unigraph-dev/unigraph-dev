@@ -1,6 +1,6 @@
 import express, { Request } from 'express';
 import { Server } from 'http';
-import expressWs, { Application } from 'express-ws';
+import expressWs, { Application, WebsocketRequestHandler } from 'express-ws';
 import { isJsonString } from './utils/utils';
 import Client from './dgraphClient';
 import { insertsToUpsert } from './utils/txnWrapper';
@@ -24,7 +24,7 @@ export default async function startServer(client: Client) {
   }
 
   const eventRouter: Record<string, Function> = {
-    "query_by_string_with_vars": function (event: EventQueryByStringWithVars, ws: {send: Function}) {
+    "query_by_string_with_vars": function (event: EventQueryByStringWithVars, ws: IWebsocket) {
       dgraphClient.queryData<any[]>(event.query, event.vars).then(res => {
         ws.send(makeResponse(event, true, {"result": res}));
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})));

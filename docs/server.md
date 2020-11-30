@@ -42,7 +42,7 @@ Fore more information on how to write these events, refer to the `custom.d.ts` t
     "type": "event",
     "event": "create_unigraph_schema",
     "data": {
-        // Your schema here, use an array id there are multiple
+        // Your schema here, use an array if there are multiple schemas
     },
     "id": 1
 }

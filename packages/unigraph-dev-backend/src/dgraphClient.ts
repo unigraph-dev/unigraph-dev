@@ -72,15 +72,14 @@ export default class DgraphClient {
   async createUnigraphUpsert(data: UnigraphUpsert) {
     const txn = this.dgraphClient.newTxn();
     try {
-      const querybody = data.queries.reduce((accu, current) => {return accu + "\n" + current});
+      const querybody = data.queries.join('\n');
       const querystr = `query {
         ${querybody}
       }`;
-      let mutations: Mutation[] = [];
-      data.mutations.forEach((obj: any) => {
+      let mutations: Mutation[] = data.mutations.map((obj: any) => {
         let mu = new dgraph.Mutation();
         mu.setSetJson(obj);
-        mutations.push(mu);
+        return mu;
       });
       const req = new dgraph.Request();
       req.setQuery(querystr);
