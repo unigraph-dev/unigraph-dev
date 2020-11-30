@@ -24,14 +24,29 @@ For more information on the various events and subscriptions, check out the docu
 
 To send an event, use `"type": "event"` and `"event": "<name of the event to send>"`. Here is a list of available events:
 
+Fore more information on how to write these events, refer to the `custom.d.ts` type declaration.
+
 - Database operations
     * query_by_string_with_vars `{"query": "<query string>", "vars": {<maps of all vars>}}`
-    * set_schema `{"schema": "<a schema string>"}`
+    * set_dgraph_schema `{"schema": "<a schema string>"}`
     * create_data_by_json
     * drop_data (no parameters needed)
     * drop_all (no parameters needed)
+    * create_unigraph_schema
+    * create_unigraph_object
 - Administrative events
-- Statistics and logging 
+- Statistics and logging
+
+```json
+{
+    "type": "event",
+    "event": "create_unigraph_schema",
+    "data": {
+        // Your schema here, use an array if there are multiple schemas
+    },
+    "id": 1
+}
+```
 
 For more detailed info regarding each of the events, TODO
 

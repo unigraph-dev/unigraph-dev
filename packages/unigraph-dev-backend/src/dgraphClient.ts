@@ -1,4 +1,5 @@
-import { DgraphClient as ActualDgraphClient, DgraphClientStub, Operation, Mutation, Check } from 'dgraph-js';
+import dgraph, { DgraphClient as ActualDgraphClient, DgraphClientStub, Operation, Mutation, Check } from 'dgraph-js';
+import { UnigraphUpsert } from './custom';
 
 /**
  * Example client, adapted from:
@@ -14,6 +15,7 @@ export default class DgraphClient {
       throw new Error("Could not establish connection to Dgraph client, exiting...");
     }})
     this.dgraphClient = new ActualDgraphClient(this.dgraphClientStub);
+    // TODO(haojixu): Check if default db exists - if not, set default
   }
 
   async dropAll() {
@@ -58,6 +60,35 @@ export default class DgraphClient {
       console.log();
     } catch (e) {
       console.error('Error:', e);
+    } finally {
+      await txn.discard();
+    }
+  }
+
+  /**
+   * Creates data from a upsert request (i.e. query for data then use the result to mutate).
+   * @param {UnigraphUpsert} data 
+   */
+  async createUnigraphUpsert(data: UnigraphUpsert) {
+    const txn = this.dgraphClient.newTxn();
+    try {
+      const querybody = data.queries.join('\n');
+      const querystr = `query {
+        ${querybody}
+      }`;
+      let mutations: Mutation[] = data.mutations.map((obj: any) => {
+        let mu = new dgraph.Mutation();
+        mu.setSetJson(obj);
+        return mu;
+      });
+      const req = new dgraph.Request();
+      req.setQuery(querystr);
+      req.setMutationsList(mutations);
+      req.setCommitNow(true);
+
+      await txn.doRequest(req);
+    } catch (e) {
+      console.error('Error: ', e);
     } finally {
       await txn.discard();
     }
