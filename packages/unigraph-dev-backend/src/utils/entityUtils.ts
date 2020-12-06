@@ -51,7 +51,7 @@ export function validateUnpaddedEntity(object: Object) {
 export function buildUnigraphEntity (raw: Object, schemaName: string = "any", validateSchema: boolean = false, padding: boolean = true): EntityDgraph<string> | TypeError {
     // Check for unvalidated entity
     if (!validateEntityWithSchema(raw, schemaName) || (padding === false && !validateUnpaddedEntity(raw))) {
-        return new TypeError("Entity validation failed for entity " + raw)
+        throw new TypeError("Entity validation failed for entity " + raw)
     } else {
         return {
             "type": makeRefUnigraphId(`$/schema/${schemaName}`) as RefUnigraphIdType<`$/schema/${string}`>,

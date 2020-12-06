@@ -2,17 +2,21 @@ import express, { Request } from 'express';
 import { Server } from 'http';
 import expressWs, { Application, WebsocketRequestHandler } from 'express-ws';
 import { isJsonString } from './utils/utils';
-import Client from './dgraphClient';
+import DgraphClient from './dgraphClient';
 import { insertsToUpsert } from './utils/txnWrapper';
 import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDropAll, EventDropData, EventQueryByStringWithVars, EventSetDgraphSchema, IWebsocket, UnigraphUpsert } from './custom';
 import { buildUnigraphEntity } from './utils/entityUtils';
+import { checkOrCreateDefaultDataModel } from './datamodelManager';
 
 const PORT = 3001;
 const verbose = 5;
 
-export default async function startServer(client: Client) {
+export default async function startServer(client: DgraphClient) {
   let app: Application;
   let dgraphClient = client;
+  
+  // Basic checks
+  await checkOrCreateDefaultDataModel(client);
 
   const makeResponse = (event: {id: number}, success: boolean, body: object) => {
     return JSON.stringify({

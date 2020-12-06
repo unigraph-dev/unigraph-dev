@@ -65,6 +65,26 @@ export default class DgraphClient {
     }
   }
 
+  async createMutation(data: any[]) {
+    const txn = this.dgraphClient.newTxn();
+    try {
+      let mutations: Mutation[] = data.map((obj: any) => {
+        let mu = new dgraph.Mutation();
+        mu.setSetJson(obj);
+        return mu;
+      });
+      const req = new dgraph.Request();
+      req.setMutationsList(mutations);
+      req.setCommitNow(true);
+
+      await txn.doRequest(req);
+    } catch (e) {
+      console.error('Error: ', e);
+    } finally {
+      await txn.discard();
+    }
+  }
+
   /**
    * Creates data from a upsert request (i.e. query for data then use the result to mutate).
    * @param {UnigraphUpsert} data 
@@ -99,6 +119,22 @@ export default class DgraphClient {
       .newTxn({ readOnly: true })
       .queryWithVars(query, vars);
     return Object.values(res.getJson())[0] as T;
+  }
+
+  // Some helpful functions for unigraph
+
+  /**
+   * Queries the database for objects with a unigraph.id.
+   * @param id The desired id to query
+   */
+  async queryUnigraphId<T = unknown>(id: string) {
+    return this.queryData<T>(`
+    query findByName($a: string) {
+      entities(func: eq(unigraph.id, $a)) {
+        expand(_predicate_)
+      }
+    }
+  `, {$a: id})
   }
 
   close() {
