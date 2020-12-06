@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useEvent } from 'react-use';
 
 import Box from '@material-ui/core/Box';
@@ -19,10 +19,11 @@ export default function ExplorerHome() {
   const classes = useStyles();
   const [messages, setMessages] = React.useState(window.unigraph.backendMessages);
 
-  useEvent<WebSocket>('message', msg => {
-    window.unigraph.backendMessages = [(msg as MessageEvent).data, ...messages];
-    setMessages(window.unigraph.backendMessages);
-  }, window.unigraph.backendConnection);
+  useEffect(() => {
+    window.unigraph.addEventListener((_: any) => {
+      setMessages(window.unigraph.backendMessages);
+    })
+  })
 
   return (
     <div>
@@ -31,7 +32,7 @@ export default function ExplorerHome() {
       <p>Connected to: {window.unigraph.backendConnection.url}</p>
       <h1>Messages</h1>
       <Box display="grid" gridGap={8} justifyContent="start">
-        {messages.map((message, i) => <code key={i} className={classes.code}>{message}</code>)}
+        {messages.map((message, i) => <code key={i} className={classes.code}>{JSON.stringify(message)}</code>)}
       </Box>
     </div>
   );

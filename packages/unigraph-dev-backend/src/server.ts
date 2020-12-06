@@ -100,6 +100,9 @@ export default async function startServer(client: DgraphClient) {
             eventRouter[msgObject.event](msgObject, ws);
           }
           if (verbose >= 2) console.log(msgObject);
+        } else {
+          console.log("Message received is not JSON!");
+          console.log(msg)
         }
       });
       ws.send(JSON.stringify({
