@@ -17,6 +17,7 @@ function insertsToUpsertRecursive(inserts: any[], appends: any[], queries: strin
             queries.push("unigraphquery" + (queries.length + 1) + " as var(func: eq(unigraph.id, \"" + refQuery + "\"))");
             currentObject['uid'] = "uid(unigraphquery" + queries.length + ")";
         };
+        console.log(currentObject)
         let objectValues = Object.values(currentObject);
         for(let i=0; i<objectValues.length; ++i) {
             if (typeof objectValues[i] === "object" && !Array.isArray(objectValues[i])) {

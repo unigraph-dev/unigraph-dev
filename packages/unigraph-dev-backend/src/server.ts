@@ -74,7 +74,8 @@ export default async function startServer(client: DgraphClient) {
       let schema = (Array.isArray(event.schema) ? event.schema : [event.schema]);
       let upsert: UnigraphUpsert = insertsToUpsert(schema);
       dgraphClient.createUnigraphUpsert(upsert).then(_ => {
-        ws.send(makeResponse(event, true, {}))
+        ws.send(makeResponse(event, true, {}));
+        caches["schemas"].updateNow();
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
     },
 

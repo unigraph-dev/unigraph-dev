@@ -7,7 +7,7 @@ type data = any;
 export type Cache = {
     data: data,
     updateNow(): data,
-    cacheType: "subscription" | "when-needed",
+    cacheType: "subscription" | "manual",
     subscribe(listener: Function): any
 }
 
@@ -18,11 +18,11 @@ export function createSchemaCache(client: DgraphClient): Cache {
     let cache: Cache = {
         data: [],
         updateNow: async () => null,
-        cacheType: "when-needed",
+        cacheType: "manual",
         subscribe: (listener) => null
     };
 
-    cache.updateNow = async () => cache.data = client.getSchemas();
+    cache.updateNow = async () => cache.data = await client.getSchemas();
 
     cache.updateNow();
 
