@@ -8,6 +8,7 @@ import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSc
 import { buildUnigraphEntity } from './utils/entityUtils';
 import { checkOrCreateDefaultDataModel } from './datamodelManager';
 import { Cache, createSchemaCache } from './caches';
+import repl from 'repl';
 
 const PORT = 3001;
 const verbose = 5;
@@ -122,6 +123,10 @@ export default async function startServer(client: DgraphClient) {
       console.log('\nListening on port', PORT);
     });
   });
+
+  let debugServer = repl.start("unigraph> ");
+  // @ts-ignore
+  debugServer.context.unigraph = {caches: caches, dgraphClient: client, server: server};
 
   return [app!, server] as const;
 }
