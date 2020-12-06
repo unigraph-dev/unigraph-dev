@@ -7,6 +7,7 @@ import { insertsToUpsert } from './utils/txnWrapper';
 import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDropAll, EventDropData, EventQueryByStringWithVars, EventSetDgraphSchema, IWebsocket, UnigraphUpsert } from './custom';
 import { buildUnigraphEntity } from './utils/entityUtils';
 import { checkOrCreateDefaultDataModel } from './datamodelManager';
+import { Cache, createSchemaCache } from './caches';
 
 const PORT = 3001;
 const verbose = 5;
@@ -14,9 +15,14 @@ const verbose = 5;
 export default async function startServer(client: DgraphClient) {
   let app: Application;
   let dgraphClient = client;
+  let caches: Record<string, Cache> = {};
   
   // Basic checks
   await checkOrCreateDefaultDataModel(client);
+
+  // Initialize managers
+  caches["schemas"] = createSchemaCache(client);
+  console.log(caches["schemas"]);
 
   const makeResponse = (event: {id: number}, success: boolean, body: object) => {
     return JSON.stringify({

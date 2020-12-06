@@ -137,6 +137,17 @@ export default class DgraphClient {
   `, {$a: id})
   }
 
+  async getSchemas() {
+    return this.queryData<any[]>(`
+    query findByName() {
+      entities(func: eq(dgraph.type, "Type")) @recurse(depth: 10) {
+        uid
+        expand(_predicate_)
+      }
+    }
+  `, {})
+  }
+
   close() {
     this.dgraphClientStub.close();
   }
