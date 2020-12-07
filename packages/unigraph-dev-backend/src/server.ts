@@ -86,7 +86,7 @@ export default async function startServer(client: DgraphClient) {
      */
     "create_unigraph_object": function (event: EventCreateUnigraphObject, ws: IWebsocket) {
       // TODO: Talk about schema verifications
-      let finalUnigraphObject = buildUnigraphEntity(event.object, event.schema, false, event.padding);
+      let finalUnigraphObject = buildUnigraphEntity(event.object, event.schema, caches['schemas'].data);
       let upsert = insertsToUpsert([finalUnigraphObject]);
       dgraphClient.createUnigraphUpsert(upsert).then(_ => {
         ws.send(makeResponse(event, true, {}))

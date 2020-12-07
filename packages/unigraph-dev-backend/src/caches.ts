@@ -16,13 +16,21 @@ export type Cache = {
 export function createSchemaCache(client: DgraphClient): Cache {
 
     let cache: Cache = {
-        data: [],
+        data: {},
         updateNow: async () => null,
         cacheType: "manual",
         subscribe: (listener) => null
     };
 
-    cache.updateNow = async () => cache.data = await client.getSchemas();
+    cache.updateNow = async () => { 
+        let newdata = await client.getSchemas();
+        cache.data = newdata.reduce((prev, obj) => {
+            if (obj && typeof obj["unigraph.id"] === "string" && obj["unigraph.id"].startsWith('$/schema/')) {
+                prev[obj["unigraph.id"]] = obj;
+            };
+            return prev;
+        }, {})
+    };
 
     cache.updateNow();
 

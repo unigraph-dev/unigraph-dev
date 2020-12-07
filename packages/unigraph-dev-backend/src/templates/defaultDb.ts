@@ -31,6 +31,9 @@ export const defaultUserlandSchemas = [
         "unigraph.id": "$/primitive/null"
     },
     {
+        "unigraph.id": "$/primitive/undefined"
+    },
+    {
         "unigraph.id": "$/composer/Array"
     },
     {
