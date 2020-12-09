@@ -5,6 +5,9 @@ import TextField from '@material-ui/core/TextField';
 import { EntityField } from './types';
 
 const useStyles = makeStyles(theme => ({
+  root: {
+    marginBottom: 8
+  },
   fieldName: {
     marginRight: 8,
   }
