@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import React, { useCallback, FC, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { useList } from 'react-use';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
@@ -23,7 +23,11 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const SchemaEditor: FC = () => {
+interface SchemaEditorProps {
+  onSubmit(schema: any): void;
+}
+
+const SchemaEditor: FC<SchemaEditorProps> = ({ onSubmit }) => {
   const classes = useStyles();
   const [fields, { push, updateAt }] = useList<Partial<EntityField>>([{}]);
   const fieldUpdaters = useMemo(() =>
@@ -36,11 +40,12 @@ const SchemaEditor: FC = () => {
     push({});
   }, [push]);
 
-  const createData = useCallback(() => {
+  const handleSubmit = useCallback(() => {
     const properties = _.fromPairs(
       fields.map(({ key, definition }) => [key, definition?.type])
     );
-    const entity = {
+
+    onSubmit({
       ...makeUnigraphId('$/schema/todo'),
       'dgraph.type': 'Type',
       definition: {
@@ -49,14 +54,10 @@ const SchemaEditor: FC = () => {
           indexedBy: makeRefUnigraphId('$/primitive/string'),
           indexes: ['name']
         },
-        properties
+        properties,
       }
-    };
-    window.unigraph.backendConnection.send(JSON.stringify({
-      event: 'create_data_by_json',
-      data: entity,
-    }));
-  }, [fields]);
+    });
+  }, [fields, onSubmit]);
 
   return (
     <Box className={classes.root} flexDirection="column">
@@ -68,7 +69,7 @@ const SchemaEditor: FC = () => {
         <IconButton onClick={addField}>
           <Add />
         </IconButton>
-        <Button onClick={createData}>Submit</Button>
+        <Button onClick={handleSubmit}>Submit</Button>
       </Box>
     </Box>
   );
