@@ -14,7 +14,8 @@
     "react-scripts": "3.4.4",
     "react-use": "^15.3.4",
     "typeface-roboto": "^1.1.13",
-    "typescript": "~3.7.2"
+    "typescript": "~3.7.2",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^4.2.4",
@@ -25,7 +26,8 @@
     "@types/node": "^12.0.0",
     "@types/react": "^16.9.0",
     "@types/react-dom": "^16.9.0",
-    "@types/react-router-dom": "^5.1.6"
+    "@types/react-router-dom": "^5.1.6",
+    "@types/uuid": "^8.3.0"
   },
   "scripts": {
     "start": "react-scripts start",
