@@ -1,5 +1,5 @@
 import { Button } from '@material-ui/core';
-import React, from 'react';
+import React from 'react';
 import CodeMirror from 'react-codemirror';
 require('codemirror/lib/codemirror.css');
 
