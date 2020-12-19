@@ -18,6 +18,22 @@ export default class DgraphClient {
     // TODO(haojixu): Check if default db exists - if not, set default
   }
 
+  async getStatus() {
+    let count: any[][] = await this.queryDgraph(`{
+      objects(func: type(Entity)) {
+        totalObjects : count(uid)
+      }
+      schemas(func: type(Type)) {
+        totalSchemas : count(uid)
+      }
+    }`, {});
+    return {
+      "version": await (await this.dgraphClientStub.checkVersion(new Check())).toString(),
+      "objects": count[0][0].totalObjects,
+      "schemas": count[1][0].totalSchemas
+    }
+  }
+
   async dropAll() {
     const op = new Operation();
     op.setDropAll(true);
@@ -121,6 +137,18 @@ export default class DgraphClient {
       .newTxn({ readOnly: true })
       .queryWithVars(query, vars);
     return Object.values(res.getJson())[0] as T;
+  }
+
+  /**
+   * Executes a raw query directly on dgraph that is not type safe.
+   * @param query 
+   * @param vars 
+   */
+  async queryDgraph(query: string, vars: Record<string, any>|undefined = undefined): Promise<any[]> {
+    const res = await this.dgraphClient
+      .newTxn({ readOnly: true })
+      .queryWithVars(query, vars);
+    return Object.values(res.getJson());
   }
 
   // Some helpful functions for unigraph

@@ -40,6 +40,12 @@ function getUnigraphType (object: any): UnigraphTypeString {
 
 type BuildEntityOptions = {makeAbstract: boolean, validateSchema: boolean}
 
+/* Schema checking spec list:
+ * - should be able to check basic objects (restrictive schema, nonabstract, unpadded)
+ * - should be able to check nonrestrictive objects (i.e. fields don't exist on schema)
+ * - should be able to check padded objects
+ */
+
 function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions = {makeAbstract: false, validateSchema: true}, schemaMap: Record<string, Schema>, localSchema: Definition | any): {"_value": any} {
     let unigraphPartValue: any = undefined;
     let rawPartUnigraphType = getUnigraphType(rawPart);
@@ -89,17 +95,8 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions = {m
     return {"_value": unigraphPartValue};
 }
 
-export function validateEntityWithSchema(object: Object, schemaName: string, schemaMap: Record<string, Schema>) {
-    if (schemaName === "any") {
-        return true;
-    } else {
-        // TODO: Add schema validation
-        return true;
-    }
-}
-
-export function validateUnpaddedEntity(object: Object) {
-    // TODO: Validate unpadded entity
+export function validatePaddedEntity(object: Object) {
+    // TODO: Validate padded entity
     return true;
 }
 
@@ -115,7 +112,7 @@ export function validateUnpaddedEntity(object: Object) {
  */
 export function buildUnigraphEntity (raw: Object, schemaName: string = "any", schemaMap: Record<string, Schema>, padding: boolean = true, options: BuildEntityOptions = {makeAbstract: false, validateSchema: true}): EntityDgraph<string> | TypeError {
     // Check for unvalidated entity
-    if (padding === false && !validateUnpaddedEntity(raw)) {
+    if (padding === false && !validatePaddedEntity(raw)) {
         throw new TypeError("Entity validation failed for entity " + raw)
     } else {
         let localSchema = schemaMap[schemaName].definition

@@ -53,3 +53,121 @@ For more detailed info regarding each of the events, TODO
 ## Listening/Subscribing to events
 
 TODO
+
+## Examples
+
+### Get status of unigraph server
+```json
+{
+    "type": "event",
+    "event": "get_status",
+    "id": 1608353103794
+}
+```
+
+### List of all existing objects with ID
+```json
+{
+    "type": "event",
+    "event": "query_by_string_with_vars",
+    "query": "query findByName() {entities(func: has(unigraph.id)) {uid expand(_predicate_) { uid expand(_predicate_)}}}",
+    "vars": {},
+    "id": 1608353103794
+}
+```
+
+### Insert a new object
+```json
+{
+    "type": "event",
+    "event": "create_unigraph_object",
+    "object": {
+        "name": "Write initial definitions of JSON-TS",
+        "done": false,
+        "users": [
+            {
+                "name": "Haoji Xu",
+            }
+        ]
+    },
+    "schema": "$/schema/todo",
+    "id": 1234567890
+}
+```
+
+### Insert a new schema
+```json
+{
+    "type": "event",
+    "event": "create_unigraph_schema",
+    "schema": {
+        "unigraph.id": "$/schema/todo",
+        "dgraph.type": "Type",
+        "definition": {
+            "type": {
+                "$ref": {
+                    "key": "unigraph.id",
+                    "query": "$/composer/Object"
+                }
+            },
+            "parameters": {
+                "indexedBy": {
+                    "$ref": {
+                        "key": "unigraph.id",
+                        "query": "$/primitive/string"
+                    }
+                },
+                "indexes": [
+                    "name"
+                ]
+            },
+            "properties": [
+                {
+                    "key": "name",
+                    "definition": {
+                        "type": {
+                            "$ref": {
+                                "key": "unigraph.id",
+                                "query": "$/primitive/string"
+                            }
+                        }
+                    }
+                },
+                {
+                    "key": "done",
+                    "definition": {
+                        "type": {
+                            "$ref": {
+                                "key": "unigraph.id",
+                                "query": "$/primitive/boolean"
+                            }
+                        }
+                    }
+                },
+                {
+                    "key": "users",
+                    "definition": {
+                        "type": {
+                            "$ref": {
+                                "key": "unigraph.id",
+                                "query": "$/composer/Array"
+                            }
+                        },
+                        "parameters": {
+                            "element": {
+                                "type": {
+                                    "$ref": {
+                                        "key": "unigraph.id",
+                                        "query": "$/schema/user"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    "id": 1
+}
+```
