@@ -4,11 +4,12 @@ import expressWs, { Application, WebsocketRequestHandler } from 'express-ws';
 import { isJsonString } from './utils/utils';
 import DgraphClient from './dgraphClient';
 import { insertsToUpsert } from './utils/txnWrapper';
-import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDropAll, EventDropData, EventQueryByStringWithVars, EventSetDgraphSchema, IWebsocket, UnigraphUpsert } from './custom';
+import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDropAll, EventDropData, EventQueryByStringWithVars, EventSetDgraphSchema, EventSubscribeObject, IWebsocket, UnigraphUpsert } from './custom';
 import { buildUnigraphEntity } from './utils/entityUtils';
 import { checkOrCreateDefaultDataModel } from './datamodelManager';
 import { Cache, createSchemaCache } from './caches';
 import repl from 'repl';
+import { createSubscriptionWS, MsgCallbackFn, pollSubscriptions, Subscription } from './subscriptions';
 
 const PORT = 3001;
 const verbose = 5;
@@ -16,14 +17,28 @@ const verbose = 5;
 export default async function startServer(client: DgraphClient) {
   let app: Application;
   let dgraphClient = client;
+
+  const pollInterval = 1000;
+
   let caches: Record<string, Cache> = {};
+  let subscriptions: Subscription[] = [];
   
   // Basic checks
   await checkOrCreateDefaultDataModel(client);
 
-  // Initialize managers
+  // Initialize caches
   caches["schemas"] = createSchemaCache(client);
-  console.log(caches["schemas"]);
+
+  // Initialize subscriptions
+  const pollCallback: MsgCallbackFn = (id, newdata, msgPort) => {
+    msgPort.send(JSON.stringify({
+      type: "subscription",
+      updated: true,
+      id: id,
+      result: newdata
+    }))};
+
+  setInterval(() => pollSubscriptions(subscriptions, dgraphClient, pollCallback), pollInterval);
 
   const makeResponse = (event: {id: number}, success: boolean, body: object) => {
     return JSON.stringify({
@@ -65,6 +80,11 @@ export default async function startServer(client: DgraphClient) {
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})))
     },
 
+    "subscribe_to_object": function (event: EventSubscribeObject, ws: IWebsocket) {
+      let newSub = createSubscriptionWS(event.id, ws, event.queryFragment);
+      subscriptions.push(newSub);
+    },
+
     /**
      * Creates unigraph schema entity(s) in dgraph.
      * @param event The event for creating the schema
@@ -98,6 +118,13 @@ export default async function startServer(client: DgraphClient) {
         "dgraph": await dgraphClient.getStatus(),
         "unigraph": {
           // TODO: Pull status for debugging/statistics
+          "cache": {
+            "length": Object.values(caches).length,
+            "names": Object.keys(caches),
+          },
+          "subscription": {
+            "length": subscriptions.length,
+          }
         }
       }
       ws.send(makeResponse(event, true, status))
@@ -137,7 +164,7 @@ export default async function startServer(client: DgraphClient) {
 
   let debugServer = repl.start("unigraph> ");
   // @ts-ignore
-  debugServer.context.unigraph = {caches: caches, dgraphClient: client, server: server};
+  debugServer.context.unigraph = {caches: caches, dgraphClient: client, server: server, subscriptions: subscriptions};
 
   return [app!, server] as const;
 }

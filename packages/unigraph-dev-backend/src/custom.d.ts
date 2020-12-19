@@ -63,6 +63,13 @@ declare type EventQueryByStringWithVars = {
   id: number
 }
 
+declare type EventSubscribeObject = {
+  type: "event",
+  event: "subscribe_to_object",
+  id: number | string,
+  queryFragment: string
+}
+
 declare interface IWebsocket {
   send: Function
 }

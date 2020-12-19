@@ -15,6 +15,12 @@ const templateRequests = {
         "type": "event",
         "event": "get_status",
         "id": ${Date.now()}
+    }`,
+    "subscribe-all": `{
+        "type": "event",
+        "event": "subscribe_to_object",
+        "id": ${Date.now()},
+        "queryFragment": "(func: has(unigraph.id)) {uid expand(_predicate_) { uid expand(_predicate_)}}" 
     }`
 }
 
@@ -30,11 +36,11 @@ export default function Request () {
             options={{lineNumbers: true, mode: "javascript"}} 
         />
         <Button onClick={() => {
-            console.log(code)
             window.unigraph.backendConnection.send(code)
         }}>Send to server</Button>
         <p>Templates: </p>
         <Button onClick={() => setCode(templateRequests['get-all-objects-with-id'])}>Get all objects with ID</Button>
         <Button onClick={() => setCode(templateRequests['get-status'])}>Get server status</Button>
+        <Button onClick={() => setCode(templateRequests['subscribe-all'])}>Subscribe to all changes</Button>
     </div>
 }
