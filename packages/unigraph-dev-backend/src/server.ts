@@ -91,6 +91,16 @@ export default async function startServer(client: DgraphClient) {
       dgraphClient.createUnigraphUpsert(upsert).then(_ => {
         ws.send(makeResponse(event, true, {}))
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
+    },
+
+    "get_status": async function (event: any, ws: IWebsocket) {
+      let status = {
+        "dgraph": await dgraphClient.getStatus(),
+        "unigraph": {
+          // TODO: Pull status for debugging/statistics
+        }
+      }
+      ws.send(makeResponse(event, true, status))
     }
   };
 

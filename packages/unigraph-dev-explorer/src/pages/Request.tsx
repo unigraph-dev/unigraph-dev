@@ -11,6 +11,11 @@ const templateRequests = {
         "vars": {},
         "id": ${Date.now()}
     }`,
+    "get-status": `{
+        "type": "event",
+        "event": "get_status",
+        "id": ${Date.now()}
+    }`
 }
 
 export default function Request () {
@@ -30,5 +35,6 @@ export default function Request () {
         }}>Send to server</Button>
         <p>Templates: </p>
         <Button onClick={() => setCode(templateRequests['get-all-objects-with-id'])}>Get all objects with ID</Button>
+        <Button onClick={() => setCode(templateRequests['get-status'])}>Get server status</Button>
     </div>
 }
