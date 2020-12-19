@@ -24,7 +24,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 interface SchemaEditorProps {
-  onSubmit(schema: any): void;
+  onSubmit(schema: any, preview?: boolean): void;
 }
 
 const SchemaEditor: FC<SchemaEditorProps> = ({ onSubmit }) => {
@@ -40,7 +40,7 @@ const SchemaEditor: FC<SchemaEditorProps> = ({ onSubmit }) => {
     push({});
   }, [push]);
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = useCallback((event: any, preview: boolean = false) => {
     const properties = _.fromPairs(
       fields.map(({ key, definition }) => [key, definition?.type])
     );
@@ -56,7 +56,7 @@ const SchemaEditor: FC<SchemaEditorProps> = ({ onSubmit }) => {
         },
         properties,
       }
-    });
+    }, preview);
   }, [fields, onSubmit]);
 
   return (
@@ -70,6 +70,7 @@ const SchemaEditor: FC<SchemaEditorProps> = ({ onSubmit }) => {
           <Add />
         </IconButton>
         <Button onClick={handleSubmit}>Submit</Button>
+        <Button onClick={(ev) => handleSubmit(ev, true)}>Preview</Button>
       </Box>
     </Box>
   );
