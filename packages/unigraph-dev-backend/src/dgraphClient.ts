@@ -36,7 +36,7 @@ export default class DgraphClient {
     await this.dgraphClient.alter(op);
   }
 
-  async createData(data: Record<string, any>) {
+  async createData(data: Record<string, any>, test = false) {
     const txn = this.dgraphClient.newTxn();
     try {
 
@@ -46,18 +46,20 @@ export default class DgraphClient {
 
       await txn.commit();
 
-      const resolvedUid = response
-        .getUidsMap()
-        .get(data.uid.slice(2));
+      if (test) {
+        const resolvedUid = response
+          .getUidsMap()
+          .get(data.uid.slice(2));
 
-      console.log(
-        `Created node named '${data.name}' with uid = ${resolvedUid}\n`,
-      );
+        console.log(
+          `Created node named '${data.name}' with uid = ${resolvedUid}\n`,
+        );
 
-      console.log('All created nodes:');
-      const uids = response.getUidsMap();
-      uids.forEach((uid, key) => console.log(`${key} => ${uid}`));
-      console.log();
+        console.log('All created nodes:');
+        const uids = response.getUidsMap();
+        uids.forEach((uid, key) => console.log(`${key} => ${uid}`));
+        console.log();
+      }
     } catch (e) {
       console.error('Error:', e);
     } finally {

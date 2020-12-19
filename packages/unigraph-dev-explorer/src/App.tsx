@@ -13,6 +13,7 @@ import About from './pages/About';
 import ExplorerHome from './pages/ExplorerHome';
 import unigraph from './unigraph';
 import Request from './pages/Request';
+import AddSchema from './pages/AddSchema';
 
 // TODO: custom theme
 const useStyles = makeStyles(theme => ({
@@ -64,6 +65,9 @@ function App() {
             </Route>
             <Route path="/about">
               <About />
+            </Route>
+            <Route path="/schema/new">
+              <AddSchema />
             </Route>
             <Route path="/">
               <ExplorerHome />

@@ -91,7 +91,7 @@ export default async function startServer(client: Client) {
         let msgObject: {type: string | null, event: string | null} = isJsonString(msg)
         if (msgObject) {
           // match events
-          if (msgObject && msgObject.type === "event" && msgObject.event && eventRouter[msgObject.event]) {
+          if (msgObject.type === "event" && msgObject.event && eventRouter[msgObject.event]) {
             if (verbose >= 1) console.log("matched event: " + msgObject.event);
             eventRouter[msgObject.event](msgObject, ws);
           }

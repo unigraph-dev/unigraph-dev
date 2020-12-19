@@ -3,8 +3,8 @@ import { UnigraphUpsert } from "@/custom"
 function insertsToUpsertRecursive(inserts: any[], appends: any[], queries: string[], currentObject: any) {
     // If this is a reference object
     if (currentObject && currentObject["$ref"] && currentObject["$ref"].key && currentObject["$ref"].query) {
-        let refTarget = currentObject["$ref"].key.replaceAll(/["%@\\]/g, "")
-        let refQuery = currentObject["$ref"].query.replaceAll(/["%@\\]/g, "")
+        let refTarget = currentObject["$ref"].key.replace(/["%@\\]/g, "")
+        let refQuery = currentObject["$ref"].query.replace(/["%@\\]/g, "")
         queries.push("unigraphquery" + (queries.length + 1) + " as var(func: eq(" + refTarget + ", \"" + refQuery + "\"))");
         currentObject["uid"] = "uid(unigraphquery" + queries.length + ")";
         currentObject["$ref"] = undefined;

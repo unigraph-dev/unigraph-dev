@@ -6,6 +6,7 @@
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
     "@types/react-codemirror": "^1.0.3",
+    "lodash": "^4.17.20",
     "react": "^17.0.1",
     "react-codemirror": "^1.0.0",
     "react-dom": "^17.0.1",
@@ -13,17 +14,20 @@
     "react-scripts": "3.4.4",
     "react-use": "^15.3.4",
     "typeface-roboto": "^1.1.13",
-    "typescript": "~3.7.2"
+    "typescript": "~3.7.2",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "@types/jest": "^24.0.0",
+    "@types/lodash": "^4.14.165",
     "@types/node": "^12.0.0",
     "@types/react": "^16.9.0",
     "@types/react-dom": "^16.9.0",
-    "@types/react-router-dom": "^5.1.6"
+    "@types/react-router-dom": "^5.1.6",
+    "@types/uuid": "^8.3.0"
   },
   "scripts": {
     "start": "react-scripts start",
