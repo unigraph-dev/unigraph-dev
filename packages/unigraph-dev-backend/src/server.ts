@@ -2,17 +2,28 @@ import express, { Request } from 'express';
 import { Server } from 'http';
 import expressWs, { Application, WebsocketRequestHandler } from 'express-ws';
 import { isJsonString } from './utils/utils';
-import Client from './dgraphClient';
+import DgraphClient from './dgraphClient';
 import { insertsToUpsert } from './utils/txnWrapper';
 import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDropAll, EventDropData, EventQueryByStringWithVars, EventSetDgraphSchema, IWebsocket, UnigraphUpsert } from './custom';
 import { buildUnigraphEntity } from './utils/entityUtils';
+import { checkOrCreateDefaultDataModel } from './datamodelManager';
+import { Cache, createSchemaCache } from './caches';
+import repl from 'repl';
 
 const PORT = 3001;
 const verbose = 5;
 
-export default async function startServer(client: Client) {
+export default async function startServer(client: DgraphClient) {
   let app: Application;
   let dgraphClient = client;
+  let caches: Record<string, Cache> = {};
+  
+  // Basic checks
+  await checkOrCreateDefaultDataModel(client);
+
+  // Initialize managers
+  caches["schemas"] = createSchemaCache(client);
+  console.log(caches["schemas"]);
 
   const makeResponse = (event: {id: number}, success: boolean, body: object) => {
     return JSON.stringify({
@@ -63,7 +74,8 @@ export default async function startServer(client: Client) {
       let schema = (Array.isArray(event.schema) ? event.schema : [event.schema]);
       let upsert: UnigraphUpsert = insertsToUpsert(schema);
       dgraphClient.createUnigraphUpsert(upsert).then(_ => {
-        ws.send(makeResponse(event, true, {}))
+        ws.send(makeResponse(event, true, {}));
+        caches["schemas"].updateNow();
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
     },
 
@@ -74,7 +86,7 @@ export default async function startServer(client: Client) {
      */
     "create_unigraph_object": function (event: EventCreateUnigraphObject, ws: IWebsocket) {
       // TODO: Talk about schema verifications
-      let finalUnigraphObject = buildUnigraphEntity(event.object, event.schema, false, event.padding);
+      let finalUnigraphObject = buildUnigraphEntity(event.object, event.schema, caches['schemas'].data);
       let upsert = insertsToUpsert([finalUnigraphObject]);
       dgraphClient.createUnigraphUpsert(upsert).then(_ => {
         ws.send(makeResponse(event, true, {}))
@@ -96,6 +108,9 @@ export default async function startServer(client: Client) {
             eventRouter[msgObject.event](msgObject, ws);
           }
           if (verbose >= 2) console.log(msgObject);
+        } else {
+          console.log("Message received is not JSON!");
+          console.log(msg)
         }
       });
       ws.send(JSON.stringify({
@@ -109,6 +124,10 @@ export default async function startServer(client: Client) {
       console.log('\nListening on port', PORT);
     });
   });
+
+  let debugServer = repl.start("unigraph> ");
+  // @ts-ignore
+  debugServer.context.unigraph = {caches: caches, dgraphClient: client, server: server};
 
   return [app!, server] as const;
 }

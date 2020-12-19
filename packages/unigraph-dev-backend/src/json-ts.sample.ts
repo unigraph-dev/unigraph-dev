@@ -1,6 +1,7 @@
 import { assert } from "console";
-import { SchemaDgraph, UidType, EntityDgraph, UnigraphIdType, RefUnigraphIdType } from "./json-ts";
+import { SchemaDgraph, UidType, EntityDgraph, UnigraphIdType, RefUnigraphIdType, Schema } from "./json-ts";
 import { buildUnigraphEntity, makeRefUnigraphId, makeUnigraphId } from "./utils/entityUtils";
+import _ from "lodash";
 
 let todoSchema: SchemaDgraph = {
     ...makeUnigraphId("$/schema/todo"),
@@ -37,6 +38,83 @@ let todoSchema: SchemaDgraph = {
     }
 }
 
+let userSchema: SchemaDgraph = {
+    ...makeUnigraphId("$/schema/user"),
+    "dgraph.type": "Type",
+    "definition": {
+        "type": makeRefUnigraphId("$/composer/Object"),
+        "parameters": {
+            "indexedBy": makeRefUnigraphId("$/primitive/string"),
+            "indexes": ["name"]
+        },
+        "properties": [
+            {
+                "key": "name",
+                "definition": {
+                    "type": makeRefUnigraphId("$/primitive/string")
+                }
+            }
+        ]
+    }
+}
+
+let todoSchemaDeref: any = {
+    ...makeUnigraphId("$/schema/todo"),
+    "dgraph.type": "Type",
+    "definition": {
+        "type": makeUnigraphId("$/composer/Object"),
+        "parameters": {
+            "indexedBy": makeUnigraphId("$/primitive/string"),
+            "indexes": ["name"]
+        },
+        "properties": [
+            {
+                "key": "name",
+                "definition": {
+                    "type": makeUnigraphId("$/primitive/string")
+                }
+            },
+            {
+                "key": "done",
+                "definition": {
+                    "type": makeUnigraphId("$/primitive/boolean")
+                }
+            },
+            {
+                "key": "users",
+                "definition": {
+                    "type": makeUnigraphId("$/composer/Array"),
+                    "parameters": {
+                        "element": {"type": makeUnigraphId("$/schema/user")}
+                    }
+                }
+            }
+        ]
+    }
+}
+
+let userSchemaDeref: any = {
+    ...makeUnigraphId("$/schema/user"),
+    "dgraph.type": "Type",
+    "definition": {
+        "type": makeUnigraphId("$/composer/Object"),
+        "parameters": {
+            "indexedBy": makeUnigraphId("$/primitive/string"),
+            "indexes": ["name"]
+        },
+        "properties": [
+            {
+                "key": "name",
+                "definition": {
+                    "type": makeUnigraphId("$/primitive/string")
+                }
+            }
+        ]
+    }
+}
+
+let schemaMap = {"$/schema/todo": todoSchemaDeref, "$/schema/user": userSchemaDeref}
+
 // This is the entity before the `buildUngiraphEntity` operation, similar to most Object-Relation Mapping representations.
 let todoItemRaw = {
     name: "Write initial definitions of JSON-TS",
@@ -57,18 +135,18 @@ let todoItem: EntityDgraph<"todo"> = {
         "done": {"_value": false},
         "users": {"_value": [
             {
-                "_value": {"name": {"_value": "Haoji Xu"}}, 
-                "dgraph.type": "Entity", 
-                "type": makeRefUnigraphId("$/schema/user")
+                "_value": {
+                    "_value": {"name": {"_value": "Haoji Xu"}}, 
+                    "dgraph.type": "Entity", 
+                    "type": makeRefUnigraphId("$/schema/user")
+                }
             }
         ]}
     }
 }
 
 // The operation should successfully yield the above result.
-// TODO: Find an elegant way to deal with nested objects (maybe via schema verification?) 
-// Currently this assertion fails because nested objects doens't get dgraph metadata.
-assert(todoItem === buildUnigraphEntity(todoItemRaw, "todo"), JSON.stringify(buildUnigraphEntity(todoItemRaw, "todo"), null, 4));
+assert(_.isEqual(todoItem, buildUnigraphEntity(todoItemRaw, "$/schema/todo", schemaMap as Record<string, Schema>)));
 
 type EntityDgraphAbstract = any; // TODO
 

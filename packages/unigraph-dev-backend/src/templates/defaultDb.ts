@@ -4,7 +4,7 @@
  * Default database entries includes default userland schemas (primitive, composers) and default dgraph schemas (and types).
  */
 
-const defaultTypes = `<_value>: uid .
+export const defaultTypes = `<_value>: uid .
 <definition>: uid .
 <type>: uid .
 <unigraph.id>: string @index(exact) .
@@ -17,7 +17,7 @@ type <Type> {
 }
 `
 
-const defaultUserlandSchemas = [
+export const defaultUserlandSchemas = [
     {
         "unigraph.id": "$/primitive/number"
     },
@@ -31,9 +31,16 @@ const defaultUserlandSchemas = [
         "unigraph.id": "$/primitive/null"
     },
     {
+        "unigraph.id": "$/primitive/undefined"
+    },
+    {
         "unigraph.id": "$/composer/Array"
     },
     {
         "unigraph.id": "$/composer/Object"
     },
+    {
+        "unigraph.id": "$/unigraph",
+        "version": "schema-v0.0.1"
+    }
 ]

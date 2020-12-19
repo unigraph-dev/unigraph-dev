@@ -12,6 +12,12 @@ function insertsToUpsertRecursive(inserts: any[], appends: any[], queries: strin
         append[refTarget] = refQuery
         appends.push(append)
     } else { // Check sub-fields
+        if (currentObject && typeof currentObject['unigraph.id'] === "string") {
+            let refQuery = currentObject['unigraph.id'].replace(/["%@\\]/g, "")
+            queries.push("unigraphquery" + (queries.length + 1) + " as var(func: eq(unigraph.id, \"" + refQuery + "\"))");
+            currentObject['uid'] = "uid(unigraphquery" + queries.length + ")";
+        };
+        console.log(currentObject)
         let objectValues = Object.values(currentObject);
         for(let i=0; i<objectValues.length; ++i) {
             if (typeof objectValues[i] === "object" && !Array.isArray(objectValues[i])) {
@@ -27,6 +33,7 @@ function insertsToUpsertRecursive(inserts: any[], appends: any[], queries: strin
 
 /**
  * Converts a list of objects or schemas to a dgraph upsert operation.
+ * This function will ensure that the field `unigraph.id` is unique and all references to be resolved.
  * @param inserts An array of objects or schemas to insert, containing the `$ref` field
  */
 export function insertsToUpsert(inserts: any[]): UnigraphUpsert {

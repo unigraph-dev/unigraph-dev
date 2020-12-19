@@ -7,7 +7,7 @@ import { makeUnigraphId, makeRefUnigraphId } from '../components/SchemaEditor/ty
 
 const AddSchema = () => {
   const [schemaResult, setSchemaResult] = useState<any>();
-  const createSchema = useCallback((schema: any) => {
+  const createSchema = useCallback((schema: any, preview: boolean = false) => {
     const id = uuid.v4();
 
     const handleResponse = ({ data }: MessageEvent) => {
@@ -21,16 +21,21 @@ const AddSchema = () => {
       window.unigraph.backendConnection.removeEventListener('message', handleResponse);
     };
 
+    // TODO: (haojixu) thinking of merging this into a wrapped event system
     window.unigraph.backendConnection.addEventListener('message', handleResponse);
 
     // TODO: make this more scalable (right now, handleResponse will receive every
     // message sent between when schema is submitted and when response is sent back)
-    window.unigraph.backendConnection.send(JSON.stringify({
-      type: 'event',
-      event: 'create_unigraph_schema',
-      schema,
-      id,
-    }));
+    if (!preview) {
+      window.unigraph.backendConnection.send(JSON.stringify({
+        type: 'event',
+        event: 'create_unigraph_schema',
+        schema,
+        id,
+      }))
+    } else {
+      setSchemaResult(schema)
+    };
   }, []);
 
   return (
