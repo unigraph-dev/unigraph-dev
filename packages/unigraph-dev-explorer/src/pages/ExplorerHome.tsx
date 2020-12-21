@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { useEvent } from 'react-use';
 
 import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/core/styles';
@@ -17,13 +16,21 @@ const useStyles = makeStyles(() => ({
 
 export default function ExplorerHome() {
   const classes = useStyles();
-  const [messages, setMessages] = React.useState(window.unigraph.backendMessages);
+  const [messages, setMessages]: [any[], Function] = React.useState([]);
+
+  const listener = (_: any) => {
+    setMessages(window.unigraph.backendMessages);
+  }
 
   useEffect(() => {
-    window.unigraph.addEventListener((_: any) => {
-      setMessages(window.unigraph.backendMessages);
-    })
-  })
+    console.log(window.unigraph)
+    window.unigraph.eventTarget.addEventListener("onmessage", listener);
+    setMessages(window.unigraph.backendMessages);
+
+    return function cleanup() {
+      window.unigraph.eventTarget.removeEventListener("onmessage", listener);
+    }
+  }, [])
 
   return (
     <div>

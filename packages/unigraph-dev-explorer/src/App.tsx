@@ -11,7 +11,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import { AppDrawer } from './components';
 import About from './pages/About';
 import ExplorerHome from './pages/ExplorerHome';
-import unigraph from './unigraph';
 import Request from './pages/Request';
 import AddSchema from './pages/AddSchema';
 import TodoList from './examples/todo/TodoList';
@@ -35,11 +34,6 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(3),
   },
 }));
-
-// REVIEW: use react state? why is window.unigraph needed?
-// must keep single reference to this, otherwise react
-// mounting the app causes a 2nd connection to be created
-window.unigraph = unigraph("ws://localhost:3001");
 
 function App() {
   const classes = useStyles();

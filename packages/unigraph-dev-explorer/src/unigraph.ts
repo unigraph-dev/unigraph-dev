@@ -1,7 +1,7 @@
 export interface Unigraph {
     backendConnection: WebSocket;
     backendMessages: string[];
-    addEventListener(listener: Function): any;
+    eventTarget: EventTarget;
     ensureSchema(name: string, fallback: any): Promise<any>;
     subscribeToType(name: string, callback: Function): Promise<number>;
     unsubscribe(id: number): any;
@@ -29,7 +29,6 @@ export function makeRefUnigraphId(id: string): RefUnigraphIdType {
 }
 
 function unpad(object: any) {
-    console.log(object)
     let result: any = undefined;
     if (typeof object === "object" && !Array.isArray(object)) {
         result = {};
@@ -51,7 +50,7 @@ function unpad(object: any) {
 export default function unigraph(url: string): Unigraph {
     let connection = new WebSocket(url);
     let messages: any[] = [];
-    let listeners: Function[] = [];
+    let eventTarget: EventTarget = new EventTarget();
     let callbacks: Record<string, Function> = {};
     let subscriptions: Record<string, Function> = {}
 
@@ -59,9 +58,7 @@ export default function unigraph(url: string): Unigraph {
         try {
             let parsed = JSON.parse(ev.data);
             messages.push(parsed);
-            listeners.forEach(listener => {
-                listener(parsed)
-            });
+            eventTarget.dispatchEvent(new Event("onmessage", parsed));
             if (parsed.type === "response" && parsed.id && callbacks[parsed.id]) callbacks[parsed.id](parsed);
             if (parsed.type === "subscription" && parsed.id && subscriptions[parsed.id]) subscriptions[parsed.id](parsed.result);
         } catch (e) {
@@ -74,7 +71,7 @@ export default function unigraph(url: string): Unigraph {
     return {
         backendConnection: connection,
         backendMessages: messages,
-        addEventListener: (listener: Function) => listeners.push(listener),
+        eventTarget: eventTarget,
         ensureSchema: (name: string, fallback: any) => new Promise((resolve, reject) => {
             // TODO: Ensure schema exists
             let id = Date.now();

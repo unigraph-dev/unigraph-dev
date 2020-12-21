@@ -1,6 +1,5 @@
 import { Button, Checkbox, List, ListItem, ListItemIcon, ListItemText, TextField } from '@material-ui/core';
-import { Label } from '@material-ui/icons';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { makeUnigraphId, makeRefUnigraphId } from '../../unigraph';
 
 // Define the todo schema for ensurance
@@ -101,7 +100,7 @@ export default function TodoList () {
         return function cleanup() {
             window.unigraph.unsubscribe(subsId);
         };
-    }, []);
+    });
 
 
 
