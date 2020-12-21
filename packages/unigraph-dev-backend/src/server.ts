@@ -4,12 +4,13 @@ import expressWs, { Application, WebsocketRequestHandler } from 'express-ws';
 import { isJsonString } from './utils/utils';
 import DgraphClient from './dgraphClient';
 import { insertsToUpsert } from './utils/txnWrapper';
-import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDropAll, EventDropData, EventQueryByStringWithVars, EventSetDgraphSchema, EventSubscribeObject, IWebsocket, UnigraphUpsert } from './custom';
+import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDropAll, EventDropData, EventEnsureUnigraphSchema, EventQueryByStringWithVars, EventSetDgraphSchema, EventSubscribeObject, IWebsocket, UnigraphUpsert } from './custom';
 import { buildUnigraphEntity } from './utils/entityUtils';
 import { checkOrCreateDefaultDataModel } from './datamodelManager';
 import { Cache, createSchemaCache } from './caches';
 import repl from 'repl';
 import { createSubscriptionWS, MsgCallbackFn, pollSubscriptions, Subscription } from './subscriptions';
+import { Hooks } from './hooks';
 
 const PORT = 3001;
 const verbose = 5;
@@ -22,6 +23,11 @@ export default async function startServer(client: DgraphClient) {
 
   let caches: Record<string, Cache> = {};
   let subscriptions: Subscription[] = [];
+  let hooks: Hooks = {
+    "after_subscription_added": [],
+    "after_schema_updated": [],
+    "after_data_synced_from_remote": [],
+  } // TODO: Use hooks for updates instead
   
   // Basic checks
   await checkOrCreateDefaultDataModel(client);
@@ -40,7 +46,7 @@ export default async function startServer(client: DgraphClient) {
 
   setInterval(() => pollSubscriptions(subscriptions, dgraphClient, pollCallback), pollInterval);
 
-  const makeResponse = (event: {id: number}, success: boolean, body: object) => {
+  const makeResponse = (event: {id: number | string}, success: boolean, body: object) => {
     return JSON.stringify({
       type: "response",
       success: success,
@@ -64,6 +70,7 @@ export default async function startServer(client: DgraphClient) {
 
     "create_data_by_json": function (event: EventCreateDataByJson, ws: IWebsocket) {
       dgraphClient.createData(event.data).then(_ => {
+        pollSubscriptions(subscriptions, dgraphClient, pollCallback) // TODO: Into hooks
         ws.send(makeResponse(event, true, {}));
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})))
     },
@@ -83,6 +90,18 @@ export default async function startServer(client: DgraphClient) {
     "subscribe_to_object": function (event: EventSubscribeObject, ws: IWebsocket) {
       let newSub = createSubscriptionWS(event.id, ws, event.queryFragment);
       subscriptions.push(newSub);
+      pollSubscriptions(subscriptions, dgraphClient, pollCallback) // TODO: Into hooks
+      ws.send(makeResponse(event, true, {}));
+    },
+
+    "ensure_unigraph_schema": function (event: EventEnsureUnigraphSchema, ws: IWebsocket) {
+      let names = Object.keys(caches["schemas"].data);
+      if (names.includes(event.name)) {
+        ws.send(makeResponse(event, true, {}));
+      } else {
+        // Falls back to create nonexistent schema
+        eventRouter["create_unigraph_schema"]({...event, schema: event.fallback}, ws);
+      }
     },
 
     /**
@@ -107,8 +126,10 @@ export default async function startServer(client: DgraphClient) {
     "create_unigraph_object": function (event: EventCreateUnigraphObject, ws: IWebsocket) {
       // TODO: Talk about schema verifications
       let finalUnigraphObject = buildUnigraphEntity(event.object, event.schema, caches['schemas'].data);
+      console.log(JSON.stringify(finalUnigraphObject, null, 4))
       let upsert = insertsToUpsert([finalUnigraphObject]);
       dgraphClient.createUnigraphUpsert(upsert).then(_ => {
+        pollSubscriptions(subscriptions, dgraphClient, pollCallback) // TODO: Into hooks
         ws.send(makeResponse(event, true, {}))
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
     },

@@ -27,15 +27,17 @@ To send an event, use `"type": "event"` and `"event": "<name of the event to sen
 Fore more information on how to write these events, refer to the `custom.d.ts` type declaration.
 
 - Database operations
-    * query_by_string_with_vars `{"query": "<query string>", "vars": {<maps of all vars>}}`
-    * set_dgraph_schema `{"schema": "<a schema string>"}`
+    * query_by_string_with_vars
+    * set_dgraph_schema
     * create_data_by_json
     * drop_data (no parameters needed)
     * drop_all (no parameters needed)
     * create_unigraph_schema
     * create_unigraph_object
+    * ensure_unigraph_schema - if the denoted schema doesn't exist, create the fallback schema anyway. However, if the schema exists, even if the schema is different from the one indicated, no changes would be made.
 - Administrative events
 - Statistics and logging
+    * get_status - gets the stats of this server.
 
 ```json
 {

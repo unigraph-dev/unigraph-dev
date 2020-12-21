@@ -48,12 +48,14 @@ type BuildEntityOptions = {makeAbstract: boolean, validateSchema: boolean}
 
 function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions = {makeAbstract: false, validateSchema: true}, schemaMap: Record<string, Schema>, localSchema: Definition | any): {"_value": any} {
     let unigraphPartValue: any = undefined;
+    let predicate = "_value";
     let rawPartUnigraphType = getUnigraphType(rawPart);
 
     // Check for localSchema accordance
     if (localSchema.type && localSchema.type['unigraph.id'] === rawPartUnigraphType) {
         switch (rawPartUnigraphType) {
             case "$/composer/Array":
+                predicate = "_value["
                 let newLocalSchema = localSchema['parameters']['element'];
                 unigraphPartValue = rawPart.map((el: any) => buildUnigraphEntityPart(el, options, schemaMap, newLocalSchema));
                 break;
@@ -79,9 +81,24 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions = {m
                     })
                 };
                 break;
+
+            case "$/primitive/boolean":
+                predicate = "_value.!";
+                unigraphPartValue = rawPart;
+                break;
+
+            case "$/primitive/number":
+                if (Number.isInteger(rawPart)) predicate = "_value.#i";
+                else predicate = "_value.#";
+                unigraphPartValue = rawPart;
+                break;
+
+            case "$/primitive/string":
+                predicate = "_value.%";
+                unigraphPartValue = rawPart;
+                break;
         
             default:
-                unigraphPartValue = rawPart;
                 break;
         };
     } else if (localSchema.type && localSchema.type['unigraph.id'] && localSchema.type['unigraph.id'].startsWith('$/schema/') && rawPartUnigraphType === "$/composer/Object") {
@@ -90,9 +107,8 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions = {m
         throw new TypeError("Schema check failure for object: " + JSON.stringify(rawPart) + JSON.stringify(localSchema) + rawPartUnigraphType);
     }
 
-    
-
-    return {"_value": unigraphPartValue};
+    let res: any = {}; res[predicate] = unigraphPartValue;
+    return res;
 }
 
 export function validatePaddedEntity(object: Object) {

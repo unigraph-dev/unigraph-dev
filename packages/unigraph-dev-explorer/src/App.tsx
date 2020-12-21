@@ -14,6 +14,7 @@ import ExplorerHome from './pages/ExplorerHome';
 import unigraph from './unigraph';
 import Request from './pages/Request';
 import AddSchema from './pages/AddSchema';
+import TodoList from './examples/todo/TodoList';
 
 // TODO: custom theme
 const useStyles = makeStyles(theme => ({
@@ -60,6 +61,9 @@ function App() {
         <main className={classes.content}>
           <div className={classes.toolbar} />
           <Switch>
+            <Route path="/examples/todo">
+              <TodoList />
+            </Route>
             <Route path="/request">
               <Request />
             </Route>

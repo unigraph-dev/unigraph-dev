@@ -3,7 +3,6 @@ import Typography from '@material-ui/core/Typography';
 import * as uuid from 'uuid';
 
 import SchemaEditor from '../components/SchemaEditor';
-import { makeUnigraphId, makeRefUnigraphId } from '../components/SchemaEditor/types';
 
 const AddSchema = () => {
   const [schemaResult, setSchemaResult] = useState<any>();

@@ -73,3 +73,11 @@ declare type EventSubscribeObject = {
 declare interface IWebsocket {
   send: Function
 }
+
+declare type EventEnsureUnigraphSchema = {
+  type: "event",
+  event: "ensure_unigraph_schema",
+  id: number,
+  name: string,
+  fallback: any
+}

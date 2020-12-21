@@ -131,12 +131,12 @@ let todoItem: EntityDgraph<"todo"> = {
     "dgraph.type": "Entity",
     "type": makeRefUnigraphId("$/schema/todo"),
     "_value": { // When the Object composer is indexed by string, we write it like a JSON object for performance
-        "name": {"_value": "Write initial definitions of JSON-TS"},
-        "done": {"_value": false},
-        "users": {"_value": [
+        "name": {"_value.%": "Write initial definitions of JSON-TS"},
+        "done": {"_value.!": false},
+        "users": {"_value[": [
             {
                 "_value": {
-                    "_value": {"name": {"_value": "Haoji Xu"}}, 
+                    "_value": {"name": {"_value.%": "Haoji Xu"}}, 
                     "dgraph.type": "Entity", 
                     "type": makeRefUnigraphId("$/schema/user")
                 }
@@ -157,15 +157,15 @@ let todoItemAbstract: EntityDgraphAbstract = {
     "_value": [
         {
             "key": "name",
-            "_value": "Write initial definitions of JSON-TS"
+            "_value.": "Write initial definitions of JSON-TS"
         },
         {
             "key": "done",
-            "_value": false
+            "_value.": false
         },
         {
             "key": "users",
-            "_value": [
+            "_value[": [
                 {
                     "_value": {"name": "Haoji Xu"}, 
                     "dgraph.type": "Entity", 

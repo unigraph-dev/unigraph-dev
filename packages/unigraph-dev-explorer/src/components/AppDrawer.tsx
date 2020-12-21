@@ -56,6 +56,11 @@ export default function DrawerRouter() {
           <ListItemIcon><Storage /></ListItemIcon>
           <ListItemText primary="Add Schema" />
         </ListItem>
+        <Divider/>
+        <ListItem button component={Link} to="/examples/todo">
+          <ListItemIcon><Storage /></ListItemIcon>
+          <ListItemText primary="Todo list" />
+        </ListItem>
       </List>
     </Drawer>
   );
