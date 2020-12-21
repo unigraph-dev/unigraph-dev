@@ -100,7 +100,7 @@ export default function TodoList () {
         return function cleanup() {
             window.unigraph.unsubscribe(subsId);
         };
-    });
+    }, []);
 
 
 
