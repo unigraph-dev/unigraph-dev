@@ -29,6 +29,13 @@ declare type EventCreateUnigraphObject = {
   padding: boolean | undefined
 }
 
+declare type EventDeleteUnigraphObject = {
+  type: "event",
+  event: "delete_unigraph_object",
+  id: number,
+  uid: string
+}
+
 declare type EventDropAll = {
   type: "event",
   event: "drop_all",

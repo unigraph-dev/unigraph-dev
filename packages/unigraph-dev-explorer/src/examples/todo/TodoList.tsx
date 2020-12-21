@@ -1,4 +1,5 @@
-import { Button, Checkbox, List, ListItem, ListItemIcon, ListItemText, TextField } from '@material-ui/core';
+import { Button, Checkbox, IconButton, List, ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, TextField } from '@material-ui/core';
+import { Delete } from '@material-ui/icons';
 import React, { useEffect, useState } from 'react';
 import { makeUnigraphId, makeRefUnigraphId } from '../../unigraph';
 
@@ -115,6 +116,11 @@ export default function TodoList () {
                             <Checkbox checked={todo.done} />
                         </ListItemIcon>
                         <ListItemText primary={todo.name}/>
+                        <ListItemSecondaryAction>
+                            <IconButton aria-label="delete" onClick={() => window.unigraph.deleteObject(todo.uid!)}>
+                                <Delete/>
+                            </IconButton>
+                        </ListItemSecondaryAction>
                     </ListItem>
                 })}
             </List>

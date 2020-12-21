@@ -6,6 +6,7 @@ export interface Unigraph {
     subscribeToType(name: string, callback: Function): Promise<number>;
     unsubscribe(id: number): any;
     addObject(object: any, schema: string): any;
+    deleteObject(uid: string): any
 }
 
 export type RefUnigraphIdType<UID extends string = string> = {
@@ -94,7 +95,7 @@ export default function unigraph(url: string): Unigraph {
                 else reject(response);
             };
             subscriptions[id] = (result: any) => {
-                if (simple) callback(result.map((el: any) => unpad(el)));
+                if (simple) callback(result.map((el: any) => {let uidroot = el.uid; el = unpad(el); el.uid = uidroot; return el;}));
                 else callback(result);
             }
             connection.send(JSON.stringify({ // TODO: Write documentations for query variables in subscriptions
@@ -104,7 +105,7 @@ export default function unigraph(url: string): Unigraph {
                     uid 
                     expand(_predicate_) 
                 }
-                var${id} as var(func: has(type)) @cascade {
+                var${id} as var(func: type(Entity)) @cascade @filter(NOT type(Deleted)) {
                     type @filter(eq(<unigraph.id>, "${name}"))
                 }`,
                 "id": id
@@ -120,7 +121,14 @@ export default function unigraph(url: string): Unigraph {
                 "object": object,
                 "schema": schema,
                 "id": Date.now()
-            }))
+            }));
+        },
+        deleteObject: (uid) => {
+            connection.send(JSON.stringify({
+                "type": "event",
+                "event": "delete_unigraph_object",
+                "uid": uid
+            }));
         }
     }
 }

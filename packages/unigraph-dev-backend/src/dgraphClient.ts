@@ -178,6 +178,13 @@ export default class DgraphClient {
   `, {})
   }
 
+  async deleteUnigraphObject(uid: string) {
+    return this.createData({
+      uid: uid,
+      "dgraph.type": "Deleted"
+    })
+  }
+
   close() {
     this.dgraphClientStub.close();
   }

@@ -4,7 +4,7 @@ import expressWs, { Application, WebsocketRequestHandler } from 'express-ws';
 import { isJsonString } from './utils/utils';
 import DgraphClient from './dgraphClient';
 import { insertsToUpsert } from './utils/txnWrapper';
-import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDropAll, EventDropData, EventEnsureUnigraphSchema, EventQueryByStringWithVars, EventSetDgraphSchema, EventSubscribeObject, IWebsocket, UnigraphUpsert } from './custom';
+import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphSchema, EventQueryByStringWithVars, EventSetDgraphSchema, EventSubscribeObject, IWebsocket, UnigraphUpsert } from './custom';
 import { buildUnigraphEntity } from './utils/entityUtils';
 import { checkOrCreateDefaultDataModel } from './datamodelManager';
 import { Cache, createSchemaCache } from './caches';
@@ -115,6 +115,13 @@ export default async function startServer(client: DgraphClient) {
       dgraphClient.createUnigraphUpsert(upsert).then(_ => {
         ws.send(makeResponse(event, true, {}));
         caches["schemas"].updateNow();
+      }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
+    },
+
+    "delete_unigraph_object": function (event: EventDeleteUnigraphObject, ws: IWebsocket) {
+      dgraphClient.deleteUnigraphObject(event.uid).then(_ => {
+        pollSubscriptions(subscriptions, dgraphClient, pollCallback) // TODO: Into hooks
+        ws.send(makeResponse(event, true, {}));
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
     },
 
