@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/core/styles';
 import { red } from '@material-ui/core/colors';
+import { act } from 'react-dom/test-utils';
 
 const useStyles = makeStyles(() => ({
   code: {
@@ -16,7 +17,12 @@ const useStyles = makeStyles(() => ({
 
 export default function ExplorerHome() {
   const classes = useStyles();
-  const [messages, setMessages]: [any[], Function] = React.useState([]);
+  const [messages, actualSetMessages]: [any[], Function] = React.useState([]);
+
+  const setMessages = (msgs: any[]) => {
+    let reversed = msgs.reverse();
+    actualSetMessages(reversed.slice(0, 5));
+  }
 
   const listener = (_: any) => {
     setMessages(window.unigraph.backendMessages);
