@@ -85,7 +85,8 @@ declare type EventSubscribeType = {
 }
 
 declare interface IWebsocket {
-  send: Function
+  send: Function,
+  readyState: 0 | 1 | 2 | 3
 }
 
 declare type EventEnsureUnigraphSchema = {

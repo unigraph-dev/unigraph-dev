@@ -37,7 +37,7 @@ export default async function startServer(client: DgraphClient) {
 
   // Initialize subscriptions
   const pollCallback: MsgCallbackFn = (id, newdata, msgPort) => {
-    msgPort.send(JSON.stringify({
+    if(msgPort.readyState === 1) msgPort.send(JSON.stringify({
       type: "subscription",
       updated: true,
       id: id,
