@@ -139,3 +139,42 @@ export function buildUnigraphEntity (raw: Object, schemaName: string = "any", sc
         };
     }
 }
+
+export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<string, Schema>) {
+    function makePart(localSchema: Definition | any) {
+        let entries = ["uid"];
+        let type = localSchema.type["unigraph.id"];
+        switch (type) {
+            case "$/composer/Object":
+                let properties = localSchema.properties.map((p: any) => {
+                    return p.key + makePart(p.definition)
+                })
+                entries.push("_value {" + properties.reduce((current: string, now: any) => current + "\n" + now, "") + "}");
+                break;
+
+            case "$/composer/Array":
+                entries.push("<_value[> {" + makePart(localSchema.parameters.element) + "}");
+                break;
+            
+            case "$/primitive/string":
+                entries.push("<_value.%>");
+                break;
+                
+            case "$/primitive/boolean":
+                entries.push("<_value.!>");
+                break;
+                
+            case "$/primitive/number":
+                entries.push("<_value.#>");
+                break;
+
+            default:
+                break;
+        }
+        return "{" + entries.reduce((current: string, now: any) => current + "\n" + now, "") + "}";
+    }
+    console.log(schemaMap, schemaName);
+    let localSchema = schemaMap[schemaName].definition;
+    return makePart(localSchema);
+
+}

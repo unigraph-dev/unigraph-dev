@@ -4,8 +4,8 @@ import expressWs, { Application, WebsocketRequestHandler } from 'express-ws';
 import { isJsonString } from './utils/utils';
 import DgraphClient from './dgraphClient';
 import { insertsToUpsert } from './utils/txnWrapper';
-import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphSchema, EventQueryByStringWithVars, EventSetDgraphSchema, EventSubscribeObject, IWebsocket, UnigraphUpsert } from './custom';
-import { buildUnigraphEntity } from './utils/entityUtils';
+import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphSchema, EventQueryByStringWithVars, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, IWebsocket, UnigraphUpsert } from './custom';
+import { buildUnigraphEntity, makeQueryFragmentFromType } from './utils/entityUtils';
 import { checkOrCreateDefaultDataModel } from './datamodelManager';
 import { Cache, createSchemaCache } from './caches';
 import repl from 'repl';
@@ -92,6 +92,16 @@ export default async function startServer(client: DgraphClient) {
       subscriptions.push(newSub);
       pollSubscriptions(subscriptions, dgraphClient, pollCallback) // TODO: Into hooks
       ws.send(makeResponse(event, true, {}));
+    },
+
+    "subscribe_to_type": function (event: EventSubscribeType, ws: IWebsocket) {
+      let actualQuery = makeQueryFragmentFromType(event.schema, caches["schemas"].data);
+      let query = `(func: uid(par${event.id})) ${actualQuery}
+      par${event.id} as var(func: has(type)) @filter(NOT type(Deleted)) @cascade {
+        type @filter(eq(<unigraph.id>, "$/schema/todo"))
+      }`
+      console.log(query); // TODO: Remove debug
+      eventRouter["subscribe_to_object"]({...event, queryFragment: query}, ws)
     },
 
     "ensure_unigraph_schema": function (event: EventEnsureUnigraphSchema, ws: IWebsocket) {

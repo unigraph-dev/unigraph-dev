@@ -3,7 +3,7 @@ export interface Unigraph {
     backendMessages: string[];
     eventTarget: EventTarget;
     ensureSchema(name: string, fallback: any): Promise<any>;
-    subscribeToType(name: string, callback: Function): Promise<number>;
+    subscribeToType(name: string, callback: Function, simple?: boolean): Promise<number>;
     unsubscribe(id: number): any;
     addObject(object: any, schema: string): any;
     deleteObject(uid: string): any
@@ -73,7 +73,7 @@ export default function unigraph(url: string): Unigraph {
         backendConnection: connection,
         backendMessages: messages,
         eventTarget: eventTarget,
-        ensureSchema: (name: string, fallback: any) => new Promise((resolve, reject) => {
+        ensureSchema: (name, fallback) => new Promise((resolve, reject) => {
             // TODO: Ensure schema exists
             let id = Date.now();
             callbacks[id] = (response: any) => {
@@ -100,14 +100,8 @@ export default function unigraph(url: string): Unigraph {
             }
             connection.send(JSON.stringify({ // TODO: Write documentations for query variables in subscriptions
                 "type": "event",
-                "event": "subscribe_to_object",
-                "queryFragment": `(func: uid(var${id})) @recurse(depth: 10) {
-                    uid 
-                    expand(_predicate_) 
-                }
-                var${id} as var(func: type(Entity)) @cascade @filter(NOT type(Deleted)) {
-                    type @filter(eq(<unigraph.id>, "${name}"))
-                }`,
+                "event": "subscribe_to_type",
+                "schema": name,
                 "id": id
             }));
         }),

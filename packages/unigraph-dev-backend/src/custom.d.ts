@@ -77,6 +77,13 @@ declare type EventSubscribeObject = {
   queryFragment: string
 }
 
+declare type EventSubscribeType = {
+  type: "event",
+  event: "subscribe_to_type",
+  id: number | string,
+  schema: string
+}
+
 declare interface IWebsocket {
   send: Function
 }
