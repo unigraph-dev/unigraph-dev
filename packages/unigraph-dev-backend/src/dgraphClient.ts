@@ -140,6 +140,30 @@ export default class DgraphClient {
   }
 
   /**
+   * Perform a standard RDF-style SPO update on Dgraph. Must provide a UID, predicate, and value.
+   * 
+   * Caveats: 
+   * 1. Doesn't work with references - will be updated later
+   * 
+   * @param s Subject
+   * @param p Predicate
+   * @param o Object
+   */
+  async updateSPO(s: string, p: string, o: any) { // TODO Security
+    return new Promise((resolve, reject) => {
+      if (typeof o === "object") reject("Can't update the target when it's an object!");
+      let txn = this.dgraphClient.newTxn();
+      let mu = new dgraph.Mutation();
+      mu.setSetNquads(`<${s}> <${p}> "${o.toString()}" .`);
+      const req = new dgraph.Request();
+      req.setCommitNow(true);
+      req.setMutationsList([mu]);
+      txn.doRequest(req).then(resolve).catch(reject);
+    })
+    
+  }
+
+  /**
    * Executes a raw query directly on dgraph that is not type safe.
    * @param query 
    * @param vars 

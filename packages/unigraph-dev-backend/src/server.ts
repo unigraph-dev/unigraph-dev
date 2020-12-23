@@ -4,7 +4,7 @@ import expressWs, { Application, WebsocketRequestHandler } from 'express-ws';
 import { isJsonString } from './utils/utils';
 import DgraphClient from './dgraphClient';
 import { insertsToUpsert } from './utils/txnWrapper';
-import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphSchema, EventQueryByStringWithVars, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, IWebsocket, UnigraphUpsert } from './custom';
+import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphSchema, EventQueryByStringWithVars, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
 import { buildUnigraphEntity, makeQueryFragmentFromType } from './utils/entityUtils';
 import { checkOrCreateDefaultDataModel } from './datamodelManager';
 import { Cache, createSchemaCache } from './caches';
@@ -146,6 +146,13 @@ export default async function startServer(client: DgraphClient) {
       console.log(JSON.stringify(finalUnigraphObject, null, 4))
       let upsert = insertsToUpsert([finalUnigraphObject]);
       dgraphClient.createUnigraphUpsert(upsert).then(_ => {
+        pollSubscriptions(subscriptions, dgraphClient, pollCallback) // TODO: Into hooks
+        ws.send(makeResponse(event, true, {}))
+      }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
+    },
+
+    "update_spo": function (event: EventUpdateSPO, ws: IWebsocket) {
+      dgraphClient.updateSPO(event.uid, event.predicate, event.value).then(_ => {
         pollSubscriptions(subscriptions, dgraphClient, pollCallback) // TODO: Into hooks
         ws.send(makeResponse(event, true, {}))
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})));

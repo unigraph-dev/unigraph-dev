@@ -6,7 +6,9 @@ export interface Unigraph {
     subscribeToType(name: string, callback: Function, simple?: boolean): Promise<number>;
     unsubscribe(id: number): any;
     addObject(object: any, schema: string): any;
-    deleteObject(uid: string): any
+    deleteObject(uid: string): any;
+    unpad(object: any): any;
+    updateSimpleObject(object: any, predicate: string, value: any): any;
 }
 
 export type RefUnigraphIdType<UID extends string = string> = {
@@ -29,23 +31,39 @@ export function makeRefUnigraphId(id: string): RefUnigraphIdType {
     };
 }
 
-function unpad(object: any) {
+const typeMap = {
+    "object": "_value",
+    "number": "_value.#",
+    "bigint": "_value.#i",
+    "undefined": "_value",
+    "null": "_value",
+    "boolean": "_value.!",
+    "string": "_value.%",
+    "function": "_value",
+    "symbol": "_value"
+}
+
+function unpadRecurse(object: any) {
     let result: any = undefined;
     if (typeof object === "object" && !Array.isArray(object)) {
         result = {};
         let predicate = Object.keys(object).find(p => p.startsWith("_value"));
         if (predicate) { // In simple settings, if contains _value ignore all edge annotations
-            result = unpad(object[predicate]);
+            result = unpadRecurse(object[predicate]);
         } else {
-            result = Object.fromEntries(Object.entries(object).map(([k, v]) => [k, unpad(v)]));
+            result = Object.fromEntries(Object.entries(object).map(([k, v]) => [k, unpadRecurse(v)]));
         }
     } else if (Array.isArray(object)) {
         result = [];
-        object.forEach(val => result.push(unpad(val)));
+        object.forEach(val => result.push(unpadRecurse(val)));
     } else {
         result = object;
     };
     return result;
+}
+
+function unpad(object: any) {
+    return {...unpadRecurse(object), uid: object.uid}
 }
 
 export default function unigraph(url: string): Unigraph {
@@ -88,16 +106,13 @@ export default function unigraph(url: string): Unigraph {
                 "id": id
             }));
         }),
-        subscribeToType: (name, callback, simple = true) => new Promise((resolve, reject) => {
+        subscribeToType: (name, callback) => new Promise((resolve, reject) => {
             let id = Date.now();
             callbacks[id] = (response: any) => {
                 if (response.success) resolve(id);
                 else reject(response);
             };
-            subscriptions[id] = (result: any) => {
-                if (simple) callback(result.map((el: any) => {let uidroot = el.uid; el = unpad(el); el.uid = uidroot; return el;}));
-                else callback(result);
-            }
+            subscriptions[id] = (result: any) => callback(result);
             connection.send(JSON.stringify({ // TODO: Write documentations for query variables in subscriptions
                 "type": "event",
                 "event": "subscribe_to_type",
@@ -121,8 +136,21 @@ export default function unigraph(url: string): Unigraph {
             connection.send(JSON.stringify({
                 "type": "event",
                 "event": "delete_unigraph_object",
-                "uid": uid
+                "uid": uid,
+                "id": Date.now()
             }));
+        },
+        unpad: unpad,
+        updateSimpleObject: (object, predicate, value) => {
+            let predicateUid = object['_value'][predicate].uid;
+            connection.send(JSON.stringify({
+                "type": "event",
+                "event": "update_spo",
+                "uid": predicateUid,
+                "predicate": typeMap[typeof value],
+                "value": value,
+                "id": Date.now()
+            }))
         }
     }
 }

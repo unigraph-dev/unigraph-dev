@@ -1,6 +1,7 @@
 import { Button, Checkbox, IconButton, List, ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, TextField } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
 import React, { useEffect, useState } from 'react';
+import { useVideo } from 'react-use';
 import { makeUnigraphId, makeRefUnigraphId } from '../../unigraph';
 
 // Define the todo schema for ensurance
@@ -111,13 +112,17 @@ export default function TodoList () {
             There are currently {todoList.length} todo items!   <br/>
             <List>
                 {todoList.map(todo => {
-                    return <ListItem button key={todo.uid}>
+                    let unpadded = window.unigraph.unpad(todo);
+                    console.log(todo.uid, unpadded)
+                    return <ListItem button key={unpadded.uid}>
                         <ListItemIcon>
-                            <Checkbox checked={todo.done} />
+                            <Checkbox checked={unpadded.done} onClick={_ => {
+                                window.unigraph.updateSimpleObject(todo, "done", !unpadded.done);
+                            }} />
                         </ListItemIcon>
-                        <ListItemText primary={todo.name}/>
+                        <ListItemText primary={unpadded.name}/>
                         <ListItemSecondaryAction>
-                            <IconButton aria-label="delete" onClick={() => window.unigraph.deleteObject(todo.uid!)}>
+                            <IconButton aria-label="delete" onClick={() => window.unigraph.deleteObject(unpadded.uid!)}>
                                 <Delete/>
                             </IconButton>
                         </ListItemSecondaryAction>

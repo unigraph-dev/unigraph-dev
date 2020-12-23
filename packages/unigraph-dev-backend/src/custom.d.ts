@@ -29,6 +29,15 @@ declare type EventCreateUnigraphObject = {
   padding: boolean | undefined
 }
 
+declare type EventUpdateSPO = {
+  type: "event",
+  event: "update_spo",
+  uid: string,
+  predicate: string,
+  value: any,
+  id: number
+}
+
 declare type EventDeleteUnigraphObject = {
   type: "event",
   event: "delete_unigraph_object",
