@@ -10,7 +10,7 @@ import { checkOrCreateDefaultDataModel } from './datamodelManager';
 import { Cache, createSchemaCache } from './caches';
 import repl from 'repl';
 import { createSubscriptionWS, MsgCallbackFn, pollSubscriptions, Subscription } from './subscriptions';
-import { Hooks } from './hooks';
+import { callHooks, HookAfterObjectChangedParams, HookAfterSchemaUpdatedParams, HookAfterSubscriptionAddedParams, Hooks } from './hooks';
 
 const PORT = 3001;
 const verbose = 5;
@@ -23,12 +23,8 @@ export default async function startServer(client: DgraphClient) {
 
   let caches: Record<string, Cache> = {};
   let subscriptions: Subscription[] = [];
-  let hooks: Hooks = {
-    "after_subscription_added": [],
-    "after_schema_updated": [],
-    "after_data_synced_from_remote": [],
-  } // TODO: Use hooks for updates instead
-  
+
+
   // Basic checks
   await checkOrCreateDefaultDataModel(client);
 
@@ -45,6 +41,20 @@ export default async function startServer(client: DgraphClient) {
     }))};
 
   setInterval(() => pollSubscriptions(subscriptions, dgraphClient, pollCallback), pollInterval);
+
+  let hooks: Hooks = {
+    "after_subscription_added": [(context: HookAfterSubscriptionAddedParams) => {
+      pollSubscriptions(context.newSubscriptions, dgraphClient, pollCallback);
+    }],
+    "after_schema_updated": [(context: HookAfterSchemaUpdatedParams) => {
+      context.newCaches["schemas"].updateNow();
+    }],
+    "after_object_changed": [(context: HookAfterObjectChangedParams) => {
+      pollSubscriptions(context.subscriptions, dgraphClient, pollCallback);
+    }],
+  }
+  
+  
 
   const makeResponse = (event: {id: number | string}, success: boolean, body: object) => {
     return JSON.stringify({
@@ -70,7 +80,7 @@ export default async function startServer(client: DgraphClient) {
 
     "create_data_by_json": function (event: EventCreateDataByJson, ws: IWebsocket) {
       dgraphClient.createData(event.data).then(_ => {
-        pollSubscriptions(subscriptions, dgraphClient, pollCallback) // TODO: Into hooks
+        callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
         ws.send(makeResponse(event, true, {}));
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})))
     },
@@ -90,7 +100,7 @@ export default async function startServer(client: DgraphClient) {
     "subscribe_to_object": function (event: EventSubscribeObject, ws: IWebsocket) {
       let newSub = createSubscriptionWS(event.id, ws, event.queryFragment);
       subscriptions.push(newSub);
-      pollSubscriptions(subscriptions, dgraphClient, pollCallback) // TODO: Into hooks
+      callHooks(hooks, "after_subscription_added", {newSubscriptions: subscriptions});
       ws.send(makeResponse(event, true, {}));
     },
 
@@ -131,13 +141,13 @@ export default async function startServer(client: DgraphClient) {
       let upsert: UnigraphUpsert = insertsToUpsert(schema);
       dgraphClient.createUnigraphUpsert(upsert).then(_ => {
         ws.send(makeResponse(event, true, {}));
-        caches["schemas"].updateNow();
+        callHooks(hooks, "after_schema_updated", {caches: caches});
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
     },
 
     "delete_unigraph_object": function (event: EventDeleteUnigraphObject, ws: IWebsocket) {
       dgraphClient.deleteUnigraphObject(event.uid).then(_ => {
-        pollSubscriptions(subscriptions, dgraphClient, pollCallback) // TODO: Into hooks
+        callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
         ws.send(makeResponse(event, true, {}));
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
     },
@@ -153,14 +163,14 @@ export default async function startServer(client: DgraphClient) {
       console.log(JSON.stringify(finalUnigraphObject, null, 4))
       let upsert = insertsToUpsert([finalUnigraphObject]);
       dgraphClient.createUnigraphUpsert(upsert).then(_ => {
-        pollSubscriptions(subscriptions, dgraphClient, pollCallback) // TODO: Into hooks
+        callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
         ws.send(makeResponse(event, true, {}))
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
     },
 
     "update_spo": function (event: EventUpdateSPO, ws: IWebsocket) {
       dgraphClient.updateSPO(event.uid, event.predicate, event.value).then(_ => {
-        pollSubscriptions(subscriptions, dgraphClient, pollCallback) // TODO: Into hooks
+        callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
         ws.send(makeResponse(event, true, {}))
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
     },

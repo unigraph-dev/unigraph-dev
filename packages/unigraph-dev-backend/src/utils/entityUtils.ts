@@ -173,7 +173,6 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
         }
         return "{" + entries.reduce((current: string, now: any) => current + "\n" + now, "") + "}";
     }
-    console.log(schemaMap, schemaName);
     let localSchema = schemaMap[schemaName].definition;
     return makePart(localSchema);
 
