@@ -56,7 +56,7 @@ export default async function startServer(client: DgraphClient) {
   
   
 
-  const makeResponse = (event: {id: number | string}, success: boolean, body: object) => {
+  const makeResponse = (event: {id: number | string}, success: boolean, body: object = {}) => {
     return JSON.stringify({
       type: "response",
       success: success,
@@ -74,26 +74,26 @@ export default async function startServer(client: DgraphClient) {
 
     "set_dgraph_schema": function (event: EventSetDgraphSchema, ws: IWebsocket) {
       dgraphClient.setSchema(event.schema).then(_ => {
-        ws.send(makeResponse(event, true, {}));
+        ws.send(makeResponse(event, true));
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})))
     },
 
     "create_data_by_json": function (event: EventCreateDataByJson, ws: IWebsocket) {
       dgraphClient.createData(event.data).then(_ => {
         callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
-        ws.send(makeResponse(event, true, {}));
+        ws.send(makeResponse(event, true));
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})))
     },
 
     "drop_data": function (event: EventDropData, ws: IWebsocket) {
       dgraphClient.dropData().then(_ => {
-        ws.send(makeResponse(event, true, {}))
+        ws.send(makeResponse(event, true))
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})))
     },
   
     "drop_all": function (event: EventDropAll, ws: IWebsocket) {
       dgraphClient.dropAll().then(_ => {
-        ws.send(makeResponse(event, true, {}))
+        ws.send(makeResponse(event, true))
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})))
     },
 
@@ -101,7 +101,7 @@ export default async function startServer(client: DgraphClient) {
       let newSub = createSubscriptionWS(event.id, ws, event.queryFragment);
       subscriptions.push(newSub);
       callHooks(hooks, "after_subscription_added", {newSubscriptions: subscriptions});
-      ws.send(makeResponse(event, true, {}));
+      ws.send(makeResponse(event, true));
     },
 
     "subscribe_to_type": function (event: EventSubscribeType, ws: IWebsocket) {
@@ -118,13 +118,13 @@ export default async function startServer(client: DgraphClient) {
         if (curr.id === event.id) return prev;
         else {prev.push(curr); return prev};
       }, []);
-      ws.send(makeResponse(event, true, {}));
+      ws.send(makeResponse(event, true));
     },
 
     "ensure_unigraph_schema": function (event: EventEnsureUnigraphSchema, ws: IWebsocket) {
       let names = Object.keys(caches["schemas"].data);
       if (names.includes(event.name)) {
-        ws.send(makeResponse(event, true, {}));
+        ws.send(makeResponse(event, true));
       } else {
         // Falls back to create nonexistent schema
         eventRouter["create_unigraph_schema"]({...event, schema: event.fallback}, ws);
@@ -140,7 +140,7 @@ export default async function startServer(client: DgraphClient) {
       let schema = (Array.isArray(event.schema) ? event.schema : [event.schema]);
       let upsert: UnigraphUpsert = insertsToUpsert(schema);
       dgraphClient.createUnigraphUpsert(upsert).then(_ => {
-        ws.send(makeResponse(event, true, {}));
+        ws.send(makeResponse(event, true));
         callHooks(hooks, "after_schema_updated", {caches: caches});
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
     },
@@ -148,7 +148,7 @@ export default async function startServer(client: DgraphClient) {
     "delete_unigraph_object": function (event: EventDeleteUnigraphObject, ws: IWebsocket) {
       dgraphClient.deleteUnigraphObject(event.uid).then(_ => {
         callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
-        ws.send(makeResponse(event, true, {}));
+        ws.send(makeResponse(event, true));
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
     },
 
@@ -164,14 +164,14 @@ export default async function startServer(client: DgraphClient) {
       let upsert = insertsToUpsert([finalUnigraphObject]);
       dgraphClient.createUnigraphUpsert(upsert).then(_ => {
         callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
-        ws.send(makeResponse(event, true, {}))
+        ws.send(makeResponse(event, true))
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
     },
 
     "update_spo": function (event: EventUpdateSPO, ws: IWebsocket) {
       dgraphClient.updateSPO(event.uid, event.predicate, event.value).then(_ => {
         callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
-        ws.send(makeResponse(event, true, {}))
+        ws.send(makeResponse(event, true))
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
     },
 
@@ -179,7 +179,6 @@ export default async function startServer(client: DgraphClient) {
       let status = {
         "dgraph": await dgraphClient.getStatus(),
         "unigraph": {
-          // TODO: Pull status for debugging/statistics
           "cache": {
             "length": Object.values(caches).length,
             "names": Object.keys(caches),
