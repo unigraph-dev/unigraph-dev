@@ -3,7 +3,7 @@ export interface Unigraph {
     backendMessages: string[];
     eventTarget: EventTarget;
     ensureSchema(name: string, fallback: any): Promise<any>;
-    subscribeToType(name: string, callback: Function, simple?: boolean): Promise<number>;
+    subscribeToType(name: string, callback: Function, eventId: number | undefined): Promise<number>;
     unsubscribe(id: number): any;
     addObject(object: any, schema: string): any;
     deleteObject(uid: string): any;
@@ -106,8 +106,8 @@ export default function unigraph(url: string): Unigraph {
                 "id": id
             }));
         }),
-        subscribeToType: (name, callback) => new Promise((resolve, reject) => {
-            let id = Date.now();
+        subscribeToType: (name, callback, eventId = undefined) => new Promise((resolve, reject) => {
+            let id = typeof eventId === "number" ? eventId : Date.now();
             callbacks[id] = (response: any) => {
                 if (response.success) resolve(id);
                 else reject(response);
@@ -121,7 +121,11 @@ export default function unigraph(url: string): Unigraph {
             }));
         }),
         unsubscribe: (id) => {
-            // TODO: Add unsubscribe support
+            connection.send(JSON.stringify({
+                "type": "event",
+                "event": "unsubscribe_by_id",
+                "id": id
+            }));
         },
         addObject: (object, schema) => {
             connection.send(JSON.stringify({

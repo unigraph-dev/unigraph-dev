@@ -4,7 +4,7 @@ import expressWs, { Application, WebsocketRequestHandler } from 'express-ws';
 import { isJsonString } from './utils/utils';
 import DgraphClient from './dgraphClient';
 import { insertsToUpsert } from './utils/txnWrapper';
-import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphSchema, EventQueryByStringWithVars, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
+import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphSchema, EventQueryByStringWithVars, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
 import { buildUnigraphEntity, makeQueryFragmentFromType } from './utils/entityUtils';
 import { checkOrCreateDefaultDataModel } from './datamodelManager';
 import { Cache, createSchemaCache } from './caches';
@@ -100,8 +100,15 @@ export default async function startServer(client: DgraphClient) {
       par${event.id} as var(func: has(type)) @filter(NOT type(Deleted)) @cascade {
         type @filter(eq(<unigraph.id>, "$/schema/todo"))
       }`
-      console.log(query); // TODO: Remove debug
       eventRouter["subscribe_to_object"]({...event, queryFragment: query}, ws)
+    },
+
+    "unsubscribe_by_id": function (event: EventUnsubscribeById, ws: IWebsocket) {
+      subscriptions = subscriptions.reduce((prev: Subscription[], curr: Subscription) => {
+        if (curr.id === event.id) return prev;
+        else {prev.push(curr); return prev};
+      }, []);
+      ws.send(makeResponse(event, true, {}));
     },
 
     "ensure_unigraph_schema": function (event: EventEnsureUnigraphSchema, ws: IWebsocket) {

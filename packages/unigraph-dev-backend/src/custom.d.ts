@@ -93,6 +93,12 @@ declare type EventSubscribeType = {
   schema: string
 }
 
+declare type EventUnsubscribeById = {
+  type: "event",
+  event: "unsubscribe_by_id",
+  id: number | string
+}
+
 declare interface IWebsocket {
   send: Function,
   readyState: 0 | 1 | 2 | 3

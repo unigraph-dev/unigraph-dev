@@ -82,7 +82,7 @@ type ATodoList = {
 export default function TodoList () {
     
     const [initialized, setInitialized] = useState(false);
-    const [subsId, setSubsId] = useState(0);
+    const [subsId, setSubsId] = useState(Date.now());
     const [todoList, setTodoList]: [ATodoList[], Function] = useState([]);
     const [newName, setNewName] = useState("");
 
@@ -90,9 +90,7 @@ export default function TodoList () {
         await window.unigraph.ensureSchema("$/schema/todo", schemaTodo);
         await window.unigraph.ensureSchema("$/schema/user", schemaUser);
         setInitialized(true);
-        window.unigraph.subscribeToType("$/schema/todo", (result: ATodoList[]) => {setTodoList(result)}).then((id: number) => {
-            setSubsId(id);
-        });
+        window.unigraph.subscribeToType("$/schema/todo", (result: ATodoList[]) => {setTodoList(result)}, subsId);
     }
 
     useEffect(() => {
