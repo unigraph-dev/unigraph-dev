@@ -14,6 +14,7 @@ import ExplorerHome from './pages/ExplorerHome';
 import Request from './pages/Request';
 import AddSchema from './pages/AddSchema';
 import TodoList from './examples/todo/TodoList';
+import UserLibrary from './pages/UserLibrary';
 
 // TODO: custom theme
 const useStyles = makeStyles(theme => ({
@@ -63,6 +64,9 @@ function App() {
             </Route>
             <Route path="/about">
               <About />
+            </Route>
+            <Route path="/library">
+              <UserLibrary />
             </Route>
             <Route path="/schema/new">
               <AddSchema />
