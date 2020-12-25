@@ -5,6 +5,7 @@
   "dependencies": {
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
+    "@material-ui/lab": "^4.0.0-alpha.57",
     "@types/react-codemirror": "^1.0.3",
     "codemirror": "^5.58.3",
     "lodash": "^4.17.20",

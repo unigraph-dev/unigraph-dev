@@ -1,11 +1,11 @@
 import _ from 'lodash';
-import React, { FC, useCallback, useMemo } from 'react';
-import { useList } from 'react-use';
+import React, { FC, useCallback, useMemo, useState } from 'react';
+import { useEffectOnce, useList } from 'react-use';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 
-import SchemaFieldForm from './SchemaFieldForm';
-import { EntityField } from './types';
+import { SchemaFieldForm, SchemaNameForm } from './SchemaFieldForm';
+import { EntityField, EntityFieldInput } from './types';
 import { makeUnigraphId, makeRefUnigraphId } from '../../unigraph';
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -30,24 +30,37 @@ interface SchemaEditorProps {
 
 const SchemaEditor: FC<SchemaEditorProps> = ({ onSubmit }) => {
   const classes = useStyles();
-  const [fields, { push, updateAt }] = useList<Partial<EntityField>>([{}]);
+  const [name, setName] = useState("$/schema/");
+  const [fields, { push, updateAt }] = useList<Partial<EntityFieldInput>>([{}]);
+  const [referenceables, setReferenceables] = useState([]);
   const fieldUpdaters = useMemo(() =>
-    // TODO: uid references in addition to string inputs
-    fields.map((f, i) => (field: EntityField) => updateAt(i, field)),
+    fields.map((f, i) => (field: EntityFieldInput) => updateAt(i, field)),
     [fields, updateAt]
   );
+
+  useEffectOnce(() => {
+    window.unigraph.getReferenceables().then(refs => setReferenceables(refs));
+  })
 
   const addField = useCallback(() => {
     push({});
   }, [push]);
 
   const handleSubmit = useCallback((event: any, preview: boolean = false) => {
-    const properties = _.fromPairs(
-      fields.map(({ key, definition }) => [key, definition?.type])
+    const properties: Partial<EntityField>[] = fields.map(
+      ({ key, definition }) =>
+      {
+        return {
+          key: key, 
+          definition: {
+            type: definition ? makeRefUnigraphId(definition?.type) : undefined
+          }
+        }
+      }
     );
 
     onSubmit({
-      ...makeUnigraphId('$/schema/todo'),
+      ...makeUnigraphId(name),
       'dgraph.type': 'Type',
       definition: {
         type: makeRefUnigraphId('$/composer/Object'),
@@ -58,13 +71,13 @@ const SchemaEditor: FC<SchemaEditorProps> = ({ onSubmit }) => {
         properties,
       }
     }, preview);
-  }, [fields, onSubmit]);
+  }, [name, fields, onSubmit]);
 
   return (
     <Box className={classes.root} flexDirection="column">
+      <SchemaNameForm name={name} onChange={setName} />
       {fields.map((field, i) =>
-        // TODO: use ID of autocomplete entity for key
-        <SchemaFieldForm key={i} field={field} onChange={fieldUpdaters[i]} />
+        <SchemaFieldForm key={i} referenceables={referenceables} field={field} onChange={fieldUpdaters[i]} />
       )}
       <Box display="flex" justifyContent="space-between">
         <IconButton onClick={addField}>

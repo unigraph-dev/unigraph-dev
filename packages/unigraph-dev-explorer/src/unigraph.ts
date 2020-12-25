@@ -2,6 +2,7 @@ export interface Unigraph {
     backendConnection: WebSocket;
     backendMessages: string[];
     eventTarget: EventTarget;
+    createSchema(schema: any): Promise<any>;
     ensureSchema(name: string, fallback: any): Promise<any>;
     subscribeToType(name: string, callback: Function, eventId: number | undefined): Promise<number>;
     unsubscribe(id: number): any;
@@ -9,6 +10,8 @@ export interface Unigraph {
     deleteObject(uid: string): any;
     unpad(object: any): any;
     updateSimpleObject(object: any, predicate: string, value: any): any;
+    getReferenceables(): Promise<any>;
+    getReferenceables(key: string | undefined, asMapWithContent: boolean | undefined): Promise<any>;
 }
 
 export type RefUnigraphIdType<UID extends string = string> = {
@@ -66,22 +69,22 @@ function unpad(object: any) {
     return {...unpadRecurse(object), uid: object.uid}
 }
 
-function sendEvent(conn: WebSocket, name: string, params: any, id?: Number | undefined) {
-    if (!id) id = Date.now();
-    conn.send(JSON.stringify({
-        "type": "event",
-        "name": name,
-        "id": id,
-        ...params
-    }))
-}
-
 export default function unigraph(url: string): Unigraph {
     let connection = new WebSocket(url);
     let messages: any[] = [];
     let eventTarget: EventTarget = new EventTarget();
     let callbacks: Record<string, Function> = {};
-    let subscriptions: Record<string, Function> = {}
+    let subscriptions: Record<string, Function> = {};
+
+    function sendEvent(conn: WebSocket, name: string, params: any, id?: Number | undefined) {
+        if (!id) id = Date.now();
+        conn.send(JSON.stringify({
+            "type": "event",
+            "event": name,
+            "id": id,
+            ...params
+        }))
+    }
 
     connection.onmessage = (ev) => {
         try {
@@ -102,6 +105,14 @@ export default function unigraph(url: string): Unigraph {
         backendMessages: messages,
         eventTarget: eventTarget,
         unpad: unpad,
+        createSchema: (schema) => new Promise((resolve, reject) => {
+            let id = Date.now();
+            callbacks[id] = (response: any) => {
+                if (response.success) resolve(response);
+                else reject(response);
+            };
+            sendEvent(connection, "create_unigraph_schema", {schema: schema}, id)
+        }),
         ensureSchema: (name, fallback) => new Promise((resolve, reject) => {
             let id = Date.now();
             callbacks[id] = (response: any) => {
@@ -131,7 +142,22 @@ export default function unigraph(url: string): Unigraph {
         updateSimpleObject: (object, predicate, value) => {
             let predicateUid = object['_value'][predicate].uid;
             sendEvent(connection, "update_spo", {uid: predicateUid, predicate: typeMap[typeof value], value: value})
-        }
+        },
+        getReferenceables: (key: string = "unigraph.id", asMapWithContent: boolean = false) => new Promise((resolve, reject) => {
+            let id = Date.now();
+            callbacks[id] = (response: any) => {
+                if (response.success) resolve(response.result.map((obj: { [x: string]: any; }) => obj["unigraph.id"]));
+                else reject(response);
+            };
+            sendEvent(connection, "query_by_string_with_vars", {
+                vars: {},
+                query: `{
+                    q(func: has(unigraph.id)) {
+                        unigraph.id
+                    }
+                }`
+            }, id);
+        })
     }
 }
 

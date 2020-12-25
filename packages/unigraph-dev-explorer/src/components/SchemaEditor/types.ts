@@ -14,11 +14,16 @@ export type KeyValueInput<K = any, V = any> = Partial<KeyValueField<K, V>>;
 export type EntityField<T extends string = string> = {
   key: string;
   definition: {
-    type: RefUnigraphIdType<T>;
+    type?: RefUnigraphIdType<T>;
     parameters?: {
       element: {
         type: RefUnigraphIdType<T>;
       }
     }
   };
+}
+
+export type EntityFieldInput<T extends string = string> = {
+  key: string,
+  definition: { type: string }
 }
