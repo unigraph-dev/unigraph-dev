@@ -66,6 +66,16 @@ function unpad(object: any) {
     return {...unpadRecurse(object), uid: object.uid}
 }
 
+function sendEvent(conn: WebSocket, name: string, params: any, id?: Number | undefined) {
+    if (!id) id = Date.now();
+    conn.send(JSON.stringify({
+        "type": "event",
+        "name": name,
+        "id": id,
+        ...params
+    }))
+}
+
 export default function unigraph(url: string): Unigraph {
     let connection = new WebSocket(url);
     let messages: any[] = [];
@@ -91,20 +101,14 @@ export default function unigraph(url: string): Unigraph {
         backendConnection: connection,
         backendMessages: messages,
         eventTarget: eventTarget,
+        unpad: unpad,
         ensureSchema: (name, fallback) => new Promise((resolve, reject) => {
-            // TODO: Ensure schema exists
             let id = Date.now();
             callbacks[id] = (response: any) => {
                 if (response.success) resolve(response);
                 else reject(response);
             };
-            connection.send(JSON.stringify({
-                "type": "event",
-                "event": "ensure_unigraph_schema",
-                "name": name,
-                "fallback": fallback,
-                "id": id
-            }));
+            sendEvent(connection, "ensure_unigraph_schema", {name: name, fallback: fallback})
         }),
         subscribeToType: (name, callback, eventId = undefined) => new Promise((resolve, reject) => {
             let id = typeof eventId === "number" ? eventId : Date.now();
@@ -113,48 +117,20 @@ export default function unigraph(url: string): Unigraph {
                 else reject(response);
             };
             subscriptions[id] = (result: any) => callback(result);
-            connection.send(JSON.stringify({ // TODO: Write documentations for query variables in subscriptions
-                "type": "event",
-                "event": "subscribe_to_type",
-                "schema": name,
-                "id": id
-            }));
+            sendEvent(connection, "subscribe_to_type", {schema: name}, id);
         }),
         unsubscribe: (id) => {
-            connection.send(JSON.stringify({
-                "type": "event",
-                "event": "unsubscribe_by_id",
-                "id": id
-            }));
+            sendEvent(connection, "unsubscribe_by_id", {}, id);
         },
         addObject: (object, schema) => {
-            connection.send(JSON.stringify({
-                "type": "event",
-                "event": "create_unigraph_object",
-                "object": object,
-                "schema": schema,
-                "id": Date.now()
-            }));
+            sendEvent(connection, "create_unigraph_object", {object: object, schema: schema});
         },
         deleteObject: (uid) => {
-            connection.send(JSON.stringify({
-                "type": "event",
-                "event": "delete_unigraph_object",
-                "uid": uid,
-                "id": Date.now()
-            }));
+            sendEvent(connection, "delete_unigraph_object", {uid: uid});
         },
-        unpad: unpad,
         updateSimpleObject: (object, predicate, value) => {
             let predicateUid = object['_value'][predicate].uid;
-            connection.send(JSON.stringify({
-                "type": "event",
-                "event": "update_spo",
-                "uid": predicateUid,
-                "predicate": typeMap[typeof value],
-                "value": value,
-                "id": Date.now()
-            }))
+            sendEvent(connection, "update_spo", {uid: predicateUid, predicate: typeMap[typeof value], value: value})
         }
     }
 }
