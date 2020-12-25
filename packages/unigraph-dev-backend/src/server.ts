@@ -105,10 +105,11 @@ export default async function startServer(client: DgraphClient) {
     },
 
     "subscribe_to_type": function (event: EventSubscribeType, ws: IWebsocket) {
-      let actualQuery = makeQueryFragmentFromType(event.schema, caches["schemas"].data);
-      let query = `(func: uid(par${event.id})) ${actualQuery}
+      let queryAny = `(func: type(Entity)) @recurse { uid expand(_predicate_) }`
+      let query = event.schema === "any" ? queryAny : `(func: uid(par${event.id})) 
+      ${makeQueryFragmentFromType(event.schema, caches["schemas"].data)}
       par${event.id} as var(func: has(type)) @filter(NOT type(Deleted)) @cascade {
-        type @filter(eq(<unigraph.id>, "$/schema/todo"))
+        type @filter(eq(<unigraph.id>, ${event.schema}))
       }`
       eventRouter["subscribe_to_object"]({...event, queryFragment: query}, ws)
     },
