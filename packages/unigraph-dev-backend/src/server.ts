@@ -109,8 +109,9 @@ export default async function startServer(client: DgraphClient) {
       let query = event.schema === "any" ? queryAny : `(func: uid(par${event.id})) 
       ${makeQueryFragmentFromType(event.schema, caches["schemas"].data)}
       par${event.id} as var(func: has(type)) @filter(NOT type(Deleted)) @cascade {
-        type @filter(eq(<unigraph.id>, ${event.schema}))
+        type @filter(eq(<unigraph.id>, "${event.schema}"))
       }`
+      console.log(query)
       eventRouter["subscribe_to_object"]({...event, queryFragment: query}, ws)
     },
 
