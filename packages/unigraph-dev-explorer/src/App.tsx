@@ -11,9 +11,10 @@ import { makeStyles } from '@material-ui/core/styles';
 import { AppDrawer } from './components';
 import About from './pages/About';
 import ExplorerHome from './pages/ExplorerHome';
-import unigraph from './unigraph';
 import Request from './pages/Request';
 import AddSchema from './pages/AddSchema';
+import TodoList from './examples/todo/TodoList';
+import UserLibrary from './pages/UserLibrary';
 
 // TODO: custom theme
 const useStyles = makeStyles(theme => ({
@@ -35,11 +36,6 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-// REVIEW: use react state? why is window.unigraph needed?
-// must keep single reference to this, otherwise react
-// mounting the app causes a 2nd connection to be created
-window.unigraph = unigraph("ws://localhost:3001");
-
 function App() {
   const classes = useStyles();
 
@@ -60,11 +56,17 @@ function App() {
         <main className={classes.content}>
           <div className={classes.toolbar} />
           <Switch>
+            <Route path="/examples/todo">
+              <TodoList />
+            </Route>
             <Route path="/request">
               <Request />
             </Route>
             <Route path="/about">
               <About />
+            </Route>
+            <Route path="/library">
+              <UserLibrary />
             </Route>
             <Route path="/schema/new">
               <AddSchema />

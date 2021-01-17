@@ -29,6 +29,22 @@ declare type EventCreateUnigraphObject = {
   padding: boolean | undefined
 }
 
+declare type EventUpdateSPO = {
+  type: "event",
+  event: "update_spo",
+  uid: string,
+  predicate: string,
+  value: any,
+  id: number
+}
+
+declare type EventDeleteUnigraphObject = {
+  type: "event",
+  event: "delete_unigraph_object",
+  id: number,
+  uid: string
+}
+
 declare type EventDropAll = {
   type: "event",
   event: "drop_all",
@@ -63,6 +79,35 @@ declare type EventQueryByStringWithVars = {
   id: number
 }
 
+declare type EventSubscribeObject = {
+  type: "event",
+  event: "subscribe_to_object",
+  id: number | string,
+  queryFragment: string
+}
+
+declare type EventSubscribeType = {
+  type: "event",
+  event: "subscribe_to_type",
+  id: number | string,
+  schema: string
+}
+
+declare type EventUnsubscribeById = {
+  type: "event",
+  event: "unsubscribe_by_id",
+  id: number | string
+}
+
 declare interface IWebsocket {
-  send: Function
+  send: Function,
+  readyState: 0 | 1 | 2 | 3
+}
+
+declare type EventEnsureUnigraphSchema = {
+  type: "event",
+  event: "ensure_unigraph_schema",
+  id: number,
+  name: string,
+  fallback: any
 }

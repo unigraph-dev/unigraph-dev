@@ -5,12 +5,17 @@
  */
 
 export const defaultTypes = `<_value>: uid .
+<_value.#i>: int .
+<_value.#>: float .
+<_value.?>: bool .
+<_value.%>: string .
+<_value.>: default .
+<_value[>: [uid] .
 <definition>: uid .
 <type>: uid .
 <unigraph.id>: string @index(exact) .
 type <Entity> {
 	type
-	_value
 }
 type <Type> {
 	definition
@@ -41,6 +46,6 @@ export const defaultUserlandSchemas = [
     },
     {
         "unigraph.id": "$/unigraph",
-        "version": "schema-v0.0.1"
+        "version": "schema-v0.0.1dev"
     }
 ]

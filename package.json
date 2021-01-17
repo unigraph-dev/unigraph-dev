@@ -4,7 +4,8 @@
   "workspaces": ["packages/*"],
   "scripts": {
     "backend-start": "yarn workspace unigraph-dev-backend start",
-    "explorer-start": "yarn workspace unigraph-dev-explorer start"
+    "explorer-start": "yarn workspace unigraph-dev-explorer start",
+    "dev": "bash scripts/start_server.sh"
   },
   "engines": {
     "node": "^12.11.1",

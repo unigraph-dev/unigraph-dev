@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
-import { useEvent } from 'react-use';
 
 import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/core/styles';
 import { red } from '@material-ui/core/colors';
+import { act } from 'react-dom/test-utils';
 
 const useStyles = makeStyles(() => ({
   code: {
@@ -17,13 +17,26 @@ const useStyles = makeStyles(() => ({
 
 export default function ExplorerHome() {
   const classes = useStyles();
-  const [messages, setMessages] = React.useState(window.unigraph.backendMessages);
+  const [messages, actualSetMessages]: [any[], Function] = React.useState([]);
+
+  const setMessages = (msgs: any[]) => {
+    let reversed = msgs.reverse();
+    actualSetMessages(reversed.slice(0, 5));
+  }
+
+  const listener = (_: any) => {
+    setMessages(window.unigraph.backendMessages);
+  }
 
   useEffect(() => {
-    window.unigraph.addEventListener((_: any) => {
-      setMessages(window.unigraph.backendMessages);
-    })
-  })
+    console.log(window.unigraph)
+    window.unigraph.eventTarget.addEventListener("onmessage", listener);
+    setMessages(window.unigraph.backendMessages);
+
+    return function cleanup() {
+      window.unigraph.eventTarget.removeEventListener("onmessage", listener);
+    }
+  }, [])
 
   return (
     <div>
