@@ -9,7 +9,7 @@ const UserLibraryAll = () => {
     const [id, setId] = React.useState(Date.now());
 
     useEffectOnce(() => {
-        window.unigraph.subscribeToType("any", (objects: any[]) => { setObjects(objects) }, id);
+        window.unigraph.subscribeToType("any", (objects: any[]) => { setObjects(objects.slice(0, 10)) }, id);
 
         return function cleanup () {
             window.unigraph.unsubscribe(id);
@@ -26,7 +26,7 @@ const UserLibraryAll = () => {
             <Button>Select All</Button>
         </ButtonGroup>
         <List>
-            {objects.map(obj => <ListItem><DefaultObjectView object={obj} options={{}} /></ListItem>)}
+            {objects.map(obj => <ListItem><DefaultObjectView object={obj} options={{unpad: true, showContextMenu: true}} /></ListItem>)}
         </List>
         
     </div>

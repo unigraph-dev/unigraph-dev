@@ -5,6 +5,7 @@ export interface Unigraph {
     createSchema(schema: any): Promise<any>;
     ensureSchema(name: string, fallback: any): Promise<any>;
     subscribeToType(name: string, callback: Function, eventId: number | undefined): Promise<number>;
+    subscribeToObject(uid: string, callback: Function, eventId: number | undefined): Promise<number>;
     unsubscribe(id: number): any;
     addObject(object: any, schema: string): any;
     deleteObject(uid: string): any;
@@ -130,6 +131,16 @@ export default function unigraph(url: string): Unigraph {
             subscriptions[id] = (result: any) => callback(result);
             sendEvent(connection, "subscribe_to_type", {schema: name}, id);
         }),
+        subscribeToObject: (uid, callback, eventId = undefined) => new Promise((resolve, reject) => {
+            let id = typeof eventId === "number" ? eventId : Date.now();
+            callbacks[id] = (response: any) => {
+                if (response.success) resolve(id);
+                else reject(response);
+            };
+            subscriptions[id] = (result: any) => callback(result[0]);
+            let frag = `(func: uid(${uid})) @recurse { uid expand(_predicate_) }`
+            sendEvent(connection, "subscribe_to_object", {queryFragment: frag}, id);
+        }), 
         unsubscribe: (id) => {
             sendEvent(connection, "unsubscribe_by_id", {}, id);
         },
