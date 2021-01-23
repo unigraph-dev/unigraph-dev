@@ -1,12 +1,13 @@
-import { Button, ButtonGroup, List, ListItem, Typography } from '@material-ui/core';
+import { Button, ButtonGroup, Checkbox, FormControlLabel, List, ListItem, Typography } from '@material-ui/core';
 import React from 'react';
 import { useEffectOnce } from 'react-use';
-import DefaultObjectView from '../ObjectView/DefaultObjectView';
+import { DefaultObjectView, DefaultObjectListView } from '../ObjectView/DefaultObjectView';
 
 const UserLibraryAll = () => {
 
     const [objects, setObjects]: [any[], Function] = React.useState([]);
     const [id, setId] = React.useState(Date.now());
+    const [showDeleted, setShowDeleted] = React.useState(false);
 
     useEffectOnce(() => {
         window.unigraph.subscribeToType("any", (objects: any[]) => { setObjects(objects) }, id);
@@ -25,8 +26,18 @@ const UserLibraryAll = () => {
             <Button>Export Selected</Button>
             <Button>Select All</Button>
         </ButtonGroup>
+        <FormControlLabel control={<Checkbox
+            checked={showDeleted}
+            onChange={() => setShowDeleted(!showDeleted)}
+            name="showDeleted"
+            color="primary"
+        />} label="Show Deleted"/>
         <List>
-            {objects.map(obj => <ListItem><DefaultObjectView object={obj} options={{}} /></ListItem>)}
+            <DefaultObjectListView
+                component={ListItem}
+                objects={objects}
+                options={{filters: {showDeleted: showDeleted}}}
+            />
         </List>
         
     </div>
