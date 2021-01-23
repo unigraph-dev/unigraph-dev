@@ -3,7 +3,7 @@ import React from 'react';
 
 import { useParams } from 'react-router-dom';
 import { useEffectOnce } from 'react-use';
-import DefaultObjectView from '../ObjectView/DefaultObjectView';
+import { DefaultObjectView } from '../ObjectView/DefaultObjectView';
 
 export default function UserLibraryObject () {
     let { objectId }: any = useParams();

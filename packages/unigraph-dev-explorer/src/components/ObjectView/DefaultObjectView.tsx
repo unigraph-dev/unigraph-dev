@@ -1,8 +1,9 @@
-import { IconButton } from '@material-ui/core';
+import { IconButton, ListItem } from '@material-ui/core';
 import { MoreVert } from '@material-ui/icons';
-import React, { FC } from 'react';
+import React, { FC, ReactElement } from 'react';
 import ReactJson from 'react-json-view';
 import { DefaultObjectContextMenu } from './DefaultObjectContextMenu';
+import { filterPresets } from './objectViewFilters';
 
 type ObjectViewOptions = {
     viewer?: "string" | "json-tree",
@@ -10,9 +11,21 @@ type ObjectViewOptions = {
     showContextMenu?: boolean,
 };
 
+type ObjectListViewOptions = {
+    filters?: {
+        showDeleted?: boolean,
+    },
+}
+
 type DefaultObjectViewProps = {
     object: any,
     options: ObjectViewOptions,
+};
+
+type DefaultObjectListViewProps = {
+    component: (...args: any[]) => ReactElement<any, any>,
+    objects: any[],
+    options: ObjectListViewOptions,
 };
 
 const StringObjectViewer = ({object}: {object: any}) => {
@@ -61,4 +74,17 @@ const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options }) => {
     </div>
 }
 
-export default DefaultObjectView;
+const DefaultObjectListView: FC<DefaultObjectListViewProps> = ({component, objects, options}) => {
+    let finalObjects = objects;
+    if (!options.filters?.showDeleted) finalObjects = filterPresets['no-deleted'](finalObjects);
+
+    return <div>{finalObjects.map(obj => React.createElement(
+        component, {}, 
+        [<DefaultObjectView object={obj} 
+            options={{
+                unpad: true, 
+                showContextMenu: true,
+            }} />]))}</div>
+}
+
+export { DefaultObjectView, DefaultObjectListView};
