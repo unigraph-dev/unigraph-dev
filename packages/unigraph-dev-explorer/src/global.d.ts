@@ -1,4 +1,4 @@
-import { Unigraph } from "./unigraph";
+import { Unigraph } from "unigraph-dev-common";
 
 declare global {
     interface Window {

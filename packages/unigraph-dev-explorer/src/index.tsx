@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
 import * as serviceWorker from './serviceWorker';
-import unigraph from './unigraph';
+import {unigraph} from 'unigraph-dev-common';
 
 import App from './App';
 import { SplashScreen, DisconnectedSplashScreen} from './pages/SplashScreen';

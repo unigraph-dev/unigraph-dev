@@ -1,4 +1,4 @@
-import { RefUnigraphIdType } from "../../unigraph";
+import { RefUnigraphIdType } from "unigraph-dev-common/lib/api/unigraph";
 
 export interface KeyValueField<K = any, V = any> {
   key: K;
