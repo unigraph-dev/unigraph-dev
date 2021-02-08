@@ -6,7 +6,7 @@ import IconButton from '@material-ui/core/IconButton';
 
 import { SchemaFieldForm, SchemaNameForm } from './SchemaFieldForm';
 import { EntityField, EntityFieldInput } from './types';
-import { makeUnigraphId, makeRefUnigraphId } from '../../unigraph';
+import { makeUnigraphId, makeRefUnigraphId } from 'unigraph-dev-common/lib/api/unigraph';
 
 import { makeStyles } from '@material-ui/core/styles';
 import Box from '@material-ui/core/Box';
@@ -39,7 +39,7 @@ const SchemaEditor: FC<SchemaEditorProps> = ({ onSubmit }) => {
   );
 
   useEffectOnce(() => {
-    window.unigraph.getReferenceables().then(refs => setReferenceables(refs));
+    window.unigraph.getReferenceables().then((refs: any) => setReferenceables(refs));
   })
 
   const addField = useCallback(() => {
