@@ -5,6 +5,8 @@
   "scripts": {
     "backend-start": "yarn workspace unigraph-dev-backend start",
     "explorer-start": "yarn workspace unigraph-dev-explorer start",
+    "build-common": "yarn workspace unigraph-dev-common build",
+    "link-common": "cd packages/unigraph-dev-common && yarn link && cd ../unigraph-dev-explorer && yarn link 'unigraph-dev-common'",
     "dev": "bash scripts/start_server.sh"
   },
   "engines": {
