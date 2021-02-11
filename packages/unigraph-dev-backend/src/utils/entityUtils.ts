@@ -1,8 +1,9 @@
 import { Definition, EntityDgraph, RefUnigraphIdType, Schema, SchemaDgraph, UidType, UnigraphIdType } from "@/json-ts";
+import { stringify } from "querystring";
 
 function uid<IdType extends string>(id: IdType): UidType<IdType> {return {"uid": id}}
 export function makeUnigraphId<IdType extends string>(id: IdType): UnigraphIdType<IdType> {return {"unigraph.id": id}}
-export function makeRefUnigraphId<IdType extends string>(id: IdType): RefUnigraphIdType<IdType> {return {"$ref":{"key": "unigraph.id", "query": id}}}
+export function makeRefUnigraphId<IdType extends string>(id: IdType): RefUnigraphIdType<IdType> {return {"$ref": {"query": [{"key": "unigraph.id", "value": id}]}}}
 
 // Duplicate type declaration - this should closely follow the one in json-ts.
 type UnigraphTypeString = "$/primitive/number" | "$/primitive/boolean"
@@ -176,4 +177,54 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
     let localSchema = schemaMap[schemaName].definition;
     return makePart(localSchema);
 
+}
+
+/**
+ * 
+ * @param entity An already-processed entity for autoref
+ * @param schemas List of schemas
+ */
+export function processAutoref(entity: any, schemas: any[]) {
+
+    /**
+     * Recursively looks for places to insert autoref.
+     * 
+     * This function relies on side-effects and will break if the entity is not mutable.
+     * 
+     * @param currentEntity 
+     * @param schemas 
+     */
+    function recurse(currentEntity: any, schemas: any[]) {
+        switch (typeof currentEntity) {
+            case "object":
+                if (Array.isArray(currentEntity)) {
+                    currentEntity.forEach(e => recurse(e, schemas));
+                } else {
+                    // Is object, check for various stuff
+
+                    // 1. Can we do autoref based on reserved words?
+                    let kv = Object.entries(currentEntity);
+                    kv.forEach(([key, value]) => {
+                        if (key === "unigraph.id") {
+                            // Add autoref by unigraph.id
+                            currentEntity['$ref'] = {
+                                query: [{key: 'unigraph.id', value: value}],
+                            };
+                            currentEntity['unigraph.id'] = undefined;
+                        } else {
+                            recurse(value, schemas);
+                        }
+                    })
+
+                    // TODO: 2. Can we use entity-specific autoref rules?
+                }
+                break;
+
+            default:
+                break;
+        };
+    }
+
+    recurse(entity, schemas);
+    return entity;
 }

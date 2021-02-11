@@ -5,7 +5,7 @@ import { isJsonString } from './utils/utils';
 import DgraphClient from './dgraphClient';
 import { insertsToUpsert } from './utils/txnWrapper';
 import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphSchema, EventQueryByStringWithVars, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
-import { buildUnigraphEntity, makeQueryFragmentFromType } from './utils/entityUtils';
+import { buildUnigraphEntity, makeQueryFragmentFromType, processAutoref } from './utils/entityUtils';
 import { checkOrCreateDefaultDataModel } from './datamodelManager';
 import { Cache, createSchemaCache } from './caches';
 import repl from 'repl';
@@ -156,12 +156,17 @@ export default async function startServer(client: DgraphClient) {
 
     /**
      * Creates one unigraph object entity in dgraph.
+     * 
+     * Basically the procedure is like [Build padded entity based on schema and object] =>
+     * [Do autoref checks based on schema] => [Convert to upsert if we're using Dgraph as backend]
+     * 
      * @param event The event for creating the object
      * @param ws Websocket connection
      */
     "create_unigraph_object": function (event: EventCreateUnigraphObject, ws: IWebsocket) {
       // TODO: Talk about schema verifications
-      let finalUnigraphObject = buildUnigraphEntity(event.object, event.schema, caches['schemas'].data);
+      let unigraphObject = buildUnigraphEntity(event.object, event.schema, caches['schemas'].data);
+      let finalUnigraphObject = processAutoref(unigraphObject, caches['schemas'].data)
       console.log(JSON.stringify(finalUnigraphObject, null, 4))
       let upsert = insertsToUpsert([finalUnigraphObject]);
       dgraphClient.createUnigraphUpsert(upsert).then(_ => {

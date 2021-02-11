@@ -1,23 +1,29 @@
 import { UnigraphUpsert } from "@/custom"
 
+function buildDgraphFunctionFromRefQuery(query: {key: string, value: string}[]) {
+    let string = "";
+    query.forEach(({key, value}: any) => {
+        let refTarget = key.replace(/["%@\\]/g, "");
+        let refQuery = value.replace(/["%@\\]/g, "");
+        string += `AND eq(${refTarget}, "${refQuery}")`
+    })
+    return `var(func: has(dgraph.type)) @filter(${string.slice(4)})`
+}
+
 function insertsToUpsertRecursive(inserts: any[], appends: any[], queries: string[], currentObject: any) {
     // If this is a reference object
-    if (currentObject && currentObject["$ref"] && currentObject["$ref"].key && currentObject["$ref"].query) {
-        let refTarget = currentObject["$ref"].key.replace(/["%@\\]/g, "")
-        let refQuery = currentObject["$ref"].query.replace(/["%@\\]/g, "")
-        queries.push("unigraphquery" + (queries.length + 1) + " as var(func: eq(" + refTarget + ", \"" + refQuery + "\"))");
+    if (currentObject && currentObject["$ref"] && currentObject["$ref"].query) {
+        let query = currentObject['$ref'].query;
+        let dgraphFunction = buildDgraphFunctionFromRefQuery(query);
+        queries.push("unigraphquery" + (queries.length + 1) + " as " + dgraphFunction);
         currentObject["uid"] = "uid(unigraphquery" + queries.length + ")";
         currentObject["$ref"] = undefined;
         let append: any = {uid: "uid(unigraphquery" + queries.length + ")"}
-        append[refTarget] = refQuery
+        query.forEach(({key, value}: any) => append[key] = value);
+        // TODO: Ability to upsert into existing objects too
         appends.push(append)
     } else { // Check sub-fields
-        if (currentObject && typeof currentObject['unigraph.id'] === "string") {
-            let refQuery = currentObject['unigraph.id'].replace(/["%@\\]/g, "")
-            queries.push("unigraphquery" + (queries.length + 1) + " as var(func: eq(unigraph.id, \"" + refQuery + "\"))");
-            currentObject['uid'] = "uid(unigraphquery" + queries.length + ")";
-        };
-        console.log(currentObject)
+        //console.log(currentObject)
         let objectValues = Object.values(currentObject);
         for(let i=0; i<objectValues.length; ++i) {
             if (typeof objectValues[i] === "object" && !Array.isArray(objectValues[i])) {
