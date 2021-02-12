@@ -179,12 +179,20 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
 
 }
 
+function unpadValue(something: any) {
+    if (typeof something !== "object") return something
+    let kvs = Object.entries(something)
+    let ret = something
+    kvs.forEach(([key, value]) => {if(key.startsWith('_value'))ret = value})
+    return ret
+}
+
 /**
  * 
  * @param entity An already-processed entity for autoref
  * @param schemas List of schemas
  */
-export function processAutoref(entity: any, schemas: any[]) {
+export function processAutoref(entity: any, schema: string = "any", schemas: Record<string, Schema>) {
 
     /**
      * Recursively looks for places to insert autoref.
@@ -194,16 +202,29 @@ export function processAutoref(entity: any, schemas: any[]) {
      * @param currentEntity 
      * @param schemas 
      */
-    function recurse(currentEntity: any, schemas: any[]) {
+    function recurse(currentEntity: any, schemas: Record<string, Schema>, localSchema: Definition | any) {
+        console.log(currentEntity, localSchema)
+        let paddedEntity = currentEntity;
+        currentEntity = unpadValue(currentEntity);
         switch (typeof currentEntity) {
             case "object":
+                if (localSchema.type && localSchema.type['unigraph.id'] && localSchema.type['unigraph.id'].startsWith('$/schema/')) {
+                    localSchema = schemas[localSchema.type['unigraph.id']].definition
+                }
+
                 if (Array.isArray(currentEntity)) {
-                    currentEntity.forEach(e => recurse(e, schemas));
+                    currentEntity.forEach(e => recurse(unpadValue(e), schemas, localSchema['parameters']['element']));
                 } else {
                     // Is object, check for various stuff
 
                     // 1. Can we do autoref based on reserved words?
                     let kv = Object.entries(currentEntity);
+                    console.log(localSchema)
+                    let keysMap = localSchema['properties'].reduce((accu: any, now: any) => {
+                        accu[now["key"]] = now;
+                        return accu;
+                    }, {}) // TODO: Redundent code, abstract it somehow!
+                    
                     kv.forEach(([key, value]) => {
                         if (key === "unigraph.id") {
                             // Add autoref by unigraph.id
@@ -212,11 +233,19 @@ export function processAutoref(entity: any, schemas: any[]) {
                             };
                             currentEntity['unigraph.id'] = undefined;
                         } else {
-                            recurse(value, schemas);
+                            
+                            let localSchema = keysMap[key];
+                            if (localSchema['unique']) {
+                                // This should be a unique criterion, add an autoref upsert
+                                paddedEntity['$ref'] = {
+                                    query: [{key: key, value: unpadValue(value)},
+                                    ],
+                                };// TODO: redundent code, abstract
+                                //currentEntity[key] = undefined; - shouldn't remove the reference. let dgraph match mutations.
+                            }
+                            recurse(unpadValue(value), schemas, localSchema["definition"]);
                         }
                     })
-
-                    // TODO: 2. Can we use entity-specific autoref rules?
                 }
                 break;
 
@@ -225,6 +254,6 @@ export function processAutoref(entity: any, schemas: any[]) {
         };
     }
 
-    recurse(entity, schemas);
+    recurse(entity, schemas, schemas[schema].definition);
     return entity;
 }

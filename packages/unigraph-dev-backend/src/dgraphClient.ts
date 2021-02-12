@@ -108,6 +108,7 @@ export default class DgraphClient {
    * @param {UnigraphUpsert} data 
    */
   async createUnigraphUpsert(data: UnigraphUpsert) {
+    console.log("Trying to create upsert....============================================")
     const txn = this.dgraphClient.newTxn();
     try {
       const querybody = data.queries.join('\n');
@@ -117,19 +118,23 @@ export default class DgraphClient {
       let mutations: Mutation[] = data.mutations.map((obj: any) => {
         let mu = new dgraph.Mutation();
         mu.setSetJson(obj);
+        console.log(JSON.stringify(obj, null, 2))
         return mu;
       });
+      console.log(querystr)
       const req = new dgraph.Request();
-      req.setQuery(querystr);
+      data.queries.length ? req.setQuery(querystr) : false;
       req.setMutationsList(mutations);
       req.setCommitNow(true);
 
-      await txn.doRequest(req);
+      const response = await txn.doRequest(req);
+      console.log(JSON.stringify(response, null, 2))
     } catch (e) {
       console.error('Error: ', e);
     } finally {
       await txn.discard();
     }
+    console.log("upsert details above================================================")
   }
 
   async queryData<T = unknown>(query: string, vars: Record<string, any> = {}) {

@@ -54,7 +54,8 @@ let schemaUser = {
                 "key": "name",
                 "definition": {
                     "type": makeRefUnigraphId("$/primitive/string")
-                }
+                },
+                "unique": true,
             }
         ]
     }
