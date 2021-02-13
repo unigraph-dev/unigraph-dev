@@ -11,6 +11,7 @@ import { Cache, createSchemaCache } from './caches';
 import repl from 'repl';
 import { createSubscriptionWS, MsgCallbackFn, pollSubscriptions, Subscription } from './subscriptions';
 import { callHooks, HookAfterObjectChangedParams, HookAfterSchemaUpdatedParams, HookAfterSubscriptionAddedParams, Hooks } from './hooks';
+import { getAsyncLock } from './asyncManager';
 
 const PORT = 3001;
 const verbose = 5;
@@ -23,6 +24,8 @@ export default async function startServer(client: DgraphClient) {
 
   let caches: Record<string, Cache> = {};
   let subscriptions: Subscription[] = [];
+
+  let lock = getAsyncLock();
 
 
   // Basic checks
@@ -139,12 +142,16 @@ export default async function startServer(client: DgraphClient) {
      * @param ws Websocket connection
      */
     "create_unigraph_schema": function (event: EventCreateUnigraphSchema, ws: IWebsocket) {
-      let schema = (Array.isArray(event.schema) ? event.schema : [event.schema]);
-      let upsert: UnigraphUpsert = insertsToUpsert(schema);
-      dgraphClient.createUnigraphUpsert(upsert).then(_ => {
-        ws.send(makeResponse(event, true));
-        callHooks(hooks, "after_schema_updated", {caches: caches});
-      }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
+      lock.acquire('caches/schema', function (done: Function) {
+        let schema = (Array.isArray(event.schema) ? event.schema : [event.schema]);
+        let upsert: UnigraphUpsert = insertsToUpsert(schema);
+        dgraphClient.createUnigraphUpsert(upsert).then(_ => {
+          ws.send(makeResponse(event, true));
+          callHooks(hooks, "after_schema_updated", {caches: caches});
+          done(true, null)
+        }).catch(e => {ws.send(makeResponse(event, false, {"error": e})); done(false, null)});
+      })
+      
     },
 
     "delete_unigraph_object": function (event: EventDeleteUnigraphObject, ws: IWebsocket) {

@@ -88,8 +88,8 @@ export default function TodoList () {
     const [newName, setNewName] = useState("");
 
     const init = async () => {
-        await window.unigraph.ensureSchema("$/schema/todo", schemaTodo);
         await window.unigraph.ensureSchema("$/schema/user", schemaUser);
+        await window.unigraph.ensureSchema("$/schema/todo", schemaTodo);
         setInitialized(true);
         window.unigraph.subscribeToType("$/schema/todo", (result: ATodoList[]) => {setTodoList(result)}, subsId);
     }
