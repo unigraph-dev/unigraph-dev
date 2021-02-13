@@ -1,3 +1,5 @@
+// FIXME: This file is ambiguous in purpose! Move utils to utils folder and keep this a small interface with a window object.
+
 export interface Unigraph {
     backendConnection: WebSocket;
     backendMessages: string[];

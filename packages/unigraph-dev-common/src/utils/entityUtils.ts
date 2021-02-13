@@ -1,3 +1,5 @@
+// FIXME: This file is too large! Either break it up or add synopsis here.
+
 import { Definition, EntityDgraph, RefUnigraphIdType, Schema, UidType, UnigraphIdType, UnigraphTypeString } from "../types/json-ts";
 
 function uid<IdType extends string>(id: IdType): UidType<IdType> {return {"uid": id}}
@@ -235,7 +237,7 @@ export function processAutoref(entity: any, schema: string = "any", schemas: Rec
                                 paddedEntity['$ref'] = {
                                     query: [{key: key, value: unpadValue(value)},
                                     ],
-                                };// TODO: redundent code, abstract
+                                };
                                 //currentEntity[key] = undefined; - shouldn't remove the reference. let dgraph match mutations.
                             }
                             recurse(unpadValue(value), schemas, localSchema["definition"]);
