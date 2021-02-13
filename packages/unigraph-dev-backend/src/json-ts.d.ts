@@ -1,6 +1,6 @@
 type UidType<uid extends string> = {"uid": uid}
 type UnigraphIdType<uid extends string> = {"unigraph.id": uid}
-type RefUnigraphIdType<uid extends string> = {"$ref": {"key": "unigraph.id", "query": uid}}
+type RefUnigraphIdType<uid extends string> = {"$ref": {"query": [{"key": "unigraph.id", "value": uid}]}}
 
 declare function uid<IdType extends string>(id: IdType): UidType<IdType>
 declare function makeUnigraphId<IdType extends string>(id: IdType): UnigraphIdType<IdType>
@@ -15,6 +15,7 @@ type PrimitiveType = {
 // We say this is a Field "indexed by" T
 type Field<T extends ComposerObjectIndexs> = {
     key: PrimitiveType[T],
+    unique?: Boolean,
     definition: Definition
 }
 

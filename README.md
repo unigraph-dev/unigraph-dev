@@ -11,7 +11,11 @@ This repository contains all relevant source code for unigraph-dev:
 
 ## Docs
 
-For documentations, check out [Docs](./docs/README.md).
+Quick links:
+
+- [Schemas and Objects (overview)](./docs/schemas_and_objects.md)
+- [Data model](./docs/data_model.md)
+- [Glossary](./docs/glossary.md)
 
 ## Getting started
 

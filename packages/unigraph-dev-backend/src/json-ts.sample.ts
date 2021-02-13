@@ -52,7 +52,8 @@ let userSchema: SchemaDgraph = {
                 "key": "name",
                 "definition": {
                     "type": makeRefUnigraphId("$/primitive/string")
-                }
+                },
+                "unique": true,
             }
         ]
     }
@@ -107,7 +108,8 @@ let userSchemaDeref: any = {
                 "key": "name",
                 "definition": {
                     "type": makeUnigraphId("$/primitive/string")
-                }
+                },
+                "unique": true,
             }
         ]
     }

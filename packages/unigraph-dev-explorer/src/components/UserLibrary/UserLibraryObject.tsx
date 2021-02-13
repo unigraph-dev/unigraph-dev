@@ -1,4 +1,4 @@
-import { Typography } from '@material-ui/core';
+import { Checkbox, FormControlLabel, Typography } from '@material-ui/core';
 import React from 'react';
 
 import { useParams } from 'react-router-dom';
@@ -10,6 +10,8 @@ export default function UserLibraryObject () {
 
     const [object, setObject]: [any, Function] = React.useState({});
     const [id, setId] = React.useState(Date.now());
+
+    const [showPadded, setShowPadded] = React.useState(false);
 
     useEffectOnce(() => {
         window.unigraph.subscribeToObject(objectId, (object: any) => {
@@ -23,9 +25,15 @@ export default function UserLibraryObject () {
 
     return (<div>
         <Typography variant="h5">Object View</Typography>
+        <FormControlLabel control={<Checkbox
+            checked={showPadded}
+            onChange={() => setShowPadded(!showPadded)}
+            name="showPadded"
+            color="primary"
+        />} label="Show object as padded"/>
         <DefaultObjectView object={object} options={{
             viewer: "json-tree",
-            unpad: true
+            unpad: !showPadded
         }}></DefaultObjectView>
     </div>)
 }

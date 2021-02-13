@@ -1,8 +1,9 @@
 import { Definition, EntityDgraph, RefUnigraphIdType, Schema, SchemaDgraph, UidType, UnigraphIdType } from "@/json-ts";
+import { stringify } from "querystring";
 
 function uid<IdType extends string>(id: IdType): UidType<IdType> {return {"uid": id}}
 export function makeUnigraphId<IdType extends string>(id: IdType): UnigraphIdType<IdType> {return {"unigraph.id": id}}
-export function makeRefUnigraphId<IdType extends string>(id: IdType): RefUnigraphIdType<IdType> {return {"$ref":{"key": "unigraph.id", "query": id}}}
+export function makeRefUnigraphId<IdType extends string>(id: IdType): RefUnigraphIdType<IdType> {return {"$ref": {"query": [{"key": "unigraph.id", "value": id}]}}}
 
 // Duplicate type declaration - this should closely follow the one in json-ts.
 type UnigraphTypeString = "$/primitive/number" | "$/primitive/boolean"
@@ -176,4 +177,83 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
     let localSchema = schemaMap[schemaName].definition;
     return makePart(localSchema);
 
+}
+
+function unpadValue(something: any) {
+    if (typeof something !== "object") return something
+    let kvs = Object.entries(something)
+    let ret = something
+    kvs.forEach(([key, value]) => {if(key.startsWith('_value'))ret = value})
+    return ret
+}
+
+/**
+ * 
+ * @param entity An already-processed entity for autoref
+ * @param schemas List of schemas
+ */
+export function processAutoref(entity: any, schema: string = "any", schemas: Record<string, Schema>) {
+
+    /**
+     * Recursively looks for places to insert autoref.
+     * 
+     * This function relies on side-effects and will break if the entity is not mutable.
+     * 
+     * @param currentEntity 
+     * @param schemas 
+     */
+    function recurse(currentEntity: any, schemas: Record<string, Schema>, localSchema: Definition | any) {
+        console.log(currentEntity, localSchema)
+        let paddedEntity = currentEntity;
+        currentEntity = unpadValue(currentEntity);
+        switch (typeof currentEntity) {
+            case "object":
+                if (localSchema.type && localSchema.type['unigraph.id'] && localSchema.type['unigraph.id'].startsWith('$/schema/')) {
+                    localSchema = schemas[localSchema.type['unigraph.id']].definition
+                }
+
+                if (Array.isArray(currentEntity)) {
+                    currentEntity.forEach(e => recurse(unpadValue(e), schemas, localSchema['parameters']['element']));
+                } else {
+                    // Is object, check for various stuff
+
+                    // 1. Can we do autoref based on reserved words?
+                    let kv = Object.entries(currentEntity);
+                    console.log(localSchema)
+                    let keysMap = localSchema['properties'].reduce((accu: any, now: any) => {
+                        accu[now["key"]] = now;
+                        return accu;
+                    }, {}) // TODO: Redundent code, abstract it somehow!
+                    
+                    kv.forEach(([key, value]) => {
+                        if (key === "unigraph.id") {
+                            // Add autoref by unigraph.id
+                            currentEntity['$ref'] = {
+                                query: [{key: 'unigraph.id', value: value}],
+                            };
+                            currentEntity['unigraph.id'] = undefined;
+                        } else {
+                            
+                            let localSchema = keysMap[key];
+                            if (localSchema['unique']) {
+                                // This should be a unique criterion, add an autoref upsert
+                                paddedEntity['$ref'] = {
+                                    query: [{key: key, value: unpadValue(value)},
+                                    ],
+                                };// TODO: redundent code, abstract
+                                //currentEntity[key] = undefined; - shouldn't remove the reference. let dgraph match mutations.
+                            }
+                            recurse(unpadValue(value), schemas, localSchema["definition"]);
+                        }
+                    })
+                }
+                break;
+
+            default:
+                break;
+        };
+    }
+
+    recurse(entity, schemas, schemas[schema].definition);
+    return entity;
 }

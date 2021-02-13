@@ -1,5 +1,7 @@
 # Unigraph's Schemas and Objects
 
+This is an overview of our more comprehensive documentation on the data model. Please check out [Data Model](./data_model.md) for more.
+
 As part of our [Goal](./goal.md), Unigraph has a user-centric, free principle about schemas and objects in a flexible graph database. 
 
 ## Data Model
@@ -34,34 +36,7 @@ Any object has 4 basic fields:
 
 ## References
 
-Since we use a graph model for data representation, it is common for an object to refer another object for a specific field. For example, an abstract model for a company might refer a specific field in an annual report in that company. Internally in the graph database, all nested object layers are separate nodes with unique UIDs, and can be referenced easily using the reference syntax.
-
-A reference in the data model might look like this:
-
-```typescript
-{
-    ...
-    "earnings": {
-        "2015-Q2": { // This is the reference object
-            "$ref": {
-                "key": "name",
-                "query": "annual-report-2015"
-            }
-        } // Above is the reference object
-    }
-    ...
-}
-```
-
-A reference definition in schemas might look like this:
-
-TODO
-
-If the data were to be inserted to Unigraph, it would be transformed to an upsert operation which first query to the database searching for the `name` predicate, then the reference object would be replaced by a link to the query result.
-
-Notes:
-- The referenced field must be an indexed predicate in the database implementation (Dgraph). You can change this by a TODO operation.
-- Currently we don't have nested reference yet, but it would be added in the future TODO.
+Please see the section `docs/data_model.md` for more information.
 
 ## Predicates / Fields
 

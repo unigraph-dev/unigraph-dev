@@ -1,5 +1,6 @@
 # Optimization
 
+This documentation outlines some of the best practices in developing on or with Unigraph. Feel free to contribute your thoughts via pull requests or issues!
 ## 1. Explicit request = best
 If you know the structure of your data, best to use explicit request to save a ton of time. For example:
 ```

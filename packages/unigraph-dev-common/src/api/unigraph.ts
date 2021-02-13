@@ -15,12 +15,7 @@ export interface Unigraph {
     getReferenceables(key: string | undefined, asMapWithContent: boolean | undefined): Promise<any>;
 }
 
-export type RefUnigraphIdType<UID extends string = string> = {
-    $ref: {
-    key: 'unigraph.id',
-    query: UID
-    }
-};
+export type RefUnigraphIdType<uid extends string = string> = {"$ref": {"query": [{"key": "unigraph.id", "value": uid}]}}
 
 export function makeUnigraphId(id: string) {
     return { 'unigraph.id': id }
@@ -29,8 +24,10 @@ export function makeUnigraphId(id: string) {
 export function makeRefUnigraphId(id: string): RefUnigraphIdType {
     return {
     "$ref": {
-        "key": "unigraph.id",
-        "query": id,
+        "query": [{
+            "key": "unigraph.id",
+            "value": id
+        }],
     }
     };
 }

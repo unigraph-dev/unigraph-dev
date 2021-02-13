@@ -7,7 +7,7 @@ const AddSchema = () => {
   const [schemaResult, setSchemaResult] = useState<any>();
   const createSchema = useCallback((schema: any, preview: boolean = false) => {
 
-    if (!preview) window.unigraph.createSchema(schema).then((response) => {
+    if (!preview) window.unigraph.createSchema(schema).then((response: any) => {
       setSchemaResult(response);
     }); else setSchemaResult(schema);
 

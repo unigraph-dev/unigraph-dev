@@ -1,31 +1,67 @@
 import { UnigraphUpsert } from "@/custom"
 
+const typeMap = {
+    "object": "_value",
+    "number": "_value.#",
+    "bigint": "_value.#i",
+    "undefined": "_value",
+    "null": "_value",
+    "boolean": "_value.!",
+    "string": "_value.%",
+    "function": "_value",
+    "symbol": "_value"
+}
+
+function buildDgraphFunctionFromRefQuery(query: {key: string, value: string}[]) {
+    let string = "";
+    let string1 = "";
+    let innerRefs: string[] = [];
+    query.forEach(({key, value}: any) => {
+        let refTarget = key.replace(/["%@\\]/g, "");
+        let refQuery = value.replace(/["%@\\]/g, "");
+        if (refTarget === "unigraph.id") {
+            string += `AND eq(${refTarget}, "${refQuery}")`;
+            string1 = `eq(${refTarget}, "${refQuery}")`;
+        } else {
+            // Referencing a field (not unigraph.id), do manual padding!
+            // TODO: Support deep nested references
+            innerRefs.push(`_value { ${refTarget} @filter(eq(<${typeMap[typeof refQuery]}>, "${refQuery}")) }`)
+        }
+    })
+    if (innerRefs.length) {
+        string1 = `type(Entity)`
+        string = `AND type(Entity)`
+    }
+    let fn = `var(func: ${string1}) @filter(${string.slice(4)})`;
+    if (innerRefs.length) {
+        fn += " @cascade {\n";
+        innerRefs.forEach(str => fn += str + "\n");
+        fn += "}";
+    }
+    return fn;
+}
+
 function insertsToUpsertRecursive(inserts: any[], appends: any[], queries: string[], currentObject: any) {
+    console.log(currentObject)
     // If this is a reference object
-    if (currentObject && currentObject["$ref"] && currentObject["$ref"].key && currentObject["$ref"].query) {
-        let refTarget = currentObject["$ref"].key.replace(/["%@\\]/g, "")
-        let refQuery = currentObject["$ref"].query.replace(/["%@\\]/g, "")
-        queries.push("unigraphquery" + (queries.length + 1) + " as var(func: eq(" + refTarget + ", \"" + refQuery + "\"))");
+    if (currentObject && currentObject["$ref"] && currentObject["$ref"].query) {
+        let query = currentObject['$ref'].query;
+        let dgraphFunction = buildDgraphFunctionFromRefQuery(query);
+        queries.push("unigraphquery" + (queries.length + 1) + " as " + dgraphFunction + "\n");
         currentObject["uid"] = "uid(unigraphquery" + queries.length + ")";
         currentObject["$ref"] = undefined;
         let append: any = {uid: "uid(unigraphquery" + queries.length + ")"}
-        append[refTarget] = refQuery
+        query.forEach(({key, value}: any) => {if (key === "unigraph.id") append[key] = value});
         appends.push(append)
-    } else { // Check sub-fields
-        if (currentObject && typeof currentObject['unigraph.id'] === "string") {
-            let refQuery = currentObject['unigraph.id'].replace(/["%@\\]/g, "")
-            queries.push("unigraphquery" + (queries.length + 1) + " as var(func: eq(unigraph.id, \"" + refQuery + "\"))");
-            currentObject['uid'] = "uid(unigraphquery" + queries.length + ")";
-        };
-        console.log(currentObject)
-        let objectValues = Object.values(currentObject);
-        for(let i=0; i<objectValues.length; ++i) {
-            if (typeof objectValues[i] === "object" && !Array.isArray(objectValues[i])) {
-                insertsToUpsertRecursive(inserts, appends, queries, objectValues[i]);
-            } else if (typeof objectValues[i] === "object" && Array.isArray(objectValues[i])) {
-                for(let j=0; j<(objectValues[i] as any[]).length; ++j) {
-                    insertsToUpsertRecursive(inserts, appends, queries, (objectValues[i] as any[])[j]);
-                }
+    }
+    //console.log(currentObject)
+    let objectValues = Object.values(currentObject);
+    for(let i=0; i<objectValues.length; ++i) {
+        if (typeof objectValues[i] === "object" && !Array.isArray(objectValues[i])) {
+            insertsToUpsertRecursive(inserts, appends, queries, objectValues[i]);
+        } else if (typeof objectValues[i] === "object" && Array.isArray(objectValues[i])) {
+            for(let j=0; j<(objectValues[i] as any[]).length; ++j) {
+                insertsToUpsertRecursive(inserts, appends, queries, (objectValues[i] as any[])[j]);
             }
         }
     }

@@ -5,12 +5,13 @@ import { isJsonString } from './utils/utils';
 import DgraphClient from './dgraphClient';
 import { insertsToUpsert } from './utils/txnWrapper';
 import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphSchema, EventQueryByStringWithVars, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
-import { buildUnigraphEntity, makeQueryFragmentFromType } from './utils/entityUtils';
+import { buildUnigraphEntity, makeQueryFragmentFromType, processAutoref } from './utils/entityUtils';
 import { checkOrCreateDefaultDataModel } from './datamodelManager';
 import { Cache, createSchemaCache } from './caches';
 import repl from 'repl';
 import { createSubscriptionWS, MsgCallbackFn, pollSubscriptions, Subscription } from './subscriptions';
 import { callHooks, HookAfterObjectChangedParams, HookAfterSchemaUpdatedParams, HookAfterSubscriptionAddedParams, Hooks } from './hooks';
+import { getAsyncLock } from './asyncManager';
 
 const PORT = 3001;
 const verbose = 5;
@@ -23,6 +24,8 @@ export default async function startServer(client: DgraphClient) {
 
   let caches: Record<string, Cache> = {};
   let subscriptions: Subscription[] = [];
+
+  let lock = getAsyncLock();
 
 
   // Basic checks
@@ -139,12 +142,16 @@ export default async function startServer(client: DgraphClient) {
      * @param ws Websocket connection
      */
     "create_unigraph_schema": function (event: EventCreateUnigraphSchema, ws: IWebsocket) {
-      let schema = (Array.isArray(event.schema) ? event.schema : [event.schema]);
-      let upsert: UnigraphUpsert = insertsToUpsert(schema);
-      dgraphClient.createUnigraphUpsert(upsert).then(_ => {
-        ws.send(makeResponse(event, true));
-        callHooks(hooks, "after_schema_updated", {caches: caches});
-      }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
+      lock.acquire('caches/schema', function (done: Function) {
+        let schema = (Array.isArray(event.schema) ? event.schema : [event.schema]);
+        let upsert: UnigraphUpsert = insertsToUpsert(schema);
+        dgraphClient.createUnigraphUpsert(upsert).then(_ => {
+          ws.send(makeResponse(event, true));
+          callHooks(hooks, "after_schema_updated", {caches: caches});
+          done(true, null)
+        }).catch(e => {ws.send(makeResponse(event, false, {"error": e})); done(false, null)});
+      })
+      
     },
 
     "delete_unigraph_object": function (event: EventDeleteUnigraphObject, ws: IWebsocket) {
@@ -156,12 +163,17 @@ export default async function startServer(client: DgraphClient) {
 
     /**
      * Creates one unigraph object entity in dgraph.
+     * 
+     * Basically the procedure is like [Build padded entity based on schema and object] =>
+     * [Do autoref checks based on schema] => [Convert to upsert if we're using Dgraph as backend]
+     * 
      * @param event The event for creating the object
      * @param ws Websocket connection
      */
     "create_unigraph_object": function (event: EventCreateUnigraphObject, ws: IWebsocket) {
       // TODO: Talk about schema verifications
-      let finalUnigraphObject = buildUnigraphEntity(event.object, event.schema, caches['schemas'].data);
+      let unigraphObject = buildUnigraphEntity(event.object, event.schema, caches['schemas'].data);
+      let finalUnigraphObject = processAutoref(unigraphObject, event.schema, caches['schemas'].data)
       console.log(JSON.stringify(finalUnigraphObject, null, 4))
       let upsert = insertsToUpsert([finalUnigraphObject]);
       dgraphClient.createUnigraphUpsert(upsert).then(_ => {
