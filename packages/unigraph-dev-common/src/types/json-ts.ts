@@ -20,23 +20,23 @@ export type Field<T extends ComposerObjectIndexs> = {
 }
 
 export type ComposerObjectInstance<T extends ComposerObjectIndexs> = {
-    type: RefUnigraphIdType<"$/composer/Object">,
+    type: UnigraphIdType<"$/composer/Object">,
     parameters?: {
-        indexedBy: RefUnigraphIdType<T>,
+        indexedBy: UnigraphIdType<T>,
         indexes: PrimitiveType[T][]
     },
     properties: Field<T>[]
 }
 
 export type ComposerArrayInstance = {
-    type: RefUnigraphIdType<"$/composer/Array">,
+    type: UnigraphIdType<"$/composer/Array">,
     parameters: {
         element: Definition
     }
 }
 
 export type Composers = ComposerObjectInstance<ComposerObjectIndexs> | ComposerArrayInstance
-export type PrimitiveTypes = RefUnigraphIdType<"$/primitive/string"> | RefUnigraphIdType<"$/primitive/number"> | RefUnigraphIdType<"$/primitive/boolean">
+export type PrimitiveTypes = UnigraphIdType<"$/primitive/string"> | UnigraphIdType<"$/primitive/number"> | UnigraphIdType<"$/primitive/boolean">
 export type Primitive = {"type": PrimitiveTypes}
 
 export type Schema = {
@@ -47,7 +47,7 @@ export type Schema = {
 export type SchemaDgraph = Schema | {"dgraph.type": "Type"}
 
 export interface SchemaRef<T extends string> {
-    type: RefUnigraphIdType<`$/schema/${T}`>
+    type: UnigraphIdType<`$/schema/${T}`>
 }
 
 export type Types = Composers | Primitive | Schema | SchemaRef<string>
@@ -56,7 +56,7 @@ export type Definition = Types
 
 export type Entity<T extends string> = {
     "uid"?: string,
-    type?: RefUnigraphIdType<`$/schema/${T}`>,
+    type?: UnigraphIdType<`$/schema/${T}`>,
     "_value": any
 }
 

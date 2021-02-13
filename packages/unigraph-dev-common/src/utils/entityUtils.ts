@@ -134,7 +134,7 @@ export function buildUnigraphEntity (raw: Object, schemaName: string = "any", sc
     } else {
         let localSchema = schemaMap[schemaName].definition
         return {
-            "type": makeRefUnigraphId(schemaName) as RefUnigraphIdType<`$/schema/${string}`>,
+            "type": makeUnigraphId(schemaName) as UnigraphIdType<`$/schema/${string}`>,
             "dgraph.type": "Entity",
             ...(padding ? buildUnigraphEntityPart(raw, options, schemaMap, localSchema) : raw)
         };
