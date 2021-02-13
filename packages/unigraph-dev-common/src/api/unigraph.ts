@@ -1,3 +1,5 @@
+// FIXME: This file is ambiguous in purpose! Move utils to utils folder and keep this a small interface with a window object.
+
 export interface Unigraph {
     backendConnection: WebSocket;
     backendMessages: string[];
@@ -15,34 +17,7 @@ export interface Unigraph {
     getReferenceables(key: string | undefined, asMapWithContent: boolean | undefined): Promise<any>;
 }
 
-export type RefUnigraphIdType<uid extends string = string> = {"$ref": {"query": [{"key": "unigraph.id", "value": uid}]}}
-
-export function makeUnigraphId(id: string) {
-    return { 'unigraph.id': id }
-}
-
-export function makeRefUnigraphId(id: string): RefUnigraphIdType {
-    return {
-    "$ref": {
-        "query": [{
-            "key": "unigraph.id",
-            "value": id
-        }],
-    }
-    };
-}
-
-const typeMap = {
-    "object": "_value",
-    "number": "_value.#",
-    "bigint": "_value.#i",
-    "undefined": "_value",
-    "null": "_value",
-    "boolean": "_value.!",
-    "string": "_value.%",
-    "function": "_value",
-    "symbol": "_value"
-}
+import { typeMap } from '../types/consts'
 
 function unpadRecurse(object: any) {
     let result: any = undefined;
