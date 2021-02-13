@@ -1,4 +1,4 @@
-import { Definition, EntityDgraph, RefUnigraphIdType, Schema, SchemaDgraph, UidType, UnigraphIdType } from "@/json-ts";
+import { Definition, EntityDgraph, RefUnigraphIdType, Schema, SchemaDgraph, UidType, UnigraphIdType } from "../types/json-ts";
 import { stringify } from "querystring";
 
 function uid<IdType extends string>(id: IdType): UidType<IdType> {return {"uid": id}}

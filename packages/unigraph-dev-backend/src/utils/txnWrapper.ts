@@ -1,16 +1,6 @@
 import { UnigraphUpsert } from "@/custom"
 
-const typeMap = {
-    "object": "_value",
-    "number": "_value.#",
-    "bigint": "_value.#i",
-    "undefined": "_value",
-    "null": "_value",
-    "boolean": "_value.!",
-    "string": "_value.%",
-    "function": "_value",
-    "symbol": "_value"
-}
+import { typeMap } from 'unigraph-dev-common/lib/types/consts'
 
 function buildDgraphFunctionFromRefQuery(query: {key: string, value: string}[]) {
     let string = "";

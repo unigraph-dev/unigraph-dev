@@ -6,7 +6,7 @@
       "dom.iterable",
       "esnext"
     ],
-    "module": "esnext",
+    "module": "CommonJS",
     "declaration": true,
     "outDir": "./lib",
     "strict": true

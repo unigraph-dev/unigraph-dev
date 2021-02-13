@@ -1,6 +1,6 @@
 import { assert } from "console";
-import { SchemaDgraph, UidType, EntityDgraph, UnigraphIdType, RefUnigraphIdType, Schema } from "./json-ts";
-import { buildUnigraphEntity, makeRefUnigraphId, makeUnigraphId } from "./utils/entityUtils";
+import { SchemaDgraph, UidType, EntityDgraph, UnigraphIdType, RefUnigraphIdType, Schema } from "unigraph-dev-common/lib/types/json-ts";
+import { buildUnigraphEntity, makeRefUnigraphId, makeUnigraphId } from "unigraph-dev-common/lib/utils/entityUtils";
 import _ from "lodash";
 
 let todoSchema: SchemaDgraph = {

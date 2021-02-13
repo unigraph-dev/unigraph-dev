@@ -2,7 +2,7 @@ import { Button, Checkbox, IconButton, List, ListItem, ListItemIcon, ListItemSec
 import { Delete } from '@material-ui/icons';
 import React, { useEffect, useState } from 'react';
 import { useVideo } from 'react-use';
-import { makeUnigraphId, makeRefUnigraphId } from 'unigraph-dev-common/lib/api/unigraph';
+import { makeUnigraphId, makeRefUnigraphId } from 'unigraph-dev-common/lib/utils/entityUtils';
 
 // Define the todo schema for ensurance
 let schemaTodo = {
