@@ -60,3 +60,16 @@ Now, all newly created objects with this schema will be merged with existing obj
 # Object Deletion
 
 * Unlike conventional NoSQL systems, Unigraph cannot be sure of which parts of an object that should be deleted. For example, if the user tries to delete a todo object, the reference to the owner of that object (a user) should not be deleted; while the reference to its notes should be. Although we provide ways to declare them in the schema, 
+
+# (object) padding
+
+To represent complex hypergraphical relationships (including edge annotations, metadata) and to embrace the philosophy that edges and morphisms should also be considered as objects, we added object padding in our data model. In summary, instead of using the basic key-value model of data, we use `_value*` keywords to add extra depth and flexibility to relationships.
+
+## Advantages
+
+- Easy metadata and edge annotation support
+- Ability to treat edges as objects intrinsiclly.
+
+## Disadvantages
+
+- Less readable out of the box - please use the 'data model playground' if you want to work with padded objects.
