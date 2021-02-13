@@ -8,7 +8,8 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import { makeStyles } from '@material-ui/core/styles';
-import { Comment, Home, Info, LibraryBooks, Storage } from '@material-ui/icons';
+import { Comment, CompareArrows, Home, Info, LibraryBooks, Storage } from '@material-ui/icons';
+import { ListSubheader } from '@material-ui/core';
 
 const drawerWidth = 240;
 
@@ -40,6 +41,7 @@ export default function DrawerRouter() {
       <div className={classes.toolbar} />
       <Divider />
       <List>
+        <ListSubheader component="div" id="subheader-home"> Home </ListSubheader>
         <ListItem button component={Link} to="/">
           <ListItemIcon><Home /></ListItemIcon>
           <ListItemText primary="Home" />
@@ -47,10 +49,6 @@ export default function DrawerRouter() {
         <ListItem button component={Link} to="/about">
           <ListItemIcon><Info /></ListItemIcon>
           <ListItemText primary="About" />
-        </ListItem>
-        <ListItem button component={Link} to="/request">
-          <ListItemIcon><Comment /></ListItemIcon>
-          <ListItemText primary="Request" />
         </ListItem>
         <ListItem button component={Link} to="/library">
           <ListItemIcon><LibraryBooks /></ListItemIcon>
@@ -61,6 +59,17 @@ export default function DrawerRouter() {
           <ListItemText primary="Add Schema" />
         </ListItem>
         <Divider/>
+        <ListSubheader component="div" id="subheader-developer-tools"> Developer Tools </ListSubheader>
+        <ListItem button component={Link} to="/request">
+          <ListItemIcon><Comment /></ListItemIcon>
+          <ListItemText primary="Request" />
+        </ListItem>
+        <ListItem button component={Link} to="/datamodel-playground">
+          <ListItemIcon><CompareArrows /></ListItemIcon>
+          <ListItemText primary="DataModel Playground" />
+        </ListItem>
+        <Divider/>
+        <ListSubheader component="div" id="subheader-example-apps"> Example Apps </ListSubheader>
         <ListItem button component={Link} to="/examples/todo">
           <ListItemIcon><Storage /></ListItemIcon>
           <ListItemText primary="Todo list" />

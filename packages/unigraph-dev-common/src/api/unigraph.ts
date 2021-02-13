@@ -15,9 +15,11 @@ export interface Unigraph {
     updateSimpleObject(object: any, predicate: string, value: any): any;
     getReferenceables(): Promise<any>;
     getReferenceables(key: string | undefined, asMapWithContent: boolean | undefined): Promise<any>;
+    getSchemas(schemas: string[] | undefined): Promise<Map<string, SchemaDgraph>>;
 }
 
 import { typeMap } from '../types/consts'
+import { SchemaDgraph } from '../types/json-ts';
 
 function unpadRecurse(object: any) {
     let result: any = undefined;
@@ -139,6 +141,16 @@ export default function unigraph(url: string): Unigraph {
                         unigraph.id
                     }
                 }`
+            }, id);
+        }),
+        getSchemas: (schemas: string[] | undefined) => new Promise((resolve, reject) => {
+            let id = Date.now();
+            callbacks[id] = (response: any) => {
+                if (response.success && response.schemas) resolve(response.schemas);
+                else reject(response);
+            };
+            sendEvent(connection, "get_schemas", {
+                schemas: []
             }, id);
         })
     }

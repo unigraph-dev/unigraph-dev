@@ -4,7 +4,7 @@ import expressWs, { Application, WebsocketRequestHandler } from 'express-ws';
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import DgraphClient from './dgraphClient';
 import { insertsToUpsert } from './utils/txnWrapper';
-import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphSchema, EventQueryByStringWithVars, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
+import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphSchema, EventGetSchemas, EventQueryByStringWithVars, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
 import { buildUnigraphEntity, makeQueryFragmentFromType, processAutoref } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { checkOrCreateDefaultDataModel } from './datamodelManager';
 import { Cache, createSchemaCache } from './caches';
@@ -203,6 +203,11 @@ export default async function startServer(client: DgraphClient) {
         }
       }
       ws.send(makeResponse(event, true, status))
+    },
+
+    "get_schemas": async function (event: EventGetSchemas, ws: IWebsocket) {
+      // TODO: Option to get only a couple of schemas in cache
+      ws.send(makeResponse(event, true, {"schemas": caches['schemas'].data}));
     }
   };
 

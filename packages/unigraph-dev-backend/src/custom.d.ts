@@ -111,3 +111,10 @@ declare type EventEnsureUnigraphSchema = {
   name: string,
   fallback: any
 }
+
+declare type EventGetSchemas = {
+  type: "event",
+  event: "get_schemas",
+  id: number,
+  schemas: string[]
+}

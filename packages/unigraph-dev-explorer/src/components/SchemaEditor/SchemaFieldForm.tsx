@@ -5,6 +5,7 @@ import TextField from '@material-ui/core/TextField';
 import { EntityField, EntityFieldInput } from './types';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import classes from '*.module.css';
+import { ReferenceableSelectorControlled } from '../ObjectView/ReferenceableSelector';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -55,16 +56,10 @@ export const SchemaFieldForm: FC<SchemaFieldFormProps> = ({ field, referenceable
         value={field.key || ''}
       />
       {/* TODO: should also autocomplete w/ "add new type" from input */}
-      <Autocomplete 
-        className={classes.fieldType}
-        options={referenceables}
-        onChange={(e, v) => setFieldType(v)}
-        renderInput={(params) => <TextField
-          {...params}
-          label="Type"
-          variant="filled"
-          value={field.definition?.type || ''}
-        />}
+      <ReferenceableSelectorControlled 
+        referenceables={referenceables}
+        onChange={setFieldType}
+        value={field.definition?.type}
       />
     </Box>
   );
