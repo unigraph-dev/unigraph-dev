@@ -35,9 +35,15 @@ export type ComposerArrayInstance = {
     }
 }
 
+export type UnigraphPrimitiveTypeString = "$/primitive/number" | "$/primitive/boolean"
+| "$/primitive/string" | "$/primitive/null"
+export type UnigraphTypeString = UnigraphPrimitiveTypeString | "$/composer/Array" | "$/composer/Object" | "$/primitive/undefined"
+
 export type Composers = ComposerObjectInstance<ComposerObjectIndexs> | ComposerArrayInstance
-export type PrimitiveTypes = UnigraphIdType<"$/primitive/string"> | UnigraphIdType<"$/primitive/number"> | UnigraphIdType<"$/primitive/boolean">
+export type PrimitiveTypes = UnigraphIdType<UnigraphPrimitiveTypeString>
 export type Primitive = {"type": PrimitiveTypes}
+
+
 
 export type Schema = {
     "unigraph.id": string,

@@ -1,13 +1,8 @@
-import { Definition, EntityDgraph, RefUnigraphIdType, Schema, SchemaDgraph, UidType, UnigraphIdType } from "../types/json-ts";
-import { stringify } from "querystring";
+import { Definition, EntityDgraph, RefUnigraphIdType, Schema, UidType, UnigraphIdType, UnigraphTypeString } from "../types/json-ts";
 
 function uid<IdType extends string>(id: IdType): UidType<IdType> {return {"uid": id}}
 export function makeUnigraphId<IdType extends string>(id: IdType): UnigraphIdType<IdType> {return {"unigraph.id": id}}
 export function makeRefUnigraphId<IdType extends string>(id: IdType): RefUnigraphIdType<IdType> {return {"$ref": {"query": [{"key": "unigraph.id", "value": id}]}}}
-
-// Duplicate type declaration - this should closely follow the one in json-ts.
-type UnigraphTypeString = "$/primitive/number" | "$/primitive/boolean"
-| "$/primitive/string" | "$/primitive/null" | "$/composer/Array" | "$/composer/Object" | "$/primitive/undefined"
 
 function getUnigraphType (object: any): UnigraphTypeString {
     let typeString: UnigraphTypeString = "$/primitive/undefined"
