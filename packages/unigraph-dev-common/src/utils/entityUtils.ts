@@ -203,6 +203,7 @@ export function processAutoref(entity: any, schema: string = "any", schemas: Rec
         console.log(currentEntity, localSchema)
         let paddedEntity = currentEntity;
         currentEntity = unpadValue(currentEntity);
+        if (paddedEntity?.type) recurse(paddedEntity.type, schemas, localSchema) // Check for type references as well
         switch (typeof currentEntity) {
             case "object":
                 if (localSchema.type && localSchema.type['unigraph.id'] && localSchema.type['unigraph.id'].startsWith('$/schema/')) {
