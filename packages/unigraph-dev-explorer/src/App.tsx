@@ -15,6 +15,7 @@ import Request from './pages/Request';
 import AddSchema from './pages/AddSchema';
 import TodoList from './examples/todo/TodoList';
 import UserLibrary from './pages/UserLibrary';
+import DataModelPlayground from './pages/DataModelPlayground';
 
 // TODO: custom theme
 const useStyles = makeStyles(theme => ({
@@ -56,6 +57,9 @@ function App() {
         <main className={classes.content}>
           <div className={classes.toolbar} />
           <Switch>
+            <Route path="/datamodel-playground">
+              <DataModelPlayground />
+            </Route>
             <Route path="/examples/todo">
               <TodoList />
             </Route>
