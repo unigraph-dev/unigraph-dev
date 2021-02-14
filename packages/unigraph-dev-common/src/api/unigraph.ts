@@ -13,6 +13,7 @@ export interface Unigraph {
     deleteObject(uid: string): any;
     unpad(object: any): any;
     updateSimpleObject(object: any, predicate: string, value: any): any;
+    updateObject(uid: string, newObject: any): any;
     getReferenceables(): Promise<any>;
     getReferenceables(key: string | undefined, asMapWithContent: boolean | undefined): Promise<any>;
     getSchemas(schemas: string[] | undefined): Promise<Map<string, SchemaDgraph>>;
@@ -124,9 +125,12 @@ export default function unigraph(url: string): Unigraph {
         deleteObject: (uid) => {
             sendEvent(connection, "delete_unigraph_object", {uid: uid});
         },
-        updateSimpleObject: (object, predicate, value) => {
+        updateSimpleObject: (object, predicate, value) => { // TODO: This is very useless, should be removed once we get something better
             let predicateUid = object['_value'][predicate].uid;
             sendEvent(connection, "update_spo", {uid: predicateUid, predicate: typeMap[typeof value], value: value})
+        },
+        updateObject: (uid, newObject) => {
+            sendEvent(connection, "update_object", {uid: uid, newObject: newObject});
         },
         getReferenceables: (key: string = "unigraph.id", asMapWithContent: boolean = false) => new Promise((resolve, reject) => {
             let id = Date.now();

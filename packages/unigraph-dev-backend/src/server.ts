@@ -4,8 +4,8 @@ import expressWs, { Application, WebsocketRequestHandler } from 'express-ws';
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import DgraphClient from './dgraphClient';
 import { insertsToUpsert } from './utils/txnWrapper';
-import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphSchema, EventGetSchemas, EventQueryByStringWithVars, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
-import { buildUnigraphEntity, makeQueryFragmentFromType, processAutoref } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphSchema, EventGetSchemas, EventQueryByStringWithVars, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
+import { buildUnigraphEntity, getUpsertFromUpdater, makeQueryFragmentFromType, processAutoref } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { checkOrCreateDefaultDataModel } from './datamodelManager';
 import { Cache, createSchemaCache } from './caches';
 import repl from 'repl';
@@ -187,6 +187,36 @@ export default async function startServer(client: DgraphClient) {
         callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
         ws.send(makeResponse(event, true))
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
+    },
+
+    /**
+     * Updates an object given its uid and new object.
+     * 
+     * There are two methods of update: using or not using upsert.
+     * This choice is represented in the "upsert" property of the event.
+     * If upsert is false (currently not implemented), Unigraph will NOT care about whatever currently in object and overwrite;
+     * In upsert false mode, non-specified fields will be deleted (dereferenced). 
+     * You can use "$upsert": true to identify which part to use upsert; Note that this cannot be nested in a upsert=false object.
+     *
+     * @param event The event for update. Detailed options for the event is outlined above.
+     * @param ws Websocket connection
+     */
+    "update_object": async function (event: EventUpdateObject, ws: IWebsocket) {
+      if (typeof event.upsert === "boolean" && !event.upsert) {
+        ws.send(makeResponse(event, false, {"error": "non-upsert mode is not implemented!"})) // TODO: implement shis
+      } else { // upsert mode
+        const origObject = (await dgraphClient.queryUID(event.uid))[0];
+        const schema = origObject['type']['unigraph.id'];
+        const paddedUpdater = buildUnigraphEntity(event.newObject, schema, caches['schemas'].data);
+        const finalUpdater = processAutoref(paddedUpdater, schema, caches['schemas'].data);
+        const upsert = getUpsertFromUpdater(origObject, finalUpdater);
+        //console.log(upsert);
+        const finalUpsert = insertsToUpsert([upsert]);
+        dgraphClient.createUnigraphUpsert(finalUpsert).then(_ => {
+          callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
+          ws.send(makeResponse(event, true))
+        }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
+      }
     },
 
     "get_status": async function (event: any, ws: IWebsocket) {

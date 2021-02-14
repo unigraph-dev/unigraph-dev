@@ -255,3 +255,30 @@ export function processAutoref(entity: any, schema: string = "any", schemas: Rec
     recurse(entity, schemas, schemas[schema].definition);
     return entity;
 }
+
+/**
+ * Traverses a given updater object and returns the difference in the form of upsert object with uid.
+ * 
+ * @param object 
+ */
+export function getUpsertFromUpdater(orig: any, updater: any): any {
+
+    function recurse(origNow: any, updaterNow: any): any {
+        if (['undefined', 'null', 'number', 'bigint', 'string', 'boolean', 'symbol'].includes(typeof origNow)) {
+            // This means the updater is creating new things inside or changing primitive values: we don't need uid
+            return updaterNow;
+        } else if (typeof origNow == 'object' && Array.isArray(origNow) && Array.isArray(updaterNow)) {
+            return updaterNow.map((value, index) => index < origNow.length ? recurse(origNow[index], value) : recurse(undefined, value))
+        } else if (typeof origNow == 'object' && !Array.isArray(origNow) && !Array.isArray(updaterNow)) {
+            return Object.fromEntries([
+                ["uid", updaterNow.uid && updaterNow.uid !== origNow.uid ? updaterNow.uid : origNow.uid],
+                ...Object.entries(updaterNow).map(([key, value]) => [key, recurse(origNow[key], value)])
+            ]);
+        }
+    }
+
+    let upsertObject = recurse(orig, updater);
+
+    return upsertObject;
+
+}

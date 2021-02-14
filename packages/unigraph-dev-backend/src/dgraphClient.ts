@@ -154,7 +154,7 @@ export default class DgraphClient {
    * @param p Predicate
    * @param o Object
    */
-  async updateSPO(s: string, p: string, o: any) { // TODO Security
+  async updateSPO(s: string, p: string, o: any) { // TODO: Security
     return new Promise((resolve, reject) => {
       if (typeof o === "object") reject("Can't update the target when it's an object!");
       let txn = this.dgraphClient.newTxn();
@@ -178,6 +178,17 @@ export default class DgraphClient {
       .newTxn({ readOnly: true })
       .queryWithVars(query, vars);
     return Object.values(res.getJson());
+  }
+
+  /**
+   * Queries a UID.
+   * @param uid
+   */
+  async queryUID(uid: string): Promise<any> {
+    const res = await this.dgraphClient
+      .newTxn({ readOnly: true })
+      .queryWithVars('query yo($a: string) { e(func: uid($a)) @recurse {uid expand(_predicate_)} }', {$a: uid});
+    return Object.values(res.getJson())[0];
   }
 
   // Some helpful functions for unigraph
