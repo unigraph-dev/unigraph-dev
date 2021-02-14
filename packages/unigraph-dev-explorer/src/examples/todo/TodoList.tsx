@@ -116,7 +116,8 @@ export default function TodoList () {
                     return <ListItem button key={unpadded.uid}>
                         <ListItemIcon>
                             <Checkbox checked={unpadded.done} onClick={_ => {
-                                window.unigraph.updateSimpleObject(todo, "done", !unpadded.done);
+                                //window.unigraph.updateSimpleObject(todo, "done", !unpadded.done);
+                                window.unigraph.updateObject(todo.uid, {"done": !unpadded.done}); // For the lologs
                             }} />
                         </ListItemIcon>
                         <ListItemText primary={unpadded.name}/>

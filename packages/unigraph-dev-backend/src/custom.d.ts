@@ -118,3 +118,12 @@ declare type EventGetSchemas = {
   id: number,
   schemas: string[]
 }
+
+declare type EventUpdateObject = {
+  type: "event",
+  event: "update_object",
+  id: number,
+  uid: string,
+  newObject: any,
+  upsert: boolean | undefined
+}

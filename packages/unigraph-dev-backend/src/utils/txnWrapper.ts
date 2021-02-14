@@ -35,14 +35,18 @@ function insertsToUpsertRecursive(inserts: any[], appends: any[], queries: strin
     console.log(currentObject)
     // If this is a reference object
     if (currentObject && currentObject["$ref"] && currentObject["$ref"].query) {
-        let query = currentObject['$ref'].query;
-        let dgraphFunction = buildDgraphFunctionFromRefQuery(query);
-        queries.push("unigraphquery" + (queries.length + 1) + " as " + dgraphFunction + "\n");
-        currentObject["uid"] = "uid(unigraphquery" + queries.length + ")";
-        currentObject["$ref"] = undefined;
-        let append: any = {uid: "uid(unigraphquery" + queries.length + ")"}
-        query.forEach(({key, value}: any) => {if (key === "unigraph.id") append[key] = value});
-        appends.push(append)
+        if (currentObject.uid) { // uid takes precedence over $ref
+            delete currentObject['$ref'];
+        } else {
+            let query = currentObject['$ref'].query;
+            let dgraphFunction = buildDgraphFunctionFromRefQuery(query);
+            queries.push("unigraphquery" + (queries.length + 1) + " as " + dgraphFunction + "\n");
+            currentObject["uid"] = "uid(unigraphquery" + queries.length + ")";
+            delete currentObject['$ref'];
+            let append: any = {uid: "uid(unigraphquery" + queries.length + ")"}
+            query.forEach(({key, value}: any) => {if (key === "unigraph.id") append[key] = value});
+            appends.push(append)
+        }
     }
     //console.log(currentObject)
     let objectValues = Object.values(currentObject);
