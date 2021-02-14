@@ -56,6 +56,47 @@ Now, all newly created objects with this schema will be merged with existing obj
 ## Caveats
 - Currently we only support top-level referencing and autoref. We will support nested references very soon.
 
+# Object Updates
+
+The server event `update_object` accepts two arguments, the `uid` of the object to update, and the new object with entries being the changed ones, called the updater. The updater should be unpadded - though we can make it work for padded in a future update.
+
+## Example
+
+We have this exising object:
+```typescript
+{
+  "name": "hihihi",
+  "done": false,
+  "users": [
+    {
+      "uid": "0x1f"
+    }
+  ],
+  "uid": "0x1b"
+}
+```
+
+and updater:
+```typescript
+{ "done": true }
+```
+
+yields the following upsert object:
+```typescript
+{
+  "uid": "0x1b",
+  "type": {
+    "uid": "0x12"
+  },
+  "_value": {
+    "uid": "0x21",
+    "done": {
+      "uid": "0x22",
+      "_value.!": true
+    }
+  }
+}
+```
 
 # Object Deletion
 
