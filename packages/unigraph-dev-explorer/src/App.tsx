@@ -17,7 +17,9 @@ import AddSchema from './pages/AddSchema';
 import TodoList from './examples/todo/TodoList';
 import UserLibrary from './pages/UserLibrary';
 import DataModelPlayground from './pages/DataModelPlayground';
-import { NavigationContext } from './utils';
+import { getParameters, NavigationContext } from './utils';
+import { UserLibraryAll } from './components/UserLibrary';
+import UserLibraryObject from './components/UserLibrary/UserLibraryObject';
 
 // TODO: custom theme
 const useStyles = makeStyles(theme => ({
@@ -39,18 +41,19 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export const pages: Record<string, ReactElement> = {
-  'datamodel-playground': <DataModelPlayground />,
-  'examples/todo': <TodoList />,
-  'request': <Request />,
-  'about': <About />,
-  'library': <UserLibrary />,
-  'schema/new': <AddSchema />,
-  'home': <ExplorerHome />
+export const pages: Record<string, Function> = {
+  'datamodel-playground': () => <DataModelPlayground />,
+  'examples/todo': () => <TodoList />,
+  'request': () => <Request />,
+  'about': () => <About />,
+  'library': () => <UserLibraryAll />,
+  'library/object': (props: any) => <UserLibraryObject {...props} />,
+  'schema/new': () => <AddSchema />,
+  'home': () => <ExplorerHome />
 }
 
-export const components: Record<string, ReactElement> = {
-  'appdrawer': <AppDrawer />
+export const components: Record<string, Function> = {
+  'appdrawer': () => <AppDrawer />
 }
 
 function App() {
@@ -70,31 +73,35 @@ function App() {
             </Toolbar>
           </AppBar>
 
-          {components['appdrawer']}
+          {components['appdrawer']()}
 
           <main className={classes.content}>
             <div className={classes.toolbar} />
             <Switch>
               <Route path="/datamodel-playground">
-                {pages['datamodel-playground']}
+                {pages['datamodel-playground']()}
               </Route>
               <Route path="/examples/todo">
-                {pages['examples/todo']}
+                {pages['examples/todo']()}
               </Route>
               <Route path="/request">
-                {pages['request']}
+                {pages['request']()}
               </Route>
               <Route path="/about">
-                {pages['about']}
+                {pages['about']()}
               </Route>
+              <Route 
+                path="/library/object"
+                render={routeProps => pages['library/object'](getParameters(routeProps.location.search))}  
+              />
               <Route path="/library">
-                {pages['library']}
+                {pages['library']()}
               </Route>
               <Route path="/schema/new">
-                {pages['schema/new']}
+                {pages['schema/new']()}
               </Route>
               <Route path="/">
-                {pages['home']}
+                {pages['home']()}
               </Route>
             </Switch>
           </main>
