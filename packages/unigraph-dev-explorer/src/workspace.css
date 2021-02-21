@@ -1,0 +1,5 @@
+/* Style file for workspace only */
+
+.MuiDrawer-paper {
+    position: unset !important
+}

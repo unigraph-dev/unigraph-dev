@@ -1,5 +1,6 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import React, { ReactElement } from 'react';
+import { Router, Route, Switch } from 'react-router-dom';
+import { createBrowserHistory } from "history";
 import 'typeface-roboto';
 
 import AppBar from '@material-ui/core/AppBar';
@@ -16,6 +17,7 @@ import AddSchema from './pages/AddSchema';
 import TodoList from './examples/todo/TodoList';
 import UserLibrary from './pages/UserLibrary';
 import DataModelPlayground from './pages/DataModelPlayground';
+import { NavigationContext } from './utils';
 
 // TODO: custom theme
 const useStyles = makeStyles(theme => ({
@@ -37,51 +39,68 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+export const pages: Record<string, ReactElement> = {
+  'datamodel-playground': <DataModelPlayground />,
+  'examples/todo': <TodoList />,
+  'request': <Request />,
+  'about': <About />,
+  'library': <UserLibrary />,
+  'schema/new': <AddSchema />,
+  'home': <ExplorerHome />
+}
+
+export const components: Record<string, ReactElement> = {
+  'appdrawer': <AppDrawer />
+}
+
 function App() {
   const classes = useStyles();
+  const history = createBrowserHistory();
 
   return (
-    <div className={classes.root}>
-      <CssBaseline />
-      <Router>
-        <AppBar position="fixed" className={classes.appBar}>
-          <Toolbar variant="dense">
-            <Typography variant="h6" noWrap>
-              unigraph-dev-explorer
-            </Typography>
-          </Toolbar>
-        </AppBar>
+    <NavigationContext.Provider value={(location: string) => {history.push(location)}}>
+      <div className={classes.root}>
+        <CssBaseline />
+        <Router history={history}>
+          <AppBar position="fixed" className={classes.appBar}>
+            <Toolbar variant="dense">
+              <Typography variant="h6" noWrap>
+                unigraph-dev-explorer
+              </Typography>
+            </Toolbar>
+          </AppBar>
 
-        <AppDrawer />
+          {components['appdrawer']}
 
-        <main className={classes.content}>
-          <div className={classes.toolbar} />
-          <Switch>
-            <Route path="/datamodel-playground">
-              <DataModelPlayground />
-            </Route>
-            <Route path="/examples/todo">
-              <TodoList />
-            </Route>
-            <Route path="/request">
-              <Request />
-            </Route>
-            <Route path="/about">
-              <About />
-            </Route>
-            <Route path="/library">
-              <UserLibrary />
-            </Route>
-            <Route path="/schema/new">
-              <AddSchema />
-            </Route>
-            <Route path="/">
-              <ExplorerHome />
-            </Route>
-          </Switch>
-        </main>
-      </Router>
-    </div>
+          <main className={classes.content}>
+            <div className={classes.toolbar} />
+            <Switch>
+              <Route path="/datamodel-playground">
+                {pages['datamodel-playground']}
+              </Route>
+              <Route path="/examples/todo">
+                {pages['examples/todo']}
+              </Route>
+              <Route path="/request">
+                {pages['request']}
+              </Route>
+              <Route path="/about">
+                {pages['about']}
+              </Route>
+              <Route path="/library">
+                {pages['library']}
+              </Route>
+              <Route path="/schema/new">
+                {pages['schema/new']}
+              </Route>
+              <Route path="/">
+                {pages['home']}
+              </Route>
+            </Switch>
+          </main>
+        </Router>
+      </div>
+    </NavigationContext.Provider>
   );
 }
 
