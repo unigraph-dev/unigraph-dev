@@ -5,8 +5,8 @@ import { useParams } from 'react-router-dom';
 import { useEffectOnce } from 'react-use';
 import { DefaultObjectView } from '../ObjectView/DefaultObjectView';
 
-export default function UserLibraryObject () {
-    let { objectId }: any = useParams();
+export default function UserLibraryObject ({ uid }: any) {
+    let objectId: any = uid;
 
     const [object, setObject]: [any, Function] = React.useState({});
     const [id, setId] = React.useState(Date.now());
