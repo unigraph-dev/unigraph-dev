@@ -15,7 +15,6 @@ import ExplorerHome from './pages/ExplorerHome';
 import Request from './pages/Request';
 import AddSchema from './pages/AddSchema';
 import TodoList from './examples/todo/TodoList';
-import UserLibrary from './pages/UserLibrary';
 import DataModelPlayground from './pages/DataModelPlayground';
 import { getParameters, NavigationContext } from './utils';
 import { UserLibraryAll } from './components/UserLibrary';
@@ -41,19 +40,45 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export const pages: Record<string, Function> = {
-  'datamodel-playground': () => <DataModelPlayground />,
-  'examples/todo': () => <TodoList />,
-  'request': () => <Request />,
-  'about': () => <About />,
-  'library': () => <UserLibraryAll />,
-  'library/object': (props: any) => <UserLibraryObject {...props} />,
-  'schema/new': () => <AddSchema />,
-  'home': () => <ExplorerHome />
+export const pages: Record<string, any> = {
+  'datamodel-playground': {
+    'constructor': () => <DataModelPlayground />,
+    'name': "DataModel Playground",
+  },
+  'examples/todo': {
+    'constructor': () => <TodoList />,
+    'name': 'Todo List',
+  },
+  'request': {
+    'constructor': () => <Request />,
+    'name': 'Request',
+  },
+  'about': {
+    'constructor': () => <About />,
+    'name': 'About',
+  },
+  'library': {
+    'constructor': () => <UserLibraryAll />,
+    'name': 'Library',
+  },
+  'library/object': {
+    'constructor': (props: any) => <UserLibraryObject {...props} />,
+    'name': 'Object View',
+  },
+  'schema/new': {
+    'constructor': () => <AddSchema />,
+    'name': 'New Schema',
+  },
+  'home': {
+    'constructor': () => <ExplorerHome />,
+    'name': 'Home',
+  },
 }
 
-export const components: Record<string, Function> = {
-  'appdrawer': () => <AppDrawer />
+export const components: Record<string, any> = {
+  'appdrawer': {
+    'constructor': () => <AppDrawer />,
+  },
 }
 
 function App() {
@@ -73,35 +98,35 @@ function App() {
             </Toolbar>
           </AppBar>
 
-          {components['appdrawer']()}
+          {components['appdrawer'].constructor()}
 
           <main className={classes.content}>
             <div className={classes.toolbar} />
             <Switch>
               <Route path="/datamodel-playground">
-                {pages['datamodel-playground']()}
+                {pages['datamodel-playground'].constructor()}
               </Route>
               <Route path="/examples/todo">
-                {pages['examples/todo']()}
+                {pages['examples/todo'].constructor()}
               </Route>
               <Route path="/request">
-                {pages['request']()}
+                {pages['request'].constructor()}
               </Route>
               <Route path="/about">
-                {pages['about']()}
+                {pages['about'].constructor()}
               </Route>
               <Route 
                 path="/library/object"
-                render={routeProps => pages['library/object'](getParameters(routeProps.location.search))}  
+                render={routeProps => pages['library/object'].constructor(getParameters(routeProps.location.search))}  
               />
               <Route path="/library">
-                {pages['library']()}
+                {pages['library'].constructor()}
               </Route>
               <Route path="/schema/new">
-                {pages['schema/new']()}
+                {pages['schema/new'].constructor()}
               </Route>
               <Route path="/">
-                {pages['home']()}
+                {pages['home'].constructor()}
               </Route>
             </Switch>
           </main>

@@ -9,7 +9,8 @@ import App from './App';
 import { SplashScreen, DisconnectedSplashScreen} from './pages/SplashScreen';
 import { WorkSpace } from './Workspace';
 
-window.unigraph = unigraph("ws://localhost:3001");
+// TODO: Here we're assuming server location same as web; we can also make it configurable
+window.unigraph = unigraph(`ws://${window.location.hostname}:3001`);
 
 function render(component: any) {
   ReactDOM.render(
