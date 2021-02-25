@@ -2,24 +2,30 @@
  * Unigraph-workspace: an experimental multiwindow workspace for Unigraph
  */
 
-import React from "react";
+import React, { ReactElement } from "react";
 
 import { pages, components } from './App';
 
-import FlexLayout, { Actions, DockLocation, Node } from 'flexlayout-react';
+import FlexLayout, { Actions, DockLocation } from 'flexlayout-react';
 import 'flexlayout-react/style/light.css'
 import './workspace.css'
 import { getParameters, NavigationContext } from "./utils";
+import { CssBaseline } from "@material-ui/core";
+
+export function WorkspacePageComponent({ children }: any) {
+    return <div>
+        <CssBaseline/>
+        {children}
+    </div>
+}
 
 export function WorkSpace() {
-    // TODO: Complete workspace init
     var json = {
         global: {},
         borders: [{
 		    "type":"border",
 		 	"location": "left",
             "selected": 0,
-            
 			"children": [
 				{
 					"type": "tab",
@@ -58,16 +64,18 @@ export function WorkSpace() {
         var component = node.getComponent();
         var config = node.getConfig() || {};
         if (component.startsWith('/pages/')) {
-            return pages[(component.replace('/pages/', '') as string)](config)
+            return <WorkspacePageComponent>
+                {pages[(component.replace('/pages/', '') as string)].constructor(config)}
+            </WorkspacePageComponent>
         } else if (component.startsWith('/components/')) {
-            return components[(component.replace('/components/', '') as string)](config)
+            return components[(component.replace('/components/', '') as string)].constructor(config)
         }
     }
 
     const getComponentFromPage = (location: string, params: any = {}) => {return {
         type: 'tab',
         config: params,
-        name: 'New Page',
+        name: pages[location.slice(1)].name,
         component: '/pages' + location,
         enableFloat: 'true'
     }}
