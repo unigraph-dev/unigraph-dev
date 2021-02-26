@@ -1,3 +1,4 @@
+import { ReactElement } from "react";
 import { Unigraph } from "unigraph-dev-common";
 
 declare global {
@@ -5,3 +6,9 @@ declare global {
         unigraph: Unigraph;
     }
 };
+
+declare type DynamicViewCallbacks = {
+    "onUpdate": (data: Record<string, any>) => any,
+}
+
+declare type DynamicViewRenderer = (data: Record<string, any>, callbacks: DynamicViewCallbacks) => ReactElement

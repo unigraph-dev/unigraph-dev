@@ -2,11 +2,13 @@ import { IconButton, ListItem } from '@material-ui/core';
 import { MoreVert } from '@material-ui/icons';
 import React, { FC, ReactElement } from 'react';
 import ReactJson from 'react-json-view';
+import { TodoItem } from '../../examples/todo/TodoList';
+import { DynamicViewRenderer } from '../../global';
 import { DefaultObjectContextMenu } from './DefaultObjectContextMenu';
 import { filterPresets } from './objectViewFilters';
 
 type ObjectViewOptions = {
-    viewer?: "string" | "json-tree",
+    viewer?: "string" | "json-tree" | "dynamic-view",
     unpad?: boolean,
     showContextMenu?: boolean,
 };
@@ -40,6 +42,21 @@ const JsontreeObjectViewer = ({object}: {object: any}) => {
     </div>
 }
 
+const DynamicViews: Record<string, DynamicViewRenderer> = {
+    "$/schema/todo": TodoItem
+}
+
+const AutoDynamicView: DynamicViewRenderer = ({ object, callbacks }) => {
+    console.log(object)
+    if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViews).includes(object.type['unigraph.id'])) {
+        return React.createElement(DynamicViews[object.type['unigraph.id']], {
+            data: object, callbacks: callbacks ? callbacks : undefined
+        });
+    } else {
+        return <StringObjectViewer object={object}/>
+    }
+}
+
 const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options }) => {
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const finalObject = options.unpad ? window.unigraph.unpad(object) : object
@@ -59,6 +76,10 @@ const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options }) => {
     const [ContextMenu, setContextMenu] = React.useState<any>(null);
 
     switch (options.viewer) {
+        case "dynamic-view":
+            FinalObjectViewer = <AutoDynamicView object={object} />;
+            break;
+
         case "json-tree":
             FinalObjectViewer = <JsontreeObjectViewer object={finalObject}/>;
             break;
@@ -70,7 +91,9 @@ const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options }) => {
 
     return <div style={{display: "flex", flexDirection: "row"}}>
         {ContextMenuButton} {ContextMenu}
-        <div style={{alignSelf: "center"}}>{FinalObjectViewer}</div>
+        <div style={{alignSelf: "center",width: "100%",
+                alignItems: "center",
+                display: "flex"}}>{FinalObjectViewer}</div>
     </div>
 }
 
@@ -82,8 +105,9 @@ const DefaultObjectListView: FC<DefaultObjectListViewProps> = ({component, objec
         component, {}, 
         [<DefaultObjectView object={obj} 
             options={{
-                unpad: true, 
+                unpad: false, 
                 showContextMenu: true,
+                viewer: "dynamic-view",
             }} />]))}</div>
 }
 
