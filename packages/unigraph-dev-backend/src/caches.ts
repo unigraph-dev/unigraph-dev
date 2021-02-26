@@ -8,6 +8,7 @@ export type Cache = {
     data: data,
     updateNow(): data,
     cacheType: "subscription" | "manual",
+    /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
     subscribe(listener: Function): any
 }
 
@@ -15,7 +16,7 @@ export type Cache = {
 
 export function createSchemaCache(client: DgraphClient): Cache {
 
-    let cache: Cache = {
+    const cache: Cache = {
         data: {},
         updateNow: async () => null,
         cacheType: "manual",
@@ -23,11 +24,11 @@ export function createSchemaCache(client: DgraphClient): Cache {
     };
 
     cache.updateNow = async () => { 
-        let newdata = await client.getSchemas();
+        const newdata = await client.getSchemas();
         cache.data = newdata.reduce((prev, obj) => {
             if (obj && typeof obj["unigraph.id"] === "string" && obj["unigraph.id"].startsWith('$/schema/')) {
                 prev[obj["unigraph.id"]] = obj;
-            };
+            }
             return prev;
         }, {})
     };

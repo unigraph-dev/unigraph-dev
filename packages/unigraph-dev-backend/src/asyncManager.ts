@@ -8,4 +8,4 @@ export const resources = [
     "caches/schema",
 ];
 
-export function getAsyncLock () { return new AsyncLock() };
+export function getAsyncLock () { return new AsyncLock() }

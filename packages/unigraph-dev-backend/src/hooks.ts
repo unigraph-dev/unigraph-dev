@@ -1,6 +1,7 @@
 import { Cache } from "./caches";
 import { Subscription } from "./subscriptions";
 
+/* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
 export type Hooks = Record<string, Function[]>
 
 export function callHooks<T>(hooks: Hooks, type: string, context: T) {

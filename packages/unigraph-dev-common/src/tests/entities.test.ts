@@ -5,7 +5,7 @@
 const { buildUnigraphEntity, processAutoref } = require('../utils/entityUtils');
 const testEntities = require('./testEntities.json')
 
-let schemas = {
+const schemas = {
     "$/schema/todo": testEntities['todo-schema-test'],
     "$/schema/user": testEntities['user-schema-test'],
 }
