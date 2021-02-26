@@ -200,7 +200,6 @@ export function processAutoref(entity: any, schema: string = "any", schemas: Rec
      * @param schemas 
      */
     function recurse(currentEntity: any, schemas: Record<string, Schema>, localSchema: Definition | any) {
-        console.log(currentEntity, localSchema)
         let paddedEntity = currentEntity;
         currentEntity = unpadValue(currentEntity);
         if (paddedEntity?.type) recurse(paddedEntity.type, schemas, localSchema) // Check for type references as well
@@ -217,7 +216,6 @@ export function processAutoref(entity: any, schema: string = "any", schemas: Rec
 
                     // 1. Can we do autoref based on reserved words?
                     let kv = Object.entries(currentEntity);
-                    console.log(localSchema)
                     let keysMap = localSchema['properties'].reduce((accu: any, now: any) => {
                         accu[now["key"]] = now;
                         return accu;

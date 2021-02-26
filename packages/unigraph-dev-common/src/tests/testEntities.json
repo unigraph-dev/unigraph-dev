@@ -1,0 +1,208 @@
+{
+    "todo-schema-test": {
+        "unigraph.id": "$/schema/todo",
+        "dgraph.type": "Type",
+        "definition": {
+            "type": {
+                "unigraph.id": "$/composer/Object"
+            },
+            "parameters": {
+                "indexedBy": {
+                    "unigraph.id": "$/primitive/string"
+                },
+                "indexes": [
+                    "name"
+                ]
+            },
+            "properties": [
+                {
+                    "key": "name",
+                    "definition": {
+                        "type": {
+                            "unigraph.id": "$/primitive/string"
+                        }
+                    }
+                },
+                {
+                    "key": "done",
+                    "definition": {
+                        "type": {
+                            "unigraph.id": "$/primitive/boolean"
+                        }
+                    }
+                },
+                {
+                    "key": "users",
+                    "definition": {
+                        "type": {
+                            "unigraph.id": "$/composer/Array"
+                        },
+                        "parameters": {
+                            "element": {
+                                "type": {
+                                    "unigraph.id": "$/schema/user"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        }
+    },
+    "user-schema-test": {
+        "unigraph.id": "$/schema/user",
+        "dgraph.type": "Type",
+        "definition": {
+            "type": {
+                "unigraph.id": "$/composer/Object"
+            },
+            "parameters": {
+                "indexedBy": {
+                    "unigraph.id": "$/primitive/string"
+                },
+                "indexes": [
+                    "name"
+                ]
+            },
+            "properties": [
+                {
+                    "key": "name",
+                    "definition": {
+                        "type": {
+                            "unigraph.id": "$/primitive/string"
+                        }
+                    },
+                    "unique": true
+                }
+            ]
+        }
+    },
+    "todo-entity-test": {
+        "name": "Write initial definitions of JSON-TS",
+        "done": false,
+        "users": [
+            {
+                "name": "Haoji Xu"
+            }
+        ]
+    },
+    "todo-entity-test-target-noref": {
+        "dgraph.type": "Entity",
+        "type": {
+            "unigraph.id": "$/schema/todo"
+        },
+        "_value": {
+            "name": {
+                "_value.%": "Write initial definitions of JSON-TS"
+            },
+            "done": {
+                "_value.!": false
+            },
+            "users": {
+                "_value[": [
+                    {
+                        "_value": {
+                            "_value": {
+                                "name": {
+                                    "_value.%": "Haoji Xu"
+                                }
+                            },
+                            "dgraph.type": "Entity",
+                            "type": {
+                                "unigraph.id": "$/schema/user"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "todo-entity-test-target-ref": {
+        "dgraph.type": "Entity",
+        "type": {
+            "$ref": {
+                "query": [
+                    {
+                        "key": "unigraph.id",
+                        "value": "$/schema/todo"
+                    }
+                ]
+            }
+        },
+        "_value": {
+            "name": {
+                "_value.%": "Write initial definitions of JSON-TS"
+            },
+            "done": {
+                "_value.!": false
+            },
+            "users": {
+                "_value[": [
+                    {
+                        "_value": {
+                            "$ref": {
+                                "query": [
+                                    {
+                                        "key": "name",
+                                        "value": "Haoji Xu"
+                                    }
+                                ]
+                            },
+                            "_value": {
+                                "name": {
+                                    "_value.%": "Haoji Xu"
+                                }
+                            },
+                            "dgraph.type": "Entity",
+                            "type": {
+                                "$ref": {
+                                    "query": [
+                                        {
+                                            "key": "unigraph.id",
+                                            "value": "$/schema/user"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "simpletodo-entity-test-target-noref": {
+        "dgraph.type": "Entity",
+        "type": {
+            "unigraph.id": "$/schema/todo"
+        },
+        "_value": {
+            "name": {
+                "_value.%": "Write initial definitions of JSON-TS"
+            },
+            "done": {
+                "_value.!": false
+            }
+        }
+    },
+    "simpletodo-entity-test-target-ref": {
+        "dgraph.type": "Entity",
+        "type": {
+            "$ref": {
+                "query": [
+                    {
+                        "key": "unigraph.id",
+                        "value": "$/schema/todo"
+                    }
+                ]
+            }
+        },
+        "_value": {
+            "name": {
+                "_value.%": "Write initial definitions of JSON-TS"
+            },
+            "done": {
+                "_value.!": false
+            }
+        }
+    }
+}

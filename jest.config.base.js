@@ -1,0 +1,1 @@
+// This is the base jest config all packages import when testing.
