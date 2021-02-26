@@ -14,7 +14,7 @@ import About from './pages/About';
 import ExplorerHome from './pages/ExplorerHome';
 import Request from './pages/Request';
 import AddSchema from './pages/AddSchema';
-import TodoList from './examples/todo/TodoList';
+import { TodoList } from './examples/todo/TodoList';
 import DataModelPlayground from './pages/DataModelPlayground';
 import { getParameters, NavigationContext } from './utils';
 import { UserLibraryAll } from './components/UserLibrary';
