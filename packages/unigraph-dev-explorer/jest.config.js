@@ -22,4 +22,10 @@ module.exports = {
     name: packageName,
     displayName: packageName,
     rootDir: '../..',
+    preset: 'ts-jest',
+    globals: {
+        'ts-jest': {
+          'tsconfig': `<rootDir>/packages/${packageName}/tsconfig.json`
+        },
+    },
 }
