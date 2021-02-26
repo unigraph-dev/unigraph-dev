@@ -1,0 +1,24 @@
+name: test
+
+on:
+  pull_request:
+    paths-ignore:
+      - '*.md'
+      - 'docs/**'
+
+jobs:
+  test-common-lib:
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '12.11.1'
+      
+      - run: yarn install
+
+      - run: cd packages/unigraph-dev-common/
+
+      - run: npx jest
