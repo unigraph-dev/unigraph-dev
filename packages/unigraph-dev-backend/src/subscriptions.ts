@@ -8,6 +8,7 @@ export type Subscription = {
     subType: "polling" | "pushing",
     callbackType: "function" | "messageid",
     id: number | string, // must be provided, regardless of using function or messageid
+    /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
     function?: Function,
     msgPort?: IWebsocket,
     regTime: number // time of registration, can be used to manually terminate subscription going too long
@@ -15,7 +16,7 @@ export type Subscription = {
 
 export function buildPollingQuery(subs: Subscription[]) {
     return subs.reduce((acc, now) => {return acc += `\n sub${now.id.toString()}` + now.queryFragment}, "{") + "}"
-};
+}
 
 export type MsgCallbackFn = (id: number | string, updated: any, msgPort: IWebsocket) => any;
 
@@ -26,8 +27,8 @@ export type MsgCallbackFn = (id: number | string, updated: any, msgPort: IWebsoc
  */
 export async function pollSubscriptions(subs: Subscription[], client: DgraphClient, msgCallback: MsgCallbackFn) {
     if (subs.length >= 1) {
-        let query = buildPollingQuery(subs);
-        let results: any[] = await client.queryDgraph(query);
+        const query = buildPollingQuery(subs);
+        const results: any[] = await client.queryDgraph(query);
         results.forEach((val, id) => { // FIXME: Beware race conditions
             if (!_.isEqual(val, subs[id].data) && subs[id].msgPort) {
                 subs[id].data = val;

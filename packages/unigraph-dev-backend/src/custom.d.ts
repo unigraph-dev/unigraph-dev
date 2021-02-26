@@ -16,14 +16,14 @@ declare type UnigraphUpsert = {
 declare type EventCreateUnigraphSchema = {
   "type": "event",
   "event": "create_unigraph_schema",
-  schema: object | object[],
+  schema: Record<string, unknown> | Record<string, unknown>[],
   id: number
 }
 
 declare type EventCreateUnigraphObject = {
   "type": "event",
   "event": "create_unigraph_object",
-  object: object,
+  object: Record<string, unknown>,
   id: number,
   schema: string | undefined,
   padding: boolean | undefined
@@ -61,7 +61,7 @@ declare type EventCreateDataByJson = {
   type: "event",
   event: "create_data_by_json",
   id: number,
-  data: object
+  data: Record<string, unknown>
 }
 
 declare type EventSetDgraphSchema = {
@@ -74,7 +74,7 @@ declare type EventSetDgraphSchema = {
 declare type EventQueryByStringWithVars = {
   type: "event",
   event: "query_by_string_with_vars",
-  vars: object,
+  vars: Record<string, unknown>,
   query: string,
   id: number
 }
@@ -100,8 +100,9 @@ declare type EventUnsubscribeById = {
 }
 
 declare interface IWebsocket {
+  /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
   send: Function,
-  readyState: 0 | 1 | 2 | 3
+  readyState: number
 }
 
 declare type EventEnsureUnigraphSchema = {
@@ -127,3 +128,5 @@ declare type EventUpdateObject = {
   newObject: any,
   upsert: boolean | undefined
 }
+
+declare type EventResponser = (event: any, ws: IWebsocket) => any

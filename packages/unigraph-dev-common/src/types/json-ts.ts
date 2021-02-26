@@ -15,7 +15,7 @@ export type PrimitiveType = {
 // We say this is a Field "indexed by" T
 export type Field<T extends ComposerObjectIndexs> = {
     key: PrimitiveType[T],
-    unique?: Boolean,
+    unique?: boolean,
     definition: Definition
 }
 

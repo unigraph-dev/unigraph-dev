@@ -5,10 +5,10 @@ import { typeMap } from 'unigraph-dev-common/lib/types/consts'
 function buildDgraphFunctionFromRefQuery(query: {key: string, value: string}[]) {
     let string = "";
     let string1 = "";
-    let innerRefs: string[] = [];
+    const innerRefs: string[] = [];
     query.forEach(({key, value}: any) => {
-        let refTarget = key.replace(/["%@\\]/g, "");
-        let refQuery = value.replace(/["%@\\]/g, "");
+        const refTarget = key.replace(/["%@\\]/g, "");
+        const refQuery = value.replace(/["%@\\]/g, "");
         if (refTarget === "unigraph.id") {
             string += `AND eq(${refTarget}, "${refQuery}")`;
             string1 = `eq(${refTarget}, "${refQuery}")`;
@@ -38,18 +38,18 @@ function insertsToUpsertRecursive(inserts: any[], appends: any[], queries: strin
         if (currentObject.uid) { // uid takes precedence over $ref
             delete currentObject['$ref'];
         } else {
-            let query = currentObject['$ref'].query;
-            let dgraphFunction = buildDgraphFunctionFromRefQuery(query);
+            const query = currentObject['$ref'].query;
+            const dgraphFunction = buildDgraphFunctionFromRefQuery(query);
             queries.push("unigraphquery" + (queries.length + 1) + " as " + dgraphFunction + "\n");
             currentObject["uid"] = "uid(unigraphquery" + queries.length + ")";
             delete currentObject['$ref'];
-            let append: any = {uid: "uid(unigraphquery" + queries.length + ")"}
+            const append: any = {uid: "uid(unigraphquery" + queries.length + ")"}
             query.forEach(({key, value}: any) => {if (key === "unigraph.id") append[key] = value});
             appends.push(append)
         }
     }
     //console.log(currentObject)
-    let objectValues = Object.values(currentObject);
+    const objectValues = Object.values(currentObject);
     for(let i=0; i<objectValues.length; ++i) {
         if (typeof objectValues[i] === "object" && !Array.isArray(objectValues[i])) {
             insertsToUpsertRecursive(inserts, appends, queries, objectValues[i]);
@@ -67,9 +67,9 @@ function insertsToUpsertRecursive(inserts: any[], appends: any[], queries: strin
  * @param inserts An array of objects or schemas to insert, containing the `$ref` field
  */
 export function insertsToUpsert(inserts: any[]): UnigraphUpsert {
-    let insertsCopy = JSON.parse(JSON.stringify(inserts))
-    let queries: any[] = []
-    let appends: any[] = []
+    const insertsCopy = JSON.parse(JSON.stringify(inserts))
+    const queries: any[] = []
+    const appends: any[] = []
     for(let i=0; i<insertsCopy.length; ++i) {
         insertsToUpsertRecursive(insertsCopy, appends, queries, insertsCopy[i])
     }

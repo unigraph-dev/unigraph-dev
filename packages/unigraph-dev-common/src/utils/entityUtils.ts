@@ -32,7 +32,7 @@ function getUnigraphType (object: any): UnigraphTypeString {
     
         default:
             break;
-    };
+    }
     return typeString;
 }
 
@@ -47,37 +47,39 @@ type BuildEntityOptions = {makeAbstract: boolean, validateSchema: boolean}
 function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions = {makeAbstract: false, validateSchema: true}, schemaMap: Record<string, Schema>, localSchema: Definition | any): {"_value": any} {
     let unigraphPartValue: any = undefined;
     let predicate = "_value";
-    let rawPartUnigraphType = getUnigraphType(rawPart);
+    const rawPartUnigraphType = getUnigraphType(rawPart);
 
     // Check for localSchema accordance
     if (localSchema.type && localSchema.type['unigraph.id'] === rawPartUnigraphType) {
         switch (rawPartUnigraphType) {
             case "$/composer/Array":
                 predicate = "_value["
-                let newLocalSchema = localSchema['parameters']['element'];
+                /* eslint-disable */ // Dependent recursive behavior
+                const newLocalSchema = localSchema['parameters']['element'];
                 unigraphPartValue = rawPart.map((el: any) => buildUnigraphEntityPart(el, options, schemaMap, newLocalSchema));
                 break;
     
             case "$/composer/Object":
                 // TODO: make it work for objects not indexed by strings too!
-                let keysMap = localSchema['properties'].reduce((accu: any, now: any) => {
+                /* eslint-disable */ // Dependent recursive behavior
+                const keysMap = localSchema['properties'].reduce((accu: any, now: any) => {
                     accu[now["key"]] = now["definition"];
                     return accu;
                 }, {})
                 if (!options.makeAbstract) {
                     unigraphPartValue = {};
                     Object.entries(rawPart).forEach(([key, value]: [string, any]) => {
-                        let localSchema = keysMap[key];
+                        const localSchema = keysMap[key];
                         if (!localSchema) throw new TypeError("Schema check failure for object: " + JSON.stringify(rawPart));
                         unigraphPartValue[key] = buildUnigraphEntityPart(value, options, schemaMap, localSchema);
                     })
                 } else {
                     unigraphPartValue = Object.entries(rawPart).map(([key, value]: [string, any]) => {
                         // TODO: Add processing when making abstract
-                        let localSchema = keysMap[key];
+                        const localSchema = keysMap[key];
                         return {"key": key, "_value": value};
                     })
-                };
+                }
                 break;
 
             case "$/primitive/boolean":
@@ -98,18 +100,18 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions = {m
         
             default:
                 break;
-        };
+        }
     } else if (localSchema.type && localSchema.type['unigraph.id'] && localSchema.type['unigraph.id'].startsWith('$/schema/') && rawPartUnigraphType === "$/composer/Object") {
         unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options);
     } else {
         throw new TypeError("Schema check failure for object: " + JSON.stringify(rawPart) + JSON.stringify(localSchema) + rawPartUnigraphType);
     }
 
-    let res: any = {}; res[predicate] = unigraphPartValue;
+    const res: any = {}; res[predicate] = unigraphPartValue;
     return res;
 }
 
-export function validatePaddedEntity(object: Object) {
+export function validatePaddedEntity(object: Record<string, any>) {
     // TODO: Validate padded entity
     return true;
 }
@@ -124,27 +126,29 @@ export function validatePaddedEntity(object: Object) {
  * @param validateSchema Whether to validate schema. Defaults to false. If validation is on and the schema does not match the object, an error would be returned instead.
  * @param padding Whether to pad the raw object, used to create/change objects with predicate-properties defined. If this is false and the object does not follow the data model, an error would be returned instead.
  */
-export function buildUnigraphEntity (raw: Object, schemaName: string = "any", schemaMap: Record<string, Schema>, padding: boolean = true, options: BuildEntityOptions = {makeAbstract: false, validateSchema: true}): EntityDgraph<string> | TypeError {
+export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any", schemaMap: Record<string, Schema>, padding = true, options: BuildEntityOptions = {makeAbstract: false, validateSchema: true}): EntityDgraph<string> | TypeError {
     // Check for unvalidated entity
     if (padding === false && !validatePaddedEntity(raw)) {
         throw new TypeError("Entity validation failed for entity " + raw)
     } else {
-        let localSchema = schemaMap[schemaName].definition
+        const localSchema = schemaMap[schemaName].definition
+        const bodyObject: Record<string, any> = padding ? buildUnigraphEntityPart(raw, options, schemaMap, localSchema) : raw
         return {
             "type": makeUnigraphId(schemaName) as UnigraphIdType<`$/schema/${string}`>,
             "dgraph.type": "Entity",
-            ...(padding ? buildUnigraphEntityPart(raw, options, schemaMap, localSchema) : raw)
+            ...bodyObject
         };
     }
 }
 
 export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<string, Schema>) {
     function makePart(localSchema: Definition | any) {
-        let entries = ["uid"];
-        let type = localSchema.type["unigraph.id"];
+        const entries = ["uid"];
+        const type = localSchema.type["unigraph.id"];
         switch (type) {
             case "$/composer/Object":
-                let properties = localSchema.properties.map((p: any) => {
+                /* eslint-disable */ // Dependent recursive behavior
+                const properties = localSchema.properties.map((p: any) => {
                     return p.key + makePart(p.definition)
                 })
                 entries.push("_value {" + properties.reduce((current: string, now: any) => current + "\n" + now, "") + "}");
@@ -171,14 +175,14 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
         }
         return "{" + entries.reduce((current: string, now: any) => current + "\n" + now, "") + "}";
     }
-    let localSchema = schemaMap[schemaName].definition;
+    const localSchema = schemaMap[schemaName].definition;
     return makePart(localSchema);
 
 }
 
 function unpadValue(something: any) {
     if (typeof something !== "object") return something
-    let kvs = Object.entries(something)
+    const kvs = Object.entries(something)
     let ret = something
     kvs.forEach(([key, value]) => {if(key.startsWith('_value'))ret = value})
     return ret
@@ -189,7 +193,7 @@ function unpadValue(something: any) {
  * @param entity An already-processed entity for autoref
  * @param schemas List of schemas
  */
-export function processAutoref(entity: any, schema: string = "any", schemas: Record<string, Schema>) {
+export function processAutoref(entity: any, schema = "any", schemas: Record<string, Schema>) {
 
     /**
      * Recursively looks for places to insert autoref.
@@ -200,7 +204,7 @@ export function processAutoref(entity: any, schema: string = "any", schemas: Rec
      * @param schemas 
      */
     function recurse(currentEntity: any, schemas: Record<string, Schema>, localSchema: Definition | any) {
-        let paddedEntity = currentEntity;
+        const paddedEntity = currentEntity;
         currentEntity = unpadValue(currentEntity);
         if (paddedEntity?.type) recurse(paddedEntity.type, schemas, localSchema) // Check for type references as well
         switch (typeof currentEntity) {
@@ -215,8 +219,8 @@ export function processAutoref(entity: any, schema: string = "any", schemas: Rec
                     // Is object, check for various stuff
 
                     // 1. Can we do autoref based on reserved words?
-                    let kv = Object.entries(currentEntity);
-                    let keysMap = localSchema['properties'].reduce((accu: any, now: any) => {
+                    const kv = Object.entries(currentEntity);
+                    const keysMap = localSchema['properties'].reduce((accu: any, now: any) => {
                         accu[now["key"]] = now;
                         return accu;
                     }, {}) // TODO: Redundent code, abstract it somehow!
@@ -230,7 +234,7 @@ export function processAutoref(entity: any, schema: string = "any", schemas: Rec
                             currentEntity['unigraph.id'] = undefined;
                         } else {
                             
-                            let localSchema = keysMap[key];
+                            const localSchema = keysMap[key];
                             if (localSchema['unique']) {
                                 // This should be a unique criterion, add an autoref upsert
                                 paddedEntity['$ref'] = {
@@ -247,7 +251,7 @@ export function processAutoref(entity: any, schema: string = "any", schemas: Rec
 
             default:
                 break;
-        };
+        }
     }
 
     recurse(entity, schemas, schemas[schema].definition);
@@ -275,7 +279,7 @@ export function getUpsertFromUpdater(orig: any, updater: any): any {
         }
     }
 
-    let upsertObject = recurse(orig, updater);
+    const upsertObject = recurse(orig, updater);
 
     return upsertObject;
 

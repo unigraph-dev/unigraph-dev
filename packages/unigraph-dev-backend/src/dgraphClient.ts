@@ -19,7 +19,7 @@ export default class DgraphClient {
   }
 
   async getStatus() {
-    let count: any[][] = await this.queryDgraph(`{
+    const count: any[][] = await this.queryDgraph(`{
       objects(func: type(Entity)) {
         totalObjects : count(uid)
       }
@@ -86,8 +86,8 @@ export default class DgraphClient {
   async createMutation(data: any[]) {
     const txn = this.dgraphClient.newTxn();
     try {
-      let mutations: Mutation[] = data.map((obj: any) => {
-        let mu = new dgraph.Mutation();
+      const mutations: Mutation[] = data.map((obj: any) => {
+        const mu = new dgraph.Mutation();
         mu.setSetJson(obj);
         return mu;
       });
@@ -115,14 +115,15 @@ export default class DgraphClient {
       const querystr = `query {
         ${querybody}
       }`;
-      let mutations: Mutation[] = data.mutations.map((obj: any) => {
-        let mu = new dgraph.Mutation();
+      const mutations: Mutation[] = data.mutations.map((obj: any) => {
+        const mu = new dgraph.Mutation();
         mu.setSetJson(obj);
         console.log(JSON.stringify(obj, null, 2))
         return mu;
       });
       console.log(querystr)
       const req = new dgraph.Request();
+      /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
       data.queries.length ? req.setQuery(querystr) : false;
       req.setMutationsList(mutations);
       req.setCommitNow(true);
@@ -157,8 +158,8 @@ export default class DgraphClient {
   async updateSPO(s: string, p: string, o: any) { // TODO: Security
     return new Promise((resolve, reject) => {
       if (typeof o === "object") reject("Can't update the target when it's an object!");
-      let txn = this.dgraphClient.newTxn();
-      let mu = new dgraph.Mutation();
+      const txn = this.dgraphClient.newTxn();
+      const mu = new dgraph.Mutation();
       mu.setSetNquads(`<${s}> <${p}> "${o.toString()}" .`);
       const req = new dgraph.Request();
       req.setCommitNow(true);

@@ -4,7 +4,7 @@ import { insertsToUpsert } from "./utils/txnWrapper";
 
 export async function checkOrCreateDefaultDataModel(client: DgraphClient) {
 
-    const unigraphObject: object[] = await client.queryUnigraphId<object[]>('$/unigraph');
+    const unigraphObject: unknown[] = await client.queryUnigraphId<unknown[]>('$/unigraph');
 
     if (unigraphObject.length < 1) {
         // Insert default data
