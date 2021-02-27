@@ -8,7 +8,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import { makeStyles } from '@material-ui/core/styles';
-import { Comment, CompareArrows, Home, Info, LibraryBooks, Storage } from '@material-ui/icons';
+import { Bookmarks, Comment, CompareArrows, Home, Info, LibraryBooks, PlaylistAddCheck, Storage } from '@material-ui/icons';
 import { ListSubheader } from '@material-ui/core';
 import { NavigationContext } from '../utils';
 
@@ -74,8 +74,12 @@ export default function DrawerRouter() {
             <Divider/>
             <ListSubheader component="div" id="subheader-example-apps"> Example Apps </ListSubheader>
             <ListItem button onClick={()=>navigator('/examples/todo')}>
-              <ListItemIcon><Storage /></ListItemIcon>
+              <ListItemIcon><PlaylistAddCheck /></ListItemIcon>
               <ListItemText primary="Todo list" />
+            </ListItem>
+            <ListItem button onClick={()=>navigator('/examples/bookmarks')}>
+              <ListItemIcon><Bookmarks /></ListItemIcon>
+              <ListItemText primary="Web Bookmarks" />
             </ListItem>
           </List>
         </Drawer>}

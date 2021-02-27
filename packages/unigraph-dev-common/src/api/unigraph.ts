@@ -2,6 +2,7 @@
 
 import { typeMap } from '../types/consts'
 import { SchemaDgraph } from '../types/json-ts';
+import { base64ToBlob } from '../utils/utils';
 
 export interface Unigraph {
     backendConnection: WebSocket;
@@ -22,6 +23,7 @@ export interface Unigraph {
     getReferenceables(): Promise<any>;
     getReferenceables(key: string | undefined, asMapWithContent: boolean | undefined): Promise<any>;
     getSchemas(schemas: string[] | undefined): Promise<Map<string, SchemaDgraph>>;
+    proxyFetch(url: string, options?: Record<string, any>): Promise<Blob>;
 }
 
 function unpadRecurse(object: any) {
@@ -159,6 +161,28 @@ export default function unigraph(url: string): Unigraph {
             };
             sendEvent(connection, "get_schemas", {
                 schemas: []
+            }, id);
+        }),
+        /**
+         * Proxifies a fetch request through the server process. This is to ensure a similar experience 
+         * as using a browser (and NOT using an webapp).
+         * 
+         * Accepts exactly parameters of fetch. Returns a promise containing the blob content
+         * (you can use blobToJson to convert to JSON if that's what's returned)
+         * 
+         * @param url 
+         * @param options 
+         */
+        proxyFetch: (url, options?) => new Promise((resolve, reject) => {
+            const id = Date.now();
+            callbacks[id] = (responseBlob: {success: boolean, blob: string}) => {
+                if (responseBlob.success && responseBlob.blob)
+                    resolve(base64ToBlob(responseBlob.blob))
+                else reject(responseBlob);
+            };
+            sendEvent(connection, "proxy_fetch", {
+                url: url,
+                options: options
             }, id);
         })
     }

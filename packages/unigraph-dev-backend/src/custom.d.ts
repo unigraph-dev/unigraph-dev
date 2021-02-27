@@ -130,3 +130,11 @@ declare type EventUpdateObject = {
 }
 
 declare type EventResponser = (event: any, ws: IWebsocket) => any
+
+declare type EventProxyFetch = {
+  type: "event",
+  event: "proxy_fetch",
+  id: number,
+  url: string,
+  options?: Record<string, any>
+}

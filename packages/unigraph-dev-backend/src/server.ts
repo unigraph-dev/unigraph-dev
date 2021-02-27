@@ -1,10 +1,10 @@
-import express, { Request } from 'express';
+import express, { Request, response } from 'express';
 import { Server } from 'http';
 import expressWs, { Application, WebsocketRequestHandler } from 'express-ws';
-import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
+import { isJsonString, blobToBase64 } from 'unigraph-dev-common/lib/utils/utils';
 import DgraphClient from './dgraphClient';
 import { insertsToUpsert } from './utils/txnWrapper';
-import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphSchema, EventGetSchemas, EventQueryByStringWithVars, EventResponser, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
+import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphSchema, EventGetSchemas, EventProxyFetch, EventQueryByStringWithVars, EventResponser, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
 import { buildUnigraphEntity, getUpsertFromUpdater, makeQueryFragmentFromType, processAutoref } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { checkOrCreateDefaultDataModel } from './datamodelManager';
 import { Cache, createSchemaCache } from './caches';
@@ -12,6 +12,7 @@ import repl from 'repl';
 import { createSubscriptionWS, MsgCallbackFn, pollSubscriptions, Subscription } from './subscriptions';
 import { callHooks, HookAfterObjectChangedParams, HookAfterSchemaUpdatedParams, HookAfterSubscriptionAddedParams, Hooks } from './hooks';
 import { getAsyncLock } from './asyncManager';
+import fetch from 'node-fetch';
 
 const PORT = 3001;
 const verbose = 5;
@@ -239,6 +240,16 @@ export default async function startServer(client: DgraphClient) {
     "get_schemas": async function (event: EventGetSchemas, ws: IWebsocket) {
       // TODO: Option to get only a couple of schemas in cache
       ws.send(makeResponse(event, true, {"schemas": caches['schemas'].data}));
+    },
+
+    "proxy_fetch": async function (event: EventProxyFetch, ws: IWebsocket) {
+      // TODO: Using node-fetch here for now; if we move to deno later we can replace it.
+      // https://stackoverflow.com/questions/54099802/blob-to-base64-in-nodejs-without-filereader
+      console.log('yo2')
+      fetch(event.url, event.options)
+        .then(res => res.buffer())
+        .then(buffer => ws.send(makeResponse(event, true, {"blob": buffer.toString('base64')})))
+        .catch(err => ws.send(makeResponse(event, false, {error: err})))
     }
   };
 

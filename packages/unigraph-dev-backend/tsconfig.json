@@ -3,7 +3,8 @@
     "baseUrl": ".",
     "esModuleInterop": true,
     "lib": [
-      "ESNext"
+      "ESNext",
+      "WebWorker"
     ],
     "module": "CommonJS",
     "moduleResolution": "node",

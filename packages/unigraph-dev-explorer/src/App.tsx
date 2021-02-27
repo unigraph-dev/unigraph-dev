@@ -19,6 +19,7 @@ import DataModelPlayground from './pages/DataModelPlayground';
 import { getParameters, NavigationContext } from './utils';
 import { UserLibraryAll } from './components/UserLibrary';
 import UserLibraryObject from './components/UserLibrary/UserLibraryObject';
+import { Bookmarks } from './examples/bookmarks/Bookmarks';
 
 // TODO: custom theme
 const useStyles = makeStyles(theme => ({
@@ -48,6 +49,10 @@ export const pages: Record<string, any> = {
   'examples/todo': {
     'constructor': () => <TodoList />,
     'name': 'Todo List',
+  },
+  'examples/bookmarks': {
+    'constructor': () => <Bookmarks />,
+    'name': 'Web Bookmarks',
   },
   'request': {
     'constructor': () => <Request />,
