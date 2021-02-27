@@ -20,10 +20,10 @@ function render(component: any) {
 }
 
 // FIXME: This routing logic doesn't make sense
-if (window.location.pathname === '/workspace') {
+if (window.location.pathname === '/pages') {
   render(<React.StrictMode>
-    <WorkSpace />
-  </React.StrictMode>,);
+    <App />
+  </React.StrictMode>,)
 } else {
   render(<React.StrictMode>
     <SplashScreen />
@@ -31,8 +31,8 @@ if (window.location.pathname === '/workspace') {
   
   window.unigraph.backendConnection.onopen = () => {
     render(<React.StrictMode>
-      <App />
-    </React.StrictMode>,)
+      <WorkSpace />
+    </React.StrictMode>,);
   };
   
   window.unigraph.backendConnection.onclose = () => {
