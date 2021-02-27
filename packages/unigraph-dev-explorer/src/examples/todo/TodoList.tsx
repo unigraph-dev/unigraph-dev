@@ -1,74 +1,30 @@
-import { Button, Checkbox, IconButton, List, ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, TextField } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
+import { Button, Checkbox, Chip, IconButton, List, ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, TextField } from '@material-ui/core';
+import { Delete, LocalOffer, PriorityHigh } from '@material-ui/icons';
 import React, { useEffect, useState } from 'react';
-import { useVideo } from 'react-use';
-import { makeUnigraphId, makeRefUnigraphId } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { DynamicViewRenderer } from '../../global';
 
-// Define the todo schema for ensurance
-let schemaTodo = {
-    ...makeUnigraphId("$/schema/todo"),
-    "dgraph.type": "Type",
-    "definition": {
-        "type": makeRefUnigraphId("$/composer/Object"),
-        "parameters": {
-            "indexedBy": makeRefUnigraphId("$/primitive/string"),
-            "indexes": ["name"]
-        },
-        "properties": [
-            {
-                "key": "name",
-                "definition": {
-                    "type": makeRefUnigraphId("$/primitive/string")
-                }
-            },
-            {
-                "key": "done",
-                "definition": {
-                    "type": makeRefUnigraphId("$/primitive/boolean")
-                }
-            },
-            {
-                "key": "users",
-                "definition": {
-                    "type": makeRefUnigraphId("$/composer/Array"),
-                    "parameters": {
-                        "element": {"type": makeRefUnigraphId("$/schema/user")}
-                    }
-                }
-            }
-        ]
-    }
-}
+import { schemaColor, schemaTag, schemaNote, schemaSemanticProperties, schemaTodo } from 'unigraph-dev-common/lib/data/schemasTodo';
 
-let schemaUser = {
-    ...makeUnigraphId("$/schema/user"),
-    "dgraph.type": "Type",
-    "definition": {
-        "type": makeRefUnigraphId("$/composer/Object"),
-        "parameters": {
-            "indexedBy": makeRefUnigraphId("$/primitive/string"),
-            "indexes": ["name"]
-        },
-        "properties": [
-            {
-                "key": "name",
-                "definition": {
-                    "type": makeRefUnigraphId("$/primitive/string")
-                },
-                "unique": true,
-            }
-        ]
-    }
-}
+export const parseTodoObject: (arg0: string) => ATodoList = (todoString: string) => {
+    // TODO: Using regex for now, we can switch to a more centralized parsing solution later
+    let tags_regex = /#[a-zA-Z0-9]*\b ?/gm;
+    let tags = todoString.match(tags_regex) || [];
+    tags = tags.map(tag => tag.slice(1).trim());
+    todoString = todoString.replace(tags_regex, '');
 
-function createSimpleTodo (name: string) {
+    let priority_regex = /![0-9]\b ?/m;
+    let priority = todoString.match(priority_regex) || [];
+    let priority_num = parseInt(priority[0]?.slice(1)) || 0
+    todoString = todoString.replace(priority_regex, '');
+
     return {
-        "name": name,
-        "done": false,
-        "users": [{
-            "name": "me"
-        }]
+        name: todoString,
+        done: false,
+        priority: priority_num,
+        semantic_properties: {
+            tags: tags.map(tagName => {return {color: "#ffffff", name: tagName}}),
+            notes: []
+        }
     }
 }
 
@@ -76,9 +32,11 @@ type ATodoList = {
     uid?: string,
     name: string,
     done: boolean,
-    users: {
-        name: string
-    }[]
+    priority: number,
+    semantic_properties: {
+        tags: {uid?: string, color: string, name: string}[]
+        notes: any[]
+    }
 }
 
 export function TodoList () {
@@ -89,7 +47,10 @@ export function TodoList () {
     const [newName, setNewName] = useState("");
 
     const init = async () => {
-        await window.unigraph.ensureSchema("$/schema/user", schemaUser);
+        await window.unigraph.ensureSchema("$/schema/color", schemaColor);
+        await window.unigraph.ensureSchema("$/schema/tag", schemaTag);
+        await window.unigraph.ensureSchema("$/schema/note", schemaNote);
+        await window.unigraph.ensureSchema("$/schema/semantic_properties", schemaSemanticProperties);
         await window.unigraph.ensureSchema("$/schema/todo", schemaTodo);
         setInitialized(true);
         window.unigraph.subscribeToType("$/schema/todo", (result: ATodoList[]) => {setTodoList(result)}, subsId);
@@ -116,14 +77,14 @@ export function TodoList () {
                 </ListItem>)}
             </List>
             <TextField value={newName} onChange={(e) => setNewName(e.target.value)}></TextField>
-            <Button onClick={() => window.unigraph.addObject(createSimpleTodo(newName), "$/schema/todo")}>Add</Button>
+            <Button onClick={() => window.unigraph.addObject(parseTodoObject(newName), "$/schema/todo")}>Add</Button>
         </div>}
     </div>
 }
 
 export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
     console.log(data, callbacks)
-    let unpadded = window.unigraph.unpad(data);
+    let unpadded: ATodoList = window.unigraph.unpad(data);
     let totalCallbacks = callbacks || {
         'onUpdate': (data: Record<string, any>) => {
             window.unigraph.updateObject(data.uid, {"done": window.unigraph.unpad(data).done});
@@ -138,7 +99,19 @@ export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
                 totalCallbacks['onUpdate'](data);
             }} />
         </ListItemIcon>
-        <ListItemText primary={unpadded.name}/>
+        <ListItemText 
+            primary={unpadded.name}
+            secondary={[...(!unpadded.semantic_properties?.tags?.map ? [] :
+                unpadded.semantic_properties?.tags?.map(tag => <Chip
+                    size="small"
+                    icon={<LocalOffer/>}
+                    style={{
+                        backgroundColor: tag.color
+                    }}
+                    label={tag.name}
+                />
+            )), ...(unpadded.priority > 0 ? [<Chip size="small" icon={<PriorityHigh/>} label={"Priority " + unpadded.priority}/>]: [])]}
+        />
         <ListItemSecondaryAction>
             <IconButton aria-label="delete" onClick={() => window.unigraph.deleteObject(unpadded.uid!)}>
                 <Delete/>

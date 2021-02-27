@@ -1,0 +1,235 @@
+{
+    "test-2-schemas": {
+        "$/schema/color": {
+            "uid": "0xc",
+            "definition": {
+                "uid": "0xb",
+                "type": {
+                    "uid": "0xa",
+                    "unigraph.id": "$/primitive/string"
+                }
+            },
+            "dgraph.type": [
+                "Type"
+            ],
+            "unigraph.id": "$/schema/color"
+        },
+        "$/schema/tag": {
+            "uid": "0xf",
+            "definition": {
+                "uid": "0x11",
+                "type": {
+                    "uid": "0x10",
+                    "unigraph.id": "$/composer/Object"
+                },
+                "parameters": {
+                    "uid": "0x12",
+                    "indexedBy": {
+                        "uid": "0xa",
+                        "unigraph.id": "$/primitive/string"
+                    },
+                    "indexes": [
+                        "name"
+                    ]
+                },
+                "properties": [
+                    {
+                        "uid": "0xd",
+                        "key": "color",
+                        "definition": {
+                            "uid": "0xe",
+                            "type": {
+                                "uid": "0xc",
+                                "unigraph.id": "$/schema/color",
+                                "dgraph.type": [
+                                    "Type"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "uid": "0x13",
+                        "key": "name",
+                        "definition": {
+                            "uid": "0x14",
+                            "type": {
+                                "uid": "0xa",
+                                "unigraph.id": "$/primitive/string"
+                            }
+                        },
+                        "unique": true
+                    }
+                ]
+            },
+            "dgraph.type": [
+                "Type"
+            ],
+            "unigraph.id": "$/schema/tag"
+        },
+        "$/schema/note": {
+            "uid": "0x15",
+            "definition": {
+                "uid": "0x17",
+                "type": {
+                    "uid": "0x16",
+                    "unigraph.id": "$/primitive/string"
+                }
+            },
+            "dgraph.type": [
+                "Type"
+            ],
+            "unigraph.id": "$/schema/note"
+        },
+        "$/schema/semantic_properties": {
+            "uid": "0x18",
+            "definition": {
+                "uid": "0x19",
+                "type": {
+                    "uid": "0x23",
+                    "unigraph.id": "$/composer/Object"
+                },
+                "parameters": {
+                    "uid": "0x1f",
+                    "indexedBy": {
+                        "uid": "0x16",
+                        "unigraph.id": "$/primitive/string"
+                    },
+                    "indexes": [
+                        "name"
+                    ]
+                },
+                "properties": [
+                    {
+                        "uid": "0x1b",
+                        "key": "notes",
+                        "definition": {
+                            "uid": "0x1c",
+                            "type": {
+                                "uid": "0x4",
+                                "unigraph.id": "$/composer/Array"
+                            },
+                            "parameters": {
+                                "uid": "0x1e",
+                                "element": {
+                                    "uid": "0x1d",
+                                    "type": {
+                                        "uid": "0x15",
+                                        "dgraph.type": [
+                                            "Type"
+                                        ],
+                                        "unigraph.id": "$/schema/note"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    {
+                        "uid": "0x20",
+                        "key": "tags",
+                        "definition": {
+                            "uid": "0x21",
+                            "type": {
+                                "uid": "0x4",
+                                "unigraph.id": "$/composer/Array"
+                            },
+                            "parameters": {
+                                "uid": "0x22",
+                                "element": {
+                                    "uid": "0x1a",
+                                    "type": {
+                                        "uid": "0xf",
+                                        "dgraph.type": [
+                                            "Type"
+                                        ],
+                                        "unigraph.id": "$/schema/tag"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ]
+            },
+            "dgraph.type": [
+                "Type"
+            ],
+            "unigraph.id": "$/schema/semantic_properties"
+        },
+        "$/schema/todo": {
+            "uid": "0x27",
+            "definition": {
+                "uid": "0x28",
+                "type": {
+                    "uid": "0x23",
+                    "unigraph.id": "$/composer/Object"
+                },
+                "parameters": {
+                    "uid": "0x2d",
+                    "indexedBy": {
+                        "uid": "0x16",
+                        "unigraph.id": "$/primitive/string"
+                    },
+                    "indexes": [
+                        "name"
+                    ]
+                },
+                "properties": [
+                    {
+                        "uid": "0x24",
+                        "key": "done",
+                        "definition": {
+                            "uid": "0x25",
+                            "type": {
+                                "uid": "0x8",
+                                "unigraph.id": "$/primitive/boolean"
+                            }
+                        }
+                    },
+                    {
+                        "uid": "0x29",
+                        "key": "name",
+                        "definition": {
+                            "uid": "0x2e",
+                            "type": {
+                                "uid": "0x16",
+                                "unigraph.id": "$/primitive/string"
+                            }
+                        }
+                    },
+                    {
+                        "uid": "0x2a",
+                        "key": "priority",
+                        "definition": {
+                            "uid": "0x26",
+                            "type": {
+                                "uid": "0x7",
+                                "unigraph.id": "$/primitive/number"
+                            }
+                        }
+                    },
+                    {
+                        "uid": "0x2b",
+                        "key": "semantic_properties",
+                        "definition": {
+                            "uid": "0x2c",
+                            "type": {
+                                "uid": "0x18",
+                                "unigraph.id": "$/schema/semantic_properties",
+                                "dgraph.type": [
+                                    "Type"
+                                ]
+                            }
+                        }
+                    }
+                ]
+            },
+            "dgraph.type": [
+                "Type"
+            ],
+            "unigraph.id": "$/schema/todo"
+        }
+    },
+    "expected": {
+        "simple": "{\nuid\n_value {\nname{\nuid\n<_value.%>}\ndone{\nuid\n<_value.!>}\nusers{\nuid\n<_value[> {{\nuid\n_value {{\nuid\n_value {\nname{\nuid\n<_value.%>}}}}}}}}}",
+        "complex": "{uid\n_value {\ndone{\nuid\n<_value.!>}\nname{\nuid\n<_value.%>}\npriority{\nuid\n<_value.#>\n<_value.#i>}\nsemantic_properties{\nuid\n_value {{\nuid\n_value {\nnotes{\nuid\n<_value[> {{\nuid\n<_value.%>}}}\ntags{\nuid\n<_value[> {{\nuid\n_value {{\nuid\n_value {\ncolor{\nuid\n<_value.%>}\nname{\nuid\n<_value.%>}}}}}}}}}}}}}"
+    }
+}

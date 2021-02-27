@@ -5,6 +5,7 @@
     "packages/*"
   ],
   "scripts": {
+    "backend-build": "yarn workspace unigraph-dev-backend build",
     "backend-start": "yarn workspace unigraph-dev-backend start",
     "explorer-start": "yarn workspace unigraph-dev-explorer start",
     "build-common": "yarn workspace unigraph-dev-common build",
@@ -19,6 +20,7 @@
   "devDependencies": {
     "@babel/eslint-parser": "^7.13.4",
     "@types/jest": "^26.0.20",
+    "@types/testing-library__dom": "^7.5.0",
     "@typescript-eslint/eslint-plugin": "^4.15.2",
     "@typescript-eslint/parser": "^4.15.2",
     "babel-eslint": "^10.1.0",

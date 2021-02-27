@@ -2,7 +2,7 @@
 
 import { Definition, EntityDgraph, RefUnigraphIdType, Schema, UidType, UnigraphIdType, UnigraphTypeString } from "../types/json-ts";
 
-function uid<IdType extends string>(id: IdType): UidType<IdType> {return {"uid": id}}
+//function uid<IdType extends string>(id: IdType): UidType<IdType> {return {"uid": id}}
 export function makeUnigraphId<IdType extends string>(id: IdType): UnigraphIdType<IdType> {return {"unigraph.id": id}}
 export function makeRefUnigraphId<IdType extends string>(id: IdType): RefUnigraphIdType<IdType> {return {"$ref": {"query": [{"key": "unigraph.id", "value": id}]}}}
 
@@ -44,67 +44,75 @@ type BuildEntityOptions = {makeAbstract: boolean, validateSchema: boolean}
  * - should be able to check padded objects
  */
 
+export function isTypeAlias(localSchema: Record<string, any>, rawPartUnigraphType: UnigraphTypeString): boolean {
+    return (localSchema?.type['unigraph.id'] === rawPartUnigraphType) && (!rawPartUnigraphType.startsWith('$/composer/'));
+}
+
 function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions = {makeAbstract: false, validateSchema: true}, schemaMap: Record<string, Schema>, localSchema: Definition | any): {"_value": any} {
     let unigraphPartValue: any = undefined;
     let predicate = "_value";
     const rawPartUnigraphType = getUnigraphType(rawPart);
 
-    // Check for localSchema accordance
-    if (localSchema.type && localSchema.type['unigraph.id'] === rawPartUnigraphType) {
-        switch (rawPartUnigraphType) {
-            case "$/composer/Array":
-                predicate = "_value["
-                /* eslint-disable */ // Dependent recursive behavior
-                const newLocalSchema = localSchema['parameters']['element'];
-                unigraphPartValue = rawPart.map((el: any) => buildUnigraphEntityPart(el, options, schemaMap, newLocalSchema));
-                break;
-    
-            case "$/composer/Object":
-                // TODO: make it work for objects not indexed by strings too!
-                /* eslint-disable */ // Dependent recursive behavior
-                const keysMap = localSchema['properties'].reduce((accu: any, now: any) => {
-                    accu[now["key"]] = now["definition"];
-                    return accu;
-                }, {})
-                if (!options.makeAbstract) {
-                    unigraphPartValue = {};
-                    Object.entries(rawPart).forEach(([key, value]: [string, any]) => {
-                        const localSchema = keysMap[key];
-                        if (!localSchema) throw new TypeError("Schema check failure for object: " + JSON.stringify(rawPart));
-                        unigraphPartValue[key] = buildUnigraphEntityPart(value, options, schemaMap, localSchema);
-                    })
-                } else {
-                    unigraphPartValue = Object.entries(rawPart).map(([key, value]: [string, any]) => {
-                        // TODO: Add processing when making abstract
-                        const localSchema = keysMap[key];
-                        return {"key": key, "_value": value};
-                    })
-                }
-                break;
-
-            case "$/primitive/boolean":
-                predicate = "_value.!";
-                unigraphPartValue = rawPart;
-                break;
-
-            case "$/primitive/number":
-                if (Number.isInteger(rawPart)) predicate = "_value.#i";
-                else predicate = "_value.#";
-                unigraphPartValue = rawPart;
-                break;
-
-            case "$/primitive/string":
-                predicate = "_value.%";
-                unigraphPartValue = rawPart;
-                break;
+    try {
+        // Check for localSchema accordance
+        if (localSchema.type && (localSchema.type['unigraph.id'] === rawPartUnigraphType || isTypeAlias(schemaMap[localSchema.type['unigraph.id']].definition, rawPartUnigraphType))) {
+            switch (rawPartUnigraphType) {
+                case "$/composer/Array":
+                    predicate = "_value["
+                    /* eslint-disable */ // Dependent recursive behavior
+                    const newLocalSchema = localSchema['parameters']['element'];
+                    unigraphPartValue = rawPart.map((el: any) => buildUnigraphEntityPart(el, options, schemaMap, newLocalSchema));
+                    break;
         
-            default:
-                break;
+                case "$/composer/Object":
+                    // TODO: make it work for objects not indexed by strings too!
+                    /* eslint-disable */ // Dependent recursive behavior
+                    const keysMap = localSchema['properties'].reduce((accu: any, now: any) => {
+                        accu[now["key"]] = now["definition"];
+                        return accu;
+                    }, {})
+                    if (!options.makeAbstract) {
+                        unigraphPartValue = {};
+                        Object.entries(rawPart).forEach(([key, value]: [string, any]) => {
+                            const localSchema = keysMap[key];
+                            if (!localSchema) throw new TypeError("Schema check failure for object: " + JSON.stringify(rawPart));
+                            unigraphPartValue[key] = buildUnigraphEntityPart(value, options, schemaMap, localSchema);
+                        })
+                    } else {
+                        unigraphPartValue = Object.entries(rawPart).map(([key, value]: [string, any]) => {
+                            // TODO: Add processing when making abstract
+                            const localSchema = keysMap[key];
+                            return {"key": key, "_value": value};
+                        })
+                    }
+                    break;
+
+                case "$/primitive/boolean":
+                    predicate = "_value.!";
+                    unigraphPartValue = rawPart;
+                    break;
+
+                case "$/primitive/number":
+                    if (Number.isInteger(rawPart)) predicate = "_value.#i";
+                    else predicate = "_value.#";
+                    unigraphPartValue = rawPart;
+                    break;
+
+                case "$/primitive/string":
+                    predicate = "_value.%";
+                    unigraphPartValue = rawPart;
+                    break;
+            
+                default:
+                    break;
+            }
+        } else if (localSchema.type && localSchema.type['unigraph.id'] && localSchema.type['unigraph.id'].startsWith('$/schema/') && rawPartUnigraphType === "$/composer/Object") {
+            unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options);
+        } else {
+            throw new TypeError("Schema check failure for object: " + JSON.stringify(rawPart) + JSON.stringify(localSchema) + rawPartUnigraphType);
         }
-    } else if (localSchema.type && localSchema.type['unigraph.id'] && localSchema.type['unigraph.id'].startsWith('$/schema/') && rawPartUnigraphType === "$/composer/Object") {
-        unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options);
-    } else {
-        throw new TypeError("Schema check failure for object: " + JSON.stringify(rawPart) + JSON.stringify(localSchema) + rawPartUnigraphType);
+    } catch (e) {
+        throw new Error('Building entity part error: ' + e + JSON.stringify(rawPart) + JSON.stringify(localSchema) + rawPartUnigraphType + '\n')
     }
 
     const res: any = {}; res[predicate] = unigraphPartValue;
@@ -141,10 +149,16 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
     }
 }
 
-export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<string, Schema>) {
+export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<string, any>) {
     function makePart(localSchema: Definition | any) {
         const entries = ["uid"];
-        const type = localSchema.type["unigraph.id"];
+        let type = localSchema.type["unigraph.id"];
+
+        if (type.startsWith('$/schema/')) {
+            if (schemaMap[type]?.definition?.type["unigraph.id"]?.startsWith('$/primitive/')) 
+                type = schemaMap[type].definition.type["unigraph.id"]; // Is type alias
+            else entries.push("_value {" + makePart(schemaMap[type].definition) + "}")
+        };
         switch (type) {
             case "$/composer/Object":
                 /* eslint-disable */ // Dependent recursive behavior
@@ -167,7 +181,7 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
                 break;
                 
             case "$/primitive/number":
-                entries.push("<_value.#>");
+                entries.push("<_value.#>", "<_value.#i>");
                 break;
 
             default:
