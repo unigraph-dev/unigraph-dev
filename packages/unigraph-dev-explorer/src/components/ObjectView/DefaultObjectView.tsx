@@ -1,4 +1,4 @@
-import { IconButton, ListItem } from '@material-ui/core';
+import { IconButton } from '@material-ui/core';
 import { MoreVert } from '@material-ui/icons';
 import React, { FC, ReactElement } from 'react';
 import ReactJson from 'react-json-view';
@@ -58,7 +58,7 @@ const AutoDynamicView: DynamicViewRenderer = ({ object, callbacks }) => {
 }
 
 const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options }) => {
-    const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+    //const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
     const finalObject = options.unpad ? window.unigraph.unpad(object) : object
     let FinalObjectViewer;
     const ContextMenuButton: any = options.showContextMenu ? <IconButton 

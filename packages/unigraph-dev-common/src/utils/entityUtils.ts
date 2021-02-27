@@ -2,7 +2,7 @@
 
 import { Definition, EntityDgraph, RefUnigraphIdType, Schema, UidType, UnigraphIdType, UnigraphTypeString } from "../types/json-ts";
 
-function uid<IdType extends string>(id: IdType): UidType<IdType> {return {"uid": id}}
+//function uid<IdType extends string>(id: IdType): UidType<IdType> {return {"uid": id}}
 export function makeUnigraphId<IdType extends string>(id: IdType): UnigraphIdType<IdType> {return {"unigraph.id": id}}
 export function makeRefUnigraphId<IdType extends string>(id: IdType): RefUnigraphIdType<IdType> {return {"$ref": {"query": [{"key": "unigraph.id", "value": id}]}}}
 
@@ -44,7 +44,7 @@ type BuildEntityOptions = {makeAbstract: boolean, validateSchema: boolean}
  * - should be able to check padded objects
  */
 
-export function isTypeAlias(localSchema: Record<string, any>, rawPartUnigraphType: UnigraphTypeString) {
+export function isTypeAlias(localSchema: Record<string, any>, rawPartUnigraphType: UnigraphTypeString): boolean {
     return (localSchema?.type['unigraph.id'] === rawPartUnigraphType) && (!rawPartUnigraphType.startsWith('$/composer/'));
 }
 

@@ -1,7 +1,7 @@
 import { Button, ButtonGroup, Checkbox, FormControlLabel, List, ListItem, Typography } from '@material-ui/core';
 import React from 'react';
 import { useEffectOnce } from 'react-use';
-import { DefaultObjectView, DefaultObjectListView } from '../ObjectView/DefaultObjectView';
+import { DefaultObjectListView } from '../ObjectView/DefaultObjectView';
 
 const UserLibraryAll = () => {
 

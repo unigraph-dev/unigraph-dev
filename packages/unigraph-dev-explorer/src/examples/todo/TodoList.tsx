@@ -1,23 +1,9 @@
 import { Button, Checkbox, Chip, IconButton, List, ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, TextField } from '@material-ui/core';
 import { Delete, LocalOffer, PriorityHigh } from '@material-ui/icons';
 import React, { useEffect, useState } from 'react';
-import { useVideo } from 'react-use';
-import { makeUnigraphId, makeRefUnigraphId } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { DynamicViewRenderer } from '../../global';
 
 import { schemaColor, schemaTag, schemaNote, schemaSemanticProperties, schemaTodo } from 'unigraph-dev-common/lib/data/schemasTodo';
-
-function createSimpleTodo (name: string) {
-    return {
-        "name": name,
-        "done": false,
-        "priority": 1,
-        "semantic_properties": {
-            "tags": [ { "name": "inbox", "color": "#ffffff" } ],
-            "notes": []
-        }
-    }
-}
 
 export const parseTodoObject: (arg0: string) => ATodoList = (todoString: string) => {
     // TODO: Using regex for now, we can switch to a more centralized parsing solution later
