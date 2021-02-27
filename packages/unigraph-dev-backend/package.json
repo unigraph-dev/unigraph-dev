@@ -25,11 +25,13 @@
   },
   "dependencies": {
     "@types/async-lock": "^1.1.2",
+    "@types/node-fetch": "^2.5.8",
     "async-lock": "^1.2.8",
     "dgraph-js": "^20.3.1",
     "express": "^4.17.1",
     "express-ws": "^4.0.0",
     "google-protobuf": "^3.13.0",
-    "lodash": "^4.17.20"
+    "lodash": "^4.17.20",
+    "node-fetch": "^2.6.1"
   }
 }

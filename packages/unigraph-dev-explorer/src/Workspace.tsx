@@ -60,7 +60,6 @@ export function WorkSpace() {
     };
 
     const factory = (node: any) => {
-        console.log(node)
         var component = node.getComponent();
         var config = node.getConfig() || {};
         if (component.startsWith('/pages/')) {

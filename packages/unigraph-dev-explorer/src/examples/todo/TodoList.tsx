@@ -83,7 +83,6 @@ export function TodoList () {
 }
 
 export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
-    console.log(data, callbacks)
     let unpadded: ATodoList = window.unigraph.unpad(data);
     let totalCallbacks = callbacks || {
         'onUpdate': (data: Record<string, any>) => {

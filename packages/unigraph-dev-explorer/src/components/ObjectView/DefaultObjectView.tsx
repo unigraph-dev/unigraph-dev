@@ -2,6 +2,7 @@ import { IconButton } from '@material-ui/core';
 import { MoreVert } from '@material-ui/icons';
 import React, { FC, ReactElement } from 'react';
 import ReactJson from 'react-json-view';
+import { BookmarkItem } from '../../examples/bookmarks/Bookmarks';
 import { TodoItem } from '../../examples/todo/TodoList';
 import { DynamicViewRenderer } from '../../global';
 import { DefaultObjectContextMenu } from './DefaultObjectContextMenu';
@@ -43,7 +44,8 @@ const JsontreeObjectViewer = ({object}: {object: any}) => {
 }
 
 const DynamicViews: Record<string, DynamicViewRenderer> = {
-    "$/schema/todo": TodoItem
+    "$/schema/todo": TodoItem,
+    "$/schema/web_bookmark": BookmarkItem
 }
 
 const AutoDynamicView: DynamicViewRenderer = ({ object, callbacks }) => {

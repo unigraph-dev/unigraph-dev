@@ -19,6 +19,7 @@ function render(component: any) {
   )
 }
 
+// FIXME: This routing logic doesn't make sense
 if (window.location.pathname === '/workspace') {
   render(<React.StrictMode>
     <WorkSpace />
