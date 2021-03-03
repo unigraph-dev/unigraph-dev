@@ -3,14 +3,27 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
 import * as serviceWorker from './serviceWorker';
-import {unigraph} from 'unigraph-dev-common';
+import { unigraph } from 'unigraph-dev-common';
+import { isJsonString } from 'unigraph-dev-common/lib/utils/utils'
 
 import App from './App';
 import { SplashScreen, DisconnectedSplashScreen} from './pages/SplashScreen';
 import { WorkSpace } from './Workspace';
+import { UserSettings } from './pages/Settings';
 
-// TODO: Here we're assuming server location same as web; we can also make it configurable
-window.unigraph = unigraph(`ws://${window.location.hostname}:3001`);
+const defaultSettings: UserSettings = {
+  serverLocation: `ws://${window.location.hostname}:3001`
+}
+
+let userSettings = defaultSettings;
+
+if (!isJsonString(window.localStorage.getItem('userSettings'))) {
+  window.localStorage.setItem('userSettings', JSON.stringify(defaultSettings));
+} else { // @ts-ignore: checked type already
+  userSettings = JSON.parse(window.localStorage.getItem('userSettings')) 
+}
+
+window.unigraph = unigraph(userSettings.serverLocation);
 
 function render(component: any) {
   ReactDOM.render(
@@ -19,7 +32,6 @@ function render(component: any) {
   )
 }
 
-// FIXME: This routing logic doesn't make sense
 if (window.location.pathname === '/pages') {
   render(<React.StrictMode>
     <App />

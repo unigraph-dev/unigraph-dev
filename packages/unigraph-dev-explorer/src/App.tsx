@@ -20,6 +20,7 @@ import { getParameters, NavigationContext } from './utils';
 import { UserLibraryAll } from './components/UserLibrary';
 import UserLibraryObject from './components/UserLibrary/UserLibraryObject';
 import { Bookmarks } from './examples/bookmarks/Bookmarks';
+import Settings from './pages/Settings';
 
 // TODO: custom theme
 const useStyles = makeStyles(theme => ({
@@ -65,6 +66,10 @@ export const pages: Record<string, any> = {
   'library': {
     'constructor': () => <UserLibraryAll />,
     'name': 'Library',
+  },
+  'settings': {
+    'constructor': () => <Settings />,
+    'name': 'User Settings',
   },
   'library/object': {
     'constructor': (props: any) => <UserLibraryObject {...props} />,

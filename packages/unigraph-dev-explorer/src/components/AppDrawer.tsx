@@ -8,7 +8,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import { makeStyles } from '@material-ui/core/styles';
-import { Bookmarks, Comment, CompareArrows, Home, Info, LibraryBooks, PlaylistAddCheck, Storage } from '@material-ui/icons';
+import { Bookmarks, Comment, CompareArrows, Home, Info, LibraryBooks, PlaylistAddCheck, Settings, Storage } from '@material-ui/icons';
 import { ListSubheader } from '@material-ui/core';
 import { NavigationContext } from '../utils';
 
@@ -60,6 +60,10 @@ export default function DrawerRouter() {
             <ListItem button onClick={()=>navigator('/schema/new')}>
               <ListItemIcon><Storage /></ListItemIcon>
               <ListItemText primary="Add Schema" />
+            </ListItem>
+            <ListItem button onClick={()=>navigator('/settings')}>
+              <ListItemIcon><Settings /></ListItemIcon>
+              <ListItemText primary="User Settings" />
             </ListItem>
             <Divider/>
             <ListSubheader component="div" id="subheader-developer-tools"> Developer Tools </ListSubheader>
