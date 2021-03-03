@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import Box from '@material-ui/core/Box';
 import { makeStyles } from '@material-ui/core/styles';
 import { red } from '@material-ui/core/colors';
+import { Typography } from '@material-ui/core';
 
 const useStyles = makeStyles(() => ({
   code: {
@@ -39,10 +40,10 @@ export default function ExplorerHome() {
 
   return (
     <div>
-      <h1>Connection status</h1>
+      <Typography variant="h4">Connection status</Typography>
       <p>Connection readyState (connecting=0, open=1, closing=2, closed=3): {window.unigraph.backendConnection.readyState}</p>
       <p>Connected to: {window.unigraph.backendConnection.url}</p>
-      <h1>Messages</h1>
+      <Typography variant="h4" gutterBottom>Messages</Typography>
       <Box display="grid" gridGap={8} justifyContent="start">
         {messages.map((message, i) => <code key={i} className={classes.code}>{JSON.stringify(message)}</code>)}
       </Box>

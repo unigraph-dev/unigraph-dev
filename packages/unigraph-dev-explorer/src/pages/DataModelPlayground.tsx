@@ -41,7 +41,7 @@ export default function DataModelPlayground () {
 
     return <div>
 
-        <Typography variant="h5">DataModel Playground</Typography>
+        <Typography variant="h4">DataModel Playground</Typography>
         <p>Try composing an object here and see what happens!</p>
         <ReferenceableSelectorControlled 
             referenceables={referenceables}

@@ -42,7 +42,6 @@ export default function DrawerRouter() {
         >
           
           <div className={classes.toolbar} />
-          <Divider />
           <List>
             <ListSubheader component="div" id="subheader-home"> Home </ListSubheader>
             <ListItem button onClick={()=>navigator('/')}>

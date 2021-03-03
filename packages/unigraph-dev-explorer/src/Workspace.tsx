@@ -10,13 +10,13 @@ import FlexLayout, { Actions, DockLocation } from 'flexlayout-react';
 import 'flexlayout-react/style/light.css'
 import './workspace.css'
 import { getParameters, NavigationContext } from "./utils";
-import { CssBaseline } from "@material-ui/core";
+import { Container, CssBaseline } from "@material-ui/core";
 
 export function WorkspacePageComponent({ children }: any) {
-    return <div>
+    return <Container maxWidth="lg" disableGutters style={{paddingTop: "12px"}}>
         <CssBaseline/>
         {children}
-    </div>
+    </Container>
 }
 
 export function WorkSpace() {
