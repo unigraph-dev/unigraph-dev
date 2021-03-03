@@ -1,4 +1,4 @@
-import { Button } from '@material-ui/core';
+import { Button, Typography } from '@material-ui/core';
 import React from 'react';
 import {Controlled as CodeMirror} from 'react-codemirror2';
 require('codemirror/lib/codemirror.css');
@@ -28,7 +28,7 @@ export default function Request () {
     let [code, setCode]: [string, Function] = React.useState("// Your request here...")
 
     return <div>
-        <h1>Do a request!</h1>
+        <Typography variant="h4">Do a request!</Typography>
         <CodeMirror 
             value={code} 
             onBeforeChange={(editor: any, data: any, value: string) => {setCode(value)}}

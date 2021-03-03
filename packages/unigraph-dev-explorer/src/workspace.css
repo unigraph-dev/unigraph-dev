@@ -3,3 +3,7 @@
 .MuiDrawer-paper {
     position: unset !important
 }
+
+.flexlayout__tab_border_left {
+    overflow-x: hidden
+}

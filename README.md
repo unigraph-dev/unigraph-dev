@@ -37,4 +37,4 @@ Reasons to choose local service:
 - If you work with a lot of data or blobs.
 
 ## Demos
-![Todo Demo](./docs/todo_demo.gif)
+![Demo1](./docs/demo1.png)

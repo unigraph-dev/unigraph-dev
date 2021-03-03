@@ -18,7 +18,7 @@ const UserLibraryAll = () => {
     })
 
     return <div>
-        <Typography gutterBottom variant="h5">
+        <Typography gutterBottom variant="h4">
             Library - All Items
         </Typography>
         <ButtonGroup color="primary" aria-label="outlined primary button group">
