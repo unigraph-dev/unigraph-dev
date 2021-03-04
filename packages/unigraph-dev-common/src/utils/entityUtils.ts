@@ -274,7 +274,7 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
 
 /**
  * Traverses a given updater object and returns the difference in the form of upsert object with uid.
- * 
+ * DEPRECATED: Please don't use this function as it is much slower than using dgraph native.
  * @param object 
  */
 export function getUpsertFromUpdater(orig: any, updater: any): any {

@@ -22,7 +22,7 @@ export const parseTodoObject: (arg0: string) => ATodoList = (todoString: string)
         done: false,
         priority: priority_num,
         semantic_properties: {
-            tags: tags.map(tagName => {return {color: "#ffffff", name: tagName}}),
+            tags: tags.map(tagName => {return {name: tagName}}),
             notes: []
         }
     }
@@ -34,7 +34,7 @@ type ATodoList = {
     done: boolean,
     priority: number,
     semantic_properties: {
-        tags: {uid?: string, color: string, name: string}[]
+        tags: {uid?: string, color?: string, name: string}[]
         notes: any[]
     }
 }
@@ -105,7 +105,7 @@ export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
                     size="small"
                     icon={<LocalOffer/>}
                     style={{
-                        backgroundColor: tag.color
+                        backgroundColor: tag.color?.startsWith('#') ? tag.color : "unset"
                     }}
                     label={tag.name}
                 />
