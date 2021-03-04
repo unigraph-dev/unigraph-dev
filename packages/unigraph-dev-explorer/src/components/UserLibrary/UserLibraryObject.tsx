@@ -33,6 +33,7 @@ export default function UserLibraryObject ({ uid }: any) {
         />} label="Show object as padded"/>
         <DefaultObjectView object={object} options={{
             viewer: "json-tree",
+            canEdit: true,
             unpad: !showPadded
         }}></DefaultObjectView>
     </div>)

@@ -1,7 +1,7 @@
 import { IconButton } from '@material-ui/core';
 import { MoreVert } from '@material-ui/icons';
 import React, { FC, ReactElement } from 'react';
-import ReactJson from 'react-json-view';
+import ReactJson, { InteractionProps } from 'react-json-view';
 import { BookmarkItem } from '../../examples/bookmarks/Bookmarks';
 import { TodoItem } from '../../examples/todo/TodoList';
 import { DynamicViewRenderer } from '../../global';
@@ -11,6 +11,7 @@ import { filterPresets } from './objectViewFilters';
 type ObjectViewOptions = {
     viewer?: "string" | "json-tree" | "dynamic-view",
     unpad?: boolean,
+    canEdit?: boolean,
     showContextMenu?: boolean,
 };
 
@@ -40,9 +41,24 @@ const StringObjectViewer = ({object}: {object: any}) => {
     </div>;
 }
 
-const JsontreeObjectViewer = ({object}: {object: any}) => {
+const onPropertyEdit = (edit: InteractionProps) => {
+    console.log(edit);
+    let refUpdateHost: any = edit.existing_src;
+    edit.namespace.forEach(el => {
+        if (typeof el === "string") refUpdateHost = refUpdateHost[el]; 
+        else {throw new Error("Doesn't support deletion")}
+    });
+    if (refUpdateHost?.uid && typeof edit.name === "string") {
+        let updater: any = {};
+        updater[edit.name] = edit.new_value;
+        window.unigraph.updateObject(refUpdateHost.uid, updater)
+    }
+}
+
+const JsontreeObjectViewer = ({object, options}: {object: any, options: ObjectViewOptions}) => {
     return <div>
-        <ReactJson src={object} />
+        {JSON.stringify(options)}
+        <ReactJson src={object} onEdit={options.canEdit ? onPropertyEdit : false} onAdd={options.canEdit ? onPropertyEdit : false} />
     </div>
 }
 
@@ -86,7 +102,7 @@ const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options }) => {
             break;
 
         case "json-tree":
-            FinalObjectViewer = <JsontreeObjectViewer object={finalObject}/>;
+            FinalObjectViewer = <JsontreeObjectViewer object={finalObject} options={options}/>;
             break;
     
         default:
