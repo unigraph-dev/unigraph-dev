@@ -39,7 +39,7 @@ function buildDgraphFunctionFromRefQuery(query: {key: string, value: string}[]) 
  */
 export function wrapUpsertFromUpdater(orig: any, queryHead: string): any {
 
-    var queries: string[] = []
+    const queries: string[] = []
 
     function buildQuery(parUid: string, key: string) {
         const currentQuery = `${parUid}_${queries.length.toString()}`
