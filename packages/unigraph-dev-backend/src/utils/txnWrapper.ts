@@ -31,8 +31,46 @@ function buildDgraphFunctionFromRefQuery(query: {key: string, value: string}[]) 
     return fn;
 }
 
+/**
+ * Wraps a given updater in upsert format by adding UIDs to body.
+ * 
+ * @param object 
+ * @param string The first couple of characters passed in as uids
+ */
+export function wrapUpsertFromUpdater(orig: any, queryHead: string): any {
+
+    const queries: string[] = []
+
+    function buildQuery(parUid: string, key: string) {
+        const currentQuery = `${parUid}_${queries.length.toString()}`
+        const query = `var(func: uid(${parUid})) { <${key}> { ${currentQuery} as uid }}`
+        queries.push(query);
+        return currentQuery;
+    }
+
+    function recurse(origNow: any, thisUid: string): any {
+        console.log("recursing --- " + JSON.stringify(origNow, null, 2) + thisUid)
+        if (['undefined', 'null', 'number', 'bigint', 'string', 'boolean', 'symbol'].includes(typeof origNow)) {
+            // This means the updater is creating new things inside or changing primitive values: we don't need uid
+            queries.pop();
+            return origNow;
+        } else if (typeof origNow == 'object' && Array.isArray(origNow)) {
+            throw new Error("Array upsertion is not implemented yet!")
+        } else if (typeof origNow == 'object' && !Array.isArray(origNow)) {
+            return Object.fromEntries([
+                ["uid", `uid(${thisUid})`], // Must have UID to do anything with it
+                ...Object.entries(origNow).map(([key, value]) => [key, recurse(origNow[key], buildQuery(thisUid, key))])
+            ]);
+        }
+    }
+
+    const upsertObject = recurse(orig, queryHead);
+
+    return [upsertObject, queries];
+
+}
+
 function insertsToUpsertRecursive(inserts: any[], appends: any[], queries: string[], currentObject: any) {
-    console.log(currentObject)
     // If this is a reference object
     if (currentObject && currentObject["$ref"] && currentObject["$ref"].query) {
         if (currentObject.uid) { // uid takes precedence over $ref
@@ -41,14 +79,19 @@ function insertsToUpsertRecursive(inserts: any[], appends: any[], queries: strin
             const query = currentObject['$ref'].query;
             const dgraphFunction = buildDgraphFunctionFromRefQuery(query);
             queries.push("unigraphquery" + (queries.length + 1) + " as " + dgraphFunction + "\n");
-            currentObject["uid"] = "uid(unigraphquery" + queries.length + ")";
+            const refUid = "unigraphquery" + queries.length ;
+            //currentObject["uid"] = refUid;
             delete currentObject['$ref'];
-            const append: any = {uid: "uid(unigraphquery" + queries.length + ")"}
+            const [upsertObject, upsertQueries] = wrapUpsertFromUpdater({"_value": currentObject['_value']}, refUid);
+            //currentObject = {"uid": `uid(${refUid})`}
+            currentObject = Object.assign(currentObject, {"uid": `uid(${refUid})`, ...upsertObject})
+            queries.push(...upsertQueries)
+            const append: any = {uid: `uid(${refUid})`}
             query.forEach(({key, value}: any) => {if (key === "unigraph.id") append[key] = value});
             appends.push(append)
         }
     }
-    //console.log(currentObject)
+
     const objectValues = Object.values(currentObject);
     for(let i=0; i<objectValues.length; ++i) {
         if (typeof objectValues[i] === "object" && !Array.isArray(objectValues[i])) {
@@ -59,6 +102,7 @@ function insertsToUpsertRecursive(inserts: any[], appends: any[], queries: strin
             }
         }
     }
+    //console.log("-----------------------2", currentObject)
 }
 
 /**

@@ -32,8 +32,11 @@ type DefaultObjectListViewProps = {
 };
 
 const StringObjectViewer = ({object}: {object: any}) => {
+    const finalObject = window.unigraph.unpad(object)
+
     return <div>
-        {JSON.stringify(object, null, 2)}
+        Type: {object?.type?.["unigraph.id"]}<br/>
+        {JSON.stringify(finalObject, null, 2)}
     </div>;
 }
 
