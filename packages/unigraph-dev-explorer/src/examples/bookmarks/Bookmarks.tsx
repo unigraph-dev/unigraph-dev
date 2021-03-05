@@ -3,10 +3,10 @@ import React, { useState, useEffect } from "react";
 import { schemaColor, schemaTag, schemaNote, schemaSemanticProperties } from 'unigraph-dev-common/lib/data/schemasTodo';
 import { schemaIconURL, schemaURL, schemaWebBookmark } from 'unigraph-dev-common/lib/data/schemasBookmark';
 
-import { isUrl } from 'unigraph-dev-common/lib/utils/utils';
 import { DynamicViewRenderer } from "../../global";
 import { List, ListItem, TextField, Button, Chip, IconButton, ListItemSecondaryAction, ListItemText, ListItemIcon, Avatar } from "@material-ui/core";
-import { LocalOffer, PriorityHigh, Delete, TagFaces, Link } from "@material-ui/icons";
+import { LocalOffer, Delete, Link } from "@material-ui/icons";
+import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph'
 
 type ABookmark = {
     uid?: string,
@@ -53,28 +53,31 @@ export const createBookmark: (t: string) => Promise<ABookmark> = (text: string) 
 export function Bookmarks () {
     
     const [initialized, setInitialized] = useState(false);
-    const [subsId, setSubsId] = useState(Date.now());
+    const [subsId, setSubsId] = useState(getRandomInt());
     const [bookmarks, setBookmarks]: [any[], Function] = useState([]);
     const [newName, setNewName] = useState("");
 
     const init = async () => {
-        await window.unigraph.ensureSchema("$/schema/color", schemaColor);
-        await window.unigraph.ensureSchema("$/schema/tag", schemaTag);
-        await window.unigraph.ensureSchema("$/schema/note", schemaNote);
-        await window.unigraph.ensureSchema("$/schema/semantic_properties", schemaSemanticProperties);
-        await window.unigraph.ensureSchema("$/schema/icon_url", schemaIconURL);
-        await window.unigraph.ensureSchema("$/schema/url", schemaURL);
-        await window.unigraph.ensureSchema("$/schema/web_bookmark", schemaWebBookmark);
-        setInitialized(true);
-        window.unigraph.subscribeToType("$/schema/web_bookmark", (result: ABookmark[]) => {setBookmarks(result)}, subsId);
+        const promises = [
+            window.unigraph.ensureSchema("$/schema/color", schemaColor),
+            window.unigraph.ensureSchema("$/schema/tag", schemaTag),
+            window.unigraph.ensureSchema("$/schema/note", schemaNote),
+            window.unigraph.ensureSchema("$/schema/semantic_properties", schemaSemanticProperties),
+            window.unigraph.ensureSchema("$/schema/icon_url", schemaIconURL),
+            window.unigraph.ensureSchema("$/schema/url", schemaURL),
+            window.unigraph.ensureSchema("$/schema/web_bookmark", schemaWebBookmark)
+        ];
+        Promise.all(promises).then(() => {
+            setInitialized(true);
+            window.unigraph.subscribeToType("$/schema/web_bookmark", (result: ABookmark[]) => {setBookmarks(result)}, subsId);
+        });
     }
 
     useEffect(() => {
-        // Ensure todo schema is present
         init();
 
         return function cleanup() {
-            //window.unigraph.unsubscribe(subsId);
+            window.unigraph.unsubscribe(subsId);
         };
     }, []);
 

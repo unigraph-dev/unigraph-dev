@@ -20,5 +20,6 @@
   "bugs": {
     "url": "https://github.com/unigraph-dev/unigraph-dev/issues"
   },
-  "homepage": "https://github.com/unigraph-dev/unigraph-dev#readme"
+  "homepage": "https://github.com/unigraph-dev/unigraph-dev#readme",
+  "dependencies": {}
 }
