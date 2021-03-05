@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { DynamicViewRenderer } from '../../global';
 
 import { schemaColor, schemaTag, schemaNote, schemaSemanticProperties, schemaTodo } from 'unigraph-dev-common/lib/data/schemasTodo';
+import { getContrast } from '../../utils';
+import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph'
 
 export const parseTodoObject: (arg0: string) => ATodoList = (todoString: string) => {
     // TODO: Using regex for now, we can switch to a more centralized parsing solution later
@@ -42,18 +44,21 @@ type ATodoList = {
 export function TodoList () {
     
     const [initialized, setInitialized] = useState(false);
-    const [subsId, setSubsId] = useState(Date.now());
+    const [subsId, setSubsId] = useState(getRandomInt());
     const [todoList, setTodoList]: [ATodoList[], Function] = useState([]);
     const [newName, setNewName] = useState("");
 
     const init = async () => {
-        await window.unigraph.ensureSchema("$/schema/color", schemaColor);
-        await window.unigraph.ensureSchema("$/schema/tag", schemaTag);
-        await window.unigraph.ensureSchema("$/schema/note", schemaNote);
-        await window.unigraph.ensureSchema("$/schema/semantic_properties", schemaSemanticProperties);
-        await window.unigraph.ensureSchema("$/schema/todo", schemaTodo);
-        setInitialized(true);
-        window.unigraph.subscribeToType("$/schema/todo", (result: ATodoList[]) => {setTodoList(result)}, subsId);
+        Promise.all([
+            window.unigraph.ensureSchema("$/schema/color", schemaColor),
+            window.unigraph.ensureSchema("$/schema/tag", schemaTag),
+            window.unigraph.ensureSchema("$/schema/note", schemaNote),
+            window.unigraph.ensureSchema("$/schema/semantic_properties", schemaSemanticProperties),
+            window.unigraph.ensureSchema("$/schema/todo", schemaTodo)
+        ]).then(() => {
+            setInitialized(true);
+            window.unigraph.subscribeToType("$/schema/todo", (result: ATodoList[]) => {setTodoList(result)}, subsId);
+        });
     }
 
     useEffect(() => {
@@ -101,14 +106,17 @@ export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
         <ListItemText 
             primary={unpadded.name}
             secondary={[...(!unpadded.semantic_properties?.tags?.map ? [] :
-                unpadded.semantic_properties?.tags?.map(tag => <Chip
-                    size="small"
-                    icon={<LocalOffer/>}
-                    style={{
-                        backgroundColor: tag.color?.startsWith('#') ? tag.color : "unset"
-                    }}
-                    label={tag.name}
-                />
+                unpadded.semantic_properties?.tags?.map(tag => {
+                    const bgc = tag.color?.startsWith('#') ? tag.color : "unset";
+                    return <Chip
+                        size="small"
+                        icon={<LocalOffer/>}
+                        style={{
+                            backgroundColor: bgc,
+                            color: bgc.startsWith("#") ? getContrast(bgc) : "unset"
+                        }}
+                        label={tag.name}
+                    />}
             )), ...(unpadded.priority > 0 ? [<Chip size="small" icon={<PriorityHigh/>} label={"Priority " + unpadded.priority}/>]: [])]}
         />
         <ListItemSecondaryAction>

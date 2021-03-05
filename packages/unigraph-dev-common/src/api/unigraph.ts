@@ -49,6 +49,8 @@ function unpad(object: any) {
     return {...unpadRecurse(object), uid: object.uid}
 }
 
+export function getRandomInt() {return Math.floor(Math.random() * Math.floor(1000000))}
+
 export default function unigraph(url: string): Unigraph {
     const connection = new WebSocket(url);
     const messages: any[] = [];
@@ -59,7 +61,7 @@ export default function unigraph(url: string): Unigraph {
     const subscriptions: Record<string, Function> = {};
 
     function sendEvent(conn: WebSocket, name: string, params: any, id?: number | undefined) {
-        if (!id) id = Date.now();
+        if (!id) id = getRandomInt();
         conn.send(JSON.stringify({
             "type": "event",
             "event": name,
@@ -88,7 +90,7 @@ export default function unigraph(url: string): Unigraph {
         eventTarget: eventTarget,
         unpad: unpad,
         createSchema: (schema) => new Promise((resolve, reject) => {
-            const id = Date.now();
+            const id = getRandomInt();
             callbacks[id] = (response: any) => {
                 if (response.success) resolve(response);
                 else reject(response);
@@ -96,15 +98,15 @@ export default function unigraph(url: string): Unigraph {
             sendEvent(connection, "create_unigraph_schema", {schema: schema}, id)
         }),
         ensureSchema: (name, fallback) => new Promise((resolve, reject) => {
-            const id = Date.now();
+            const id = getRandomInt();
             callbacks[id] = (response: any) => {
                 if (response.success) resolve(response);
                 else reject(response);
             };
-            sendEvent(connection, "ensure_unigraph_schema", {name: name, fallback: fallback})
+            sendEvent(connection, "ensure_unigraph_schema", {name: name, fallback: fallback}, id)
         }),
         subscribeToType: (name, callback, eventId = undefined) => new Promise((resolve, reject) => {
-            const id = typeof eventId === "number" ? eventId : Date.now();
+            const id = typeof eventId === "number" ? eventId : getRandomInt();
             callbacks[id] = (response: any) => {
                 if (response.success) resolve(id);
                 else reject(response);
@@ -113,7 +115,7 @@ export default function unigraph(url: string): Unigraph {
             sendEvent(connection, "subscribe_to_type", {schema: name}, id);
         }),
         subscribeToObject: (uid, callback, eventId = undefined) => new Promise((resolve, reject) => {
-            const id = typeof eventId === "number" ? eventId : Date.now();
+            const id = typeof eventId === "number" ? eventId : getRandomInt();
             callbacks[id] = (response: any) => {
                 if (response.success) resolve(id);
                 else reject(response);
@@ -139,7 +141,7 @@ export default function unigraph(url: string): Unigraph {
             sendEvent(connection, "update_object", {uid: uid, newObject: newObject});
         },
         getReferenceables: (key = "unigraph.id", asMapWithContent = false) => new Promise((resolve, reject) => {
-            const id = Date.now();
+            const id = getRandomInt();
             callbacks[id] = (response: any) => {
                 if (response.success) resolve(response.result.map((obj: { [x: string]: any; }) => obj["unigraph.id"]));
                 else reject(response);
@@ -154,7 +156,7 @@ export default function unigraph(url: string): Unigraph {
             }, id);
         }),
         getSchemas: (schemas: string[] | undefined) => new Promise((resolve, reject) => {
-            const id = Date.now();
+            const id = getRandomInt();
             callbacks[id] = (response: any) => {
                 if (response.success && response.schemas) resolve(response.schemas);
                 else reject(response);
@@ -174,7 +176,7 @@ export default function unigraph(url: string): Unigraph {
          * @param options 
          */
         proxyFetch: (url, options?) => new Promise((resolve, reject) => {
-            const id = Date.now();
+            const id = getRandomInt();
             callbacks[id] = (responseBlob: {success: boolean, blob: string}) => {
                 if (responseBlob.success && responseBlob.blob)
                     resolve(base64ToBlob(responseBlob.blob))
