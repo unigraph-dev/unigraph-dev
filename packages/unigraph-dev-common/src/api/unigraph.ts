@@ -24,6 +24,7 @@ export interface Unigraph {
     getReferenceables(key: string | undefined, asMapWithContent: boolean | undefined): Promise<any>;
     getSchemas(schemas: string[] | undefined): Promise<Map<string, SchemaDgraph>>;
     proxyFetch(url: string, options?: Record<string, any>): Promise<Blob>;
+    buildGraph(objects: any[]): any[];
 }
 
 function unpadRecurse(object: any) {
@@ -47,6 +48,39 @@ function unpadRecurse(object: any) {
 
 function unpad(object: any) {
     return {...unpadRecurse(object), uid: object.uid}
+}
+
+/**
+ * Implement a graph-like data structure based on js pointers from uid references.
+ * 
+ * Since pointers are not serializable, this must be done on the client side.
+ * 
+ * @param objects Objects with uid references
+ */
+function buildGraph(objects: any[]): any[] {
+
+    let objs: any[] = JSON.parse(JSON.stringify(objects))
+    let dict: any = {}
+    objs.forEach(object => {if (object.uid) dict[object.uid] = object})
+
+    function buildGraphRecurse(obj: any) {
+        if (typeof obj === "object" && Array.isArray(obj)) {
+            obj.forEach((val, index) => {
+                if(val.uid && dict[val.uid]) obj[index] = dict[val.uid];
+                buildGraphRecurse(val)
+            })
+        } else if (typeof obj === "object") {
+            Object.entries(obj).forEach(([key, value]: [key: string, value: any]) => {
+                if(value.uid && dict[value.uid]) obj[key] = dict[value.uid];
+                buildGraphRecurse(value)
+            })
+        }
+    }
+
+    objs.forEach(object => buildGraphRecurse(object))
+
+    return objs
+
 }
 
 export function getRandomInt() {return Math.floor(Math.random() * Math.floor(1000000))}
@@ -89,6 +123,7 @@ export default function unigraph(url: string): Unigraph {
         backendMessages: messages,
         eventTarget: eventTarget,
         unpad: unpad,
+        buildGraph: buildGraph,
         createSchema: (schema) => new Promise((resolve, reject) => {
             const id = getRandomInt();
             callbacks[id] = (response: any) => {
@@ -111,7 +146,7 @@ export default function unigraph(url: string): Unigraph {
                 if (response.success) resolve(id);
                 else reject(response);
             };
-            subscriptions[id] = (result: any) => callback(result);
+            subscriptions[id] = (result: any) => callback(buildGraph(result));
             sendEvent(connection, "subscribe_to_type", {schema: name}, id);
         }),
         subscribeToObject: (uid, callback, eventId = undefined) => new Promise((resolve, reject) => {
