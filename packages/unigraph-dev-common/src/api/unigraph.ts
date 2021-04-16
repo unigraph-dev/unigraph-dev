@@ -59,8 +59,8 @@ function unpad(object: any) {
  */
 function buildGraph(objects: any[]): any[] {
 
-    let objs: any[] = JSON.parse(JSON.stringify(objects))
-    let dict: any = {}
+    const objs: any[] = JSON.parse(JSON.stringify(objects))
+    const dict: any = {}
     objs.forEach(object => {if (object.uid) dict[object.uid] = object})
 
     function buildGraphRecurse(obj: any) {

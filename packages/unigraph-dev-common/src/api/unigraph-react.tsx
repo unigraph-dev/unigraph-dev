@@ -8,7 +8,7 @@
 import React from "react"
 import { getRandomInt } from './unigraph';
 
-export function withUnigraphSubscription(WrappedComponent: React.Component, 
+export function withUnigraphSubscription(WrappedComponent: React.FC<{data: any[]}>, 
     unigraphContext: UnigraphContext, unigraphHooks: UnigraphHooks): React.FC {
 
     return () => {
@@ -16,8 +16,7 @@ export function withUnigraphSubscription(WrappedComponent: React.Component,
         const [data, setData] = React.useState(unigraphContext.defaultData);
 
         const init = async () => {
-            // @ts-ignore
-            Promise.all(unigraphContext.schemas.map(el => window.unigraph.ensureSchema(el.name, el.schema)))
+            Promise.all(unigraphContext.schemas.map(el => (window as any).unigraph.ensureSchema(el.name, el.schema)))
                 .then(unigraphHooks.afterSchemasLoaded(subsId, setData))
         }
 
@@ -26,12 +25,10 @@ export function withUnigraphSubscription(WrappedComponent: React.Component,
             init();
 
             return function cleanup() {
-                // @ts-ignore
-                window.unigraph.unsubscribe(subsId);
+                (window as any).unigraph.unsubscribe(subsId);
             };
         }, []);
 
-        // @ts-ignore
         return <WrappedComponent data={data}/>
     }
 
