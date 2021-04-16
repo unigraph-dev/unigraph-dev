@@ -5,7 +5,7 @@ import { DynamicViewRenderer } from '../../global';
 
 import { schemaColor, schemaTag, schemaNote, schemaSemanticProperties, schemaTodo } from 'unigraph-dev-common/lib/data/schemasTodo';
 import { getContrast } from '../../utils';
-import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph'
+import { withUnigraphSubscription } from 'unigraph-dev-common/lib/api/unigraph-react'
 
 export const parseTodoObject: (arg0: string) => ATodoList = (todoString: string) => {
     // TODO: Using regex for now, we can switch to a more centralized parsing solution later
@@ -41,51 +41,39 @@ type ATodoList = {
     }
 }
 
-export function TodoList () {
+function TodoListBody ({data}: { data: ATodoList[] }) {
     
-    const [initialized, setInitialized] = useState(false);
-    const [subsId, setSubsId] = useState(getRandomInt());
-    const [todoList, setTodoList]: [ATodoList[], Function] = useState([]);
+    const todoList = data;
     const [newName, setNewName] = useState("");
 
-    const init = async () => {
-        Promise.all([
-            window.unigraph.ensureSchema("$/schema/color", schemaColor),
-            window.unigraph.ensureSchema("$/schema/tag", schemaTag),
-            window.unigraph.ensureSchema("$/schema/note", schemaNote),
-            window.unigraph.ensureSchema("$/schema/semantic_properties", schemaSemanticProperties),
-            window.unigraph.ensureSchema("$/schema/todo", schemaTodo)
-        ]).then(() => {
-            setInitialized(true);
-            window.unigraph.subscribeToType("$/schema/todo", (result: ATodoList[]) => {setTodoList(result)}, subsId);
-        });
-    }
-
-    useEffect(() => {
-        // Ensure todo schema is present
-        init();
-
-        return function cleanup() {
-            window.unigraph.unsubscribe(subsId);
-        };
-    }, []);
-
-
-
     return <div>
-        {!initialized ? <p>Loading...</p> : <div>
-            Hello todo!    <br/>
-            There are currently {todoList.length} todo items!   <br/>
-            <List>
-                {todoList.map(todo => <ListItem button key={todo.uid}>
-                    <TodoItem data={todo} />
-                </ListItem>)}
-            </List>
-            <TextField value={newName} onChange={(e) => setNewName(e.target.value)}></TextField>
-            <Button onClick={() => window.unigraph.addObject(parseTodoObject(newName), "$/schema/todo")}>Add</Button>
-        </div>}
+        Hello todo!    <br/>
+        There are currently {todoList.length} todo items!   <br/>
+        <List>
+            {todoList.map(todo => <ListItem button key={todo.uid}>
+                <TodoItem data={todo} />
+            </ListItem>)}
+        </List>
+        <TextField value={newName} onChange={(e) => setNewName(e.target.value)}></TextField>
+        <Button onClick={() => window.unigraph.addObject(parseTodoObject(newName), "$/schema/todo")}>Add</Button>
     </div>
 }
+
+export const TodoList = withUnigraphSubscription(
+    // @ts-ignore
+    TodoListBody,
+    { schemas: [
+        {name: "$/schema/color", schema: schemaColor },
+        {name: "$/schema/tag", schema: schemaTag },
+        {name: "$/schema/note", schema: schemaNote },
+        {name: "$/schema/semantic_properties", schema: schemaSemanticProperties},
+        {name: "$/schema/todo", schema: schemaTodo }
+    ], defaultData: []
+    },
+    { afterSchemasLoaded: (subsId: number, setData: any) => {
+        window.unigraph.subscribeToType("$/schema/todo", (result: ATodoList[]) => {setData(result)}, subsId);
+    }}
+)
 
 export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
     let unpadded: ATodoList = window.unigraph.unpad(data);

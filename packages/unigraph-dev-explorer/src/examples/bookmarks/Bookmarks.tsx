@@ -7,6 +7,7 @@ import { DynamicViewRenderer } from "../../global";
 import { List, ListItem, TextField, Button, Chip, IconButton, ListItemSecondaryAction, ListItemText, ListItemIcon, Avatar } from "@material-ui/core";
 import { LocalOffer, Delete, Link } from "@material-ui/icons";
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph'
+import { withUnigraphSubscription } from 'unigraph-dev-common/lib/api/unigraph-react'
 
 type ABookmark = {
     uid?: string,
@@ -50,53 +51,40 @@ export const createBookmark: (t: string) => Promise<ABookmark> = (text: string) 
     })
 } 
 
-export function Bookmarks () {
+function BookmarksBody ({data}: { data: ABookmark[] }) {
     
-    const [initialized, setInitialized] = useState(false);
-    const [subsId, setSubsId] = useState(getRandomInt());
-    const [bookmarks, setBookmarks]: [any[], Function] = useState([]);
+    const bookmarks = data;
     const [newName, setNewName] = useState("");
 
-    const init = async () => {
-        const promises = [
-            window.unigraph.ensureSchema("$/schema/color", schemaColor),
-            window.unigraph.ensureSchema("$/schema/tag", schemaTag),
-            window.unigraph.ensureSchema("$/schema/note", schemaNote),
-            window.unigraph.ensureSchema("$/schema/semantic_properties", schemaSemanticProperties),
-            window.unigraph.ensureSchema("$/schema/icon_url", schemaIconURL),
-            window.unigraph.ensureSchema("$/schema/url", schemaURL),
-            window.unigraph.ensureSchema("$/schema/web_bookmark", schemaWebBookmark)
-        ];
-        Promise.all(promises).then(() => {
-            setInitialized(true);
-            window.unigraph.subscribeToType("$/schema/web_bookmark", (result: ABookmark[]) => {setBookmarks(result)}, subsId);
-        });
-    }
-
-    useEffect(() => {
-        init();
-
-        return function cleanup() {
-            window.unigraph.unsubscribe(subsId);
-        };
-    }, []);
-
-
-
     return <div>
-        {!initialized ? <p>Loading...</p> : <div>
-            Hello bookmark!    <br/> 
-            There are currently {bookmarks.length} bookmarks!   <br/>
-            <List>
-                {bookmarks.map(it => <ListItem button key={it.uid}>
-                    <BookmarkItem data={it} />
-                </ListItem>)}
-            </List>
-            <TextField value={newName} onChange={(e) => setNewName(e.target.value)}></TextField>
-            <Button onClick={() => createBookmark(newName).then((obj: any) => window.unigraph.addObject(obj, "$/schema/web_bookmark"))}>Add</Button>
-        </div>}
+        Hello bookmark!    <br/> 
+        There are currently {bookmarks.length} bookmarks!   <br/>
+        <List>
+            {bookmarks.map(it => <ListItem button key={it.uid}>
+                <BookmarkItem data={it} />
+            </ListItem>)}
+        </List>
+        <TextField value={newName} onChange={(e) => setNewName(e.target.value)}></TextField>
+        <Button onClick={() => createBookmark(newName).then((obj: any) => window.unigraph.addObject(obj, "$/schema/web_bookmark"))}>Add</Button>
     </div>
 }
+
+export const Bookmarks = withUnigraphSubscription(
+    // @ts-ignore
+    BookmarksBody,
+    { defaultData: [], schemas: [
+        {name: "$/schema/color", schema: schemaColor},
+        {name: "$/schema/tag", schema: schemaTag},
+        {name: "$/schema/note", schema: schemaNote},
+        {name: "$/schema/semantic_properties", schema: schemaSemanticProperties},
+        {name: "$/schema/icon_url", schema: schemaIconURL},
+        {name: "$/schema/url", schema: schemaURL},
+        {name: "$/schema/web_bookmark", schema: schemaWebBookmark},
+    ]},
+    { afterSchemasLoaded: (subsId: number, setData: any) => {
+        window.unigraph.subscribeToType("$/schema/web_bookmark", (result: ABookmark[]) => {setData(result)}, subsId);
+    }}
+)
 
 export const BookmarkItem: DynamicViewRenderer = ({data, callbacks}) => {
     let unpadded: ABookmark = window.unigraph.unpad(data);
