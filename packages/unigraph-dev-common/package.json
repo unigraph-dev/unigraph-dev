@@ -21,5 +21,7 @@
     "url": "https://github.com/unigraph-dev/unigraph-dev/issues"
   },
   "homepage": "https://github.com/unigraph-dev/unigraph-dev#readme",
-  "dependencies": {}
+  "peerDependencies": {
+    "react": "^17.0.1"
+  }
 }

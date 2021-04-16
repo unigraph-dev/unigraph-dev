@@ -22,6 +22,9 @@ import UserLibraryObject from './components/UserLibrary/UserLibraryObject';
 import { Bookmarks } from './examples/bookmarks/Bookmarks';
 import Settings from './pages/Settings';
 
+// @ts-ignore
+window.React3 = React;
+
 // TODO: custom theme
 const useStyles = makeStyles(theme => ({
   root: {

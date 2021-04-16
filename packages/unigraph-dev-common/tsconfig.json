@@ -1,15 +1,18 @@
 {
   "compilerOptions": {
+    "jsx": "react",
     "target": "es5",
     "lib": [
       "dom",
       "dom.iterable",
       "esnext"
     ],
-    "module": "CommonJS",
+    "module": "esnext",
     "declaration": true,
     "outDir": "./lib",
-    "strict": true
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true
   },
   "include": ["src"],
   "exclude": ["**/node_modules", "**/tests/*"]
