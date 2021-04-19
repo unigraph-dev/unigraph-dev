@@ -3,7 +3,7 @@ import { Delete, LocalOffer, PriorityHigh } from '@material-ui/icons';
 import React, { useEffect, useState } from 'react';
 import { DynamicViewRenderer } from '../../global';
 
-import { schemaColor, schemaTag, schemaNote, schemaSemanticProperties, schemaTodo } from 'unigraph-dev-common/lib/data/schemasTodo';
+import { pkg as todoPackage } from 'unigraph-dev-common/lib/data/unigraph.todo.pkg';
 import { getContrast } from '../../utils';
 import { withUnigraphSubscription } from 'unigraph-dev-common/lib/api/unigraph-react'
 
@@ -62,13 +62,7 @@ function TodoListBody ({data}: { data: ATodoList[] }) {
 export const TodoList = withUnigraphSubscription(
     // @ts-ignore
     TodoListBody,
-    { schemas: [
-        {name: "$/schema/color", schema: schemaColor },
-        {name: "$/schema/tag", schema: schemaTag },
-        {name: "$/schema/note", schema: schemaNote },
-        {name: "$/schema/semantic_properties", schema: schemaSemanticProperties},
-        {name: "$/schema/todo", schema: schemaTodo }
-    ], defaultData: []
+    { schemas: [], defaultData: [], packages: [todoPackage]
     },
     { afterSchemasLoaded: (subsId: number, setData: any) => {
         window.unigraph.subscribeToType("$/schema/todo", (result: ATodoList[]) => {setData(result)}, subsId);

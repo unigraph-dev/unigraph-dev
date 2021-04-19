@@ -1,4 +1,5 @@
 import DgraphClient from './dgraphClient';
+import { PackageDeclaration } from 'unigraph-dev-common/lib/types/packages';
 
 declare global {
   namespace Express {
@@ -18,6 +19,13 @@ declare type EventCreateUnigraphSchema = {
   "event": "create_unigraph_schema",
   schema: Record<string, unknown> | Record<string, unknown>[],
   id: number
+}
+
+declare type EventAddUnigraphPackage = {
+  "type": "event",
+  "event": "add_unigraph_package",
+  id: number,
+  package: PackageDeclaration
 }
 
 declare type EventCreateUnigraphObject = {
@@ -113,11 +121,26 @@ declare type EventEnsureUnigraphSchema = {
   fallback: any
 }
 
+declare type EventEnsureUnigraphPackage = {
+  type: "event",
+  event: "ensure_unigraph_package",
+  id: number,
+  packageName: string,
+  fallback: PackageDeclaration
+}
+
 declare type EventGetSchemas = {
   type: "event",
   event: "get_schemas",
   id: number,
   schemas: string[]
+}
+
+declare type EventGetPackages = {
+  type: "event",
+  event: "get_packages",
+  id: number,
+  packages: string[]
 }
 
 declare type EventUpdateObject = {

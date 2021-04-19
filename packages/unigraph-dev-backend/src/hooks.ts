@@ -14,10 +14,10 @@ export type HookAfterSubscriptionAddedParams = {
 }
 
 export type HookAfterSchemaUpdatedParams = {
-    newCaches: Record<string, Cache>,
+    newCaches: Record<string, Cache<any>>,
 }
 
 export type HookAfterObjectChangedParams = {
     subscriptions: Subscription[],
-    caches: Record<string, Cache>,
+    caches: Record<string, Cache<any>>,
 }

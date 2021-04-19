@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-import { schemaColor, schemaTag, schemaNote, schemaSemanticProperties } from 'unigraph-dev-common/lib/data/schemasTodo';
-import { schemaIconURL, schemaURL, schemaWebBookmark } from 'unigraph-dev-common/lib/data/schemasBookmark';
+import { pkg as bookmarkPackage } from 'unigraph-dev-common/lib/data/unigraph.bookmark.pkg';
 
 import { DynamicViewRenderer } from "../../global";
 import { List, ListItem, TextField, Button, Chip, IconButton, ListItemSecondaryAction, ListItemText, ListItemIcon, Avatar } from "@material-ui/core";
@@ -72,15 +71,7 @@ function BookmarksBody ({data}: { data: ABookmark[] }) {
 export const Bookmarks = withUnigraphSubscription(
     // @ts-ignore
     BookmarksBody,
-    { defaultData: [], schemas: [
-        {name: "$/schema/color", schema: schemaColor},
-        {name: "$/schema/tag", schema: schemaTag},
-        {name: "$/schema/note", schema: schemaNote},
-        {name: "$/schema/semantic_properties", schema: schemaSemanticProperties},
-        {name: "$/schema/icon_url", schema: schemaIconURL},
-        {name: "$/schema/url", schema: schemaURL},
-        {name: "$/schema/web_bookmark", schema: schemaWebBookmark},
-    ]},
+    { defaultData: [], schemas: [], packages: [bookmarkPackage]},
     { afterSchemasLoaded: (subsId: number, setData: any) => {
         window.unigraph.subscribeToType("$/schema/web_bookmark", (result: ABookmark[]) => {setData(result)}, subsId);
     }}

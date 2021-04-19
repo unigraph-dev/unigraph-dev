@@ -4,6 +4,8 @@
  * Default database entries includes default userland schemas (primitive, composers) and default dgraph schemas (and types).
  */
 
+import {pkg as semantic} from 'unigraph-dev-common/lib/data/unigraph.semantic.pkg'
+
 export const defaultTypes = `<_value>: uid .
 <_value.#i>: int .
 <_value.#>: float .
@@ -13,12 +15,16 @@ export const defaultTypes = `<_value>: uid .
 <_value[>: [uid] .
 <definition>: uid .
 <type>: uid .
+<pkgManifest>: uid .
 <unigraph.id>: string @index(exact) .
 type <Entity> {
 	type
 }
 type <Type> {
 	definition
+}
+type <Package> {
+    pkgManifest
 }
 `
 
@@ -47,5 +53,12 @@ export const defaultUserlandSchemas = [
     {
         "unigraph.id": "$/unigraph",
         "version": "schema-v0.0.1dev"
+    },
+    {
+        "unigraph.id": "$/meta/namespace_map",
     }
+]
+
+export const defaultPackages = [
+    semantic
 ]
