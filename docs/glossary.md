@@ -9,3 +9,7 @@ Since the explicit referencing method can be cumbersome and not always consisten
 ## (object) padding
 
 To represent complex hypergraphical relationships (including edge annotations, metadata) and to embrace the philosophy that edges and morphisms should also be considered as objects, we added object padding in our data model. In summary, instead of using the basic key-value model of data, we use `_value*` keywords to add extra depth and flexibility to relationships. For more information see [Data model](./data_model.md)
+
+## shorthand
+
+A shorthand is a shorter notation when dealing with schema compatibilities, like `$/schema/todo`. For more information see [Namespaces](./namespaces.md)
