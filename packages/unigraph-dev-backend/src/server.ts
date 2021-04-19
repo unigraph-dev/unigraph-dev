@@ -4,10 +4,10 @@ import expressWs, { Application, WebsocketRequestHandler } from 'express-ws';
 import { isJsonString, blobToBase64 } from 'unigraph-dev-common/lib/utils/utils';
 import DgraphClient from './dgraphClient';
 import { insertsToUpsert } from './utils/txnWrapper';
-import { EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphSchema, EventGetSchemas, EventProxyFetch, EventQueryByStringWithVars, EventResponser, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
+import { EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventGetPackages, EventGetSchemas, EventProxyFetch, EventQueryByStringWithVars, EventResponser, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
 import { buildUnigraphEntity, getUpsertFromUpdater, makeQueryFragmentFromType, processAutoref } from 'unigraph-dev-common/lib/utils/entityUtils';
-import { checkOrCreateDefaultDataModel } from './datamodelManager';
-import { Cache, createSchemaCache } from './caches';
+import { addUnigraphPackage, checkOrCreateDefaultDataModel, createPackageCache, createSchemaCache } from './datamodelManager';
+import { Cache } from './caches';
 import repl from 'repl';
 import { createSubscriptionWS, MsgCallbackFn, pollSubscriptions, Subscription } from './subscriptions';
 import { callHooks, HookAfterObjectChangedParams, HookAfterSchemaUpdatedParams, HookAfterSubscriptionAddedParams, Hooks } from './hooks';
@@ -23,7 +23,7 @@ export default async function startServer(client: DgraphClient) {
 
   const pollInterval = 10000;
 
-  const caches: Record<string, Cache> = {};
+  const caches: Record<string, Cache<any>> = {};
   let subscriptions: Subscription[] = [];
 
   const lock = getAsyncLock();
@@ -34,6 +34,7 @@ export default async function startServer(client: DgraphClient) {
 
   // Initialize caches
   caches["schemas"] = createSchemaCache(client);
+  caches["packages"] = createPackageCache(client);
 
   // Initialize subscriptions
   const pollCallback: MsgCallbackFn = (id, newdata, msgPort) => {
@@ -52,6 +53,7 @@ export default async function startServer(client: DgraphClient) {
     }],
     "after_schema_updated": [(context: HookAfterSchemaUpdatedParams) => {
       context.newCaches["schemas"].updateNow();
+      context.newCaches["packages"].updateNow();
     }],
     "after_object_changed": [(context: HookAfterObjectChangedParams) => {
       pollSubscriptions(context.subscriptions, dgraphClient, pollCallback);
@@ -156,6 +158,26 @@ export default async function startServer(client: DgraphClient) {
       
     },
 
+    "ensure_unigraph_package": function (event: EventEnsureUnigraphPackage, ws: IWebsocket) {
+      const names = Object.keys(caches["packages"].data);
+      if (names.includes(event.packageName)) {
+        ws.send(makeResponse(event, true));
+      } else {
+        // Falls back to add package
+        eventRouter["add_unigraph_package"]({...event, package: event.fallback}, ws);
+      }
+    },
+
+    "add_unigraph_package": function (event: EventAddUnigraphPackage, ws: IWebsocket) {
+      lock.acquire('caches/schema', function(done: Function) {
+        addUnigraphPackage(dgraphClient, event.package).then(_ => {
+          ws.send(makeResponse(event, true));
+          callHooks(hooks, "after_schema_updated", {caches: caches});
+          done(true, null)
+        }).catch(e => {ws.send(makeResponse(event, false, {"error": e})); done(false, null)});
+      })
+    },
+
     "delete_unigraph_object": function (event: EventDeleteUnigraphObject, ws: IWebsocket) {
       dgraphClient.deleteUnigraphObject(event.uid).then(_ => {
         callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
@@ -240,6 +262,11 @@ export default async function startServer(client: DgraphClient) {
     "get_schemas": async function (event: EventGetSchemas, ws: IWebsocket) {
       // TODO: Option to get only a couple of schemas in cache
       ws.send(makeResponse(event, true, {"schemas": caches['schemas'].data}));
+    },
+
+    "get_packages": async function (event: EventGetPackages, ws: IWebsocket) {
+      // TODO: Option to get only a couple of schemas in cache
+      ws.send(makeResponse(event, true, {"packages": caches['packages'].data}));
     },
 
     "proxy_fetch": async function (event: EventProxyFetch, ws: IWebsocket) {

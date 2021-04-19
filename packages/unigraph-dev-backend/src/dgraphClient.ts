@@ -108,7 +108,7 @@ export default class DgraphClient {
    * @param {UnigraphUpsert} data 
    */
   async createUnigraphUpsert(data: UnigraphUpsert) {
-    //console.log("Trying to create upsert....============================================")
+    console.log("Trying to create upsert....============================================")
     const txn = this.dgraphClient.newTxn();
     try {
       const querybody = data.queries.join('\n');
@@ -118,10 +118,10 @@ export default class DgraphClient {
       const mutations: Mutation[] = data.mutations.map((obj: any) => {
         const mu = new dgraph.Mutation();
         mu.setSetJson(obj);
-        //console.log(JSON.stringify(obj, null, 2))
+        console.log(JSON.stringify(obj, null, 2))
         return mu;
       });
-      //console.log(querystr)
+      console.log(querystr)
       const req = new dgraph.Request();
       /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
       data.queries.length ? req.setQuery(querystr) : false;
@@ -129,13 +129,13 @@ export default class DgraphClient {
       req.setCommitNow(true);
 
       const response = await txn.doRequest(req);
-      //console.log(JSON.stringify(response, null, 2))
+      console.log(JSON.stringify(response, null, 2))
     } catch (e) {
       console.error('Error: ', e);
     } finally {
       await txn.discard();
     }
-    //console.log("upsert details above================================================")
+    console.log("upsert details above================================================")
   }
 
   async queryData<T = unknown>(query: string, vars: Record<string, any> = {}) {
@@ -212,6 +212,29 @@ export default class DgraphClient {
     return this.queryData<any[]>(`
     query findByName() {
       entities(func: eq(dgraph.type, "Type")) @recurse {
+        uid
+        expand(_predicate_)
+      }
+    }
+  `, {})
+  }
+
+  /** Only get schemas that are registered through the package manager. */
+  async getSchemasFromTable() {
+    return (await this.queryData<any[]>(`
+    query findByName() {
+      entities(func: eq(unigraph.id, "$/meta/namespace_map")) @recurse {
+        uid
+        expand(_predicate_)
+      }
+    }
+  `, {}))[0]
+  }
+
+  async getPackages() {
+    return this.queryData<any[]>(`
+    query findByName() {
+      entities(func: eq(dgraph.type, "Package")) @recurse {
         uid
         expand(_predicate_)
       }

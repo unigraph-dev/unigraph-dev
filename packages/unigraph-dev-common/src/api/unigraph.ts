@@ -2,6 +2,7 @@
 
 import { typeMap } from '../types/consts'
 import { SchemaDgraph } from '../types/json-ts';
+import { PackageDeclaration } from '../types/packages';
 import { base64ToBlob } from '../utils/utils';
 
 export interface Unigraph {
@@ -10,6 +11,7 @@ export interface Unigraph {
     eventTarget: EventTarget;
     createSchema(schema: any): Promise<any>;
     ensureSchema(name: string, fallback: any): Promise<any>;
+    ensurePackage(packageName: string, fallback: PackageDeclaration): Promise<any>;
     // eslint-disable-next-line @typescript-eslint/ban-types
     subscribeToType(name: string, callback: Function, eventId: number | undefined): Promise<number>;
     // eslint-disable-next-line @typescript-eslint/ban-types
@@ -23,6 +25,7 @@ export interface Unigraph {
     getReferenceables(): Promise<any>;
     getReferenceables(key: string | undefined, asMapWithContent: boolean | undefined): Promise<any>;
     getSchemas(schemas: string[] | undefined): Promise<Map<string, SchemaDgraph>>;
+    getPackages(packages: string[] | undefined): Promise<Map<string, PackageDeclaration>>;
     proxyFetch(url: string, options?: Record<string, any>): Promise<Blob>;
     buildGraph(objects: any[]): any[];
 }
@@ -140,6 +143,14 @@ export default function unigraph(url: string): Unigraph {
             };
             sendEvent(connection, "ensure_unigraph_schema", {name: name, fallback: fallback}, id)
         }),
+        ensurePackage: (packageName, fallback) => new Promise((resolve, reject) => {
+            const id = getRandomInt();
+            callbacks[id] = (response: any) => {
+                if (response.success) resolve(response);
+                else reject(response);
+            };
+            sendEvent(connection, "ensure_unigraph_package", {packageName: packageName, fallback: fallback}, id)
+        }),
         subscribeToType: (name, callback, eventId = undefined) => new Promise((resolve, reject) => {
             const id = typeof eventId === "number" ? eventId : getRandomInt();
             callbacks[id] = (response: any) => {
@@ -198,6 +209,16 @@ export default function unigraph(url: string): Unigraph {
             };
             sendEvent(connection, "get_schemas", {
                 schemas: []
+            }, id);
+        }),
+        getPackages: (packages) => new Promise((resolve, reject) => {
+            const id = getRandomInt();
+            callbacks[id] = (response: any) => {
+                if (response.success && response.packages) resolve(response.packages);
+                else reject(response);
+            };
+            sendEvent(connection, "get_packages", {
+                packages: []
             }, id);
         }),
         /**

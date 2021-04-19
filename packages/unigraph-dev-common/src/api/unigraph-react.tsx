@@ -6,6 +6,7 @@
  * For some sample usages, see the examples folder in unigraph-dev-explorer.
  */
 import React from "react"
+import { UnigraphContext, UnigraphHooks } from "../types/unigraph";
 import { getRandomInt } from './unigraph';
 
 export function withUnigraphSubscription(WrappedComponent: React.FC<{data: any[]}>, 
@@ -16,8 +17,10 @@ export function withUnigraphSubscription(WrappedComponent: React.FC<{data: any[]
         const [data, setData] = React.useState(unigraphContext.defaultData);
 
         const init = async () => {
-            Promise.all(unigraphContext.schemas.map(el => (window as any).unigraph.ensureSchema(el.name, el.schema)))
-                .then(unigraphHooks.afterSchemasLoaded(subsId, setData))
+            Promise.all([
+                ...unigraphContext.schemas.map(el => (window as any).unigraph.ensureSchema(el.name, el.schema)),
+                ...unigraphContext.packages.map(el => (window as any).unigraph.ensurePackage(el.pkgManifest.pkgPackageName, el))
+            ]).then(unigraphHooks.afterSchemasLoaded(subsId, setData))
         }
 
         React.useEffect(() => {

@@ -21,6 +21,7 @@ import { UserLibraryAll } from './components/UserLibrary';
 import UserLibraryObject from './components/UserLibrary/UserLibraryObject';
 import { Bookmarks } from './examples/bookmarks/Bookmarks';
 import Settings from './pages/Settings';
+import { PackageManager } from './components/PackageManager/PackageManager';
 
 // @ts-ignore
 window.React3 = React;
@@ -73,6 +74,10 @@ export const pages: Record<string, any> = {
   'settings': {
     'constructor': () => <Settings />,
     'name': 'User Settings',
+  },
+  'package-manager': {
+    'constructor': () => <PackageManager />,
+    'name': 'Package Manager'
   },
   'library/object': {
     'constructor': (props: any) => <UserLibraryObject {...props} />,

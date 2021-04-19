@@ -1,13 +1,16 @@
-declare type UnigraphSchemaDeclaration = {
+import { PackageDeclaration } from "./packages"
+
+export type UnigraphSchemaDeclaration = {
     name: string,
     schema: any
 }
 
-declare type UnigraphContext = {
+export type UnigraphContext = {
     schemas: UnigraphSchemaDeclaration[],
+    packages: PackageDeclaration[],
     defaultData: any,
 }
 
-declare type UnigraphHooks = {
+export type UnigraphHooks = {
     afterSchemasLoaded: (subsId: any, componentThis: any) => any,
 }

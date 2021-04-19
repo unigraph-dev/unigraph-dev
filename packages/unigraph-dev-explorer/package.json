@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.11.0",
+    "@material-ui/data-grid": "^4.0.0-alpha.25",
     "@material-ui/icons": "^4.9.1",
     "@material-ui/lab": "^4.0.0-alpha.57",
     "codemirror": "^5.58.3",
@@ -17,8 +18,8 @@
     "react-use": "^15.3.4",
     "typeface-roboto": "^1.1.13",
     "typescript": "^4.2.2",
-    "uuid": "^8.3.2",
-    "unigraph-dev-common": "0.0.1"
+    "unigraph-dev-common": "0.0.1",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^4.2.4",

@@ -46,11 +46,15 @@ export type Primitive = {"type": PrimitiveTypes}
 
 
 export type Schema = {
-    "unigraph.id": string,
+    "unigraph.id"?: string,
     definition: Definition
 }
 
-export type SchemaDgraph = Schema | {"dgraph.type": "Type"}
+export type SchemaDgraph = {
+    "unigraph.id"?: string,
+    definition: Definition,
+    "dgraph.type": "Type"
+}
 
 export interface SchemaRef<T extends string> {
     type: UnigraphIdType<`$/schema/${T}`>
