@@ -1,52 +1,33 @@
+import { Card, Typography } from '@material-ui/core';
 import React, { useEffect } from 'react';
 
-import Box from '@material-ui/core/Box';
-import { makeStyles } from '@material-ui/core/styles';
-import { red } from '@material-ui/core/colors';
-import { Typography } from '@material-ui/core';
-
-const useStyles = makeStyles(() => ({
-  code: {
-    backgroundColor: red[50],
-    color: red[500],
-    border: `1px solid ${red[100]}`,
-    borderRadius: 4,
-    padding: '2px 4px',
-  }
-}))
+import GridLayout from 'react-grid-layout'; 
+import { AppLibrary } from '../components/PackageManager/AppLibrary';
+import { ConnectionWidget } from '../components/UnigraphMeta/ConnectionWidget';
+import { TagWidget } from '../examples/semantic/TagWidget';
+import './home.css';
 
 export default function ExplorerHome() {
-  const classes = useStyles();
-  const [messages, actualSetMessages]: [any[], Function] = React.useState([]);
 
-  const setMessages = (msgs: any[]) => {
-    let reversed = msgs.reverse();
-    actualSetMessages(reversed.slice(0, 5));
-  }
-
-  const listener = (_: any) => {
-    setMessages(window.unigraph.backendMessages);
-  }
-
-  useEffect(() => {
-    console.log(window.unigraph)
-    window.unigraph.eventTarget.addEventListener("onmessage", listener);
-    setMessages(window.unigraph.backendMessages);
-
-    return function cleanup() {
-      window.unigraph.eventTarget.removeEventListener("onmessage", listener);
-    }
-  }, [])
-
+  const layout = [
+    {i: 'a', x: 0, y: 0, w: 6, h: 5},
+    {i: 'b', x: 6, y: 0, w: 6, h: 8},
+    {i: 'c', x: 0, y: 5, w: 6, h: 8},
+  ];
   return (
-    <div>
-      <Typography variant="h4">Connection status</Typography>
-      <p>Connection readyState (connecting=0, open=1, closing=2, closed=3): {window.unigraph.backendConnection.readyState}</p>
-      <p>Connected to: {window.unigraph.backendConnection.url}</p>
-      <Typography variant="h4" gutterBottom>Messages</Typography>
-      <Box display="grid" gridGap={8} justifyContent="start">
-        {messages.map((message, i) => <code key={i} className={classes.code}>{JSON.stringify(message)}</code>)}
-      </Box>
-    </div>
-  );
+    <React.Fragment>
+      <Typography variant="body2">Did you know? You can pop any widget here into its own window by clicking on the bottom right corner.</Typography>
+      <GridLayout className="layout" layout={layout} cols={12} rowHeight={30} width={1200}>
+        <div key="a"><Card variant="outlined" style={{height: "100%", padding: "16px"}}> 
+          <TagWidget/>
+        </Card></div>
+        <div key="b"><Card variant="outlined" style={{height: "100%", padding: "16px"}}> 
+          <AppLibrary/>
+        </Card></div>
+        <div key="c"><Card variant="outlined" style={{height: "100%", padding: "16px"}}> 
+          <ConnectionWidget/>
+        </Card></div>
+      </GridLayout>
+    </React.Fragment>
+  )
 }

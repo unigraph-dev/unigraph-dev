@@ -1,4 +1,4 @@
-import { IconButton } from '@material-ui/core';
+import { Button, ButtonGroup, Checkbox, FormControlLabel, IconButton, List, ListItem } from '@material-ui/core';
 import { MoreVert } from '@material-ui/icons';
 import React, { FC, ReactElement } from 'react';
 import ReactJson, { InteractionProps } from 'react-json-view';
@@ -18,6 +18,7 @@ type ObjectViewOptions = {
 type ObjectListViewOptions = {
     filters?: {
         showDeleted?: boolean,
+        showNoView?: boolean,
     },
 }
 
@@ -29,7 +30,7 @@ type DefaultObjectViewProps = {
 type DefaultObjectListViewProps = {
     component: (...args: any[]) => ReactElement<any, any>,
     objects: any[],
-    options: ObjectListViewOptions,
+    options?: ObjectListViewOptions,
 };
 
 const StringObjectViewer = ({object}: {object: any}) => {
@@ -62,7 +63,7 @@ const JsontreeObjectViewer = ({object, options}: {object: any, options: ObjectVi
     </div>
 }
 
-const DynamicViews: Record<string, DynamicViewRenderer> = {
+export const DynamicViews: Record<string, DynamicViewRenderer> = {
     "$/schema/todo": TodoItem,
     "$/schema/web_bookmark": BookmarkItem
 }
@@ -118,9 +119,10 @@ const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options }) => {
     </div>
 }
 
-const DefaultObjectListView: FC<DefaultObjectListViewProps> = ({component, objects, options}) => {
+const DefaultObjectList: FC<DefaultObjectListViewProps> = ({component, objects, options}) => {
     let finalObjects = objects;
-    if (!options.filters?.showDeleted) finalObjects = filterPresets['no-deleted'](finalObjects);
+    if (!options?.filters?.showDeleted) finalObjects = filterPresets['no-deleted'](finalObjects);
+    if (!options?.filters?.showNoView) finalObjects = filterPresets['no-noview'](finalObjects, DynamicViews);
 
     return <div>{finalObjects.map(obj => React.createElement(
         component, {}, 
@@ -132,4 +134,38 @@ const DefaultObjectListView: FC<DefaultObjectListViewProps> = ({component, objec
             }} />]))}</div>
 }
 
-export { DefaultObjectView, DefaultObjectListView};
+const DefaultObjectListView: FC<DefaultObjectListViewProps> = ({component, objects}) => {
+
+    const [showDeleted, setShowDeleted] = React.useState(false);
+    const [showNoView, setShowNoView] = React.useState(false);
+
+    return <div>
+        <ButtonGroup color="primary" aria-label="outlined primary button group">
+            <Button>Export All</Button>
+            <Button>Export Selected</Button>
+            <Button>Select All</Button>
+        </ButtonGroup>
+        <FormControlLabel control={<Checkbox
+            checked={showDeleted}
+            onChange={() => setShowDeleted(!showDeleted)}
+            name="showDeleted"
+            color="primary"
+        />} label="Show Deleted"/>
+        <FormControlLabel control={<Checkbox
+            checked={showNoView}
+            onChange={() => setShowNoView(!showNoView)}
+            name="showNoView"
+            color="primary"
+        />} label="Show Objects without a View"/>
+        <List>
+            <DefaultObjectList 
+                component={component}
+                objects={objects}
+                options={{filters: {showDeleted: showDeleted, showNoView: showNoView}}}
+            />
+        </List>
+    </div>
+
+}
+
+export { DefaultObjectView, DefaultObjectList, DefaultObjectListView};
