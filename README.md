@@ -2,6 +2,8 @@
 
 A local-first and universal graph database, knowledge engine, and workspace for your life.
 
+[Live demo](http://workspace.jingyixu.me:3000)
+
 ## Projects
 
 This repository contains all relevant source code for unigraph-dev:
