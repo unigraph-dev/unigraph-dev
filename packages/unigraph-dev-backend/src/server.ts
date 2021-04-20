@@ -13,6 +13,7 @@ import { createSubscriptionWS, MsgCallbackFn, pollSubscriptions, Subscription } 
 import { callHooks, HookAfterObjectChangedParams, HookAfterSchemaUpdatedParams, HookAfterSubscriptionAddedParams, Hooks } from './hooks';
 import { getAsyncLock } from './asyncManager';
 import fetch from 'node-fetch';
+import { EventEmitter } from 'ws';
 
 const PORT = 3001;
 const verbose = 5;
@@ -114,9 +115,16 @@ export default async function startServer(client: DgraphClient) {
       const queryAny = `(func: type(Entity)) @recurse { uid expand(_predicate_) }`
       const query = event.schema === "any" ? queryAny : `(func: uid(par${event.id})) 
       ${makeQueryFragmentFromType(event.schema, caches["schemas"].data)}
-      par${event.id} as var(func: has(type)) @filter(NOT type(Deleted)) @cascade {
+      par${event.id} as var(func: has(type)) @filter((NOT type(Deleted)) AND type(Entity)) @cascade {
         type @filter(eq(<unigraph.id>, "${event.schema}"))
       }`
+      console.log(query)
+      eventRouter["subscribe_to_object"]({...event, queryFragment: query}, ws)
+    },
+
+    "subscribe_to_query": function (event: EventSubscribeObject, ws: IWebsocket) {
+      const query = `(func: uid(par${event.id})) @recurse {uid expand(_predicate_)}
+      par${event.id} as var${event.queryFragment}`
       console.log(query)
       eventRouter["subscribe_to_object"]({...event, queryFragment: query}, ws)
     },

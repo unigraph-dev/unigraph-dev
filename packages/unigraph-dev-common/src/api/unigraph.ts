@@ -9,6 +9,7 @@ export interface Unigraph {
     backendConnection: WebSocket;
     backendMessages: string[];
     eventTarget: EventTarget;
+    getStatus(): Promise<any>;
     createSchema(schema: any): Promise<any>;
     ensureSchema(name: string, fallback: any): Promise<any>;
     ensurePackage(packageName: string, fallback: PackageDeclaration): Promise<any>;
@@ -16,6 +17,8 @@ export interface Unigraph {
     subscribeToType(name: string, callback: Function, eventId: number | undefined): Promise<number>;
     // eslint-disable-next-line @typescript-eslint/ban-types
     subscribeToObject(uid: string, callback: Function, eventId: number | undefined): Promise<number>;
+    // eslint-disable-next-line @typescript-eslint/ban-types
+    subscribeToQuery(fragment: string, callback: Function, eventId: number | undefined): Promise<number>;
     unsubscribe(id: number): any;
     addObject(object: any, schema: string): any;
     deleteObject(uid: string): any;
@@ -127,6 +130,14 @@ export default function unigraph(url: string): Unigraph {
         eventTarget: eventTarget,
         unpad: unpad,
         buildGraph: buildGraph,
+        getStatus: () => new Promise((resolve, reject) => {
+            const id = getRandomInt();
+            callbacks[id] = (response: any) => {
+                if (response.success) resolve(response);
+                else reject(response);
+            };
+            sendEvent(connection, 'get_status', {}, id)
+        }),
         createSchema: (schema) => new Promise((resolve, reject) => {
             const id = getRandomInt();
             callbacks[id] = (response: any) => {
@@ -169,6 +180,15 @@ export default function unigraph(url: string): Unigraph {
             subscriptions[id] = (result: any) => callback(result[0]);
             const frag = `(func: uid(${uid})) @recurse { uid expand(_predicate_) }`
             sendEvent(connection, "subscribe_to_object", {queryFragment: frag}, id);
+        }), 
+        subscribeToQuery: (fragment, callback, eventId = undefined) => new Promise((resolve, reject) => {
+            const id = typeof eventId === "number" ? eventId : getRandomInt();
+            callbacks[id] = (response: any) => {
+                if (response.success) resolve(id);
+                else reject(response);
+            };
+            subscriptions[id] = (result: any) => callback(result);
+            sendEvent(connection, "subscribe_to_query", {queryFragment: fragment}, id);
         }), 
         unsubscribe: (id) => {
             sendEvent(connection, "unsubscribe_by_id", {}, id);

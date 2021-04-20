@@ -22,6 +22,7 @@ import UserLibraryObject from './components/UserLibrary/UserLibraryObject';
 import { Bookmarks } from './examples/bookmarks/Bookmarks';
 import Settings from './pages/Settings';
 import { PackageManager } from './components/PackageManager/PackageManager';
+import { TagResults } from './examples/semantic/TagResults';
 
 // @ts-ignore
 window.React3 = React;
@@ -91,6 +92,10 @@ export const pages: Record<string, any> = {
     'constructor': () => <ExplorerHome />,
     'name': 'Home',
   },
+  'semantic/tagresults': {
+    'constructor': (props: any) => <TagResults {...props} />,
+    'name': 'Tag Results'
+  }
 }
 
 export const components: Record<string, any> = {

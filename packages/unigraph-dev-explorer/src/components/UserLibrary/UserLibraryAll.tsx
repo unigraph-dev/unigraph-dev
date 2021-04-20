@@ -7,7 +7,6 @@ const UserLibraryAll = () => {
 
     const [objects, setObjects]: [any[], Function] = React.useState([]);
     const [id, setId] = React.useState(Date.now());
-    const [showDeleted, setShowDeleted] = React.useState(false);
 
     useEffectOnce(() => {
         window.unigraph.subscribeToType("any", (objects: any[]) => { setObjects(objects) }, id);
@@ -20,25 +19,9 @@ const UserLibraryAll = () => {
     return <div>
         <Typography gutterBottom variant="h4">
             Library - All Items
+            <DefaultObjectListView objects={objects} component={ListItem}/>
         </Typography>
-        <ButtonGroup color="primary" aria-label="outlined primary button group">
-            <Button>Export All</Button>
-            <Button>Export Selected</Button>
-            <Button>Select All</Button>
-        </ButtonGroup>
-        <FormControlLabel control={<Checkbox
-            checked={showDeleted}
-            onChange={() => setShowDeleted(!showDeleted)}
-            name="showDeleted"
-            color="primary"
-        />} label="Show Deleted"/>
-        <List>
-            <DefaultObjectListView
-                component={ListItem}
-                objects={objects}
-                options={{filters: {showDeleted: showDeleted}}}
-            />
-        </List>
+        
         
     </div>
 }

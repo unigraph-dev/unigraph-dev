@@ -10,3 +10,13 @@ We use a custom fork of dgraph which can be founded in the github organization.
 ## Snippets
 
 ### Query for all objects with unigraph.id
+
+### Create relation
+```{
+  "set": {
+  "uid": "0xa4",
+  "_value.[": [
+  {"_value": {"uid": "0x7a"}}
+]
+}
+}```
