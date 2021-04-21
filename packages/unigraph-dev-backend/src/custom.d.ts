@@ -133,7 +133,8 @@ declare type EventGetSchemas = {
   type: "event",
   event: "get_schemas",
   id: number,
-  schemas: string[]
+  schemas: string[],
+  resolve: boolean
 }
 
 declare type EventGetPackages = {

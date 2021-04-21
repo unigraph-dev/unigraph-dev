@@ -23,9 +23,7 @@ import { Bookmarks } from './examples/bookmarks/Bookmarks';
 import Settings from './pages/Settings';
 import { PackageManager } from './components/PackageManager/PackageManager';
 import { TagResults } from './examples/semantic/TagResults';
-
-// @ts-ignore
-window.React3 = React;
+import { ObjectEditor } from './components/ObjectView/ObjectEditor';
 
 // TODO: custom theme
 const useStyles = makeStyles(theme => ({
@@ -95,6 +93,10 @@ export const pages: Record<string, any> = {
   'semantic/tagresults': {
     'constructor': (props: any) => <TagResults {...props} />,
     'name': 'Tag Results'
+  },
+  'object-editor': {
+    'constructor': () => <ObjectEditor />,
+    'name': 'Object Editor'
   }
 }
 
