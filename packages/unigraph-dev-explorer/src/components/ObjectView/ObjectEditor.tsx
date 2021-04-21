@@ -1,4 +1,4 @@
-import { TextField } from '@material-ui/core';
+import { Button, TextField } from '@material-ui/core';
 import React from 'react';
 import { useEffectOnce } from 'react-use';
 import { Definition, SchemaDgraph } from 'unigraph-dev-common/lib/types/json-ts';
@@ -41,13 +41,29 @@ const getFieldsFromDefinition = (def: Definition, schemas: any, rootObj: any, pa
         // @ts-ignore
     } else if (def.type['unigraph.id'].startsWith('$/primitive')) {
         let onFChange = recursiveBindField(path, rootObj)
-        return <TextField variant="outlined" onChange={(newValue) => (onFChange(newValue.target.value))}/>
+        let val: Function = (v: string) => v;
+        // @ts-ignore
+        switch (def.type['unigraph.id']) {
+            case "$/primitive/number":
+                val = (v: string) => Number(v);
+                break;
+            case "$/primitive/boolean":
+                val = (v: string) => Boolean(v);
+                break;
+            default:
+                break;
+        }
+        return <TextField variant="outlined" onChange={(event) => {
+            let newValue = event.target.value;
+            onFChange(val(newValue));
+        }}/>
     }
 }
 
 export const ObjectEditor = () => {
 
     const [currentSchema, setCurrentSchema]: [null | SchemaDgraph, Function] = React.useState(null)
+    const [currentSchemaSHName, setCurrentSchemaSHName]: any = React.useState(null)
     const [referenceables, setReferenceables] = React.useState([]);
     const [allSchemas, setAllSchemas] = React.useState({});
 
@@ -62,13 +78,14 @@ export const ObjectEditor = () => {
         Schema name: <ReferenceableSelectorControlled 
             referenceables={referenceables}
             onChange={(schema: string) => window.unigraph.getSchemas()
-                .then((schemas: Record<string, SchemaDgraph>) => setCurrentSchema(schemas[schema]))}
-            value={// @ts-ignore 
+                .then((schemas: Record<string, SchemaDgraph>) => {setCurrentSchema(schemas[schema]); setCurrentSchemaSHName(schema)})}
+            value={// @ts-ignore
                 (currentSchema as unknown as SchemaDgraph)?.definition.type['unigraph.id']}
         />
         {currentSchema ? <div>
             {getFieldsFromDefinition((currentSchema as any).definition, allSchemas, [currentObject, setCurrentObject])}
             {JSON.stringify(currentObject)}
         </div> : []}
+        <Button onClick={()=> {window.unigraph.addObject(currentObject, currentSchemaSHName)}}>Submit (WIP)</Button>
     </div>
 }
