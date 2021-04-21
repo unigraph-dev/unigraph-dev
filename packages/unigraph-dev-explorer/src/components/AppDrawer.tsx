@@ -83,15 +83,6 @@ export default function DrawerRouter() {
               <ListItemText primary="DataModel Playground" />
             </ListItem>
             <Divider/>
-            <ListSubheader component="div" id="subheader-example-apps"> Example Apps </ListSubheader>
-            <ListItem button onClick={()=>navigator('/examples/todo')}>
-              <ListItemIcon><PlaylistAddCheck /></ListItemIcon>
-              <ListItemText primary="Todo list" />
-            </ListItem>
-            <ListItem button onClick={()=>navigator('/examples/bookmarks')}>
-              <ListItemIcon><Bookmarks /></ListItemIcon>
-              <ListItemText primary="Web Bookmarks" />
-            </ListItem>
           </List>
         </Drawer>}
     </NavigationContext.Consumer>

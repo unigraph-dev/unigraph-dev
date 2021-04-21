@@ -2,7 +2,7 @@ import { Card, Typography } from '@material-ui/core';
 import React, { useEffect } from 'react';
 
 import GridLayout from 'react-grid-layout'; 
-import { AppLibrary } from '../components/PackageManager/AppLibrary';
+import { AppLibraryWidget } from '../components/PackageManager/AppLibraryWidget';
 import { ConnectionWidget } from '../components/UnigraphMeta/ConnectionWidget';
 import { TagWidget } from '../examples/semantic/TagWidget';
 import './home.css';
@@ -22,7 +22,7 @@ export default function ExplorerHome() {
           <TagWidget/>
         </Card></div>
         <div key="b"><Card variant="outlined" style={{height: "100%", padding: "16px"}}> 
-          <AppLibrary/>
+          <AppLibraryWidget/>
         </Card></div>
         <div key="c"><Card variant="outlined" style={{height: "100%", padding: "16px"}}> 
           <ConnectionWidget/>

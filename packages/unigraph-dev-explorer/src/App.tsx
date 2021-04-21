@@ -24,6 +24,7 @@ import Settings from './pages/Settings';
 import { PackageManager } from './components/PackageManager/PackageManager';
 import { TagResults } from './examples/semantic/TagResults';
 import { ObjectEditor } from './components/ObjectView/ObjectEditor';
+import { AppLibrary } from './components/PackageManager/AppLibrary';
 
 // TODO: custom theme
 const useStyles = makeStyles(theme => ({
@@ -97,6 +98,10 @@ export const pages: Record<string, any> = {
   'object-editor': {
     'constructor': () => <ObjectEditor />,
     'name': 'Object Editor'
+  },
+  'app-library': {
+    'constructor': () => <AppLibrary/>,
+    'name': 'App Library'
   }
 }
 
