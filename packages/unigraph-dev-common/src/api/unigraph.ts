@@ -27,7 +27,7 @@ export interface Unigraph {
     updateObject(uid: string, newObject: any): any;
     getReferenceables(): Promise<any>;
     getReferenceables(key: string | undefined, asMapWithContent: boolean | undefined): Promise<any>;
-    getSchemas(schemas: string[] | undefined): Promise<Map<string, SchemaDgraph>>;
+    getSchemas(schemas: string[] | undefined, resolve?: boolean): Promise<Map<string, SchemaDgraph>>;
     getPackages(packages: string[] | undefined): Promise<Map<string, PackageDeclaration>>;
     proxyFetch(url: string, options?: Record<string, any>): Promise<Blob>;
     buildGraph(objects: any[]): any[];
@@ -221,14 +221,15 @@ export default function unigraph(url: string): Unigraph {
                 }`
             }, id);
         }),
-        getSchemas: (schemas: string[] | undefined) => new Promise((resolve, reject) => {
+        getSchemas: (schemas: string[] | undefined, resolve = false) => new Promise((resolver, reject) => {
             const id = getRandomInt();
             callbacks[id] = (response: any) => {
-                if (response.success && response.schemas) resolve(response.schemas);
+                if (response.success && response.schemas) resolver(response.schemas);
                 else reject(response);
             };
             sendEvent(connection, "get_schemas", {
-                schemas: []
+                schemas: [],
+                resolve: resolve
             }, id);
         }),
         getPackages: (packages) => new Promise((resolve, reject) => {
