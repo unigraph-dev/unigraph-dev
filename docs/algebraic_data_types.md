@@ -1,0 +1,37 @@
+# Algebraic data types
+
+Unigraph schema supports [algebraic data types](https://en.wikipedia.org/wiki/Algebraic_data_type), which is a kind of complex typing system.
+
+**Where to next?** check out the `entityUtils.ts` in the `unigraph-dev-common` package.
+
+## Progress
+
+Implemented: 
+- Disjoint union (via `$/composer/Union`)
+- Product types (native)
+
+Not implemented:
+
+## Disjoint union
+
+### Behavior
+- Without specifications in the object, the schema checker would reject ambiguously-typed objects - that is, objects with more than one possible schema membership.
+- 
+Example:
+```json
+{
+    "type": { "unigraph.id": "$/composer/Array" },
+    "parameters": {
+        "element": {
+            "type": { "unigraph.id": "$/composer/Union" },
+            "parameters": {
+                "definitions": [{
+                    "type": { "unigraph.id": "$/schema/user" }
+                }, {
+                    "type": { "unigraph.id": "$/schema/customer" }
+                }]
+            }
+        }
+    }
+}
+```
