@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "author": "your name",
     "description": "My Electron app",
-    "main": "main.js",
+    "main": "src/main.js",
     "scripts": {
         "start": "electron ."
     }
