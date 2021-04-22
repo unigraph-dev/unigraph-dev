@@ -1,4 +1,4 @@
-export const typeMap = {
+export const typeMap: Record<string, string> = {
     "object": "_value",
     "number": "_value.#",
     "bigint": "_value.#i",
