@@ -112,14 +112,17 @@ export default async function startServer(client: DgraphClient) {
     },
 
     "subscribe_to_type": function (event: EventSubscribeType, ws: IWebsocket) {
-      const queryAny = `(func: type(Entity)) @recurse { uid expand(_predicate_) }`
-      const query = event.schema === "any" ? queryAny : `(func: uid(par${event.id})) 
-      ${makeQueryFragmentFromType(event.schema, caches["schemas"].data)}
-      par${event.id} as var(func: has(type)) @filter((NOT type(Deleted)) AND type(Entity)) @cascade {
-        type @filter(eq(<unigraph.id>, "${event.schema}"))
-      }`
-      console.log(query)
-      eventRouter["subscribe_to_object"]({...event, queryFragment: query}, ws)
+      lock.acquire('caches/schema', function(done: (any)) {
+        done(true);
+        const queryAny = `(func: type(Entity)) @recurse { uid expand(_predicate_) }`
+        const query = event.schema === "any" ? queryAny : `(func: uid(par${event.id})) 
+        ${makeQueryFragmentFromType(event.schema, caches["schemas"].data)}
+        par${event.id} as var(func: has(type)) @filter((NOT type(Deleted)) AND type(Entity)) @cascade {
+          type @filter(eq(<unigraph.id>, "${event.schema}"))
+        }`
+        console.log(query)
+        eventRouter["subscribe_to_object"]({...event, queryFragment: query}, ws)
+      });
     },
 
     "subscribe_to_query": function (event: EventSubscribeObject, ws: IWebsocket) {
@@ -157,9 +160,11 @@ export default async function startServer(client: DgraphClient) {
       lock.acquire('caches/schema', function (done: Function) {
         const schema = (Array.isArray(event.schema) ? event.schema : [event.schema]);
         const upsert: UnigraphUpsert = insertsToUpsert(schema);
-        dgraphClient.createUnigraphUpsert(upsert).then(_ => {
-          ws.send(makeResponse(event, true));
+        dgraphClient.createUnigraphUpsert(upsert).then(async _ => {
+          await caches['schemas'].updateNow();
+          await caches['packages'].updateNow();
           callHooks(hooks, "after_schema_updated", {caches: caches});
+          ws.send(makeResponse(event, true));
           done(true, null)
         }).catch(e => {ws.send(makeResponse(event, false, {"error": e})); done(false, null)});
       })

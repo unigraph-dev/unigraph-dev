@@ -9,7 +9,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "yarn build && node dist",
+    "start": "yarn build && node --trace-warnings dist",
     "example": "yarn build && node dist/example",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

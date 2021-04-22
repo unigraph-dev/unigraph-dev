@@ -43,7 +43,7 @@ export function createSchemaCache(client: DgraphClient): Cache<any> {
         // Remove all interface objects items first
         Object.entries(cache.data).forEach(([k, v]: any) => {
             if (k.startsWith("$/schema/interface/")) {
-                let defn = v.definition as ComposerUnionInstance;
+                const defn = v.definition as ComposerUnionInstance;
                 defn.parameters.definitions = [];
             }
         })
@@ -51,8 +51,8 @@ export function createSchemaCache(client: DgraphClient): Cache<any> {
         newdata2.forEach((obj: any) => {
             if (obj && typeof obj["unigraph.id"] === "string" && obj["unigraph.id"].split("/").reverse()[1] === 'interface') {
                 // This is an interface object
-                let defn = obj.definition as ComposerUnionInstance;
-                let revPath = obj["unigraph.id"].split("/").reverse();
+                const defn = obj.definition as ComposerUnionInstance;
+                const revPath = obj["unigraph.id"].split("/").reverse();
                 (cache.data[`$/schema/interface/${revPath[0]}`].definition as ComposerUnionInstance)
                     .parameters.definitions.push(...defn.parameters.definitions)
             } 
