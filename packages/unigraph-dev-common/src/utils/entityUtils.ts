@@ -1,6 +1,8 @@
 // FIXME: This file is too large! Either break it up or add synopsis here.
 
-import { Definition, EntityDgraph, RefUnigraphIdType, Schema, UidType, UnigraphIdType, UnigraphTypeString } from "../types/json-ts";
+import unigraph from "../api/unigraph";
+import { typeMap } from "../types/consts";
+import { ComposerUnionInstance, Definition, EntityDgraph, RefUnigraphIdType, Schema, UidType, UnigraphIdType, UnigraphTypeString } from "../types/json-ts";
 
 //function uid<IdType extends string>(id: IdType): UidType<IdType> {return {"uid": id}}
 export function makeUnigraphId<IdType extends string>(id: IdType): UnigraphIdType<IdType> {return {"unigraph.id": id}}
@@ -36,7 +38,7 @@ function getUnigraphType (object: any): UnigraphTypeString {
     return typeString;
 }
 
-type BuildEntityOptions = {makeAbstract: boolean, validateSchema: boolean}
+type BuildEntityOptions = {validateSchema: boolean}
 
 /* Schema checking spec list:
  * - should be able to check basic objects (restrictive schema, nonabstract, unpadded)
@@ -48,14 +50,16 @@ export function isTypeAlias(localSchema: Record<string, any>, rawPartUnigraphTyp
     return (localSchema?.type['unigraph.id'] === rawPartUnigraphType) && (!rawPartUnigraphType.startsWith('$/composer/'));
 }
 
-function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions = {makeAbstract: false, validateSchema: true}, schemaMap: Record<string, Schema>, localSchema: Definition | any): {"_value": any} {
+function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions = {validateSchema: true}, schemaMap: Record<string, Schema>, localSchema: Definition | any): {"_value": any} {
     let unigraphPartValue: any = undefined;
     let predicate = "_value";
+    let isUnion = false;
     const rawPartUnigraphType = getUnigraphType(rawPart);
 
     try {
         // Check for localSchema accordance
-        if (localSchema.type && (localSchema.type['unigraph.id'] === rawPartUnigraphType || isTypeAlias(schemaMap[localSchema.type['unigraph.id']].definition, rawPartUnigraphType))) {
+        if (localSchema.type && (localSchema.type['unigraph.id'] === rawPartUnigraphType || isTypeAlias(schemaMap[localSchema.type['unigraph.id']]?.definition, rawPartUnigraphType))) {
+            // Case 1: Entity type == schema type. This is straightforward
             switch (rawPartUnigraphType) {
                 case "$/composer/Array":
                     predicate = "_value["
@@ -71,20 +75,12 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions = {m
                         accu[now["key"]] = now["definition"];
                         return accu;
                     }, {})
-                    if (!options.makeAbstract) {
-                        unigraphPartValue = {};
-                        Object.entries(rawPart).forEach(([key, value]: [string, any]) => {
-                            const localSchema = keysMap[key];
-                            if (!localSchema) throw new TypeError("Schema check failure for object: " + JSON.stringify(rawPart));
-                            unigraphPartValue[key] = buildUnigraphEntityPart(value, options, schemaMap, localSchema);
-                        })
-                    } else {
-                        unigraphPartValue = Object.entries(rawPart).map(([key, value]: [string, any]) => {
-                            // TODO: Add processing when making abstract
-                            const localSchema = keysMap[key];
-                            return {"key": key, "_value": value};
-                        })
-                    }
+                    unigraphPartValue = {};
+                    Object.entries(rawPart).forEach(([key, value]: [string, any]) => {
+                        const localSchema = keysMap[key];
+                        if (!localSchema) throw new TypeError("Schema check failure for object: " + JSON.stringify(rawPart));
+                        unigraphPartValue[key] = buildUnigraphEntityPart(value, options, schemaMap, localSchema);
+                    })
                     break;
 
                 case "$/primitive/boolean":
@@ -107,15 +103,33 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions = {m
                     break;
             }
         } else if (localSchema.type && localSchema.type['unigraph.id'] && localSchema.type['unigraph.id'].startsWith('$/schema/') && rawPartUnigraphType === "$/composer/Object") {
+            // Case 2: References another schema.
             unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options);
-        } else {
+        } else if (localSchema.type && localSchema.type['unigraph.id'] && localSchema.type['unigraph.id'].startsWith('$/composer/Union')) {
+            // Case 3: Local schema is a union: we should compare against all possible choices recursively
+            isUnion = true;
+            let unionSchema = localSchema as ComposerUnionInstance;
+            let choicesResults = unionSchema.parameters.definitions.map(defn => {
+                try {
+                    return buildUnigraphEntityPart(rawPart, options, schemaMap, defn)
+                } catch (e) {return undefined};
+            }).filter(x => x !== undefined);
+            if (choicesResults.length !== 1) {
+                throw new TypeError("Union type does not allow ambiguous or nonexistent selections!" + JSON.stringify(rawPart) + JSON.stringify(localSchema) + rawPartUnigraphType)
+            } else {
+                unigraphPartValue = choicesResults[0];
+            }
+        } else{
+            // Default: Error out.
             throw new TypeError("Schema check failure for object: " + JSON.stringify(rawPart) + JSON.stringify(localSchema) + rawPartUnigraphType);
         }
     } catch (e) {
         throw new Error('Building entity part error: ' + e + JSON.stringify(rawPart) + JSON.stringify(localSchema) + rawPartUnigraphType + '\n')
     }
 
-    const res: any = {}; res[predicate] = unigraphPartValue;
+    let res: any = {};
+    if (!isUnion) res[predicate] = unigraphPartValue;
+    else res = unigraphPartValue;
     return res;
 }
 
@@ -134,7 +148,7 @@ export function validatePaddedEntity(object: Record<string, any>) {
  * @param validateSchema Whether to validate schema. Defaults to false. If validation is on and the schema does not match the object, an error would be returned instead.
  * @param padding Whether to pad the raw object, used to create/change objects with predicate-properties defined. If this is false and the object does not follow the data model, an error would be returned instead.
  */
-export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any", schemaMap: Record<string, Schema>, padding = true, options: BuildEntityOptions = {makeAbstract: false, validateSchema: true}): EntityDgraph<string> | TypeError {
+export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any", schemaMap: Record<string, Schema>, padding = true, options: BuildEntityOptions = {validateSchema: true}): EntityDgraph<string> | TypeError {
     // Check for unvalidated entity
     if (padding === false && !validatePaddedEntity(raw)) {
         throw new TypeError("Entity validation failed for entity " + raw)

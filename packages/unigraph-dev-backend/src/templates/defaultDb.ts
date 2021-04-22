@@ -51,6 +51,9 @@ export const defaultUserlandSchemas = [
         "unigraph.id": "$/composer/Object"
     },
     {
+        "unigraph.id": "$/composer/Interface"
+    },
+    {
         "unigraph.id": "$/unigraph",
         "version": "schema-v0.0.1dev"
     },
