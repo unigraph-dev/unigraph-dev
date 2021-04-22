@@ -1,8 +1,8 @@
 {
-    "name": "my-electron-app",
+    "name": "unigraph-dev-electron",
     "version": "0.1.0",
-    "author": "your name",
-    "description": "My Electron app",
+    "author": "Unigraph contributors",
+    "description": "A local-first and universal graph database, knowledge engine, and workspace",
     "main": "src/main.js",
     "scripts": {
         "start": "electron .",
@@ -13,5 +13,10 @@
         "electron-builder": "^22.10.5",
         "electron": "12.0.5"
     },
-    "electronVersion": "^12.0.5"
+    "electronVersion": "^12.0.5",
+    "files": [
+        "*.js",
+        "build", "dgraph", "distnode", "src",
+        "node_modules"
+    ]
 }
