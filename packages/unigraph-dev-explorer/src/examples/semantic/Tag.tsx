@@ -5,6 +5,7 @@ import { getContrast, NavigationContext } from '../../utils';
 import { DynamicViewRenderer } from '../../global';
 
 export const Tag: DynamicViewRenderer = ({data, callbacks}) => {
+    if (data['_value']) data = window.unigraph.unpad(data);
     const tag = data;
     const bgc = tag.color?.startsWith('#') ? tag.color : "unset";
     return <NavigationContext.Consumer>
