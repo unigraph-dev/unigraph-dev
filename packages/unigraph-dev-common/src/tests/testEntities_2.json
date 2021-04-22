@@ -229,7 +229,7 @@
         }
     },
     "expected": {
-        "simple": "{\nuid\n_value {\nname{\nuid\n<_value.%>}\ndone{\nuid\n<_value.!>}\nusers{\nuid\n<_value[> {{\nuid\n_value {{\nuid\n_value {\nname{\nuid\n<_value.%>}}}}}}}}}",
-        "complex": "{uid\n_value {\ndone{\nuid\n<_value.!>}\nname{\nuid\n<_value.%>}\npriority{\nuid\n<_value.#>\n<_value.#i>}\nsemantic_properties{\nuid\n_value {{\nuid\n_value {\nnotes{\nuid\n<_value[> {{\nuid\n<_value.%>}}}\ntags{\nuid\n<_value[> {{\nuid\n_value {{\nuid\n_value {\ncolor{\nuid\n<_value.%>}\nname{\nuid\n<_value.%>}}}}}}}}}}}}}"
+        "simple": "{uid type { <unigraph.id> } _value { name { uid type { <unigraph.id> } <_value.%> } done { uid type { <unigraph.id> } <_value.!> } users { uid type { <unigraph.id> } <_value[> { uid type { <unigraph.id> } _value { uid type { <unigraph.id> } _value { name { uid type { <unigraph.id> } <_value.%> } } } } } }}",
+        "complex": "{uid type { <unigraph.id> } _value { done { uid type { <unigraph.id> } <_value.!> } name { uid type { <unigraph.id> } <_value.%> } priority { uid type { <unigraph.id> } <_value.#> <_value.#i> } semantic_properties { uid type { <unigraph.id> } _value { uid type { <unigraph.id> } _value { notes { uid type { <unigraph.id> } <_value[> { uid type { <unigraph.id> } <_value.%> } } tags { uid type { <unigraph.id> } <_value[> { uid type { <unigraph.id> } _value { uid type { <unigraph.id> } _value { color { uid type { <unigraph.id> } <_value.%> } name { uid type { <unigraph.id> } <_value.%> } } } } } } } } }}"    
     }
 }
