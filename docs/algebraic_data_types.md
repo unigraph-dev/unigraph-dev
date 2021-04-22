@@ -17,7 +17,7 @@ Not implemented:
 ### Behavior
 - Without specifications in the object, the schema checker would reject ambiguously-typed objects - that is, objects with more than one possible schema membership.
 - 
-Example:
+### Example:
 ```json
 {
     "type": { "unigraph.id": "$/composer/Array" },
@@ -35,3 +35,9 @@ Example:
     }
 }
 ```
+### Union interface
+Unigraph also supports union interfaces, a way of declaring compatible interfaces that altomatically connects to existing union interfaces.
+
+To get your union recognized as a union interface, you need to:
+- make the type of your schema `$/composer/Union`;
+- start your type key with `interface/`.

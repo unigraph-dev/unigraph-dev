@@ -9,6 +9,7 @@ import { defaultPackages, defaultTypes, defaultUserlandSchemas } from "./templat
 import { insertsToUpsert } from "./utils/txnWrapper";
 import { Cache } from './caches';
 import { PackageDeclaration } from "unigraph-dev-common/lib/types/packages";
+import { ComposerUnionInstance } from "unigraph-dev-common/lib/types/json-ts";
 
 export async function checkOrCreateDefaultDataModel(client: DgraphClient) {
 
@@ -39,8 +40,22 @@ export function createSchemaCache(client: DgraphClient): Cache<any> {
     cache.updateNow = async () => { 
         const newdata = await client.getSchemasFromTable();
         cache.data = newdata;
+        // Remove all interface objects items first
+        Object.entries(cache.data).forEach(([k, v]: any) => {
+            if (k.startsWith("$/schema/interface/")) {
+                let defn = v.definition as ComposerUnionInstance;
+                defn.parameters.definitions = [];
+            }
+        })
         const newdata2 = await client.getSchemas();
         newdata2.forEach((obj: any) => {
+            if (obj && typeof obj["unigraph.id"] === "string" && obj["unigraph.id"].split("/").reverse()[1] === 'interface') {
+                // This is an interface object
+                let defn = obj.definition as ComposerUnionInstance;
+                let revPath = obj["unigraph.id"].split("/").reverse();
+                (cache.data[`$/schema/interface/${revPath[0]}`].definition as ComposerUnionInstance)
+                    .parameters.definitions.push(...defn.parameters.definitions)
+            } 
             if (obj && typeof obj["unigraph.id"] === "string" && obj["unigraph.id"].includes('/schema/')) {
                 cache.data[obj["unigraph.id"]] = obj;
             }

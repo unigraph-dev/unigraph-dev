@@ -46,6 +46,17 @@ export const pkg: PackageDeclaration = {
                 "type": makeUnigraphId('$/primitive/string')
             }
         },
+        "interface/note": {
+            "dgraph.type": "Type",
+            "definition": {
+                "type": makeUnigraphId('$/composer/Union'),
+                "parameters": {
+                    "definitions": [{
+                        "type": makeUnigraphId('$/schema/note')
+                    }]
+                }
+            }
+        },
         semantic_properties: {
             "dgraph.type": "Type",
             "definition": {
