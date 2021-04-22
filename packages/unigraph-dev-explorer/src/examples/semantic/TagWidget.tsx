@@ -2,19 +2,14 @@ import { Card, Chip, Typography } from "@material-ui/core"
 import { LocalOffer } from "@material-ui/icons";
 import React from "react"
 import { withUnigraphSubscription } from "unigraph-dev-common/lib/api/unigraph-react"
+import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
 import { getContrast, NavigationContext } from "../../utils";
+import { Tag } from "./Tag";
 
 function TagList ({data}: any) {
     return <div>
         <NavigationContext.Consumer>
-        {(navigator: any) => data.map((el: any) => {
-            let fin = window.unigraph.unpad(el);
-            const bgc = fin.color?.startsWith('#') ? fin.color : "unset";
-            return <Chip size="small" icon={<LocalOffer/>} style={{backgroundColor: bgc,
-                color: bgc.startsWith("#") ? getContrast(bgc) : "unset"}} label={fin.name} onClick={() => {
-                    navigator(`/semantic/tagresults?name=${fin.name}`)
-                }}/>
-        })}
+        {(navigator: any) => data.map((el: any) => <Tag data={window.unigraph.unpad(el)}/>)}
         </NavigationContext.Consumer>
     </div>
 }

@@ -3,6 +3,7 @@ import { MoreVert } from '@material-ui/icons';
 import React, { FC, ReactElement } from 'react';
 import ReactJson, { InteractionProps } from 'react-json-view';
 import { BookmarkItem } from '../../examples/bookmarks/Bookmarks';
+import { Tag } from '../../examples/semantic/Tag';
 import { TodoItem } from '../../examples/todo/TodoList';
 import { DynamicViewRenderer } from '../../global';
 import { DefaultObjectContextMenu } from './DefaultObjectContextMenu';
@@ -65,10 +66,11 @@ const JsontreeObjectViewer = ({object, options}: {object: any, options: ObjectVi
 
 export const DynamicViews: Record<string, DynamicViewRenderer> = {
     "$/schema/todo": TodoItem,
-    "$/schema/web_bookmark": BookmarkItem
+    "$/schema/web_bookmark": BookmarkItem,
+    "$/schema/tag": Tag
 }
 
-const AutoDynamicView: DynamicViewRenderer = ({ object, callbacks }) => {
+export const AutoDynamicView: DynamicViewRenderer = ({ object, callbacks }) => {
     console.log(object)
     if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViews).includes(object.type['unigraph.id'])) {
         return React.createElement(DynamicViews[object.type['unigraph.id']], {
