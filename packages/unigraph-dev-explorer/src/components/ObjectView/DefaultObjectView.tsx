@@ -44,7 +44,7 @@ const StringObjectViewer = ({object}: {object: any}) => {
 }
 
 const onPropertyEdit = (edit: InteractionProps) => {
-    console.log(edit);
+    //console.log(edit);
     let refUpdateHost: any = edit.existing_src;
     edit.namespace.forEach(el => {
         if (typeof el === "string") refUpdateHost = refUpdateHost[el]; 
@@ -71,7 +71,7 @@ export const DynamicViews: Record<string, DynamicViewRenderer> = {
 }
 
 export const AutoDynamicView: DynamicViewRenderer = ({ object, callbacks }) => {
-    console.log(object)
+    //console.log(object)
     if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViews).includes(object.type['unigraph.id'])) {
         return React.createElement(DynamicViews[object.type['unigraph.id']], {
             data: object, callbacks: callbacks ? callbacks : undefined

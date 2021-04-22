@@ -9,12 +9,15 @@ const getQuery = (name: string) => `(func: type(Entity)) @cascade {
       semantic_properties {
         <_value> {
       	  <_value> {
-            tags {
+            children {
             	<_value[> {
                 <_value> {
+                  type @filter(eq(<unigraph.id>, "$/schema/tag")) {
+                    <unigraph.id>
+                  }
                   <_value> {
                     name @filter(eq(<_value.%>, "${name}")){
-                      <_value.%> 
+                      <_value.%>
                     }
                   }
                 }

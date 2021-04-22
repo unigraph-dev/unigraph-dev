@@ -30,7 +30,7 @@ export default function About(){
     }
 
     React.useEffect(() => {
-        console.log(window.unigraph)
+        //console.log(window.unigraph)
         window.unigraph.eventTarget.addEventListener("onmessage", listener);
         setMessages(window.unigraph.backendMessages);
 

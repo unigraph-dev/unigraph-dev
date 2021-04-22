@@ -23,5 +23,8 @@
   "homepage": "https://github.com/unigraph-dev/unigraph-dev#readme",
   "peerDependencies": {
     "react": "^17.0.1"
+  },
+  "dependencies": {
+    "json-to-graphql-query": "^2.0.0"
   }
 }

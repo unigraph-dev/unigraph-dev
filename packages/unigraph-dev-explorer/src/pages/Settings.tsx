@@ -26,7 +26,7 @@ export default function Settings () {
     };
 
     const id0 = Boolean(anchorEl[0]) ? 'address-popover' : undefined;
-    console.log(Boolean(anchorEl[0]))
+    //console.log(Boolean(anchorEl[0]))
     return <div>
         <Typography variant="h4">User Settings</Typography>
         <p>These setting will be stored in your localStorage. </p>

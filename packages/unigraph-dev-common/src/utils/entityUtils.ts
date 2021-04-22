@@ -1,5 +1,7 @@
 // FIXME: This file is too large! Either break it up or add synopsis here.
 
+import { jsonToGraphQLQuery } from "json-to-graphql-query";
+import _ from "lodash";
 import unigraph from "../api/unigraph";
 import { typeMap } from "../types/consts";
 import { ComposerUnionInstance, Definition, EntityDgraph, RefUnigraphIdType, Schema, UidType, UnigraphIdType, UnigraphTypeString } from "../types/json-ts";
@@ -111,13 +113,13 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions = {v
             let unionSchema = localSchema as ComposerUnionInstance;
             let choicesResults = unionSchema.parameters.definitions.map(defn => {
                 try {
-                    return buildUnigraphEntityPart(rawPart, options, schemaMap, defn)
+                    return [defn, buildUnigraphEntityPart(rawPart, options, schemaMap, defn)]
                 } catch (e) {return undefined};
             }).filter(x => x !== undefined);
             if (choicesResults.length !== 1) {
                 throw new TypeError("Union type does not allow ambiguous or nonexistent selections!" + JSON.stringify(rawPart) + JSON.stringify(localSchema) + rawPartUnigraphType)
             } else {
-                unigraphPartValue = choicesResults[0];
+                unigraphPartValue = choicesResults[0]![1];
             }
         } else{
             // Default: Error out.
@@ -163,48 +165,63 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
     }
 }
 
-export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<string, any>) {
-    function makePart(localSchema: Definition | any) {
-        const entries = ["uid"];
+export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<string, any>, maxDepth = 20) {
+    function makePart(localSchema: Definition | any, depth = 0) {
+        if (depth > maxDepth) return {};
+        let entries: any = {"uid": {}, 'type': { "<unigraph.id>": {} }};
         let type = localSchema.type["unigraph.id"];
 
         if (type.startsWith('$/schema/')) {
             if (schemaMap[type]?.definition?.type["unigraph.id"]?.startsWith('$/primitive/')) 
                 type = schemaMap[type].definition.type["unigraph.id"]; // Is type alias
-            else entries.push("_value {" + makePart(schemaMap[type].definition) + "}")
+            else entries = _.merge(entries, {"_value": makePart(schemaMap[type].definition, depth+1)})
         };
         switch (type) {
             case "$/composer/Object":
                 /* eslint-disable */ // Dependent recursive behavior
                 const properties = localSchema.properties.map((p: any) => {
-                    return p.key + makePart(p.definition)
+                    let ret: any = {}; ret[p.key] = makePart(p.definition, depth+1);
+                    return ret
                 })
-                entries.push("_value {" + properties.reduce((current: string, now: any) => current + "\n" + now, "") + "}");
+                entries = _.merge(entries, {"_value": _.merge({}, ...properties)});
+                break;
+
+            case "$/composer/Union":
+                let defn = localSchema as ComposerUnionInstance;
+                const options = defn.parameters.definitions.map(defnel => {
+                    let children: any = makePart(defnel, depth+1)
+                    entries = _.merge(entries, children);
+                    //console.log(children)
+                });
                 break;
 
             case "$/composer/Array":
-                entries.push("<_value[> {" + makePart(localSchema.parameters.element) + "}");
+                entries = _.merge(entries, {"<_value[>": makePart(localSchema.parameters.element, depth+1)});
                 break;
             
             case "$/primitive/string":
-                entries.push("<_value.%>");
+                entries["<_value.%>"] = {};
                 break;
                 
             case "$/primitive/boolean":
-                entries.push("<_value.!>");
+                entries["<_value.!>"] = {};
                 break;
                 
             case "$/primitive/number":
-                entries.push("<_value.#>", "<_value.#i>");
+                entries["<_value.#>"] = {};
+                entries["<_value.#i>"] = {};
                 break;
 
             default:
                 break;
         }
-        return "{" + entries.reduce((current: string, now: any) => current + "\n" + now, "") + "}";
+        return entries;
     }
     const localSchema = schemaMap[schemaName].definition;
-    return makePart(localSchema);
+    let res = makePart(localSchema)
+    let ret = jsonToGraphQLQuery(res)
+    //console.log(ret)
+    return "{" + ret + "}";
 
 }
 
@@ -232,15 +249,21 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
      * @param schemas 
      */
     function recurse(currentEntity: any, schemas: Record<string, Schema>, localSchema: Definition | any) {
+        //console.log("=====================")
+        if (currentEntity.type && currentEntity.type['unigraph.id'] && currentEntity.type['unigraph.id'].startsWith('$/schema/')) {
+            localSchema = schemas[currentEntity.type['unigraph.id']].definition
+        }
+        //console.log(JSON.stringify(currentEntity))
         const paddedEntity = currentEntity;
         currentEntity = unpadValue(currentEntity);
-        if (paddedEntity?.type) recurse(paddedEntity.type, schemas, localSchema) // Check for type references as well
+        if (paddedEntity?.type) recurse(paddedEntity.type, schemas, localSchema) // Check for type references as well 
+        //console.log(localSchema, JSON.stringify(currentEntity))
         switch (typeof currentEntity) {
             case "object":
                 if (localSchema.type && localSchema.type['unigraph.id'] && localSchema.type['unigraph.id'].startsWith('$/schema/')) {
                     localSchema = schemas[localSchema.type['unigraph.id']].definition
                 }
-
+                //console.log(localSchema, currentEntity)
                 if (Array.isArray(currentEntity)) {
                     currentEntity.forEach(e => recurse(unpadValue(e), schemas, localSchema['parameters']['element']));
                 } else {
@@ -248,7 +271,7 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
 
                     // 1. Can we do autoref based on reserved words?
                     const kv = Object.entries(currentEntity);
-                    const keysMap = localSchema['properties'].reduce((accu: any, now: any) => {
+                    const keysMap = localSchema['properties']?.reduce((accu: any, now: any) => {
                         accu[now["key"]] = now;
                         return accu;
                     }, {}) // TODO: Redundent code, abstract it somehow!
@@ -280,6 +303,7 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
             default:
                 break;
         }
+        //console.log("=====================outro")
     }
 
     recurse(entity, schemas, schemas[schema].definition);

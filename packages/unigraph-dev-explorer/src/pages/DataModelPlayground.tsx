@@ -26,7 +26,7 @@ export default function DataModelPlayground () {
                 try {
                     const unigraphObject = buildUnigraphEntity(objUpdated, schemaName, schemas);
                     transformed = processAutoref(unigraphObject, schemaName, schemas);
-                    console.log(transformed);
+                    //console.log(transformed);
                     setProcessedData(JSON.stringify(transformed, null, 4));
                 } catch (e) {
                     transformed = 'Processing error: \n' + e.toString()

@@ -49,7 +49,7 @@ export function wrapUpsertFromUpdater(orig: any, queryHead: string): any {
     }
 
     function recurse(origNow: any, thisUid: string): any {
-        console.log("recursing --- " + JSON.stringify(origNow, null, 2) + thisUid)
+        //console.log("recursing --- " + JSON.stringify(origNow, null, 2) + thisUid)
         if (['undefined', 'null', 'number', 'bigint', 'string', 'boolean', 'symbol'].includes(typeof origNow)) {
             // This means the updater is creating new things inside or changing primitive values: we don't need uid
             queries.pop();
