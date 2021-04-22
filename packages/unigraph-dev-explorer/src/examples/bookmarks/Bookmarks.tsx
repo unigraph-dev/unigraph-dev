@@ -15,8 +15,7 @@ type ABookmark = {
     url: string,
     favicon: string,
     semantic_properties: {
-        tags: {uid?: string, color?: string, name: string}[]
-        notes: any[]
+        children: any[]
     }
 }
 
@@ -41,14 +40,13 @@ export const createBookmark: (t: string) => Promise<ABookmark> = (text: string) 
                         favicon = newUrl.href;
                     }
                 })
-                console.log(headDom)
+                //console.log(headDom)
                 res({
                     name: headDom.title || url.href,
                     url: url.href,
                     favicon: favicon,
                     semantic_properties: {
-                        tags: tags.map(tagName => {return {name: tagName}}),
-                        notes: []
+                        children: tags.map(tagName => {return {name: tagName}}),
                     }
                 })
             })
@@ -99,8 +97,8 @@ export const BookmarkItem: DynamicViewRenderer = ({data, callbacks}) => {
             primary={unpadded.name}
             secondary={<div style={{display: "flex", alignContent: "center"}}>
                 <Link onClick={() => {window.open(unpadded.url, "_blank")}}></Link>
-                {!unpadded.semantic_properties?.tags?.map ? [] :
-                unpadded.semantic_properties?.tags?.map(tag => <Tag data={tag}/>)}
+                {!unpadded.semantic_properties?.children?.map ? [] :
+                unpadded.semantic_properties?.children?.map(it => <Tag data={it}/>)}
                 </div>}
         />
         <ListItemSecondaryAction>

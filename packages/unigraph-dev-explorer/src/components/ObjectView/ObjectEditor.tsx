@@ -11,7 +11,7 @@ const recursiveBindField = (path: string, rootObj: any) => {
         let newObj: any = {};
         let paths = path.split('/')
         let curr = newObj;
-        console.log(newValue)
+        //console.log(newValue)
         paths.slice(1, paths.length-1).forEach(key => {
             newObj[key] = {};
             curr = newObj[key];
@@ -26,7 +26,7 @@ const recursiveBindField = (path: string, rootObj: any) => {
 }
 
 const getFieldsFromDefinition = (def: Definition, schemas: any, rootObj: any, path = "") => {
-    console.log(schemas)
+    //console.log(schemas)
     // @ts-ignore
     if (def.type['unigraph.id'].startsWith('$/schema')) def = schemas[def.type['unigraph.id']].definition;
 

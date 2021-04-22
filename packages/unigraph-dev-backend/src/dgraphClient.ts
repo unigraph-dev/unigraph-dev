@@ -107,8 +107,9 @@ export default class DgraphClient {
    * Creates data from a upsert request (i.e. query for data then use the result to mutate).
    * @param {UnigraphUpsert} data 
    */
-  async createUnigraphUpsert(data: UnigraphUpsert) {
-    console.log("Trying to create upsert....============================================")
+  async createUnigraphUpsert(data: UnigraphUpsert, test = false) {
+    /* eslint-disable */
+    !test ? true : console.log("Trying to create upsert....============================================")
     const txn = this.dgraphClient.newTxn();
     try {
       const querybody = data.queries.join('\n');
@@ -118,10 +119,11 @@ export default class DgraphClient {
       const mutations: Mutation[] = data.mutations.map((obj: any) => {
         const mu = new dgraph.Mutation();
         mu.setSetJson(obj);
-        console.log(JSON.stringify(obj, null, 2))
+        !test ? true : console.log(JSON.stringify(obj, null, 2))
         return mu;
       });
-      console.log(querystr)
+      /* eslint-disable */
+      !test ? true : console.log(querystr)
       const req = new dgraph.Request();
       /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
       data.queries.length ? req.setQuery(querystr) : false;
@@ -129,13 +131,14 @@ export default class DgraphClient {
       req.setCommitNow(true);
 
       const response = await txn.doRequest(req);
-      console.log(JSON.stringify(response, null, 2))
+      !test ? true : console.log(JSON.stringify(response, null, 2))
     } catch (e) {
       console.error('Error: ', e);
     } finally {
       await txn.discard();
     }
-    console.log("upsert details above================================================")
+    /* eslint-disable */
+    !test ? true : console.log("upsert details above================================================")
   }
 
   async queryData<T = unknown>(query: string, vars: Record<string, any> = {}) {

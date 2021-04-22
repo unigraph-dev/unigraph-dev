@@ -25,8 +25,7 @@ export const parseTodoObject: (arg0: string) => ATodoList = (todoString: string)
         done: false,
         priority: priority_num,
         semantic_properties: {
-            tags: tags.map(tagName => {return {name: tagName}}),
-            notes: []
+            children: tags.map(tagName => {return {name: tagName}})
         }
     }
 }
@@ -37,8 +36,7 @@ type ATodoList = {
     done: boolean,
     priority: number,
     semantic_properties: {
-        tags: {uid?: string, color?: string, name: string}[]
-        notes: any[]
+        children: any[]
     }
 }
 
@@ -77,7 +75,7 @@ export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
             window.unigraph.updateObject(data.uid, {"done": window.unigraph.unpad(data).done});
         }
     };
-    console.log(data.uid, unpadded)
+    //console.log(data.uid, unpadded)
     return <React.Fragment>
         <ListItemIcon>
             <Checkbox checked={unpadded.done} onClick={_ => {
@@ -88,8 +86,8 @@ export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
         </ListItemIcon>
         <ListItemText 
             primary={unpadded.name}
-            secondary={[...(!unpadded.semantic_properties?.tags?.map ? [] :
-                unpadded.semantic_properties?.tags?.map(tag => <Tag data={tag}/>
+            secondary={[...(!unpadded.semantic_properties?.children?.map ? [] :
+                unpadded.semantic_properties?.children?.map(it => <Tag data={it}/>
             )), ...(unpadded.priority > 0 ? [<Chip size="small" icon={<PriorityHigh/>} label={"Priority " + unpadded.priority}/>]: [])]}
         />
         <ListItemSecondaryAction>

@@ -120,7 +120,7 @@ export default async function startServer(client: DgraphClient) {
         par${event.id} as var(func: has(type)) @filter((NOT type(Deleted)) AND type(Entity)) @cascade {
           type @filter(eq(<unigraph.id>, "${event.schema}"))
         }`
-        console.log(query)
+        if (verbose >= 2) console.log(query)
         eventRouter["subscribe_to_object"]({...event, queryFragment: query}, ws)
       });
     },
@@ -128,7 +128,7 @@ export default async function startServer(client: DgraphClient) {
     "subscribe_to_query": function (event: EventSubscribeObject, ws: IWebsocket) {
       const query = `(func: uid(par${event.id})) @recurse {uid expand(_predicate_)}
       par${event.id} as var${event.queryFragment}`
-      console.log(query)
+      if (verbose >= 2) console.log(query)
       eventRouter["subscribe_to_object"]({...event, queryFragment: query}, ws)
     },
 
@@ -285,7 +285,7 @@ export default async function startServer(client: DgraphClient) {
     "proxy_fetch": async function (event: EventProxyFetch, ws: IWebsocket) {
       // TODO: Using node-fetch here for now; if we move to deno later we can replace it.
       // https://stackoverflow.com/questions/54099802/blob-to-base64-in-nodejs-without-filereader
-      console.log('yo2')
+      if (verbose >= 2) console.log('yo2')
       fetch(event.url, event.options)
         .then(res => res.buffer())
         .then(buffer => ws.send(makeResponse(event, true, {"blob": buffer.toString('base64')})))
