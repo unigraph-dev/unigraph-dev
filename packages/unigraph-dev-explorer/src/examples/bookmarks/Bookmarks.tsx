@@ -7,6 +7,7 @@ import { List, ListItem, TextField, Button, Chip, IconButton, ListItemSecondaryA
 import { LocalOffer, Delete, Link } from "@material-ui/icons";
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph'
 import { withUnigraphSubscription } from 'unigraph-dev-common/lib/api/unigraph-react'
+import { Tag } from "../semantic/Tag";
 
 type ABookmark = {
     uid?: string,
@@ -14,13 +15,18 @@ type ABookmark = {
     url: string,
     favicon: string,
     semantic_properties: {
-        tags: {uid?: string, color: string, name: string}[]
+        tags: {uid?: string, color?: string, name: string}[]
         notes: any[]
     }
 }
 
 export const createBookmark: (t: string) => Promise<ABookmark> = (text: string) => {
-    const url = new URL(text);
+    let tags_regex = /#[a-zA-Z0-9]*\b ?/gm;
+    let tags = text.match(tags_regex) || [];
+    tags = tags.map(tag => tag.slice(1).trim());
+    text = text.replace(tags_regex, '');
+
+    const url = new URL(text.trim());
     return new Promise((res, rej) => {
         window.unigraph.proxyFetch(url).then((fin: Blob) => {
             fin.text().then(text => {
@@ -41,7 +47,7 @@ export const createBookmark: (t: string) => Promise<ABookmark> = (text: string) 
                     url: url.href,
                     favicon: favicon,
                     semantic_properties: {
-                        tags: [],
+                        tags: tags.map(tagName => {return {name: tagName}}),
                         notes: []
                     }
                 })
@@ -65,6 +71,7 @@ function BookmarksBody ({data}: { data: ABookmark[] }) {
         </List>
         <TextField value={newName} onChange={(e) => setNewName(e.target.value)}></TextField>
         <Button onClick={() => createBookmark(newName).then((obj: any) => window.unigraph.addObject(obj, "$/schema/web_bookmark"))}>Add</Button>
+        For example, enter #tag1 https://example.com
     </div>
 }
 
@@ -90,17 +97,11 @@ export const BookmarkItem: DynamicViewRenderer = ({data, callbacks}) => {
         <ListItemIcon><Avatar alt={"favicon of "+unpadded.name} src={unpadded.favicon}>I</Avatar></ListItemIcon>
         <ListItemText 
             primary={unpadded.name}
-            secondary={[<Link onClick={() => {window.open(unpadded.url, "_blank")}}></Link>
-                ,...(!unpadded.semantic_properties?.tags?.map ? [] :
-                unpadded.semantic_properties?.tags?.map(tag => <Chip
-                    size="small"
-                    icon={<LocalOffer/>}
-                    style={{
-                        backgroundColor: tag.color
-                    }}
-                    label={tag.name}
-                />
-            ))]}
+            secondary={<div style={{display: "flex", alignContent: "center"}}>
+                <Link onClick={() => {window.open(unpadded.url, "_blank")}}></Link>
+                {!unpadded.semantic_properties?.tags?.map ? [] :
+                unpadded.semantic_properties?.tags?.map(tag => <Tag data={tag}/>)}
+                </div>}
         />
         <ListItemSecondaryAction>
             <IconButton aria-label="delete" onClick={() => window.unigraph.deleteObject(unpadded.uid!)}>

@@ -6,6 +6,7 @@ import { DynamicViewRenderer } from '../../global';
 import { pkg as todoPackage } from 'unigraph-dev-common/lib/data/unigraph.todo.pkg';
 import { getContrast } from '../../utils';
 import { withUnigraphSubscription } from 'unigraph-dev-common/lib/api/unigraph-react'
+import { Tag } from '../semantic/Tag';
 
 export const parseTodoObject: (arg0: string) => ATodoList = (todoString: string) => {
     // TODO: Using regex for now, we can switch to a more centralized parsing solution later
@@ -88,17 +89,7 @@ export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
         <ListItemText 
             primary={unpadded.name}
             secondary={[...(!unpadded.semantic_properties?.tags?.map ? [] :
-                unpadded.semantic_properties?.tags?.map(tag => {
-                    const bgc = tag.color?.startsWith('#') ? tag.color : "unset";
-                    return <Chip
-                        size="small"
-                        icon={<LocalOffer/>}
-                        style={{
-                            backgroundColor: bgc,
-                            color: bgc.startsWith("#") ? getContrast(bgc) : "unset"
-                        }}
-                        label={tag.name}
-                    />}
+                unpadded.semantic_properties?.tags?.map(tag => <Tag data={tag}/>
             )), ...(unpadded.priority > 0 ? [<Chip size="small" icon={<PriorityHigh/>} label={"Priority " + unpadded.priority}/>]: [])]}
         />
         <ListItemSecondaryAction>
