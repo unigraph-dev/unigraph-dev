@@ -6,6 +6,7 @@ import { BookmarkItem } from '../../examples/bookmarks/Bookmarks';
 import { Tag } from '../../examples/semantic/Tag';
 import { TodoItem } from '../../examples/todo/TodoList';
 import { DynamicViewRenderer } from '../../global';
+import { download } from '../../utils';
 import { DefaultObjectContextMenu } from './DefaultObjectContextMenu';
 import { filterPresets } from './objectViewFilters';
 
@@ -143,7 +144,7 @@ const DefaultObjectListView: FC<DefaultObjectListViewProps> = ({component, objec
 
     return <div>
         <ButtonGroup color="primary" aria-label="outlined primary button group">
-            <Button>Export All</Button>
+            <Button onClick={() => {download(`export_unigraph_${new Date().toISOString()}.json`, JSON.stringify(objects))}}>Export All</Button>
             <Button>Export Selected</Button>
             <Button>Select All</Button>
         </ButtonGroup>
