@@ -5,7 +5,13 @@
     "description": "My Electron app",
     "main": "src/main.js",
     "scripts": {
-        "start": "electron ."
+        "start": "electron .",
+        "dist": "electron-builder"
     },
-    "homepage": "./"
+    "homepage": "./",
+    "devDependencies": {
+        "electron-builder": "^22.10.5",
+        "electron": "12.0.5"
+    },
+    "electronVersion": "^12.0.5"
 }

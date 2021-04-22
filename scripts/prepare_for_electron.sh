@@ -13,5 +13,6 @@ yarn workspace unigraph-dev-backend build
 cp -r packages/unigraph-dev-backend/dist packages/unigraph-dev-electron/dist
 
 # copy dgraph
+rm -rf packages/unigraph-dev-electron/dgraph
 mkdir packages/unigraph-dev-electron/dgraph
 cp /opt/unigraph/dgraph packages/unigraph-dev-electron/dgraph

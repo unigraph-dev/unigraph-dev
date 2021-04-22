@@ -11,7 +11,8 @@
     "build-common": "yarn workspace unigraph-dev-common build",
     "link-common": "cd packages/unigraph-dev-common && yarn link && cd ../unigraph-dev-explorer && yarn link 'unigraph-dev-common' && cd ../unigraph-dev-backend && yarn link 'unigraph-dev-common'",
     "dev": "bash scripts/start_server.sh",
-    "lint": "yarn eslint . --ext .js,.jsx,.ts,.tsx"
+    "lint": "yarn eslint . --ext .js,.jsx,.ts,.tsx",
+    "electron-dist": "bash scripts/prepare_for_electron.sh && yarn workspace unigraph-dev-electron dist"
   },
   "engines": {
     "node": "^14.16.0",
