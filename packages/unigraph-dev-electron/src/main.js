@@ -5,7 +5,7 @@ const { exec } = require("child_process");
 exec(path.join(__dirname, '..', 'dgraph', 'dgraph') + " alpha")
 exec(path.join(__dirname, '..', 'dgraph', 'dgraph') + " zero")
 
-setTimeout(() => require(path.join(__dirname, '..', 'dist', 'index.js')), 5000)
+setTimeout(() => require(path.join(__dirname, '..', 'distnode', 'index.js')), 5000)
 
 
 
