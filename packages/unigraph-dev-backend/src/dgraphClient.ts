@@ -108,6 +108,7 @@ export default class DgraphClient {
    * @param {UnigraphUpsert} data 
    */
   async createUnigraphUpsert(data: UnigraphUpsert, test = false) {
+    /* eslint-disable */
     !test ? true : console.log("Trying to create upsert....============================================")
     const txn = this.dgraphClient.newTxn();
     try {
@@ -121,6 +122,7 @@ export default class DgraphClient {
         !test ? true : console.log(JSON.stringify(obj, null, 2))
         return mu;
       });
+      /* eslint-disable */
       !test ? true : console.log(querystr)
       const req = new dgraph.Request();
       /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
@@ -135,6 +137,7 @@ export default class DgraphClient {
     } finally {
       await txn.discard();
     }
+    /* eslint-disable */
     !test ? true : console.log("upsert details above================================================")
   }
 
