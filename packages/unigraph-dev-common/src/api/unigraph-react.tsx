@@ -12,7 +12,7 @@ import { getRandomInt } from './unigraph';
 export function withUnigraphSubscription(WrappedComponent: React.FC<{data: any[]}>, 
     unigraphContext: UnigraphContext, unigraphHooks: UnigraphHooks): React.FC {
 
-    return () => {
+    return (props) => {
         const [subsId, setSubsId] = React.useState(getRandomInt());
         const [data, setData] = React.useState(unigraphContext.defaultData);
 
@@ -32,7 +32,7 @@ export function withUnigraphSubscription(WrappedComponent: React.FC<{data: any[]
             };
         }, []);
 
-        return <WrappedComponent data={data}/>
+        return <WrappedComponent {...props} data={data}/>
     }
 
 }
