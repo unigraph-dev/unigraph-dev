@@ -9,11 +9,12 @@ import { buildUnigraphEntity, getUpsertFromUpdater, makeQueryFragmentFromType, p
 import { addUnigraphPackage, checkOrCreateDefaultDataModel, createPackageCache, createSchemaCache } from './datamodelManager';
 import { Cache } from './caches';
 import repl from 'repl';
-import { createSubscriptionWS, MsgCallbackFn, pollSubscriptions, Subscription } from './subscriptions';
+import { createSubscriptionWS, MsgCallbackFn, pollSubscriptions, removeSubscriptionsById, Subscription } from './subscriptions';
 import { callHooks, HookAfterObjectChangedParams, HookAfterSchemaUpdatedParams, HookAfterSubscriptionAddedParams, Hooks } from './hooks';
 import { getAsyncLock } from './asyncManager';
 import fetch from 'node-fetch';
 import { EventEmitter } from 'ws';
+import { uniqueId } from 'lodash';
 
 const PORT = 3001;
 const verbose = 5;
@@ -105,7 +106,7 @@ export default async function startServer(client: DgraphClient) {
     },
 
     "subscribe_to_object": function (event: EventSubscribeObject, ws: IWebsocket) {
-      const newSub = createSubscriptionWS(event.id, ws, event.queryFragment);
+      const newSub = createSubscriptionWS(event.id, ws, event.queryFragment, event.connId);
       subscriptions.push(newSub);
       callHooks(hooks, "after_subscription_added", {newSubscriptions: subscriptions});
       ws.send(makeResponse(event, true));
@@ -298,13 +299,14 @@ export default async function startServer(client: DgraphClient) {
 
     // TODO pull into separate express.Router
     app.ws('/', (ws, req) => {
+      let connId = uniqueId();
       ws.on('message', (msg: string) => {
         const msgObject: {type: string | null, event: string | null} = isJsonString(msg)
         if (msgObject) {
           // match events
           if (msgObject.type === "event" && msgObject.event && eventRouter[msgObject.event]) {
             if (verbose >= 1) console.log("matched event: " + msgObject.event);
-            eventRouter[msgObject.event](msgObject, ws);
+            eventRouter[msgObject.event]({...msgObject, connId: connId}, ws);
           }
           if (verbose >= 2) console.log(msgObject);
         } else {
@@ -312,6 +314,9 @@ export default async function startServer(client: DgraphClient) {
           console.log(msg)
         }
       });
+      ws.on('close', () => {
+        subscriptions = removeSubscriptionsById(subscriptions, connId);
+      })
       ws.send(JSON.stringify({
         "type": "hello"
       }))

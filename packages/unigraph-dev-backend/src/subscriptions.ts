@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { resourceLimits } from "worker_threads";
 import { IWebsocket } from "./custom";
 import DgraphClient from "./dgraphClient";
 
@@ -11,7 +12,8 @@ export type Subscription = {
     /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
     function?: Function,
     msgPort?: IWebsocket,
-    regTime: number // time of registration, can be used to manually terminate subscription going too long
+    regTime: number, // time of registration, can be used to manually terminate subscription going too long
+    connId: string
 };
 
 export function buildPollingQuery(subs: Subscription[]) {
@@ -38,7 +40,7 @@ export async function pollSubscriptions(subs: Subscription[], client: DgraphClie
     }
 }
 
-export function createSubscriptionWS(id: string | number, msgPort: IWebsocket, queryFragment: string) {
+export function createSubscriptionWS(id: string | number, msgPort: IWebsocket, queryFragment: string, connId: string) {
     return {
         data: null,
         queryFragment: queryFragment,
@@ -47,5 +49,10 @@ export function createSubscriptionWS(id: string | number, msgPort: IWebsocket, q
         id: id,
         msgPort: msgPort,
         regTime: new Date().getTime(),
+        connId: connId
     } as Subscription;
+}
+
+export function removeSubscriptionsById(subscriptions: Subscription[], connId: string) {
+    return subscriptions.filter((it) => !(it.connId === connId))
 }

@@ -91,14 +91,16 @@ declare type EventSubscribeObject = {
   type: "event",
   event: "subscribe_to_object",
   id: number | string,
-  queryFragment: string
+  queryFragment: string,
+  connId: string,
 }
 
 declare type EventSubscribeType = {
   type: "event",
   event: "subscribe_to_type",
   id: number | string,
-  schema: string
+  schema: string,
+  connId: string,
 }
 
 declare type EventUnsubscribeById = {
