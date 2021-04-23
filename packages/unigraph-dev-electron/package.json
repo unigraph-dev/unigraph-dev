@@ -13,10 +13,20 @@
         "electron-builder": "^22.10.5",
         "electron": "12.0.5"
     },
+    "dependencies": {
+        "async-lock": "^1.2.8",
+        "dgraph-js": "^20.3.1",
+        "express": "^4.17.1",
+        "express-ws": "^4.0.0",
+        "google-protobuf": "^3.13.0",
+        "lodash": "^4.17.20",
+        "node-fetch": "^2.6.1",
+        "unigraph-dev-common": "0.0.1"
+    },
     "electronVersion": "^12.0.5",
     "files": [
         "*.js",
-        "build", "dgraph", "distnode", "src",
-        "node_modules"
+        "buildweb", "dgraph", "distnode", "src",
+        "node_modules", "!p/", "!w/", "!zw/"
     ]
 }

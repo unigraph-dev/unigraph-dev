@@ -1,9 +1,14 @@
 {
   "private": true,
   "name": "unigraph-dev",
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": [
+      "**/unigraph-dev-electron/**"
+    ]
+  },
   "scripts": {
     "backend-build": "yarn workspace unigraph-dev-backend build",
     "backend-start": "yarn workspace unigraph-dev-backend start",

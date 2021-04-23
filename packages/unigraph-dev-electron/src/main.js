@@ -18,7 +18,7 @@ function createWindow () {
     }
   })
 
-  win.loadFile(path.join(__dirname, '..', 'build', 'index.html'))
+  win.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'))
 }
 
 app.whenReady().then(() => {

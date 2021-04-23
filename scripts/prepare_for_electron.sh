@@ -1,13 +1,12 @@
 #!/bin/bash
 
-rm -rf packages/unigraph-dev-electron/build
-rm -rf packages/unigraph-dev-electron/dist
+rm -rf packages/unigraph-dev-electron/buildweb
 rm -rf packages/unigraph-dev-electron/distnode
 yarn build-common
 
 # copy frontend code
 yarn workspace unigraph-dev-explorer build
-cp -r packages/unigraph-dev-explorer/build packages/unigraph-dev-electron/build
+cp -r packages/unigraph-dev-explorer/build packages/unigraph-dev-electron/buildweb
 
 # copy backend code
 yarn workspace unigraph-dev-backend build
