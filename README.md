@@ -4,6 +4,8 @@ A local-first and universal graph database, knowledge engine, and workspace for 
 
 [Live demo](http://workspace.jingyixu.me:3000)
 
+[![Discord](https://img.shields.io/discord/591914197219016707.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/2x5DxcPnWf)
+
 ## Projects
 
 This repository contains all relevant source code for unigraph-dev:
