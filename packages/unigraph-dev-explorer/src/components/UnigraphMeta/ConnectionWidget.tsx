@@ -1,9 +1,9 @@
-import { Card, Chip, Typography } from "@material-ui/core"
+import { Button, Card, Chip, Typography } from "@material-ui/core"
 import { LocalOffer } from "@material-ui/icons";
 import React from "react"
 import { useEffectOnce } from "react-use";
 import { withUnigraphSubscription } from "unigraph-dev-common/lib/api/unigraph-react"
-import { getContrast } from "../../utils";
+import { getContrast, upload } from "../../utils";
 
 export const ConnectionWidget: React.FC = ({}) => {
 
@@ -21,6 +21,6 @@ export const ConnectionWidget: React.FC = ({}) => {
         <b>Total objects </b> {content?.dgraph?.objects} <br/>
         <b>Total schemas </b> {content?.dgraph?.schemas} <br/>
         <b>Total subscriptions </b> {content?.unigraph?.subscription?.length} <br/>
-
+        <Button onClick={() => upload((f: File) => {f.text().then((txt) => window.unigraph.importObjects(txt))})}>Import objects</Button>
     </div>
 }

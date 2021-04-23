@@ -116,7 +116,7 @@ export default class DgraphClient {
       const querystr = `query {
         ${querybody}
       }`;
-      const mutations: Mutation[] = data.mutations.map((obj: any) => {
+      const mutations: Mutation[] = [...data.mutations, ...data.appends].map((obj: any) => {
         const mu = new dgraph.Mutation();
         mu.setSetJson(obj);
         !test ? true : console.log(JSON.stringify(obj, null, 2))

@@ -249,15 +249,15 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
      * @param schemas 
      */
     function recurse(currentEntity: any, schemas: Record<string, Schema>, localSchema: Definition | any) {
-        //console.log("=====================")
+        console.log("=====================")
         if (currentEntity.type && currentEntity.type['unigraph.id'] && currentEntity.type['unigraph.id'].startsWith('$/schema/')) {
             localSchema = schemas[currentEntity.type['unigraph.id']].definition
         }
-        //console.log(JSON.stringify(currentEntity))
+        console.log(JSON.stringify(currentEntity), JSON.stringify(localSchema))
         const paddedEntity = currentEntity;
         currentEntity = unpadValue(currentEntity);
         if (paddedEntity?.type) recurse(paddedEntity.type, schemas, localSchema) // Check for type references as well 
-        //console.log(localSchema, JSON.stringify(currentEntity))
+        console.log(localSchema, JSON.stringify(currentEntity))
         switch (typeof currentEntity) {
             case "object":
                 if (localSchema.type && localSchema.type['unigraph.id'] && localSchema.type['unigraph.id'].startsWith('$/schema/')) {
@@ -283,7 +283,7 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
                                 query: [{key: 'unigraph.id', value: value}],
                             };
                             currentEntity['unigraph.id'] = undefined;
-                        } else {
+                        } else if (Object.keys(keysMap).includes(key)) {
                             
                             const localSchema = keysMap[key];
                             if (localSchema['unique']) {
@@ -345,4 +345,53 @@ export function resolveSchemas(schemasMap: Record<string, any>) {
 
     
 
+}
+
+/**
+ * Decontextualize objects by replacing object UIDs with placeholder items
+ * such as `_:`.
+ * 
+ * This is used by object importers.
+ */
+export function dectxObjects(objects: any[], prefix = "_:"): any[] {
+    let newObjects = objects;
+    let nextUid = 1;
+    let uidMap: any = {};
+
+    function recurse(currentEntity: any) {
+        switch (typeof currentEntity) {
+            case "object":
+                if (Array.isArray(currentEntity)) {
+                    currentEntity.forEach(el => recurse(el));
+                } else {
+                    let kvs = Object.entries(currentEntity);
+                    for (let i=0; i<kvs.length; ++i) {
+                        if (kvs[i][0] !== "uid") {
+                            // not UID, recursing
+                            recurse(kvs[i][1]);
+                        } else if (typeof kvs[i][1] === "string") {
+                            // key is UID, compare
+                            let value = kvs[i][1] as string;
+                            if (!Object.keys(uidMap).includes(value)) {
+                                uidMap[value] = prefix+nextUid.toString();
+                                nextUid += 1;
+                            }
+                            currentEntity.uid = uidMap[value];
+                        }
+                    }
+                    // If we have unigraph.id in object we should delete the uid
+                    if (Object.keys(currentEntity).includes('unigraph.id')) {
+                        delete currentEntity.uid;
+                    }
+                }
+                break;
+
+            default:
+                break;
+        }
+    }
+    
+    newObjects.forEach(obj => recurse(obj));
+
+    return newObjects;
 }

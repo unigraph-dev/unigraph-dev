@@ -11,7 +11,8 @@ declare global {
 
 declare type UnigraphUpsert = {
   queries: string[],
-  mutations: any[]
+  mutations: any[],
+  appends: any[]
 }
 
 declare type EventCreateUnigraphSchema = {
@@ -163,4 +164,11 @@ declare type EventProxyFetch = {
   id: number,
   url: string,
   options?: Record<string, any>
+}
+
+declare type EventImportObjects = {
+  type: "event",
+  event: "import_objects",
+  id: number,
+  objects: string
 }
