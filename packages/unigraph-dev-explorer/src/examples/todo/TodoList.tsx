@@ -7,6 +7,7 @@ import { pkg as todoPackage } from 'unigraph-dev-common/lib/data/unigraph.todo.p
 import { getContrast } from '../../utils';
 import { withUnigraphSubscription } from 'unigraph-dev-common/lib/api/unigraph-react'
 import { Tag } from '../semantic/Tag';
+import { Autocomplete } from '@material-ui/lab';
 
 export const parseTodoObject: (arg0: string) => ATodoList = (todoString: string) => {
     // TODO: Using regex for now, we can switch to a more centralized parsing solution later
@@ -40,16 +41,59 @@ type ATodoList = {
     }
 }
 
+const filterFns = {
+    "no-filter": (objs: any[]) => objs,
+    "only-incomplete": (objs: any[]) => objs.filter(obj => {
+        let r;
+        try {r = window.unigraph.unpad(obj)['done'] === false}
+        catch (e) {r=false};
+        return r;
+    }),
+    "only-complete": (objs: any[]) => objs.filter(obj => {
+        let r;
+        try {r = window.unigraph.unpad(obj)['done'] === true}
+        catch (e) {r=false};
+        return r;
+    }),
+    "high-priority": (objs: any[]) => objs.filter(obj => {
+        let r;
+        try {r = window.unigraph.unpad(obj)['priority'] >= 1}
+        catch (e) {r=false};
+        return r;
+    })
+}
+
 function TodoListBody ({data}: { data: ATodoList[] }) {
     
     const todoList = data;
     const [newName, setNewName] = useState("");
 
+    const [filteredItems, setFilteredItems] = React.useState(todoList);
+    const [filterName, setFilterName] = React.useState(["no-filter"]);
+
+    React.useEffect(() => {
+        let res = todoList;
+        filterName.forEach(name => {
+            if (name && Object.keys(filterFns).includes(name)) // @ts-ignore: already accounted for
+            res = filterFns[name](res)
+        });
+        setFilteredItems(res)
+    }, [filterName, todoList]) 
+
     return <div>
-        Hello todo!    <br/>
-        There are currently {todoList.length} todo items!   <br/>
+        <Autocomplete
+            multiple
+            value={filterName}
+            onChange={(event, newValue) => {
+                setFilterName(newValue)
+            }}
+            id="filter-selector"
+            options={Object.keys(filterFns)}
+            style={{ width: 300 }}
+            renderInput={(params) => <TextField {...params} label="Filter presets" variant="outlined" />}
+        />
         <List>
-            {todoList.map(todo => <ListItem button key={todo.uid}>
+            {filteredItems.map(todo => <ListItem button key={todo.uid}>
                 <TodoItem data={todo} />
             </ListItem>)}
         </List>
