@@ -12,6 +12,7 @@ module.exports = {
     ignorePatterns: [
       "**/lib/**/*.*",
       "**/dist/**/*.*",
+      "**/build/**/*.*",
       "**/*.test.ts",
       "**/*.config.js"
     ]

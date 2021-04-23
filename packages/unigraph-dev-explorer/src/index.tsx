@@ -11,8 +11,10 @@ import { SplashScreen, DisconnectedSplashScreen} from './pages/SplashScreen';
 import { WorkSpace } from './Workspace';
 import { UserSettings } from './pages/Settings';
 
+let hst = window.location.hostname.length ? window.location.hostname : "localhost";
+
 const defaultSettings: UserSettings = {
-  serverLocation: `ws://${window.location.hostname}:3001`
+  serverLocation: `ws://${hst}:3001`
 }
 
 let userSettings = defaultSettings;
