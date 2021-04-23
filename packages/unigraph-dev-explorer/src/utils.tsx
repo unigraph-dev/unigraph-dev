@@ -1,3 +1,4 @@
+import { randomInt } from 'crypto';
 import React from 'react';
 
 export const NavigationContext = React.createContext((location: string) => {});
@@ -61,6 +62,19 @@ export function download(filename: string, text: string) {
     var element = document.createElement('a');
     element.setAttribute('href', 'data:text/json;charset=utf-8,' + encodeURIComponent(text));
     element.setAttribute('download', filename);
+
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+}
+
+export function upload(callback: any) {
+    var element = document.createElement('input');
+    element.setAttribute('type', 'file');
+    element.onchange = (ev) => callback(element.files![0])
 
     element.style.display = 'none';
     document.body.appendChild(element);

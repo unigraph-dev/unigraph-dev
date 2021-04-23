@@ -54,7 +54,7 @@ export function createSchemaCache(client: DgraphClient): Cache<any> {
                 const defn = obj.definition as ComposerUnionInstance;
                 const revPath = obj["unigraph.id"].split("/").reverse();
                 (cache.data[`$/schema/interface/${revPath[0]}`].definition as ComposerUnionInstance)
-                    .parameters.definitions.push(...defn.parameters.definitions)
+                    .parameters.definitions?.push(...defn.parameters.definitions)
             } 
             if (obj && typeof obj["unigraph.id"] === "string" && obj["unigraph.id"].includes('/schema/')) {
                 cache.data[obj["unigraph.id"]] = obj;

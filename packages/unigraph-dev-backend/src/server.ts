@@ -3,9 +3,9 @@ import { Server } from 'http';
 import expressWs, { Application, WebsocketRequestHandler } from 'express-ws';
 import { isJsonString, blobToBase64 } from 'unigraph-dev-common/lib/utils/utils';
 import DgraphClient from './dgraphClient';
-import { insertsToUpsert } from './utils/txnWrapper';
-import { EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventGetPackages, EventGetSchemas, EventProxyFetch, EventQueryByStringWithVars, EventResponser, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
-import { buildUnigraphEntity, getUpsertFromUpdater, makeQueryFragmentFromType, processAutoref } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { anchorBatchUpsert, insertsToUpsert } from './utils/txnWrapper';
+import { EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventGetPackages, EventGetSchemas, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventResponser, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
+import { buildUnigraphEntity, getUpsertFromUpdater, makeQueryFragmentFromType, processAutoref, dectxObjects } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { addUnigraphPackage, checkOrCreateDefaultDataModel, createPackageCache, createSchemaCache } from './datamodelManager';
 import { Cache } from './caches';
 import repl from 'repl';
@@ -212,8 +212,9 @@ export default async function startServer(client: DgraphClient) {
       // TODO: Talk about schema verifications
       const unigraphObject = buildUnigraphEntity(event.object, event.schema, caches['schemas'].data);
       const finalUnigraphObject = processAutoref(unigraphObject, event.schema, caches['schemas'].data)
-      //console.log(JSON.stringify(finalUnigraphObject, null, 4))
+      console.log(JSON.stringify(finalUnigraphObject, null, 4))
       const upsert = insertsToUpsert([finalUnigraphObject]);
+      console.log(JSON.stringify(upsert, null, 2))
       dgraphClient.createUnigraphUpsert(upsert).then(_ => {
         callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
         ws.send(makeResponse(event, true))
@@ -291,6 +292,27 @@ export default async function startServer(client: DgraphClient) {
         .then(res => res.buffer())
         .then(buffer => ws.send(makeResponse(event, true, {"blob": buffer.toString('base64')})))
         .catch(err => ws.send(makeResponse(event, false, {error: err})))
+    },
+
+    "import_objects": async function (event: EventImportObjects, ws: IWebsocket) {
+      const parsed = JSON.parse(event.objects);
+      const dectx: any[] = JSON.parse(JSON.stringify(dectxObjects(parsed)));
+      const ref = dectx.map(el => processAutoref(JSON.parse(JSON.stringify(el)), el.type['unigraph.id'], caches['schemas'].data));
+      console.log(JSON.stringify(ref, null, 2))
+      const upsert = insertsToUpsert(ref);
+      //const anchor = anchorBatchUpsert(upsert);
+      //console.log(JSON.stringify(anchor, null, 2))
+      console.log(JSON.stringify(upsert, null, 2))/*
+      dgraphClient.createUnigraphUpsert(anchor).then(_ => {
+        dgraphClient.createUnigraphUpsert(upsert).then(_ => {
+          callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
+          ws.send(makeResponse(event, true))
+        }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
+      }).catch(e => ws.send(makeResponse(event, false, {"error": e})));*/
+      dgraphClient.createUnigraphUpsert(upsert).then(_ => {
+          callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
+          ws.send(makeResponse(event, true))
+        }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
     }
   };
 

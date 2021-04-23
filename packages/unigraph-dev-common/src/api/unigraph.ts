@@ -31,6 +31,7 @@ export interface Unigraph {
     getPackages(packages: string[] | undefined): Promise<Map<string, PackageDeclaration>>;
     proxyFetch(url: string, options?: Record<string, any>): Promise<Blob>;
     buildGraph(objects: any[]): any[];
+    importObjects(objects: any[]|string): Promise<any>;
 }
 
 function unpadRecurse(object: any) {
@@ -263,6 +264,11 @@ export default function unigraph(url: string): Unigraph {
                 url: url,
                 options: options
             }, id);
+        }),
+        importObjects: (objects) => new Promise((resolve, reject) => {
+            if (typeof objects !== "string") objects = JSON.stringify(objects)
+            const id = getRandomInt();
+            sendEvent(connection, "import_objects", {objects: objects}, id);
         })
     }
 }
