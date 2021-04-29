@@ -1,0 +1,60 @@
+{
+    "typealias-todo-object": {
+        "name": "Hello world",
+        "done": false,
+        "semantic_properties": {
+            "tags": [{
+                "name": "unigraph",
+                "color": "#b8a2c8"
+            }]
+        }
+    },
+    "typealias-todo-expected": {
+        "type": {
+            "unigraph.id": "$/schema/todo"
+        },
+        "dgraph.type": "Entity",
+        "_value": {
+            "name": {
+                "_value.%": "Hello world"
+            },
+            "done": {
+                "_value.!": false
+            },
+            "semantic_properties": {
+                "_value": {
+                    "type": {
+                        "unigraph.id": "$/schema/semantic_properties"
+                    },
+                    "dgraph.type": "Entity",
+                    "_value": {
+                        "tags": {
+                            "_value[": [
+                                {
+                                    "_value": {
+                                        "type": {
+                                            "unigraph.id": "$/schema/tag"
+                                        },
+                                        "dgraph.type": "Entity",
+                                        "_value": {
+                                            "name": {
+                                                "_value.%": "unigraph"
+                                            },
+                                            "color": {
+                                                "type": {
+                                                    "unigraph.id": "$/schema/color"
+                                                },
+                                                "dgraph.type": "Entity",
+                                                "_value.%": "#b8a2c8"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
