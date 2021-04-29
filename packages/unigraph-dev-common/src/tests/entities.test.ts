@@ -6,15 +6,25 @@ const { buildUnigraphEntity, processAutoref, makeQueryFragmentFromType } = requi
 const testEntities_1 = require('./testEntities_1.json')
 const testEntities_2 = require('./testEntities_2.json')
 const testEntities_3 = require('./testEntities_3_union.json')
+const testEntities_4 = require('./testEntities_4_type_alias.json')
 
 const schemas = {
     "$/schema/todo": testEntities_1['todo-schema-test'],
     "$/schema/user": testEntities_1['user-schema-test'],
 }
 
-test('should build unigraph entity based on schema and input', () => {
-    expect(buildUnigraphEntity(testEntities_1['todo-entity-test'], "$/schema/todo", schemas))
-        .toEqual(testEntities_1['todo-entity-test-target-noref'])
+const schemas2 = testEntities_2['test-2-schemas']
+
+describe('should build unigraph entity based on schema and input', () => {
+    test('should build simple unigraph entity based on schema and input', () => {
+        expect(buildUnigraphEntity(testEntities_1['todo-entity-test'], "$/schema/todo", schemas))
+            .toEqual(testEntities_1['todo-entity-test-target-noref'])
+    });
+
+    test('should build unigraph entity based on schema and input with type aliases', () => {
+        expect(buildUnigraphEntity(testEntities_4['typealias-todo-object'], "$/schema/todo", schemas2))
+            .toEqual(testEntities_4['typealias-todo-expected'])
+    });
 });
 
 describe('should build unigraph entity using union types', () => {

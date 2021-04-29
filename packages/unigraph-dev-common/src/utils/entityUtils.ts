@@ -60,7 +60,7 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions = {v
 
     try {
         // Check for localSchema accordance
-        if (localSchema.type && (localSchema.type['unigraph.id'] === rawPartUnigraphType || isTypeAlias(schemaMap[localSchema.type['unigraph.id']]?.definition, rawPartUnigraphType))) {
+        if (localSchema.type && localSchema.type['unigraph.id'] === rawPartUnigraphType) {
             // Case 1: Entity type == schema type. This is straightforward
             switch (rawPartUnigraphType) {
                 case "$/composer/Array":
@@ -104,8 +104,12 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions = {v
                 default:
                     break;
             }
-        } else if (localSchema.type && localSchema.type['unigraph.id'] && localSchema.type['unigraph.id'].startsWith('$/schema/') && rawPartUnigraphType === "$/composer/Object") {
+        } else if (localSchema.type && (localSchema.type['unigraph.id'] && localSchema.type['unigraph.id'].startsWith('$/schema/') && rawPartUnigraphType === "$/composer/Object" )) {
             // Case 2: References another schema.
+            unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options);
+        } else if (localSchema.type && isTypeAlias(schemaMap[localSchema.type['unigraph.id']]?.definition, rawPartUnigraphType)) {
+            // Case 2.5: Is type alias (return unigraph object but keeps relationship)
+            isUnion = true;
             unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options);
         } else if (localSchema.type && localSchema.type['unigraph.id'] && localSchema.type['unigraph.id'].startsWith('$/composer/Union')) {
             // Case 3: Local schema is a union: we should compare against all possible choices recursively
@@ -157,11 +161,14 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
     } else {
         const localSchema = schemaMap[schemaName].definition
         const bodyObject: Record<string, any> = padding ? buildUnigraphEntityPart(raw, options, schemaMap, localSchema) : raw
-        return {
+        const result = {
             "type": makeUnigraphId(schemaName) as UnigraphIdType<`$/schema/${string}`>,
             "dgraph.type": "Entity",
             ...bodyObject
         };
+        //console.log(JSON.stringify(result, null, 4));
+        // @ts-ignore
+        return result;
     }
 }
 
