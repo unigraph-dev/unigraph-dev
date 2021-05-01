@@ -28,6 +28,122 @@ type <Package> {
 }
 `
 
+export const packageManifestSchema = {
+    "unigraph.id": "$/schema/package_manifest",
+    "dgraph.type": "Type",
+    "definition": {
+        "type": {
+            "unigraph.id": "$/composer/Object"
+        },
+        "parameters": {
+            "indexedBy": {
+                "unigraph.id": "$/primitive/string"
+            },
+            "indexes": [ ]
+        },
+        "properties": [
+            {
+                "key": "name",
+                "definition": {
+                    "type": {
+                        "unigraph.id": "$/primitive/string"
+                    }
+                }
+            },
+            {
+                "key": "package_name",
+                "definition": {
+                    "type": {
+                        "unigraph.id": "$/primitive/string"
+                    }
+                },
+                "unique": true
+            },
+            {
+                "key": "version",
+                "definition": {
+                    "type": {
+                        "unigraph.id": "$/primitive/string"
+                    }
+                }
+            },
+            {
+                "key": "description",
+                "definition": {
+                    "type": {
+                        "unigraph.id": "$/primitive/string"
+                    }
+                }
+            }
+        ]
+    }
+}
+
+export const packageExecutableSchema = {
+    "unigraph.id": "$/schema/executable",
+    "dgraph.type": "Type",
+    "definition": {
+        "type": {
+            "unigraph.id": "$/composer/Object"
+        },
+        "parameters": {
+            "indexedBy": {
+                "unigraph.id": "$/primitive/string"
+            },
+            "indexes": [ ]
+        },
+        "properties": [
+            {
+                "key": "name",
+                "definition": {
+                    "type": {
+                        "unigraph.id": "$/primitive/string"
+                    }
+                }
+            },
+            {
+                "key": "env",
+                "definition": {
+                    "type": {
+                        "unigraph.id": "$/primitive/string"
+                    }
+                }
+            },
+            {
+                "key": "src",
+                "definition": {
+                    "type": {
+                        "unigraph.id": "$/primitive/string"
+                    }
+                }
+            },
+            {
+                "key": "editable",
+                "definition": {
+                    "type": {
+                        "unigraph.id": "$/primitive/boolean"
+                    }
+                }
+            },
+            {
+                "key": "edited",
+                "definition": {
+                    "type": {
+                        "unigraph.id": "$/primitive/string"
+                    }
+                }
+            },
+            {
+                "key": "semantic_properties",
+                "definition": {
+                    "type": {"unigraph.id": "$/schema/semantic_properties"},
+                }
+            }
+        ]
+    }
+}
+
+
 export const defaultUserlandSchemas = [
     {
         "unigraph.id": "$/primitive/number"
@@ -55,11 +171,13 @@ export const defaultUserlandSchemas = [
     },
     {
         "unigraph.id": "$/unigraph",
-        "version": "schema-v0.0.1dev"
+        "_version": "schema-v0.0.1dev"
     },
     {
         "unigraph.id": "$/meta/namespace_map",
-    }
+    },
+    packageManifestSchema,
+    packageExecutableSchema
 ]
 
 export const defaultPackages = [

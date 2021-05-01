@@ -19,7 +19,7 @@ export function withUnigraphSubscription(WrappedComponent: React.FC<{data: any[]
         const init = async () => {
             Promise.all([
                 ...unigraphContext.schemas.map(el => (window as any).unigraph.ensureSchema(el.name, el.schema)),
-                ...unigraphContext.packages.map(el => (window as any).unigraph.ensurePackage(el.pkgManifest.pkgPackageName, el))
+                ...unigraphContext.packages.map(el => (window as any).unigraph.ensurePackage(el.pkgManifest.package_name, el))
             ]).then(unigraphHooks.afterSchemasLoaded(subsId, setData))
         }
 

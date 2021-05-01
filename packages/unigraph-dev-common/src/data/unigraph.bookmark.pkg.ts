@@ -3,10 +3,10 @@ import { makeUnigraphId, makeRefUnigraphId } from "../utils/entityUtils"
 
 export const pkg: PackageDeclaration = {
     pkgManifest: {
-        pkgDisplayName: "Bookmark",
-        pkgPackageName: "unigraph.bookmark",
-        pkgVersion: "0.0.1",
-        pkgDescription: "Bookmark manager."
+        name: "Bookmark",
+        package_name: "unigraph.bookmark",
+        version: "0.0.1",
+        description: "Bookmark manager."
     },
     pkgSchemas: {
         icon_url: {

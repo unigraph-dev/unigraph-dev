@@ -3,10 +3,10 @@ import { makeUnigraphId, makeRefUnigraphId } from "../utils/entityUtils"
 
 export const pkg: PackageDeclaration = {
     pkgManifest: {
-        pkgDisplayName: "Semantic",
-        pkgPackageName: "unigraph.semantic",
-        pkgVersion: "0.0.1",
-        pkgDescription: "Semantic properties support for unigraph objects."
+        name: "Semantic",
+        package_name: "unigraph.semantic",
+        version: "0.0.1",
+        description: "Semantic properties support for unigraph objects."
     },
     pkgSchemas: {
         color: {
