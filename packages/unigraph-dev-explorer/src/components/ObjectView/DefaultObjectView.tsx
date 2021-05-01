@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, Checkbox, FormControlLabel, IconButton, List, ListItem } from '@material-ui/core';
+import { Button, ButtonGroup, Checkbox, FormControlLabel, IconButton, List, ListItem, Typography } from '@material-ui/core';
 import { MoreVert, PlayArrow } from '@material-ui/icons';
 import React, { FC, ReactElement } from 'react';
 import ReactJson, { InteractionProps } from 'react-json-view';
@@ -8,11 +8,12 @@ import { Tag } from '../../examples/semantic/Tag';
 import { TodoItem } from '../../examples/todo/TodoList';
 import { DynamicViewRenderer } from '../../global';
 import { download } from '../../utils';
+import { ExecutableCodeEditor } from './DefaultCodeEditor';
 import { DefaultObjectContextMenu } from './DefaultObjectContextMenu';
 import { filterPresets } from './objectViewFilters';
 
 type ObjectViewOptions = {
-    viewer?: "string" | "json-tree" | "dynamic-view",
+    viewer?: "string" | "json-tree" | "dynamic-view" | "code-editor" | "dynamic-view-detailed",
     unpad?: boolean,
     canEdit?: boolean,
     showContextMenu?: boolean,
@@ -60,9 +61,19 @@ const onPropertyEdit = (edit: InteractionProps) => {
 }
 
 const JsontreeObjectViewer = ({object, options}: {object: any, options: ObjectViewOptions}) => {
+
+    const [showPadded, setShowPadded] = React.useState(false);
+
     return <div>
+        <Typography variant="h5">Object View</Typography>
+        <FormControlLabel control={<Checkbox
+            checked={showPadded}
+            onChange={() => setShowPadded(!showPadded)}
+            name="showPadded"
+            color="primary"
+        />} label="Show object as padded"/>
         {JSON.stringify(options)}
-        <ReactJson src={object} onEdit={options.canEdit ? onPropertyEdit : false} onAdd={options.canEdit ? onPropertyEdit : false} />
+        <ReactJson src={showPadded ? object : unpad(object)} onEdit={options.canEdit ? onPropertyEdit : false} onAdd={options.canEdit ? onPropertyEdit : false} />
     </div>
 }
 
@@ -83,6 +94,10 @@ export const DynamicViews: Record<string, DynamicViewRenderer> = {
     "$/schema/executable": Executable
 }
 
+export const DynamicViewsDetailed: Record<string, DynamicViewRenderer> = {
+    "$/schema/executable": ExecutableCodeEditor
+}
+
 export const AutoDynamicView: DynamicViewRenderer = ({ object, callbacks }) => {
     //console.log(object)
     if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViews).includes(object.type['unigraph.id'])) {
@@ -94,8 +109,24 @@ export const AutoDynamicView: DynamicViewRenderer = ({ object, callbacks }) => {
     }
 }
 
+export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, callbacks }) => {
+    //console.log(object)
+    if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViewsDetailed).includes(object.type['unigraph.id'])) {
+        return React.createElement(DynamicViewsDetailed[object.type['unigraph.id']], {
+            data: object, callbacks: callbacks ? callbacks : undefined
+        });
+    } else {
+        return <JsontreeObjectViewer object={object} options={options}/>
+    }
+}
+
 const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options }) => {
     //const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+
+    const [ContextMenu, setContextMenu] = React.useState<any>(null);
+
+    if (!object) return <div/>
+
     const finalObject = options.unpad ? window.unigraph.unpad(object) : object
     let FinalObjectViewer;
     const ContextMenuButton: any = options.showContextMenu ? <IconButton 
@@ -110,15 +141,23 @@ const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options }) => {
     >
         <MoreVert />
     </IconButton> : null
-    const [ContextMenu, setContextMenu] = React.useState<any>(null);
+    
 
     switch (options.viewer) {
         case "dynamic-view":
             FinalObjectViewer = <AutoDynamicView object={object} />;
             break;
 
+        case "dynamic-view-detailed":
+            FinalObjectViewer = <AutoDynamicViewDetailed object={object} options={options}/>;
+            break;
+
         case "json-tree":
-            FinalObjectViewer = <JsontreeObjectViewer object={finalObject} options={options}/>;
+            FinalObjectViewer = <JsontreeObjectViewer object={object} options={options}/>;
+            break;
+
+        case "code-editor":
+            FinalObjectViewer = <ExecutableCodeEditor object={object} />;
             break;
     
         default:
