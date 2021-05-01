@@ -79,6 +79,7 @@ export type ExecRunner = (src: string, context: ExecContext, unigraph: Unigraph)
 
 export const runEnvRoutineJs: ExecRunner = (src, context, unigraph) => {
     //const fn = () => eval(src);
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor
     const fn = new AsyncFunction("context", "unigraph", src).bind(this, context, unigraph);
 
@@ -110,9 +111,9 @@ export function getLocalUnigraphAPI(client: DgraphClient, caches: Record<string,
             callHooks(hooks, "after_schema_updated", {caches: caches});
         },
         // latertodo
-        ensureSchema: async (name, fallback) => {},
+        ensureSchema: async (name, fallback) => {return Error('Not implemented')},
         // latertodo
-        ensurePackage: async (packageName, fallback) => {},
+        ensurePackage: async (packageName, fallback) => {return Error('Not implemented')},
         subscribeToType: async (name, callback: any, eventId = undefined) => {
             eventId = getRandomInt();
             const queryAny = `(func: type(Entity)) @recurse { uid expand(_predicate_) }`
@@ -181,7 +182,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, caches: Record<string,
             callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
         },
         // latertodo
-        getReferenceables: async (key = "unigraph.id", asMapWithContent = false) => {},
+        getReferenceables: async (key = "unigraph.id", asMapWithContent = false) => {return Error('Not implemented')},
         getSchemas: async (schemas: string[] | undefined, resolve = false) => {
             return caches['schemas'].data;
         },
@@ -191,7 +192,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, caches: Record<string,
         // latertodo
         proxyFetch: async (url, options?) => {return new Blob([])},
         // latertodo
-        importObjects: async (objects) => {},
+        importObjects: async (objects) => {return Error('Not implemented')},
         runExecutable: async (unigraphid) => {
             const exec = caches["executables"].data[unigraphid];
             buildExecutable(exec, {"hello": "ranfromExecutable"}, {} as Unigraph)()
