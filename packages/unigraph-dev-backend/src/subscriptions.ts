@@ -13,14 +13,14 @@ export type Subscription = {
     function?: Function,
     msgPort?: IWebsocket,
     regTime: number, // time of registration, can be used to manually terminate subscription going too long
-    connId: string
+    connId?: string
 };
 
 export function buildPollingQuery(subs: Subscription[]) {
     return subs.reduce((acc, now) => {return acc += `\n sub${now.id.toString()}` + now.queryFragment}, "{") + "}"
 }
 
-export type MsgCallbackFn = (id: number | string, updated: any, msgPort: IWebsocket) => any;
+export type MsgCallbackFn = (id: number | string, updated: any, msgPort: IWebsocket, sub: Subscription) => any;
 
 /**
  * Poll the database for subscription updates. Should be called by server roughly every 1 seconds (or more/less).
@@ -32,9 +32,9 @@ export async function pollSubscriptions(subs: Subscription[], client: DgraphClie
         const query = buildPollingQuery(subs);
         const results: any[] = await client.queryDgraph(query);
         results.forEach((val, id) => { // FIXME: Beware race conditions
-            if (!_.isEqual(val, subs[id].data) && subs[id].msgPort) {
+            if (!_.isEqual(val, subs[id].data)) {
                 subs[id].data = val;
-                msgCallback(subs[id].id, val, subs[id].msgPort!);
+                msgCallback(subs[id].id, val, subs[id].msgPort!, subs[id]);
             }
         })
     }
@@ -50,6 +50,18 @@ export function createSubscriptionWS(id: string | number, msgPort: IWebsocket, q
         msgPort: msgPort,
         regTime: new Date().getTime(),
         connId: connId
+    } as Subscription;
+}
+
+export function createSubscriptionLocal(id: string | number, callback: (data: any) => any, queryFragment: string) {
+    return {
+        data: null,
+        queryFragment: queryFragment,
+        subType: "polling",
+        callbackType: "function",
+        id: id,
+        function: callback,
+        regTime: new Date().getTime()
     } as Subscription;
 }
 

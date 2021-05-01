@@ -15,7 +15,8 @@ import { getAsyncLock } from './asyncManager';
 import fetch from 'node-fetch';
 import { EventEmitter } from 'ws';
 import { uniqueId } from 'lodash';
-import { buildExecutable, createExecutableCache, environmentRunners } from './executableManager';
+import { buildExecutable, createExecutableCache, environmentRunners, getLocalUnigraphAPI } from './executableManager';
+import { Unigraph } from 'unigraph-dev-common/lib/api/unigraph';
 
 const PORT = 3001;
 const verbose = 5;
@@ -35,22 +36,6 @@ export default async function startServer(client: DgraphClient) {
   // Basic checks
   await checkOrCreateDefaultDataModel(client);
 
-  // Initialize caches
-  caches["schemas"] = createSchemaCache(client);
-  caches["packages"] = createPackageCache(client);
-  caches["executables"] = createExecutableCache(client);
-
-  // Initialize subscriptions
-  const pollCallback: MsgCallbackFn = (id, newdata, msgPort) => {
-    if(msgPort.readyState === 1) msgPort.send(JSON.stringify({
-      type: "subscription",
-      updated: true,
-      id: id,
-      result: newdata
-    }))};
-
-  setInterval(() => pollSubscriptions(subscriptions, dgraphClient, pollCallback), pollInterval);
-
   const hooks: Hooks = {
     "after_subscription_added": [(context: HookAfterSubscriptionAddedParams) => {
       pollSubscriptions(context.newSubscriptions, dgraphClient, pollCallback);
@@ -64,9 +49,29 @@ export default async function startServer(client: DgraphClient) {
       context.caches["executables"].updateNow();
     }],
   }
-  
-  
 
+  // Initialize caches
+  caches["schemas"] = createSchemaCache(client);
+  caches["packages"] = createPackageCache(client);
+  const localApi = getLocalUnigraphAPI(client, caches, subscriptions, hooks)
+  caches["executables"] = createExecutableCache(client, {"hello": "world"}, localApi);
+
+  // Initialize subscriptions
+  const pollCallback: MsgCallbackFn = (id, newdata, msgPort, sub) => {
+    if (sub?.callbackType === "messageid") {
+      if(msgPort.readyState === 1) msgPort.send(JSON.stringify({
+        type: "subscription",
+        updated: true,
+        id: id,
+        result: newdata
+      }));
+    } else if (sub?.callbackType === "function" && sub.function){
+      sub.function(newdata);
+    }
+  }
+
+  setInterval(() => pollSubscriptions(subscriptions, dgraphClient, pollCallback), pollInterval);
+  
   const makeResponse = (event: {id: number | string}, success: boolean, body: Record<string, unknown> = {}) => {
     return JSON.stringify({
       type: "response",
@@ -320,7 +325,7 @@ export default async function startServer(client: DgraphClient) {
 
     "run_executable": async function (event: EventRunExecutable, ws: IWebsocket) {
       const exec = caches["executables"].data[event['unigraph.id']];
-      buildExecutable(exec)();
+      buildExecutable(exec, {"hello": "ranfromExecutable"}, localApi)();
     }
   };
 
