@@ -49,10 +49,10 @@ export function createExecutableCache(client: DgraphClient): Cache<any> {
 
 export function buildExecutable(exec: Executable): any {
     if (Object.keys(environmentRunners).includes(exec.env)) {
-        // @ts-ignore: checked for key inclusion
+        // @ts-expect-error: already checked for environment runner inclusion
         return environmentRunners[exec.env](exec.src);
     }
-    return () => {};
+    return undefined;
 }
 
 export function initExecutables(executables: Executable[]) {

@@ -21,8 +21,8 @@ export async function checkOrCreateDefaultDataModel(client: DgraphClient) {
         await client.setSchema(defaultTypes);
         await client.createUnigraphUpsert(insertsToUpsert(defaultUserlandSchemas));
         for (let i=0; i<defaultPackages.length; ++i) {
-            await addUnigraphPackage(client, defaultPackages[i], // @ts-ignore
-                {'schemas': {data: Object.fromEntries(defaultUserlandSchemas.map(el => [el["unigraph.id"], el]))}});
+            await addUnigraphPackage(client, defaultPackages[i],
+                {'schemas': {data: Object.fromEntries(defaultUserlandSchemas.map(el => [el["unigraph.id"], el]))} as Cache<any>});
         }
     } else {
         // Everything is OK, returning
@@ -154,8 +154,8 @@ export async function addUnigraphPackage(client: DgraphClient, pkg: PackageDecla
                     }
                 ]
             }
-        }])), // @ts-ignore
-        pkgExecutables: !(pkg.pkgExecutables && Object.entries(pkg.pkgExecutables)) ? undefined : Object.fromEntries(executables.map((exec, i) => [Object.keys(pkg.pkgExecutables)[i], {
+        }])),
+        pkgExecutables: !(pkg.pkgExecutables && Object.entries(pkg.pkgExecutables)) ? undefined : Object.fromEntries(executables.map((exec, i) => [Object.keys(pkg.pkgExecutables!)[i], {
             "$ref": {
                 "query": [
                     {
@@ -188,8 +188,8 @@ export async function addUnigraphPackage(client: DgraphClient, pkg: PackageDecla
                     }
                 ]
             }
-        }])), // @ts-ignore
-        ...!(pkg.pkgExecutables && Object.entries(pkg.pkgExecutables)) ? undefined : Object.fromEntries(executables.map((exec, i) => [`$/executable/${Object.keys(pkg.pkgExecutables)[i]}`, {
+        }])),
+        ...!(pkg.pkgExecutables && Object.entries(pkg.pkgExecutables)) ? undefined : Object.fromEntries(executables.map((exec, i) => [`$/executable/${Object.keys(pkg.pkgExecutables!)[i]}`, {
             "$ref": {
                 "query": [
                     {
