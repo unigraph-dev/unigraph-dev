@@ -1,7 +1,8 @@
 import { Button, ButtonGroup, Checkbox, FormControlLabel, IconButton, List, ListItem } from '@material-ui/core';
-import { MoreVert } from '@material-ui/icons';
+import { MoreVert, PlayArrow } from '@material-ui/icons';
 import React, { FC, ReactElement } from 'react';
 import ReactJson, { InteractionProps } from 'react-json-view';
+import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { BookmarkItem } from '../../examples/bookmarks/Bookmarks';
 import { Tag } from '../../examples/semantic/Tag';
 import { TodoItem } from '../../examples/todo/TodoList';
@@ -36,7 +37,7 @@ type DefaultObjectListViewProps = {
 };
 
 const StringObjectViewer = ({object}: {object: any}) => {
-    const finalObject = window.unigraph.unpad(object)
+    const finalObject = unpad(object)
 
     return <div>
         Type: {object?.type?.["unigraph.id"]}<br/>
@@ -65,10 +66,21 @@ const JsontreeObjectViewer = ({object, options}: {object: any, options: ObjectVi
     </div>
 }
 
+const Executable: DynamicViewRenderer = ({data, callbacks}) => {
+    const unpadded = unpad(data);
+
+    return <React.Fragment>
+        <Button onClick={() => {window.unigraph.runExecutable(unpadded['unigraph.id'])}}><PlayArrow/></Button>
+        {unpadded.name}
+    </React.Fragment>
+}
+
+
 export const DynamicViews: Record<string, DynamicViewRenderer> = {
     "$/schema/todo": TodoItem,
     "$/schema/web_bookmark": BookmarkItem,
-    "$/schema/tag": Tag
+    "$/schema/tag": Tag,
+    "$/schema/executable": Executable
 }
 
 export const AutoDynamicView: DynamicViewRenderer = ({ object, callbacks }) => {

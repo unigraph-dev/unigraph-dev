@@ -160,12 +160,16 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
         throw new TypeError("Entity validation failed for entity " + raw)
     } else {
         const localSchema = schemaMap[schemaName].definition
+        const unigraphId = raw?.['unigraph.id'];
+        if (unigraphId) delete raw?.['unigraph.id'];
         const bodyObject: Record<string, any> = padding ? buildUnigraphEntityPart(raw, options, schemaMap, localSchema) : raw
         const result = {
             "type": makeUnigraphId(schemaName) as UnigraphIdType<`$/schema/${string}`>,
             "dgraph.type": "Entity",
             ...bodyObject
         };
+        // @ts-ignore
+        if (unigraphId) result['unigraph.id'] = unigraphId;
         //console.log(JSON.stringify(result, null, 4));
         // @ts-ignore
         return result;
@@ -257,7 +261,7 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
      */
     function recurse(currentEntity: any, schemas: Record<string, Schema>, localSchema: Definition | any) {
         console.log("=====================")
-        if (currentEntity.type && currentEntity.type['unigraph.id'] && currentEntity.type['unigraph.id'].startsWith('$/schema/')) {
+        if (currentEntity.type && currentEntity.type['unigraph.id'] && currentEntity.type['unigraph.id'].includes('$/schema/')) {
             localSchema = schemas[currentEntity.type['unigraph.id']].definition
         }
         console.log(JSON.stringify(currentEntity), JSON.stringify(localSchema))
@@ -401,4 +405,28 @@ export function dectxObjects(objects: any[], prefix = "_:"): any[] {
     newObjects.forEach(obj => recurse(obj));
 
     return newObjects;
+}
+
+export function unpadRecurse(object: any) {
+    let result: any = undefined;
+    if (typeof object === "object" && !Array.isArray(object)) {
+        result = {};
+        const predicate = Object.keys(object).find(p => p.startsWith("_value"));
+        if (predicate) { // In simple settings, if contains _value ignore all edge annotations
+            result = unpadRecurse(object[predicate]);
+        } else {
+            result = Object.fromEntries(Object.entries(object).map(([k, v]) => [k, unpadRecurse(v)]));
+        }
+        if (object['unigraph.id']) result['unigraph.id'] = object['unigraph.id']
+    } else if (Array.isArray(object)) {
+        result = [];
+        object.forEach(val => result.push(unpadRecurse(val)));
+    } else {
+        result = object;
+    }
+    return result;
+}
+
+export function unpad(object: any) {
+    return {...unpadRecurse(object), uid: object.uid}
 }

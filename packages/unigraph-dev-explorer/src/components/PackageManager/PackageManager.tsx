@@ -9,7 +9,8 @@ export const PackageManager: React.FC = ({}) => {
 
     React.useEffect(() => {
         window.unigraph.getPackages().then((pkg: any) => {
-            setPackages(Object.values(pkg))
+            pkg = Object.values(pkg).map((el: any) => {el.pkgManifest = window.unigraph.unpad(el.pkgManifest); return el})
+            setPackages(pkg) 
         })
     }, [])
 
@@ -18,11 +19,11 @@ export const PackageManager: React.FC = ({}) => {
             Package Manager
         </Typography>
         <DataGrid columns={[
-            {field: 'pkgPackageName', headerName: 'Package Name', width: 200},
-            {field: 'pkgDisplayName', headerName: "Name", width: 150},
-            {field: 'pkgDescription', headerName: "Description", width: 250},
-            {field: 'pkgVersion', headerName: "Version", width: 100},
+            {field: 'package_name', headerName: 'Package Name', width: 200},
+            {field: 'name', headerName: "Name", width: 150},
+            {field: 'description', headerName: "Description", width: 250},
+            {field: 'version', headerName: "Version", width: 100},
             {field: 'schemaLen', headerName: "Schemas", width: 100, type: 'number'}
-        ]} rows={packages.map((pkg: any) => {return {...pkg.pkgManifest, schemaLen: Object.keys(pkg.pkgSchemas).length-1}})} getRowId={row => row.pkgPackageName} pageSize={10}/>
+        ]} rows={packages.map((pkg: any) => {return {...pkg.pkgManifest, schemaLen: Object.keys(pkg.pkgSchemas).length-1}})} getRowId={row => row.package_name} pageSize={10}/>
     </div>
 }

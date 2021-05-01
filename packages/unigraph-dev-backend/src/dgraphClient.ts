@@ -245,6 +245,17 @@ export default class DgraphClient {
   `, {})
   }
 
+  async getExecutables() {
+    return this.queryData<any[]>(`
+    query findByName() {
+      entities(func: eq(dgraph.type, "Executable")) @recurse {
+        uid
+        expand(_predicate_)
+      }
+    }
+  `, {})
+  }
+
   async deleteUnigraphObject(uid: string) {
     return this.createData({
       uid: uid,

@@ -3,10 +3,10 @@ import { makeUnigraphId, makeRefUnigraphId } from "../utils/entityUtils"
 
 export const pkg: PackageDeclaration = {
     pkgManifest: {
-        pkgDisplayName: "Todo",
-        pkgPackageName: "unigraph.todo",
-        pkgVersion: "0.0.1",
-        pkgDescription: "Todo lists and task management."
+        name: "Todo",
+        package_name: "unigraph.todo",
+        version: "0.0.1",
+        description: "Todo lists and task management."
     },
     pkgSchemas: {
         todo: {
