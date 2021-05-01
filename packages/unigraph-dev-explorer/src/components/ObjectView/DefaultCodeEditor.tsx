@@ -26,6 +26,7 @@ export const ExecutableCodeEditor = ({data}: any) => {
         <Button onClick={() => updateCode(currentCode)}><Save/></Button>
         <Editor
             height="90vh"
+            width="100vh"
             defaultLanguage="javascript"
             defaultValue={currentCode}
             onChange={handleEditorChange}
