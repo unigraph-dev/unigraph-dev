@@ -160,12 +160,16 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
         throw new TypeError("Entity validation failed for entity " + raw)
     } else {
         const localSchema = schemaMap[schemaName].definition
+        const unigraphId = raw?.['unigraph.id'];
+        if (unigraphId) delete raw?.['unigraph.id'];
         const bodyObject: Record<string, any> = padding ? buildUnigraphEntityPart(raw, options, schemaMap, localSchema) : raw
         const result = {
             "type": makeUnigraphId(schemaName) as UnigraphIdType<`$/schema/${string}`>,
             "dgraph.type": "Entity",
             ...bodyObject
         };
+        // @ts-ignore
+        if (unigraphId) result['unigraph.id'] = unigraphId;
         //console.log(JSON.stringify(result, null, 4));
         // @ts-ignore
         return result;
@@ -413,6 +417,7 @@ export function unpadRecurse(object: any) {
         } else {
             result = Object.fromEntries(Object.entries(object).map(([k, v]) => [k, unpadRecurse(v)]));
         }
+        if (object['unigraph.id']) result['unigraph.id'] = object['unigraph.id']
     } else if (Array.isArray(object)) {
         result = [];
         object.forEach(val => result.push(unpadRecurse(val)));

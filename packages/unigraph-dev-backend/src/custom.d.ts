@@ -172,3 +172,10 @@ declare type EventImportObjects = {
   id: number,
   objects: string
 }
+
+declare type EventRunExecutable = {
+  type: "event",
+  event: "run_executable",
+  id: number,
+  "unigraph.id": string
+}

@@ -5,6 +5,7 @@
  */
 
 import {pkg as semantic} from 'unigraph-dev-common/lib/data/unigraph.semantic.pkg'
+import {pkg as execexample} from 'unigraph-dev-common/lib/data/unigraph.execexample.pkg'
 
 export const defaultTypes = `<_value>: uid .
 <_value.#i>: int .
@@ -110,6 +111,14 @@ export const packageExecutableSchema = {
                 }
             },
             {
+                "key": "periodic",
+                "definition": {
+                    "type": {
+                        "unigraph.id": "$/primitive/string"
+                    }
+                }
+            },
+            {
                 "key": "src",
                 "definition": {
                     "type": {
@@ -181,5 +190,5 @@ export const defaultUserlandSchemas = [
 ]
 
 export const defaultPackages = [
-    semantic
+    semantic, execexample
 ]

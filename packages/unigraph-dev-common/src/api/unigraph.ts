@@ -32,6 +32,8 @@ export interface Unigraph {
     proxyFetch(url: string, options?: Record<string, any>): Promise<Blob>;
     buildGraph(objects: any[]): any[];
     importObjects(objects: any[]|string): Promise<any>;
+    runExecutable(unigraphid: string): Promise<any>;
+    
 }
 
 function unpadRecurse(object: any) {
@@ -269,6 +271,10 @@ export default function unigraph(url: string): Unigraph {
             if (typeof objects !== "string") objects = JSON.stringify(objects)
             const id = getRandomInt();
             sendEvent(connection, "import_objects", {objects: objects}, id);
+        }),
+        runExecutable: (unigraphid) => new Promise((resolve, reject) => {
+            const id = getRandomInt();
+            sendEvent(connection, "run_executable", {"unigraph.id": unigraphid}, id);
         })
     }
 }

@@ -4,8 +4,8 @@ import expressWs, { Application, WebsocketRequestHandler } from 'express-ws';
 import { isJsonString, blobToBase64 } from 'unigraph-dev-common/lib/utils/utils';
 import DgraphClient from './dgraphClient';
 import { anchorBatchUpsert, insertsToUpsert } from './utils/txnWrapper';
-import { EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventGetPackages, EventGetSchemas, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventResponser, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
-import { buildUnigraphEntity, getUpsertFromUpdater, makeQueryFragmentFromType, processAutoref, dectxObjects } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventGetPackages, EventGetSchemas, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventResponser, EventRunExecutable, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
+import { buildUnigraphEntity, getUpsertFromUpdater, makeQueryFragmentFromType, processAutoref, dectxObjects, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { addUnigraphPackage, checkOrCreateDefaultDataModel, createPackageCache, createSchemaCache } from './datamodelManager';
 import { Cache } from './caches';
 import repl from 'repl';
@@ -15,6 +15,7 @@ import { getAsyncLock } from './asyncManager';
 import fetch from 'node-fetch';
 import { EventEmitter } from 'ws';
 import { uniqueId } from 'lodash';
+import { buildExecutable, createExecutableCache, environmentRunners } from './executableManager';
 
 const PORT = 3001;
 const verbose = 5;
@@ -37,6 +38,7 @@ export default async function startServer(client: DgraphClient) {
   // Initialize caches
   caches["schemas"] = createSchemaCache(client);
   caches["packages"] = createPackageCache(client);
+  caches["executables"] = createExecutableCache(client);
 
   // Initialize subscriptions
   const pollCallback: MsgCallbackFn = (id, newdata, msgPort) => {
@@ -59,6 +61,7 @@ export default async function startServer(client: DgraphClient) {
     }],
     "after_object_changed": [(context: HookAfterObjectChangedParams) => {
       pollSubscriptions(context.subscriptions, dgraphClient, pollCallback);
+      context.caches["executables"].updateNow();
     }],
   }
   
@@ -313,6 +316,11 @@ export default async function startServer(client: DgraphClient) {
           callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
           ws.send(makeResponse(event, true))
         }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
+    },
+
+    "run_executable": async function (event: EventRunExecutable, ws: IWebsocket) {
+      const exec = caches["executables"].data[event['unigraph.id']];
+      buildExecutable(exec)();
     }
   };
 
