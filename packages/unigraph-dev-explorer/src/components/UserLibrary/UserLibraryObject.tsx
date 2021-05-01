@@ -8,7 +8,7 @@ import { DefaultObjectView } from '../ObjectView/DefaultObjectView';
 export default function UserLibraryObject ({ uid }: any) {
     let objectId: any = uid;
 
-    const [object, setObject]: [any, Function] = React.useState({});
+    const [object, setObject]: [any, Function] = React.useState(undefined);
     const [id, setId] = React.useState(Date.now());
 
     const [showPadded, setShowPadded] = React.useState(false);
@@ -24,15 +24,8 @@ export default function UserLibraryObject ({ uid }: any) {
     })
 
     return (<div>
-        <Typography variant="h5">Object View</Typography>
-        <FormControlLabel control={<Checkbox
-            checked={showPadded}
-            onChange={() => setShowPadded(!showPadded)}
-            name="showPadded"
-            color="primary"
-        />} label="Show object as padded"/>
         <DefaultObjectView object={object} options={{
-            viewer: "json-tree",
+            viewer: "dynamic-view-detailed",
             canEdit: true,
             unpad: !showPadded
         }}></DefaultObjectView>
