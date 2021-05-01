@@ -6,7 +6,7 @@ import { PackageDeclaration } from '../types/packages';
 import { base64ToBlob } from '../utils/utils';
 
 export interface Unigraph {
-    backendConnection: WebSocket;
+    backendConnection: WebSocket | false;
     backendMessages: string[];
     eventTarget: EventTarget;
     getStatus(): Promise<any>;
@@ -14,13 +14,14 @@ export interface Unigraph {
     ensureSchema(name: string, fallback: any): Promise<any>;
     ensurePackage(packageName: string, fallback: PackageDeclaration): Promise<any>;
     // eslint-disable-next-line @typescript-eslint/ban-types
-    subscribeToType(name: string, callback: Function, eventId: number | undefined): Promise<number>;
+    subscribeToType(name: string, callback: Function, eventId: number | undefined): Promise<any>;
     // eslint-disable-next-line @typescript-eslint/ban-types
-    subscribeToObject(uid: string, callback: Function, eventId: number | undefined): Promise<number>;
+    subscribeToObject(uid: string, callback: Function, eventId: number | undefined): Promise<any>;
     // eslint-disable-next-line @typescript-eslint/ban-types
-    subscribeToQuery(fragment: string, callback: Function, eventId: number | undefined): Promise<number>;
+    subscribeToQuery(fragment: string, callback: Function, eventId: number | undefined): Promise<any>;
     unsubscribe(id: number): any;
     addObject(object: any, schema: string): any;
+    getType(name: string): any;
     deleteObject(uid: string): any;
     unpad(object: any): any;
     updateSimpleObject(object: any, predicate: string, value: any): any;
@@ -66,7 +67,7 @@ function unpad(object: any) {
  * 
  * @param objects Objects with uid references
  */
-function buildGraph(objects: any[]): any[] {
+export function buildGraph(objects: any[]): any[] {
 
     const objs: any[] = JSON.parse(JSON.stringify(objects))
     const dict: any = {}
@@ -275,7 +276,8 @@ export default function unigraph(url: string): Unigraph {
         runExecutable: (unigraphid) => new Promise((resolve, reject) => {
             const id = getRandomInt();
             sendEvent(connection, "run_executable", {"unigraph.id": unigraphid}, id);
-        })
+        }),
+        getType: (name) => {throw Error("Not implemented")}
     }
 }
 
