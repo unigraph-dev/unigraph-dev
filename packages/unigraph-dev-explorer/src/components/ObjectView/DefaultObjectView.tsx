@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, Checkbox, FormControlLabel, IconButton, List, ListItem, Typography } from '@material-ui/core';
+import { Button, ButtonGroup, Checkbox, FormControlLabel, IconButton, List, ListItemIcon, ListItemText, Typography } from '@material-ui/core';
 import { MoreVert, PlayArrow } from '@material-ui/icons';
 import React, { FC, ReactElement } from 'react';
 import ReactJson, { InteractionProps } from 'react-json-view';
@@ -81,8 +81,8 @@ const Executable: DynamicViewRenderer = ({data, callbacks}) => {
     const unpadded = unpad(data);
 
     return <React.Fragment>
-        <Button onClick={() => {window.unigraph.runExecutable(unpadded['unigraph.id'])}}><PlayArrow/></Button>
-        {unpadded.name}
+        <ListItemIcon style={{paddingLeft: "8px"}} onClick={() => {window.unigraph.runExecutable(unpadded['unigraph.id'])}}><PlayArrow/></ListItemIcon>
+        <ListItemText primary={"Run code: " + unpadded.name} secondary={`Environment: ${unpadded.env}`} />
     </React.Fragment>
 }
 

@@ -19,10 +19,8 @@ const UserLibraryAll = () => {
     return <div>
         <Typography gutterBottom variant="h4">
             Library - All Items
-            <DefaultObjectListView objects={objects} component={ListItem}/>
         </Typography>
-        
-        
+        <DefaultObjectListView objects={objects} component={ListItem}/>
     </div>
 }
 
