@@ -22,6 +22,7 @@
                 "_value.!": false
             },
             "semantic_properties": {
+                "_propertyType": "inheritance",
                 "_value": {
                     "type": {
                         "unigraph.id": "$/schema/semantic_properties"

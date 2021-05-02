@@ -14,31 +14,32 @@ export type PrimitiveType = {
 
 // We say this is a Field "indexed by" T
 export type Field<T extends ComposerObjectIndexs> = {
-    key: PrimitiveType[T],
-    unique?: boolean,
-    definition: Definition
+    _key: PrimitiveType[T],
+    _unique?: boolean,
+    _propertyType?: "inheritance",
+    _definition: Definition
 }
 
 export type ComposerObjectInstance<T extends ComposerObjectIndexs> = {
     type: UnigraphIdType<"$/composer/Object">,
-    parameters?: {
-        indexedBy: UnigraphIdType<T>,
-        indexes: PrimitiveType[T][]
+    _parameters?: {
+        _indexedBy: UnigraphIdType<T>,
+        _indexes: PrimitiveType[T][]
     },
-    properties: Field<T>[]
+    _properties: Field<T>[]
 }
 
 export type ComposerArrayInstance = {
     type: UnigraphIdType<"$/composer/Array">,
-    parameters: {
-        element: Definition
+    _parameters: {
+        _element: Definition
     }
 }
 
 export type ComposerUnionInstance = {
     type: UnigraphIdType<"$/composer/Union">,
-    parameters: {
-        definitions: Definition[]
+    _parameters: {
+        _definitions: Definition[]
     }
 }
 
@@ -54,12 +55,12 @@ export type Primitive = {"type": PrimitiveTypes}
 
 export type Schema = {
     "unigraph.id"?: string,
-    definition: Definition
+    _definition: Definition
 }
 
 export type SchemaDgraph = {
     "unigraph.id"?: string,
-    definition: Definition,
+    _definition: Definition,
     "dgraph.type": "Type"
 }
 
