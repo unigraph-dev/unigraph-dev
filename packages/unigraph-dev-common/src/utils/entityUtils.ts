@@ -120,7 +120,7 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions = {v
         } else if (localSchema.type?.['unigraph.id']?.startsWith('$/schema/') && rawPartUnigraphType === "$/composer/Object" ) {
             // Case 2: References another schema.
             unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options);
-        } else if (localSchema.type?.['unigraph.id']?.startsWith('$/schema/') && rawPartUnigraphType !== "$/composer/Object" ) {
+        } else if (localSchema.type?.['unigraph.id']?.startsWith('$/schema/') && rawPartUnigraphType !== "$/composer/Object" && rawPartUnigraphType) {
             // Case 2.1: References another schema with primitive type (thus no predicate)
             noPredicate = true;
             unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options);
@@ -137,10 +137,10 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions = {v
                     return [defn, buildUnigraphEntityPart(rawPart, options, schemaMap, defn)]
                 } catch (e) {console.log(e); return undefined};
             }).filter(x => x !== undefined);
-            if (choicesResults.length !== 1) {
+            if (choicesResults.length !== 1 && rawPartUnigraphType !== "$/primitive/undefined") {
                 throw new TypeError("Union type does not allow ambiguous or nonexistent selections!" + JSON.stringify(rawPart) + JSON.stringify(localSchema) + rawPartUnigraphType)
             } else {
-                unigraphPartValue = choicesResults[0]![1];
+                unigraphPartValue = choicesResults[0]?.[1];
             }
         } else{
             // Default: Error out.
@@ -447,3 +447,20 @@ export function unpadRecurse(object: any) {
 export function unpad(object: any) {
     return {...unpadRecurse(object), uid: object.uid}
 }
+
+export function clearEmpties(o: any) {
+    for (var k in o) {
+      if (!o[k]) {
+          delete o[k];
+          continue
+      } else if (typeof o[k] !== "object") {
+        continue // If null or not an object, skip to the next iteration
+      }
+  
+      // The property is an object
+      clearEmpties(o[k]); // <-- Make a recursive call on the nested object
+      if (Object.keys(o[k]).length === 0) {
+        delete o[k]; // The object had no properties, so delete that property
+      }
+    }
+  }

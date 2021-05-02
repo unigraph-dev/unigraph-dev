@@ -3,7 +3,7 @@
  */
 
 import DgraphClient from "./dgraphClient";
-import { buildUnigraphEntity, getUpsertFromUpdater, makeQueryFragmentFromType, processAutoref, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
+import { buildUnigraphEntity, clearEmpties, getUpsertFromUpdater, makeQueryFragmentFromType, processAutoref, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { buildGraph, getRandomInt, Unigraph } from "unigraph-dev-common/lib/api/unigraph";
 import { Cache } from './caches';
 import { createContext } from "react";
@@ -12,6 +12,7 @@ import { createSubscriptionLocal, Subscription } from "./subscriptions";
 import { callHooks } from "./hooks";
 import { insertsToUpsert } from "./utils/txnWrapper";
 import { UnigraphUpsert } from "./custom";
+import _ from "lodash";
 
 export type Executable = {
     name?: string,
@@ -86,7 +87,7 @@ export const runEnvRoutineJs: ExecRunner = (src, context, unigraph) => {
     //const fn = () => eval(src);
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor
-    const fn = new AsyncFunction("context", "unigraph", src).bind(this, context, unigraph);
+    const fn = new AsyncFunction("require", "context", "unigraph", src).bind(this, require, context, unigraph);
 
     return fn;
 }
@@ -153,6 +154,8 @@ export function getLocalUnigraphAPI(client: DgraphClient, caches: Record<string,
             }, []);
         },
         addObject: async (object, schema) => {
+            clearEmpties(object);
+            console.log(object)
             const unigraphObject = buildUnigraphEntity(object, schema, caches['schemas'].data);
             const finalUnigraphObject = processAutoref(unigraphObject, schema, caches['schemas'].data)
             const upsert = insertsToUpsert([finalUnigraphObject]);
@@ -198,9 +201,9 @@ export function getLocalUnigraphAPI(client: DgraphClient, caches: Record<string,
         proxyFetch: async (url, options?) => {return new Blob([])},
         // latertodo
         importObjects: async (objects) => {return Error('Not implemented')},
-        runExecutable: async (unigraphid) => {
+        runExecutable: async (unigraphid, params) => {
             const exec = caches["executables"].data[unigraphid];
-            buildExecutable(exec, {"hello": "ranfromExecutable"}, {} as Unigraph)()
+            buildExecutable(exec, {"hello": "ranfromExecutable", "params": params}, {} as Unigraph)()
         }
     }
 }

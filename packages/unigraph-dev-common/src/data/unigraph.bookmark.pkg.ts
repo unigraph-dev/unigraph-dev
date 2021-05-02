@@ -59,7 +59,14 @@ export const pkg: PackageDeclaration = {
                         "_definition": {
                             "type": makeUnigraphId("$/schema/interface/textual")
                         }
-                    }
+                    },
+                    {
+                        "_key": "creative_work",
+                        "_propertyType": "inheritance",
+                        "_definition": {
+                            "type": makeUnigraphId("$/schema/creative_work")
+                        }
+                    },
                 ]
             }
         }

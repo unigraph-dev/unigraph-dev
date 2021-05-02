@@ -3,10 +3,10 @@ import { makeUnigraphId, makeRefUnigraphId } from "../utils/entityUtils"
 
 export const pkg: PackageDeclaration = {
     pkgManifest: {
-        name: "Executables",
-        package_name: "unigraph.execexample",
+        name: "RSS Reader",
+        package_name: "unigraph.rss_reader",
         version: "0.0.1",
-        description: "Example executables"
+        description: "An RSS Reader with Unigraph"
     },
     pkgSchemas: {
         rss_feed: {
@@ -81,6 +81,12 @@ export const pkg: PackageDeclaration = {
             periodic: "*/30 * * * *",
             editable: true,
             name: "Update feeds every half an hour"
+        },
+        "add-feed": {
+            env: "routine/js",
+            src: "console.log(new Date())",
+            editable: true,
+            name: "Add a feed to RSS feeds list"
         }
     }
 }
