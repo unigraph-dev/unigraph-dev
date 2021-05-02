@@ -26,6 +26,8 @@ export type Executable = {
 
 export function createExecutableCache(client: DgraphClient, context: ExecContext, unigraph: Unigraph): Cache<any> {
     
+    const schedule: Record<string, cron.ScheduledTask> = {};
+    
     const cache: Cache<any> = {
         data: {},
         updateNow: async () => null,
@@ -42,8 +44,8 @@ export function createExecutableCache(client: DgraphClient, context: ExecContext
             }
             return prev;
         }, {})
-
-        initExecutables(Object.values(cache.data), context, unigraph)
+        
+        initExecutables(Object.values(cache.data), context, unigraph, schedule)
     };
 
     cache.updateNow();
@@ -60,9 +62,12 @@ export function buildExecutable(exec: Executable, context: ExecContext, unigraph
     return undefined;
 }
 
-export function initExecutables(executables: Executable[], context: ExecContext, unigraph: Unigraph) {
+export function initExecutables(executables: Executable[], context: ExecContext, unigraph: Unigraph, schedule: Record<string, cron.ScheduledTask>) {
     executables.forEach(el => {
-        if (el.periodic) cron.schedule(el.periodic, buildExecutable(el, context, unigraph))
+        if (el.periodic) {
+            schedule[el["unigraph.id"]].destroy();
+            schedule[el["unigraph.id"]] = cron.schedule(el.periodic, buildExecutable(el, context, unigraph))
+        }
     })
 }
 
