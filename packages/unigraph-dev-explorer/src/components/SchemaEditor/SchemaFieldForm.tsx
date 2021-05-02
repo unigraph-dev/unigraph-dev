@@ -37,13 +37,13 @@ interface SchemaNameFormProps {
 export const SchemaFieldForm: FC<SchemaFieldFormProps> = ({ field, referenceables, onChange }) => {
   const classes = useStyles();
   const setFieldName = useCallback(event => {
-    const key = event.target.value;
-    onChange({ ...field, key });
+    const _key = event.target.value;
+    onChange({ ...field, _key });
   }, [field, onChange]);
 
   const setFieldType = useCallback(value => {
     const type = value;
-    onChange({ ...field, definition: { type } });
+    onChange({ ...field, _definition: { type } });
   }, [field, onChange]);
 
   return (
@@ -53,13 +53,13 @@ export const SchemaFieldForm: FC<SchemaFieldFormProps> = ({ field, referenceable
         label="Name"
         variant="filled"
         onChange={setFieldName}
-        value={field.key || ''}
+        value={field._key || ''}
       />
       {/* TODO: should also autocomplete w/ "add new type" from input */}
       <ReferenceableSelectorControlled 
         referenceables={referenceables}
         onChange={setFieldType}
-        value={field.definition?.type}
+        value={field._definition?.type}
       />
     </Box>
   );

@@ -28,13 +28,13 @@ const recursiveBindField = (path: string, rootObj: any) => {
 const getFieldsFromDefinition = (def: Definition, schemas: any, rootObj: any, path = "") => {
     //console.log(schemas)
     // @ts-ignore
-    if (def.type['unigraph.id'].startsWith('$/schema')) def = schemas[def.type['unigraph.id']].definition;
+    if (def.type['unigraph.id'].startsWith('$/schema')) def = schemas[def.type['unigraph.id']]._definition;
 
     // @ts-ignore
     if(def.type['unigraph.id'] === '$/composer/Object') { // Generate object fields
         // @ts-ignore: already have properties. fix type later
-        return def.properties.map((el) => <div>
-            {[el.key, getFieldsFromDefinition(el.definition, schemas, rootObj, path+`/${el.key}`)]}
+        return def._properties.map((el) => <div>
+            {[el._key, getFieldsFromDefinition(el._definition, schemas, rootObj, path+`/${el._key}`)]}
         </div>) // @ts-ignore
     } else if (def.type['unigraph.id'].startsWith('$/composer/Array')) {
         return "This is an array..."
@@ -80,10 +80,10 @@ export const ObjectEditor = () => {
             onChange={(schema: string) => window.unigraph.getSchemas()
                 .then((schemas: Record<string, SchemaDgraph>) => {setCurrentSchema(schemas[schema]); setCurrentSchemaSHName(schema)})}
             value={// @ts-ignore
-                (currentSchema as unknown as SchemaDgraph)?.definition.type['unigraph.id']}
+                (currentSchema as unknown as SchemaDgraph)?._definition.type['unigraph.id']}
         />
         {currentSchema ? <div>
-            {getFieldsFromDefinition((currentSchema as any).definition, allSchemas, [currentObject, setCurrentObject])}
+            {getFieldsFromDefinition((currentSchema as any)._definition, allSchemas, [currentObject, setCurrentObject])}
             {JSON.stringify(currentObject)}
         </div> : []}
         <Button onClick={()=> {window.unigraph.addObject(currentObject, currentSchemaSHName)}}>Submit (WIP)</Button>

@@ -11,35 +11,35 @@ export const pkg: PackageDeclaration = {
     pkgSchemas: {
         color: {
             "dgraph.type": "Type",
-            "definition": {
+            "_definition": {
                 "type": makeUnigraphId('$/primitive/string')
             }
         },
         tag: {
             "dgraph.type": "Type",
-            "definition": {
+            "_definition": {
                 "type": makeUnigraphId('$/composer/Object'),
-                "parameters": {
-                    "indexedBy": makeUnigraphId("$/primitive/string"),
-                    "indexes": ["name"]
+                "_parameters": {
+                    "_indexedBy": makeUnigraphId("$/primitive/string"),
+                    "_indexes": ["name"]
                 },
-                "properties": [
+                "_properties": [
                     {
-                        "key": "name",
-                        "definition": {
+                        "_key": "name",
+                        "_definition": {
                             "type": makeUnigraphId("$/primitive/string")
                         },
-                        "unique": true
+                        "_unique": true
                     },
                     {
-                        "key": "color",
-                        "definition": {
+                        "_key": "color",
+                        "_definition": {
                             "type": makeUnigraphId("$/schema/color")
                         }
                     },
                     {
-                        "key": "semantic_properties",
-                        "definition": {
+                        "_key": "semantic_properties",
+                        "_definition": {
                             "type": makeUnigraphId("$/schema/semantic_properties")
                         }
                     },
@@ -48,16 +48,16 @@ export const pkg: PackageDeclaration = {
         },
         note: {
             "dgraph.type": "Type",
-            "definition": {
+            "_definition": {
                 "type": makeUnigraphId('$/primitive/string')
             }
         },
         "interface/note": {
             "dgraph.type": "Type",
-            "definition": {
+            "_definition": {
                 "type": makeUnigraphId('$/composer/Union'),
-                "parameters": {
-                    "definitions": [{
+                "_parameters": {
+                    "_definitions": [{
                         "type": makeUnigraphId('$/schema/note')
                     }]
                 }
@@ -65,31 +65,31 @@ export const pkg: PackageDeclaration = {
         },
         "interface/semantic": {
             "dgraph.type": "Type",
-            "definition": {
+            "_definition": {
                 "type": makeUnigraphId('$/composer/Union'),
-                "parameters": {
-                    "definitions": []
+                "_parameters": {
+                    "_definitions": []
                 }
             }
         },
         semantic_properties: {
             "dgraph.type": "Type",
-            "definition": {
+            "_definition": {
                 "type": makeUnigraphId('$/composer/Object'),
-                "parameters": {
-                    "indexedBy": makeUnigraphId("$/primitive/string"),
-                    "indexes": ["name"]
+                "_parameters": {
+                    "_indexedBy": makeUnigraphId("$/primitive/string"),
+                    "_indexes": ["name"]
                 },
-                "properties": [
+                "_properties": [
                     {
-                        "key": "children",
-                        "definition": {
+                        "_key": "children",
+                        "_definition": {
                             "type": makeUnigraphId('$/composer/Array'),
-                            "parameters": {
-                                "element": {
+                            "_parameters": {
+                                "_element": {
                                     "type": makeUnigraphId('$/composer/Union'),
-                                    "parameters": {
-                                        "definitions": [{
+                                    "_parameters": {
+                                        "_definitions": [{
                                             "type": makeUnigraphId('$/schema/interface/note')
                                         }, {
                                             "type": makeUnigraphId('$/schema/interface/semantic')

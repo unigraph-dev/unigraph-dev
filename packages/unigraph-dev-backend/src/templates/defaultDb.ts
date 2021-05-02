@@ -14,7 +14,7 @@ export const defaultTypes = `<_value>: uid .
 <_value.%>: string .
 <_value.>: default .
 <_value[>: [uid] .
-<definition>: uid .
+<_definition>: uid .
 <type>: uid .
 <pkgManifest>: uid .
 <unigraph.id>: string @index(exact) .
@@ -22,7 +22,7 @@ type <Entity> {
 	type
 }
 type <Type> {
-	definition
+	_definition
 }
 type <Package> {
     pkgManifest
@@ -32,28 +32,28 @@ type <Package> {
 export const packageManifestSchema = {
     "unigraph.id": "$/schema/package_manifest",
     "dgraph.type": "Type",
-    "definition": {
+    "_definition": {
         "type": {
             "unigraph.id": "$/composer/Object"
         },
-        "parameters": {
-            "indexedBy": {
+        "_parameters": {
+            "_indexedBy": {
                 "unigraph.id": "$/primitive/string"
             },
-            "indexes": [ ]
+            "_indexes": [ ]
         },
-        "properties": [
+        "_properties": [
             {
-                "key": "name",
-                "definition": {
+                "_key": "name",
+                "_definition": {
                     "type": {
                         "unigraph.id": "$/primitive/string"
                     }
                 }
             },
             {
-                "key": "package_name",
-                "definition": {
+                "_key": "package_name",
+                "_definition": {
                     "type": {
                         "unigraph.id": "$/primitive/string"
                     }
@@ -61,16 +61,16 @@ export const packageManifestSchema = {
                 "unique": true
             },
             {
-                "key": "version",
-                "definition": {
+                "_key": "version",
+                "_definition": {
                     "type": {
                         "unigraph.id": "$/primitive/string"
                     }
                 }
             },
             {
-                "key": "description",
-                "definition": {
+                "_key": "description",
+                "_definition": {
                     "type": {
                         "unigraph.id": "$/primitive/string"
                     }
@@ -83,68 +83,68 @@ export const packageManifestSchema = {
 export const packageExecutableSchema = {
     "unigraph.id": "$/schema/executable",
     "dgraph.type": "Type",
-    "definition": {
+    "_definition": {
         "type": {
             "unigraph.id": "$/composer/Object"
         },
-        "parameters": {
-            "indexedBy": {
+        "_parameters": {
+            "_indexedBy": {
                 "unigraph.id": "$/primitive/string"
             },
-            "indexes": [ ]
+            "_indexes": [ ]
         },
-        "properties": [
+        "_properties": [
             {
-                "key": "name",
-                "definition": {
+                "_key": "name",
+                "_definition": {
                     "type": {
                         "unigraph.id": "$/primitive/string"
                     }
                 }
             },
             {
-                "key": "env",
-                "definition": {
+                "_key": "env",
+                "_definition": {
                     "type": {
                         "unigraph.id": "$/primitive/string"
                     }
                 }
             },
             {
-                "key": "periodic",
-                "definition": {
+                "_key": "periodic",
+                "_definition": {
                     "type": {
                         "unigraph.id": "$/primitive/string"
                     }
                 }
             },
             {
-                "key": "src",
-                "definition": {
+                "_key": "src",
+                "_definition": {
                     "type": {
                         "unigraph.id": "$/primitive/string"
                     }
                 }
             },
             {
-                "key": "editable",
-                "definition": {
+                "_key": "editable",
+                "_definition": {
                     "type": {
                         "unigraph.id": "$/primitive/boolean"
                     }
                 }
             },
             {
-                "key": "edited",
-                "definition": {
+                "_key": "edited",
+                "_definition": {
                     "type": {
                         "unigraph.id": "$/primitive/string"
                     }
                 }
             },
             {
-                "key": "semantic_properties",
-                "definition": {
+                "_key": "semantic_properties",
+                "_definition": {
                     "type": {"unigraph.id": "$/schema/semantic_properties"},
                 }
             }

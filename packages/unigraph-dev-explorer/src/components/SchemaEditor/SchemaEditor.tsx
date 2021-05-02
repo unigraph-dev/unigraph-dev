@@ -47,13 +47,13 @@ const SchemaEditor: FC<SchemaEditorProps> = ({ onSubmit }) => {
   }, [push]);
 
   const handleSubmit = useCallback((event: any, preview: boolean = false) => {
-    const properties: Partial<EntityField>[] = fields.map(
-      ({ key, definition }) =>
+    const _properties: Partial<EntityField>[] = fields.map(
+      ({ _key, _definition }) =>
       {
         return {
-          key: key, 
-          definition: {
-            type: definition ? makeRefUnigraphId(definition?.type) : undefined
+          _key: _key, 
+          _definition: {
+            type: _definition ? makeRefUnigraphId(_definition?.type) : undefined
           }
         }
       }
@@ -68,7 +68,7 @@ const SchemaEditor: FC<SchemaEditorProps> = ({ onSubmit }) => {
           indexedBy: makeRefUnigraphId('$/primitive/string'),
           indexes: ['name']
         },
-        properties,
+        _properties,
       }
     }, preview);
   }, [name, fields, onSubmit]);

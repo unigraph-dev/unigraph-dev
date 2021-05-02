@@ -11,34 +11,35 @@ export const pkg: PackageDeclaration = {
     pkgSchemas: {
         todo: {
             "dgraph.type": "Type",
-            "definition": {
+            "_definition": {
                 "type": makeUnigraphId("$/composer/Object"),
-                "parameters": {
-                    "indexedBy": makeUnigraphId("$/primitive/string"),
-                    "indexes": ["name"]
+                "_parameters": {
+                    "_indexedBy": makeUnigraphId("$/primitive/string"),
+                    "_indexes": ["name"]
                 },
-                "properties": [
+                "_properties": [
                     {
-                        "key": "name",
-                        "definition": {
+                        "_key": "name",
+                        "_definition": {
                             "type": makeUnigraphId("$/primitive/string")
                         }
                     },
                     {
-                        "key": "done",
-                        "definition": {
+                        "_key": "done",
+                        "_definition": {
                             "type": makeUnigraphId("$/primitive/boolean")
                         }
                     },
                     {
-                        "key": "priority",
-                        "definition": {
+                        "_key": "priority",
+                        "_definition": {
                             "type": makeUnigraphId("$/primitive/number")
                         }
                     },
                     {
-                        "key": "semantic_properties",
-                        "definition": {
+                        "_key": "semantic_properties",
+                        "_propertyType": "inheritance",
+                        "_definition": {
                             "type": makeUnigraphId("$/schema/semantic_properties"),
                         }
                     }

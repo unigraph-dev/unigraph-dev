@@ -11,46 +11,46 @@ export const pkg: PackageDeclaration = {
     pkgSchemas: {
         icon_url: {
             "dgraph.type": "Type",
-            "definition": {
+            "_definition": {
                 "type": makeUnigraphId('$/primitive/string')
             }
         },
         url: {
             "dgraph.type": "Type",
-            "definition": {
+            "_definition": {
                 "type": makeUnigraphId('$/primitive/string')
             }
         },
         web_bookmark: {
             "dgraph.type": "Type",
-            "definition": {
+            "_definition": {
                 "type": makeUnigraphId("$/composer/Object"),
-                "parameters": {
-                    "indexedBy": makeUnigraphId("$/primitive/string"),
-                    "indexes": ["name"]
+                "_parameters": {
+                    "_indexedBy": makeUnigraphId("$/primitive/string"),
+                    "_indexes": ["name"]
                 },
-                "properties": [
+                "_properties": [
                     {
-                        "key": "name",
-                        "definition": {
+                        "_key": "name",
+                        "_definition": {
                             "type": makeUnigraphId("$/primitive/string")
                         }
                     },
                     {
-                        "key": "url",
-                        "definition": {
+                        "_key": "url",
+                        "_definition": {
                             "type": makeUnigraphId("$/schema/url")
                         }
                     },
                     {
-                        "key": "favicon",
-                        "definition": {
+                        "_key": "favicon",
+                        "_definition": {
                             "type": makeUnigraphId("$/schema/icon_url")
                         }
                     },
                     {
-                        "key": "semantic_properties",
-                        "definition": {
+                        "_key": "semantic_properties",
+                        "_definition": {
                             "type": makeUnigraphId("$/schema/semantic_properties"),
                         }
                     }

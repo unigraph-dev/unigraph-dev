@@ -2,43 +2,43 @@
     "todo-schema-test": {
         "unigraph.id": "$/schema/todo",
         "dgraph.type": "Type",
-        "definition": {
+        "_definition": {
             "type": {
                 "unigraph.id": "$/composer/Object"
             },
-            "parameters": {
-                "indexedBy": {
+            "_parameters": {
+                "_indexedBy": {
                     "unigraph.id": "$/primitive/string"
                 },
-                "indexes": [
+                "_indexes": [
                     "name"
                 ]
             },
-            "properties": [
+            "_properties": [
                 {
-                    "key": "name",
-                    "definition": {
+                    "_key": "name",
+                    "_definition": {
                         "type": {
                             "unigraph.id": "$/primitive/string"
                         }
                     }
                 },
                 {
-                    "key": "done",
-                    "definition": {
+                    "_key": "done",
+                    "_definition": {
                         "type": {
                             "unigraph.id": "$/primitive/boolean"
                         }
                     }
                 },
                 {
-                    "key": "users",
-                    "definition": {
+                    "_key": "users",
+                    "_definition": {
                         "type": {
                             "unigraph.id": "$/composer/Array"
                         },
-                        "parameters": {
-                            "element": {
+                        "_parameters": {
+                            "_element": {
                                 "type": {
                                     "unigraph.id": "$/schema/user"
                                 }
@@ -52,27 +52,27 @@
     "user-schema-test": {
         "unigraph.id": "$/schema/user",
         "dgraph.type": "Type",
-        "definition": {
+        "_definition": {
             "type": {
                 "unigraph.id": "$/composer/Object"
             },
-            "parameters": {
-                "indexedBy": {
+            "_parameters": {
+                "_indexedBy": {
                     "unigraph.id": "$/primitive/string"
                 },
-                "indexes": [
+                "_indexes": [
                     "name"
                 ]
             },
-            "properties": [
+            "_properties": [
                 {
-                    "key": "name",
-                    "definition": {
+                    "_key": "name",
+                    "_definition": {
                         "type": {
                             "unigraph.id": "$/primitive/string"
                         }
                     },
-                    "unique": true
+                    "_unique": true
                 }
             ]
         }

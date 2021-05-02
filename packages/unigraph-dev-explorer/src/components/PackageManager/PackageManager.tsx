@@ -9,8 +9,8 @@ export const PackageManager: React.FC = ({}) => {
 
     React.useEffect(() => {
         window.unigraph.getPackages().then((pkg: any) => {
-            pkg = Object.values(pkg).map((el: any) => {el.pkgManifest = window.unigraph.unpad(el.pkgManifest); return el})
-            setPackages(pkg) 
+            console.log(Object.values(pkg))
+            setPackages(Object.values(pkg)) 
         })
     }, [])
 
@@ -24,6 +24,6 @@ export const PackageManager: React.FC = ({}) => {
             {field: 'description', headerName: "Description", width: 250},
             {field: 'version', headerName: "Version", width: 100},
             {field: 'schemaLen', headerName: "Schemas", width: 100, type: 'number'}
-        ]} rows={packages.map((pkg: any) => {return {...pkg.pkgManifest, schemaLen: Object.keys(pkg.pkgSchemas).length-1}})} getRowId={row => row.package_name} pageSize={10}/>
+        ]} rows={packages.map((pkg: any) => {return {...pkg.pkgManifest, schemaLen: pkg.pkgSchemas ? Object.keys(pkg.pkgSchemas).length-1 : 0}})} getRowId={row => row.package_name} pageSize={10}/>
     </div>
 }
