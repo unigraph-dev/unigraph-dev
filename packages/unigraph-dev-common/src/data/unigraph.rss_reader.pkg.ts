@@ -1,6 +1,26 @@
 import { PackageDeclaration } from "../types/packages";
 import { makeUnigraphId, makeRefUnigraphId } from "../utils/entityUtils"
 
+const addFeedCode = `const url = context.params.url;
+let Parser = require('rss-parser');
+let parser = new Parser();
+const feed = await parser.parseURL(url);
+const feedObj = {
+    feed_url: url,
+    site_info: {
+        name: feed.title,
+        url: feed.link,
+        favicon: feed.link + "/favicon.ico",
+        creative_work: {
+            abstract: feed.description
+        }
+    }
+}
+
+const result = await unigraph.addObject(feedObj, '$/schema/rss_feed')
+                            
+console.log(result);`
+
 export const pkg: PackageDeclaration = {
     pkgManifest: {
         name: "RSS Reader",
@@ -84,7 +104,7 @@ export const pkg: PackageDeclaration = {
         },
         "add-feed": {
             env: "routine/js",
-            src: "console.log(new Date())",
+            src: addFeedCode,
             editable: true,
             name: "Add a feed to RSS feeds list"
         }
