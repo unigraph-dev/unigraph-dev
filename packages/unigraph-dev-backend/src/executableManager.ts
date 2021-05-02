@@ -65,7 +65,7 @@ export function buildExecutable(exec: Executable, context: ExecContext, unigraph
 export function initExecutables(executables: Executable[], context: ExecContext, unigraph: Unigraph, schedule: Record<string, cron.ScheduledTask>) {
     executables.forEach(el => {
         if (el.periodic) {
-            schedule[el["unigraph.id"]].destroy();
+            schedule[el["unigraph.id"]]?.destroy();
             schedule[el["unigraph.id"]] = cron.schedule(el.periodic, buildExecutable(el, context, unigraph))
         }
     })
