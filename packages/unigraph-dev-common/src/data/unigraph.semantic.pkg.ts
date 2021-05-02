@@ -15,6 +15,12 @@ export const pkg: PackageDeclaration = {
                 "type": makeUnigraphId('$/primitive/string')
             }
         },
+        person: {
+            "dgraph.type": "Type",
+            "_definition": {
+                "type": makeUnigraphId('$/primitive/string')
+            }
+        },
         tag: {
             "dgraph.type": "Type",
             "_definition": {
@@ -52,7 +58,7 @@ export const pkg: PackageDeclaration = {
                 "type": makeUnigraphId('$/primitive/string')
             }
         },
-        "interface/note": {
+        "interface/textual": {
             "dgraph.type": "Type",
             "_definition": {
                 "type": makeUnigraphId('$/composer/Union'),
@@ -90,7 +96,7 @@ export const pkg: PackageDeclaration = {
                                     "type": makeUnigraphId('$/composer/Union'),
                                     "_parameters": {
                                         "_definitions": [{
-                                            "type": makeUnigraphId('$/schema/interface/note')
+                                            "type": makeUnigraphId('$/schema/interface/textual')
                                         }, {
                                             "type": makeUnigraphId('$/schema/interface/semantic')
                                         }, {
@@ -99,6 +105,36 @@ export const pkg: PackageDeclaration = {
                                     }
                                 }
                             }
+                        }
+                    }
+                ]
+            }
+        },
+        creative_work: {
+            "dgraph.type": "Type",
+            "_definition": {
+                "type": makeUnigraphId('$/composer/Object'),
+                "_parameters": {
+                    "_indexedBy": makeUnigraphId("$/primitive/string"),
+                    "_indexes": ["name"]
+                },
+                "_properties": [
+                    {
+                        "_key": "text",
+                        "_definition": {
+                            "type": makeUnigraphId('$/schema/interface/textual')
+                        }
+                    },
+                    {
+                        "_key": "about",
+                        "_definition": {
+                            "type": makeUnigraphId('$/schema/interface/textual')
+                        }
+                    },
+                    {
+                        "_key": "author",
+                        "_definition": {
+                            "type": makeUnigraphId('$/schema/person')
                         }
                     }
                 ]

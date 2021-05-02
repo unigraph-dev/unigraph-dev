@@ -8,6 +8,7 @@ import { getContrast } from '../../utils';
 import { withUnigraphSubscription } from 'unigraph-dev-common/lib/api/unigraph-react'
 import { Tag } from '../semantic/Tag';
 import { Autocomplete } from '@material-ui/lab';
+import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 
 export const parseTodoObject: (arg0: string) => ATodoList = (todoString: string) => {
     // TODO: Using regex for now, we can switch to a more centralized parsing solution later
@@ -114,6 +115,8 @@ export const TodoList = withUnigraphSubscription(
 
 export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
     let unpadded: ATodoList = window.unigraph.unpad(data);
+    console.log(unpadded)
+    console.log(data)
     let totalCallbacks = callbacks || {
         'onUpdate': (data: Record<string, any>) => {
             window.unigraph.updateObject(data.uid, {"done": window.unigraph.unpad(data).done});

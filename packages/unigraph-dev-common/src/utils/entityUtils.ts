@@ -120,6 +120,10 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions = {v
         } else if (localSchema.type?.['unigraph.id']?.startsWith('$/schema/') && rawPartUnigraphType === "$/composer/Object" ) {
             // Case 2: References another schema.
             unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options);
+        } else if (localSchema.type?.['unigraph.id']?.startsWith('$/schema/') && rawPartUnigraphType !== "$/composer/Object" ) {
+            // Case 2.1: References another schema with primitive type (thus no predicate)
+            noPredicate = true;
+            unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options);
         } else if (localSchema.type && isTypeAlias(schemaMap[localSchema.type['unigraph.id']]?._definition, rawPartUnigraphType)) {
             // Case 2.5: Is type alias (return unigraph object but keeps relationship)
             noPredicate = true;
@@ -198,7 +202,7 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
         if (type.startsWith('$/schema/')) {
             if (schemaMap[type]?._definition?.type["unigraph.id"]?.startsWith('$/primitive/')) 
                 type = schemaMap[type]._definition.type["unigraph.id"]; // Is type alias
-            else entries = _.merge(entries, {"_value": makePart(schemaMap[type]._definition, depth+1)})
+            else entries = _.merge(entries, {"_value": makePart(schemaMap[type]._definition, depth+1)}, makePart(schemaMap[type]._definition, depth+1)) // Possibly non-object data
         };
         switch (type) {
             case "$/composer/Object":

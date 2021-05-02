@@ -53,6 +53,12 @@ export const pkg: PackageDeclaration = {
                         "_definition": {
                             "type": makeUnigraphId("$/schema/semantic_properties"),
                         }
+                    },
+                    {
+                        "_key": "source",
+                        "_definition": {
+                            "type": makeUnigraphId("$/schema/interface/textual")
+                        }
                     }
                 ]
             }
