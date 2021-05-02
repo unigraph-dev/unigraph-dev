@@ -38,7 +38,7 @@ function getUnigraphType (object: any): UnigraphTypeString {
     return typeString;
 }
 
-type BuildEntityOptions = {validateSchema: boolean}
+type BuildEntityOptions = {validateSchema: boolean, isUpdate: boolean}
 type PropertyDescription = Partial<Field<any>>
 
 /* Schema checking spec list:
@@ -64,7 +64,7 @@ export function isTypeAlias(localSchema: Record<string, any>, rawPartUnigraphTyp
  * @param schemaMap A map of all schemas indexed by schema unigraph.id starting with $/package/.../schema or $/schema
  * @param localSchema A definition, usually the value corresponding to the "definition" key in schemas.
  */
-function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions = {validateSchema: true}, schemaMap: Record<string, Schema>, localSchema: Definition | any, propDesc: PropertyDescription | Record<string, never> = {}): {"_value": any} {
+function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, schemaMap: Record<string, Schema>, localSchema: Definition | any, propDesc: PropertyDescription | Record<string, never> = {}): {"_value": any} {
     let unigraphPartValue: any = undefined;
     let predicate = "_value";
     let noPredicate = false;
@@ -171,7 +171,7 @@ export function validatePaddedEntity(object: Record<string, any>) {
  * @param validateSchema Whether to validate schema. Defaults to false. If validation is on and the schema does not match the object, an error would be returned instead.
  * @param padding Whether to pad the raw object, used to create/change objects with predicate-properties defined. If this is false and the object does not follow the data model, an error would be returned instead.
  */
-export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any", schemaMap: Record<string, Schema>, padding = true, options: BuildEntityOptions = {validateSchema: true}): EntityDgraph<string> | TypeError {
+export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any", schemaMap: Record<string, Schema>, padding = true, options: BuildEntityOptions = {validateSchema: true, isUpdate: false}): EntityDgraph<string> | TypeError {
     // Check for unvalidated entity
     if (padding === false && !validatePaddedEntity(raw)) {
         throw new TypeError("Entity validation failed for entity " + raw)
@@ -180,10 +180,14 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
         const unigraphId = raw?.['unigraph.id'];
         if (unigraphId) delete raw?.['unigraph.id'];
         const bodyObject: Record<string, any> = padding ? buildUnigraphEntityPart(raw, options, schemaMap, localSchema) : raw
+        const now = new Date().toISOString();
+        let timestamp: any = {_updatedAt: now}
+        if (!options.isUpdate) timestamp._createdAt = now;
         const result = {
             "type": makeUnigraphId(schemaName) as UnigraphIdType<`$/schema/${string}`>,
             "dgraph.type": "Entity",
-            ...bodyObject
+            ...bodyObject,
+            "_timestamp": timestamp
         };
         // @ts-ignore
         if (unigraphId) result['unigraph.id'] = unigraphId;
@@ -429,12 +433,14 @@ export function unpadRecurse(object: any) {
     if (typeof object === "object" && !Array.isArray(object)) {
         result = {};
         const predicate = Object.keys(object).find(p => p.startsWith("_value"));
+        const timestamp = Object.keys(object).find(p => p.startsWith("_timestamp"));
         if (predicate) { // In simple settings, if contains _value ignore all edge annotations
             result = unpadRecurse(object[predicate]);
         } else {
             result = Object.fromEntries(Object.entries(object).map(([k, v]) => [k, unpadRecurse(v)]));
         }
-        if (object['unigraph.id']) result['unigraph.id'] = object['unigraph.id']
+        if (object['unigraph.id']) result['unigraph.id'] = object['unigraph.id'];
+        if (timestamp) result["_timestamp"] = object["_timestamp"]
     } else if (Array.isArray(object)) {
         result = [];
         object.forEach(val => result.push(unpadRecurse(val)));

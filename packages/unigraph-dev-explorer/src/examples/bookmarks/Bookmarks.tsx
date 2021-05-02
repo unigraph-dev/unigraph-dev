@@ -8,6 +8,7 @@ import { LocalOffer, Delete, Link } from "@material-ui/icons";
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph'
 import { withUnigraphSubscription } from 'unigraph-dev-common/lib/api/unigraph-react'
 import { Tag } from "../semantic/Tag";
+import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 
 type ABookmark = {
     uid?: string,
@@ -88,11 +89,11 @@ export const Bookmarks = withUnigraphSubscription(
 )
 
 export const BookmarkItem: DynamicViewRenderer = ({data, callbacks}) => {
-    let unpadded: ABookmark = window.unigraph.unpad(data);
+    let unpadded: ABookmark = unpad(data);
     let totalCallbacks = callbacks || {
         'onUpdate': (data: Record<string, any>) => {
             throw new Error("not implemented")
-            //window.unigraph.updateObject(data.uid, {"done": window.unigraph.unpad(data).done});
+            //window.unigraph.updateObject(data.uid, {"done": unpad(data).done});
         }
     };
 

@@ -18,8 +18,16 @@ export const defaultTypes = `<_value>: uid .
 <type>: uid .
 <pkgManifest>: uid .
 <unigraph.id>: string @index(exact) .
+<_timestamp>: uid .
+<_createdAt>: dateTime @index(hour) .
+<_updatedAt>: dateTime @index(hour) .
+type <Timestamp> {
+    _createdAt
+    _updatedAt
+}
 type <Entity> {
-	type
+    type
+    _timestamp
 }
 type <Type> {
 	_definition

@@ -3,9 +3,10 @@ import { Chip } from "@material-ui/core";
 import { LocalOffer } from '@material-ui/icons';
 import { getContrast, NavigationContext } from '../../utils';
 import { DynamicViewRenderer } from '../../global';
+import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 
 export const Tag: DynamicViewRenderer = ({data, callbacks}) => {
-    if (data['_value']) data = window.unigraph.unpad(data);
+    if (data['_value']) data = unpad(data);
     const tag = data;
     const bgc = tag.color?.startsWith('#') ? tag.color : "unset";
     return <NavigationContext.Consumer>

@@ -14,6 +14,10 @@
             "unigraph.id": "$/schema/todo"
         },
         "dgraph.type": "Entity",
+        "_timestamp": {
+            "_createdAt": "1970-01-01T00:00:00.000Z",
+            "_updatedAt": "1970-01-01T00:00:00.000Z"
+        },
         "_value": {
             "name": {
                 "_value.%": "Hello world"
@@ -28,6 +32,10 @@
                         "unigraph.id": "$/schema/semantic_properties"
                     },
                     "dgraph.type": "Entity",
+                    "_timestamp": {
+                        "_createdAt": "1970-01-01T00:00:00.000Z",
+                        "_updatedAt": "1970-01-01T00:00:00.000Z"
+                    },
                     "_value": {
                         "tags": {
                             "_value[": [
@@ -37,6 +45,10 @@
                                             "unigraph.id": "$/schema/tag"
                                         },
                                         "dgraph.type": "Entity",
+                                        "_timestamp": {
+                                            "_createdAt": "1970-01-01T00:00:00.000Z",
+                                            "_updatedAt": "1970-01-01T00:00:00.000Z"
+                                        },
                                         "_value": {
                                             "name": {
                                                 "_value.%": "unigraph"
@@ -46,6 +58,10 @@
                                                     "unigraph.id": "$/schema/color"
                                                 },
                                                 "dgraph.type": "Entity",
+                                                "_timestamp": {
+                                                    "_createdAt": "1970-01-01T00:00:00.000Z",
+                                                    "_updatedAt": "1970-01-01T00:00:00.000Z"
+                                                },
                                                 "_value.%": "#b8a2c8"
                                             }
                                         }
