@@ -25,6 +25,7 @@ import { PackageManager } from './components/PackageManager/PackageManager';
 import { TagResults } from './examples/semantic/TagResults';
 import { ObjectEditor } from './components/ObjectView/ObjectEditor';
 import { AppLibrary } from './components/PackageManager/AppLibrary';
+import RSSReader from './examples/rss_reader';
 
 // TODO: custom theme
 const useStyles = makeStyles(theme => ({
@@ -58,6 +59,10 @@ export const pages: Record<string, any> = {
   'examples/bookmarks': {
     'constructor': () => <Bookmarks />,
     'name': 'Web Bookmarks',
+  },
+  'examples/rss_reader': {
+    'constructor': () => <RSSReader />,
+    'name': 'RSS Reader',
   },
   'request': {
     'constructor': () => <Request />,

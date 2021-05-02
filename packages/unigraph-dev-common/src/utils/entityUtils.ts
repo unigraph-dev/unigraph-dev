@@ -120,6 +120,10 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions = {v
         } else if (localSchema.type?.['unigraph.id']?.startsWith('$/schema/') && rawPartUnigraphType === "$/composer/Object" ) {
             // Case 2: References another schema.
             unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options);
+        } else if (localSchema.type?.['unigraph.id']?.startsWith('$/schema/') && rawPartUnigraphType !== "$/composer/Object" && rawPartUnigraphType) {
+            // Case 2.1: References another schema with primitive type (thus no predicate)
+            noPredicate = true;
+            unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options);
         } else if (localSchema.type && isTypeAlias(schemaMap[localSchema.type['unigraph.id']]?._definition, rawPartUnigraphType)) {
             // Case 2.5: Is type alias (return unigraph object but keeps relationship)
             noPredicate = true;
@@ -133,10 +137,10 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions = {v
                     return [defn, buildUnigraphEntityPart(rawPart, options, schemaMap, defn)]
                 } catch (e) {console.log(e); return undefined};
             }).filter(x => x !== undefined);
-            if (choicesResults.length !== 1) {
+            if (choicesResults.length !== 1 && rawPartUnigraphType !== "$/primitive/undefined") {
                 throw new TypeError("Union type does not allow ambiguous or nonexistent selections!" + JSON.stringify(rawPart) + JSON.stringify(localSchema) + rawPartUnigraphType)
             } else {
-                unigraphPartValue = choicesResults[0]![1];
+                unigraphPartValue = choicesResults[0]?.[1];
             }
         } else{
             // Default: Error out.
@@ -198,7 +202,7 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
         if (type.startsWith('$/schema/')) {
             if (schemaMap[type]?._definition?.type["unigraph.id"]?.startsWith('$/primitive/')) 
                 type = schemaMap[type]._definition.type["unigraph.id"]; // Is type alias
-            else entries = _.merge(entries, {"_value": makePart(schemaMap[type]._definition, depth+1)})
+            else entries = _.merge(entries, {"_value": makePart(schemaMap[type]._definition, depth+1)}, makePart(schemaMap[type]._definition, depth+1)) // Possibly non-object data
         };
         switch (type) {
             case "$/composer/Object":
@@ -443,3 +447,20 @@ export function unpadRecurse(object: any) {
 export function unpad(object: any) {
     return {...unpadRecurse(object), uid: object.uid}
 }
+
+export function clearEmpties(o: any) {
+    for (var k in o) {
+      if (!o[k]) {
+          delete o[k];
+          continue
+      } else if (typeof o[k] !== "object") {
+        continue // If null or not an object, skip to the next iteration
+      }
+  
+      // The property is an object
+      clearEmpties(o[k]); // <-- Make a recursive call on the nested object
+      if (Object.keys(o[k]).length === 0) {
+        delete o[k]; // The object had no properties, so delete that property
+      }
+    }
+  }

@@ -33,7 +33,7 @@ export interface Unigraph {
     proxyFetch(url: string, options?: Record<string, any>): Promise<Blob>;
     buildGraph(objects: any[]): any[];
     importObjects(objects: any[]|string): Promise<any>;
-    runExecutable(unigraphid: string): Promise<any>;
+    runExecutable<T>(unigraphid: string, params: T): Promise<any>;
     
 }
 
@@ -273,11 +273,14 @@ export default function unigraph(url: string): Unigraph {
             const id = getRandomInt();
             sendEvent(connection, "import_objects", {objects: objects}, id);
         }),
-        runExecutable: (unigraphid) => new Promise((resolve, reject) => {
+        runExecutable: (unigraphid, params?) => new Promise((resolve, reject) => {
             const id = getRandomInt();
-            sendEvent(connection, "run_executable", {"unigraph.id": unigraphid}, id);
+            sendEvent(connection, "run_executable", {"unigraph.id": unigraphid, params: params ? params : {}}, id);
         }),
         getType: (name) => {throw Error("Not implemented")}
     }
 }
 
+export function getExecutableId(pkg: PackageDeclaration, name: string) { 
+    return `$/package/${pkg.pkgManifest.package_name}/${pkg.pkgManifest.version}/executable/${name}` 
+}

@@ -21,7 +21,7 @@ export const pkg: PackageDeclaration = {
                     {
                         "_key": "name",
                         "_definition": {
-                            "type": makeUnigraphId("$/primitive/string")
+                            "type": makeUnigraphId("$/schema/interface/textual")
                         }
                     },
                     {

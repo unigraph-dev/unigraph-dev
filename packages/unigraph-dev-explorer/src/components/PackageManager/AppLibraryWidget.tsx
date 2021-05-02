@@ -19,6 +19,11 @@ export const AppLibraryWidget = ({}) => {
                 Bookmarks
             </div>
             <div style={{display: "flex", flexDirection: "column", alignItems: "center", padding: "16px"}}
+                onClick={() =>navigator('/examples/rss_reader')}>
+                <Avatar><Bookmarks/></Avatar>
+                RSS Reader
+            </div>
+            <div style={{display: "flex", flexDirection: "column", alignItems: "center", padding: "16px"}}
                 onClick={() =>navigator('/app-library')}>
                 <Avatar><Apps/></Avatar>
                 All Apps

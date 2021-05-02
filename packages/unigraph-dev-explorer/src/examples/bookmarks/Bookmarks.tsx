@@ -16,6 +16,11 @@ type ABookmark = {
     favicon: string,
     semantic_properties: {
         children: any[]
+    },
+    creative_work?: {
+        text?: string,
+        abstract?: string,
+        author?: string
     }
 }
 
@@ -91,6 +96,7 @@ export const BookmarkItem: DynamicViewRenderer = ({data, callbacks}) => {
         }
     };
 
+    console.log(unpadded)
     return <React.Fragment>
         <ListItemIcon><Avatar alt={"favicon of "+unpadded.name} src={unpadded.favicon}>I</Avatar></ListItemIcon>
         <ListItemText 
@@ -99,6 +105,7 @@ export const BookmarkItem: DynamicViewRenderer = ({data, callbacks}) => {
                 <Link onClick={() => {window.open(unpadded.url, "_blank")}}></Link>
                 {!unpadded.semantic_properties?.children?.map ? [] :
                 unpadded.semantic_properties?.children?.map(it => <Tag data={it}/>)}
+                {unpadded.creative_work?.abstract ? unpadded.creative_work?.abstract : []}
                 </div>}
         />
         <ListItemSecondaryAction>
