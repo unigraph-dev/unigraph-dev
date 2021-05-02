@@ -126,7 +126,7 @@ export const pkg: PackageDeclaration = {
                         }
                     },
                     {
-                        "_key": "about",
+                        "_key": "abstract",
                         "_definition": {
                             "type": makeUnigraphId('$/schema/interface/textual')
                         }
