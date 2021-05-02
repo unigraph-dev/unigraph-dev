@@ -87,7 +87,7 @@ export const runEnvRoutineJs: ExecRunner = (src, context, unigraph) => {
     //const fn = () => eval(src);
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor
-    const fn = new AsyncFunction("require", "context", "unigraph", src).bind(this, require, context, unigraph);
+    const fn = new AsyncFunction("require", "unpad", "context", "unigraph", src).bind(this, require, unpad, context, unigraph);
 
     return fn;
 }
@@ -170,6 +170,12 @@ export function getLocalUnigraphAPI(client: DgraphClient, caches: Record<string,
                 type @filter(eq(<unigraph.id>, "${name}"))
             }}`
             const res = await client.queryData(query);
+            return res;
+        },
+        getQueries: async (fragments) => {
+            const allQueries = fragments.map((it, index) => `query${index}(func: uid(par${index})) @recurse {uid expand(_predicate_)}
+            par${index} as var${it}`);
+            const res = await client.queryDgraph(`query {${allQueries.join('\n')}}`);
             return res;
         },
         deleteObject: async (uid) => {

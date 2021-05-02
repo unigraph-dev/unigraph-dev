@@ -117,6 +117,10 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
                 default:
                     break;
             }
+        } else if (localSchema.type?.['unigraph.id']?.startsWith('$/schema/') && rawPartUnigraphType === "$/composer/Object" && 
+            Object.keys(rawPart).length === 1 && typeof rawPart.uid === "string" && rawPart.uid.startsWith("0x")) {
+            // Case 2: References another schema using UID, passing through.
+            unigraphPartValue = rawPart
         } else if (localSchema.type?.['unigraph.id']?.startsWith('$/schema/') && rawPartUnigraphType === "$/composer/Object" ) {
             // Case 2: References another schema.
             unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options);
