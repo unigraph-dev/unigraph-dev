@@ -64,7 +64,7 @@ export function isTypeAlias(localSchema: Record<string, any>, rawPartUnigraphTyp
  * @param schemaMap A map of all schemas indexed by schema unigraph.id starting with $/package/.../schema or $/schema
  * @param localSchema A definition, usually the value corresponding to the "definition" key in schemas.
  */
-function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions = {validateSchema: true}, schemaMap: Record<string, Schema>, localSchema: Definition | any, propDesc: PropertyDescription | {} = {}): {"_value": any} {
+function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions = {validateSchema: true}, schemaMap: Record<string, Schema>, localSchema: Definition | any, propDesc: PropertyDescription | Record<string, never> = {}): {"_value": any} {
     let unigraphPartValue: any = undefined;
     let predicate = "_value";
     let noPredicate = false;
