@@ -3,7 +3,7 @@ import { makeUnigraphId, makeRefUnigraphId } from "../utils/entityUtils"
 export const schemaIconURL = {
     ...makeUnigraphId('$/schema/icon_url'),
     "dgraph.type": "Type",
-    "definition": {
+    "_definition": {
         "type": makeUnigraphId('$/primitive/string')
     }
 }
@@ -11,7 +11,7 @@ export const schemaIconURL = {
 export const schemaURL = {
     ...makeUnigraphId('$/schema/url'),
     "dgraph.type": "Type",
-    "definition": {
+    "_definition": {
         "type": makeUnigraphId('$/primitive/string')
     }
 }
@@ -19,7 +19,7 @@ export const schemaURL = {
 export const schemaWebBookmark = {
     ...makeUnigraphId("$/schema/web_bookmark"),
     "dgraph.type": "Type",
-    "definition": {
+    "_definition": {
         "type": makeRefUnigraphId("$/composer/Object"),
         "parameters": {
             "indexedBy": makeRefUnigraphId("$/primitive/string"),
@@ -27,26 +27,26 @@ export const schemaWebBookmark = {
         },
         "properties": [
             {
-                "key": "name",
-                "definition": {
+                "_key": "name",
+                "_definition": {
                     "type": makeRefUnigraphId("$/primitive/string")
                 }
             },
             {
-                "key": "url",
-                "definition": {
+                "_key": "url",
+                "_definition": {
                     "type": makeRefUnigraphId("$/schema/url")
                 }
             },
             {
-                "key": "favicon",
-                "definition": {
+                "_key": "favicon",
+                "_definition": {
                     "type": makeRefUnigraphId("$/schema/icon_url")
                 }
             },
             {
-                "key": "semantic_properties",
-                "definition": {
+                "_key": "semantic_properties",
+                "_definition": {
                     "type": makeRefUnigraphId("$/schema/semantic_properties"),
                 }
             }

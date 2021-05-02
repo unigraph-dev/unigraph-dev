@@ -12,11 +12,11 @@ export type KeyValueInput<K = any, V = any> = Partial<KeyValueField<K, V>>;
  */
 
 export type EntityField<T extends string = string> = {
-  key: string;
-  definition: {
+  _key: string;
+  _definition: {
     type?: RefUnigraphIdType<T>;
-    parameters?: {
-      element: {
+    _parameters?: {
+      _element: {
         type: RefUnigraphIdType<T>;
       }
     }
@@ -24,6 +24,6 @@ export type EntityField<T extends string = string> = {
 }
 
 export type EntityFieldInput<T extends string = string> = {
-  key: string,
-  definition: { type: string }
+  _key: string,
+  _definition: { type: string }
 }
