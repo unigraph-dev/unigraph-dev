@@ -2,6 +2,7 @@ import { Card, Chip, Typography } from "@material-ui/core"
 import { LocalOffer } from "@material-ui/icons";
 import React from "react"
 import { withUnigraphSubscription } from "unigraph-dev-common/lib/api/unigraph-react"
+import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
 import { getContrast, NavigationContext } from "../../utils";
 import { Tag } from "./Tag";
@@ -9,7 +10,7 @@ import { Tag } from "./Tag";
 function TagList ({data}: any) {
     return <div>
         <NavigationContext.Consumer>
-        {(navigator: any) => data.map((el: any) => <Tag data={window.unigraph.unpad(el)}/>)}
+        {(navigator: any) => data.map((el: any) => <Tag data={unpad(el)}/>)}
         </NavigationContext.Consumer>
     </div>
 }

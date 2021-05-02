@@ -254,7 +254,7 @@ export default async function startServer(client: DgraphClient) {
       } else { // upsert mode
         const origObject = (await dgraphClient.queryUID(event.uid))[0];
         const schema = origObject['type']['unigraph.id'];
-        const paddedUpdater = buildUnigraphEntity(event.newObject, schema, caches['schemas'].data);
+        const paddedUpdater = buildUnigraphEntity(event.newObject, schema, caches['schemas'].data, true, {validateSchema: true, isUpdate: true});
         const finalUpdater = processAutoref(paddedUpdater, schema, caches['schemas'].data);
         const upsert = getUpsertFromUpdater(origObject, finalUpdater);
         //console.log(upsert);

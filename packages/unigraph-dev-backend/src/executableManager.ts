@@ -104,7 +104,6 @@ export function getLocalUnigraphAPI(client: DgraphClient, caches: Record<string,
         backendConnection: false,
         backendMessages: messages,
         eventTarget: eventTarget,
-        unpad: unpad,
         buildGraph: buildGraph,
         // latertodo
         getStatus: () => {throw Error("Not implemented")},
@@ -182,7 +181,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, caches: Record<string,
         updateObject: async (uid, newObject) => {
             const origObject = (await client.queryUID(uid))[0];
             const schema = origObject['type']['unigraph.id'];
-            const paddedUpdater = buildUnigraphEntity(newObject, schema, caches['schemas'].data);
+            const paddedUpdater = buildUnigraphEntity(newObject, schema, caches['schemas'].data, true, {validateSchema: true, isUpdate: true});
             const finalUpdater = processAutoref(paddedUpdater, schema, caches['schemas'].data);
             const upsert = getUpsertFromUpdater(origObject, finalUpdater);
             const finalUpsert = insertsToUpsert([upsert]);

@@ -127,7 +127,7 @@ const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options }) => {
 
     if (!object) return <div/>
 
-    const finalObject = options.unpad ? window.unigraph.unpad(object) : object
+    const finalObject = options.unpad ? unpad(object) : object
     let FinalObjectViewer;
     const ContextMenuButton: any = options.showContextMenu ? <IconButton 
         aria-label="context-menu"

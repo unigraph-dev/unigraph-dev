@@ -46,19 +46,19 @@ const filterFns = {
     "no-filter": (objs: any[]) => objs,
     "only-incomplete": (objs: any[]) => objs.filter(obj => {
         let r;
-        try {r = window.unigraph.unpad(obj)['done'] === false}
+        try {r = unpad(obj)['done'] === false}
         catch (e) {r=false};
         return r;
     }),
     "only-complete": (objs: any[]) => objs.filter(obj => {
         let r;
-        try {r = window.unigraph.unpad(obj)['done'] === true}
+        try {r = unpad(obj)['done'] === true}
         catch (e) {r=false};
         return r;
     }),
     "high-priority": (objs: any[]) => objs.filter(obj => {
         let r;
-        try {r = window.unigraph.unpad(obj)['priority'] >= 1}
+        try {r = unpad(obj)['priority'] >= 1}
         catch (e) {r=false};
         return r;
     })
@@ -114,12 +114,12 @@ export const TodoList = withUnigraphSubscription(
 )
 
 export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
-    let unpadded: ATodoList = window.unigraph.unpad(data);
+    let unpadded: ATodoList = unpad(data);
     console.log(unpadded)
     console.log(data)
     let totalCallbacks = callbacks || {
         'onUpdate': (data: Record<string, any>) => {
-            window.unigraph.updateObject(data.uid, {"done": window.unigraph.unpad(data).done});
+            window.unigraph.updateObject(data.uid, {"done": unpad(data).done});
         }
     };
     //console.log(data.uid, unpadded)

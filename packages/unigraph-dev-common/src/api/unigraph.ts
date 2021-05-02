@@ -23,7 +23,6 @@ export interface Unigraph {
     addObject(object: any, schema: string): any;
     getType(name: string): any;
     deleteObject(uid: string): any;
-    unpad(object: any): any;
     updateSimpleObject(object: any, predicate: string, value: any): any;
     updateObject(uid: string, newObject: any): any;
     getReferenceables(): Promise<any>;
@@ -35,29 +34,6 @@ export interface Unigraph {
     importObjects(objects: any[]|string): Promise<any>;
     runExecutable<T>(unigraphid: string, params: T): Promise<any>;
     
-}
-
-function unpadRecurse(object: any) {
-    let result: any = undefined;
-    if (typeof object === "object" && !Array.isArray(object)) {
-        result = {};
-        const predicate = Object.keys(object).find(p => p.startsWith("_value"));
-        if (predicate) { // In simple settings, if contains _value ignore all edge annotations
-            result = unpadRecurse(object[predicate]);
-        } else {
-            result = Object.fromEntries(Object.entries(object).map(([k, v]) => [k, unpadRecurse(v)]));
-        }
-    } else if (Array.isArray(object)) {
-        result = [];
-        object.forEach(val => result.push(unpadRecurse(val)));
-    } else {
-        result = object;
-    }
-    return result;
-}
-
-function unpad(object: any) {
-    return {...unpadRecurse(object), uid: object.uid}
 }
 
 /**
@@ -132,7 +108,6 @@ export default function unigraph(url: string): Unigraph {
         backendConnection: connection,
         backendMessages: messages,
         eventTarget: eventTarget,
-        unpad: unpad,
         buildGraph: buildGraph,
         getStatus: () => new Promise((resolve, reject) => {
             const id = getRandomInt();

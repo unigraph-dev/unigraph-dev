@@ -8,6 +8,11 @@ const testEntities_2 = require('./testEntities_2.json')
 const testEntities_3 = require('./testEntities_3_union.json')
 const testEntities_4 = require('./testEntities_4_type_alias.json')
 
+jest
+  .useFakeTimers('modern')
+  .setSystemTime(new Date(0).getTime());
+
+
 const schemas = {
     "$/schema/todo": testEntities_1['todo-schema-test'],
     "$/schema/user": testEntities_1['user-schema-test'],
