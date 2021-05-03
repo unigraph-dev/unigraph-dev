@@ -1,9 +1,10 @@
 import { Button, List, TextField, Typography } from "@material-ui/core";
 import React from "react";
 import { getExecutableId } from "unigraph-dev-common/lib/api/unigraph";
-import { withUnigraphSubscription } from "unigraph-dev-common/lib/api/unigraph-react"
+import { registerDynamicViews, withUnigraphSubscription } from "unigraph-dev-common/lib/api/unigraph-react"
 import { pkg as rssReaderPackage } from 'unigraph-dev-common/lib/data/unigraph.rss_reader.pkg';
 import { DefaultObjectListView } from "../../components/ObjectView/DefaultObjectView";
+import { DynamicViewRenderer } from "../../global";
 
 export type ARSSFeed = {
     uid?: string,
@@ -46,6 +47,25 @@ export type ARSSItem = {
 }
 
 type ParserParam = {url: string}
+
+const RSSItem: DynamicViewRenderer = (data, callbacks) => {
+    return <React.Fragment>
+        RSS Item LOL
+    </React.Fragment>
+}
+
+const RSSFeed: DynamicViewRenderer = (data, callbacks) => {
+    return <React.Fragment>
+        RSS Feed LOL
+    </React.Fragment>
+}
+
+const dynamicComponents = {
+    "$/schema/rss_item": RSSItem,
+    "$/schema/rss_feed": RSSFeed
+}
+
+registerDynamicViews(dynamicComponents);
 
 const RSSFeedsBody: React.FC<{data: ARSSFeed[]}> = ({data}) => {
     const [newUrl, setNewUrl] = React.useState("");

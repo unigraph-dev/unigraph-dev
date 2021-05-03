@@ -212,7 +212,7 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
     }
 }
 
-export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<string, any>, maxDepth = 20) {
+export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<string, any>, maxDepth = 10) {
     function makePart(localSchema: Definition | any, depth = 0) {
         if (depth > maxDepth) return {};
         let entries: any = {"uid": {}, 'type': { "<unigraph.id>": {} }};

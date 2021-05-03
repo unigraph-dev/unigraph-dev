@@ -94,6 +94,8 @@ export const DynamicViews: Record<string, DynamicViewRenderer> = {
     "$/schema/executable": Executable
 }
 
+window.DynamicViews = DynamicViews;
+
 export const DynamicViewsDetailed: Record<string, DynamicViewRenderer> = {
     "$/schema/executable": ExecutableCodeEditor
 }

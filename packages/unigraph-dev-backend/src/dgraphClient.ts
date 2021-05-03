@@ -267,3 +267,8 @@ export default class DgraphClient {
     this.dgraphClientStub.close();
   }
 }
+
+export const queries: Record<string, string> = {
+  "queryAny": `(func: type(Entity)) @recurse @filter(NOT eq(<_propertyType>, "inheritance")) { uid expand(_predicate_) }`,
+  "queryAny-withInh": `(func: type(Entity)) @recurse { uid expand(_predicate_) }`
+}
