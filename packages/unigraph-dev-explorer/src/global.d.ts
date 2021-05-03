@@ -17,11 +17,6 @@ declare type DynamicViewCallbacks = {
 
 declare type DynamicViewRenderer = (data: Record<string, any>, callbacks: DynamicViewCallbacks) => ReactElement
 
-declare module 'javascript-time-ago' {
-    function foo(): void; 
-    export = foo;
-};
-
 declare type UserSettings = {
     serverLocation: string,
     "new-window": "new-tab" | "new-pane" | "new-popout"
