@@ -57,6 +57,7 @@ export default async function startServer(client: DgraphClient) {
     "after_schema_updated": [async (context: HookAfterSchemaUpdatedParams) => {
       await context.caches["schemas"].updateNow();
       await context.caches["packages"].updateNow();
+      await context.caches["executables"].updateNow();
     }],
     "after_object_changed": [async (context: HookAfterObjectChangedParams) => {
       pollSubscriptions(context.subscriptions, dgraphClient, pollCallback);
@@ -180,13 +181,22 @@ export default async function startServer(client: DgraphClient) {
     },
 
     "ensure_unigraph_package": function (event: EventEnsureUnigraphPackage, ws: IWebsocket) {
-      const names = Object.keys(caches["packages"].data);
-      if (names.includes(event.packageName)) {
-        ws.send(makeResponse(event, true));
-      } else {
-        // Falls back to add package
-        eventRouter["add_unigraph_package"]({...event, package: event.fallback}, ws);
-      }
+      lock.acquire('caches/schema', function(done: Function) {
+        const names = Object.keys(caches["packages"].data);
+        if (names.includes(event.packageName)) {
+          ws.send(makeResponse(event, true));
+          done(false, null);
+        } else {
+          // Falls back to add package
+          const eventb: any = {...event, package: event.fallback};
+          addUnigraphPackage(dgraphClient, eventb.package, caches).then(async _ => {
+            await callHooks(hooks, "after_schema_updated", {caches: caches});
+            done(false, null)
+            //console.log("Hooks called")
+            ws.send(makeResponse(eventb, true));
+          }).catch(e => {ws.send(makeResponse(eventb, false, {"error": e})); done(true, null)});
+        }
+      })
     },
 
     "add_unigraph_package": function (event: EventAddUnigraphPackage, ws: IWebsocket) {
