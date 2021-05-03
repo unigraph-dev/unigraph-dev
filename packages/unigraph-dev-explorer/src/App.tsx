@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import React from 'react';
 import { Router, Route, Switch } from 'react-router-dom';
 import { createBrowserHistory } from "history";
 import 'typeface-roboto';
@@ -14,18 +14,21 @@ import About from './pages/About';
 import ExplorerHome from './pages/ExplorerHome';
 import Request from './pages/Request';
 import AddSchema from './pages/AddSchema';
-import { TodoList } from './examples/todo/TodoList';
+
 import DataModelPlayground from './pages/DataModelPlayground';
 import { getParameters, NavigationContext } from './utils';
 import { UserLibraryAll } from './components/UserLibrary';
 import UserLibraryObject from './components/UserLibrary/UserLibraryObject';
-import { Bookmarks } from './examples/bookmarks/Bookmarks';
+
 import Settings from './pages/Settings';
 import { PackageManager } from './components/PackageManager/PackageManager';
 import { TagResults } from './examples/semantic/TagResults';
 import { ObjectEditor } from './components/ObjectView/ObjectEditor';
 import { AppLibrary } from './components/PackageManager/AppLibrary';
+
+import { TodoList } from './examples/todo/TodoList';
 import RSSReader from './examples/rss_reader';
+import { Bookmarks } from './examples/bookmarks/Bookmarks';
 
 // TODO: custom theme
 const useStyles = makeStyles(theme => ({

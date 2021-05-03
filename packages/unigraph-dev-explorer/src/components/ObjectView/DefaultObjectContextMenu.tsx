@@ -5,7 +5,7 @@ import { NavigationContext } from '../../utils';
 
 export const DefaultObjectContextMenu = ({uid, object, anchorEl, handleClose}: 
     {uid: string, object: any, anchorEl: null|HTMLElement, handleClose: any}) => {
-    const history = useHistory();
+    //const history = useHistory();
 
     return (<Menu
         id={`context-menu-${uid}`}

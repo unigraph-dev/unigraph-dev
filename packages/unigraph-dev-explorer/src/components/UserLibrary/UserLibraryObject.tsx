@@ -1,7 +1,5 @@
-import { Checkbox, FormControlLabel, Typography } from '@material-ui/core';
 import React from 'react';
 
-import { useParams } from 'react-router-dom';
 import { useEffectOnce } from 'react-use';
 import { DefaultObjectView } from '../ObjectView/DefaultObjectView';
 

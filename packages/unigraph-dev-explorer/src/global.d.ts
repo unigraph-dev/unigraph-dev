@@ -4,7 +4,8 @@ import { Unigraph } from "unigraph-dev-common";
 declare global {
     interface Window {
         unigraph: Unigraph;
-        DynamicViews: Record<string, DynamicViewRenderer>
+        DynamicViews: Record<string, DynamicViewRenderer>,
+        DynamicViewsDetailed: Record<string, DynamicViewRenderer>
     }
 };
 

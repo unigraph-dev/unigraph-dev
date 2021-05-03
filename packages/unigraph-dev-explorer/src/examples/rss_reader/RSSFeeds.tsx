@@ -57,8 +57,6 @@ type ParserParam = {url: string}
 const RSSItem: DynamicViewRenderer = ({data, callbacks}) => {
     let unpadded: ARSSItem = unpad(data);
 
-    console.log(unpadded);
-
     return <React.Fragment>
         <ListItemIcon>
             <Avatar alt={"favicon of "+unpadded.feed?.site_info?.name} src={unpadded.item_data?.favicon}>{unpadded.feed?.site_info?.name}</Avatar>
@@ -91,7 +89,7 @@ const RSSFeedsBody: React.FC<{data: ARSSFeed[]}> = ({data}) => {
         <DefaultObjectListView component={List} objects={data.map((el: any) => {let site = el._value.site_info._value; console.log(site); return site})} />
         <TextField value={newUrl} onChange={(e) => setNewUrl(e.target.value)}></TextField>
         <Button onClick={() => 
-            window.unigraph.runExecutable(getExecutableId(rssReaderPackage, "add-feed"), {url: newUrl})
+            window.unigraph.runExecutable<ParserParam>(getExecutableId(rssReaderPackage, "add-feed"), {url: newUrl})
         }>Add feed</Button>
         <Divider/>
     </div>

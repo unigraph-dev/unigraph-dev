@@ -1,7 +1,5 @@
-import { List, ListItem, Typography } from '@material-ui/core';
+import { Typography } from '@material-ui/core';
 import React from 'react';
-import { useEffectOnce } from 'react-use';
-import { PackageDeclaration } from 'unigraph-dev-common/lib/types/packages';
 import { DataGrid } from '@material-ui/data-grid';
 
 export const PackageManager: React.FC = ({}) => {

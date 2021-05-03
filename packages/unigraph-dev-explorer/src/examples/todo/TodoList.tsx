@@ -1,11 +1,10 @@
 import { Button, Checkbox, Chip, IconButton, List, ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, TextField } from '@material-ui/core';
-import { Delete, LocalOffer, PriorityHigh } from '@material-ui/icons';
+import { Delete, PriorityHigh } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { DynamicViewRenderer } from '../../global';
 
 import { pkg as todoPackage } from 'unigraph-dev-common/lib/data/unigraph.todo.pkg';
-import { getContrast } from '../../utils';
-import { withUnigraphSubscription } from 'unigraph-dev-common/lib/api/unigraph-react'
+import { registerDynamicViews, withUnigraphSubscription } from 'unigraph-dev-common/lib/api/unigraph-react'
 import { Tag } from '../semantic/Tag';
 import { Autocomplete } from '@material-ui/lab';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
@@ -103,16 +102,6 @@ function TodoListBody ({data}: { data: ATodoList[] }) {
     </div>
 }
 
-export const TodoList = withUnigraphSubscription(
-    // @ts-ignore
-    TodoListBody,
-    { schemas: [], defaultData: [], packages: [todoPackage]
-    },
-    { afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
-        window.unigraph.subscribeToType("$/schema/todo", (result: ATodoList[]) => {setData(result)}, subsId);
-    }}
-)
-
 export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
     let unpadded: ATodoList = unpad(data);
     console.log(unpadded)
@@ -144,3 +133,15 @@ export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
         </ListItemSecondaryAction>
     </React.Fragment>
 }
+
+registerDynamicViews({"$/schema/todo": TodoItem})
+
+export const TodoList = withUnigraphSubscription( 
+    // @ts-ignore
+    TodoListBody,
+    { schemas: [], defaultData: [], packages: [todoPackage]
+    },
+    { afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
+        window.unigraph.subscribeToType("$/schema/todo", (result: ATodoList[]) => {setData(result)}, subsId);
+    }}
+)

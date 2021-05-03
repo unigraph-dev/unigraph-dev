@@ -6,12 +6,18 @@ import * as serviceWorker from './serviceWorker';
 import { unigraph } from 'unigraph-dev-common';
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils'
 
+import { DynamicViews, DynamicViewsDetailed } from './components/ObjectView/DefaultObjectView'
+
 import App from './App';
 import { SplashScreen, DisconnectedSplashScreen} from './pages/SplashScreen';
 import { WorkSpace } from './Workspace';
 import { UserSettings } from './pages/Settings';
 
 let hst = window.location.hostname.length ? window.location.hostname : "localhost";
+
+// Load dynamic views registry
+window.DynamicViews = DynamicViews;
+window.DynamicViewsDetailed = DynamicViewsDetailed;
 
 const defaultSettings: UserSettings = {
   serverLocation: `ws://${hst}:3001`
@@ -25,6 +31,7 @@ if (!isJsonString(window.localStorage.getItem('userSettings'))) {
   userSettings = JSON.parse(window.localStorage.getItem('userSettings')) 
 }
 
+// Connect to Unigraph
 window.unigraph = unigraph(userSettings.serverLocation);
 
 function render(component: any) {
