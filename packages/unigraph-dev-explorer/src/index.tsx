@@ -50,6 +50,7 @@ if (window.location.pathname === '/pages') {
   };
   
   window.unigraph.backendConnection.onclose = () => {
+    setTimeout(() => {window.location.reload()}, 1000)
     render(<React.StrictMode>
       <DisconnectedSplashScreen />
     </React.StrictMode>,)

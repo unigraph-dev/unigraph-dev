@@ -8,6 +8,6 @@ export function SplashScreen () {
 
 export function DisconnectedSplashScreen () {
     return <div>
-        <div style={{position: "absolute", left: "50%", top: "50%"}}> Disconnected, refresh to try again. </div>
+        <div style={{position: "absolute", left: "50%", top: "50%"}}> Disconnected, retrying... </div>
     </div>
 }

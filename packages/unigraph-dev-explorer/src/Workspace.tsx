@@ -86,7 +86,7 @@ export function WorkSpace() {
         location = location.split('?')[0];
         model.doAction(Actions.addNode(getComponentFromPage(location, getParameters(search)), "workspace-main-tabset", DockLocation.CENTER, 0))
     }}>
-        <FlexLayout.Layout model={model} factory={factory} popoutURL={window.location.origin+"/popout_page.html"}/>
+        <FlexLayout.Layout model={model} factory={factory} popoutURL={"./popout_page.html"}/>
     </NavigationContext.Provider>
 
 }
