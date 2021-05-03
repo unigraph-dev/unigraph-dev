@@ -468,7 +468,7 @@ export function unpadRecurse(object: any) {
             result = Object.fromEntries(Object.entries(object).map(([k, v]) => [k, unpadRecurse(v)]));
         }
         if (object['unigraph.id']) result['unigraph.id'] = object['unigraph.id'];
-        if (timestamp) result["_timestamp"] = object["_timestamp"]
+        if (timestamp && typeof result === "object" && !Array.isArray(result)) result["_timestamp"] = object["_timestamp"]
     } else if (Array.isArray(object)) {
         result = [];
         object.forEach(val => result.push(unpadRecurse(val)));
