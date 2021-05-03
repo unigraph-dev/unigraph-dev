@@ -1,6 +1,7 @@
 import express, { Request, response } from 'express';
 import { Server } from 'http';
 import expressWs, { Application, WebsocketRequestHandler } from 'express-ws';
+import WebSocket from 'ws';
 import { isJsonString, blobToBase64 } from 'unigraph-dev-common/lib/utils/utils';
 import DgraphClient, { queries } from './dgraphClient';
 import { anchorBatchUpsert, insertsToUpsert } from './utils/txnWrapper';
@@ -339,12 +340,17 @@ export default async function startServer(client: DgraphClient) {
     }
   };
 
-  const server = await new Promise<Server>(res => {
-    ({ app } = expressWs(express()));
+  const server = new WebSocket.Server({
+    port: PORT,
+    perMessageDeflate: true
+  })
 
-    // TODO pull into separate express.Router
-    app.ws('/', (ws, req) => {
-      let connId = uniqueId();
+  server.on('listening', (server: any) => {
+    console.log('\nListening on port', PORT);
+  })
+
+  server.on('connection', (ws, req) => {
+    let connId = uniqueId();
       ws.on('message', (msg: string) => {
         const msgObject: {type: string | null, event: string | null} = isJsonString(msg)
         if (msgObject) {
@@ -366,13 +372,7 @@ export default async function startServer(client: DgraphClient) {
         "type": "hello"
       }))
       console.log('opened socket connection');
-    });
-
-    const server = app.listen(PORT, () => {
-      res(server);
-      console.log('\nListening on port', PORT);
-    });
-  });
+  })
 
   const debugServer = repl.start("unigraph> ");
   // @ts-ignore /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
