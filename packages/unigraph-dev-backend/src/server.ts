@@ -346,7 +346,7 @@ export default async function startServer(client: DgraphClient) {
   })
 
   server.on('listening', (server: any) => {
-    console.log('\nListening on port', PORT);
+    console.log('\nUnigraph server listening on port', PORT);
   })
 
   server.on('connection', (ws, req) => {
