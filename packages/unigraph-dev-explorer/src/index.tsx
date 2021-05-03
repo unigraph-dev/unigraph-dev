@@ -11,7 +11,7 @@ import { DynamicViews, DynamicViewsDetailed } from './components/ObjectView/Defa
 import App from './App';
 import { SplashScreen, DisconnectedSplashScreen} from './pages/SplashScreen';
 import { WorkSpace } from './Workspace';
-import { UserSettings } from './pages/Settings';
+import { UserSettings } from './global';
 
 let hst = window.location.hostname.length ? window.location.hostname : "localhost";
 
@@ -20,7 +20,8 @@ window.DynamicViews = DynamicViews;
 window.DynamicViewsDetailed = DynamicViewsDetailed;
 
 const defaultSettings: UserSettings = {
-  serverLocation: `ws://${hst}:3001`
+  serverLocation: `ws://${hst}:3001`,
+  "new-window": "new-tab"
 }
 
 let userSettings = defaultSettings;
@@ -57,7 +58,7 @@ if (window.location.pathname === '/pages') {
   };
   
   window.unigraph.backendConnection.onclose = () => {
-    setTimeout(() => {window.location.reload()}, 1000)
+    setTimeout(() => {window.location.reload()}, 1000) 
     render(<React.StrictMode>
       <DisconnectedSplashScreen />
     </React.StrictMode>,)

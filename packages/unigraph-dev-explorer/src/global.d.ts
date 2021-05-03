@@ -1,9 +1,11 @@
+import { Model } from "flexlayout-react";
 import { ReactElement } from "react";
-import { Unigraph } from "unigraph-dev-common";
+import { Unigraph } from "unigraph-dev-common/lib/api/unigraph";
 
 declare global {
     interface Window {
-        unigraph: Unigraph;
+        unigraph: Unigraph<WebSocket>;
+        layoutModel: Model
         DynamicViews: Record<string, DynamicViewRenderer>,
         DynamicViewsDetailed: Record<string, DynamicViewRenderer>
     }
@@ -19,3 +21,8 @@ declare module 'javascript-time-ago' {
     function foo(): void; 
     export = foo;
 };
+
+declare type UserSettings = {
+    serverLocation: string,
+    "new-window": "new-tab" | "new-pane" | "new-popout"
+}

@@ -81,7 +81,7 @@ export const pages: Record<string, any> = {
   },
   'settings': {
     'constructor': () => <Settings />,
-    'name': 'User Settings',
+    'name': 'Settings',
   },
   'package-manager': {
     'constructor': () => <PackageManager />,
