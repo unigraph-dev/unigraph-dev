@@ -57,6 +57,7 @@ export default async function startServer(client: DgraphClient) {
     "after_schema_updated": [async (context: HookAfterSchemaUpdatedParams) => {
       await context.caches["schemas"].updateNow();
       await context.caches["packages"].updateNow();
+      await context.caches["executables"].updateNow();
     }],
     "after_object_changed": [async (context: HookAfterObjectChangedParams) => {
       pollSubscriptions(context.subscriptions, dgraphClient, pollCallback);
