@@ -10,17 +10,30 @@
     },
     "homepage": "./",
     "devDependencies": {
-        "electron-builder": "^22.10.5",
-        "electron": "12.0.5"
+        "electron": "12.0.5",
+        "electron-builder": "^22.10.5"
     },
     "dependencies": {
+        "electron-util": "^0.15.1",
         "unigraph-dev-backend": "0.1.0",
         "unigraph-dev-common": "0.0.1"
     },
     "electronVersion": "^12.0.5",
-    "files": [
-        "*.js",
-        "buildweb", "dgraph", "distnode", "src",
-        "node_modules", "!p/", "!w/", "!zw/"
-    ]
+    "build": {
+        "files": [
+            "*.js",
+            "buildweb",
+            "dgraph",
+            "distnode",
+            "src",
+            "node_modules",
+            "!p/",
+            "!w/",
+            "!zw/"
+        ],
+        "asar": {
+            "smartUnpack": true
+        },
+        "asarUnpack": ["dgraph/*"]
+    }
 }

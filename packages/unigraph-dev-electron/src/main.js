@@ -1,9 +1,12 @@
 const { app, BrowserWindow } = require('electron')
 const path = require('path')
 const { spawn } = require("child_process");
+const { fixPathForAsarUnpack } = require('electron-util');
 
-let alpha = spawn(path.join(__dirname, '..', 'dgraph', 'dgraph'),  ["alpha"])
-let zero = spawn(path.join(__dirname, '..', 'dgraph', 'dgraph'), ["zero"])
+const userData = app.getPath('userData')
+
+let alpha = spawn(fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', 'dgraph')),  ["alpha", '--wal', path.join(userData, 'w'), '--postings', path.join(userData, 'p')])
+let zero = spawn(fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', 'dgraph')), ["zero", '--wal', path.join(userData, 'zw')])
 
 let completedLog = "ResetCors closed" // When this is logged we know it's completed
 
