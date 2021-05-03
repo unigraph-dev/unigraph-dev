@@ -366,7 +366,7 @@ export default async function startServer(client: DgraphClient) {
 
   const debugServer = repl.start("unigraph> ");
   // @ts-ignore /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
-  debugServer.context.unigraph = {caches: caches, dgraphClient: client, server: server, subscriptions: subscriptions};
+  debugServer.context.unigraph = {caches: caches, dgraphClient: client, server: server, subscriptions: subscriptions, localApi: localApi};
 
   return [app!, server] as const;
 }

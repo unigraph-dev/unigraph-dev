@@ -6,6 +6,7 @@ export const typeMap: Record<string, string> = {
     "null": "_value",
     "boolean": "_value.!",
     "string": "_value.%",
+    "datetime": "_value.%dt",
     "function": "_value",
     "symbol": "_value"
 }

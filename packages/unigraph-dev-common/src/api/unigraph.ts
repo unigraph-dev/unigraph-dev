@@ -22,6 +22,7 @@ export interface Unigraph {
     unsubscribe(id: number): any;
     addObject(object: any, schema: string): any;
     getType(name: string): any;
+    getQueries(fragments: string[]): any;
     deleteObject(uid: string): any;
     updateSimpleObject(object: any, predicate: string, value: any): any;
     updateObject(uid: string, newObject: any): any;
@@ -252,7 +253,8 @@ export default function unigraph(url: string): Unigraph {
             const id = getRandomInt();
             sendEvent(connection, "run_executable", {"unigraph.id": unigraphid, params: params ? params : {}}, id);
         }),
-        getType: (name) => {throw Error("Not implemented")}
+        getType: (name) => {throw Error("Not implemented")},
+        getQueries: (name) => {throw Error("Not implemented")}
     }
 }
 

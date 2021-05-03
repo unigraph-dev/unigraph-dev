@@ -24,7 +24,8 @@ function getUnigraphType (object: any): UnigraphTypeString {
             break;
 
         case "string":
-            typeString = "$/primitive/string";
+            if (Date.parse(object) > 0) typeString = "$/primitive/datetime";
+            else typeString = "$/primitive/string";
             break;
         
         case "object":
@@ -113,21 +114,31 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
                     predicate = "_value.%";
                     unigraphPartValue = rawPart;
                     break;
+
+                case "$/primitive/datetime":
+                    if (Date.parse(rawPart) > 0) predicate = "_value.%dt"
+                    else predicate = "_value.%";
+                    unigraphPartValue = rawPart;
+                    break;
             
                 default:
                     break;
             }
+        } else if (localSchema.type?.['unigraph.id']?.startsWith('$/schema/') && rawPartUnigraphType === "$/composer/Object" && 
+            Object.keys(rawPart).length === 1 && typeof rawPart.uid === "string" && rawPart.uid.startsWith("0x")) {
+            // Case 2: References another schema using UID, passing through.
+            unigraphPartValue = rawPart
         } else if (localSchema.type?.['unigraph.id']?.startsWith('$/schema/') && rawPartUnigraphType === "$/composer/Object" ) {
             // Case 2: References another schema.
-            unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options);
+            unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options, propDesc);
         } else if (localSchema.type?.['unigraph.id']?.startsWith('$/schema/') && rawPartUnigraphType !== "$/composer/Object" && rawPartUnigraphType) {
             // Case 2.1: References another schema with primitive type (thus no predicate)
             noPredicate = true;
-            unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options);
+            unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options, propDesc);
         } else if (localSchema.type && isTypeAlias(schemaMap[localSchema.type['unigraph.id']]?._definition, rawPartUnigraphType)) {
             // Case 2.5: Is type alias (return unigraph object but keeps relationship)
             noPredicate = true;
-            unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options);
+            unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options, propDesc);
         } else if (localSchema.type?.['unigraph.id']?.startsWith('$/composer/Union')) {
             // Case 3: Local schema is a union: we should compare against all possible choices recursively
             noPredicate = true;
@@ -171,7 +182,7 @@ export function validatePaddedEntity(object: Record<string, any>) {
  * @param validateSchema Whether to validate schema. Defaults to false. If validation is on and the schema does not match the object, an error would be returned instead.
  * @param padding Whether to pad the raw object, used to create/change objects with predicate-properties defined. If this is false and the object does not follow the data model, an error would be returned instead.
  */
-export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any", schemaMap: Record<string, Schema>, padding = true, options: BuildEntityOptions = {validateSchema: true, isUpdate: false}): EntityDgraph<string> | TypeError {
+export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any", schemaMap: Record<string, Schema>, padding = true, options: BuildEntityOptions = {validateSchema: true, isUpdate: false}, propDesc: any = {}): EntityDgraph<string> | TypeError {
     // Check for unvalidated entity
     if (padding === false && !validatePaddedEntity(raw)) {
         throw new TypeError("Entity validation failed for entity " + raw)
@@ -179,7 +190,7 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
         const localSchema = schemaMap[schemaName]._definition
         const unigraphId = raw?.['unigraph.id'];
         if (unigraphId) delete raw?.['unigraph.id'];
-        const bodyObject: Record<string, any> = padding ? buildUnigraphEntityPart(raw, options, schemaMap, localSchema) : raw
+        const bodyObject: Record<string, any> = padding ? buildUnigraphEntityPart(raw, options, schemaMap, localSchema, {}) : raw
         const now = new Date().toISOString();
         let timestamp: any = {_updatedAt: now}
         if (!options.isUpdate) timestamp._createdAt = now;
@@ -187,7 +198,8 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
             "type": makeUnigraphId(schemaName) as UnigraphIdType<`$/schema/${string}`>,
             "dgraph.type": "Entity",
             ...bodyObject,
-            "_timestamp": timestamp
+            "_timestamp": timestamp,
+            ...propDesc
         };
         // @ts-ignore
         if (unigraphId) result['unigraph.id'] = unigraphId;
@@ -233,6 +245,10 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
             
             case "$/primitive/string":
                 entries["<_value.%>"] = {};
+                break;
+
+            case "$/primitive/datetime":
+                entries["<_value.%dt>"] = {};
                 break;
                 
             case "$/primitive/boolean":

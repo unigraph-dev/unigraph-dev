@@ -61,6 +61,12 @@ export const pkg: PackageDeclaration = {
                         }
                     },
                     {
+                        "_key": "date_created",
+                        "_definition": {
+                            "type": makeUnigraphId("$/primitive/datetime")
+                        }
+                    },
+                    {
                         "_key": "creative_work",
                         "_propertyType": "inheritance",
                         "_definition": {
