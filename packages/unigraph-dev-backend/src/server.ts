@@ -36,26 +36,6 @@ export default async function startServer(client: DgraphClient) {
   // Basic checks
   await checkOrCreateDefaultDataModel(client);
 
-  const hooks: Hooks = {
-    "after_subscription_added": [(context: HookAfterSubscriptionAddedParams) => {
-      pollSubscriptions(context.newSubscriptions, dgraphClient, pollCallback);
-    }],
-    "after_schema_updated": [(context: HookAfterSchemaUpdatedParams) => {
-      context.newCaches["schemas"].updateNow();
-      context.newCaches["packages"].updateNow();
-    }],
-    "after_object_changed": [(context: HookAfterObjectChangedParams) => {
-      pollSubscriptions(context.subscriptions, dgraphClient, pollCallback);
-      context.caches["executables"].updateNow();
-    }],
-  }
-
-  // Initialize caches
-  caches["schemas"] = createSchemaCache(client);
-  caches["packages"] = createPackageCache(client);
-  const localApi = getLocalUnigraphAPI(client, caches, subscriptions, hooks)
-  caches["executables"] = createExecutableCache(client, {"hello": "world"}, localApi);
-
   // Initialize subscriptions
   const pollCallback: MsgCallbackFn = (id, newdata, msgPort, sub) => {
     if (sub?.callbackType === "messageid") {
@@ -70,9 +50,30 @@ export default async function startServer(client: DgraphClient) {
     }
   }
 
+  const hooks: Hooks = {
+    "after_subscription_added": [async (context: HookAfterSubscriptionAddedParams) => {
+      pollSubscriptions(context.subscriptions, dgraphClient, pollCallback);
+    }],
+    "after_schema_updated": [async (context: HookAfterSchemaUpdatedParams) => {
+      await context.caches["schemas"].updateNow();
+      await context.caches["packages"].updateNow();
+    }],
+    "after_object_changed": [async (context: HookAfterObjectChangedParams) => {
+      pollSubscriptions(context.subscriptions, dgraphClient, pollCallback);
+      await context.caches["executables"].updateNow();
+    }],
+  }
+
+  // Initialize caches
+  caches["schemas"] = createSchemaCache(client);
+  caches["packages"] = createPackageCache(client);
+  const localApi = getLocalUnigraphAPI(client, caches, subscriptions, hooks)
+  caches["executables"] = createExecutableCache(client, {"hello": "world"}, localApi);
+
   setInterval(() => pollSubscriptions(subscriptions, dgraphClient, pollCallback), pollInterval);
   
   const makeResponse = (event: {id: number | string}, success: boolean, body: Record<string, unknown> = {}) => {
+    //console.log(event, success, body)
     return JSON.stringify({
       type: "response",
       success: success,
@@ -116,13 +117,13 @@ export default async function startServer(client: DgraphClient) {
     "subscribe_to_object": function (event: EventSubscribeObject, ws: IWebsocket) {
       const newSub = createSubscriptionWS(event.id, ws, event.queryFragment, event.connId);
       subscriptions.push(newSub);
-      callHooks(hooks, "after_subscription_added", {newSubscriptions: subscriptions});
+      callHooks(hooks, "after_subscription_added", {subscriptions: subscriptions});
       ws.send(makeResponse(event, true));
     },
 
     "subscribe_to_type": function (event: EventSubscribeType, ws: IWebsocket) {
       lock.acquire('caches/schema', function(done: (any)) {
-        done(true);
+        done(false);
         const queryAny = `(func: type(Entity)) @recurse { uid expand(_predicate_) }`
         const query = event.schema === "any" ? queryAny : `(func: uid(par${event.id})) 
         ${makeQueryFragmentFromType(event.schema, caches["schemas"].data)}
@@ -170,12 +171,10 @@ export default async function startServer(client: DgraphClient) {
         const schema = (Array.isArray(event.schema) ? event.schema : [event.schema]);
         const upsert: UnigraphUpsert = insertsToUpsert(schema);
         dgraphClient.createUnigraphUpsert(upsert).then(async _ => {
-          await caches['schemas'].updateNow();
-          await caches['packages'].updateNow();
-          callHooks(hooks, "after_schema_updated", {caches: caches});
+          await callHooks(hooks, "after_schema_updated", {caches: caches});
           ws.send(makeResponse(event, true));
-          done(true, null)
-        }).catch(e => {ws.send(makeResponse(event, false, {"error": e})); done(false, null)});
+          done(false, null)
+        }).catch(e => {ws.send(makeResponse(event, false, {"error": e})); done(true, null)});
       })
       
     },
@@ -192,17 +191,18 @@ export default async function startServer(client: DgraphClient) {
 
     "add_unigraph_package": function (event: EventAddUnigraphPackage, ws: IWebsocket) {
       lock.acquire('caches/schema', function(done: Function) {
-        addUnigraphPackage(dgraphClient, event.package, caches).then(_ => {
+        addUnigraphPackage(dgraphClient, event.package, caches).then(async _ => {
+          await callHooks(hooks, "after_schema_updated", {caches: caches});
+          done(false, null)
+          //console.log("Hooks called")
           ws.send(makeResponse(event, true));
-          callHooks(hooks, "after_schema_updated", {caches: caches});
-          done(true, null)
-        }).catch(e => {ws.send(makeResponse(event, false, {"error": e})); done(false, null)});
+        }).catch(e => {ws.send(makeResponse(event, false, {"error": e})); done(true, null)});
       })
     },
 
     "delete_unigraph_object": function (event: EventDeleteUnigraphObject, ws: IWebsocket) {
-      dgraphClient.deleteUnigraphObject(event.uid).then(_ => {
-        callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
+      dgraphClient.deleteUnigraphObject(event.uid).then(async _ => {
+        await callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
         ws.send(makeResponse(event, true));
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
     },
