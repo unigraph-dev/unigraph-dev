@@ -59,7 +59,7 @@ const objects = results.map((els, index) => els.length >= 1 ? undefined : {
         name: queries[index].item.title,
         url: queries[index].item.link,
         favicon: feeds[queries[index].feedId].site_info.favicon,
-        //date_created: queries[index].item.isoDate
+        date_created: queries[index].item.isoDate
     }
 }).filter(el => el !== undefined);
 console.log(objects)

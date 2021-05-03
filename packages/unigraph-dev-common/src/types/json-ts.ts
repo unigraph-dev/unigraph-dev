@@ -44,7 +44,7 @@ export type ComposerUnionInstance = {
 }
 
 export type UnigraphPrimitiveTypeString = "$/primitive/number" | "$/primitive/boolean"
-| "$/primitive/string" | "$/primitive/null"
+| "$/primitive/string" | "$/primitive/null" | "$/primitive/datetime"
 export type UnigraphTypeString = UnigraphPrimitiveTypeString | "$/composer/Array" | "$/composer/Object" | "$/primitive/undefined"
 
 export type Composers = ComposerObjectInstance<ComposerObjectIndexs> | ComposerArrayInstance | ComposerUnionInstance

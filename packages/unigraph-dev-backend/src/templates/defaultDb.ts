@@ -14,6 +14,7 @@ export const defaultTypes = `<_value>: uid .
 <_value.%>: string .
 <_value.>: default .
 <_value[>: [uid] .
+<_value.%dt>: dateTime @index(hour) .
 <_definition>: uid .
 <type>: uid .
 <pkgManifest>: uid .
