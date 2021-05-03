@@ -2,7 +2,7 @@ import express, { Request, response } from 'express';
 import { Server } from 'http';
 import expressWs, { Application, WebsocketRequestHandler } from 'express-ws';
 import { isJsonString, blobToBase64 } from 'unigraph-dev-common/lib/utils/utils';
-import DgraphClient from './dgraphClient';
+import DgraphClient, { queries } from './dgraphClient';
 import { anchorBatchUpsert, insertsToUpsert } from './utils/txnWrapper';
 import { EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventGetPackages, EventGetSchemas, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventResponser, EventRunExecutable, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
 import { buildUnigraphEntity, getUpsertFromUpdater, makeQueryFragmentFromType, processAutoref, dectxObjects, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
@@ -124,7 +124,7 @@ export default async function startServer(client: DgraphClient) {
     "subscribe_to_type": function (event: EventSubscribeType, ws: IWebsocket) {
       lock.acquire('caches/schema', function(done: (any)) {
         done(false);
-        const queryAny = `(func: type(Entity)) @recurse { uid expand(_predicate_) }`
+        const queryAny = queries.queryAny
         const query = event.schema === "any" ? queryAny : `(func: uid(par${event.id})) 
         ${makeQueryFragmentFromType(event.schema, caches["schemas"].data)}
         par${event.id} as var(func: has(type)) @filter((NOT type(Deleted)) AND type(Entity)) @cascade {

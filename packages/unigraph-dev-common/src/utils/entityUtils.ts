@@ -8,7 +8,11 @@ import { ComposerUnionInstance, Definition, EntityDgraph, Field, RefUnigraphIdTy
 export function makeUnigraphId<IdType extends string>(id: IdType): UnigraphIdType<IdType> {return {"unigraph.id": id}}
 export function makeRefUnigraphId<IdType extends string>(id: IdType): RefUnigraphIdType<IdType> {return {"$ref": {"query": [{"key": "unigraph.id", "value": id}]}}}
 
-function getUnigraphType (object: any): UnigraphTypeString {
+function isDate(dateStr: string) {
+    return !isNaN(new Date(dateStr).getDate());
+  }
+
+function getUnigraphType (object: any, schemaType: UnigraphTypeString): UnigraphTypeString {
     let typeString: UnigraphTypeString = "$/primitive/undefined"
     switch (typeof object) {
         case "number":
@@ -24,7 +28,7 @@ function getUnigraphType (object: any): UnigraphTypeString {
             break;
 
         case "string":
-            if (Date.parse(object) > 0) typeString = "$/primitive/datetime";
+            if (schemaType === "$/primitive/datetime" && isDate(object)) typeString = "$/primitive/datetime";
             else typeString = "$/primitive/string";
             break;
         
@@ -69,7 +73,7 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
     let unigraphPartValue: any = undefined;
     let predicate = "_value";
     let noPredicate = false;
-    const rawPartUnigraphType = getUnigraphType(rawPart);
+    const rawPartUnigraphType = getUnigraphType(rawPart, localSchema.type?.['unigraph.id']);
 
     try {
         // Check for localSchema accordance
@@ -116,8 +120,7 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
                     break;
 
                 case "$/primitive/datetime":
-                    if (Date.parse(rawPart) > 0) predicate = "_value.%dt"
-                    else predicate = "_value.%";
+                    predicate = "_value.%dt";
                     unigraphPartValue = rawPart;
                     break;
             
@@ -209,8 +212,16 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
     }
 }
 
-export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<string, any>, maxDepth = 20) {
-    function makePart(localSchema: Definition | any, depth = 0) {
+export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<string, any>, maxDepth = 10) {
+
+    const timestampQuery = {
+        _timestamp: {
+            _updatedAt: {},
+            _createdAt: {}
+        }
+    };
+
+    function makePart(localSchema: Definition | any, depth = 0, isRoot = false) {
         if (depth > maxDepth) return {};
         let entries: any = {"uid": {}, 'type': { "<unigraph.id>": {} }};
         let type = localSchema.type["unigraph.id"];
@@ -218,7 +229,7 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
         if (type.startsWith('$/schema/')) {
             if (schemaMap[type]?._definition?.type["unigraph.id"]?.startsWith('$/primitive/')) 
                 type = schemaMap[type]._definition.type["unigraph.id"]; // Is type alias
-            else entries = _.merge(entries, {"_value": makePart(schemaMap[type]._definition, depth+1)}, makePart(schemaMap[type]._definition, depth+1)) // Possibly non-object data
+            else entries = _.merge(entries, {"_value": makePart(schemaMap[type]._definition, depth+1, true)}, makePart(schemaMap[type]._definition, depth+1, true)) // Possibly non-object data
         };
         switch (type) {
             case "$/composer/Object":
@@ -263,10 +274,11 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
             default:
                 break;
         }
+        if (isRoot) _.merge(entries, timestampQuery)
         return entries;
     }
     const localSchema = schemaMap[schemaName]._definition;
-    let res = makePart(localSchema)
+    let res = makePart(localSchema, 0, true)
     let ret = jsonToGraphQLQuery(res)
     //console.log(ret)
     return "{" + ret + "}";
@@ -456,7 +468,7 @@ export function unpadRecurse(object: any) {
             result = Object.fromEntries(Object.entries(object).map(([k, v]) => [k, unpadRecurse(v)]));
         }
         if (object['unigraph.id']) result['unigraph.id'] = object['unigraph.id'];
-        if (timestamp) result["_timestamp"] = object["_timestamp"]
+        if (timestamp && typeof result === "object" && !Array.isArray(result)) result["_timestamp"] = object["_timestamp"]
     } else if (Array.isArray(object)) {
         result = [];
         object.forEach(val => result.push(unpadRecurse(val)));

@@ -17,7 +17,7 @@ function TagList ({data}: any) {
 
 const TagListSubscription = withUnigraphSubscription(
     // @ts-ignore
-    TagList, {schemas: [], defaultData: [], packages: []}, {afterSchemasLoaded: (subsId, setData) => {
+    TagList, {schemas: [], defaultData: [], packages: []}, {afterSchemasLoaded: (subsId, data, setData) => {
         window.unigraph.subscribeToType('$/schema/tag', (result: any) => {setData(result)})
     }}
 )

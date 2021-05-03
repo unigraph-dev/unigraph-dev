@@ -83,7 +83,7 @@ export const Bookmarks = withUnigraphSubscription(
     // @ts-ignore
     BookmarksBody,
     { defaultData: [], schemas: [], packages: [bookmarkPackage]},
-    { afterSchemasLoaded: (subsId: number, setData: any) => {
+    { afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
         window.unigraph.subscribeToType("$/schema/web_bookmark", (result: ABookmark[]) => {setData(result)}, subsId);
     }}
 )

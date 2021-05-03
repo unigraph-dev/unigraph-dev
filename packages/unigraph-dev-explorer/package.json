@@ -20,6 +20,7 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "^4.0.3",
     "react-use": "^15.3.4",
+    "timeago.js": "^4.0.2",
     "typeface-roboto": "^1.1.13",
     "typescript": "^4.2.2",
     "unigraph-dev-common": "0.0.1",

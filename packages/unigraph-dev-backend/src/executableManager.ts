@@ -2,7 +2,7 @@
  * This module contains functions that handle executables and their functionalities.
  */
 
-import DgraphClient from "./dgraphClient";
+import DgraphClient, { queries } from "./dgraphClient";
 import { buildUnigraphEntity, clearEmpties, getUpsertFromUpdater, makeQueryFragmentFromType, processAutoref, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { buildGraph, getRandomInt, Unigraph } from "unigraph-dev-common/lib/api/unigraph";
 import { Cache } from './caches';
@@ -121,7 +121,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, caches: Record<string,
         ensurePackage: async (packageName, fallback) => {return Error('Not implemented')},
         subscribeToType: async (name, callback: any, eventId = undefined) => {
             eventId = getRandomInt();
-            const queryAny = `(func: type(Entity)) @recurse { uid expand(_predicate_) }`
+            const queryAny = queries.queryAny
             const query = name === "any" ? queryAny : `(func: uid(par${eventId})) 
             ${makeQueryFragmentFromType(name, caches["schemas"].data)}
             par${eventId} as var(func: has(type)) @filter((NOT type(Deleted)) AND type(Entity)) @cascade {

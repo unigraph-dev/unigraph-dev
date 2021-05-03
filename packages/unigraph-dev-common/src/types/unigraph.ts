@@ -12,5 +12,5 @@ export type UnigraphContext = {
 }
 
 export type UnigraphHooks = {
-    afterSchemasLoaded: (subsId: any, componentThis: any) => any,
+    afterSchemasLoaded: (subsId: any, data: any, componentThis: any) => any,
 }
