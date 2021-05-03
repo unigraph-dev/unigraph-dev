@@ -35,6 +35,7 @@
     "lodash": "^4.17.20",
     "node-cron": "^3.0.0",
     "node-fetch": "^2.6.1",
-    "rss-parser": "^3.12.0"
+    "rss-parser": "^3.12.0",
+    "ws": "^7.4.5"
   }
 }
