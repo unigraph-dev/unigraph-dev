@@ -213,7 +213,15 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
 }
 
 export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<string, any>, maxDepth = 10) {
-    function makePart(localSchema: Definition | any, depth = 0) {
+
+    const timestampQuery = {
+        _timestamp: {
+            _updatedAt: {},
+            _createdAt: {}
+        }
+    };
+
+    function makePart(localSchema: Definition | any, depth = 0, isRoot = false) {
         if (depth > maxDepth) return {};
         let entries: any = {"uid": {}, 'type': { "<unigraph.id>": {} }};
         let type = localSchema.type["unigraph.id"];
@@ -221,7 +229,7 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
         if (type.startsWith('$/schema/')) {
             if (schemaMap[type]?._definition?.type["unigraph.id"]?.startsWith('$/primitive/')) 
                 type = schemaMap[type]._definition.type["unigraph.id"]; // Is type alias
-            else entries = _.merge(entries, {"_value": makePart(schemaMap[type]._definition, depth+1)}, makePart(schemaMap[type]._definition, depth+1)) // Possibly non-object data
+            else entries = _.merge(entries, {"_value": makePart(schemaMap[type]._definition, depth+1, true)}, makePart(schemaMap[type]._definition, depth+1, true)) // Possibly non-object data
         };
         switch (type) {
             case "$/composer/Object":
@@ -266,10 +274,11 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
             default:
                 break;
         }
+        if (isRoot) _.merge(entries, timestampQuery)
         return entries;
     }
     const localSchema = schemaMap[schemaName]._definition;
-    let res = makePart(localSchema)
+    let res = makePart(localSchema, 0, true)
     let ret = jsonToGraphQLQuery(res)
     //console.log(ret)
     return "{" + ret + "}";

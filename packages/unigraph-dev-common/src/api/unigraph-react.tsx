@@ -9,7 +9,7 @@ import React from "react"
 import { UnigraphContext, UnigraphHooks } from "../types/unigraph";
 import { getRandomInt } from './unigraph';
 
-export function withUnigraphSubscription(WrappedComponent: React.FC<{data: any[]}>, 
+export function withUnigraphSubscription(WrappedComponent: React.FC<{data: any}>, 
     unigraphContext: UnigraphContext, unigraphHooks: UnigraphHooks): React.FC {
 
     return (props) => {
@@ -20,7 +20,7 @@ export function withUnigraphSubscription(WrappedComponent: React.FC<{data: any[]
             Promise.all([
                 ...unigraphContext.schemas.map(el => (window as any).unigraph.ensureSchema(el.name, el.schema)),
                 ...unigraphContext.packages.map(el => (window as any).unigraph.ensurePackage(el.pkgManifest.package_name, el))
-            ]).then(unigraphHooks.afterSchemasLoaded(subsId, setData))
+            ]).then(unigraphHooks.afterSchemasLoaded(subsId, data, setData))
         }
 
         React.useEffect(() => {

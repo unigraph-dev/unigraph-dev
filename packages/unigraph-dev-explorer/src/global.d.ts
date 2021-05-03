@@ -13,3 +13,8 @@ declare type DynamicViewCallbacks = {
 }
 
 declare type DynamicViewRenderer = (data: Record<string, any>, callbacks: DynamicViewCallbacks) => ReactElement
+
+declare module 'javascript-time-ago' {
+    function foo(): void; 
+    export = foo;
+};
