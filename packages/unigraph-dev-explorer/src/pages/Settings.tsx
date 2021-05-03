@@ -1,10 +1,6 @@
 import React from 'react';
 
-import { List, ListItem, ListItemText, Popover, TextField, Typography } from '@material-ui/core';
-
-export type UserSettings = {
-    serverLocation: string
-}
+import { List, ListItem, ListItemSecondaryAction, ListItemText, ListSubheader, MenuItem, Popover, Select, Switch, TextField, Typography } from '@material-ui/core';
 
 export default function Settings () {
     // @ts-ignore: When loading the app we've already ensured userSettings is going to be JSON
@@ -19,6 +15,13 @@ export default function Settings () {
         setActivePopover(n);
     };
 
+    const handleWindowSelection = (value: string) => {
+        console.log(value)
+        let newSettings = {...settings, "new-window": value};
+        setSettings(newSettings)
+        window.localStorage.setItem('userSettings', JSON.stringify(newSettings));
+    }
+
     const handleClose = () => {
         setAnchorEl([null]);
         window.localStorage.setItem('userSettings', JSON.stringify(settings));
@@ -28,11 +31,47 @@ export default function Settings () {
     const id0 = Boolean(anchorEl[0]) ? 'address-popover' : undefined;
     //console.log(Boolean(anchorEl[0]))
     return <div>
-        <Typography variant="h4">User Settings</Typography>
-        <p>These setting will be stored in your localStorage. </p>
+        <Typography variant="h4">Settings</Typography>
+        <p>These setting will be stored in your browser. </p>
         <List>
+            <ListSubheader component="div" id="nested-list-subheader">
+            Connection
+            </ListSubheader>
             <ListItem button onClick={(e) => handleClick(e, 0)}>
                 <ListItemText primary="Server address" secondary={`Current address: ${settings.serverLocation}`}/>
+            </ListItem>
+            <ListSubheader component="div" id="nested-list-subheader">
+            Window Management
+            </ListSubheader>
+            <ListItem button onClick={e => {}}>
+                <ListItemText id="switch-list-label-new-window" primary="New window options" secondary="Choose the behavior when a new window is opened." />
+                <ListItemSecondaryAction>
+                    <Select
+                        labelId="demo-simple-select-outlined-label"
+                        id="demo-simple-select-outlined"
+                        value={settings['new-window'] ? settings['new-window']: "new-tab"}
+                        onChange={(event) => handleWindowSelection(event.target.value as string)}
+                        label="new-window"
+                    >
+                        <MenuItem value={"new-tab"}>Open in new tab</MenuItem>
+                        <MenuItem value={"new-pane"}>Open in new pane side by side</MenuItem>
+                        <MenuItem value={"new-popout"}>Open in new popout window</MenuItem>
+                    </Select>
+                </ListItemSecondaryAction>
+            </ListItem>
+            <ListSubheader component="div" id="nested-list-subheader">
+            Developers
+            </ListSubheader>
+            <ListItem button onClick={e => {}}>
+                <ListItemText id="switch-list-label-developer-mode" primary="Developer mode" secondary="Enable utilities about Unigraph for developers." />
+                <ListItemSecondaryAction>
+                    <Switch
+                        edge="end"
+                        onChange={() => {}}
+                        checked={true}
+                        inputProps={{ 'aria-labelledby': 'switch-list-label-developer-mode' }}
+                    />
+                </ListItemSecondaryAction>
             </ListItem>
         </List>
         <Popover

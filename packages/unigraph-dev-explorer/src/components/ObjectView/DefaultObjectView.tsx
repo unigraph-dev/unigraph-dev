@@ -78,7 +78,7 @@ const Executable: DynamicViewRenderer = ({data, callbacks}) => {
     const unpadded = unpad(data);
 
     return <React.Fragment>
-        <ListItemIcon style={{paddingLeft: "8px"}} onClick={() => {window.unigraph.runExecutable(unpadded['unigraph.id'])}}><PlayArrow/></ListItemIcon>
+        <ListItemIcon style={{paddingLeft: "8px"}} onClick={() => {window.unigraph.runExecutable(unpadded['unigraph.id'], {})}}><PlayArrow/></ListItemIcon>
         <ListItemText primary={"Run code: " + unpadded.name} secondary={`Environment: ${unpadded.env}`} />
     </React.Fragment>
 }

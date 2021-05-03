@@ -65,7 +65,7 @@ export default function DrawerRouter() {
             </ListItem>
             <ListItem button onClick={()=>navigator('/settings')}>
               <ListItemIcon><Settings /></ListItemIcon>
-              <ListItemText primary="User Settings" />
+              <ListItemText primary="Settings" />
             </ListItem>
             <ListItem button onClick={()=>navigator('/package-manager')}>
               <ListItemIcon><Category /></ListItemIcon>

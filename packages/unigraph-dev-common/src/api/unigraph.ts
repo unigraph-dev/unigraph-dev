@@ -5,8 +5,8 @@ import { SchemaDgraph } from '../types/json-ts';
 import { PackageDeclaration } from '../types/packages';
 import { base64ToBlob } from '../utils/utils';
 
-export interface Unigraph {
-    backendConnection: WebSocket | false;
+export interface Unigraph<TT = WebSocket | false> {
+    backendConnection: TT;
     backendMessages: string[];
     eventTarget: EventTarget;
     getStatus(): Promise<any>;
@@ -14,11 +14,11 @@ export interface Unigraph {
     ensureSchema(name: string, fallback: any): Promise<any>;
     ensurePackage(packageName: string, fallback: PackageDeclaration): Promise<any>;
     // eslint-disable-next-line @typescript-eslint/ban-types
-    subscribeToType(name: string, callback: Function, eventId: number | undefined): Promise<any>;
+    subscribeToType(name: string, callback: Function, eventId?: number | undefined): Promise<any>;
     // eslint-disable-next-line @typescript-eslint/ban-types
-    subscribeToObject(uid: string, callback: Function, eventId: number | undefined): Promise<any>;
+    subscribeToObject(uid: string, callback: Function, eventId?: number | undefined): Promise<any>;
     // eslint-disable-next-line @typescript-eslint/ban-types
-    subscribeToQuery(fragment: string, callback: Function, eventId: number | undefined): Promise<any>;
+    subscribeToQuery(fragment: string, callback: Function, eventId?: number | undefined): Promise<any>;
     unsubscribe(id: number): any;
     addObject(object: any, schema: string): any;
     getType(name: string): any;
@@ -27,12 +27,12 @@ export interface Unigraph {
     updateSimpleObject(object: any, predicate: string, value: any): any;
     updateObject(uid: string, newObject: any): any;
     getReferenceables(): Promise<any>;
-    getReferenceables(key: string | undefined, asMapWithContent: boolean | undefined): Promise<any>;
-    getSchemas(schemas: string[] | undefined, resolve?: boolean): Promise<Map<string, SchemaDgraph>>;
-    getPackages(packages: string[] | undefined): Promise<Map<string, PackageDeclaration>>;
-    proxyFetch(url: string, options?: Record<string, any>): Promise<Blob>;
+    getReferenceables(key?: string | undefined, asMapWithContent?: boolean | undefined): Promise<any>;
+    getSchemas(schemas?: string[] | undefined, resolve?: boolean): Promise<Record<string, SchemaDgraph>>;
+    getPackages(packages?: string[] | undefined): Promise<Record<string, PackageDeclaration>>;
+    proxyFetch(url: string | URL, options?: Record<string, any>): Promise<Blob>;
     buildGraph(objects: any[]): any[];
-    importObjects(objects: any[]|string): Promise<any>;
+    importObjects(objects: any[] | string): Promise<any>;
     runExecutable<T>(unigraphid: string, params: T): Promise<any>;
     
 }
@@ -72,7 +72,7 @@ export function buildGraph(objects: any[]): any[] {
 
 export function getRandomInt() {return Math.floor(Math.random() * Math.floor(1000000))}
 
-export default function unigraph(url: string): Unigraph {
+export default function unigraph(url: string): Unigraph<WebSocket> {
     const connection = new WebSocket(url);
     const messages: any[] = [];
     const eventTarget: EventTarget = new EventTarget();
