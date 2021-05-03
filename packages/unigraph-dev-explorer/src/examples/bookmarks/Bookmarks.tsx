@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
 import { pkg as bookmarkPackage } from 'unigraph-dev-common/lib/data/unigraph.bookmark.pkg';
 
 import { DynamicViewRenderer } from "../../global";
 import { List, ListItem, TextField, Button, Chip, IconButton, ListItemSecondaryAction, ListItemText, ListItemIcon, Avatar } from "@material-ui/core";
-import { LocalOffer, Delete, Link } from "@material-ui/icons";
-import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph'
-import { withUnigraphSubscription } from 'unigraph-dev-common/lib/api/unigraph-react'
+import { Delete, Link } from "@material-ui/icons";
+import { registerDynamicViews, withUnigraphSubscription } from 'unigraph-dev-common/lib/api/unigraph-react'
 import { Tag } from "../semantic/Tag";
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 
@@ -116,3 +115,5 @@ export const BookmarkItem: DynamicViewRenderer = ({data, callbacks}) => {
         </ListItemSecondaryAction>
     </React.Fragment>
 }
+
+registerDynamicViews({"$/schema/web_bookmark": BookmarkItem})

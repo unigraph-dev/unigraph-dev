@@ -3,9 +3,6 @@ import { MoreVert, PlayArrow } from '@material-ui/icons';
 import React, { FC, ReactElement } from 'react';
 import ReactJson, { InteractionProps } from 'react-json-view';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
-import { BookmarkItem } from '../../examples/bookmarks/Bookmarks';
-import { Tag } from '../../examples/semantic/Tag';
-import { TodoItem } from '../../examples/todo/TodoList';
 import { DynamicViewRenderer } from '../../global';
 import { download } from '../../utils';
 import { ExecutableCodeEditor } from './DefaultCodeEditor';
@@ -87,18 +84,17 @@ const Executable: DynamicViewRenderer = ({data, callbacks}) => {
 }
 
 
-export const DynamicViews: Record<string, DynamicViewRenderer> = {
-    "$/schema/todo": TodoItem,
-    "$/schema/web_bookmark": BookmarkItem,
-    "$/schema/tag": Tag,
+const DynamicViews: Record<string, DynamicViewRenderer> = {
     "$/schema/executable": Executable
 }
 
 window.DynamicViews = DynamicViews;
 
-export const DynamicViewsDetailed: Record<string, DynamicViewRenderer> = {
+const DynamicViewsDetailed: Record<string, DynamicViewRenderer> = {
     "$/schema/executable": ExecutableCodeEditor
 }
+
+window.DynamicViewsDetailed = DynamicViews;
 
 export const AutoDynamicView: DynamicViewRenderer = ({ object, callbacks }) => {
     //console.log(object)
@@ -224,4 +220,4 @@ const DefaultObjectListView: FC<DefaultObjectListViewProps> = ({component, objec
 
 }
 
-export { DefaultObjectView, DefaultObjectList, DefaultObjectListView};
+export { DefaultObjectView, DefaultObjectList, DefaultObjectListView, DynamicViews, DynamicViewsDetailed };

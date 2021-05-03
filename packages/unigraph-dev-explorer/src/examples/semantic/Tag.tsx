@@ -4,6 +4,7 @@ import { LocalOffer } from '@material-ui/icons';
 import { getContrast, NavigationContext } from '../../utils';
 import { DynamicViewRenderer } from '../../global';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { registerDynamicViews } from 'unigraph-dev-common/lib/api/unigraph-react';
 
 export const Tag: DynamicViewRenderer = ({data, callbacks}) => {
     if (data['_value']) data = unpad(data);
@@ -25,3 +26,5 @@ export const Tag: DynamicViewRenderer = ({data, callbacks}) => {
         />}
     </NavigationContext.Consumer>
 }
+
+registerDynamicViews({"$/schema/tag": Tag})
