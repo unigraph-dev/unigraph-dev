@@ -8,7 +8,11 @@ import { ComposerUnionInstance, Definition, EntityDgraph, Field, RefUnigraphIdTy
 export function makeUnigraphId<IdType extends string>(id: IdType): UnigraphIdType<IdType> {return {"unigraph.id": id}}
 export function makeRefUnigraphId<IdType extends string>(id: IdType): RefUnigraphIdType<IdType> {return {"$ref": {"query": [{"key": "unigraph.id", "value": id}]}}}
 
-function getUnigraphType (object: any): UnigraphTypeString {
+function isDate(dateStr: string) {
+    return !isNaN(new Date(dateStr).getDate());
+  }
+
+function getUnigraphType (object: any, schemaType: UnigraphTypeString): UnigraphTypeString {
     let typeString: UnigraphTypeString = "$/primitive/undefined"
     switch (typeof object) {
         case "number":
@@ -24,7 +28,7 @@ function getUnigraphType (object: any): UnigraphTypeString {
             break;
 
         case "string":
-            if (Date.parse(object) > 0) typeString = "$/primitive/datetime";
+            if (schemaType === "$/primitive/datetime" && isDate(object)) typeString = "$/primitive/datetime";
             else typeString = "$/primitive/string";
             break;
         
@@ -69,7 +73,7 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
     let unigraphPartValue: any = undefined;
     let predicate = "_value";
     let noPredicate = false;
-    const rawPartUnigraphType = getUnigraphType(rawPart);
+    const rawPartUnigraphType = getUnigraphType(rawPart, localSchema.type?.['unigraph.id']);
 
     try {
         // Check for localSchema accordance
@@ -116,8 +120,7 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
                     break;
 
                 case "$/primitive/datetime":
-                    if (Date.parse(rawPart) > 0) predicate = "_value.%dt"
-                    else predicate = "_value.%";
+                    predicate = "_value.%dt";
                     unigraphPartValue = rawPart;
                     break;
             
