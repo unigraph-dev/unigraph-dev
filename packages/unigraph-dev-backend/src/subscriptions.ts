@@ -30,7 +30,7 @@ export type MsgCallbackFn = (id: number | string, updated: any, msgPort: IWebsoc
 export async function pollSubscriptions(subs: Subscription[], client: DgraphClient, msgCallback: MsgCallbackFn) {
     if (subs.length >= 1) {
         const query = buildPollingQuery(subs);
-        const results: any[] = await client.queryDgraph(query);
+        let results: any[] = await client.queryDgraph(query).catch(e => {console.log(e); return []});
         results.forEach((val, id) => { // FIXME: Beware race conditions
             if (!_.isEqual(val, subs[id].data)) {
                 subs[id].data = val;

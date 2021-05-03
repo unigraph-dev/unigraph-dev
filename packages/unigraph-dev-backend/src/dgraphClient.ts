@@ -180,7 +180,7 @@ export default class DgraphClient {
   async queryDgraph(query: string, vars: Record<string, any>|undefined = undefined): Promise<any[]> {
     const res = await this.dgraphClient
       .newTxn({ readOnly: true })
-      .queryWithVars(query, vars);
+      .queryWithVars(query, vars).catch(e => {console.log(e); return e});
     return Object.values(res.getJson());
   }
 

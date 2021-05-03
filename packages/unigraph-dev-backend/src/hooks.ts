@@ -4,17 +4,17 @@ import { Subscription } from "./subscriptions";
 /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
 export type Hooks = Record<string, Function[]>
 
-export function callHooks<T>(hooks: Hooks, type: string, context: T) {
-    if (Object.keys(hooks).includes(type)) hooks[type].forEach(val => val(context));
+export async function callHooks<T>(hooks: Hooks, type: string, context: T) {
+    if (Object.keys(hooks).includes(type)) await Promise.all(hooks[type].map(val => val(context)));
 }
 
 // Default hooks
 export type HookAfterSubscriptionAddedParams = { 
-    newSubscriptions: Subscription[],
+    subscriptions: Subscription[],
 }
 
 export type HookAfterSchemaUpdatedParams = {
-    newCaches: Record<string, Cache<any>>,
+    caches: Record<string, Cache<any>>,
 }
 
 export type HookAfterObjectChangedParams = {
