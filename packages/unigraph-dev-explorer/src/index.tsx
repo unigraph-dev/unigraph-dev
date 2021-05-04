@@ -70,10 +70,13 @@ if (window.location.pathname === '/pages') {
       if (isJsonString(window.localStorage.getItem('userSettings')) && // @ts-expect-error: Already checked for nullity
         JSON.parse(window.localStorage.getItem('userSettings'))['nativeNotifications']) {
           window.notificationCallbacks.push((el: any[]) => {
-            el = el.pop();
+            el = JSON.parse(JSON.stringify(el)).pop();
             const unpadded: ANotification = unpad(el); 
-            console.log(unpadded);
-            const nfn = new Notification(unpadded.name, {body: unpadded.from + ": " + unpadded.content})
+            let updated = new Date(unpadded?._timestamp?._updatedAt);
+            let current = new Date();
+            if (current.valueOf() - updated.valueOf() < 5000) {
+              const nfn = new Notification(unpadded.name, {body: unpadded.from + ": " + unpadded.content})
+            }
           })
       }
     })
