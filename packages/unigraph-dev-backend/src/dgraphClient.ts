@@ -204,7 +204,7 @@ export default class DgraphClient {
   async queryUnigraphId<T = unknown>(id: string) {
     return this.queryData<T>(`
     query findByName($a: string) {
-      entities(func: eq(unigraph.id, $a)) {
+      entities(func: eq(unigraph.id, $a)) @recurse {
         expand(_predicate_)
       }
     }
@@ -269,6 +269,6 @@ export default class DgraphClient {
 }
 
 export const queries: Record<string, string> = {
-  "queryAny": `(func: type(Entity)) @recurse @filter(NOT eq(<_propertyType>, "inheritance")) { uid expand(_predicate_) }`,
+  "queryAny": `(func: type(Entity)) @recurse @filter((NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) { uid expand(_predicate_) }`,
   "queryAny-withInh": `(func: type(Entity)) @recurse { uid expand(_predicate_) }`
 }

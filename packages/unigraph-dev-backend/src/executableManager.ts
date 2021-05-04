@@ -13,6 +13,7 @@ import { callHooks } from "./hooks";
 import { insertsToUpsert } from "./utils/txnWrapper";
 import { UnigraphUpsert } from "./custom";
 import _ from "lodash";
+import { addNotification } from "./notifications";
 
 export type Executable = {
     name?: string,
@@ -209,6 +210,11 @@ export function getLocalUnigraphAPI(client: DgraphClient, caches: Record<string,
         runExecutable: async (unigraphid, params) => {
             const exec = caches["executables"].data[unigraphid];
             buildExecutable(exec, {"hello": "ranfromExecutable", "params": params}, {} as Unigraph)()
+        },
+        addNotification: async (notification) => {
+            await addNotification(notification, caches, client);
+            //console.log(hooks)
+            callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
         }
     }
 }

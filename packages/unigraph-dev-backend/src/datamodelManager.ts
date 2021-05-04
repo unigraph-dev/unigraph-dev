@@ -11,18 +11,25 @@ import { Cache } from './caches';
 import { PackageDeclaration } from "unigraph-dev-common/lib/types/packages";
 import { ComposerUnionInstance } from "unigraph-dev-common/lib/types/json-ts";
 import { buildUnigraphEntity, processAutoref, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
+import { getRefQueryUnigraphId } from "unigraph-dev-common/lib/utils/utils";
 
 export async function checkOrCreateDefaultDataModel(client: DgraphClient) {
 
     const unigraphObject: unknown[] = await client.queryUnigraphId<unknown[]>('$/unigraph');
 
+
     if (unigraphObject.length < 1) {
         // Insert default data
+        const tempSchemaCache = createSchemaCache(client);
+
         await client.setSchema(defaultTypes);
         await client.createUnigraphUpsert(insertsToUpsert(defaultUserlandSchemas));
+
+        await tempSchemaCache.updateNow();
+
         for (let i=0; i<defaultPackages.length; ++i) {
-            await addUnigraphPackage(client, defaultPackages[i],
-                {'schemas': {data: Object.fromEntries(defaultUserlandSchemas.map(el => [el["unigraph.id"], el]))} as Cache<any>});
+            await addUnigraphPackage(client, defaultPackages[i], {'schemas': tempSchemaCache});
+            await tempSchemaCache.updateNow();
         }
     } else {
         // Everything is OK, returning
@@ -41,7 +48,7 @@ export function createSchemaCache(client: DgraphClient): Cache<any> {
 
     cache.updateNow = async () => { 
         const newdata = await client.getSchemasFromTable();
-        cache.data = newdata;
+        cache.data = newdata ? newdata : [];
         // Remove all non-schema objects items first
         Object.entries(cache.data).forEach(([k, v]: any) => {
             if (k.startsWith("$/schema/interface/")) {
@@ -115,20 +122,26 @@ export async function addUnigraphPackage(client: DgraphClient, pkg: PackageDecla
         autoRefExecutable['dgraph.type'] = ['Entity', 'Executable']
         return autoRefExecutable
     })
+    // 1.7 Create all predefined entities
+    const entities = !(pkg.pkgEntities && Object.entries(pkg.pkgEntities)) ? [] : Object.entries(pkg.pkgEntities).map(([key, obj]: any) => {
+        const schema = obj?.type?.['unigraph.id'];
+        if (typeof schema === "string") {
+            delete obj.type;
+            const builtEntity = buildUnigraphEntity(obj, schema, caches['schemas'].data);
+            const autoRefEntity = processAutoref(builtEntity, schema, caches['schemas'].data);
+            autoRefEntity['unigraph.id'] = `$/package/${pkg.pkgManifest.package_name}/${pkg.pkgManifest.version}/entity/${key}`;
+            autoRefEntity['dgraph.type'] = ['Entity', 'Named']
+            return autoRefEntity
+        } else return undefined;
+    }).filter(x => x !== undefined);
+    if (entities.length !== 0 && (typeof pkg.pkgEntities !== "object" || entities.length !== Object.values(pkg.pkgEntities).length)) {
+        throw new SyntaxError("Malformed package declaration, aborting!")
+    }
     // TODO: Use concurrency here
     for(let i=0; i<schemas.length; ++i) {
         const schemaShorthandRef = {
             "unigraph.id": `$/schema/${Object.keys(pkg.pkgSchemas)[i]}`,
-            "_value[": {
-                "$ref": {
-                    "query": [
-                        {
-                            "key": "unigraph.id",
-                            "value": schemas[i]["unigraph.id"]
-                        }
-                    ]
-                }
-            }
+            "_value[": getRefQueryUnigraphId(schemas[i]["unigraph.id"])
         }
         const upsert = insertsToUpsert([schemas[i]]);
         await client.createUnigraphUpsert(upsert)
@@ -139,66 +152,47 @@ export async function addUnigraphPackage(client: DgraphClient, pkg: PackageDecla
         const upsert = insertsToUpsert([executables[i]]);
         await client.createUnigraphUpsert(upsert)
     }
+    for(let i=0; i<entities.length; ++i) {
+        const upsert = insertsToUpsert([entities[i]]);
+        await client.createUnigraphUpsert(upsert)
+    }
     // 2. Create package object and link to all schemas
     const newManifest = buildUnigraphEntity(pkg.pkgManifest, '$/schema/package_manifest', caches['schemas'].data);
     const autorefManifest = processAutoref(newManifest, "$/schema/package_manifest", caches['schemas'].data);
     const pkgObj = {
         pkgManifest: autorefManifest,
         "dgraph.type": "Package",
-        pkgSchemas: Object.fromEntries(schemas.map((schema, i) => [Object.keys(pkg.pkgSchemas)[i], {
-            "$ref": {
-                "query": [
-                    {
-                        "key": "unigraph.id",
-                        "value": schema["unigraph.id"]
-                    }
-                ]
-            }
-        }])),
-        pkgExecutables: !(pkg.pkgExecutables && Object.entries(pkg.pkgExecutables)) ? undefined : Object.fromEntries(executables.map((exec, i) => [Object.keys(pkg.pkgExecutables!)[i], {
-            "$ref": {
-                "query": [
-                    {
-                        "key": "unigraph.id",
-                        "value": exec["unigraph.id"]
-                    }
-                ]
-            }
-        }]))
+        pkgSchemas: Object.fromEntries(schemas.map((schema, i) => [
+            Object.keys(pkg.pkgSchemas)[i], 
+            getRefQueryUnigraphId(schema["unigraph.id"])
+        ])),
+        pkgExecutables: !(pkg.pkgExecutables && Object.entries(pkg.pkgExecutables)) ? undefined : Object.fromEntries(executables.map((exec, i) => [
+            Object.keys(pkg.pkgExecutables!)[i],
+            getRefQueryUnigraphId(exec["unigraph.id"])
+        ])),
+        pkgEntities: !(pkg.pkgEntities && Object.entries(pkg.pkgEntities)) ? undefined : Object.fromEntries(entities.map((et, i) => [
+            Object.keys(pkg.pkgEntities!)[i], 
+            getRefQueryUnigraphId(et["unigraph.id"])
+        ]))
     }
     console.log(pkgObj)
     const upsert = insertsToUpsert([pkgObj]);
     await client.createUnigraphUpsert(upsert);
     // 3. Update schema reference table for these schemas
     const upsert2 = insertsToUpsert([{
-        "$ref": {
-            "query": [
-                {
-                    "key": "unigraph.id",
-                    "value": "$/meta/namespace_map"
-                }
-            ]
-        },
-        ...Object.fromEntries(schemas.map((schema, i) => [`$/schema/${Object.keys(pkg.pkgSchemas)[i]}`, {
-            "$ref": {
-                "query": [
-                    {
-                        "key": "unigraph.id",
-                        "value": schema["unigraph.id"]
-                    }
-                ]
-            }
-        }])),
-        ...!(pkg.pkgExecutables && Object.entries(pkg.pkgExecutables)) ? undefined : Object.fromEntries(executables.map((exec, i) => [`$/executable/${Object.keys(pkg.pkgExecutables!)[i]}`, {
-            "$ref": {
-                "query": [
-                    {
-                        "key": "unigraph.id",
-                        "value": exec["unigraph.id"]
-                    }
-                ]
-            }
-        }]))
+        ...getRefQueryUnigraphId("$/meta/namespace_map"),
+        ...Object.fromEntries(schemas.map((schema, i) => [
+            `$/schema/${Object.keys(pkg.pkgSchemas)[i]}`, 
+            getRefQueryUnigraphId(schema["unigraph.id"])
+        ])),
+        ...!(pkg.pkgExecutables && Object.entries(pkg.pkgExecutables)) ? undefined : Object.fromEntries(executables.map((exec, i) => [
+            `$/executable/${Object.keys(pkg.pkgExecutables!)[i]}`,
+            getRefQueryUnigraphId(exec["unigraph.id"])
+        ])),
+        ...!(pkg.pkgEntities && Object.entries(pkg.pkgEntities)) ? undefined : Object.fromEntries(entities.map((et, i) => [
+            `$/entity/${Object.keys(pkg.pkgEntities!)[i]}`,
+            getRefQueryUnigraphId(et["unigraph.id"])
+        ]))
     }])
     await client.createUnigraphUpsert(upsert2);
 }

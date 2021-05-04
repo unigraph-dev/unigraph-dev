@@ -14,5 +14,6 @@ export type PackageManifest = {
 export type PackageDeclaration = {
     pkgManifest: PackageManifest,
     pkgSchemas: Record<string, Schema | SchemaDgraph>,
-    pkgExecutables?: Record<string, any>
+    pkgExecutables?: Record<string, any>,
+    pkgEntities?: Record<string, any>,
 }

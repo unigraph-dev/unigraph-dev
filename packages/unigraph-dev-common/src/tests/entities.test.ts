@@ -7,6 +7,7 @@ const testEntities_1 = require('./testEntities_1.json')
 const testEntities_2 = require('./testEntities_2.json')
 const testEntities_3 = require('./testEntities_3_union.json')
 const testEntities_4 = require('./testEntities_4_type_alias.json')
+const testEntities_5 = require('./testEntities_5_any.json')
 
 jest
   .useFakeTimers('modern')
@@ -71,3 +72,16 @@ describe('should build database query strings based on schema', () => {
         expect(makeQueryFragmentFromType("$/schema/todo", testEntities_2['test-2-schemas'])).toEqual(testEntities_2['expected']['complex'])
     })
 })*/
+
+describe('should process objects with schema that includes $/schema/any', () => {
+    let schemasAny = JSON.parse(JSON.stringify(schemas2));
+    schemasAny['$/schema/semantic_properties'] = testEntities_5['$/schema/semantic_properties'];
+    test('should allow object with defined schema type in `any` argument', () => {
+        expect(buildUnigraphEntity(testEntities_5['typealias-todo-object-any'], "$/schema/todo", schemasAny))
+            .toEqual(testEntities_4['typealias-todo-expected'])
+    });
+    test('should disallow object without defined schema type in `any` argument', () => {
+        expect(() => buildUnigraphEntity(testEntities_5['typealias-todo-object-disallow'], "$/schema/todo", schemasAny))
+            .toThrowError("`$/schema/any` directive must have a corresponding type declaration in object!")
+    });
+})

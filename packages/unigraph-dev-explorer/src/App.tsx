@@ -29,6 +29,7 @@ import { AppLibrary } from './components/PackageManager/AppLibrary';
 import { TodoList } from './examples/todo/TodoList';
 import RSSReader from './examples/rss_reader';
 import { Bookmarks } from './examples/bookmarks/Bookmarks';
+import { NotificationCenter } from './components/UnigraphCore/Notification';
 
 // TODO: custom theme
 const useStyles = makeStyles(theme => ({
@@ -110,6 +111,10 @@ export const pages: Record<string, any> = {
   'app-library': {
     'constructor': () => <AppLibrary/>,
     'name': 'App Library'
+  },
+  'notification-center': {
+    'constructor': () => <NotificationCenter />,
+    'name': "Notification Center"
   }
 }
 

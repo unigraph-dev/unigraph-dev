@@ -52,3 +52,12 @@ export function blobToJson(blob: Blob): Promise<any> {
         blob.text().then(text => isJsonString(text) ? resolve(JSON.stringify(text)): reject("blob not a json"))
     })
 }
+
+export function getRefQueryUnigraphId(id: string) {
+    return { "$ref": {
+        "query": [{
+            "key": "unigraph.id",
+            "value": id
+        }]
+    } }
+}

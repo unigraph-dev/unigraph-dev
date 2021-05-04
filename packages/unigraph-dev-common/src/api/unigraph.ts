@@ -3,6 +3,7 @@
 import { typeMap } from '../types/consts'
 import { SchemaDgraph } from '../types/json-ts';
 import { PackageDeclaration } from '../types/packages';
+import { UnigraphNotification } from '../types/unigraph';
 import { base64ToBlob } from '../utils/utils';
 
 export interface Unigraph<TT = WebSocket | false> {
@@ -34,6 +35,7 @@ export interface Unigraph<TT = WebSocket | false> {
     buildGraph(objects: any[]): any[];
     importObjects(objects: any[] | string): Promise<any>;
     runExecutable<T>(unigraphid: string, params: T): Promise<any>;
+    addNotification(item: UnigraphNotification): Promise<any>;
     
 }
 
@@ -254,7 +256,15 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
             sendEvent(connection, "run_executable", {"unigraph.id": unigraphid, params: params ? params : {}}, id);
         }),
         getType: (name) => {throw Error("Not implemented")},
-        getQueries: (name) => {throw Error("Not implemented")}
+        getQueries: (name) => {throw Error("Not implemented")},
+        addNotification: (item) => new Promise((resolve, reject) => {
+            const id = getRandomInt();
+            callbacks[id] = (response: any) => {
+                if (response.success && response.schemas) resolve(response.schemas);
+                else reject(response);
+            };
+            sendEvent(connection, "add_notification", {item: item}, id);
+        })
     }
 }
 
