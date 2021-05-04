@@ -4,8 +4,12 @@ One interesting feature of Unigraph is the ability to create 'dynamic views' - i
 
 This is currently very much a work in progress, and please make sure to read the documentation below.
 
-# Current Implementation
+Dynamic views are registered in the global map `window.DynamicViews`. You can check out its details in the Javascript console for more information.
 
-Currently we only support internal dynamic views: views that are defined and viewed internally. This includes code, todo items, web bookmarks, calendar items, notes, and more.
+## Current Implementation
 
-Supporting user-generated content is our top priority, and we will implement ability to use custom views in the near future.
+You can register a dynamic view for your schema programmatically in explorer: just need to call `registerDynamicViews` in the global Window object and provide a hashmap of schema shorthand names (starting with `$/schema`) to your component of type `DynamicViewRenderer`.
+
+You can also register a dynamic list view with automatic subscription support by using the `withUnigraphSubscription` method.
+
+For more instructions, check out `packages/unigraph-dev-explorer/src/examples`.
