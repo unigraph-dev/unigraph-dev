@@ -11,11 +11,16 @@ Welcome to the unigraph-dev documentation! This is a work-in-progress under rapi
 - [Data model](./data_model.md)
 - [Glossary](./glossary.md)
 - [Namespaces](./namespaces.md)
+(experimental)
+- [Algebraic data types](./algebraic_data_types.md)
 
 ### Backend
 - [Server API](./server.md)
 - [Dgraph](./dgraph.md)
 
 ### Transclusive ecosystem
-- [Apps](./apps.md)
-- [Namespaces](./namespaces.md)
+- [Apps](./apps.md) and [Core apps](./core_apps.md)
+- [Namespaces](./namespaces.md) and [unigraph.id](./unigraph_id.md)
+- [Dynamic view](./dynamic_view.md)
+- [Executables](./executables.md)
+

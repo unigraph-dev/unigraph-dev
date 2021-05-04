@@ -34,6 +34,8 @@ Any object has 4 basic fields:
 - `type`: Used in the Unigraph type system to provide schema enforcement, view generation, and many other awesome features.
 - `_value`: Used internally to provide flexibility in data model (for example, predicate-properties). You can choose to strip it away (making values the same level as other fields, similar to regular object representations of data) if you don't need predicate-properties.
 
+You can configure additional arbitrary metadata as you prefer - more details would be added soon.
+
 ## References
 
 Please see the section `docs/data_model.md` for more information.

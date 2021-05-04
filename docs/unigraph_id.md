@@ -10,6 +10,8 @@ All subspaces has their own rules regarding how to form names. See respective do
 - `$/package/` The package namespace
 - `$/primitive/` Primitive types references and annotations
 - `$/unigraph` Singular namespace object with metadata of current Unigraph installation
+- `$/entity/` (not actually stored in database) the shorthand for named entities from packages
+- `$/executable` (not actually stored in database) the shorthand for executable entities from packages
 
 ## Upcoming
 - `$/composer/` The composer namespace, allowing for flexible data and view integration across packages

@@ -16,4 +16,6 @@ List of environments:
 
 Executable objects can access their contexts and the Unigraph API via global (comparing to executables) objects:
 
-In JS/TS, they are: `context, unigraph`, of type `ExecContext, Unigraph`
+In JS/TS, they are: `context, unigraph`, of type `ExecContext, Unigraph`.
+
+In JS/TS, you can get type annotations and autocomplete by enforcing your function to the `UnigraphExecutable` generic type with type argument being a map of your named arguments. 

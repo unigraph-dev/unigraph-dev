@@ -13,3 +13,15 @@ To represent complex hypergraphical relationships (including edge annotations, m
 ## shorthand
 
 A shorthand is a shorter notation when dealing with schema compatibilities, like `$/schema/todo`. For more information see [Namespaces](./namespaces.md)
+
+## executable
+
+An entity with underlying type `Executable` (i.e. `dgraph.type: ['Entity', 'Executable']`) can be `eval`-ed in the user scope. This is dangerous from a security perspective, and we're currently planning on changing it. See more: [Executables](./executables.md).
+
+## apps and packages
+
+An app is something similar to the level of development needed for a Firebase app - and a package is an app without user interfaces: it can be a supporting package for other apps, or just some background functions that are run on the server.
+
+## DQL
+
+DQL is the underlying query language of our current graph database, dgraph. We're using a fork of its codebase so additional commands in DQL beyond the offical documentation are supported. For more info, check out [dgraph](./dgraph.md)
