@@ -6,6 +6,7 @@ import { PackageDeclaration } from '../types/packages';
 import { UnigraphNotification } from '../types/unigraph';
 import { base64ToBlob } from '../utils/utils';
 
+/** Unigraph interface */ // Don't remove this line - needed for Monaco to work
 export interface Unigraph<TT = WebSocket | false> {
     backendConnection: TT;
     backendMessages: string[];
@@ -38,7 +39,7 @@ export interface Unigraph<TT = WebSocket | false> {
     addNotification(item: UnigraphNotification): Promise<any>;
     
 }
-
+/** End of unigraph interface */ // Don't remove this line - needed for Monaco to work
 /**
  * Implement a graph-like data structure based on js pointers from uid references.
  * 

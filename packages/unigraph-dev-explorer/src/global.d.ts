@@ -21,3 +21,8 @@ declare type UserSettings = {
     serverLocation: string,
     "new-window": "new-tab" | "new-pane" | "new-popout"
 }
+
+declare module '*.d.ts' {
+    const content: string;
+    export default content;
+}
