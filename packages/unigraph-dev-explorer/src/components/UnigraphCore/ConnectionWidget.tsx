@@ -1,9 +1,7 @@
-import { Button, Card, Chip, Typography } from "@material-ui/core"
-import { LocalOffer } from "@material-ui/icons";
+import { Button, Typography } from "@material-ui/core"
 import React from "react"
 import { useEffectOnce } from "react-use";
-import { withUnigraphSubscription } from "unigraph-dev-common/lib/api/unigraph-react"
-import { getContrast, upload } from "../../utils";
+import { upload } from "../../utils"; 
 
 export const ConnectionWidget: React.FC = ({}) => {
 

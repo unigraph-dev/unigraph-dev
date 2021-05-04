@@ -43,6 +43,7 @@
   },
   "dependencies": {
     "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react-dom": "^17.0.1",
+    "schema-utils": "^3.0.0"
   }
 }
