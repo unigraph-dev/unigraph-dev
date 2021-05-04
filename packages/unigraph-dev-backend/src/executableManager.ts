@@ -122,7 +122,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, caches: Record<string,
         ensurePackage: async (packageName, fallback) => {return Error('Not implemented')},
         subscribeToType: async (name, callback: any, eventId = undefined) => {
             eventId = getRandomInt();
-            const queryAny = queries.queryAny
+            const queryAny = queries.queryAny(getRandomInt().toString());
             const query = name === "any" ? queryAny : `(func: uid(par${eventId})) 
             ${makeQueryFragmentFromType(name, caches["schemas"].data)}
             par${eventId} as var(func: has(type)) @filter((NOT type(Deleted)) AND type(Entity)) @cascade {
