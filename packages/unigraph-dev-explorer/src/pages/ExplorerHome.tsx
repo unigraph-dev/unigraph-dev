@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 
 import GridLayout from 'react-grid-layout'; 
 import { AppLibraryWidget } from '../components/PackageManager/AppLibraryWidget';
-import { ConnectionWidget } from '../components/UnigraphMeta/ConnectionWidget';
+import { ConnectionWidget } from '../components/UnigraphCore/ConnectionWidget';
 import { TagWidget } from '../examples/semantic/TagWidget';
 import './home.css';
 

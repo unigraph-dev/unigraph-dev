@@ -67,6 +67,10 @@ export default function DrawerRouter() {
               <ListItemIcon><Settings /></ListItemIcon>
               <ListItemText primary="Settings" />
             </ListItem>
+            <ListItem button onClick={()=>navigator('/notification-center')}>
+              <ListItemIcon><Settings /></ListItemIcon>
+              <ListItemText primary="Notification Center" />
+            </ListItem>
             <ListItem button onClick={()=>navigator('/package-manager')}>
               <ListItemIcon><Category /></ListItemIcon>
               <ListItemText primary="Package Manager" />

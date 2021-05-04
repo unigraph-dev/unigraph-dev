@@ -1,5 +1,6 @@
 import DgraphClient from './dgraphClient';
 import { PackageDeclaration } from 'unigraph-dev-common/lib/types/packages';
+import { UnigraphNotification } from 'unigraph-dev-common/lib/types/unigraph';
 
 declare global {
   namespace Express {
@@ -179,4 +180,11 @@ declare type EventRunExecutable = {
   id: number,
   "unigraph.id": string,
   params: any,
+}
+
+declare type EventAddNotification = {
+  type: "event",
+  event: "add_notification",
+  id: number,
+  item: UnigraphNotification
 }

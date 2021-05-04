@@ -5,7 +5,7 @@ import WebSocket from 'ws';
 import { isJsonString, blobToBase64 } from 'unigraph-dev-common/lib/utils/utils';
 import DgraphClient, { queries } from './dgraphClient';
 import { anchorBatchUpsert, insertsToUpsert } from './utils/txnWrapper';
-import { EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventGetPackages, EventGetSchemas, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventResponser, EventRunExecutable, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
+import { EventAddNotification, EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventGetPackages, EventGetSchemas, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventResponser, EventRunExecutable, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
 import { buildUnigraphEntity, getUpsertFromUpdater, makeQueryFragmentFromType, processAutoref, dectxObjects, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { addUnigraphPackage, checkOrCreateDefaultDataModel, createPackageCache, createSchemaCache } from './datamodelManager';
 import { Cache } from './caches';
@@ -18,6 +18,7 @@ import { EventEmitter } from 'ws';
 import { uniqueId } from 'lodash';
 import { buildExecutable, createExecutableCache, environmentRunners, getLocalUnigraphAPI } from './executableManager';
 import { Unigraph } from 'unigraph-dev-common/lib/api/unigraph';
+import { addNotification } from './notifications';
 
 const PORT = 3001;
 const verbose = 5;
@@ -337,6 +338,14 @@ export default async function startServer(client: DgraphClient) {
     "run_executable": async function (event: EventRunExecutable, ws: IWebsocket) {
       const exec = caches["executables"].data[event['unigraph.id']];
       buildExecutable(exec, {"hello": "ranfromExecutable", params: event.params}, localApi)();
+    },
+
+    /* Userspace methods: eventually, users can install apps that extend their own methods into here. */
+
+    "add_notification": async function (event: EventAddNotification, ws: IWebsocket) {
+      await addNotification(event.item, caches, dgraphClient).catch(e => ws.send(makeResponse(event, false, {error: e})));
+      callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches});
+      ws.send(makeResponse(event, true));
     }
   };
 

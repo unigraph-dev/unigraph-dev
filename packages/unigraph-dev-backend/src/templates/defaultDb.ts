@@ -4,8 +4,10 @@
  * Default database entries includes default userland schemas (primitive, composers) and default dgraph schemas (and types).
  */
 
-import {pkg as semantic} from 'unigraph-dev-common/lib/data/unigraph.semantic.pkg'
-import {pkg as execexample} from 'unigraph-dev-common/lib/data/unigraph.execexample.pkg'
+import {pkg as semantic} from 'unigraph-dev-common/lib/data/unigraph.semantic.pkg';
+import {pkg as core} from 'unigraph-dev-common/lib/data/unigraph.core.pkg';
+import {pkg as coreuser} from 'unigraph-dev-common/lib/data/unigraph.coreuser.pkg';
+import {pkg as execexample} from 'unigraph-dev-common/lib/data/unigraph.execexample.pkg';
 
 export const defaultTypes = `<_value>: uid .
 <_value.#i>: int .
@@ -188,7 +190,8 @@ export const defaultUserlandSchemas = [
         "unigraph.id": "$/composer/Interface"
     },
     {
-        "unigraph.id": "$/schema/any"
+        "unigraph.id": "$/schema/any",
+        "dgraph.type": [ "Type" ]
     },
     {
         "unigraph.id": "$/unigraph",
@@ -202,5 +205,5 @@ export const defaultUserlandSchemas = [
 ]
 
 export const defaultPackages = [
-    semantic, execexample
+    semantic, core, execexample, coreuser
 ]

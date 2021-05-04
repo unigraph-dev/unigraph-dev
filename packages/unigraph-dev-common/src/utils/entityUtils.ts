@@ -219,6 +219,7 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
         };
         // @ts-ignore
         if (unigraphId) result['unigraph.id'] = unigraphId;
+        if (schemaMap[schemaName]._hide) result['_hide'] = true;
         //console.log(JSON.stringify(result, null, 4));
         // @ts-ignore
         return result;

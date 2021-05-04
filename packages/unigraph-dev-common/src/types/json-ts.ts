@@ -16,7 +16,7 @@ export type PrimitiveType = {
 export type Field<T extends ComposerObjectIndexs> = {
     _key: PrimitiveType[T],
     _unique?: boolean,
-    _propertyType?: "inheritance",
+    _propertyType?: "inheritance" | "internal",
     _definition: Definition
 }
 
@@ -55,11 +55,13 @@ export type Primitive = {"type": PrimitiveTypes}
 
 export type Schema = {
     "unigraph.id"?: string,
+    _hide?: boolean,
     _definition: Definition
 }
 
 export type SchemaDgraph = {
     "unigraph.id"?: string,
+    _hide?: boolean,
     _definition: Definition,
     "dgraph.type": "Type"
 }

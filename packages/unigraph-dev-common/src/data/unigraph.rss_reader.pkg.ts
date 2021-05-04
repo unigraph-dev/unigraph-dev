@@ -62,10 +62,11 @@ const objects = results.map((els, index) => els.length >= 1 ? undefined : {
         date_created: queries[index].item.isoDate
     }
 }).filter(el => el !== undefined);
-console.log(objects)
 for(let i=0; i<objects.length; ++i) {
     await unigraph.addObject(objects[i], "$/schema/rss_item")
-}`
+}
+unigraph.addNotification({name: "Feeds updated", from: "unigraph.rss_reader", content: "Added " + objects.length + " items.", actions: []})
+`
 
 export const pkg: PackageDeclaration = {
     pkgManifest: {

@@ -17,10 +17,10 @@ export const pkg: PackageDeclaration = {
         },
         "time-announcer": {
             env: "routine/js",
-            src: "console.log(new Date())",
-            periodic: "* * * * *",
+            src: `console.log(new Date().toISOString())`,
+            periodic: "*/5 * * * *",
             editable: true,
-            name: "Announce the current time"
+            name: "Announce the current time every 5 minutes"
         }
     }
 }
