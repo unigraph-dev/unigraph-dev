@@ -30,7 +30,7 @@ window.registerNotifications = (callback: ((data: any[]) => any)) => {
 const defaultSettings: UserSettings = {
   serverLocation: `ws://${hst}:3001`,
   "new-window": "new-tab",
-  nativeNotifications: false
+  nativeNotifications: true
 }
 
 let userSettings = defaultSettings;
@@ -69,7 +69,8 @@ if (window.location.pathname === '/pages') {
     }).then(() => {
       if (isJsonString(window.localStorage.getItem('userSettings')) && // @ts-expect-error: Already checked for nullity
         JSON.parse(window.localStorage.getItem('userSettings'))['nativeNotifications']) {
-          window.notificationCallbacks.push((el: any) => {
+          window.notificationCallbacks.push((el: any[]) => {
+            el = el.pop();
             const unpadded: ANotification = unpad(el); 
             console.log(unpadded);
             const nfn = new Notification(unpadded.name, {body: unpadded.from + ": " + unpadded.content})
