@@ -51,6 +51,7 @@ export const NotificationCenterBody: React.FC<{data: ANotification[]}> = ({data}
     </div>
 };
 
+/*
 export const NotificationCenter = withUnigraphSubscription(
     NotificationCenterBody, { schemas: [], defaultData: [], packages: [] },
     {
@@ -59,3 +60,19 @@ export const NotificationCenter = withUnigraphSubscription(
         }
     }
 )
+*/
+
+export const NotificationCenter = () => {
+    const [data, setData] = React.useState(window.notifications);
+
+    React.useEffect(() => {
+        let len = window.notificationCallbacks.length;
+        window.registerNotifications((ns) => setData(JSON.parse(JSON.stringify(ns)).reverse())); 
+
+        return function cleanup() {
+            delete window.notificationCallbacks[len];
+        }
+    })
+
+    return <NotificationCenterBody data={data} />
+}

@@ -8,6 +8,9 @@ declare global {
         layoutModel: Model
         DynamicViews: Record<string, DynamicViewRenderer>,
         DynamicViewsDetailed: Record<string, DynamicViewRenderer>
+        notificationCallbacks: ((data: any[]) => any)[],
+        notifications: any[],
+        registerNotifications: (callback: ((data: any[]) => any)) => any
     }
 };
 
@@ -19,7 +22,8 @@ declare type DynamicViewRenderer = (data: Record<string, any>, callbacks: Dynami
 
 declare type UserSettings = {
     serverLocation: string,
-    "new-window": "new-tab" | "new-pane" | "new-popout"
+    "new-window": "new-tab" | "new-pane" | "new-popout",
+    nativeNotifications: boolean
 }
 
 declare module '*.d.ts' {
