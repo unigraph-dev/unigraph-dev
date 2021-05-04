@@ -75,6 +75,19 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
     let noPredicate = false;
     const rawPartUnigraphType = getUnigraphType(rawPart, localSchema.type?.['unigraph.id']);
 
+    if (localSchema.type?.['unigraph.id'] === "$/schema/any" && typeof rawPart?.type?.['unigraph.id'] === "string") {
+        // If schema is any object and the object has a type (that we can check), 
+        // we allow any rawPart by setting localSchema type to that of object.
+        localSchema = JSON.parse(JSON.stringify(localSchema));
+        localSchema.type['unigraph.id'] = rawPart.type['unigraph.id'];
+    } else if (localSchema.type?.['unigraph.id'] === "$/schema/any") {
+        throw new TypeError('`$/schema/any` directive must have a corresponding type declaration in object!')
+    }
+
+    // TODO: Allow for selecting union types too
+
+    delete rawPart.type;
+
     try {
         // Check for localSchema accordance
         if (localSchema.type?.['unigraph.id'] === rawPartUnigraphType) {

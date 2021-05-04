@@ -1,0 +1,90 @@
+{
+    "typealias-todo-object-any": {
+        "name": "Hello world",
+        "done": false,
+        "semantic_properties": {
+            "tags": [{
+                "type": {
+                    "unigraph.id": "$/schema/tag"
+                },
+                "name": "unigraph",
+                "color": "#b8a2c8"
+            }]
+        }
+    },
+    "typealias-todo-object-disallow": {
+        "name": "Hello world",
+        "done": false,
+        "semantic_properties": {
+            "tags": [{
+                "name": "unigraph",
+                "color": "#b8a2c8"
+            }]
+        }
+    },
+    "$/schema/semantic_properties": {
+        "uid": "0x18",
+        "_definition": {
+            "uid": "0x19",
+            "type": {
+                "uid": "0x23",
+                "unigraph.id": "$/composer/Object"
+            },
+            "_parameters": {
+                "uid": "0x1f",
+                "_indexedBy": {
+                    "uid": "0x16",
+                    "unigraph.id": "$/primitive/string"
+                },
+                "_indexes": [
+                    "name"
+                ]
+            },
+            "_properties": [
+                {
+                    "uid": "0x1b",
+                    "_key": "notes",
+                    "_definition": {
+                        "uid": "0x1c",
+                        "type": {
+                            "uid": "0x4",
+                            "unigraph.id": "$/composer/Array"
+                        },
+                        "_parameters": {
+                            "uid": "0x1e",
+                            "_element": {
+                                "uid": "0x1d",
+                                "type": {
+                                    "uid": "0x15",
+                                    "dgraph.type": [
+                                        "Type"
+                                    ],
+                                    "unigraph.id": "$/schema/note"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "_key": "tags",
+                    "_definition": {
+                        "type": {
+                            "unigraph.id": "$/composer/Array"
+                        },
+                        "_parameters": {
+                            "_element": {
+                                "type": {
+                                    "unigraph.id": "$/schema/any"
+                                }
+                            }
+                        }
+                    }
+                }
+            ]
+        },
+        "dgraph.type": [
+            "Type"
+        ],
+        "unigraph.id": "$/schema/semantic_properties"
+    }
+}

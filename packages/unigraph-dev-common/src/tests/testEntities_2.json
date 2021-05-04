@@ -137,10 +137,6 @@
                                 "_element": {
                                     "uid": "0x1a",
                                     "type": {
-                                        "uid": "0xf",
-                                        "dgraph.type": [
-                                            "Type"
-                                        ],
                                         "unigraph.id": "$/schema/tag"
                                     }
                                 }
