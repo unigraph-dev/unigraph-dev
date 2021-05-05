@@ -268,7 +268,18 @@ export default class DgraphClient {
   }
 }
 
-export const queries: Record<string, string> = {
-  "queryAny": `(func: type(Entity)) @recurse @filter((NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) { uid expand(_predicate_) }`,
-  "queryAny-withInh": `(func: type(Entity)) @recurse { uid expand(_predicate_) }`
+export const queries: Record<string, (a: string) => string> = {
+  "queryAny": (a) => `(func: uid(es${a}), orderdesc: val(cca${a})) @recurse {
+    uid
+    expand(_predicate_)
+  }
+  
+  es${a} as var(func: type(Entity)) @filter((NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true)))
+    { 
+      _timestamp {
+				ca${a} as _updatedAt
+      }
+      cca${a} as min(val(ca${a}))
+    }`,
+  "queryAny-withInh": (_) => `(func: type(Entity)) @recurse { uid expand(_predicate_) }`
 }

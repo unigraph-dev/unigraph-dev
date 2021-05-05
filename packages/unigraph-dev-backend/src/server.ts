@@ -17,7 +17,7 @@ import fetch from 'node-fetch';
 import { EventEmitter } from 'ws';
 import { uniqueId } from 'lodash';
 import { buildExecutable, createExecutableCache, environmentRunners, getLocalUnigraphAPI } from './executableManager';
-import { Unigraph } from 'unigraph-dev-common/lib/api/unigraph';
+import { getRandomInt, Unigraph } from 'unigraph-dev-common/lib/api/unigraph';
 import { addNotification } from './notifications';
 
 const PORT = 3001;
@@ -127,7 +127,7 @@ export default async function startServer(client: DgraphClient) {
     "subscribe_to_type": function (event: EventSubscribeType, ws: IWebsocket) {
       lock.acquire('caches/schema', function(done: (any)) {
         done(false);
-        const queryAny = queries.queryAny
+        const queryAny = queries.queryAny(getRandomInt().toString())
         const query = event.schema === "any" ? queryAny : `(func: uid(par${event.id})) 
         ${makeQueryFragmentFromType(event.schema, caches["schemas"].data)}
         par${event.id} as var(func: has(type)) @filter((NOT type(Deleted)) AND type(Entity)) @cascade {
