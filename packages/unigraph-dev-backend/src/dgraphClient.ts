@@ -276,7 +276,6 @@ export const queries: Record<string, (a: string) => string> = {
   
   es${a} as var(func: type(Entity)) @filter((NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true)))
     { 
-      uid
       _timestamp {
 				ca${a} as _updatedAt
       }
