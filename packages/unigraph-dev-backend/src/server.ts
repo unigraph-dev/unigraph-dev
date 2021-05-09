@@ -6,7 +6,7 @@ import { isJsonString, blobToBase64 } from 'unigraph-dev-common/lib/utils/utils'
 import DgraphClient, { queries } from './dgraphClient';
 import { anchorBatchUpsert, insertsToUpsert } from './utils/txnWrapper';
 import { EventAddNotification, EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventGetPackages, EventGetSchemas, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventResponser, EventRunExecutable, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
-import { buildUnigraphEntity, getUpsertFromUpdater, makeQueryFragmentFromType, processAutoref, dectxObjects, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { buildUnigraphEntity, getUpsertFromUpdater, makeQueryFragmentFromType, processAutoref, dectxObjects, unpad, processAutorefUnigraphId } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { addUnigraphPackage, checkOrCreateDefaultDataModel, createPackageCache, createSchemaCache } from './datamodelManager';
 import { Cache } from './caches';
 import repl from 'repl';
@@ -171,8 +171,9 @@ export default async function startServer(client: DgraphClient) {
     "create_unigraph_schema": function (event: EventCreateUnigraphSchema, ws: IWebsocket) {
       /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
       lock.acquire('caches/schema', function (done: Function) {
-        const schema = (Array.isArray(event.schema) ? event.schema : [event.schema]);
-        const upsert: UnigraphUpsert = insertsToUpsert(schema);
+        const schema = event.schema;
+        const schemaAutoref = processAutorefUnigraphId(schema);
+        const upsert: UnigraphUpsert = insertsToUpsert([schemaAutoref]);
         dgraphClient.createUnigraphUpsert(upsert).then(async _ => {
           await callHooks(hooks, "after_schema_updated", {caches: caches});
           ws.send(makeResponse(event, true));

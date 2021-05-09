@@ -317,8 +317,6 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
     /**
      * Recursively looks for places to insert autoref.
      * 
-     * This function relies on side-effects and will break if the entity is not mutable.
-     * 
      * @param currentEntity 
      * @param schemas 
      */
@@ -356,7 +354,7 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
                             currentEntity['$ref'] = {
                                 query: [{key: 'unigraph.id', value: value}],
                             };
-                            currentEntity['unigraph.id'] = undefined;
+                            delete currentEntity['unigraph.id'];
                         } else if (Object.keys(keysMap).includes(key)) {
                             
                             const localSchema = keysMap[key];
@@ -379,9 +377,46 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
         }
         //console.log("=====================outro")
     }
-
+    entity = JSON.parse(JSON.stringify(entity))
     recurse(entity, schemas, schemas[schema]._definition);
     return entity;
+}
+
+/**
+ * Processes autoref for schema objects, changing mentions of `unigraph.id` into references, and keep everything else untouched, without object paddings.
+ * 
+ */
+export function processAutorefUnigraphId(orig: any) {
+    function recurse(current: any) {
+        switch (typeof current) {
+            case "object":
+                if (Array.isArray(current)) {
+                    current.forEach(e => recurse(e));
+                } else {
+                    const kv = Object.entries(current);
+                    kv.forEach(([key, value]) => {
+                        if (key === "unigraph.id") {
+                            // Add autoref by unigraph.id
+                            current['$ref'] = {
+                                query: [{key: 'unigraph.id', value: value}],
+                            };
+                            delete current['unigraph.id'];
+                        } else {
+                            recurse(value);
+                        }
+                    })
+                }
+                break;
+            
+            default:
+                break;
+        }
+    }
+
+    orig = JSON.parse(JSON.stringify(orig))
+
+    recurse(orig);
+    return orig;
 }
 
 /**

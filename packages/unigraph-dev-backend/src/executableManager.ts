@@ -3,7 +3,7 @@
  */
 
 import DgraphClient, { queries } from "./dgraphClient";
-import { buildUnigraphEntity, clearEmpties, getUpsertFromUpdater, makeQueryFragmentFromType, processAutoref, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
+import { buildUnigraphEntity, clearEmpties, getUpsertFromUpdater, makeQueryFragmentFromType, processAutoref, processAutorefUnigraphId, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { buildGraph, getRandomInt, Unigraph } from "unigraph-dev-common/lib/api/unigraph";
 import { Cache } from './caches';
 import { createContext } from "react";
@@ -109,8 +109,8 @@ export function getLocalUnigraphAPI(client: DgraphClient, caches: Record<string,
         // latertodo
         getStatus: () => {throw Error("Not implemented")},
         createSchema: async (schemain) => {
-            const schema = (Array.isArray(schemain) ? schemain : [schemain]);
-            const upsert: UnigraphUpsert = insertsToUpsert(schema);
+            const autorefSchema = processAutorefUnigraphId(schemain);
+            const upsert: UnigraphUpsert = insertsToUpsert([autorefSchema]);
             await client.createUnigraphUpsert(upsert);
             await caches['schemas'].updateNow();
             await caches['packages'].updateNow();

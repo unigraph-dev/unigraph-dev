@@ -2,7 +2,7 @@
  * Test file for entity-related functions and data models.
  * For the tests used, check out testEntities.json.
  */
-const { buildUnigraphEntity, processAutoref, makeQueryFragmentFromType } = require('../utils/entityUtils');
+const { buildUnigraphEntity, processAutoref, processAutorefUnigraphId, makeQueryFragmentFromType } = require('../utils/entityUtils');
 const testEntities_1 = require('./testEntities_1.json')
 const testEntities_2 = require('./testEntities_2.json')
 const testEntities_3 = require('./testEntities_3_union.json')
@@ -84,4 +84,10 @@ describe('should process objects with schema that includes $/schema/any', () => 
         expect(() => buildUnigraphEntity(testEntities_5['typealias-todo-object-disallow'], "$/schema/todo", schemasAny))
             .toThrowError("`$/schema/any` directive must have a corresponding type declaration in object!")
     });
+})
+
+describe('should process autoref for schemas as well', () => {
+    test('should convert schema objects into autoref mentions', () => {
+        expect(processAutorefUnigraphId(testEntities_1['user-schema-test'])).toEqual(testEntities_1['user-schema-test-autoref'])
+    })
 })
