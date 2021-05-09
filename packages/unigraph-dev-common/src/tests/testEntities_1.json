@@ -77,6 +77,62 @@
             ]
         }
     },
+    "user-schema-test-autoref": {
+        "$ref": {
+            "query": [
+                {
+                    "key": "unigraph.id",
+                    "value": "$/schema/user"
+                }
+            ]
+        },
+        "dgraph.type": "Type",
+        "_definition": {
+            "type": {
+                "$ref": {
+                    "query": [
+                        {
+                            "key": "unigraph.id",
+                            "value": "$/composer/Object"
+                        }
+                    ]
+                }
+            },
+            "_parameters": {
+                "_indexedBy": {
+                    "$ref": {
+                        "query": [
+                            {
+                                "key": "unigraph.id",
+                                "value": "$/primitive/string"
+                            }
+                        ]
+                    }
+                },
+                "_indexes": [
+                    "name"
+                ]
+            },
+            "_properties": [
+                {
+                    "_key": "name",
+                    "_definition": {
+                        "type": {
+                            "$ref": {
+                                "query": [
+                                    {
+                                        "key": "unigraph.id",
+                                        "value": "$/primitive/string"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "_unique": true
+                }
+            ]
+        }
+    },
     "todo-entity-test": {
         "name": "Write initial definitions of JSON-TS",
         "done": false,

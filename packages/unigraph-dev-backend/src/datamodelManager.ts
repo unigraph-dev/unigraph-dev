@@ -10,7 +10,7 @@ import { insertsToUpsert } from "./utils/txnWrapper";
 import { Cache } from './caches';
 import { PackageDeclaration } from "unigraph-dev-common/lib/types/packages";
 import { ComposerUnionInstance } from "unigraph-dev-common/lib/types/json-ts";
-import { buildUnigraphEntity, processAutoref, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
+import { buildUnigraphEntity, processAutoref, processAutorefUnigraphId, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { getRefQueryUnigraphId } from "unigraph-dev-common/lib/utils/utils";
 
 export async function checkOrCreateDefaultDataModel(client: DgraphClient) {
@@ -23,7 +23,10 @@ export async function checkOrCreateDefaultDataModel(client: DgraphClient) {
         const tempSchemaCache = createSchemaCache(client);
 
         await client.setSchema(defaultTypes);
-        await client.createUnigraphUpsert(insertsToUpsert(defaultUserlandSchemas));
+        for (let i=0; i<defaultUserlandSchemas.length; ++i) {
+            const schema = processAutorefUnigraphId(defaultUserlandSchemas[i]);
+            await client.createUnigraphUpsert(insertsToUpsert([schema]));
+        }
 
         await tempSchemaCache.updateNow();
 
@@ -143,7 +146,8 @@ export async function addUnigraphPackage(client: DgraphClient, pkg: PackageDecla
             "unigraph.id": `$/schema/${Object.keys(pkg.pkgSchemas)[i]}`,
             "_value[": getRefQueryUnigraphId(schemas[i]["unigraph.id"])
         }
-        const upsert = insertsToUpsert([schemas[i]]);
+        const schemaAutoref = processAutorefUnigraphId(schemas[i])
+        const upsert = insertsToUpsert([schemaAutoref]);
         await client.createUnigraphUpsert(upsert)
         const upsert2 = insertsToUpsert([schemaShorthandRef]);
         await client.createUnigraphUpsert(upsert2)
@@ -175,7 +179,7 @@ export async function addUnigraphPackage(client: DgraphClient, pkg: PackageDecla
             getRefQueryUnigraphId(et["unigraph.id"])
         ]))
     }
-    console.log(pkgObj)
+    console.log(JSON.stringify(pkgObj, null, 4))
     const upsert = insertsToUpsert([pkgObj]);
     await client.createUnigraphUpsert(upsert);
     // 3. Update schema reference table for these schemas
