@@ -215,6 +215,9 @@ export function getLocalUnigraphAPI(client: DgraphClient, caches: Record<string,
             await addNotification(notification, caches, client);
             //console.log(hooks)
             callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
-        }
+        },
+        addState: (...params) => {throw Error('Not available in server side')},
+        getState: (...params) => {throw Error('Not available in server side')},
+        deleteState: (...params) => {throw Error('Not available in server side')},
     }
 }

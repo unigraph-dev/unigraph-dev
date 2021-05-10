@@ -17,7 +17,7 @@ export default function Settings () {
 
     const handleWindowSelection = (value: string) => {
         console.log(value)
-        let newSettings = {...settings, "new-window": value};
+        let newSettings = {...settings, newWindow: value};
         setSettings(newSettings)
         window.localStorage.setItem('userSettings', JSON.stringify(newSettings));
     }
@@ -49,7 +49,7 @@ export default function Settings () {
                     <Select
                         labelId="demo-simple-select-outlined-label"
                         id="demo-simple-select-outlined"
-                        value={settings['new-window'] ? settings['new-window']: "new-tab"}
+                        value={settings['newWindow'] ? settings['newWindow']: "new-tab"}
                         onChange={(event) => handleWindowSelection(event.target.value as string)}
                         label="new-window"
                     >
@@ -68,7 +68,7 @@ export default function Settings () {
                     <Switch
                         edge="end"
                         onChange={() => {}}
-                        checked={true}
+                        checked={settings['developerMode'] ? settings['developerMode'] : false}
                         inputProps={{ 'aria-labelledby': 'switch-list-label-developer-mode' }}
                     />
                 </ListItemSecondaryAction>

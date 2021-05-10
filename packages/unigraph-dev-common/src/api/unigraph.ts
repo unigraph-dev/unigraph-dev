@@ -164,7 +164,25 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param item Of type UnigraphNotification: `{from: "<sender>", name: "<title>", content: "<content>"}`
      */
     addNotification(item: UnigraphNotification): Promise<any>;
-    
+    /**
+     * Returns the AppState object for the selected string. Not implemented in backend API (for now).
+     * 
+     * @param name Name of the state object - this is globally (to the app) unique
+     */
+    getState(name: string): AppState;
+    /**
+     * Adds a state to the global state manager. Not available server side (for now).
+     * 
+     * @param name Name of the state object - this is globally (to the app) unique
+     * @param initialValue Initial value, could be anything
+     */
+    addState<T = any>(name: string, initialValue: T): any;
+    /**
+     * Deletes the state specified by the name. Not available server side (for now).
+     * 
+     * @param name Name of the state object - this is globally (to the app) unique
+     */
+    deleteState(name: string): any;
 }
 /** End of unigraph interface */ // Don't remove this line - needed for Monaco to work
 /**
@@ -200,6 +218,13 @@ export function buildGraph(objects: any[]): any[] {
 
 }
 
+type AppState<T = any> = {
+    value: T,
+    subscribers: ((newValue: T) => any)[],
+    subscribe: (fn: (newValue: T) => any) => any,
+    setValue: (newValue: T) => any,
+}
+
 export function getRandomInt() {return Math.floor(Math.random() * Math.floor(1000000))}
 
 export default function unigraph(url: string): Unigraph<WebSocket> {
@@ -210,6 +235,7 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
     const callbacks: Record<string, Function> = {};
     // eslint-disable-next-line @typescript-eslint/ban-types
     const subscriptions: Record<string, Function> = {};
+    const states: Record<string, AppState> = {};
 
     function sendEvent(conn: WebSocket, name: string, params: any, id?: number | undefined) {
         if (!id) id = getRandomInt();
@@ -236,6 +262,23 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
     
 
     return {
+        getState: (name) => states[name],
+        addState: (name, initialValue) => {
+            let subs: ((newValue: any) => any)[] = [];
+            let state = {
+                value: initialValue,
+                subscribers: subs,
+                subscribe: (subscriber: (newValue: any) => any) => subs.push(subscriber),
+                setValue: (newValue: any) => {}
+            }
+            state.setValue = (newValue: any) => {
+                state.value = newValue;
+                subs.forEach(sub => sub(state.value));
+            }
+            states[name] = state;
+            return state;
+        },
+        deleteState: (name) => delete states[name],
         backendConnection: connection,
         backendMessages: messages,
         eventTarget: eventTarget,
