@@ -42,6 +42,7 @@ const Notification: DynamicViewRenderer = ({data, callbacks}) => {
 registerDynamicViews({"$/schema/notification": Notification});
 
 export const NotificationCenterBody: React.FC<{data: ANotification[]}> = ({data}) => {
+    data = JSON.parse(JSON.stringify(data)).reverse()
     return <div>
         <List>
             {data.map(it => <ListItem key={it.uid}>

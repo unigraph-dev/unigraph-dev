@@ -97,7 +97,7 @@ export const runEnvRoutineJs: ExecRunner = (src, context, unigraph) => {
 
 export const environmentRunners = {"routine/js": runEnvRoutineJs} /** List of all environments supported in Unigraph */
 
-export function getLocalUnigraphAPI(client: DgraphClient, caches: Record<string, Cache<any>>, subscriptions: Subscription[], hooks: any): Unigraph {
+export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Record<string, Cache<any>>, subscriptions: Subscription[], hooks: any}): Unigraph {
     const messages: any[] = [];
     const eventTarget: any = {};
 
@@ -112,9 +112,9 @@ export function getLocalUnigraphAPI(client: DgraphClient, caches: Record<string,
             const autorefSchema = processAutorefUnigraphId(schemain);
             const upsert: UnigraphUpsert = insertsToUpsert([autorefSchema]);
             await client.createUnigraphUpsert(upsert);
-            await caches['schemas'].updateNow();
-            await caches['packages'].updateNow();
-            callHooks(hooks, "after_schema_updated", {caches: caches});
+            await states.caches['schemas'].updateNow();
+            await states.caches['packages'].updateNow();
+            callHooks(states.hooks, "after_schema_updated", {caches: caches});
         },
         // latertodo
         ensureSchema: async (name, fallback) => {return Error('Not implemented')},
@@ -124,31 +124,31 @@ export function getLocalUnigraphAPI(client: DgraphClient, caches: Record<string,
             eventId = getRandomInt();
             const queryAny = queries.queryAny(getRandomInt().toString());
             const query = name === "any" ? queryAny : `(func: uid(par${eventId})) 
-            ${makeQueryFragmentFromType(name, caches["schemas"].data)}
+            ${makeQueryFragmentFromType(name, states.caches["schemas"].data)}
             par${eventId} as var(func: has(type)) @filter((NOT type(Deleted)) AND type(Entity)) @cascade {
                 type @filter(eq(<unigraph.id>, "${name}"))
             }`
             const newSub = createSubscriptionLocal(eventId, callback, query);
-            subscriptions.push(newSub);
-            callHooks(hooks, "after_subscription_added", {newSubscriptions: subscriptions});
+            states.subscriptions.push(newSub);
+            callHooks(states.hooks, "after_subscription_added", {newSubscriptions: states.subscriptions});
         },
         subscribeToObject: async (uid, callback: any, eventId = undefined) => {
             eventId = getRandomInt();
             const frag = `(func: uid(${uid})) @recurse { uid expand(_predicate_) }`
             const newSub = createSubscriptionLocal(eventId, callback, frag);
-            subscriptions.push(newSub);
-            callHooks(hooks, "after_subscription_added", {newSubscriptions: subscriptions});
+            states.subscriptions.push(newSub);
+            callHooks(states.hooks, "after_subscription_added", {newSubscriptions: states.subscriptions});
         },
         subscribeToQuery: async (fragment, callback: any, eventId = undefined) => {
             eventId = getRandomInt();
             const query = `(func: uid(par${eventId})) @recurse {uid expand(_predicate_)}
             par${eventId} as var${fragment}`
             const newSub = createSubscriptionLocal(eventId, callback, query);
-            subscriptions.push(newSub);
-            callHooks(hooks, "after_subscription_added", {newSubscriptions: subscriptions});
+            states.subscriptions.push(newSub);
+            callHooks(states.hooks, "after_subscription_added", {newSubscriptions: states.subscriptions});
         },
         unsubscribe: async (id) => {
-            subscriptions = subscriptions.reduce((prev: Subscription[], curr: Subscription) => {
+            states.subscriptions = states.subscriptions.reduce((prev: Subscription[], curr: Subscription) => {
                 if (curr.id === id) return prev;
                 else {prev.push(curr); return prev}
             }, []);
@@ -156,17 +156,17 @@ export function getLocalUnigraphAPI(client: DgraphClient, caches: Record<string,
         addObject: async (object, schema) => {
             clearEmpties(object);
             console.log(object)
-            const unigraphObject = buildUnigraphEntity(object, schema, caches['schemas'].data);
-            const finalUnigraphObject = processAutoref(unigraphObject, schema, caches['schemas'].data)
+            const unigraphObject = buildUnigraphEntity(object, schema, states.caches['schemas'].data);
+            const finalUnigraphObject = processAutoref(unigraphObject, schema, states.caches['schemas'].data)
             const upsert = insertsToUpsert([finalUnigraphObject]);
             await client.createUnigraphUpsert(upsert);
-            callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
+            callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
         },
         getType: async (name) => {
             const eventId = getRandomInt();
             const queryAny = `query {entities(func: type(Entity)) @recurse { uid expand(_predicate_) }}`
             const query = name === "any" ? queryAny : `query {entities(func: uid(par${eventId})) 
-            ${makeQueryFragmentFromType(name, caches["schemas"].data)}
+            ${makeQueryFragmentFromType(name, states.caches["schemas"].data)}
             par${eventId} as var(func: has(type)) @filter((NOT type(Deleted)) AND type(Entity)) @cascade {
                 type @filter(eq(<unigraph.id>, "${name}"))
             }}`
@@ -181,40 +181,40 @@ export function getLocalUnigraphAPI(client: DgraphClient, caches: Record<string,
         },
         deleteObject: async (uid) => {
             await client.deleteUnigraphObject(uid);
-            callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
+            callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
         },
         // latertodo
         updateSimpleObject: async (object, predicate, value) => {throw Error("Not implemented")},
         updateObject: async (uid, newObject) => {
             const origObject = (await client.queryUID(uid))[0];
             const schema = origObject['type']['unigraph.id'];
-            const paddedUpdater = buildUnigraphEntity(newObject, schema, caches['schemas'].data, true, {validateSchema: true, isUpdate: true});
-            const finalUpdater = processAutoref(paddedUpdater, schema, caches['schemas'].data);
+            const paddedUpdater = buildUnigraphEntity(newObject, schema, states.caches['schemas'].data, true, {validateSchema: true, isUpdate: true});
+            const finalUpdater = processAutoref(paddedUpdater, schema, states.caches['schemas'].data);
             const upsert = getUpsertFromUpdater(origObject, finalUpdater);
             const finalUpsert = insertsToUpsert([upsert]);
             await client.createUnigraphUpsert(finalUpsert);
-            callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
+            callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
         },
         // latertodo
         getReferenceables: async (key = "unigraph.id", asMapWithContent = false) => {return Error('Not implemented')},
         getSchemas: async (schemas: string[] | undefined, resolve = false) => {
-            return caches['schemas'].data;
+            return states.caches['schemas'].data;
         },
         getPackages: async (packages) => {
-            return caches['packages'].data;
+            return states.caches['packages'].data;
         },
         // latertodo
         proxyFetch: async (url, options?) => {return new Blob([])},
         // latertodo
         importObjects: async (objects) => {return Error('Not implemented')},
         runExecutable: async (unigraphid, params) => {
-            const exec = caches["executables"].data[unigraphid];
+            const exec = states.caches["executables"].data[unigraphid];
             buildExecutable(exec, {"hello": "ranfromExecutable", "params": params}, {} as Unigraph)()
         },
         addNotification: async (notification) => {
-            await addNotification(notification, caches, client);
+            await addNotification(notification, states.caches, client);
             //console.log(hooks)
-            callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
+            callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
         },
         addState: (...params) => {throw Error('Not available in server side')},
         getState: (...params) => {throw Error('Not available in server side')},

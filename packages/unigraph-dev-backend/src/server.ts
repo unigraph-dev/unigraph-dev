@@ -67,10 +67,16 @@ export default async function startServer(client: DgraphClient) {
     }],
   }
 
+  const serverStates = {
+    caches: caches,
+    subscriptions: subscriptions,
+    hooks: hooks
+  }
+
   // Initialize caches
   caches["schemas"] = createSchemaCache(client);
   caches["packages"] = createPackageCache(client);
-  const localApi = getLocalUnigraphAPI(client, caches, subscriptions, hooks)
+  const localApi = getLocalUnigraphAPI(client, serverStates)
   caches["executables"] = createExecutableCache(client, {"hello": "world"}, localApi);
 
   setInterval(() => pollSubscriptions(subscriptions, dgraphClient, pollCallback), pollInterval);
@@ -377,6 +383,7 @@ export default async function startServer(client: DgraphClient) {
       });
       ws.on('close', () => {
         subscriptions = removeSubscriptionsById(subscriptions, connId);
+        serverStates.subscriptions = subscriptions;
       })
       ws.send(JSON.stringify({
         "type": "hello"
