@@ -29,6 +29,10 @@ const useStyles = makeStyles(theme => ({
 export default function DrawerRouter() {
   const classes = useStyles();
 
+  const devState = window.unigraph.getState('settings/developerMode');
+  const [devMode, setDevMode] = React.useState(devState.value);
+  devState.subscribe((newState: boolean) => setDevMode(newState));
+
   return (
     <NavigationContext.Consumer>
         { (navigator: any) => <Drawer
@@ -76,16 +80,18 @@ export default function DrawerRouter() {
               <ListItemText primary="Package Manager" />
             </ListItem>
             <Divider/>
-            <ListSubheader component="div" id="subheader-developer-tools"> Developer Tools </ListSubheader>
-            <ListItem button onClick={()=>navigator('/request')}>
-              <ListItemIcon><Comment /></ListItemIcon>
-              <ListItemText primary="Request" />
-            </ListItem>
-            <ListItem button onClick={()=>navigator('/datamodel-playground')}>
-              <ListItemIcon><CompareArrows /></ListItemIcon>
-              <ListItemText primary="DataModel Playground" />
-            </ListItem>
-            <Divider/>
+            <div style={{display: devMode ? "inherit" : "none"}}>
+              <ListSubheader component="div" id="subheader-developer-tools"> Developer Tools </ListSubheader>
+              <ListItem button onClick={()=>navigator('/request')}>
+                <ListItemIcon><Comment /></ListItemIcon>
+                <ListItemText primary="Request" />
+              </ListItem>
+              <ListItem button onClick={()=>navigator('/datamodel-playground')}>
+                <ListItemIcon><CompareArrows /></ListItemIcon>
+                <ListItemText primary="DataModel Playground" />
+              </ListItem>
+              <Divider/>
+            </div>
           </List>
         </Drawer>}
     </NavigationContext.Consumer>

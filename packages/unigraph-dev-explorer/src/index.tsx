@@ -51,6 +51,11 @@ nfState.subscribe((el: any[]) => {
   }
 });
 
+const devState = window.unigraph.addState('settings/developerMode', userSettings.developerMode);
+devState.subscribe((val: boolean) => {
+  window.localStorage.setItem('userSettings', JSON.stringify({...JSON.parse(window.localStorage.getItem('userSettings')!), developerMode: val}))
+})
+
 function render(component: any) {
   ReactDOM.render(
     component,

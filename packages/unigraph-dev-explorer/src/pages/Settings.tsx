@@ -9,6 +9,10 @@ export default function Settings () {
     const [anchorEl, setAnchorEl]: [any[], any] = React.useState([null]);
     const [activePopover, setActivePopover] = React.useState(-1);
 
+    const devState = window.unigraph.getState('settings/developerMode');
+    const [devMode, setDevMode] = React.useState(devState.value);
+    devState.subscribe((newState: boolean) => setDevMode(newState));
+
     const handleClick = (event: any, n: number) => {
         let total = anchorEl; total[n] = event.currentTarget;
         setAnchorEl(total);
@@ -67,8 +71,8 @@ export default function Settings () {
                 <ListItemSecondaryAction>
                     <Switch
                         edge="end"
-                        onChange={() => {}}
-                        checked={settings['developerMode'] ? settings['developerMode'] : false}
+                        onChange={(e) => {devState.setValue(!devMode)}}
+                        checked={devMode}
                         inputProps={{ 'aria-labelledby': 'switch-list-label-developer-mode' }}
                     />
                 </ListItemSecondaryAction>
