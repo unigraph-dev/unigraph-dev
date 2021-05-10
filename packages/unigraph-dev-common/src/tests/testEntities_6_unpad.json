@@ -1,0 +1,96 @@
+{
+    "before-unpad-ordered": {
+        "dgraph.type": "Entity",
+        "type": {
+            "unigraph.id": "$/schema/todo"
+        },
+        "uid": "0x1",
+        "_value": {
+            "name": {
+                "_value.%": "Write initial definitions of JSON-TS"
+            },
+            "done": {
+                "_value.!": false
+            },
+            "users": {
+                "_value[": [
+                    {
+                        "_index": {
+                            "_value.#i": 1
+                        },
+                        "_value": {
+                            "_value": {
+                                "name": {
+                                    "_value.%": "User 1"
+                                }
+                            },
+                            "dgraph.type": "Entity",
+                            "type": {
+                                "unigraph.id": "$/schema/user"
+                            }
+                        }
+                    },
+                    {
+                        "_index": {
+                            "_value.#i": 0
+                        },
+                        "_value": {
+                            "_value": {
+                                "name": {
+                                    "_value.%": "User 2"
+                                }
+                            },
+                            "dgraph.type": "Entity",
+                            "type": {
+                                "unigraph.id": "$/schema/user"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "after-unpad-ordered": {
+        "type": {
+            "unigraph.id": "$/schema/todo"
+        },
+        "done": false,
+        "uid": "0x1",
+        "name": "Write initial definitions of JSON-TS",
+        "users": [
+            {
+                "name": "User 2"
+            },
+            {
+                "name": "User 1"
+            }
+        ]
+    },
+    "before-unpad-timestamp": {
+        "dgraph.type": "Entity",
+        "type": {
+            "unigraph.id": "$/schema/todo"
+        },
+        "uid": "0x1",
+        "_timestamp": {
+            "_createdAt": "1970-01-01T00:00:00.000Z",
+            "_updatedAt": "1970-01-01T00:00:00.000Z"
+        },
+        "_value": {
+            "name": {
+                "_value.%": "Write initial definitions of JSON-TS"
+            }
+        }
+    },
+    "after-unpad-timestamp": {
+        "uid": "0x1",
+        "name": "Write initial definitions of JSON-TS",
+        "type": {
+            "unigraph.id": "$/schema/todo"
+        },
+        "_timestamp": {
+            "_createdAt": "1970-01-01T00:00:00.000Z",
+            "_updatedAt": "1970-01-01T00:00:00.000Z"
+        }
+    }
+}
