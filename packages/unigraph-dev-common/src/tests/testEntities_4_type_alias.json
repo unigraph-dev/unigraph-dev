@@ -41,6 +41,9 @@
                         "tags": {
                             "_value[": [
                                 {
+                                    "_index": {
+                                        "_value.#i": 0
+                                    },
                                     "_value": {
                                         "type": {
                                             "unigraph.id": "$/schema/tag"

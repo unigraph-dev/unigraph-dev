@@ -181,7 +181,10 @@ export const defaultUserlandSchemas = [
         "unigraph.id": "$/primitive/undefined"
     },
     {
-        "unigraph.id": "$/composer/Array"
+        "unigraph.id": "$/composer/List" // Unordered list
+    },
+    {
+        "unigraph.id": "$/composer/Array" // Ordered array
     },
     {
         "unigraph.id": "$/composer/Object"

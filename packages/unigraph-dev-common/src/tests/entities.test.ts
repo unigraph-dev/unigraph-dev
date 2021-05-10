@@ -2,12 +2,13 @@
  * Test file for entity-related functions and data models.
  * For the tests used, check out testEntities.json.
  */
-const { buildUnigraphEntity, processAutoref, processAutorefUnigraphId, makeQueryFragmentFromType } = require('../utils/entityUtils');
+const { buildUnigraphEntity, processAutoref, processAutorefUnigraphId, makeQueryFragmentFromType, unpad } = require('../utils/entityUtils');
 const testEntities_1 = require('./testEntities_1.json')
 const testEntities_2 = require('./testEntities_2.json')
 const testEntities_3 = require('./testEntities_3_union.json')
 const testEntities_4 = require('./testEntities_4_type_alias.json')
 const testEntities_5 = require('./testEntities_5_any.json')
+const testEntities_6 = require('./testEntities_6_unpad.json')
 
 jest
   .useFakeTimers('modern')
@@ -89,5 +90,14 @@ describe('should process objects with schema that includes $/schema/any', () => 
 describe('should process autoref for schemas as well', () => {
     test('should convert schema objects into autoref mentions', () => {
         expect(processAutorefUnigraphId(testEntities_1['user-schema-test'])).toEqual(testEntities_1['user-schema-test-autoref'])
+    })
+})
+
+describe('should unpad Unigraph entities', () => {
+    test('should preserve orders for ordered lists', () => {
+        expect(unpad(testEntities_6['before-unpad-ordered'])).toEqual(testEntities_6['after-unpad-ordered'])
+    }),
+    test('should preserve timestamps', () => {
+        expect(unpad(testEntities_6['before-unpad-timestamp'])).toEqual(testEntities_6['after-unpad-timestamp'])
     })
 })
