@@ -50,7 +50,7 @@ const newWindowActions = {
 const workspaceNavigator = (model: Model, location: string) => {
     // @ts-expect-error: already checked for isJsonString
     let userSettings = JSON.parse(isJsonString(window.localStorage.getItem('userSettings')) ? window.localStorage.getItem('userSettings') : "{}")
-    let newWindowBehavior = userSettings['new-window'] && Object.keys(newWindowActions).includes(userSettings['new-window']) ? userSettings['new-window'] : "new-tab"
+    let newWindowBehavior = userSettings['newWindow'] && Object.keys(newWindowActions).includes(userSettings['newWindow']) ? userSettings['newWindow'] : "new-tab"
 
     let search = "?" + location.split('?')[1];
     location = location.split('?')[0];

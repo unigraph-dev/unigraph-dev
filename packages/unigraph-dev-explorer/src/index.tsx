@@ -21,16 +21,11 @@ let hst = window.location.hostname.length ? window.location.hostname : "localhos
 window.DynamicViews = DynamicViews;
 window.DynamicViewsDetailed = DynamicViewsDetailed;
 
-window.notificationCallbacks = [];
-window.registerNotifications = (callback: ((data: any[]) => any)) => {
-  callback(window.notifications);
-  window.notificationCallbacks.push(callback)
-}
-
 const defaultSettings: UserSettings = {
   serverLocation: `ws://${hst}:3001`,
-  "new-window": "new-tab",
-  nativeNotifications: true
+  newWindow: "new-tab",
+  nativeNotifications: true,
+  developerMode: false
 }
 
 let userSettings = defaultSettings;
@@ -43,6 +38,23 @@ if (!isJsonString(window.localStorage.getItem('userSettings'))) {
 
 // Connect to Unigraph
 window.unigraph = unigraph(userSettings.serverLocation);
+
+const nfState = window.unigraph.addState('notification-center/notifications', []);
+nfState.subscribe((el: any[]) => {
+  el = JSON.parse(JSON.stringify(el)).pop();
+  const unpadded: ANotification = unpad(el); 
+  let updated = new Date(unpadded?._timestamp?._updatedAt);
+  let current = new Date();
+  if (current.valueOf() - updated.valueOf() < 11000) {
+    const nfn = new Notification(unpadded.name, {body: unpadded.from + ": " + unpadded.content})
+    console.log(unpadded);
+  }
+});
+
+const devState = window.unigraph.addState('settings/developerMode', userSettings.developerMode);
+devState.subscribe((val: boolean) => {
+  window.localStorage.setItem('userSettings', JSON.stringify({...JSON.parse(window.localStorage.getItem('userSettings')!), developerMode: val}))
+})
 
 function render(component: any) {
   ReactDOM.render(
@@ -64,21 +76,8 @@ if (window.location.pathname === '/pages') {
     // Register notification center
     // TODO: Do we need a state management library? Ask around and evaluate.
     window.unigraph.subscribeToType("$/schema/notification", (data: any[]) => {
-      window.notifications = data;
-      window.notificationCallbacks.forEach(el => el(data));
-    }).then(() => {
-      if (isJsonString(window.localStorage.getItem('userSettings')) && // @ts-expect-error: Already checked for nullity
-        JSON.parse(window.localStorage.getItem('userSettings'))['nativeNotifications']) {
-          window.notificationCallbacks.push((el: any[]) => {
-            el = JSON.parse(JSON.stringify(el)).pop();
-            const unpadded: ANotification = unpad(el); 
-            let updated = new Date(unpadded?._timestamp?._updatedAt);
-            let current = new Date();
-            if (current.valueOf() - updated.valueOf() < 5000) {
-              const nfn = new Notification(unpadded.name, {body: unpadded.from + ": " + unpadded.content})
-            }
-          })
-      }
+      const nfState = window.unigraph.getState('notification-center/notifications');
+      nfState.setValue(data);
     })
 
     render(<React.StrictMode>

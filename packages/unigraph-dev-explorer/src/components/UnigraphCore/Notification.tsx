@@ -63,16 +63,11 @@ export const NotificationCenter = withUnigraphSubscription(
 */
 
 export const NotificationCenter = () => {
-    const [data, setData] = React.useState(window.notifications);
+    const nfState = window.unigraph.getState('notification-center/notifications');
 
-    React.useEffect(() => {
-        let len = window.notificationCallbacks.length;
-        window.registerNotifications((ns) => setData(JSON.parse(JSON.stringify(ns)).reverse())); 
+    const [data, setData] = React.useState(nfState.value);
 
-        return function cleanup() {
-            delete window.notificationCallbacks[len];
-        }
-    })
+    nfState.subscribe(v => setData(v));
 
     return <NotificationCenterBody data={data} />
 }

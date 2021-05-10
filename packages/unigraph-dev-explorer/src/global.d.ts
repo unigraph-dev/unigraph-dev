@@ -22,8 +22,9 @@ declare type DynamicViewRenderer = (data: Record<string, any>, callbacks: Dynami
 
 declare type UserSettings = {
     serverLocation: string,
-    "new-window": "new-tab" | "new-pane" | "new-popout",
-    nativeNotifications: boolean
+    newWindow: "new-tab" | "new-pane" | "new-popout",
+    nativeNotifications: boolean,
+    developerMode: boolean
 }
 
 declare module '*.d.ts' {

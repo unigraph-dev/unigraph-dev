@@ -9,6 +9,10 @@ export default function Settings () {
     const [anchorEl, setAnchorEl]: [any[], any] = React.useState([null]);
     const [activePopover, setActivePopover] = React.useState(-1);
 
+    const devState = window.unigraph.getState('settings/developerMode');
+    const [devMode, setDevMode] = React.useState(devState.value);
+    devState.subscribe((newState: boolean) => setDevMode(newState));
+
     const handleClick = (event: any, n: number) => {
         let total = anchorEl; total[n] = event.currentTarget;
         setAnchorEl(total);
@@ -17,7 +21,7 @@ export default function Settings () {
 
     const handleWindowSelection = (value: string) => {
         console.log(value)
-        let newSettings = {...settings, "new-window": value};
+        let newSettings = {...settings, newWindow: value};
         setSettings(newSettings)
         window.localStorage.setItem('userSettings', JSON.stringify(newSettings));
     }
@@ -49,7 +53,7 @@ export default function Settings () {
                     <Select
                         labelId="demo-simple-select-outlined-label"
                         id="demo-simple-select-outlined"
-                        value={settings['new-window'] ? settings['new-window']: "new-tab"}
+                        value={settings['newWindow'] ? settings['newWindow']: "new-tab"}
                         onChange={(event) => handleWindowSelection(event.target.value as string)}
                         label="new-window"
                     >
@@ -67,8 +71,8 @@ export default function Settings () {
                 <ListItemSecondaryAction>
                     <Switch
                         edge="end"
-                        onChange={() => {}}
-                        checked={true}
+                        onChange={(e) => {devState.setValue(!devMode)}}
+                        checked={devMode}
                         inputProps={{ 'aria-labelledby': 'switch-list-label-developer-mode' }}
                     />
                 </ListItemSecondaryAction>
