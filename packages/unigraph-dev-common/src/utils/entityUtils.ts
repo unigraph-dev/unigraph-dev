@@ -33,7 +33,8 @@ function getUnigraphType (object: any, schemaType: UnigraphTypeString): Unigraph
             break;
         
         case "object":
-            if (Array.isArray(object)) typeString = "$/composer/Array";
+            if (Array.isArray(object) && schemaType === "$/composer/List") typeString = "$/composer/List";
+            else if (Array.isArray(object)) typeString = "$/composer/Array";
             else typeString = "$/composer/Object";
             break;
     
@@ -96,8 +97,18 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
                 case "$/composer/Array":
                     predicate = "_value["
                     /* eslint-disable */ // Dependent recursive behavior
-                    const newLocalSchema = localSchema['_parameters']['_element'];
-                    unigraphPartValue = rawPart.map((el: any) => buildUnigraphEntityPart(el, options, schemaMap, newLocalSchema));
+                    const newLocalSchema1 = localSchema['_parameters']['_element'];
+                    unigraphPartValue = rawPart.map((el: any, index: number) => {return {
+                        ...buildUnigraphEntityPart(el, options, schemaMap, newLocalSchema1), 
+                        _index: {"_value.#i": index}
+                    }});
+                    break;
+
+                case "$/composer/List":
+                    predicate = "_value["
+                    /* eslint-disable */ // Dependent recursive behavior
+                    const newLocalSchema2 = localSchema['_parameters']['_element'];
+                    unigraphPartValue = rawPart.map((el: any) => buildUnigraphEntityPart(el, options, schemaMap, newLocalSchema2));
                     break;
         
                 case "$/composer/Object":
@@ -265,7 +276,10 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
                 break;
 
             case "$/composer/Array":
-                entries = _.merge(entries, {"<_value[>": makePart(localSchema._parameters._element, depth+1)});
+                entries = _.merge(entries, {"<_value[>": {
+                    ...makePart(localSchema._parameters._element, depth+1)}, 
+                    "<_index>": { "<_value.#i>": {}, "<_value.#>": {} }
+                });
                 break;
             
             case "$/primitive/string":
@@ -520,6 +534,7 @@ export function unpadRecurse(object: any) {
         if (timestamp && typeof result === "object" && !Array.isArray(result)) result["_timestamp"] = object["_timestamp"]
     } else if (Array.isArray(object)) {
         result = [];
+        object.sort((a, b) => (a["_index"]?.["_value.#i"] || 0) - (b["_index"]?.["_value.#i"] || 0));
         object.forEach(val => result.push(unpadRecurse(val)));
     } else {
         result = object;

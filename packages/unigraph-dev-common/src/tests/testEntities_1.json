@@ -161,6 +161,9 @@
             "users": {
                 "_value[": [
                     {
+                        "_index": {
+                            "_value.#i": 0
+                        },
                         "_value": {
                             "_timestamp": {
                                 "_createdAt": "1970-01-01T00:00:00.000Z",
@@ -207,6 +210,9 @@
             "users": {
                 "_value[": [
                     {
+                        "_index": {
+                            "_value.#i": 0
+                        },
                         "_value": {
                             "$ref": {
                                 "query": [
