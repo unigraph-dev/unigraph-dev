@@ -264,12 +264,12 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
     return {
         getState: (name) => states[name],
         addState: (name, initialValue) => {
-            let subs: ((newValue: any) => any)[] = [];
-            let state = {
+            const subs: ((newValue: any) => any)[] = [];
+            const state = {
                 value: initialValue,
                 subscribers: subs,
                 subscribe: (subscriber: (newValue: any) => any) => subs.push(subscriber),
-                setValue: (newValue: any) => {}
+                setValue: undefined as any
             }
             state.setValue = (newValue: any) => {
                 state.value = newValue;
