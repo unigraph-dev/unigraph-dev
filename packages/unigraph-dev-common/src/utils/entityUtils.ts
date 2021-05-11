@@ -563,3 +563,9 @@ export function clearEmpties(o: any) {
       }
     }
   }
+
+export function isPaddedObject(obj: any) {
+    let valueKeysCount = 0;
+    Object.keys(obj).forEach(key => {if (key.startsWith("_value")) valueKeysCount ++;})
+    return valueKeysCount === 1;
+}
