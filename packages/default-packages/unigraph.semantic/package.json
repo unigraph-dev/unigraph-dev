@@ -1,0 +1,18 @@
+{
+    "displayName": "Semantic",
+    "version": "0.0.1",
+    "description": "Semantic properties support for unigraph objects.",
+    "unigraph": {
+        "package_name": "unigraph.semantic",
+        "schemas": [
+            {"id": "color", "src": "schemas/color.json"},
+            {"id": "person", "src": "schemas/person.json"},
+            {"id": "tag", "src": "schemas/tag.json"},
+            {"id": "note", "src": "schemas/note.json"},
+            {"id": "interface/textual", "src": "schemas/textual.json"},
+            {"id": "interface/semantic", "src": "schemas/semantic.json"},
+            {"id": "semantic_properties", "src": "schemas/semantic_properties.json"},
+            {"id": "creative_work", "src": "schemas/creative_work.json"}
+        ]
+    }
+}

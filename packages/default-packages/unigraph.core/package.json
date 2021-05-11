@@ -1,0 +1,12 @@
+{
+    "displayName": "Unigraph Core",
+    "version": "0.0.1",
+    "description": "The core package of Unigraph, contains many high level abstractions for development.",
+    "unigraph": {
+        "package_name": "unigraph.core",
+        "schemas": [{
+            "id": "list",
+            "src": "schemas/list.json"
+        }]
+    }
+}

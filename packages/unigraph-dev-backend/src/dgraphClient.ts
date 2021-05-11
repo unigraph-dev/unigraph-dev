@@ -10,7 +10,7 @@ export default class DgraphClient {
   private dgraphClientStub: DgraphClientStub;
 
   constructor(connectionUri: string) {
-    this.dgraphClientStub = new DgraphClientStub(connectionUri);
+    this.dgraphClientStub = new DgraphClientStub(connectionUri, undefined, {'grpc.max_receive_message_length': 1024 * 1024 * 1024});
     this.dgraphClientStub.checkVersion(new Check()).catch(e => {if (e.code === 14) {
       throw new Error("Could not establish connection to Dgraph client, exiting...");
     }})

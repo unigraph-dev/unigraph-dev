@@ -1,0 +1,39 @@
+{
+    "dgraph.type": "Type",
+    "_definition": {
+        "type": { "unigraph.id": "$/composer/Object" },
+        "_parameters": {
+            "_indexedBy": { "unigraph.id": "$/primitive/string" },
+            "_indexes": ["name"]
+        },
+        "_properties": [
+            {
+                "_key": "feed",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/rss_feed" }
+                }
+            },
+            {
+                "_key": "content",
+                "_propertyType": "inheritance",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/creative_work" }
+                }
+            },
+            {
+                "_key": "item_data",
+                "_propertyType": "inheritance",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/web_bookmark" }
+                }
+            },
+            {
+                "_key": "semantic_properties",
+                "_propertyType": "inheritance",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/semantic_properties" }
+                }
+            }
+        ]
+    }
+}

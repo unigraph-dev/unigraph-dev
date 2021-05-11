@@ -1,0 +1,30 @@
+{
+    "dgraph.type": "Type",
+    "_definition": {
+        "type": { "unigraph.id": "$/composer/Object" },
+        "_parameters": {
+            "_indexedBy": { "unigraph.id": "$/primitive/string" },
+            "_indexes": ["name"]
+        },
+        "_properties": [
+            {
+                "_key": "text",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/interface/textual" }
+                }
+            },
+            {
+                "_key": "abstract",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/interface/textual" }
+                }
+            },
+            {
+                "_key": "author",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/person" }
+                }
+            }
+        ]
+    }
+}

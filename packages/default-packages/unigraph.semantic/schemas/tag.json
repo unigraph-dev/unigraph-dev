@@ -1,0 +1,31 @@
+{
+    "dgraph.type": "Type",
+    "_definition": {
+        "type": { "unigraph.id": "$/composer/Object" },
+        "_parameters": {
+            "_indexedBy": { "unigraph.id": "$/primitive/string" },
+            "_indexes": ["name"]
+        },
+        "_properties": [
+            {
+                "_key": "name",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                },
+                "_unique": true
+            },
+            {
+                "_key": "color",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/color" }
+                }
+            },
+            {
+                "_key": "semantic_properties",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/semantic_properties" }
+                }
+            }
+        ]
+    }
+}

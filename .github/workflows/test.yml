@@ -61,7 +61,7 @@ jobs:
       
       - run: yarn install
 
-      - run: yarn build-common
+      - run: yarn build-deps
       - run: yarn backend-build
 
   lint:

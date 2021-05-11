@@ -1,0 +1,10 @@
+{
+    "displayName": "Unigraph CoreUser",
+    "version": "0.0.1",
+    "description": "Provides core utilities for enhancing the user experience.",
+    "unigraph": {
+        "package_name": "unigraph.coreuser",
+        "schemas": [{"id": "notification", "src": "schemas/notification.json"}],
+        "entities": [{"id": "notification_center", "src": "entities/notification_center.json"}]
+    }
+}

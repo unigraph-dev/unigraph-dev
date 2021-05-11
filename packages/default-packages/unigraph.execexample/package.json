@@ -1,0 +1,23 @@
+{
+    "displayName": "Executables",
+    "version": "0.0.1",
+    "description": "Example executables",
+    "unigraph": {
+        "package_name": "unigraph.execexample",
+        "executables": [{
+            "name": "Hello World",
+            "env": "routine/js",
+            "id": "hello",
+            "src": "executables/hello.js",
+            "editable": true
+        },
+        {
+            "name": "Announce the current time every 5 minutes",
+            "env": "routine/js",
+            "id": "time-announcer",
+            "src": "executables/announce.js",
+            "editable": true,
+            "periodic": "*/5 * * * *"
+        }]
+    }
+}

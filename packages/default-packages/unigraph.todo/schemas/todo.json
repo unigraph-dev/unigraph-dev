@@ -1,0 +1,37 @@
+{
+    "dgraph.type": "Type",
+    "_definition": {
+        "type": { "unigraph.id": "$/composer/Object" },
+        "_parameters": {
+            "_indexedBy": { "unigraph.id": "$/primitive/string" },
+            "_indexes": ["name"]
+        },
+        "_properties": [
+            {
+                "_key": "name",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/interface/textual" }
+                }
+            },
+            {
+                "_key": "done",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/boolean" }
+                }
+            },
+            {
+                "_key": "priority",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/number" }
+                }
+            },
+            {
+                "_key": "semantic_properties",
+                "_propertyType": "inheritance",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/semantic_properties" }
+                }
+            }
+        ]
+    }
+}
