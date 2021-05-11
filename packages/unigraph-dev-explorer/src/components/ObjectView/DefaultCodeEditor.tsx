@@ -4,14 +4,15 @@ import React from "react";
 import { Button } from "@material-ui/core";
 import { Save } from "@material-ui/icons";
 // eslint-disable-next-line import/no-webpack-loader-syntax
-const unigraphDecl: string = require('!!raw-loader!unigraph-dev-common/lib/api/unigraph.d.ts').default;
+const unigraphDecl: string = require('!!raw-loader!unigraph-dev-common/lib/types/unigraph.d.ts').default;
 const beginStr = '/** Unigraph interface */'
 const endStr = '/** End of unigraph interface */'
 let decl = unigraphDecl.substring(
     unigraphDecl.lastIndexOf(beginStr)+beginStr.length,
     unigraphDecl.lastIndexOf(endStr)    
 )
-decl = decl.replace("export interface Unigraph", "declare interface Unigraph")
+decl = decl.replace(/export declare type /g, "declare type ")
+decl = decl.replace("export interface ", "declare interface ")
 console.log(decl);
 
 export const ExecutableCodeEditor = ({data}: any) => {

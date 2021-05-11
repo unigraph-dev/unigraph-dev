@@ -4,7 +4,8 @@
 
 import DgraphClient, { queries } from "./dgraphClient";
 import { buildUnigraphEntity, clearEmpties, getUpsertFromUpdater, makeQueryFragmentFromType, processAutoref, processAutorefUnigraphId, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
-import { buildGraph, getRandomInt, Unigraph } from "unigraph-dev-common/lib/api/unigraph";
+import { buildGraph, getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
+import { Unigraph } from "unigraph-dev-common/lib/types/unigraph";
 import { Cache } from './caches';
 import { createContext } from "react";
 import cron from 'node-cron';

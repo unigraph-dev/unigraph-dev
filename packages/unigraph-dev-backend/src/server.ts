@@ -17,7 +17,8 @@ import fetch from 'node-fetch';
 import { EventEmitter } from 'ws';
 import { uniqueId } from 'lodash';
 import { buildExecutable, createExecutableCache, environmentRunners, getLocalUnigraphAPI } from './executableManager';
-import { getRandomInt, Unigraph } from 'unigraph-dev-common/lib/api/unigraph';
+import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
+import { Unigraph } from 'unigraph-dev-common/lib/types/unigraph';
 import { addNotification } from './notifications';
 
 const PORT = 3001;
