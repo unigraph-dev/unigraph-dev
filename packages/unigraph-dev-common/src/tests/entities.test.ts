@@ -9,6 +9,7 @@ const testEntities_3 = require('./testEntities_3_union.json')
 const testEntities_4 = require('./testEntities_4_type_alias.json')
 const testEntities_5 = require('./testEntities_5_any.json')
 const testEntities_6 = require('./testEntities_6_unpad.json')
+const testEntities_7 = require('./testEntities_7_partial.json')
 
 jest
   .useFakeTimers('modern')
@@ -87,9 +88,17 @@ describe('should process objects with schema that includes $/schema/any', () => 
     });
 })
 
-describe('should process autoref for schemas as well', () => {
+describe('should process autoref for schemas and partial objects as well', () => {
     test('should convert schema objects into autoref mentions', () => {
         expect(processAutorefUnigraphId(testEntities_1['user-schema-test'])).toEqual(testEntities_1['user-schema-test-autoref'])
+    })
+
+    test('should work with partial objects without autoref', () => {
+        expect(processAutorefUnigraphId(testEntities_7['partial-object-no-autoref'])).toEqual(testEntities_7['partial-object-no-autoref'])
+    })
+
+    test('should work with partial objects with autoref too', () => {
+        expect(processAutorefUnigraphId(testEntities_7['partial-object-autoref'])).toEqual(testEntities_7['partial-object-autoref-withref'])
     })
 })
 

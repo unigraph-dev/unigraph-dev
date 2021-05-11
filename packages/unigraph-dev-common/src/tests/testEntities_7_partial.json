@@ -1,0 +1,101 @@
+{
+    "partial-object-no-autoref": {
+        "uid": "0x1",
+        "_value[": [
+            {
+                "uid": "0x2",
+                "_index": {
+                    "uid": "0x3",
+                    "_value.#i": 0
+                },
+                "_value": {
+                    "uid": "0x4",
+                    "_timestamp": {
+                        "uid": "0x5",
+                        "_createdAt": "1970-01-01T00:00:00.000Z",
+                        "_updatedAt": "1970-01-01T00:00:00.000Z"
+                    },
+                    "_value": {
+                        "uid": "0x6",
+                        "name": {
+                            "uid": "0x7",
+                            "_value.%": "Haoji Xu"
+                        }
+                    },
+                    "dgraph.type": "Entity"
+                }
+            }
+        ]
+    },
+    "partial-object-autoref": {
+        "uid": "0x1",
+        "_value[": [
+            {
+                "uid": "0x2",
+                "_index": {
+                    "uid": "0x3",
+                    "_value.#i": 0
+                },
+                "_value": {
+                    "uid": "0x4",
+                    "_timestamp": {
+                        "uid": "0x5",
+                        "_createdAt": "1970-01-01T00:00:00.000Z",
+                        "_updatedAt": "1970-01-01T00:00:00.000Z"
+                    },
+                    "_value": {
+                        "uid": "0x6",
+                        "name": {
+                            "uid": "0x7",
+                            "_value.%": "Haoji Xu"
+                        }
+                    },
+                    "dgraph.type": "Entity",
+                    "type": {
+                        "uid": "0x8",
+                        "unigraph.id": "$/schema/user"
+                    }
+                }
+            }
+        ]
+    },
+    "partial-object-autoref-withref": {
+        "uid": "0x1",
+        "_value[": [
+            {
+                "uid": "0x2",
+                "_index": {
+                    "uid": "0x3",
+                    "_value.#i": 0
+                },
+                "_value": {
+                    "uid": "0x4",
+                    "_timestamp": {
+                        "uid": "0x5",
+                        "_createdAt": "1970-01-01T00:00:00.000Z",
+                        "_updatedAt": "1970-01-01T00:00:00.000Z"
+                    },
+                    "_value": {
+                        "uid": "0x6",
+                        "name": {
+                            "uid": "0x7",
+                            "_value.%": "Haoji Xu"
+                        }
+                    },
+                    "dgraph.type": "Entity",
+                    "type": {
+                        "uid": "0x8",
+                        "$ref":  {
+                            "query":  [
+                                {
+                                    "key": "unigraph.id",
+                                    "value": "$/schema/user"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        ]
+    }
+}
