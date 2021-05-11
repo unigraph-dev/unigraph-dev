@@ -15,7 +15,15 @@ export const DefaultObjectContextMenu = ({uid, object, anchorEl, handleClose}:
     >
         <NavigationContext.Consumer>
         { (navigator: any) => 
-            <MenuItem onClick={() => {handleClose(); navigator(`/library/object?uid=${uid}`)}}>View object</MenuItem>
+            <React.Fragment><MenuItem onClick={() => {handleClose(); navigator(`/library/object?uid=${uid}&viewer=${"dynamic-view-detailed"}`)}}>
+                View object with its default
+                </MenuItem>
+            <MenuItem onClick={() => {handleClose(); navigator(`/library/object?uid=${uid}&viewer=${"dynamic-view-detailed"}`)}}>
+                View object with object editor (🚧)
+            </MenuItem>
+            <MenuItem onClick={() => {handleClose(); navigator(`/library/object?uid=${uid}&viewer=${"json-tree"}`)}}>
+                View object with JSON tree viewer
+            </MenuItem></React.Fragment>
         }
         </NavigationContext.Consumer>
         
