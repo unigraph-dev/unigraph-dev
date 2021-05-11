@@ -19,6 +19,7 @@
     "react-json-view": "^1.20.2",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^4.0.3",
+    "react-sizeme": "^3.0.1",
     "react-use": "^15.3.4",
     "timeago.js": "^4.0.2",
     "typeface-roboto": "^1.1.13",

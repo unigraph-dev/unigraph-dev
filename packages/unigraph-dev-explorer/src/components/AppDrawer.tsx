@@ -47,10 +47,6 @@ export default function DrawerRouter() {
           <div className={classes.toolbar} />
           <List>
             <ListSubheader component="div" id="subheader-home"> Home </ListSubheader>
-            <ListItem button onClick={()=>navigator('/')}>
-              <ListItemIcon><Home /></ListItemIcon>
-              <ListItemText primary="Home" />
-            </ListItem>
             <ListItem button onClick={()=>navigator('/about')}>
               <ListItemIcon><Info /></ListItemIcon>
               <ListItemText primary="About" />
@@ -73,11 +69,11 @@ export default function DrawerRouter() {
             </ListItem>
             <ListItem button onClick={()=>navigator('/notification-center')}>
               <ListItemIcon><Settings /></ListItemIcon>
-              <ListItemText primary="Notification Center" />
+              <ListItemText primary="Notifications" />
             </ListItem>
             <ListItem button onClick={()=>navigator('/package-manager')}>
               <ListItemIcon><Category /></ListItemIcon>
-              <ListItemText primary="Package Manager" />
+              <ListItemText primary="Packages" />
             </ListItem>
             <Divider/>
             <div style={{display: devMode ? "inherit" : "none"}}>

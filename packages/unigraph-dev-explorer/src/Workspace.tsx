@@ -93,8 +93,8 @@ export function WorkSpace(this: any) {
 				{
 					"type": "tab",
 					"enableClose":false,
-                    "minSize": 540,
-                    
+                    "minSize": 700,
+                    "maxSize": 700,
 					"name": "App Drawer",
 					"component": "/components/appdrawer",
 				}
@@ -110,13 +110,7 @@ export function WorkSpace(this: any) {
                     "weight": 50,
                     "selected": 0,
                     "children": [
-                        {
-                            "type": "tab",
-                            "name": "Home",
-                            "component":"/pages/home",
-                            "enableFloat": "true",
-                            "enableClose":false,
-                        }
+                        {...getComponentFromPage('/home'), enableClose: false}
                     ]
                 }
             ]

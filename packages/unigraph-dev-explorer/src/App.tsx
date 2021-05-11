@@ -98,7 +98,7 @@ export const pages: Record<string, any> = {
   },
   'home': {
     'constructor': () => <ExplorerHome />,
-    'name': 'Home',
+    'name': 'Dashboard',
   },
   'semantic/tagresults': {
     'constructor': (props: any) => <TagResults {...props} />,
