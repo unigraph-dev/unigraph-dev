@@ -1,10 +1,8 @@
-import express, { Request, response } from 'express';
-import { Server } from 'http';
-import expressWs, { Application, WebsocketRequestHandler } from 'express-ws';
+import { Application } from 'express-ws';
 import WebSocket from 'ws';
-import { isJsonString, blobToBase64 } from 'unigraph-dev-common/lib/utils/utils';
+import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import DgraphClient, { queries } from './dgraphClient';
-import { anchorBatchUpsert, insertsToUpsert } from './utils/txnWrapper';
+import { insertsToUpsert } from './utils/txnWrapper';
 import { EventAddNotification, EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventGetPackages, EventGetSchemas, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventResponser, EventRunExecutable, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
 import { buildUnigraphEntity, getUpsertFromUpdater, makeQueryFragmentFromType, processAutoref, dectxObjects, unpad, processAutorefUnigraphId, isPaddedObject } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { addUnigraphPackage, checkOrCreateDefaultDataModel, createPackageCache, createSchemaCache } from './datamodelManager';
@@ -14,10 +12,10 @@ import { createSubscriptionWS, MsgCallbackFn, pollSubscriptions, removeSubscript
 import { callHooks, HookAfterObjectChangedParams, HookAfterSchemaUpdatedParams, HookAfterSubscriptionAddedParams, Hooks } from './hooks';
 import { getAsyncLock } from './asyncManager';
 import fetch from 'node-fetch';
-import { EventEmitter } from 'ws';
 import { uniqueId } from 'lodash';
-import { buildExecutable, createExecutableCache, environmentRunners, getLocalUnigraphAPI } from './executableManager';
-import { getRandomInt, Unigraph } from 'unigraph-dev-common/lib/api/unigraph';
+import { buildExecutable, createExecutableCache } from './executableManager';
+import { getLocalUnigraphAPI } from './localUnigraphApi';
+import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { addNotification } from './notifications';
 
 const PORT = 3001;

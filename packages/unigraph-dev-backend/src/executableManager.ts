@@ -2,18 +2,14 @@
  * This module contains functions that handle executables and their functionalities.
  */
 
-import DgraphClient, { queries } from "./dgraphClient";
-import { buildUnigraphEntity, clearEmpties, getUpsertFromUpdater, makeQueryFragmentFromType, processAutoref, processAutorefUnigraphId, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
-import { buildGraph, getRandomInt, Unigraph } from "unigraph-dev-common/lib/api/unigraph";
+import DgraphClient from "./dgraphClient";
+import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
+import { Unigraph } from "unigraph-dev-common/lib/types/unigraph";
 import { Cache } from './caches';
-import { createContext } from "react";
+
 import cron from 'node-cron';
-import { createSubscriptionLocal, Subscription } from "./subscriptions";
-import { callHooks } from "./hooks";
-import { insertsToUpsert } from "./utils/txnWrapper";
-import { UnigraphUpsert } from "./custom";
+
 import _ from "lodash";
-import { addNotification } from "./notifications";
 
 export type Executable = {
     name?: string,
@@ -97,127 +93,3 @@ export const runEnvRoutineJs: ExecRunner = (src, context, unigraph) => {
 
 export const environmentRunners = {"routine/js": runEnvRoutineJs} /** List of all environments supported in Unigraph */
 
-export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Record<string, Cache<any>>, subscriptions: Subscription[], hooks: any}): Unigraph {
-    const messages: any[] = [];
-    const eventTarget: any = {};
-
-    return {
-        backendConnection: false,
-        backendMessages: messages,
-        eventTarget: eventTarget,
-        buildGraph: buildGraph,
-        // latertodo
-        getStatus: () => {throw Error("Not implemented")},
-        createSchema: async (schemain) => {
-            const autorefSchema = processAutorefUnigraphId(schemain);
-            const upsert: UnigraphUpsert = insertsToUpsert([autorefSchema]);
-            await client.createUnigraphUpsert(upsert);
-            await states.caches['schemas'].updateNow();
-            await states.caches['packages'].updateNow();
-            callHooks(states.hooks, "after_schema_updated", {caches: caches});
-        },
-        // latertodo
-        ensureSchema: async (name, fallback) => {return Error('Not implemented')},
-        // latertodo
-        ensurePackage: async (packageName, fallback) => {return Error('Not implemented')},
-        subscribeToType: async (name, callback: any, eventId = undefined) => {
-            eventId = getRandomInt();
-            const queryAny = queries.queryAny(getRandomInt().toString());
-            const query = name === "any" ? queryAny : `(func: uid(par${eventId})) 
-            ${makeQueryFragmentFromType(name, states.caches["schemas"].data)}
-            par${eventId} as var(func: has(type)) @filter((NOT type(Deleted)) AND type(Entity)) @cascade {
-                type @filter(eq(<unigraph.id>, "${name}"))
-            }`
-            const newSub = createSubscriptionLocal(eventId, callback, query);
-            states.subscriptions.push(newSub);
-            callHooks(states.hooks, "after_subscription_added", {newSubscriptions: states.subscriptions});
-        },
-        subscribeToObject: async (uid, callback: any, eventId = undefined) => {
-            eventId = getRandomInt();
-            const frag = `(func: uid(${uid})) @recurse { uid expand(_predicate_) }`
-            const newSub = createSubscriptionLocal(eventId, callback, frag);
-            states.subscriptions.push(newSub);
-            callHooks(states.hooks, "after_subscription_added", {newSubscriptions: states.subscriptions});
-        },
-        subscribeToQuery: async (fragment, callback: any, eventId = undefined) => {
-            eventId = getRandomInt();
-            const query = `(func: uid(par${eventId})) @recurse {uid expand(_predicate_)}
-            par${eventId} as var${fragment}`
-            const newSub = createSubscriptionLocal(eventId, callback, query);
-            states.subscriptions.push(newSub);
-            callHooks(states.hooks, "after_subscription_added", {newSubscriptions: states.subscriptions});
-        },
-        unsubscribe: async (id) => {
-            states.subscriptions = states.subscriptions.reduce((prev: Subscription[], curr: Subscription) => {
-                if (curr.id === id) return prev;
-                else {prev.push(curr); return prev}
-            }, []);
-        },
-        addObject: async (object, schema) => {
-            clearEmpties(object);
-            console.log(object)
-            const unigraphObject = buildUnigraphEntity(object, schema, states.caches['schemas'].data);
-            const finalUnigraphObject = processAutoref(unigraphObject, schema, states.caches['schemas'].data)
-            const upsert = insertsToUpsert([finalUnigraphObject]);
-            await client.createUnigraphUpsert(upsert);
-            callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
-        },
-        getType: async (name) => {
-            const eventId = getRandomInt();
-            const queryAny = `query {entities(func: type(Entity)) @recurse { uid expand(_predicate_) }}`
-            const query = name === "any" ? queryAny : `query {entities(func: uid(par${eventId})) 
-            ${makeQueryFragmentFromType(name, states.caches["schemas"].data)}
-            par${eventId} as var(func: has(type)) @filter((NOT type(Deleted)) AND type(Entity)) @cascade {
-                type @filter(eq(<unigraph.id>, "${name}"))
-            }}`
-            const res = await client.queryData(query);
-            return res;
-        },
-        getQueries: async (fragments) => {
-            const allQueries = fragments.map((it, index) => `query${index}(func: uid(par${index})) @recurse {uid expand(_predicate_)}
-            par${index} as var${it}`);
-            const res = await client.queryDgraph(`query {${allQueries.join('\n')}}`);
-            return res;
-        },
-        deleteObject: async (uid) => {
-            await client.deleteUnigraphObject(uid);
-            callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
-        },
-        // latertodo
-        updateSimpleObject: async (object, predicate, value) => {throw Error("Not implemented")},
-        updateObject: async (uid, newObject) => {
-            const origObject = (await client.queryUID(uid))[0];
-            const schema = origObject['type']['unigraph.id'];
-            const paddedUpdater = buildUnigraphEntity(newObject, schema, states.caches['schemas'].data, true, {validateSchema: true, isUpdate: true});
-            const finalUpdater = processAutoref(paddedUpdater, schema, states.caches['schemas'].data);
-            const upsert = getUpsertFromUpdater(origObject, finalUpdater);
-            const finalUpsert = insertsToUpsert([upsert]);
-            await client.createUnigraphUpsert(finalUpsert);
-            callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
-        },
-        // latertodo
-        getReferenceables: async (key = "unigraph.id", asMapWithContent = false) => {return Error('Not implemented')},
-        getSchemas: async (schemas: string[] | undefined, resolve = false) => {
-            return states.caches['schemas'].data;
-        },
-        getPackages: async (packages) => {
-            return states.caches['packages'].data;
-        },
-        // latertodo
-        proxyFetch: async (url, options?) => {return new Blob([])},
-        // latertodo
-        importObjects: async (objects) => {return Error('Not implemented')},
-        runExecutable: async (unigraphid, params) => {
-            const exec = states.caches["executables"].data[unigraphid];
-            buildExecutable(exec, {"hello": "ranfromExecutable", "params": params}, {} as Unigraph)()
-        },
-        addNotification: async (notification) => {
-            await addNotification(notification, states.caches, client);
-            //console.log(hooks)
-            callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
-        },
-        addState: (...params) => {throw Error('Not available in server side')},
-        getState: (...params) => {throw Error('Not available in server side')},
-        deleteState: (...params) => {throw Error('Not available in server side')},
-    }
-}

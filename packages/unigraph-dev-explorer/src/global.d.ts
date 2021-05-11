@@ -1,6 +1,6 @@
 import { Model } from "flexlayout-react";
 import { ReactElement } from "react";
-import { Unigraph } from "unigraph-dev-common/lib/api/unigraph";
+import { Unigraph } from "unigraph-dev-common/lib/types/unigraph";
 
 declare global {
     interface Window {
