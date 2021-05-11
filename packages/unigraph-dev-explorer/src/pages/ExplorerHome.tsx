@@ -1,23 +1,35 @@
 import { Card, Typography } from '@material-ui/core';
-import React, { useEffect } from 'react';
+import React from 'react';
 
-import GridLayout from 'react-grid-layout'; 
+import sizeMe, { SizeMeProps } from 'react-sizeme';
+
+import { Responsive as ResponsiveGridLayout } from 'react-grid-layout';
 import { AppLibraryWidget } from '../components/PackageManager/AppLibraryWidget';
 import { ConnectionWidget } from '../components/UnigraphCore/ConnectionWidget';
 import { TagWidget } from '../examples/semantic/TagWidget';
 import './home.css';
+import { ExecutablesWidget } from '../components/UnigraphCore/ExecutablesWidget';
+import { isTouchDevice } from '../utils';
 
-export default function ExplorerHome() {
+function ExplorerHome({ size } : SizeMeProps) {
 
   const layout = [
-    {i: 'a', x: 0, y: 0, w: 6, h: 5},
-    {i: 'b', x: 6, y: 0, w: 6, h: 8},
-    {i: 'c', x: 0, y: 5, w: 6, h: 8},
+    {i: 'a', x: 0, y: 0, w: 6, h: 8},
+    {i: 'b', x: 0, y: 8, w: 6, h: 8},
+    {i: 'c', x: 6, y: 0, w: 6, h: 8},
+    {i: 'd', x: 6, y: 8, w: 6, h: 8},
   ];
   return (
     <React.Fragment>
-      <Typography variant="body2">Did you know? You can pop any widget here into its own window by clicking on the bottom right corner.</Typography>
-      <GridLayout className="layout" layout={layout} cols={12} rowHeight={30} width={1200}>
+      <ResponsiveGridLayout 
+        className="layout" 
+        layouts={{lg: layout}}  
+        breakpoints={{lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0}} 
+        cols={{lg: 12, md: 10, sm: 6, xs: 4, xxs: 2}} 
+        rowHeight={30} width={size.width ? size.width : 1200}
+        compactType="horizontal"
+        isDraggable={!isTouchDevice()}
+      >
         <div key="a"><Card variant="outlined" style={{height: "100%", padding: "16px"}}> 
           <TagWidget/>
         </Card></div>
@@ -27,7 +39,12 @@ export default function ExplorerHome() {
         <div key="c"><Card variant="outlined" style={{height: "100%", padding: "16px"}}> 
           <ConnectionWidget/>
         </Card></div>
-      </GridLayout>
+        <div key="d"><Card variant="outlined" style={{height: "100%", padding: "16px"}}> 
+          <ExecutablesWidget/> 
+        </Card></div>
+      </ResponsiveGridLayout>
     </React.Fragment>
   )
 }
+
+export default sizeMe()(ExplorerHome)

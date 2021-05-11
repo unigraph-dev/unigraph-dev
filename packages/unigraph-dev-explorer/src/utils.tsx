@@ -83,3 +83,9 @@ export function upload(callback: any) {
 
     document.body.removeChild(element);
 }
+
+export function isTouchDevice() {
+    return (('ontouchstart' in window) ||
+       (navigator.maxTouchPoints > 0) ||
+       (navigator.msMaxTouchPoints > 0));
+  }
