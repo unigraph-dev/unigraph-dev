@@ -1,0 +1,42 @@
+{
+    "dgraph.type": "Type",
+    "_hide": true,
+    "_definition": {
+        "type": { "unigraph.id": "$/composer/Object" },
+        "_parameters": {
+            "_indexedBy": { "unigraph.id": "$/primitive/string" },
+            "_indexes": ["name"]
+        },
+        "_properties": [
+            {
+                "_key": "name",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                }
+            },
+            {
+                "_key": "from",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                }
+            },
+            {
+                "_key": "content",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/interface/textual" }
+                }
+            },
+            {
+                "_key": "actions",
+                "_definition": {
+                    "type": { "unigraph.id": "$/composer/Array" },
+                    "_parameters": {
+                        "_element": {
+                            "type": { "unigraph.id": "$/schema/executable" }
+                        }
+                    }
+                }
+            }
+        ]
+    }
+}

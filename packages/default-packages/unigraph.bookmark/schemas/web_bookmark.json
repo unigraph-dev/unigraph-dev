@@ -1,0 +1,55 @@
+{
+    "dgraph.type": "Type",
+    "_definition": {
+        "type": { "unigraph.id": "$/composer/Object" },
+        "_parameters": {
+            "_indexedBy": { "unigraph.id": "$/primitive/string" },
+            "_indexes": ["name"]
+        },
+        "_properties": [
+            {
+                "_key": "name",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                }
+            },
+            {
+                "_key": "url",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/url" }
+                }
+            },
+            {
+                "_key": "favicon",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/icon_url" }
+                }
+            },
+            {
+                "_key": "semantic_properties",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/semantic_properties" }
+                }
+            },
+            {
+                "_key": "source",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/interface/textual" }
+                }
+            },
+            {
+                "_key": "date_created",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/datetime" }
+                }
+            },
+            {
+                "_key": "creative_work",
+                "_propertyType": "inheritance",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/creative_work" }
+                }
+            }
+        ]
+    }
+}

@@ -1,0 +1,9 @@
+{
+    "displayName": "Todo",
+    "version": "0.0.1",
+    "description": "Todo lists and task management.",
+    "unigraph": {
+        "package_name": "unigraph.todo",
+        "schemas": [{"id": "todo", "src": "schemas/todo.json"}]
+    }
+}

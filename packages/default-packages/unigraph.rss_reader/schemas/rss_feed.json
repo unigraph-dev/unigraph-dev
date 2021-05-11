@@ -1,0 +1,25 @@
+{
+    "dgraph.type": "Type",
+    "_definition": {
+        "type": { "unigraph.id": "$/composer/Object" },
+        "_parameters": {
+            "_indexedBy": { "unigraph.id": "$/primitive/string" },
+            "_indexes": ["name"]
+        },
+        "_properties": [
+            {
+                "_key": "feed_url",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/url" }
+                }
+            },
+            {
+                "_key": "site_info",
+                "_propertyType": "inheritance",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/web_bookmark" }
+                }
+            }
+        ]
+    }
+}

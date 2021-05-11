@@ -17,7 +17,7 @@ export const pkg: PackageDeclaration = {
         name: "Unigraph Core",
         package_name: "unigraph.core",
         version: "0.0.1",
-        description: "The core package of Unigraph, contains many high level abstractions for development."
+        description: "Unigraph Core"
     },
     pkgSchemas: {
         list: {
