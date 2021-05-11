@@ -5,7 +5,7 @@ const getQuery = (targetUrl) => `(func: type(Entity)) @cascade {
       item_data {
         _value {
           _value {
-            url @filter(eq(<_value.%>, "\${targetUrl}"))
+            url @filter(eq(<_value.%>, "${targetUrl}"))
           }
         }
       }
