@@ -2,7 +2,7 @@
 
 rm -rf packages/unigraph-dev-electron/buildweb
 rm -rf packages/unigraph-dev-electron/distnode
-yarn build-common
+yarn build-deps
 
 # copy frontend code
 yarn workspace unigraph-dev-explorer build
