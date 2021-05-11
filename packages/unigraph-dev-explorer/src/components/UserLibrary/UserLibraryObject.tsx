@@ -3,8 +3,10 @@ import React from 'react';
 import { useEffectOnce } from 'react-use';
 import { DefaultObjectView } from '../ObjectView/DefaultObjectView';
 
-export default function UserLibraryObject ({ uid }: any) {
+export default function DetailedObjectView ({ uid, viewer }: any) {
     let objectId: any = uid;
+
+    const viewerId = viewer ? viewer : "dynamic-view-detailed"
 
     const [object, setObject]: [any, Function] = React.useState(undefined);
     const [id, setId] = React.useState(Date.now());
@@ -23,7 +25,7 @@ export default function UserLibraryObject ({ uid }: any) {
 
     return (<div>
         <DefaultObjectView object={object} options={{
-            viewer: "dynamic-view-detailed",
+            viewer: viewerId,
             canEdit: true,
             unpad: !showPadded
         }}></DefaultObjectView>

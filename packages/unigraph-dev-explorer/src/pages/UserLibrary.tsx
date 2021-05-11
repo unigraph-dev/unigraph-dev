@@ -9,7 +9,7 @@ import {
   useParams,
   useRouteMatch
 } from "react-router-dom";
-import UserLibraryObject from "../components/UserLibrary/UserLibraryObject";
+import DetailedObjectView from "../components/UserLibrary/UserLibraryObject";
 
 const UserLibrary = () => {
   let { path, url } = useRouteMatch();
@@ -18,7 +18,7 @@ const UserLibrary = () => {
     <Switch>
       <Route exact path={path}><UserLibraryAll/></Route>
       <Route path={`${path}/object/:objectId`}>
-        <UserLibraryObject/>
+        <DetailedObjectView/>
       </Route>
     </Switch>
   );

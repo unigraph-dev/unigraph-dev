@@ -18,7 +18,7 @@ import AddSchema from './pages/AddSchema';
 import DataModelPlayground from './pages/DataModelPlayground';
 import { getParameters, NavigationContext } from './utils';
 import { UserLibraryAll } from './components/UserLibrary';
-import UserLibraryObject from './components/UserLibrary/UserLibraryObject';
+import DetailedObjectView from './components/UserLibrary/UserLibraryObject';
 
 import Settings from './pages/Settings';
 import { PackageManager } from './components/PackageManager/PackageManager';
@@ -89,7 +89,7 @@ export const pages: Record<string, any> = {
     'name': 'Package Manager'
   },
   'library/object': {
-    'constructor': (props: any) => <UserLibraryObject {...props} />,
+    'constructor': (props: any) => <DetailedObjectView {...props} />,
     'name': 'Object View',
   },
   'schema/new': {
