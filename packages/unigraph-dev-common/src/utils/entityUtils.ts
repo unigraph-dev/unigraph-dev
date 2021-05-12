@@ -248,7 +248,7 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
 
     function makePart(localSchema: Definition | any, depth = 0, isRoot = false) {
         if (depth > maxDepth) return {};
-        let entries: any = {"uid": {}, 'type': { "<unigraph.id>": {} }};
+        let entries: any = {"uid": {}, "<unigraph.id>": {}, 'type': { "<unigraph.id>": {} }};
         let type = localSchema.type["unigraph.id"];
 
         if (type.startsWith('$/schema/')) {
