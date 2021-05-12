@@ -277,9 +277,9 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
 
             case "$/composer/Array":
                 entries = _.merge(entries, {"<_value[>": {
-                    ...makePart(localSchema._parameters._element, depth+1)}, 
+                    ...makePart(localSchema._parameters._element, depth+1), 
                     "<_index>": { "<_value.#i>": {}, "<_value.#>": {} }
-                });
+                }});
                 break;
             
             case "$/primitive/string":
