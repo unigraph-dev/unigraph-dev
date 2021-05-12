@@ -98,13 +98,20 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         },
         // latertodo
         updateSimpleObject: async (object, predicate, value) => {throw Error("Not implemented")},
-        updateObject: async (uid, newObject) => {
+        updateObject: async (uid, newObject, isUpsert = true, pad = true) => {
             const origObject = (await client.queryUID(uid))[0];
-            const schema = origObject['type']['unigraph.id'];
-            const paddedUpdater = buildUnigraphEntity(newObject, schema, states.caches['schemas'].data, true, {validateSchema: true, isUpdate: true});
-            const finalUpdater = processAutoref(paddedUpdater, schema, states.caches['schemas'].data);
+            let finalUpdater = newObject;
+            if (pad) {
+                const schema = origObject['type']['unigraph.id'];
+                const paddedUpdater = buildUnigraphEntity(newObject, schema, states.caches['schemas'].data, true, {validateSchema: true, isUpdate: true});
+                finalUpdater = processAutoref(paddedUpdater, schema, states.caches['schemas'].data);
+            } else {
+                finalUpdater = processAutorefUnigraphId(finalUpdater);
+            }
             const upsert = getUpsertFromUpdater(origObject, finalUpdater);
+            console.log(finalUpdater, upsert)
             const finalUpsert = insertsToUpsert([upsert]);
+            console.log(finalUpsert)
             await client.createUnigraphUpsert(finalUpsert);
             callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
         },
@@ -122,7 +129,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         importObjects: async (objects) => {return Error('Not implemented')},
         runExecutable: async (unigraphid, params) => {
             const exec = states.caches["executables"].data[unigraphid];
-            buildExecutable(exec, {"hello": "ranfromExecutable", "params": params}, {} as Unigraph)()
+            buildExecutable(exec, {"params": params, "definition": exec}, {} as Unigraph)()
         },
         addNotification: async (notification) => {
             await addNotification(notification, states.caches, client);

@@ -145,8 +145,9 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param upsert Whether to perform an upsert, defaults to `true`. Note that if
      * not upserting, the new object is going to be the only values of that UID. Thus,
      * make sure your update is minimal.
+     * @param pad Whether to pad the new object - for partial update this should be false.
      */
-    updateObject(uid: string, newObject: any, upsert?: boolean): any;
+    updateObject(uid: string, newObject: any, upsert?: boolean, pad?: boolean): any;
     /** Gets all referenceables from the library (like primitives, schemas, shorthands, etc) */
     getReferenceables(): Promise<any>;
     /** Deprecated: get selected referenceables. */
