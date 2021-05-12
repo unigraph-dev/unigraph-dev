@@ -8,6 +8,7 @@ import { Delete, Link } from "@material-ui/icons";
 import { registerDynamicViews, withUnigraphSubscription } from 'unigraph-dev-common/lib/api/unigraph-react'
 import { Tag } from "../semantic/Tag";
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
+import { getExecutableId } from "unigraph-dev-common/lib/api/unigraph";
 
 type ABookmark = {
     uid?: string,
@@ -31,32 +32,8 @@ export const createBookmark: (t: string) => Promise<ABookmark> = (text: string) 
     text = text.replace(tags_regex, '');
 
     const url = new URL(text.trim());
-    return new Promise((res, rej) => {
-        window.unigraph.proxyFetch(url).then((fin: Blob) => {
-            fin.text().then(text => {
-                const match = text.match(/(<head>.*<\/head>)/gms);
-                const head = match ? match[0] : "";
-                let parser = new DOMParser();
-                let headDom = parser.parseFromString(head, "text/html");
-                var favicon = url.origin + "/favicon.ico";
-                headDom.head.childNodes.forEach((node: any) => {
-                    if (node.nodeName === "LINK" && node?.name?.includes('icon') && node.href) {
-                        let newUrl = new URL(node.href, url.origin)
-                        favicon = newUrl.href;
-                    }
-                })
-                //console.log(headDom)
-                res({
-                    name: headDom.title || url.href,
-                    url: url.href,
-                    favicon: favicon,
-                    semantic_properties: {
-                        children: tags.map(tagName => {return {name: tagName}}),
-                    }
-                })
-            })
-        }).catch(rej)
-    })
+    window.unigraph.runExecutable(getExecutableId(bookmarkPackage, "add-bookmark"), {url: url, tags: tags})
+    return new Promise((res, rej) => {res(undefined as any)});
 } 
 
 function BookmarksBody ({data}: { data: ABookmark[] }) {
@@ -73,7 +50,7 @@ function BookmarksBody ({data}: { data: ABookmark[] }) {
             </ListItem>)}
         </List>
         <TextField value={newName} onChange={(e) => setNewName(e.target.value)}></TextField>
-        <Button onClick={() => createBookmark(newName).then((obj: any) => window.unigraph.addObject(obj, "$/schema/web_bookmark"))}>Add</Button>
+        <Button onClick={() => createBookmark(newName).then((obj: any) => {return false;})}>Add</Button>
         For example, enter #tag1 https://example.com
     </div>
 }

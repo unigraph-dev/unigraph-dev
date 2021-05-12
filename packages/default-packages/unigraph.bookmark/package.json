@@ -17,6 +17,13 @@
                 "id": "web_bookmark",
                 "src": "schemas/web_bookmark.json"
             }
-        ]
+        ],
+        "executables": [{
+            "id": "add-bookmark",
+            "env": "routine/js",
+            "src": "executables/addBookmark.js",
+            "editable": true,
+            "name": "Adds a bookmark to bookmarks list"
+        }]
     }
 }
