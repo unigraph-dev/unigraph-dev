@@ -245,7 +245,7 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
     }
 }
 
-export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<string, any>, maxDepth = 10) {
+export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<string, any>, maxDepth = 10, toString = true) {
 
     const timestampQuery = {
         _timestamp: {
@@ -317,10 +317,9 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
     }
     const localSchema = schemaMap[schemaName]._definition;
     let res = makePart(localSchema, 0, true)
-    let ret = jsonToGraphQLQuery(res)
-    //console.log(ret)
-    return "{" + ret + "}";
-
+    //console.log(JSON.stringify(res))
+    let ret = toString ? "{" + jsonToGraphQLQuery(res) + "}" : res
+    return ret;
 }
 
 function unpadValue(something: any) {
