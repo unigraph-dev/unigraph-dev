@@ -13,6 +13,15 @@
             {"id": "interface/semantic", "src": "schemas/semantic.json"},
             {"id": "semantic_properties", "src": "schemas/semantic_properties.json"},
             {"id": "creative_work", "src": "schemas/creative_work.json"}
+        ],
+        "executables": [
+            { 
+                "id": "add-tag-to-object",
+                "env": "routine/js",
+                "src": "executables/addTagToObject.js",
+                "editable": true,
+                "name": "Adds a tag to an object"
+            }
         ]
     }
 }
