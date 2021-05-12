@@ -451,6 +451,9 @@ export function getUpsertFromUpdater(orig: any, updater: any): any {
                 ["uid", updaterNow.uid && updaterNow.uid !== origNow.uid ? updaterNow.uid : origNow.uid],
                 ...Object.entries(updaterNow).map(([key, value]) => [key, recurse(origNow[key], value)])
             ]);
+        } else if (typeof origNow == 'object' && Array.isArray(origNow) && !Array.isArray(updaterNow)) {
+            // Updating a list type with a singular item - following Dgrpah's syntax we just treat it as a new object.
+            return updaterNow;
         }
     }
 
