@@ -39,6 +39,9 @@
                     },
                     "_value": {
                         "tags": {
+                            "type": {
+                                "unigraph.id": "$/composer/Array"
+                            },
                             "_value[": [
                                 {
                                     "_index": {

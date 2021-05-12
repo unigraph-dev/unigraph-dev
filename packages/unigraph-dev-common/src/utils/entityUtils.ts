@@ -102,6 +102,14 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
                         ...buildUnigraphEntityPart(el, options, schemaMap, newLocalSchema1), 
                         _index: {"_value.#i": index}
                     }});
+                    unigraphPartValue = {
+                        ...propDesc,
+                        "type": {
+                            "unigraph.id": "$/composer/Array"
+                        },
+                        [predicate]: unigraphPartValue
+                    }
+                    noPredicate = true;
                     break;
 
                 case "$/composer/List":
@@ -251,7 +259,9 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
         let entries: any = {"uid": {}, "<unigraph.id>": {}, 'type': { "<unigraph.id>": {} }};
         let type = localSchema.type["unigraph.id"];
 
-        if (type.startsWith('$/schema/')) {
+        if (type === '$/schema/any') {
+            entries = { "uid": {}, "<expand(_predicate_)>": makePart(localSchema, depth+1) }
+        } else if (type.startsWith('$/schema/')) {
             if (schemaMap[type]?._definition?.type["unigraph.id"]?.startsWith('$/primitive/')) 
                 type = schemaMap[type]._definition.type["unigraph.id"]; // Is type alias
             else entries = _.merge(entries, {"_value": makePart(schemaMap[type]._definition, depth+1, true)}, makePart(schemaMap[type]._definition, depth+1, true)) // Possibly non-object data

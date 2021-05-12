@@ -159,6 +159,9 @@
                 "_value.!": false
             },
             "users": {
+                "type": {
+                    "unigraph.id": "$/composer/Array"
+                },
                 "_value[": [
                     {
                         "_index": {
@@ -208,6 +211,9 @@
                 "_value.!": false
             },
             "users": {
+                "type": {
+                    "unigraph.id": "$/composer/Array"
+                },
                 "_value[": [
                     {
                         "_index": {
