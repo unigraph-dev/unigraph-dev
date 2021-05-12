@@ -569,3 +569,35 @@ export function isPaddedObject(obj: any) {
     Object.keys(obj).forEach(key => {if (key.startsWith("_value")) valueKeysCount ++;})
     return valueKeysCount === 1;
 }
+
+export function prepareExportObject(obj: any, exportSchemas: boolean) {
+
+    function recurse(curr: any) {
+        switch (typeof curr) {
+            case "object":
+                if (Array.isArray(curr)) {
+                    curr.forEach(el => recurse(el));
+                } else {
+                    if (curr.type) {
+                        curr.type = {"unigraph.id": curr.type["unigraph.id"]};
+                    }
+                    curr = Object.fromEntries(Object.entries(curr).map(([k, v]) => [k, recurse(v)]));
+                }
+                break;
+        
+            default:
+                break;
+        }
+    }
+
+    obj = JSON.parse(JSON.stringify(obj));
+    recurse(obj);
+    return obj;
+}
+
+/**
+ * Edit the objects for export.
+ */
+export function prepareExportObjects(objects: any[], exportSchemas: boolean = false) {
+    return objects.map(it => prepareExportObject(it, exportSchemas))
+}

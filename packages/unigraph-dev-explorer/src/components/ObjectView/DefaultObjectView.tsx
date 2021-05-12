@@ -2,7 +2,7 @@ import { Button, ButtonGroup, Checkbox, FormControlLabel, IconButton, List, List
 import { MoreVert, PlayArrow } from '@material-ui/icons';
 import React, { FC, ReactElement } from 'react';
 import ReactJson, { InteractionProps } from 'react-json-view';
-import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { prepareExportObjects, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { DynamicViewRenderer } from '../../global';
 import { download } from '../../utils';
 import { ExecutableCodeEditor } from './DefaultCodeEditor';
@@ -191,9 +191,11 @@ const DefaultObjectListView: FC<DefaultObjectListViewProps> = ({component, objec
     const [showDeleted, setShowDeleted] = React.useState(false);
     const [showNoView, setShowNoView] = React.useState(false);
 
+    console.log(objects);
+
     return <div>
         <ButtonGroup color="primary" aria-label="outlined primary button group">
-            <Button onClick={() => {download(`export_unigraph_${new Date().toISOString()}.json`, JSON.stringify(objects))}}>Export All</Button>
+            <Button onClick={() => {download(`export_unigraph_${new Date().toISOString()}.json`, JSON.stringify(prepareExportObjects(objects)))}}>Export All</Button>
             <Button>Export Selected</Button>
             <Button>Select All</Button>
         </ButtonGroup>
