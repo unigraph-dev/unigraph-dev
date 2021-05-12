@@ -90,7 +90,6 @@ export type ExecRunner = (src: string, context: ExecContext, unigraph: Unigraph)
 export const runEnvRoutineJs: ExecRunner = (src, context, unigraph) => {
     //const fn = () => eval(src);
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-
     const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor
     const fn = new AsyncFunction("require", "unpad", "context", "unigraph", `try {${src}} catch (e) {
         unigraph.addNotification({
