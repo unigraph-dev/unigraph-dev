@@ -10,6 +10,7 @@ import { Cache } from './caches';
 import cron from 'node-cron';
 
 import _ from "lodash";
+import { PackageDeclaration } from "unigraph-dev-common/lib/types/packages";
 
 export type Executable = {
     name?: string,
@@ -22,7 +23,7 @@ export type Executable = {
     semantic_properties?: any
 }
 
-export function createExecutableCache(client: DgraphClient, context: ExecContext, unigraph: Unigraph): Cache<any> {
+export function createExecutableCache(client: DgraphClient, context: Partial<ExecContext>, unigraph: Unigraph): Cache<any> {
     
     const schedule: Record<string, cron.ScheduledTask> = {};
     
@@ -60,11 +61,11 @@ export function buildExecutable(exec: Executable, context: ExecContext, unigraph
     return undefined;
 }
 
-export function initExecutables(executables: Executable[], context: ExecContext, unigraph: Unigraph, schedule: Record<string, cron.ScheduledTask>) {
+export function initExecutables(executables: Executable[], context: Partial<ExecContext>, unigraph: Unigraph, schedule: Record<string, cron.ScheduledTask>) {
     executables.forEach(el => {
         if (el.periodic) {
             schedule[el["unigraph.id"]]?.stop();
-            schedule[el["unigraph.id"]] = cron.schedule(el.periodic, buildExecutable(el, context, unigraph))
+            schedule[el["unigraph.id"]] = cron.schedule(el.periodic, buildExecutable(el, {...context, definition: el, params: {}}, unigraph))
         }
     })
 }
@@ -72,7 +73,13 @@ export function initExecutables(executables: Executable[], context: ExecContext,
 /** Routines */
 
 export type ExecContext = {
-    // TODO: add context specifications
+    /** Input parameters in the form of an object */
+    params: any;
+    /** Package declaration */
+    package?: PackageDeclaration;
+    /** Definition of the executable */
+    definition: Executable;
+    [x: string]: any 
 }
 
 /**
@@ -83,8 +90,17 @@ export type ExecRunner = (src: string, context: ExecContext, unigraph: Unigraph)
 export const runEnvRoutineJs: ExecRunner = (src, context, unigraph) => {
     //const fn = () => eval(src);
     // eslint-disable-next-line @typescript-eslint/no-empty-function
+
     const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor
-    const fn = new AsyncFunction("require", "unpad", "context", "unigraph", src).bind(this, require, unpad, context, unigraph);
+    const fn = new AsyncFunction("require", "unpad", "context", "unigraph", `try {${src}} catch (e) {
+        unigraph.addNotification({
+            from: "Executable manager", 
+            name: "Failed to run executable " + context.definition["unigraph.id"], 
+            content: "Error was: " + e.toString()}
+        )
+    }`).bind(this, require, unpad, context, unigraph);
+
+    
 
     return fn;
 }

@@ -352,7 +352,7 @@ export default async function startServer(client: DgraphClient) {
 
     "run_executable": async function (event: EventRunExecutable, ws: IWebsocket) {
       const exec = caches["executables"].data[event['unigraph.id']];
-      buildExecutable(exec, {"hello": "ranfromExecutable", params: event.params}, localApi)();
+      buildExecutable(exec, {"hello": "ranfromExecutable", params: event.params, definition: exec}, localApi)();
     },
 
     /* Userspace methods: eventually, users can install apps that extend their own methods into here. */

@@ -129,7 +129,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         importObjects: async (objects) => {return Error('Not implemented')},
         runExecutable: async (unigraphid, params) => {
             const exec = states.caches["executables"].data[unigraphid];
-            buildExecutable(exec, {"hello": "ranfromExecutable", "params": params}, {} as Unigraph)()
+            buildExecutable(exec, {"params": params, "definition": exec}, {} as Unigraph)()
         },
         addNotification: async (notification) => {
             await addNotification(notification, states.caches, client);
