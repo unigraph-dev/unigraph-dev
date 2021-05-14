@@ -43,7 +43,7 @@ const StringObjectViewer = ({object}: {object: any}) => {
     </div>;
 }
 
-const onPropertyEdit = (edit: InteractionProps) => {
+const onPropertyEdit = (edit: InteractionProps, pad: boolean) => { 
     //console.log(edit);
     let refUpdateHost: any = edit.existing_src;
     edit.namespace.forEach(el => {
@@ -53,13 +53,14 @@ const onPropertyEdit = (edit: InteractionProps) => {
     if (refUpdateHost?.uid && typeof edit.name === "string") {
         let updater: any = {};
         updater[edit.name] = edit.new_value;
-        window.unigraph.updateObject(refUpdateHost.uid, updater)
+        window.unigraph.updateObject(refUpdateHost.uid, updater, true, pad)
     }
 }
 
 const JsontreeObjectViewer = ({object, options}: {object: any, options: ObjectViewOptions}) => {
 
     const [showPadded, setShowPadded] = React.useState(false);
+    const onedit = (props: InteractionProps) => onPropertyEdit(props, !showPadded);
 
     return <div>
         <Typography variant="h5">Object View</Typography>
@@ -70,7 +71,7 @@ const JsontreeObjectViewer = ({object, options}: {object: any, options: ObjectVi
             color="primary"
         />} label="Show object as padded"/>
         {JSON.stringify(options)}
-        <ReactJson src={showPadded ? object : unpad(object)} onEdit={options.canEdit ? onPropertyEdit : false} onAdd={options.canEdit ? onPropertyEdit : false} />
+        <ReactJson src={showPadded ? object : unpad(object)} onEdit={options.canEdit ? onedit : false} onAdd={options.canEdit ? onedit : false} />
     </div>
 }
 

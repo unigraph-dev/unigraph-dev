@@ -154,7 +154,24 @@ declare type EventUpdateObject = {
   id: number,
   uid: string,
   newObject: any,
-  upsert: boolean | undefined
+  upsert: boolean | undefined,
+  pad: boolean | undefined,
+}
+
+declare type EventDeleteRelation = {
+  type: "event",
+  event: "delete_relation",
+  id: number,
+  uid: string,
+  relation: any
+}
+
+declare type EventDeleteItemFromArray = {
+  type: "event",
+  event: "delete_item_from_array",
+  id: number,
+  uid: string,
+  item: any
 }
 
 declare type EventResponser = (event: any, ws: IWebsocket) => any

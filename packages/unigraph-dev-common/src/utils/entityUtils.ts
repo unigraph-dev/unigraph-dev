@@ -91,7 +91,10 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
 
     try {
         // Check for localSchema accordance
-        if (localSchema.type?.['unigraph.id'] === rawPartUnigraphType) {
+        if (rawPart && rawPart.uid && rawPart.uid.startsWith && rawPart.uid.startsWith('0x') && Object.keys(rawPart).length === 1) {
+            // Is UID reference, don't check for accordance
+            unigraphPartValue = rawPart;
+        } else if (localSchema.type?.['unigraph.id'] === rawPartUnigraphType) {
             // Case 1: Entity type == schema type. This is straightforward
             switch (rawPartUnigraphType) {
                 case "$/composer/Array":
@@ -102,6 +105,14 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
                         ...buildUnigraphEntityPart(el, options, schemaMap, newLocalSchema1), 
                         _index: {"_value.#i": index}
                     }});
+                    unigraphPartValue = {
+                        ...propDesc,
+                        "type": {
+                            "unigraph.id": "$/composer/Array"
+                        },
+                        [predicate]: unigraphPartValue
+                    }
+                    noPredicate = true;
                     break;
 
                 case "$/composer/List":
@@ -237,7 +248,7 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
     }
 }
 
-export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<string, any>, maxDepth = 10) {
+export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<string, any>, maxDepth = 10, toString = true) {
 
     const timestampQuery = {
         _timestamp: {
@@ -251,7 +262,9 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
         let entries: any = {"uid": {}, "<unigraph.id>": {}, 'type': { "<unigraph.id>": {} }};
         let type = localSchema.type["unigraph.id"];
 
-        if (type.startsWith('$/schema/')) {
+        if (type === '$/schema/any') {
+            entries = { "uid": {}, "<expand(_predicate_)>": makePart(localSchema, depth+1) }
+        } else if (type.startsWith('$/schema/')) {
             if (schemaMap[type]?._definition?.type["unigraph.id"]?.startsWith('$/primitive/')) 
                 type = schemaMap[type]._definition.type["unigraph.id"]; // Is type alias
             else entries = _.merge(entries, {"_value": makePart(schemaMap[type]._definition, depth+1, true)}, makePart(schemaMap[type]._definition, depth+1, true)) // Possibly non-object data
@@ -307,10 +320,9 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
     }
     const localSchema = schemaMap[schemaName]._definition;
     let res = makePart(localSchema, 0, true)
-    let ret = jsonToGraphQLQuery(res)
-    //console.log(ret)
-    return "{" + ret + "}";
-
+    //console.log(JSON.stringify(res))
+    let ret = toString ? "{" + jsonToGraphQLQuery(res) + "}" : res
+    return ret;
 }
 
 function unpadValue(something: any) {
