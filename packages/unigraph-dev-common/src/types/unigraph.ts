@@ -89,9 +89,9 @@ export interface Unigraph<TT = WebSocket | false> {
     // eslint-disable-next-line @typescript-eslint/ban-types
     subscribeToType(name: string, callback: Function, eventId?: number | undefined): Promise<any>;
     /**
-     * Subscribe to a Unigraph object with a given UID, and call the callback function evry time the subscription is updated.
+     * Subscribe to a Unigraph object with a given UID or name, and call the callback function evry time the subscription is updated.
      * 
-     * @param uid UID of the unigraph object, of the format `0xabcd`
+     * @param uid UID of the unigraph object, of the format `0xabcd`; or a named entity starting with `$/`
      * @param callback the callback function.
      * @param eventId can be left empty - in this case, we will generate one for you, 
      * but you cannot get the subscription elsewhere other than from callback.

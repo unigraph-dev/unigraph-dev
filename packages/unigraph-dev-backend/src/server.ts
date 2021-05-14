@@ -32,6 +32,8 @@ export default async function startServer(client: DgraphClient) {
 
   const lock = getAsyncLock();
 
+  const connections: Record<string, WebSocket> = {};
+
 
   // Basic checks
   await checkOrCreateDefaultDataModel(client);
@@ -68,7 +70,13 @@ export default async function startServer(client: DgraphClient) {
   let namespaceMap: any = {}
   const namespaceSub = createSubscriptionLocal(getRandomInt(), (data) => {
     namespaceMap = data[0];
-    // TODO: update client side about namespace map changes somehow
+    Object.values(connections).forEach(el => {
+      el.send(JSON.stringify({
+        "type": "cache_updated",
+        "name": "namespaceMap",
+        result: data[0]
+      }))
+    })
   }, `(func: eq(<unigraph.id>, "$/meta/namespace_map")) {
     uid
     expand(_predicate_) {
@@ -407,6 +415,7 @@ export default async function startServer(client: DgraphClient) {
 
   server.on('connection', (ws, req) => {
     let connId = uniqueId();
+    connections[connId] = ws;
       ws.on('message', (msg: string) => {
         const msgObject: {type: string | null, event: string | null} = isJsonString(msg)
         if (msgObject) {
@@ -424,6 +433,7 @@ export default async function startServer(client: DgraphClient) {
       ws.on('close', () => {
         subscriptions = removeSubscriptionsById(subscriptions, connId);
         serverStates.subscriptions = subscriptions;
+        delete connections[connId];
       })
       ws.send(JSON.stringify({
         "type": "hello"
