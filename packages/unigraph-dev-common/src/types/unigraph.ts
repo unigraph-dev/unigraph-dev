@@ -148,6 +148,21 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param pad Whether to pad the new object - for partial update this should be false.
      */
     updateObject(uid: string, newObject: any, upsert?: boolean, pad?: boolean): any;
+    /**
+     * Deletes relationships by supplying the origin UID and JSONs to delete.
+     * 
+     * For example, if we have an array `0x1`, we can put uid as `0x1` and relation as `{
+     *   "_value[": [{ "uid": "0x2" }] (note: for list elements, the second UID is the master UID with metadata.)
+     * }`
+     */
+    deleteRelation(uid: string, relation: any): any;
+    /**
+     * Deletes an item from an array (ordered list).
+     * 
+     * @param uid The uid of the target list - must be of type `$/composer/Array`
+     * @param item Either the UID (outer) or the index of an item, or an array of such items.
+     */
+    deleteItemFromArray(uid: string, item: (number | string) | (number | string)[]): any;
     /** Gets all referenceables from the library (like primitives, schemas, shorthands, etc) */
     getReferenceables(): Promise<any>;
     /** Deprecated: get selected referenceables. */

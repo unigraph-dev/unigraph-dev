@@ -9,6 +9,7 @@ import { addNotification } from "./notifications";
 import { Subscription, createSubscriptionLocal } from "./subscriptions";
 import { insertsToUpsert } from "./utils/txnWrapper";
 import { Cache } from './caches';
+import dgraph from "dgraph-js";
 
 export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Record<string, Cache<any>>, subscriptions: Subscription[], hooks: any}): Unigraph {
     const messages: any[] = [];
@@ -114,6 +115,33 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             console.log(finalUpsert)
             await client.createUnigraphUpsert(finalUpsert);
             callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
+        },
+        deleteRelation: async (uid, relation) => {await client.deleteRelationbyJson({uid: uid, ...relation})},
+        deleteItemFromArray: async (uid, item) => {
+            let items = Array.isArray(item) ? item : [item]
+            const origObject = (await client.queryUID(uid))[0];
+            if (!origObject || !(Array.isArray(origObject['_value[']))) {
+                throw Error("Cannot delete as source item is not an array!");
+            }
+            origObject['_value['].sort((a: any, b: any) => (a["_index"]?.["_value.#i"] || 0) - (b["_index"]?.["_value.#i"] || 0));
+            let newValues: any[] = [];
+            origObject['_value['].forEach((el: any, index: number) => {
+                if (!items.includes(index) && !items.includes(el.uid)) {newValues.push({...el, _index: {"_value.#i": index}})}
+            });
+            const delete_array = new dgraph.Mutation();
+            delete_array.setDelNquads(`<${uid}> <_value[> * .`)
+            const create_json = new dgraph.Mutation();
+            create_json.setSetJson({
+                uid: `${uid}`,
+                "_value[": newValues
+            });
+            return await client.createDgraphUpsert({
+                query: false,
+                mutations: [
+                    delete_array,
+                    create_json
+                ]
+            })
         },
         // latertodo
         getReferenceables: async (key = "unigraph.id", asMapWithContent = false) => {return Error('Not implemented')},

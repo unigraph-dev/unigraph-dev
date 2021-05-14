@@ -172,6 +172,12 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
         updateObject: (uid, newObject, upsert = true, pad = true) => {
             sendEvent(connection, "update_object", {uid: uid, newObject: newObject, upsert: upsert, pad: pad});
         },
+        deleteRelation: (uid, relation) => {
+            sendEvent(connection, "delete_relation", {uid: uid, relation: relation});
+        },
+        deleteItemFromArray: (uid, item) => {
+            sendEvent(connection, "delete_item_from_array", {uid: uid, item: item});
+        },
         getReferenceables: (key = "unigraph.id", asMapWithContent = false) => new Promise((resolve, reject) => {
             const id = getRandomInt();
             callbacks[id] = (response: any) => {

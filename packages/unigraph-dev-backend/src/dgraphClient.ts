@@ -141,6 +141,30 @@ export default class DgraphClient {
     !test ? true : console.log("upsert details above================================================")
   }
 
+  async createDgraphUpsert(data: {query: string | false, mutations: Mutation[]}) {
+    const txn = this.dgraphClient.newTxn();
+    let response;
+    try {
+      const req = new dgraph.Request();
+      if (data.query) req.setQuery(data.query);
+      req.setMutationsList(data.mutations);
+      req.setCommitNow(true);
+      response = await txn.doRequest(req);
+    } catch (e) {
+      console.error('Error: ', e);
+    } finally {
+      await txn.discard();
+    }
+    return response;
+  }
+
+  async deleteRelationbyJson(data: any) {
+    const txn = this.dgraphClient.newTxn();
+    const mu = new dgraph.Mutation();
+    mu.setDeleteJson(data);
+    return await txn.mutate(mu);
+  }
+
   async queryData<T = unknown>(query: string, vars: Record<string, any> = {}) {
     const res = await this.dgraphClient
       .newTxn({ readOnly: true })

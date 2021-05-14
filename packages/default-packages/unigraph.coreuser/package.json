@@ -5,6 +5,9 @@
     "unigraph": {
         "package_name": "unigraph.coreuser",
         "schemas": [{"id": "notification", "src": "schemas/notification.json"}],
-        "entities": [{"id": "notification_center", "src": "entities/notification_center.json"}]
+        "entities": [
+            {"id": "notification_center", "src": "entities/notification_center.json"},
+            {"id": "inbox", "src": "entities/inbox.json"}
+        ]
     }
 }

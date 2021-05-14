@@ -7,6 +7,13 @@
         "schemas": [{
             "id": "list",
             "src": "schemas/list.json"
+        }],
+        "executables": [{
+            "id": "add-item-to-list",
+            "env": "routine/js",
+            "src": "executables/addItemToList.js",
+            "editable": true,
+            "name": "Add an item to a list object"
         }]
     }
 }

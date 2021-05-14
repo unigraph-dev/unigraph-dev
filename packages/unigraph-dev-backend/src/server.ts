@@ -3,7 +3,7 @@ import WebSocket from 'ws';
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import DgraphClient, { queries } from './dgraphClient';
 import { insertsToUpsert } from './utils/txnWrapper';
-import { EventAddNotification, EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventGetPackages, EventGetSchemas, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventResponser, EventRunExecutable, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
+import { EventAddNotification, EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteItemFromArray, EventDeleteRelation, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventGetPackages, EventGetSchemas, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventResponser, EventRunExecutable, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
 import { buildUnigraphEntity, getUpsertFromUpdater, makeQueryFragmentFromType, processAutoref, dectxObjects, unpad, processAutorefUnigraphId, isPaddedObject } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { addUnigraphPackage, checkOrCreateDefaultDataModel, createPackageCache, createSchemaCache } from './datamodelManager';
 import { Cache } from './caches';
@@ -297,6 +297,20 @@ export default async function startServer(client: DgraphClient) {
           ws.send(makeResponse(event, true))
         }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
       }
+    },
+
+    "delete_relation": async function (event: EventDeleteRelation, ws: IWebsocket) {
+      dgraphClient.deleteRelationbyJson({uid: event.uid, ...event.relation}).then(_ => {
+        callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
+        ws.send(makeResponse(event, true))
+      }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
+    },
+
+    "delete_item_from_array": async function (event: EventDeleteItemFromArray, ws: IWebsocket) {
+      localApi.deleteItemFromArray(event.uid, event.item).then((_: any) => {
+        callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
+        ws.send(makeResponse(event, true))
+      }).catch((e: any) => ws.send(makeResponse(event, false, {"error": e})));
     },
 
     "get_status": async function (event: any, ws: IWebsocket) {
