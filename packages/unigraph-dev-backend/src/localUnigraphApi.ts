@@ -11,7 +11,7 @@ import { insertsToUpsert } from "./utils/txnWrapper";
 import { Cache } from './caches';
 import dgraph from "dgraph-js";
 
-export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Record<string, Cache<any>>, subscriptions: Subscription[], hooks: any}): Unigraph {
+export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Record<string, Cache<any>>, subscriptions: Subscription[], hooks: any, namespaceMap: any}): Unigraph {
     const messages: any[] = [];
     const eventTarget: any = {};
 
@@ -75,6 +75,9 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             const upsert = insertsToUpsert([finalUnigraphObject]);
             await client.createUnigraphUpsert(upsert);
             callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
+        },
+        getNamespaceMapUid: (name) => {
+            return states.namespaceMap['name'].uid;
         },
         getType: async (name) => {
             const eventId = getRandomInt();
