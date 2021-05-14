@@ -279,13 +279,19 @@ export default async function startServer(client: DgraphClient) {
           }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
         }
       } else { // upsert mode
-        const origObject = (await dgraphClient.queryUID(event.uid))[0];
-        const schema = origObject['type']['unigraph.id'];
-        const paddedUpdater = buildUnigraphEntity(event.newObject, schema, caches['schemas'].data, true, {validateSchema: true, isUpdate: true});
-        const finalUpdater = processAutoref(paddedUpdater, schema, caches['schemas'].data);
-        const upsert = getUpsertFromUpdater(origObject, finalUpdater);
-        //console.log(upsert);
-        const finalUpsert = insertsToUpsert([upsert]);
+        let finalUpdater: any;
+        if (event.pad !== false) {
+          const origObject = (await dgraphClient.queryUID(event.uid))[0];
+          const schema = origObject['type']['unigraph.id'];
+          const paddedUpdater = buildUnigraphEntity(event.newObject, schema, caches['schemas'].data, true, {validateSchema: true, isUpdate: true});
+          finalUpdater = processAutoref({...paddedUpdater, uid: event.uid}, schema, caches['schemas'].data);
+          //console.log(upsert);
+        } else {
+          const updater = {...event.newObject, uid: event.uid ? event.uid : event.newObject.uid};
+          finalUpdater = processAutorefUnigraphId(updater);
+        }
+        
+        const finalUpsert = insertsToUpsert([finalUpdater]);
         dgraphClient.createUnigraphUpsert(finalUpsert).then(_ => {
           callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
           ws.send(makeResponse(event, true))
@@ -361,7 +367,7 @@ export default async function startServer(client: DgraphClient) {
       await addNotification(event.item, caches, dgraphClient).catch(e => ws.send(makeResponse(event, false, {error: e})));
       callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches});
       ws.send(makeResponse(event, true));
-    }
+    },
   };
 
   const server = new WebSocket.Server({

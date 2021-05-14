@@ -108,7 +108,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             } else {
                 finalUpdater = processAutorefUnigraphId(finalUpdater);
             }
-            const upsert = getUpsertFromUpdater(origObject, finalUpdater);
+            const upsert = {...finalUpdater, uid: uid};
             console.log(finalUpdater, upsert)
             const finalUpsert = insertsToUpsert([upsert]);
             console.log(finalUpsert)

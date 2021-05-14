@@ -91,7 +91,10 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
 
     try {
         // Check for localSchema accordance
-        if (localSchema.type?.['unigraph.id'] === rawPartUnigraphType) {
+        if (rawPart && rawPart.uid && rawPart.uid.startsWith && rawPart.uid.startsWith('0x') && Object.keys(rawPart).length === 1) {
+            // Is UID reference, don't check for accordance
+            unigraphPartValue = rawPart;
+        } else if (localSchema.type?.['unigraph.id'] === rawPartUnigraphType) {
             // Case 1: Entity type == schema type. This is straightforward
             switch (rawPartUnigraphType) {
                 case "$/composer/Array":

@@ -154,7 +154,8 @@ declare type EventUpdateObject = {
   id: number,
   uid: string,
   newObject: any,
-  upsert: boolean | undefined
+  upsert: boolean | undefined,
+  pad: boolean | undefined,
 }
 
 declare type EventResponser = (event: any, ws: IWebsocket) => any
