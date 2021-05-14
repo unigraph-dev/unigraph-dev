@@ -534,23 +534,24 @@ export function dectxObjects(objects: any[], prefix = "_:"): any[] {
     return newObjects;
 }
 
-export function unpadRecurse(object: any) {
+export function unpadRecurse(object: any, visitedUids: any[] = []) {
     let result: any = undefined;
     if (typeof object === "object" && !Array.isArray(object)) {
         result = {};
+        let newVisited = object['uid'] ? [...visitedUids, object['uid']] : visitedUids
         const predicate = Object.keys(object).find(p => p.startsWith("_value"));
         const timestamp = Object.keys(object).find(p => p.startsWith("_timestamp"));
         if (predicate) { // In simple settings, if contains _value ignore all edge annotations
-            result = unpadRecurse(object[predicate]);
+            result = unpadRecurse(object[predicate], newVisited);
         } else {
-            result = Object.fromEntries(Object.entries(object).map(([k, v]) => [k, unpadRecurse(v)]));
+            result = Object.fromEntries(Object.entries(object).map(([k, v]) => [k, unpadRecurse(v, newVisited)]));
         }
         if (object['unigraph.id']) result['unigraph.id'] = object['unigraph.id'];
         if (timestamp && typeof result === "object" && !Array.isArray(result)) result["_timestamp"] = object["_timestamp"]
     } else if (Array.isArray(object)) {
         result = [];
         object.sort((a, b) => (a["_index"]?.["_value.#i"] || 0) - (b["_index"]?.["_value.#i"] || 0));
-        object.forEach(val => result.push(unpadRecurse(val)));
+        object.forEach(val => result.push(unpadRecurse(val, visitedUids)));
     } else {
         result = object;
     }
@@ -559,7 +560,7 @@ export function unpadRecurse(object: any) {
 
 export function unpad(object: any) {
     
-    return {...unpadRecurse(object), uid: object.uid, type: object.type}
+    return {...unpadRecurse(object, []), uid: object.uid, type: object.type}
 }
 
 export function clearEmpties(o: any) {

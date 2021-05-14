@@ -8,7 +8,7 @@ import { buildUnigraphEntity, getUpsertFromUpdater, makeQueryFragmentFromType, p
 import { addUnigraphPackage, checkOrCreateDefaultDataModel, createPackageCache, createSchemaCache } from './datamodelManager';
 import { Cache } from './caches';
 import repl from 'repl';
-import { createSubscriptionWS, MsgCallbackFn, pollSubscriptions, removeSubscriptionsById, Subscription } from './subscriptions';
+import { createSubscriptionLocal, createSubscriptionWS, MsgCallbackFn, pollSubscriptions, removeSubscriptionsById, Subscription } from './subscriptions';
 import { callHooks, HookAfterObjectChangedParams, HookAfterSchemaUpdatedParams, HookAfterSubscriptionAddedParams, Hooks } from './hooks';
 import { getAsyncLock } from './asyncManager';
 import fetch from 'node-fetch';
@@ -65,10 +65,22 @@ export default async function startServer(client: DgraphClient) {
     }],
   }
 
+  let namespaceMap: any = {}
+  const namespaceSub = createSubscriptionLocal(getRandomInt(), (data) => {
+    namespaceMap = data[0];
+    // TODO: update client side about namespace map changes somehow
+  }, `(func: eq(<unigraph.id>, "$/meta/namespace_map")) {
+    uid
+    expand(_predicate_) {
+      uid
+  }}`);
+  subscriptions.push(namespaceSub);
+
   const serverStates = {
     caches: caches,
     subscriptions: subscriptions,
-    hooks: hooks
+    hooks: hooks,
+    namespaceMap: namespaceMap
   }
 
   // Initialize caches

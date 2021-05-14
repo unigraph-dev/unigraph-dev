@@ -12,15 +12,7 @@ if (destUidOrName.startsWith('$/entity')) {
     throw new Error("Destination is not valid - should either be a named entity or an UID.")
 }
 
-await unigraph.updateObject(destUid, {
-    _value: {
-        children: {
-            "_value[": [{
-                "_value": {
-                    uid: sourceUid
-                }
-            }]
-        }
-    }
-}, true, false);
+const destObj = await unigraph.getQueries([`(func: uid(${destUid})) {uid}`]);
+const childrenUid = destObj[0][0]._value['children'].uid;
 
+await unigraph.deleteItemFromArray(childrenUid, sourceUid);

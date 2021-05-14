@@ -117,6 +117,12 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param schema Schema of that object, must be valid. Such as: `$/schema/abc`
      */
     addObject(object: any, schema: string): any;
+    /**
+     * Reach into the namespace map cache and get a UID corresponding to the name.
+     * 
+     * @param name Name of the named entity/executable/schema, usually starts with `$/`
+     */
+    getNamespaceMapUid(name: string): string;
     /** 
      * Gets all objects of a certain type name. 
      * 
