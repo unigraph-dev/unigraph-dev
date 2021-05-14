@@ -118,15 +118,15 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         },
         deleteRelation: async (uid, relation) => {await client.deleteRelationbyJson({uid: uid, ...relation})},
         deleteItemFromArray: async (uid, item) => {
-            let items = Array.isArray(item) ? item : [item]
+            const items = Array.isArray(item) ? item : [item]
             const origObject = (await client.queryUID(uid))[0];
             if (!origObject || !(Array.isArray(origObject['_value[']))) {
                 throw Error("Cannot delete as source item is not an array!");
             }
             origObject['_value['].sort((a: any, b: any) => (a["_index"]?.["_value.#i"] || 0) - (b["_index"]?.["_value.#i"] || 0));
-            let newValues: any[] = [];
+            const newValues: any[] = [];
             origObject['_value['].forEach((el: any, index: number) => {
-                if (!items.includes(index) && !items.includes(el.uid)) {newValues.push({...el, _index: {"_value.#i": index}})}
+                if (!items.includes(index) && !items.includes(el.uid) && !items.includes(el['_value']?.uid)) {newValues.push({...el, _index: {"_value.#i": index}})}
             });
             const delete_array = new dgraph.Mutation();
             delete_array.setDelNquads(`<${uid}> <_value[> * .`)

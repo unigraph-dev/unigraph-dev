@@ -70,8 +70,8 @@ export function wrapUpsertFromUpdater(orig: any, queryHead: string, hasUid: stri
         } else if (typeof origNow === 'object' && Array.isArray(origNow)) {
             // TODO: document expected behavior: when upserting an array, elements are always appended.
             if (typeof origNow[0] === 'object') {
-                let currPos = buildQueryCount(thisUid, origNow.length, hasUid);
-                let newOrig = origNow.map((el, index) => {
+                const currPos = buildQueryCount(thisUid, origNow.length, hasUid);
+                const newOrig = origNow.map((el, index) => {
                     return {...el, _index: {"_value.#i": `val(${currPos}_${index})`}}
                 });
                 return newOrig; // Appends it
@@ -116,7 +116,7 @@ export function insertsToUpsert(inserts: any[]): UnigraphUpsert {
             if (currentObject.uid && currentObject.uid.startsWith('0x')) { 
                 // uid takes precedence over $ref: when specifying explicit; otherwise doesnt care
                 delete currentObject['$ref'];
-                let refUid = "unigraphquery" + (queries.length + 1);
+                const refUid = "unigraphquery" + (queries.length + 1);
                 const [upsertObject, upsertQueries] = wrapUpsertFromUpdater({"_value": currentObject['_value']}, refUid, currentObject.uid);
                 queries.push(...upsertQueries);
                 currentObject = Object.assign(currentObject, upsertObject);
