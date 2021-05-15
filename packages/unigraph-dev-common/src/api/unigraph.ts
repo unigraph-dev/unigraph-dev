@@ -4,6 +4,7 @@ import { typeMap } from '../types/consts'
 import { PackageDeclaration } from '../types/packages';
 import { Unigraph, AppState } from '../types/unigraph';
 import { base64ToBlob } from '../utils/utils';
+import stringify from 'json-stable-stringify';
 
 /**
  * Implement a graph-like data structure based on js pointers from uid references.
