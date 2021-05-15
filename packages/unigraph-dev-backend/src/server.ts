@@ -96,13 +96,14 @@ export default async function startServer(client: DgraphClient) {
   }}`);
 
   subscriptions.push(namespaceSub);
+  await pollSubscriptions(subscriptions, dgraphClient, pollCallback);
 
   // Initialize caches
   caches["schemas"] = createSchemaCache(client);
   caches["packages"] = createPackageCache(client);
   const localApi = getLocalUnigraphAPI(client, serverStates)
   serverStates.localApi = localApi;
-  caches["executables"] = createExecutableCache(client, {"hello": "world"}, localApi);
+  caches["executables"] = createExecutableCache(client, {"hello": "world"}, localApi, serverStates);
 
   setInterval(() => pollSubscriptions(subscriptions, dgraphClient, pollCallback), pollInterval);
   

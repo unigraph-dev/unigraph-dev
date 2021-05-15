@@ -23,7 +23,7 @@ export type Executable = {
     semantic_properties?: any
 }
 
-export function createExecutableCache(client: DgraphClient, context: Partial<ExecContext>, unigraph: Unigraph): Cache<any> {
+export function createExecutableCache(client: DgraphClient, context: Partial<ExecContext>, unigraph: Unigraph, states: any): Cache<any> {
     
     const schedule: Record<string, cron.ScheduledTask> = {};
     
@@ -41,10 +41,17 @@ export function createExecutableCache(client: DgraphClient, context: Partial<Exe
             if (obj && obj["unigraph.id"]) {
                 prev[obj["unigraph.id"]] = obj;
             }
+            if (obj && obj.uid) {
+                prev[obj.uid] = obj;
+            }
             return prev;
         }, {})
+
+        Object.entries(states.namespaceMap).forEach(([k, v]: any) => {
+            if (k.startsWith("$/executable/")) cache.data[k] = cache.data[v.uid]
+        })
         
-        initExecutables(Object.values(cache.data), context, unigraph, schedule)
+        initExecutables(Object.entries(cache.data), context, unigraph, schedule)
     };
 
     cache.updateNow();
@@ -61,9 +68,9 @@ export function buildExecutable(exec: Executable, context: ExecContext, unigraph
     return undefined;
 }
 
-export function initExecutables(executables: Executable[], context: Partial<ExecContext>, unigraph: Unigraph, schedule: Record<string, cron.ScheduledTask>) {
-    executables.forEach(el => {
-        if (el.periodic) {
+export function initExecutables(executables: [string, Executable][], context: Partial<ExecContext>, unigraph: Unigraph, schedule: Record<string, cron.ScheduledTask>) {
+    executables.forEach(([key, el]) => {
+        if (key.startsWith("0x") && el.periodic) {
             schedule[el["unigraph.id"]]?.stop();
             schedule[el["unigraph.id"]] = cron.schedule(el.periodic, buildExecutable(el, {...context, definition: el, params: {}}, unigraph))
         }
