@@ -18,6 +18,7 @@ import { getLocalUnigraphAPI } from './localUnigraphApi';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { addNotification } from './notifications';
 import { Unigraph } from 'unigraph-dev-common/lib/types/unigraph';
+import stringify from 'json-stable-stringify';
 
 const PORT = 3001;
 const verbose = 5;
@@ -42,7 +43,7 @@ export default async function startServer(client: DgraphClient) {
   // Initialize subscriptions
   const pollCallback: MsgCallbackFn = (id, newdata, msgPort, sub) => {
     if (sub?.callbackType === "messageid") {
-      if(msgPort.readyState === 1) msgPort.send(JSON.stringify({
+      if(msgPort.readyState === 1) msgPort.send(stringify({
         type: "subscription",
         updated: true,
         id: id,
@@ -82,7 +83,7 @@ export default async function startServer(client: DgraphClient) {
     namespaceMap = data[0];
     serverStates.namespaceMap = data[0];
     Object.values(connections).forEach(el => {
-      el.send(JSON.stringify({
+      el.send(stringify({
         "type": "cache_updated",
         "name": "namespaceMap",
         result: data[0]
@@ -107,7 +108,7 @@ export default async function startServer(client: DgraphClient) {
   
   const makeResponse = (event: {id: number | string}, success: boolean, body: Record<string, unknown> = {}) => {
     //console.log(event, success, body)
-    return JSON.stringify({
+    return stringify({
       type: "response",
       success: success,
       id: event.id,
@@ -444,7 +445,7 @@ export default async function startServer(client: DgraphClient) {
       ws.send(JSON.stringify({
         "type": "hello"
       }))
-      ws.send(JSON.stringify({
+      ws.send(stringify({
         "type": "cache_updated",
         "name": "namespaceMap",
         result: serverStates.namespaceMap
