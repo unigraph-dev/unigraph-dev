@@ -95,7 +95,7 @@ export const runEnvRoutineJs: ExecRunner = (src, context, unigraph) => {
         unigraph.addNotification({
             from: "Executable manager", 
             name: "Failed to run executable " + context.definition["unigraph.id"], 
-            content: "Error was: " + e.toString()}
+            content: "Error was: " + e.toString() + e.stack }
         )
     }`).bind(this, require, unpad, context, unigraph);
 
