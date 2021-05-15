@@ -14,6 +14,7 @@ import { Button, Container, CssBaseline } from "@material-ui/core";
 import { isJsonString } from "unigraph-dev-common/lib/utils/utils";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
 import { Star, StarOutlined } from "@material-ui/icons";
+import { ContextMenu } from "./components/UnigraphCore/ContextMenu";
 
 export function WorkspacePageComponent({ children }: any) {
     return <Container maxWidth="lg" disableGutters style={{paddingTop: "12px"}}>
@@ -41,7 +42,6 @@ const newWindowActions = {
         let someId = getRandomInt().toString();
         let node = getComponentFromPage(initJson) as any;
         node.id = someId;
-        console.log(model)
         let action = Actions.addNode(node, "workspace-main-tabset", DockLocation.CENTER, -1, false)
         let newNode = model.doAction(action);
         model.doAction(Actions.floatTab(someId))
@@ -140,7 +140,12 @@ export function WorkSpace(this: any) {
 
     window.layoutModel = model;
 
+    window.wsnavigator = workspaceNavigator.bind(this, model);
+
     return <NavigationContext.Provider value={workspaceNavigator.bind(this, model)}>
+        <div id="global-elements">
+            <ContextMenu />
+        </div>
         <FlexLayout.Layout model={model} factory={factory} popoutURL={"./popout_page.html"} onRenderTab={(node: TabNode, renderValues: any) => {
             setTitleOnRenderTab(model);
             const nodeId = node.getId();

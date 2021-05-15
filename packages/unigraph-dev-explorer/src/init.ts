@@ -41,12 +41,25 @@ export default function init() {
     let current = new Date();
     if (current.valueOf() - updated.valueOf() < 5000) {
         const nfn = new Notification(unpadded.name, {body: unpadded.from + ": " + unpadded.content})
-        console.log(unpadded);
     }
     });
 
     const devState = window.unigraph.addState('settings/developerMode', userSettings.developerMode);
     devState.subscribe((val: boolean) => {
     window.localStorage.setItem('userSettings', JSON.stringify({...JSON.parse(window.localStorage.getItem('userSettings')!), developerMode: val}))
-    })
+    });
+
+    initContextMenu();
+}
+
+export type ContextMenuState = {
+    anchorPosition: {top: number, left: number},
+    menuContent: ((uid: string, object: any, onfire: () => any) => React.ReactElement)[],
+    contextObject: any,
+    contextUid: string,
+    show: boolean
+}
+
+function initContextMenu() {
+    window.unigraph.addState('global/contextMenu', {show: false});
 }

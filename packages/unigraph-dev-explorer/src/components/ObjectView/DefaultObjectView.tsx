@@ -2,11 +2,12 @@ import { Button, ButtonGroup, Checkbox, FormControlLabel, IconButton, List, List
 import { MoreVert, PlayArrow } from '@material-ui/icons';
 import React, { FC, ReactElement } from 'react';
 import ReactJson, { InteractionProps } from 'react-json-view';
+import { useEffectOnce } from 'react-use';
 import { prepareExportObjects, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { DynamicViewRenderer } from '../../global';
 import { download } from '../../utils';
 import { ExecutableCodeEditor } from './DefaultCodeEditor';
-import { DefaultObjectContextMenu } from './DefaultObjectContextMenu';
+import { defaultContextMenu, DefaultObjectContextMenu } from './DefaultObjectContextMenu';
 import { filterPresets } from './objectViewFilters';
 
 type ObjectViewOptions = {
@@ -98,14 +99,37 @@ const DynamicViewsDetailed: Record<string, DynamicViewRenderer> = {
 window.DynamicViewsDetailed = DynamicViews;
 
 export const AutoDynamicView: DynamicViewRenderer = ({ object, callbacks }) => {
+
+    const domEl = React.useRef(null);
+    // @ts-ignore
+    window.pp = domEl;
+
+    useEffectOnce(() => {
+        // @ts-expect-error: 
+        domEl.current.addEventListener('contextmenu', (event: any) => {
+            event.preventDefault();
+            window.unigraph.getState('global/contextMenu').setValue({
+                anchorPosition: {top: event.y, left: event.x},
+                menuContent: defaultContextMenu,
+                contextObject: object,
+                contextUid: object?.uid,
+                show: true
+            })
+        })
+    })
+
     //console.log(object)
+    let el;
     if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViews).includes(object.type['unigraph.id'])) {
-        return React.createElement(DynamicViews[object.type['unigraph.id']], {
+        el = React.createElement(DynamicViews[object.type['unigraph.id']], {
             data: object, callbacks: callbacks ? callbacks : undefined
         });
     } else {
-        return <StringObjectViewer object={object}/>
+        el = <StringObjectViewer object={object}/>
     }
+    return <div id={"object-view-"+object?.uid} style={{display: "contents"}} ref={domEl}>
+        {el}
+    </div>;
 }
 
 export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, callbacks }) => {
@@ -191,8 +215,6 @@ const DefaultObjectListView: FC<DefaultObjectListViewProps> = ({component, objec
 
     const [showDeleted, setShowDeleted] = React.useState(false);
     const [showNoView, setShowNoView] = React.useState(false);
-
-    console.log(objects);
 
     return <div>
         <ButtonGroup color="primary" aria-label="outlined primary button group">

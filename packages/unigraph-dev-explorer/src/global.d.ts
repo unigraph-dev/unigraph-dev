@@ -13,6 +13,7 @@ declare global {
         registerNotifications: (callback: ((data: any[]) => any)) => any,
         newTab: any,
         crcTable: any,
+        wsnavigator: (sth: string) => any,
     }
 };
 

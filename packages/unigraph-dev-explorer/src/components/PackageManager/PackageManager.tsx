@@ -7,7 +7,6 @@ export const PackageManager: React.FC = ({}) => {
 
     React.useEffect(() => {
         window.unigraph.getPackages().then((pkg: any) => {
-            console.log(Object.values(pkg))
             setPackages(Object.values(pkg)) 
         })
     }, [])

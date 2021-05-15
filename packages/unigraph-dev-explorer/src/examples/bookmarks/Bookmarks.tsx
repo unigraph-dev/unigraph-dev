@@ -73,7 +73,6 @@ export const BookmarkItem: DynamicViewRenderer = ({data, callbacks}) => {
         }
     };
 
-    console.log(unpadded)
     return <React.Fragment>
         <ListItemIcon><Avatar alt={"favicon of "+unpadded.name} src={unpadded.favicon}>I</Avatar></ListItemIcon>
         <ListItemText 

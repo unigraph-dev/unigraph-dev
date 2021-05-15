@@ -16,7 +16,7 @@ export const Inbox = () => {
         window.unigraph.subscribeToObject("$/entity/inbox", (inbox: any) => {
             const children = inbox?.['_value']?.children?.['_value[']
             children.sort(byElementIndex)
-            if (children) setInbox(children);
+            if (children) {setInbox(children); } else setInbox([]);
         }, id);
 
         return function cleanup() {

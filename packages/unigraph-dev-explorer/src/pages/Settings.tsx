@@ -20,7 +20,6 @@ export default function Settings () {
     };
 
     const handleWindowSelection = (value: string) => {
-        console.log(value)
         let newSettings = {...settings, newWindow: value};
         setSettings(newSettings)
         window.localStorage.setItem('userSettings', JSON.stringify(newSettings));
