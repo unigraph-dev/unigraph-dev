@@ -111,14 +111,15 @@ export default class DgraphClient {
     /* eslint-disable */
     !test ? true : console.log("Trying to create upsert....============================================")
     const txn = this.dgraphClient.newTxn();
+    let response: dgraph.Response;
     try {
       const querybody = data.queries.join('\n');
       const querystr = `query {
         ${querybody}
       }`;
-      const mutations: Mutation[] = [...data.mutations, ...data.appends].map((obj: any) => {
+      const mutations: Mutation[] = [...data.mutations, ...data.appends].map((obj: any, index) => {
         const mu = new dgraph.Mutation();
-        mu.setSetJson(obj);
+        mu.setSetJson((data.mutations.includes(obj) && obj && !obj.uid) ? {...obj, uid: `_:upsert${index}`} : obj);
         !test ? true : console.log(JSON.stringify(obj, null, 2))
         return mu;
       });
@@ -130,8 +131,9 @@ export default class DgraphClient {
       req.setMutationsList(mutations);
       req.setCommitNow(true);
 
-      const response = await txn.doRequest(req);
+      response = await txn.doRequest(req);
       !test ? true : console.log(JSON.stringify(response, null, 2))
+      
     } catch (e) {
       console.error('Error: ', e);
     } finally {
@@ -139,6 +141,7 @@ export default class DgraphClient {
     }
     /* eslint-disable */
     !test ? true : console.log("upsert details above================================================")
+    return data.mutations.map((el, index) => response.getUidsMap().get(el.uid ? el.uid : `upsert${index}`));
   }
 
   async createDgraphUpsert(data: {query: string | false, mutations: Mutation[]}) {

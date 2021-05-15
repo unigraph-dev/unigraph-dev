@@ -49,6 +49,7 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
     // eslint-disable-next-line @typescript-eslint/ban-types
     const subscriptions: Record<string, Function> = {};
     const states: Record<string, AppState> = {};
+    const caches: Record<string, any> = { namespaceMap: {} };
 
     function sendEvent(conn: WebSocket, name: string, params: any, id?: number | undefined) {
         if (!id) id = getRandomInt();
@@ -66,6 +67,7 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
             messages.push(parsed);
             eventTarget.dispatchEvent(new Event("onmessage", parsed));
             if (parsed.type === "response" && parsed.id && callbacks[parsed.id]) callbacks[parsed.id](parsed);
+            if (parsed.type === "cache_updated" && parsed.name) caches[parsed.name] = parsed.result;
             if (parsed.type === "subscription" && parsed.id && subscriptions[parsed.id]) subscriptions[parsed.id](parsed.result);
         } catch (e) {
             console.error("Returned non-JSON reply!")
@@ -139,6 +141,10 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
         }),
         subscribeToObject: (uid, callback, eventId = undefined) => new Promise((resolve, reject) => {
             const id = typeof eventId === "number" ? eventId : getRandomInt();
+            if (uid.startsWith('$/')) {
+                // Is named entity
+                uid = caches.namespaceMap[uid].uid;
+            }
             callbacks[id] = (response: any) => {
                 if (response.success) resolve(id);
                 else reject(response);

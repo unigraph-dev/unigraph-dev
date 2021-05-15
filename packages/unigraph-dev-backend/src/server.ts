@@ -17,6 +17,7 @@ import { buildExecutable, createExecutableCache } from './executableManager';
 import { getLocalUnigraphAPI } from './localUnigraphApi';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { addNotification } from './notifications';
+import { Unigraph } from 'unigraph-dev-common/lib/types/unigraph';
 
 const PORT = 3001;
 const verbose = 5;
@@ -31,6 +32,8 @@ export default async function startServer(client: DgraphClient) {
   let subscriptions: Subscription[] = [];
 
   const lock = getAsyncLock();
+
+  const connections: Record<string, WebSocket> = {};
 
 
   // Basic checks
@@ -66,27 +69,38 @@ export default async function startServer(client: DgraphClient) {
   }
 
   let namespaceMap: any = {}
-  const namespaceSub = createSubscriptionLocal(getRandomInt(), (data) => {
-    namespaceMap = data[0];
-    // TODO: update client side about namespace map changes somehow
-  }, `(func: eq(<unigraph.id>, "$/meta/namespace_map")) {
-    uid
-    expand(_predicate_) {
-      uid
-  }}`);
-  subscriptions.push(namespaceSub);
 
   const serverStates = {
     caches: caches,
     subscriptions: subscriptions,
     hooks: hooks,
-    namespaceMap: namespaceMap
+    namespaceMap: namespaceMap,
+    localApi: {} as Unigraph
   }
+
+  const namespaceSub = createSubscriptionLocal(getRandomInt(), (data) => {
+    namespaceMap = data[0];
+    serverStates.namespaceMap = data[0];
+    Object.values(connections).forEach(el => {
+      el.send(JSON.stringify({
+        "type": "cache_updated",
+        "name": "namespaceMap",
+        result: data[0]
+      }))
+    })
+  }, `(func: eq(<unigraph.id>, "$/meta/namespace_map")) {
+    uid
+    expand(_predicate_) {
+      uid
+  }}`);
+
+  subscriptions.push(namespaceSub);
 
   // Initialize caches
   caches["schemas"] = createSchemaCache(client);
   caches["packages"] = createPackageCache(client);
   const localApi = getLocalUnigraphAPI(client, serverStates)
+  serverStates.localApi = localApi;
   caches["executables"] = createExecutableCache(client, {"hello": "world"}, localApi);
 
   setInterval(() => pollSubscriptions(subscriptions, dgraphClient, pollCallback), pollInterval);
@@ -407,6 +421,7 @@ export default async function startServer(client: DgraphClient) {
 
   server.on('connection', (ws, req) => {
     let connId = uniqueId();
+    connections[connId] = ws;
       ws.on('message', (msg: string) => {
         const msgObject: {type: string | null, event: string | null} = isJsonString(msg)
         if (msgObject) {
@@ -424,9 +439,15 @@ export default async function startServer(client: DgraphClient) {
       ws.on('close', () => {
         subscriptions = removeSubscriptionsById(subscriptions, connId);
         serverStates.subscriptions = subscriptions;
+        delete connections[connId];
       })
       ws.send(JSON.stringify({
         "type": "hello"
+      }))
+      ws.send(JSON.stringify({
+        "type": "cache_updated",
+        "name": "namespaceMap",
+        result: serverStates.namespaceMap
       }))
       console.log('opened socket connection');
   })
