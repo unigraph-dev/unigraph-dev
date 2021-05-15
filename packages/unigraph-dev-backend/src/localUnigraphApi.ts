@@ -139,13 +139,15 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
                 uid: `${uid}`,
                 "_value[": newValues
             });
-            return await client.createDgraphUpsert({
+            const result = await client.createDgraphUpsert({
                 query: false,
                 mutations: [
                     delete_array,
                     create_json
                 ]
-            })
+            });
+            callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
+            return result
         },
         // latertodo
         getReferenceables: async (key = "unigraph.id", asMapWithContent = false) => {return Error('Not implemented')},

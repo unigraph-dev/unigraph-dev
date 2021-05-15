@@ -4,7 +4,7 @@ let destUid;
 
 if (destUidOrName.startsWith('$/entity')) {
     // Named entity
-    destUidq = unigraph.getNamespaceMapUid(destUidOrName)
+    destUid = unigraph.getNamespaceMapUid(destUidOrName)
 } else if (destUidOrName.startsWith('0x')) {
     // UID
     destUid = destUidOrName;
