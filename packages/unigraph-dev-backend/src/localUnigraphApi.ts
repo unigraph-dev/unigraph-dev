@@ -11,7 +11,7 @@ import { insertsToUpsert } from "./utils/txnWrapper";
 import { Cache } from './caches';
 import dgraph from "dgraph-js";
 
-export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Record<string, Cache<any>>, subscriptions: Subscription[], hooks: any, namespaceMap: any}): Unigraph {
+export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Record<string, Cache<any>>, subscriptions: Subscription[], hooks: any, namespaceMap: any, localApi: Unigraph}): Unigraph {
     const messages: any[] = [];
     const eventTarget: any = {};
 
@@ -73,11 +73,12 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             const unigraphObject = buildUnigraphEntity(object, schema, states.caches['schemas'].data);
             const finalUnigraphObject = processAutoref(unigraphObject, schema, states.caches['schemas'].data)
             const upsert = insertsToUpsert([finalUnigraphObject]);
-            await client.createUnigraphUpsert(upsert);
-            callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
+            const uids = await client.createUnigraphUpsert(upsert);
+            callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches});
+            return uids;
         },
         getNamespaceMapUid: (name) => {
-            return states.namespaceMap['name'].uid;
+            return states.namespaceMap[name].uid;
         },
         getType: async (name) => {
             const eventId = getRandomInt();
@@ -160,7 +161,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         importObjects: async (objects) => {return Error('Not implemented')},
         runExecutable: async (unigraphid, params) => {
             const exec = states.caches["executables"].data[unigraphid];
-            buildExecutable(exec, {"params": params, "definition": exec}, {} as Unigraph)()
+            buildExecutable(exec, {"params": params, "definition": exec}, states.localApi)()
         },
         addNotification: async (notification) => {
             await addNotification(notification, states.caches, client);

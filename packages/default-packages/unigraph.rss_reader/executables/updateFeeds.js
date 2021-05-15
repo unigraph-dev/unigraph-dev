@@ -39,7 +39,11 @@ const objects = results.map((els, index) => els.length >= 1 ? undefined : {
         date_created: queries[index].item.isoDate
     }
 }).filter(el => el !== undefined);
+const uids = [];
 for(let i=0; i<objects.length; ++i) {
-    await unigraph.addObject(objects[i], "$/schema/rss_item")
+    const uid = await unigraph.addObject(objects[i], "$/schema/rss_item");
+    uids.push(uid[0])
 }
-unigraph.addNotification({name: "Feeds updated", from: "unigraph.rss_reader", content: "Added " + objects.length + " items.", actions: []})
+if (uids.length) unigraph.runExecutable("$/package/unigraph.core/0.0.1/executable/add-item-to-list", {where: "$/entity/inbox", item: uids.reverse()});
+// TODO: fix this race condition by enforcing 
+setTimeout(() => unigraph.addNotification({name: "Feeds updated", from: "unigraph.rss_reader", content: "Added " + objects.length + " items.", actions: []}), 1000);
