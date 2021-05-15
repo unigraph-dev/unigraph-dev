@@ -1,0 +1,42 @@
+{
+    "dgraph.type": "Type",
+    "_definition": {
+        "type": { "unigraph.id": "$/composer/Object" },
+        "_parameters": {
+            "_indexedBy": { "unigraph.id": "$/primitive/string" },
+            "_indexes": ["name"]
+        },
+        "_properties": [
+            {
+                "_key": "name",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                }
+            },
+            {
+                "_key": "env",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                }
+            },
+            {
+                "_key": "view",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                }
+            },
+            {
+                "_key": "props",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                }
+            },
+            {
+                "_key": "semantic_properties",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/semantic_properties" }
+                }
+            }
+        ]
+    }
+}

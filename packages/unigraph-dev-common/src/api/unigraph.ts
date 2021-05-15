@@ -165,9 +165,14 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
         unsubscribe: (id) => {
             sendEvent(connection, "unsubscribe_by_id", {}, id);
         },
-        addObject: (object, schema) => {
-            sendEvent(connection, "create_unigraph_object", {object: object, schema: schema});
-        },
+        addObject: (object, schema) => new Promise((resolve, reject) => {
+            const id = getRandomInt();
+            callbacks[id] = (response: any) => {
+                if (response.success) resolve(response.results);
+                else reject(response);
+            };
+            sendEvent(connection, "create_unigraph_object", {object: object, schema: schema, id: id});
+        }),
         deleteObject: (uid) => {
             sendEvent(connection, "delete_unigraph_object", {uid: uid});
         },

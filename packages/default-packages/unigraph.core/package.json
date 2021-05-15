@@ -7,6 +7,9 @@
         "schemas": [{
             "id": "list",
             "src": "schemas/list.json"
+        }, {
+            "id": "view",
+            "src": "schemas/view.json"
         }],
         "executables": [{
             "id": "add-item-to-list",

@@ -10,7 +10,8 @@ declare global {
         DynamicViewsDetailed: Record<string, DynamicViewRenderer>
         notificationCallbacks: ((data: any[]) => any)[],
         notifications: any[],
-        registerNotifications: (callback: ((data: any[]) => any)) => any
+        registerNotifications: (callback: ((data: any[]) => any)) => any,
+        newTab: any
     }
 };
 
