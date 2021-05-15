@@ -17,7 +17,6 @@ let decl = unigraphDecl.substring(
 )
 decl = decl.replace(/export declare type /g, "declare type ")
 decl = decl.replace("export interface ", "declare interface ")
-console.log(decl);
 
 export const ExecutableCodeEditor = ({data}: any) => {
     

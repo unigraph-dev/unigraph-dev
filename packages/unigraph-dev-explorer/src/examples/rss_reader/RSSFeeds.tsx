@@ -86,7 +86,7 @@ const RSSFeedsBody: React.FC<{data: ARSSFeed[]}> = ({data}) => {
 
     return <div>
         <Typography variant="body2">Here are all your RSS feeds:</Typography> 
-        <DefaultObjectListView component={List} objects={data.map((el: any) => {let site = el._value.site_info._value; console.log(site); return site})} />
+        <DefaultObjectListView component={List} objects={data.map((el: any) => {let site = el._value.site_info._value; return site})} />
         <TextField value={newUrl} onChange={(e) => setNewUrl(e.target.value)}></TextField>
         <Button onClick={() => 
             window.unigraph.runExecutable<ParserParam>(getExecutableId(rssReaderPackage, "add-feed"), {url: newUrl})
