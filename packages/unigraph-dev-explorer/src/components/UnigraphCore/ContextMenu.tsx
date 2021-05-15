@@ -1,4 +1,4 @@
-import { Popover, Typography } from "@material-ui/core"
+import { Divider, Popover, Typography } from "@material-ui/core"
 import React from "react"
 import { AppState } from "unigraph-dev-common/lib/types/unigraph";
 import { ContextMenuState } from "../../init"
@@ -28,6 +28,8 @@ export const ContextMenu = () => {
         horizontal: 'center',
         }}
     >
+        {<Typography variant="body1" style={{padding: "8px"}}>Object uid: {state.contextUid}; type: {state.contextObject?.type?.['unigraph.id']}</Typography>}
+        <Divider />
         {state.menuContent?.map(el => el(state.contextUid!, state.contextObject, handleClose))}
     </Popover></div>
 }

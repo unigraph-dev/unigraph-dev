@@ -8,6 +8,7 @@ import { registerDynamicViews, withUnigraphSubscription } from 'unigraph-dev-com
 import { Tag } from '../semantic/Tag';
 import { Autocomplete } from '@material-ui/lab';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { AutoDynamicView } from '../../components/ObjectView/DefaultObjectView';
 
 export const parseTodoObject: (arg0: string) => ATodoList = (todoString: string) => {
     // TODO: Using regex for now, we can switch to a more centralized parsing solution later
@@ -94,7 +95,7 @@ function TodoListBody ({data}: { data: ATodoList[] }) {
         />
         <List>
             {filteredItems.map(todo => <ListItem button key={todo.uid}>
-                <TodoItem data={todo} />
+                <AutoDynamicView object={todo} />
             </ListItem>)}
         </List>
         <TextField value={newName} onChange={(e) => setNewName(e.target.value)}></TextField>
