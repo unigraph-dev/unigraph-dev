@@ -1,8 +1,12 @@
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
+import { loader } from '@monaco-editor/react';
 import Editor from "@monaco-editor/react";
 import React from "react";
 import { Button } from "@material-ui/core";
 import { Save } from "@material-ui/icons";
+
+loader.config({ paths: { vs: '/vendor/monaco-editor_at_0.23.0/min/vs' } });
+
 // eslint-disable-next-line import/no-webpack-loader-syntax
 const unigraphDecl: string = require('!!raw-loader!unigraph-dev-common/lib/types/unigraph.d.ts').default;
 const beginStr = '/** Unigraph interface */'
