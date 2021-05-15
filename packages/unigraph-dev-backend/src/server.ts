@@ -95,8 +95,8 @@ export default async function startServer(client: DgraphClient) {
       uid
   }}`);
 
-  subscriptions.push(namespaceSub);
-  await pollSubscriptions(subscriptions, dgraphClient, pollCallback);
+  serverStates.subscriptions.push(namespaceSub);
+  await pollSubscriptions(serverStates.subscriptions, dgraphClient, pollCallback);
 
   // Initialize caches
   caches["schemas"] = createSchemaCache(client);
@@ -105,7 +105,7 @@ export default async function startServer(client: DgraphClient) {
   serverStates.localApi = localApi;
   caches["executables"] = createExecutableCache(client, {"hello": "world"}, localApi, serverStates);
 
-  setInterval(() => pollSubscriptions(subscriptions, dgraphClient, pollCallback), pollInterval);
+  setInterval(() => pollSubscriptions(serverStates.subscriptions, dgraphClient, pollCallback), pollInterval);
   
   const makeResponse = (event: {id: number | string}, success: boolean, body: Record<string, unknown> = {}) => {
     //console.log(event, success, body)
