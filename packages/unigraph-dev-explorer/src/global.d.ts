@@ -11,7 +11,8 @@ declare global {
         notificationCallbacks: ((data: any[]) => any)[],
         notifications: any[],
         registerNotifications: (callback: ((data: any[]) => any)) => any,
-        newTab: any
+        newTab: any,
+        crcTable: any,
     }
 };
 

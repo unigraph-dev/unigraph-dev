@@ -2,6 +2,7 @@ import _ from "lodash";
 import { resourceLimits } from "worker_threads";
 import { IWebsocket } from "./custom";
 import DgraphClient from "./dgraphClient";
+import stringify from 'json-stable-stringify';
 
 export type Subscription = {
     data: any,
@@ -32,7 +33,7 @@ export async function pollSubscriptions(subs: Subscription[], client: DgraphClie
         const query = buildPollingQuery(subs);
         let results: any[] = await client.queryDgraph(query).catch(e => {console.log(e); return []});
         results.forEach((val, id) => { // FIXME: Beware race conditions
-            if (!_.isEqual(val, subs[id].data)) {
+            if (stringify(val) !== stringify(subs[id].data)) {
                 subs[id].data = val;
                 msgCallback(subs[id].id, val, subs[id].msgPort!, subs[id]);
             }
