@@ -3,7 +3,7 @@
 import { typeMap } from '../types/consts'
 import { PackageDeclaration } from '../types/packages';
 import { Unigraph, AppState } from '../types/unigraph';
-import { base64ToBlob } from '../utils/utils';
+import { base64ToBlob, isJsonString } from '../utils/utils';
 import stringify from 'json-stable-stringify';
 
 /**
@@ -50,7 +50,12 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
     // eslint-disable-next-line @typescript-eslint/ban-types
     const subscriptions: Record<string, Function> = {};
     const states: Record<string, AppState> = {};
-    const caches: Record<string, any> = { namespaceMap: {} };
+    const caches: Record<string, any> = {
+        // @ts-expect-error: already checked if not JSON
+        namespaceMap: isJsonString(window.localStorage.getItem("caches/namespaceMap")) ? JSON.parse(window.localStorage.getItem("caches/namespaceMap")) : false 
+    };
+
+    console.log(caches);
 
     function sendEvent(conn: WebSocket, name: string, params: any, id?: number | undefined) {
         if (!id) id = getRandomInt();
@@ -68,7 +73,10 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
             messages.push(parsed);
             eventTarget.dispatchEvent(new Event("onmessage", parsed));
             if (parsed.type === "response" && parsed.id && callbacks[parsed.id]) callbacks[parsed.id](parsed);
-            if (parsed.type === "cache_updated" && parsed.name) caches[parsed.name] = parsed.result;
+            if (parsed.type === "cache_updated" && parsed.name) {
+                caches[parsed.name] = parsed.result;
+                window.localStorage.setItem("caches/"+parsed.name, JSON.stringify(parsed.result))
+            };
             if (parsed.type === "subscription" && parsed.id && subscriptions[parsed.id]) subscriptions[parsed.id](parsed.result);
         } catch (e) {
             console.error("Returned non-JSON reply!")
@@ -140,11 +148,16 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
             subscriptions[id] = (result: any) => callback(buildGraph(result));
             sendEvent(connection, "subscribe_to_type", {schema: name}, id);
         }),
-        subscribeToObject: (uid, callback, eventId = undefined) => new Promise((resolve, reject) => {
+        subscribeToObject: (uid, callback, eventId = undefined) => new Promise(async (resolve, reject) => {
             const id = typeof eventId === "number" ? eventId : getRandomInt();
             if (uid.startsWith('$/')) {
                 // Is named entity
-                uid = caches.namespaceMap[uid].uid;
+                if (caches.namespaceMap) {
+                    uid = caches.namespaceMap[uid].uid;
+                } else {
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    uid = caches.namespaceMap[uid].uid;
+                }
             }
             callbacks[id] = (response: any) => {
                 if (response.success) resolve(id);
