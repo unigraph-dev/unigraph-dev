@@ -255,6 +255,10 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
         }),
         runExecutable: (unigraphid, params?) => new Promise((resolve, reject) => {
             const id = getRandomInt();
+            callbacks[id] = (response: any) => {
+                if (response.success && response.returns) resolve(response.returns);
+                else reject(response);
+            };
             sendEvent(connection, "run_executable", {"unigraph.id": unigraphid, params: params ? params : {}}, id);
         }),
         getNamespaceMapUid: (name) => {throw Error("Not implemented")},

@@ -96,13 +96,14 @@ export default async function startServer(client: DgraphClient) {
   }}`);
 
   subscriptions.push(namespaceSub);
+  await pollSubscriptions(subscriptions, dgraphClient, pollCallback);
 
   // Initialize caches
   caches["schemas"] = createSchemaCache(client);
   caches["packages"] = createPackageCache(client);
   const localApi = getLocalUnigraphAPI(client, serverStates)
   serverStates.localApi = localApi;
-  caches["executables"] = createExecutableCache(client, {"hello": "world"}, localApi);
+  caches["executables"] = createExecutableCache(client, {"hello": "world"}, localApi, serverStates);
 
   setInterval(() => pollSubscriptions(subscriptions, dgraphClient, pollCallback), pollInterval);
   
@@ -399,7 +400,8 @@ export default async function startServer(client: DgraphClient) {
 
     "run_executable": async function (event: EventRunExecutable, ws: IWebsocket) {
       const exec = caches["executables"].data[event['unigraph.id']];
-      buildExecutable(exec, {"hello": "ranfromExecutable", params: event.params, definition: exec}, localApi)();
+      buildExecutable(exec, {"hello": "ranfromExecutable", params: event.params, definition: exec}, localApi)()
+        .then((ret: any) => ws.send(makeResponse(event, true, {returns: ret})));
     },
 
     /* Userspace methods: eventually, users can install apps that extend their own methods into here. */
