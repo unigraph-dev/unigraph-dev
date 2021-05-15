@@ -33,11 +33,11 @@ export const FavoriteBar = () => {
     useEffectOnce(() => {
         const id = getRandomInt();
 
-        setTimeout(() => window.unigraph.subscribeToObject("$/entity/favorite_bar", (fav: any) => {
+        window.unigraph.subscribeToObject("$/entity/favorite_bar", (fav: any) => {
             const children = fav?.['_value']?.children?.['_value[']
             children.sort(byElementIndex)
             if (children) setFav(children);
-        }, id), 1000)
+        }, id);
 
         return function cleanup() {
             window.unigraph.unsubscribe(id);
