@@ -24,7 +24,7 @@ function ExplorerHome({ size } : SizeMeProps) {
       <ResponsiveGridLayout 
         className="layout" 
         layouts={{lg: layout}}  
-        breakpoints={{lg: 1200, md: 996, sm: 768, xs: 480, xxs: 0}} 
+        breakpoints={{lg: 900, md: 750, sm: 600, xs: 480, xxs: 0}} 
         cols={{lg: 12, md: 10, sm: 6, xs: 4, xxs: 2}} 
         rowHeight={30} width={size.width ? size.width : 1200}
         compactType="horizontal"

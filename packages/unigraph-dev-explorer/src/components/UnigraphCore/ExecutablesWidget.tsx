@@ -1,4 +1,4 @@
-import { Button, ListItem, Typography } from "@material-ui/core"
+import { Button, List, ListItem, Typography } from "@material-ui/core"
 import React from "react"
 import { useEffectOnce } from "react-use";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
@@ -22,8 +22,10 @@ export const ExecutablesWidget: React.FC = ({}) => {
 
     return <div>
         <Typography variant="h5" gutterBottom >Run Function</Typography>
-        {content.map((it: any) => <ListItem key={it.uid}>
-            <AutoDynamicView object={it} />
-        </ListItem>)}
+        <List style={{overflow: "scroll", height: "280px"}}>
+            {content.map((it: any) => <ListItem key={it.uid}>
+                <AutoDynamicView object={it} />
+            </ListItem>)}
+        </List>
     </div>
 }
