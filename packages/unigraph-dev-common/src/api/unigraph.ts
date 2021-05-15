@@ -76,7 +76,7 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
             if (parsed.type === "cache_updated" && parsed.name) {
                 caches[parsed.name] = parsed.result;
                 window.localStorage.setItem("caches/"+parsed.name, JSON.stringify(parsed.result))
-            };
+            }
             if (parsed.type === "subscription" && parsed.id && subscriptions[parsed.id]) subscriptions[parsed.id](parsed.result);
         } catch (e) {
             console.error("Returned non-JSON reply!")
@@ -148,6 +148,7 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
             subscriptions[id] = (result: any) => callback(buildGraph(result));
             sendEvent(connection, "subscribe_to_type", {schema: name}, id);
         }),
+        // eslint-disable-next-line no-async-promise-executor
         subscribeToObject: (uid, callback, eventId = undefined) => new Promise(async (resolve, reject) => {
             const id = typeof eventId === "number" ? eventId : getRandomInt();
             if (uid.startsWith('$/')) {
