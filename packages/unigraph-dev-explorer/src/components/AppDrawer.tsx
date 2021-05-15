@@ -10,6 +10,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Bookmarks, Category, Comment, CompareArrows, FileCopy, Home, Info, LibraryBooks, PlaylistAddCheck, Settings, Storage } from '@material-ui/icons';
 import { ListSubheader } from '@material-ui/core';
 import { NavigationContext } from '../utils';
+import { FavoriteBar } from './UnigraphCore/FavoriteBar';
 
 const drawerWidth = 240;
 
@@ -88,6 +89,8 @@ export default function DrawerRouter() {
               </ListItem>
               <Divider/>
             </div>
+            <ListSubheader component="div" id="subheader-developer-tools"> Favorites </ListSubheader>
+            <FavoriteBar/>
           </List>
         </Drawer>}
     </NavigationContext.Consumer>

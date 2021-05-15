@@ -266,9 +266,9 @@ export default async function startServer(client: DgraphClient) {
       console.log(JSON.stringify(finalUnigraphObject, null, 4))
       const upsert = insertsToUpsert([finalUnigraphObject]);
       console.log(JSON.stringify(upsert, null, 2))
-      dgraphClient.createUnigraphUpsert(upsert).then(_ => {
+      dgraphClient.createUnigraphUpsert(upsert).then(res => {
         callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
-        ws.send(makeResponse(event, true))
+        ws.send(makeResponse(event, true, {results: res}))
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
     },
 

@@ -6,13 +6,14 @@ import React, { ReactElement } from "react";
 
 import { pages, components } from './App';
 
-import FlexLayout, { Actions, DockLocation, Model, Node } from 'flexlayout-react';
+import FlexLayout, { Actions, DockLocation, Model, Node, TabNode } from 'flexlayout-react';
 import 'flexlayout-react/style/light.css'
 import './workspace.css'
 import { getParameters, NavigationContext } from "./utils";
-import { Container, CssBaseline } from "@material-ui/core";
+import { Button, Container, CssBaseline } from "@material-ui/core";
 import { isJsonString } from "unigraph-dev-common/lib/utils/utils";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
+import { Star, StarOutlined } from "@material-ui/icons";
 
 export function WorkspacePageComponent({ children }: any) {
     return <Container maxWidth="lg" disableGutters style={{paddingTop: "12px"}}>
@@ -30,15 +31,15 @@ const getComponentFromPage = (location: string, params: any = {}) => {return {
 }}
 
 const newWindowActions = {
-    "new-tab": (model: Model, location: string, search: string) => model.doAction(Actions.addNode(getComponentFromPage(location, getParameters(search)), "workspace-main-tabset", DockLocation.CENTER, -1)),
-    "new-pane": (model: Model, location: string, search: string) => {
-        let node = getComponentFromPage(location, getParameters(search));
+    "new-tab": (model: Model, initJson: any) => model.doAction(Actions.addNode(initJson, "workspace-main-tabset", DockLocation.CENTER, -1)),
+    "new-pane": (model: Model, initJson: any) => {
+        let node = getComponentFromPage(initJson);
         let action = Actions.addNode(node, "workspace-main-tabset", DockLocation.RIGHT, 0, true)
         model.doAction(action);
     },
-    "new-popout": (model: Model, location: string, search: string) => {
+    "new-popout": (model: Model, initJson: any) => {
         let someId = getRandomInt().toString();
-        let node = getComponentFromPage(location, getParameters(search)) as any;
+        let node = getComponentFromPage(initJson) as any;
         node.id = someId;
         console.log(model)
         let action = Actions.addNode(node, "workspace-main-tabset", DockLocation.CENTER, -1, false)
@@ -47,20 +48,25 @@ const newWindowActions = {
     }
 }
 
-const workspaceNavigator = (model: Model, location: string) => {
+const newTab = (model: Model, initJson: any) => {
     // @ts-expect-error: already checked for isJsonString
     let userSettings = JSON.parse(isJsonString(window.localStorage.getItem('userSettings')) ? window.localStorage.getItem('userSettings') : "{}")
     let newWindowBehavior = userSettings['newWindow'] && Object.keys(newWindowActions).includes(userSettings['newWindow']) ? userSettings['newWindow'] : "new-tab"
+    // @ts-expect-error: already checked and added fallback
+    newWindowActions[newWindowBehavior](model, initJson)
+}
 
+window.newTab = newTab;
+
+const workspaceNavigator = (model: Model, location: string) => {
     let search = "?" + location.split('?')[1];
     location = location.split('?')[0];
-    // @ts-expect-error: already checked and added fallback
-    newWindowActions[newWindowBehavior](model, location, search)
+    newTab(model, getComponentFromPage(location, getParameters(search)))
 }
 
 const mainTabsetId = 'workspace-main-tabset';
 
-const onRenderTab = (model: Model) => {
+const setTitleOnRenderTab = (model: Model) => {
     // @ts-expect-error: using private API
     const idMap: Record<string, Node> = model._idMap;
     // @ts-expect-error: using private API
@@ -95,7 +101,8 @@ export function WorkSpace(this: any) {
 					"enableClose":false,
                     "minSize": 700,
                     "maxSize": 700,
-					"name": "App Drawer",
+                    "name": "App Drawer",
+                    "id": "app-drawer",
 					"component": "/components/appdrawer",
 				}
 			]
@@ -110,7 +117,7 @@ export function WorkSpace(this: any) {
                     "weight": 50,
                     "selected": 0,
                     "children": [
-                        {...getComponentFromPage('/home'), enableClose: false}
+                        {...getComponentFromPage('/home'), enableClose: false, id: "dashboard"}
                     ]
                 }
             ]
@@ -134,7 +141,44 @@ export function WorkSpace(this: any) {
     window.layoutModel = model;
 
     return <NavigationContext.Provider value={workspaceNavigator.bind(this, model)}>
-        <FlexLayout.Layout model={model} factory={factory} popoutURL={"./popout_page.html"} onRenderTab={() => onRenderTab(model)}/>
+        <FlexLayout.Layout model={model} factory={factory} popoutURL={"./popout_page.html"} onRenderTab={(node: TabNode, renderValues: any) => {
+            setTitleOnRenderTab(model);
+            const nodeId = node.getId();
+            if (node.isVisible() && nodeId !== "app-drawer" && nodeId !== "dashboard") {
+                renderValues.buttons.push(<div style={{zIndex: 999, transform: "scale(0.7)"}} onClick={async () => {
+                    const config = node.getConfig();
+                    delete config.undefine;
+                    const uid = await window.unigraph.addObject({
+                        name: node.getName(),
+                        env: "react-explorer",
+                        view: node.getComponent(),
+                        props: JSON.stringify({config: config}) 
+                    }, "$/schema/view");
+                    await window.unigraph.runExecutable("$/package/unigraph.core/0.0.1/executable/add-item-to-list", {
+                        item: uid[0],
+                        where: "$/entity/favorite_bar"
+                    })
+                }}><StarOutlined></StarOutlined></div>) 
+            }
+            
+            renderValues.buttons.push(<div id={"tabId"+nodeId}></div>);
+            setTimeout(() => {
+                const el = document.getElementById('tabId'+nodeId);
+                if (el && el.parentElement && node.isEnableClose()) {
+                    el.parentElement.addEventListener("mousedown", (event) => {
+                        if (typeof event === 'object') {
+                            switch (event.button) {
+                              case 1:
+                                model.doAction(Actions.deleteTab(nodeId))
+                                break;
+                              default:
+                                break;
+                            }
+                          }
+                    })
+                }
+            }, 0)
+        }}/>
     </NavigationContext.Provider>
 
 }
