@@ -30,6 +30,7 @@ import { TodoList } from './examples/todo/TodoList';
 import RSSReader from './examples/rss_reader';
 import { Bookmarks } from './examples/bookmarks/Bookmarks';
 import { NotificationCenter } from './components/UnigraphCore/Notification';
+import { Inbox } from './components/UnigraphInbox/Inbox';
 
 // TODO: custom theme
 const useStyles = makeStyles(theme => ({
@@ -99,6 +100,10 @@ export const pages: Record<string, any> = {
   'home': {
     'constructor': () => <ExplorerHome />,
     'name': 'Dashboard',
+  },
+  'inbox': {
+    'constructor': () => <Inbox />,
+    'name': 'inbox',
   },
   'semantic/tagresults': {
     'constructor': (props: any) => <TagResults {...props} />,

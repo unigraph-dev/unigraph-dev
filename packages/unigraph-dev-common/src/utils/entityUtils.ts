@@ -534,6 +534,8 @@ export function dectxObjects(objects: any[], prefix = "_:"): any[] {
     return newObjects;
 }
 
+export const byElementIndex = (a: any, b: any) => (a["_index"]?.["_value.#i"] || 0) - (b["_index"]?.["_value.#i"] || 0)
+
 export function unpadRecurse(object: any, visitedUids: any[] = []) {
     let result: any = undefined;
     if (typeof object === "object" && !Array.isArray(object)) {
@@ -550,7 +552,7 @@ export function unpadRecurse(object: any, visitedUids: any[] = []) {
         if (timestamp && typeof result === "object" && !Array.isArray(result)) result["_timestamp"] = object["_timestamp"]
     } else if (Array.isArray(object)) {
         result = [];
-        object.sort((a, b) => (a["_index"]?.["_value.#i"] || 0) - (b["_index"]?.["_value.#i"] || 0));
+        object.sort(byElementIndex);
         object.forEach(val => result.push(unpadRecurse(val, visitedUids)));
     } else {
         result = object;

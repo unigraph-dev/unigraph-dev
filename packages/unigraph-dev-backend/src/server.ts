@@ -444,6 +444,11 @@ export default async function startServer(client: DgraphClient) {
       ws.send(JSON.stringify({
         "type": "hello"
       }))
+      ws.send(JSON.stringify({
+        "type": "cache_updated",
+        "name": "namespaceMap",
+        result: serverStates.namespaceMap
+      }))
       console.log('opened socket connection');
   })
 
