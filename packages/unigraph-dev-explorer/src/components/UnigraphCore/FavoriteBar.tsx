@@ -2,7 +2,29 @@ import { ListItem, ListItemText } from "@material-ui/core";
 import React from "react";
 import { useEffectOnce } from "react-use";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
-import { byElementIndex } from "unigraph-dev-common/lib/utils/entityUtils";
+import { registerDynamicViews } from "unigraph-dev-common/lib/api/unigraph-react";
+import { byElementIndex, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
+import { DynamicViewRenderer } from "../../global";
+import { AutoDynamicView } from "../ObjectView/DefaultObjectView";
+
+const ViewItem: DynamicViewRenderer = ({data, callbacks}) => {
+    console.log(data);
+    let unpadded: any = unpad(data);
+
+    return <React.Fragment>
+        <div onClick={() => window.newTab(window.layoutModel, {
+            type: 'tab',
+            config: JSON.parse(unpadded.props).config,
+            name: unpadded.name,
+            component: unpadded.view,
+            enableFloat: 'true'
+        })} style={{display: "contents"}}>
+            <ListItemText primary={unpadded.name}></ListItemText>
+        </div>
+    </React.Fragment>
+}
+
+registerDynamicViews({"$/schema/view": ViewItem})
 
 export const FavoriteBar = () => {
 
@@ -23,14 +45,8 @@ export const FavoriteBar = () => {
     })
 
     return <React.Fragment>
-        {fav.map(el => <ListItem button onClick={() => window.newTab(window.layoutModel, {
-            type: 'tab',
-            config: JSON.parse(el?._value?._value?.props?.["_value.%"]).config,
-            name: el?._value?._value?.name?.["_value.%"],
-            component: el?._value?._value?.view?.["_value.%"],
-            enableFloat: 'true'
-        })}>
-            <ListItemText primary={el?._value?._value?.name?.["_value.%"]}/>
+        {fav.map(el => <ListItem>
+            <AutoDynamicView object={el['_value']}/>
         </ListItem>)}
     </React.Fragment>
 

@@ -10,7 +10,7 @@ import { Tag } from "./Tag";
 function TagList ({data}: any) {
     return <div>
         <NavigationContext.Consumer>
-        {(navigator: any) => data.map((el: any) => <Tag data={unpad(el)}/>)}
+        {(navigator: any) => data.map((el: any) => <AutoDynamicView object={unpad(el)}/>)}
         </NavigationContext.Consumer>
     </div>
 }

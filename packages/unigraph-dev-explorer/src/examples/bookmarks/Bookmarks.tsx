@@ -9,6 +9,7 @@ import { registerDynamicViews, withUnigraphSubscription } from 'unigraph-dev-com
 import { Tag } from "../semantic/Tag";
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { getExecutableId } from "unigraph-dev-common/lib/api/unigraph";
+import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
 
 type ABookmark = {
     uid?: string,
@@ -46,7 +47,7 @@ function BookmarksBody ({data}: { data: ABookmark[] }) {
         There are currently {bookmarks.length} bookmarks!   <br/>
         <List>
             {bookmarks.map(it => <ListItem button key={it.uid}>
-                <BookmarkItem data={it} />
+                <AutoDynamicView object={it} />
             </ListItem>)}
         </List>
         <TextField value={newName} onChange={(e) => setNewName(e.target.value)}></TextField>

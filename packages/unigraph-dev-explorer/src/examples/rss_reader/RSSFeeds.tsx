@@ -4,7 +4,7 @@ import { getExecutableId } from "unigraph-dev-common/lib/api/unigraph";
 import { registerDynamicViews, withUnigraphSubscription } from "unigraph-dev-common/lib/api/unigraph-react"
 import { pkg as rssReaderPackage } from 'unigraph-dev-common/lib/data/unigraph.rss_reader.pkg';
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
-import { DefaultObjectListView } from "../../components/ObjectView/DefaultObjectView";
+import { AutoDynamicView, DefaultObjectListView } from "../../components/ObjectView/DefaultObjectView";
 import { DynamicViewRenderer } from "../../global";
 import * as timeago from 'timeago.js';
 
@@ -108,7 +108,7 @@ const RSSItemsListBody: React.FC<{data: ARSSItem[]}> = ({data}) => {
     return <div>
         <List>
             {data.map(it => <ListItem button key={it.uid}>
-                <RSSItem data={it} />
+                <AutoDynamicView object={it} />
             </ListItem>)}
         </List>
     </div>
