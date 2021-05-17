@@ -1,32 +1,24 @@
-const url = new URL(context.params.url);
+const url = context.params.url;
 const tags = context.params.tags ? context.params.tags : [];
-const fetch = require('node-fetch');
+const scrape = require('html-metadata');
 
-const res = await fetch(url);
-const text = await res.text();
+const res = await scrape(url);
 
-//const match = text.match(/(<head>.*<\/head>)/gms);
-//const head = match ? match[0] : "";
-const { JSDOM } = require("jsdom");
-let parsed = new JSDOM(text, { includeNodeLocations: true });
-let headDom = parsed.window.document
-
-var favicon = url.origin + "/favicon.ico";
-headDom.head.childNodes.forEach((node) => {
-    if (node.nodeName === "LINK" && node?.name?.includes('icon') && node.href) {
-        let newUrl = new URL(node.href, url.origin)
-        favicon = newUrl.href;
-    }
-})
-//console.log(headDom)
 const result = {
-    name: headDom.title || url.href,
-    url: url.href,
-    favicon: favicon,
+    name: res?.general?.title || res?.openGraph?.title || res?.twitter?.title,
+    url: url,
+    favicon: res?.general?.icons?.pop().href || res?.general?.icons[0]?.href || res?.openGraph?.image?.url || res?.twitter?.image?.src || res?.twitter?.image,
     semantic_properties: {
         children: tags.map(tagName => {return {name: tagName}}),
+    },
+    creative_work: {
+        abstract: res?.general?.description || res?.openGraph?.description || res?.twitter?.description
     }
 }
-//console.log(result)
+
+if (result.favicon?.startsWith("/")) {
+    let site = new URL(url);
+    result.favicon = site.origin + result.favicon;
+}
 
 unigraph.addObject(result, "$/schema/web_bookmark")
