@@ -103,7 +103,7 @@ export const pages: Record<string, any> = {
   },
   'inbox': {
     'constructor': () => <Inbox />,
-    'name': 'inbox',
+    'name': 'Inbox',
   },
   'semantic/tagresults': {
     'constructor': (props: any) => <TagResults {...props} />,
