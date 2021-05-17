@@ -379,7 +379,8 @@ export default async function startServer(client: DgraphClient) {
 
     "import_objects": async function (event: EventImportObjects, ws: IWebsocket) {
       const parsed = JSON.parse(event.objects);
-      const dectx: any[] = JSON.parse(JSON.stringify(dectxObjects(parsed)));
+      const dectx_raw: any[] = JSON.parse(JSON.stringify(dectxObjects(parsed)));
+      const dectx: any[] = dectx_raw.filter(el => !(el['dgraph.type']?.includes('Executable') || el['dgraph.type']?.includes('Named')))
       const ref = dectx.map(el => processAutoref(JSON.parse(JSON.stringify(el)), el.type['unigraph.id'], caches['schemas'].data));
       console.log(JSON.stringify(ref, null, 2))
       const upsert = insertsToUpsert(ref);
