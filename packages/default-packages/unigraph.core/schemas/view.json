@@ -33,6 +33,7 @@
             },
             {
                 "_key": "semantic_properties",
+                "_propertyType": "inheritance",
                 "_definition": {
                     "type": { "unigraph.id": "$/schema/semantic_properties" }
                 }
