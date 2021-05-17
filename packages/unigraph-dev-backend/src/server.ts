@@ -30,7 +30,7 @@ export default async function startServer(client: DgraphClient) {
   const pollInterval = 10000;
 
   const caches: Record<string, Cache<any>> = {};
-  let subscriptions: Subscription[] = [];
+  const _subscriptions: Subscription[] = [];
 
   const lock = getAsyncLock();
 
@@ -73,7 +73,7 @@ export default async function startServer(client: DgraphClient) {
 
   const serverStates = {
     caches: caches,
-    subscriptions: subscriptions,
+    subscriptions: _subscriptions,
     hooks: hooks,
     namespaceMap: namespaceMap,
     localApi: {} as Unigraph
@@ -132,7 +132,7 @@ export default async function startServer(client: DgraphClient) {
 
     "create_data_by_json": function (event: EventCreateDataByJson, ws: IWebsocket) {
       dgraphClient.createData(event.data).then(_ => {
-        callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
+        callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
         ws.send(makeResponse(event, true));
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})))
     },
@@ -151,8 +151,8 @@ export default async function startServer(client: DgraphClient) {
 
     "subscribe_to_object": function (event: EventSubscribeObject, ws: IWebsocket) {
       const newSub = createSubscriptionWS(event.id, ws, event.queryFragment, event.connId);
-      subscriptions.push(newSub);
-      callHooks(hooks, "after_subscription_added", {subscriptions: subscriptions});
+      serverStates.subscriptions.push(newSub);
+      callHooks(hooks, "after_subscription_added", {subscriptions: serverStates.subscriptions});
       ws.send(makeResponse(event, true));
     },
 
@@ -178,7 +178,7 @@ export default async function startServer(client: DgraphClient) {
     },
 
     "unsubscribe_by_id": function (event: EventUnsubscribeById, ws: IWebsocket) {
-      subscriptions = subscriptions.reduce((prev: Subscription[], curr: Subscription) => {
+      serverStates.subscriptions = serverStates.subscriptions.reduce((prev: Subscription[], curr: Subscription) => {
         if (curr.id === event.id) return prev;
         else {prev.push(curr); return prev}
       }, []);
@@ -247,7 +247,7 @@ export default async function startServer(client: DgraphClient) {
 
     "delete_unigraph_object": function (event: EventDeleteUnigraphObject, ws: IWebsocket) {
       dgraphClient.deleteUnigraphObject(event.uid).then(async _ => {
-        await callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
+        await callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
         ws.send(makeResponse(event, true));
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
     },
@@ -269,14 +269,14 @@ export default async function startServer(client: DgraphClient) {
       const upsert = insertsToUpsert([finalUnigraphObject]);
       console.log(JSON.stringify(upsert, null, 2))
       dgraphClient.createUnigraphUpsert(upsert).then(res => {
-        callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
+        callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
         ws.send(makeResponse(event, true, {results: res}))
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
     },
 
     "update_spo": function (event: EventUpdateSPO, ws: IWebsocket) {
       dgraphClient.updateSPO(event.uid, event.predicate, event.value).then(_ => {
-        callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
+        callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
         ws.send(makeResponse(event, true))
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
     },
@@ -302,7 +302,7 @@ export default async function startServer(client: DgraphClient) {
           let autorefObject = processAutorefUnigraphId(newObject);
           const upsert = insertsToUpsert([autorefObject]);
           dgraphClient.createUnigraphUpsert(upsert).then(_ => {
-            callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
+            callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
             ws.send(makeResponse(event, true))
           }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
         }
@@ -321,7 +321,7 @@ export default async function startServer(client: DgraphClient) {
         
         const finalUpsert = insertsToUpsert([finalUpdater]);
         dgraphClient.createUnigraphUpsert(finalUpsert).then(_ => {
-          callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
+          callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
           ws.send(makeResponse(event, true))
         }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
       }
@@ -329,14 +329,14 @@ export default async function startServer(client: DgraphClient) {
 
     "delete_relation": async function (event: EventDeleteRelation, ws: IWebsocket) {
       dgraphClient.deleteRelationbyJson({uid: event.uid, ...event.relation}).then(_ => {
-        callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
+        callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
         ws.send(makeResponse(event, true))
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
     },
 
     "delete_item_from_array": async function (event: EventDeleteItemFromArray, ws: IWebsocket) {
       localApi.deleteItemFromArray(event.uid, event.item).then((_: any) => {
-        callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
+        callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
         ws.send(makeResponse(event, true))
       }).catch((e: any) => ws.send(makeResponse(event, false, {"error": e})));
     },
@@ -350,7 +350,7 @@ export default async function startServer(client: DgraphClient) {
             "names": Object.keys(caches),
           },
           "subscription": {
-            "length": subscriptions.length,
+            "length": serverStates.subscriptions.length,
           }
         }
       }
@@ -393,7 +393,7 @@ export default async function startServer(client: DgraphClient) {
         }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})));*/
       dgraphClient.createUnigraphUpsert(upsert).then(_ => {
-          callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})
+          callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
           ws.send(makeResponse(event, true))
         }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
     },
@@ -408,7 +408,7 @@ export default async function startServer(client: DgraphClient) {
 
     "add_notification": async function (event: EventAddNotification, ws: IWebsocket) {
       await addNotification(event.item, caches, dgraphClient).catch(e => ws.send(makeResponse(event, false, {error: e})));
-      callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches});
+      callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches});
       ws.send(makeResponse(event, true));
     },
   };
@@ -440,8 +440,7 @@ export default async function startServer(client: DgraphClient) {
         }
       });
       ws.on('close', () => {
-        subscriptions = removeSubscriptionsById(subscriptions, connId);
-        serverStates.subscriptions = subscriptions;
+        serverStates.subscriptions = removeSubscriptionsById(serverStates.subscriptions, connId);
         delete connections[connId];
       })
       ws.send(JSON.stringify({
@@ -457,7 +456,7 @@ export default async function startServer(client: DgraphClient) {
 
   const debugServer = repl.start("unigraph> ");
   // @ts-ignore /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
-  debugServer.context.unigraph = {caches: caches, dgraphClient: client, server: server, subscriptions: subscriptions, localApi: localApi};
+  debugServer.context.unigraph = {caches: caches, dgraphClient: client, server: server, subscriptions: serverStates.subscriptions, localApi: localApi};
 
   return [app!, server] as const;
 }
