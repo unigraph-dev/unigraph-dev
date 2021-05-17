@@ -76,6 +76,8 @@ export function wrapUpsertFromUpdater(orig: any, queryHead: string, hasUid: stri
                 });
                 return newOrig; // Appends it
             } else {
+                // No UID available for list of primitives
+                queries.pop();
                 // Just a bunch of simple objects - we're not doing index management
                 return origNow;
             }
