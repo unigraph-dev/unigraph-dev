@@ -101,6 +101,7 @@ declare type EventSubscribeType = {
   type: "event",
   event: "subscribe_to_type",
   id: number | string,
+  all?: boolean,
   schema: string,
   connId: string,
 }

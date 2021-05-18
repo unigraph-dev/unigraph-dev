@@ -1,7 +1,7 @@
 import { Button, Typography } from "@material-ui/core"
 import React from "react"
 import { useEffectOnce } from "react-use";
-import { upload } from "../../utils"; 
+import { download, upload } from "../../utils"; 
 
 export const ConnectionWidget: React.FC = ({}) => {
 
@@ -19,6 +19,7 @@ export const ConnectionWidget: React.FC = ({}) => {
         <b>Total objects </b> {content?.dgraph?.objects} <br/>
         <b>Total schemas </b> {content?.dgraph?.schemas} <br/>
         <b>Total subscriptions </b> {content?.unigraph?.subscription?.length} <br/>
-        <Button onClick={() => upload((f: File) => {f.text().then((txt) => window.unigraph.importObjects(txt))})}>Import objects</Button>
+        <Button onClick={() => upload((f: File) => {f.text().then((txt) => window.unigraph.importObjects(txt))})}>Import objects</Button> 
+        <Button onClick={() => window.unigraph.subscribeToType('any', (data: any) => {download("unigraph_export_all.json", JSON.stringify(data))}, (new Date()).getTime(), true)}>Export all objects</Button>
     </div>
 }

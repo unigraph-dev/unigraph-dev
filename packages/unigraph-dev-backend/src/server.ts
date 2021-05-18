@@ -160,7 +160,8 @@ export default async function startServer(client: DgraphClient) {
       lock.acquire('caches/schema', function(done: (any)) {
         done(false);
         const queryAny = queries.queryAny(getRandomInt().toString())
-        const query = event.schema === "any" ? queryAny : `(func: uid(par${event.id})) 
+        const queryAnyAll = queries.queryAnyAll(getRandomInt().toString())
+        const query = event.schema === "any" ? (event.all ? queryAnyAll : queryAny) : `(func: uid(par${event.id})) 
         ${makeQueryFragmentFromType(event.schema, caches["schemas"].data)}
         par${event.id} as var(func: has(type)) @filter((NOT type(Deleted)) AND type(Entity)) @cascade {
           type @filter(eq(<unigraph.id>, "${event.schema}"))
