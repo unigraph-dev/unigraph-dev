@@ -541,6 +541,8 @@ export function dectxObjects(objects: any[], prefix = "_:"): any[] {
 
 export const byElementIndex = (a: any, b: any) => (a["_index"]?.["_value.#i"] || 0) - (b["_index"]?.["_value.#i"] || 0)
 
+export const byUpdatedAt = (a: any, b: any) => (new Date((a["_timestamp"]?.["_updatedAt"] || 0))).getTime() - (new Date((b["_timestamp"]?.["_updatedAt"] || 0))).getTime()
+
 export function unpadRecurse(object: any, visitedUids: any[] = []) {
     let result: any = undefined;
     if (typeof object === "object" && !Array.isArray(object)) {

@@ -2,7 +2,7 @@ import { Avatar, List, ListItem, ListItemAvatar, ListItemText } from "@material-
 import React from "react";
 import { registerDynamicViews, withUnigraphSubscription } from "unigraph-dev-common/lib/api/unigraph-react"
 import { pkg as emailPackage } from 'unigraph-dev-common/lib/data/unigraph.email.pkg';
-import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
+import { unpad, byUpdatedAt } from "unigraph-dev-common/lib/utils/entityUtils";
 import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
 import { DynamicViewRenderer } from "../../global";
 import * as timeago from 'timeago.js';
@@ -25,7 +25,7 @@ const EmailListBody: React.FC<{data: any[]}> = ({data}) => {
 
     return <div>
         <List>
-            {data.map(it => <ListItem button key={it.uid}>
+            {data.sort(byUpdatedAt).reverse().map(it => <ListItem button key={it.uid}>
                 <AutoDynamicView object={it} />
             </ListItem>)}
         </List>
