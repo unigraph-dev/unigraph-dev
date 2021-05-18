@@ -9,6 +9,7 @@
         "_properties": [
             {
                 "_key": "text",
+                "_isDetailed": true,
                 "_definition": {
                     "type": { "unigraph.id": "$/schema/interface/textual" }
                 }

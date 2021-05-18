@@ -264,16 +264,16 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
         if (type === '$/schema/any') {
             entries = { "uid": {}, "<expand(_predicate_)>": makePart(localSchema, depth+1) }
         } else if (type.startsWith('$/schema/')) {
-            if (schemaMap[type]?._definition?.type["unigraph.id"]?.startsWith('$/primitive/')) 
-                type = schemaMap[type]._definition.type["unigraph.id"]; // Is type alias
-            else entries = _.merge(entries, {"_value": makePart(schemaMap[type]._definition, depth+1, true)}, makePart(schemaMap[type]._definition, depth+1, true)) // Possibly non-object data
+            entries = _.merge(entries, {"_value": makePart(schemaMap[type]._definition, depth+1, true)}, makePart(schemaMap[type]._definition, depth+1, true)) // Possibly non-object data
         };
         switch (type) {
             case "$/composer/Object":
                 /* eslint-disable */ // Dependent recursive behavior
                 const properties = localSchema._properties.map((p: any) => {
-                    let ret: any = {}; ret[p._key] = makePart(p._definition, depth+1);
-                    return ret
+                    if (!p._isDetailed) {
+                        let ret: any = {}; ret[p._key] = makePart(p._definition, depth+1);
+                        return ret
+                    }
                 })
                 entries = _.merge(entries, {"_value": _.merge({}, ...properties)});
                 break;
