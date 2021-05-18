@@ -170,12 +170,10 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
             // Case 2: References another schema.
             unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options, propDesc);
         } else if (localSchema.type?.['unigraph.id']?.startsWith('$/schema/') && rawPartUnigraphType !== "$/composer/Object" && rawPartUnigraphType) {
-            // Case 2.1: References another schema with primitive type (thus no predicate)
-            noPredicate = true;
+            // Case 2.1: References another schema with primitive type (still needs predicate to indicate reference)
             unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options, propDesc);
         } else if (localSchema.type && isTypeAlias(schemaMap[localSchema.type['unigraph.id']]?._definition, rawPartUnigraphType)) {
             // Case 2.5: Is type alias (return unigraph object but keeps relationship)
-            noPredicate = true;
             unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options, propDesc);
         } else if (localSchema.type?.['unigraph.id']?.startsWith('$/composer/Union')) {
             // Case 3: Local schema is a union: we should compare against all possible choices recursively
@@ -239,6 +237,7 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
             "_timestamp": timestamp,
             ...propDesc
         };
+        if (result.type?.['unigraph.id']?.startsWith('$/schema/interface')) result['dgraph.type'] = 'Interface'
         // @ts-ignore
         if (unigraphId) result['unigraph.id'] = unigraphId;
         if (schemaMap[schemaName]._hide) result['_hide'] = true;
@@ -265,16 +264,16 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
         if (type === '$/schema/any') {
             entries = { "uid": {}, "<expand(_predicate_)>": makePart(localSchema, depth+1) }
         } else if (type.startsWith('$/schema/')) {
-            if (schemaMap[type]?._definition?.type["unigraph.id"]?.startsWith('$/primitive/')) 
-                type = schemaMap[type]._definition.type["unigraph.id"]; // Is type alias
-            else entries = _.merge(entries, {"_value": makePart(schemaMap[type]._definition, depth+1, true)}, makePart(schemaMap[type]._definition, depth+1, true)) // Possibly non-object data
+            entries = _.merge(entries, {"_value": makePart(schemaMap[type]._definition, depth+1, true)}, makePart(schemaMap[type]._definition, depth+1, true)) // Possibly non-object data
         };
         switch (type) {
             case "$/composer/Object":
                 /* eslint-disable */ // Dependent recursive behavior
                 const properties = localSchema._properties.map((p: any) => {
-                    let ret: any = {}; ret[p._key] = makePart(p._definition, depth+1);
-                    return ret
+                    if (!p._isDetailed) {
+                        let ret: any = {}; ret[p._key] = makePart(p._definition, depth+1);
+                        return ret
+                    }
                 })
                 entries = _.merge(entries, {"_value": _.merge({}, ...properties)});
                 break;
@@ -286,6 +285,7 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
                     entries = _.merge(entries, children);
                     //console.log(children)
                 });
+                entries = {"_value": entries}
                 break;
 
             case "$/composer/Array":
@@ -576,7 +576,7 @@ export function clearEmpties(o: any) {
   
       // The property is an object
       clearEmpties(o[k]); // <-- Make a recursive call on the nested object
-      if (Object.keys(o[k]).length === 0) {
+      if (Object.keys(o[k]).length === 0 && JSON.stringify(o[k]).length <= 2) {
         delete o[k]; // The object had no properties, so delete that property
       }
     }

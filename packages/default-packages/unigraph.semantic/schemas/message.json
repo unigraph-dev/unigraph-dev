@@ -1,0 +1,57 @@
+{
+    "dgraph.type": "Type",
+    "_definition": {
+        "type": { "unigraph.id": "$/composer/Object" },
+        "_parameters": {
+            "_indexedBy": { "unigraph.id": "$/primitive/string" },
+            "_indexes": ["name"]
+        },
+        "_properties": [
+            {
+                "_key": "date_received",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/datetime" }
+                }
+            },
+            {
+                "_key": "sender",
+                "_definition": {
+                    "type": {
+                        "unigraph.id": "$/composer/Array"
+                    },
+                    "_parameters": {
+                        "_element": {
+                            "type": { "unigraph.id": "$/schema/person" }
+                        }
+                    }
+                }
+            },
+            {
+                "_key": "recipient",
+                "_definition": {
+                    "type": {
+                        "unigraph.id": "$/composer/Array"
+                    },
+                    "_parameters": {
+                        "_element": {
+                            "type": { "unigraph.id": "$/schema/person" }
+                        }
+                    }
+                }
+            },
+            {
+                "_key": "cc_recipient",
+                "_definition": {
+                    "type": {
+                        "unigraph.id": "$/composer/Array"
+                    },
+                    "_parameters": {
+                        "_element": {
+                            "type": { "unigraph.id": "$/schema/person" }
+                        }
+                    }
+                }
+            }
+        ]
+    }
+}

@@ -31,6 +31,7 @@ import RSSReader from './examples/rss_reader';
 import { Bookmarks } from './examples/bookmarks/Bookmarks';
 import { NotificationCenter } from './components/UnigraphCore/Notification';
 import { Inbox } from './components/UnigraphInbox/Inbox';
+import { EmailList } from './examples/email/Email';
 
 // TODO: custom theme
 const useStyles = makeStyles(theme => ({
@@ -76,6 +77,10 @@ export const pages: Record<string, any> = {
   'about': {
     'constructor': () => <About />,
     'name': 'About',
+  },
+  'email': {
+    'constructor': () => <EmailList />,
+    'name': 'Email',
   },
   'library': {
     'constructor': () => <UserLibraryAll />,

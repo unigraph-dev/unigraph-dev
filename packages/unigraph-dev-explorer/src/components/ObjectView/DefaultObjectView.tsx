@@ -188,7 +188,7 @@ const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options }) => {
             break;
     }
 
-    return <div style={{display: "flex", flexDirection: "row"}}>
+    return <div style={{display: "flex", flexDirection: "row", width: "100%"}}>
         {ContextMenuButton} {ContextMenu}
         <div style={{alignSelf: "center",width: "100%",
                 alignItems: "center",

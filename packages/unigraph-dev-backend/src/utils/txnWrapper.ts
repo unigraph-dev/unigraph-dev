@@ -84,11 +84,12 @@ export function wrapUpsertFromUpdater(orig: any, queryHead: string, hasUid: stri
         } else if (typeof origNow == 'object' && !Array.isArray(origNow)) {
             return Object.fromEntries([
                 ...Object.entries(origNow).map(([key, value]) => {
-                    if (key !== '_value[') {
+                    if (key !== '_value[' && key !== '$ref' && key !== 'type') {
                         return [key, recurse(origNow[key], buildQuery(thisUid, key, hasUid))]
-                    } else {
+                    } else if (key !== '$ref' && key !== 'type') {
                         return [key, recurse(origNow[key], thisUid)]
-                    }
+                    } else {return [key, value]} // Don't process `$ref` because we need it later or `type` because it's overwritten
+                    // TODO: These matches are of lowest priority - so we should allow the upsert even if these objects are not used
                 }),
                 ["uid",  hasUid ? hasUid : `uid(${thisUid})`] // Must have UID to do anything with it
             ]);
@@ -130,6 +131,7 @@ export function insertsToUpsert(inserts: any[]): UnigraphUpsert {
                 } 
     
                 const query = currentObject['$ref'].query;
+                delete currentObject['$ref'];
                 // FIXME: Some objects (e.g. with standoff properties or type aliases) doesn't use `_value`
                 const [upsertObject, upsertQueries] = wrapUpsertFromUpdater({"_value": currentObject['_value']}, refUid);
 
@@ -143,12 +145,13 @@ export function insertsToUpsert(inserts: any[]): UnigraphUpsert {
                 }
                 
                 currentObject = Object.assign(currentObject, {"uid": `uid(${refUid})`, ...upsertObject})
-                delete currentObject['$ref'];
                 const append: any = {uid: `uid(${refUid})`}
                 query.forEach(({key, value}: any) => {if (key === "unigraph.id") append[key] = value});
                 appends.push(append)
             }
         }
+        //console.log('++++++++++++++++++++++++++++++++++')
+        //console.log(JSON.stringify(currentObject, null, 4))
     
         const objectValues = Object.values(currentObject);
         for(let i=0; i<objectValues.length; ++i) {

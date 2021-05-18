@@ -12,7 +12,8 @@
             {"id": "interface/textual", "src": "schemas/textual.json"},
             {"id": "interface/semantic", "src": "schemas/semantic.json"},
             {"id": "semantic_properties", "src": "schemas/semantic_properties.json"},
-            {"id": "creative_work", "src": "schemas/creative_work.json"}
+            {"id": "creative_work", "src": "schemas/creative_work.json"},
+            {"id": "message", "src": "schemas/message.json"}
         ],
         "executables": [
             { 

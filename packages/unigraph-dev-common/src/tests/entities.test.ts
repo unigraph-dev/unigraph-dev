@@ -64,7 +64,7 @@ describe('should convert references to `$ref` syntax using Autoref', () => {
             .toEqual(testEntities_1['todo-entity-test-target-ref'])
     });
 });
-
+/*
 /// Removed due to recursion depth variance in production
 describe('should build database query strings based on schema', () => {
     test('should build database query for simple objects', () => {
@@ -77,7 +77,7 @@ describe('should build database query strings based on schema', () => {
     test('should build database query for $/schema/any', () => {
         expect(makeQueryFragmentFromType("$/schema/list", testEntities_2['test-2-schemas'], 6, false)).toEqual(testEntities_2['expected']['withany'])
     })
-})
+})*/
 
 describe('should process objects with schema that includes $/schema/any', () => {
     let schemasAny = JSON.parse(JSON.stringify(schemas2));
