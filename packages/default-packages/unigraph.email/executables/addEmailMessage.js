@@ -8,7 +8,7 @@ const dest = parsed.map((el) => {
         name: el.subject,
         message_id: el.messageId,
         message: {
-            date_received: el.date,
+            date_received: el.date.toISOString(),
             sender: [el.from?.text],
             recipient: [el.to?.text],
         },
@@ -19,5 +19,5 @@ const dest = parsed.map((el) => {
 })
 
 console.log(dest[0]);
-await unigraph.addObject(dest[0]);
-await unigraph.addObject(dest[0]);
+await unigraph.addObject(dest[0], '$/schema/email_message');
+await unigraph.addObject(dest[0], '$/schema/email_message');

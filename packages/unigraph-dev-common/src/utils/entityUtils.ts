@@ -237,6 +237,7 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
             "_timestamp": timestamp,
             ...propDesc
         };
+        if (result.type?.['unigraph.id']?.startsWith('$/schema/interface')) result['dgraph.type'] = 'Interface'
         // @ts-ignore
         if (unigraphId) result['unigraph.id'] = unigraphId;
         if (schemaMap[schemaName]._hide) result['_hide'] = true;
@@ -284,6 +285,7 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
                     entries = _.merge(entries, children);
                     //console.log(children)
                 });
+                entries = {"_value": entries}
                 break;
 
             case "$/composer/Array":
@@ -574,7 +576,7 @@ export function clearEmpties(o: any) {
   
       // The property is an object
       clearEmpties(o[k]); // <-- Make a recursive call on the nested object
-      if (Object.keys(o[k]).length === 0) {
+      if (Object.keys(o[k]).length === 0 && JSON.stringify(o[k]).length <= 2) {
         delete o[k]; // The object had no properties, so delete that property
       }
     }
