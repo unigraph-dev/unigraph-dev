@@ -1,5 +1,5 @@
 import { Avatar, Grid, Typography } from "@material-ui/core"
-import { Apps, Bookmarks, Inbox, PlaylistAddCheck, RssFeed } from "@material-ui/icons"
+import { Apps, Bookmarks, Email, Inbox, PlaylistAddCheck, RssFeed } from "@material-ui/icons"
 import React from "react"
 import { NavigationContext } from "../../utils"
 
@@ -27,6 +27,11 @@ export const AppLibraryWidget = ({}) => {
                 onClick={() =>navigator('/inbox')}>
                 <Avatar><Inbox/></Avatar>
                 Inbox
+            </div>
+            <div style={{display: "flex", flexDirection: "column", alignItems: "center", padding: "16px"}}
+                onClick={() =>navigator('/email')}>
+                <Avatar><Email/></Avatar>
+                Email
             </div>
             <div style={{display: "flex", flexDirection: "column", alignItems: "center", padding: "16px"}}
                 onClick={() =>navigator('/app-library')}>

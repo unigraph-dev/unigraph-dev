@@ -4,6 +4,13 @@
     "description": "Simple email client with Unigraph.",
     "unigraph": {
         "schemas": [{"id": "email_message", "src": "schemas/email_message.json"}],
+        "executables": [{
+            "name": "Add email (.eml) to Unigraph",
+            "env": "routine/js",
+            "id": "add-email",
+            "src": "executables/addEmailMessage.js",
+            "editable": true
+        }],
         "package_name": "unigraph.email"
     }
 }
