@@ -1,0 +1,46 @@
+{
+    "dgraph.type": "Type",
+    "_definition": {
+        "type": { "unigraph.id": "$/composer/Object" },
+        "_parameters": {
+            "_indexedBy": { "unigraph.id": "$/primitive/string" },
+            "_indexes": ["name"]
+        },
+        "_properties": [
+            {
+                "_key": "name",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/interface/textual" }
+                }
+            },
+            {
+                "_key": "message",
+                "_propertyType": "inheritance",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/message" }
+                }
+            },
+            {
+                "_key": "content",
+                "_propertyType": "inheritance",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/creative_work" }
+                }
+            },
+            {
+                "_key": "message_id",
+                "_unique": true,
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                }
+            },
+            {
+                "_key": "semantic_properties",
+                "_propertyType": "inheritance",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/semantic_properties" }
+                }
+            }
+        ]
+    }
+}

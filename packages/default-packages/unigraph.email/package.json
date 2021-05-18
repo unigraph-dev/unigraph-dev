@@ -1,0 +1,9 @@
+{
+    "displayName": "Unigraph Email",
+    "version": "0.0.1",
+    "description": "Simple email client with Unigraph.",
+    "unigraph": {
+        "schemas": [{"id": "email_message", "src": "schemas/email_message.json"}],
+        "package_name": "unigraph.email"
+    }
+}
