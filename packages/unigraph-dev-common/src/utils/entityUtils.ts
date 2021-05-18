@@ -226,10 +226,15 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
         const localSchema = schemaMap[schemaName]._definition
         const unigraphId = raw?.['unigraph.id'];
         if (unigraphId) delete raw?.['unigraph.id'];
+        let timestamp: any = {};
+        if (raw._timestamp) {
+            timestamp = raw._timestamp;
+            delete raw._timestamp;
+        }
         const bodyObject: Record<string, any> = padding ? buildUnigraphEntityPart(raw, options, schemaMap, localSchema, {}) : raw
         const now = new Date().toISOString();
-        let timestamp: any = {_updatedAt: now}
-        if (!options.isUpdate) timestamp._createdAt = now;
+        timestamp = {_updatedAt: now, ...timestamp};
+        if (!options.isUpdate && !timestamp._createdAt) timestamp._createdAt = now;
         const result = {
             "type": makeUnigraphId(schemaName) as UnigraphIdType<`$/schema/${string}`>,
             "dgraph.type": "Entity",
