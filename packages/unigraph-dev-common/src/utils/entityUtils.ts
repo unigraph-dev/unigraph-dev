@@ -226,10 +226,15 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
         const localSchema = schemaMap[schemaName]._definition
         const unigraphId = raw?.['unigraph.id'];
         if (unigraphId) delete raw?.['unigraph.id'];
+        let timestamp: any = {};
+        if (raw._timestamp) {
+            timestamp = raw._timestamp;
+            delete raw._timestamp;
+        }
         const bodyObject: Record<string, any> = padding ? buildUnigraphEntityPart(raw, options, schemaMap, localSchema, {}) : raw
         const now = new Date().toISOString();
-        let timestamp: any = {_updatedAt: now}
-        if (!options.isUpdate) timestamp._createdAt = now;
+        timestamp = {_updatedAt: now, ...timestamp};
+        if (!options.isUpdate && !timestamp._createdAt) timestamp._createdAt = now;
         const result = {
             "type": makeUnigraphId(schemaName) as UnigraphIdType<`$/schema/${string}`>,
             "dgraph.type": "Entity",
@@ -535,6 +540,8 @@ export function dectxObjects(objects: any[], prefix = "_:"): any[] {
 }
 
 export const byElementIndex = (a: any, b: any) => (a["_index"]?.["_value.#i"] || 0) - (b["_index"]?.["_value.#i"] || 0)
+
+export const byUpdatedAt = (a: any, b: any) => (new Date((a["_timestamp"]?.["_updatedAt"] || 0))).getTime() - (new Date((b["_timestamp"]?.["_updatedAt"] || 0))).getTime()
 
 export function unpadRecurse(object: any, visitedUids: any[] = []) {
     let result: any = undefined;

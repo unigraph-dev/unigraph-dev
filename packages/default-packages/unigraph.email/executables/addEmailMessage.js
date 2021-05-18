@@ -23,6 +23,9 @@ const dest = parsed.map((el) => {
         content: {
             abstract: el?.text?.slice(0, 100) || "No preview available",
             text: el.html || el.textAsHtml || el.text
+        },
+        _timestamp: {
+            _updatedAt: el.date.toISOString()
         }
     }
 })
