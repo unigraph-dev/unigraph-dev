@@ -170,12 +170,10 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
             // Case 2: References another schema.
             unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options, propDesc);
         } else if (localSchema.type?.['unigraph.id']?.startsWith('$/schema/') && rawPartUnigraphType !== "$/composer/Object" && rawPartUnigraphType) {
-            // Case 2.1: References another schema with primitive type (thus no predicate)
-            noPredicate = true;
+            // Case 2.1: References another schema with primitive type (still needs predicate to indicate reference)
             unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options, propDesc);
         } else if (localSchema.type && isTypeAlias(schemaMap[localSchema.type['unigraph.id']]?._definition, rawPartUnigraphType)) {
             // Case 2.5: Is type alias (return unigraph object but keeps relationship)
-            noPredicate = true;
             unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options, propDesc);
         } else if (localSchema.type?.['unigraph.id']?.startsWith('$/composer/Union')) {
             // Case 3: Local schema is a union: we should compare against all possible choices recursively
