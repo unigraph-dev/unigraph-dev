@@ -197,9 +197,9 @@ export function insertsToUpsert(inserts: any[]): UnigraphUpsert {
         if (origin && !Array.isArray(origin)) origin = [origin];
         insertsToUpsertRecursive(insertsCopy, appends, queries, curr, origin);
     }
-    console.log("Upsert processed!")
-    const util = require('util')
-    console.log(util.inspect({queries: queries, mutations: insertsCopy, appends: appends}, false, null, true /* enable colors */))
+    //console.log("Upsert processed!")
+    //const util = require('util')
+    //console.log(util.inspect({queries: queries, mutations: insertsCopy, appends: appends}, false, null, true /* enable colors */))
     return {queries: queries, mutations: insertsCopy, appends: appends}
 }
 
