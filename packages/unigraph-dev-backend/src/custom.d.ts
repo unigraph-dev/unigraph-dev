@@ -206,3 +206,11 @@ declare type EventAddNotification = {
   id: number,
   item: UnigraphNotification
 }
+
+declare type EventGetSearchResults = {
+  type: "event",
+  event: "get_search_results",
+  id: number,
+  query: string,
+  method: string
+}

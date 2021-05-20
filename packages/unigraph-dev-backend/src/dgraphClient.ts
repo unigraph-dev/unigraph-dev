@@ -264,6 +264,26 @@ export default class DgraphClient {
   `, {}))[0]
   }
 
+  async getTextSearchResults(search: string) {
+    const res = (await this.queryDgraph(`
+    query {
+			q(func:alloftext(<_value.%>, "${search}")) {
+   			uid
+    		<_value.%>
+    		<unigraph.origin> {
+					uu as uid
+        }
+      }
+      qq(func: uid(uu)) @recurse(depth: 10) {
+        uid
+        unigraph.id
+        expand(_userpredicate_)
+      }
+    
+    }`));
+    return {results: res[0] as any[], entities: res[1] as any[]};
+  }
+
   async getPackages() {
     return this.queryData<any[]>(`
     query findByName() {

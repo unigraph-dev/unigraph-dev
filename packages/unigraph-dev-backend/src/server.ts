@@ -3,7 +3,7 @@ import WebSocket from 'ws';
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import DgraphClient, { queries } from './dgraphClient';
 import { insertsToUpsert } from './utils/txnWrapper';
-import { EventAddNotification, EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteItemFromArray, EventDeleteRelation, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventGetPackages, EventGetSchemas, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventResponser, EventRunExecutable, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
+import { EventAddNotification, EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteItemFromArray, EventDeleteRelation, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventGetPackages, EventGetSchemas, EventGetSearchResults, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventResponser, EventRunExecutable, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
 import { buildUnigraphEntity, getUpsertFromUpdater, makeQueryFragmentFromType, processAutoref, dectxObjects, unpad, processAutorefUnigraphId, isPaddedObject } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { addUnigraphPackage, checkOrCreateDefaultDataModel, createPackageCache, createSchemaCache } from './datamodelManager';
 import { Cache } from './caches';
@@ -417,6 +417,12 @@ export default async function startServer(client: DgraphClient) {
       callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches});
       ws.send(makeResponse(event, true));
     },
+
+    "get_search_results": async function (event: EventGetSearchResults, ws: IWebsocket) {
+      const res = await serverStates.localApi.getSearchResults(event.query, event.method)
+        .catch((e: any) => ws.send(makeResponse(event, false, {"error": e})));
+      ws.send(makeResponse(event, true, {results: res}));
+    }
   };
 
   const server = new WebSocket.Server({
