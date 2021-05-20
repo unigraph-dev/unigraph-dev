@@ -111,11 +111,11 @@ export const AutoDynamicView: DynamicViewRenderer = ({ object, callbacks }) => {
 
     const [, drop] = useDrop(() => ({
           accept: ["$/schema/tag", "$/schema/interface/textual"],
-          drop: (item, monitor) => {
+          drop: (item: {uid: string}, monitor) => {
             window.unigraph.updateObject(object?.uid, {
                 semantic_properties: {
                     children: [{
-                        uid: item
+                        uid: item.uid
                     }]
                 }
             })
