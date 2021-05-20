@@ -136,9 +136,8 @@ export function insertsToUpsert(inserts: any[]): UnigraphUpsert {
                 if (currentObject.uid && currentObject.uid.startsWith('_:')) {
                     // definitely switch to same UID import
                     refUid = "unigraphref" + currentObject.uid.slice(2)
-                    currentOrigin?.map(el => {if (el?.uid === currentObject.uid) el.uid = `uid(${refUid})`;})
                 } 
-    
+                currentOrigin?.map(el => {if (el?.uid === currentObject.uid) el.uid = `uid(${refUid})`;})
                 const query = currentObject['$ref'].query;
                 delete currentObject['$ref'];
                 // FIXME: Some objects (e.g. with standoff properties or type aliases) doesn't use `_value`
@@ -166,7 +165,8 @@ export function insertsToUpsert(inserts: any[]): UnigraphUpsert {
             if (!currentObject.uid) currentObject.uid = genUid.next().value;
             if (!currentObject['unigraph.origin']) currentObject['unigraph.origin'] = {uid: currentObject.uid};
             if (currentObject['unigraph.origin'] && !Array.isArray(currentObject['unigraph.origin'])) currentObject['unigraph.origin'] = [currentObject['unigraph.origin']];
-            currentOrigin = currentObject['unigraph.origin'];
+            if (!currentOrigin) currentOrigin = [];
+            currentOrigin.push(...currentObject['unigraph.origin']);
         }
     
         const objectValues = Object.values(currentObject);
