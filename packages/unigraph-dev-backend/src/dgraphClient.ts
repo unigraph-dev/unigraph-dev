@@ -218,7 +218,7 @@ export default class DgraphClient {
   async queryUID(uid: string): Promise<any> {
     const res = await this.dgraphClient
       .newTxn({ readOnly: true })
-      .queryWithVars('query yo($a: string) { e(func: uid($a)) @recurse {uid expand(_predicate_)} }', {$a: uid});
+      .queryWithVars('query yo($a: string) { e(func: uid($a)) @recurse {uid unigraph.id expand(_userpredicate_)} }', {$a: uid});
     return Object.values(res.getJson())[0];
   }
 
