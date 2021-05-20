@@ -82,5 +82,54 @@
                 }
             }
         }
+    },
+    "typealias-todo-expected-uidref": {
+        "type": {
+            "unigraph.id": "$/schema/todo"
+        },
+        "dgraph.type": "Entity",
+        "_timestamp": {
+            "_createdAt": "1970-01-01T00:00:00.000Z",
+            "_updatedAt": "1970-01-01T00:00:00.000Z"
+        },
+        "_value": {
+            "name": {
+                "_value.%": "Hello world"
+            },
+            "done": {
+                "_value.!": false
+            },
+            "semantic_properties": {
+                "_propertyType": "inheritance",
+                "_value": {
+                    "_propertyType": "inheritance",
+                    "type": {
+                        "unigraph.id": "$/schema/semantic_properties"
+                    },
+                    "dgraph.type": "Entity",
+                    "_timestamp": {
+                        "_createdAt": "1970-01-01T00:00:00.000Z",
+                        "_updatedAt": "1970-01-01T00:00:00.000Z"
+                    },
+                    "_value": {
+                        "tags": {
+                            "type": {
+                                "unigraph.id": "$/composer/Array"
+                            },
+                            "_value[": [
+                                {
+                                    "_index": {
+                                        "_value.#i": 0
+                                    },
+                                    "_value": {
+                                        "uid": "0x1"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        }
     }
 }

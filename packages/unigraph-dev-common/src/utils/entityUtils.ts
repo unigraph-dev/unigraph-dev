@@ -81,7 +81,7 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
         // we allow any rawPart by setting localSchema type to that of object.
         localSchema = JSON.parse(JSON.stringify(localSchema));
         localSchema.type['unigraph.id'] = rawPart.type['unigraph.id'];
-    } else if (localSchema.type?.['unigraph.id'] === "$/schema/any") {
+    } else if (localSchema.type?.['unigraph.id'] === "$/schema/any" && !(Object.keys(rawPart).length === 1 && typeof rawPart.uid === "string" && rawPart.uid.startsWith("0x"))) {
         throw new TypeError('`$/schema/any` directive must have a corresponding type declaration in object!')
     }
 
@@ -162,8 +162,7 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
                 default:
                     break;
             }
-        } else if (localSchema.type?.['unigraph.id']?.startsWith('$/schema/') && rawPartUnigraphType === "$/composer/Object" && 
-            Object.keys(rawPart).length === 1 && typeof rawPart.uid === "string" && rawPart.uid.startsWith("0x")) {
+        } else if (Object.keys(rawPart).length === 1 && typeof rawPart.uid === "string" && rawPart.uid.startsWith("0x")) {
             // Case 2: References another schema using UID, passing through.
             unigraphPartValue = rawPart
         } else if (localSchema.type?.['unigraph.id']?.startsWith('$/schema/') && rawPartUnigraphType === "$/composer/Object" ) {

@@ -1,6 +1,7 @@
 import { Button, ButtonGroup, Checkbox, FormControlLabel, IconButton, List, ListItemIcon, ListItemText, Typography } from '@material-ui/core';
 import { MoreVert, PlayArrow } from '@material-ui/icons';
 import React, { FC, ReactElement } from 'react';
+import { useDrag, useDrop} from 'react-dnd';
 import ReactJson, { InteractionProps } from 'react-json-view';
 import { useEffectOnce } from 'react-use';
 import { prepareExportObjects, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
@@ -100,13 +101,31 @@ window.DynamicViewsDetailed = DynamicViews;
 
 export const AutoDynamicView: DynamicViewRenderer = ({ object, callbacks }) => {
 
-    const domEl = React.useRef(null);
-    // @ts-ignore
-    window.pp = domEl;
+    const [{ isDragging }, drag] = useDrag(() => ({
+        type: object['type']['unigraph.id'] || "$/schema/any",
+        item: {uid: object?.uid},
+        collect: (monitor) => ({
+          isDragging: !!monitor.isDragging()
+        })
+    }))
 
-    useEffectOnce(() => {
-        // @ts-expect-error: 
-        domEl.current.addEventListener('contextmenu', (event: any) => {
+    const [, drop] = useDrop(() => ({
+          accept: ["$/schema/tag", "$/schema/interface/textual"],
+          drop: (item: {uid: string}, monitor) => {
+            window.unigraph.updateObject(object?.uid, {
+                semantic_properties: {
+                    children: [{
+                        uid: item.uid
+                    }]
+                }
+            })
+          },
+    }))
+
+    const attach = React.useCallback((domElement) => {
+        drag(domElement);
+        drop(domElement);
+        if (!isDragging) domElement?.addEventListener('contextmenu', (event: any) => {
             event.preventDefault();
             window.unigraph.getState('global/contextMenu').setValue({
                 anchorPosition: {top: event.y, left: event.x},
@@ -116,9 +135,9 @@ export const AutoDynamicView: DynamicViewRenderer = ({ object, callbacks }) => {
                 show: true
             })
         })
-    })
+    }, [isDragging, drag])
 
-    //console.log(object)
+    //console.log(object) 
     let el;
     if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViews).includes(object.type['unigraph.id'])) {
         el = React.createElement(DynamicViews[object.type['unigraph.id']], {
@@ -127,7 +146,7 @@ export const AutoDynamicView: DynamicViewRenderer = ({ object, callbacks }) => {
     } else {
         el = <StringObjectViewer object={object}/>
     }
-    return <div id={"object-view-"+object?.uid} style={{display: "contents"}} ref={domEl}>
+    return <div id={"object-view-"+object?.uid} style={{opacity: isDragging ? 0.5 : 1, display: "inline-flex", alignItems: "center"}} ref={attach}>
         {el}
     </div>;
 }

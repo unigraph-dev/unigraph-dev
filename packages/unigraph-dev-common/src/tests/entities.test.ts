@@ -114,3 +114,12 @@ describe('should unpad Unigraph entities', () => {
         expect(unpad(testEntities_6['before-unpad-timestamp'])).toEqual(testEntities_6['after-unpad-timestamp'])
     })
 })
+
+describe('should pass through direct UID references', () => {
+    let schemasAny = JSON.parse(JSON.stringify(schemas2));
+    schemasAny['$/schema/semantic_properties'] = testEntities_5['$/schema/semantic_properties'];
+    test('should yield pure UID references without changing anything', () => {
+        expect(buildUnigraphEntity(testEntities_5['typealias-todo-object-uidref'], "$/schema/todo", schemasAny))
+            .toEqual(testEntities_4['typealias-todo-expected-uidref'])
+    })
+})
