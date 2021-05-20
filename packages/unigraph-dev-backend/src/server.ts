@@ -297,7 +297,7 @@ export default async function startServer(client: DgraphClient) {
     "update_object": async function (event: EventUpdateObject, ws: IWebsocket) {
       const newUid = event.uid ? event.uid : event.newObject.uid
       // Get new object's unigraph.origin first
-      let origin = event.newObject['unigraph.origin'] ? event.newObject['unigraph.origin'] : (await dgraphClient.queryData<any>(`query { entity(func: uid(${newUid})) { <unigraph.origin> }}`, []))[0]?.['unigraph.origin']
+      let origin = event.newObject['unigraph.origin'] ? event.newObject['unigraph.origin'] : (await dgraphClient.queryData<any>(`query { entity(func: uid(${newUid})) { <unigraph.origin> { uid }}}`, []))[0]?.['unigraph.origin']
       if (!Array.isArray(origin)) origin = [origin];
       if (typeof event.upsert === "boolean" && !event.upsert) {
         if (!isPaddedObject(event.newObject)) { 
@@ -323,7 +323,7 @@ export default async function startServer(client: DgraphClient) {
           const updater = {...event.newObject, uid: event.uid ? event.uid : event.newObject.uid, 'unigraph.origin': origin};
           finalUpdater = processAutorefUnigraphId(updater);
         }
-        
+
         const finalUpsert = insertsToUpsert([finalUpdater]);
         dgraphClient.createUnigraphUpsert(finalUpsert).then(_ => {
           callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
@@ -405,7 +405,7 @@ export default async function startServer(client: DgraphClient) {
     },
 
     "run_executable": async function (event: EventRunExecutable, ws: IWebsocket) {
-      const exec = caches["executables"].data[event['unigraph.id']];
+      const exec = serverStates.caches["executables"].data[event['unigraph.id']];
       buildExecutable(exec, {"hello": "ranfromExecutable", params: event.params, definition: exec}, localApi)()
         .then((ret: any) => ws.send(makeResponse(event, true, {returns: ret})));
     },
@@ -468,7 +468,7 @@ export default async function startServer(client: DgraphClient) {
 
   const debugServer = repl.start("unigraph> ");
   // @ts-ignore /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
-  debugServer.context.unigraph = {caches: caches, dgraphClient: client, server: server, subscriptions: serverStates.subscriptions, localApi: localApi};
+  debugServer.context.unigraph = {caches: caches, dgraphClient: client, server: server, subscriptions: serverStates.subscriptions, localApi: localApi, serverStates: serverStates};
 
   return [app!, server] as const;
 }

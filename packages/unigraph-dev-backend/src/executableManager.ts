@@ -36,6 +36,8 @@ export function createExecutableCache(client: DgraphClient, context: Partial<Exe
 
     cache.updateNow = async () => { 
         const newdata = await client.getExecutables();
+        const newdata2 = await client.getSchemasFromTable();
+        
         cache.data = newdata.reduce((prev, obj) => {
             obj = unpad(obj);
             if (obj && obj["unigraph.id"]) {
@@ -47,8 +49,8 @@ export function createExecutableCache(client: DgraphClient, context: Partial<Exe
             return prev;
         }, {})
 
-        Object.entries(states.namespaceMap).forEach(([k, v]: any) => {
-            if (k.startsWith("$/executable/")) cache.data[k] = cache.data[v.uid]
+        Object.entries(newdata2).forEach(([k, v]) => {
+            if (k.startsWith('$/executable') && !cache.data[k]) cache.data[k] = unpad(v);
         })
         
         initExecutables(Object.entries(cache.data), context, unigraph, schedule)
