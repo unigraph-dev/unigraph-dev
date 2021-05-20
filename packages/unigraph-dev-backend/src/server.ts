@@ -91,7 +91,7 @@ export default async function startServer(client: DgraphClient) {
     })
   }, `(func: eq(<unigraph.id>, "$/meta/namespace_map")) {
     uid
-    expand(_predicate_) {
+    expand(_userpredicate_) {
       uid
   }}`);
 
@@ -172,7 +172,7 @@ export default async function startServer(client: DgraphClient) {
     },
 
     "subscribe_to_query": function (event: EventSubscribeObject, ws: IWebsocket) {
-      const query = `(func: uid(par${event.id})) @recurse {uid expand(_predicate_)}
+      const query = `(func: uid(par${event.id})) @recurse {uid unigraph.id expand(_userpredicate_)}
       par${event.id} as var${event.queryFragment}`
       if (verbose >= 2) console.log(query)
       eventRouter["subscribe_to_object"]({...event, queryFragment: query}, ws)

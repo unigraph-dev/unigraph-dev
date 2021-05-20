@@ -165,7 +165,7 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
                 else reject(response);
             };
             subscriptions[id] = (result: any) => callback(result[0]);
-            const frag = `(func: uid(${uid})) @recurse { uid expand(_predicate_) }`
+            const frag = `(func: uid(${uid})) @recurse { uid unigraph.id expand(_userpredicate_) }`
             sendEvent(connection, "subscribe_to_object", {queryFragment: frag}, id);
         }), 
         subscribeToQuery: (fragment, callback, eventId = undefined) => new Promise((resolve, reject) => {
