@@ -13,7 +13,7 @@ import { getParameters, NavigationContext } from "./utils";
 import { Button, Container, CssBaseline } from "@material-ui/core";
 import { isJsonString } from "unigraph-dev-common/lib/utils/utils";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
-import { Star, StarOutlined } from "@material-ui/icons";
+import { Search, Star, StarOutlined, Menu } from "@material-ui/icons";
 import { ContextMenu } from "./components/UnigraphCore/ContextMenu";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from 'react-dnd-html5-backend'
@@ -106,6 +106,15 @@ export function WorkSpace(this: any) {
                     "name": "App Drawer",
                     "id": "app-drawer",
 					"component": "/components/appdrawer",
+                },
+                {
+					"type": "tab",
+					"enableClose":false,
+                    "minSize": 700,
+                    "maxSize": 700,
+                    "name": "Search",
+                    "id": "search-pane",
+					"component": "/pages/search",
 				}
 			]
 		}],
@@ -152,6 +161,12 @@ export function WorkSpace(this: any) {
             <FlexLayout.Layout model={model} factory={factory} popoutURL={"./popout_page.html"} onRenderTab={(node: TabNode, renderValues: any) => {
                 setTitleOnRenderTab(model);
                 const nodeId = node.getId();
+                if (nodeId === "app-drawer") {
+                    renderValues.content = <Menu/>;
+                }
+                if (nodeId === "search-pane") {
+                    renderValues.content = <Search/>;
+                }
                 if (node.isVisible() && nodeId !== "app-drawer" && nodeId !== "dashboard") {
                     renderValues.buttons.push(<div style={{zIndex: 999, transform: "scale(0.7)"}} onClick={async () => {
                         const config = node.getConfig();
