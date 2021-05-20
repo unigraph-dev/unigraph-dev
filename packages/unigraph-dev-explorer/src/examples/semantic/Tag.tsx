@@ -9,7 +9,7 @@ import { registerDynamicViews } from 'unigraph-dev-common/lib/api/unigraph-react
 export const Tag: DynamicViewRenderer = ({data, callbacks}) => {
     if (data['_value']) data = unpad(data);
     const tag = data;
-    const bgc = tag.color?.startsWith('#') ? tag.color : "unset";
+    const bgc = (tag?.color?.startsWith && tag.color.startsWith('#')) ? tag.color : "unset";
     return <NavigationContext.Consumer>
         {(navigator) => <Chip
             size="small"
