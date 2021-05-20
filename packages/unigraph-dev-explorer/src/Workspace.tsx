@@ -15,6 +15,8 @@ import { isJsonString } from "unigraph-dev-common/lib/utils/utils";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
 import { Star, StarOutlined } from "@material-ui/icons";
 import { ContextMenu } from "./components/UnigraphCore/ContextMenu";
+import { DndProvider } from "react-dnd";
+import { HTML5Backend } from 'react-dnd-html5-backend'
 
 export function WorkspacePageComponent({ children }: any) {
     return <Container maxWidth="lg" disableGutters style={{paddingTop: "12px"}}>
@@ -146,44 +148,46 @@ export function WorkSpace(this: any) {
         <div id="global-elements">
             <ContextMenu />
         </div>
-        <FlexLayout.Layout model={model} factory={factory} popoutURL={"./popout_page.html"} onRenderTab={(node: TabNode, renderValues: any) => {
-            setTitleOnRenderTab(model);
-            const nodeId = node.getId();
-            if (node.isVisible() && nodeId !== "app-drawer" && nodeId !== "dashboard") {
-                renderValues.buttons.push(<div style={{zIndex: 999, transform: "scale(0.7)"}} onClick={async () => {
-                    const config = node.getConfig();
-                    delete config.undefine;
-                    const uid = await window.unigraph.addObject({
-                        name: node.getName(),
-                        env: "react-explorer",
-                        view: node.getComponent(),
-                        props: JSON.stringify({config: config}) 
-                    }, "$/schema/view");
-                    await window.unigraph.runExecutable("$/package/unigraph.core/0.0.1/executable/add-item-to-list", {
-                        item: uid[0],
-                        where: "$/entity/favorite_bar"
-                    })
-                }}><StarOutlined></StarOutlined></div>) 
-            }
-            
-            renderValues.buttons.push(<div id={"tabId"+nodeId}></div>);
-            setTimeout(() => {
-                const el = document.getElementById('tabId'+nodeId);
-                if (el && el.parentElement && node.isEnableClose()) {
-                    el.parentElement.addEventListener("mousedown", (event) => {
-                        if (typeof event === 'object') {
-                            switch (event.button) {
-                              case 1:
-                                model.doAction(Actions.deleteTab(nodeId))
-                                break;
-                              default:
-                                break;
-                            }
-                          }
-                    })
+        <DndProvider backend={HTML5Backend}>
+            <FlexLayout.Layout model={model} factory={factory} popoutURL={"./popout_page.html"} onRenderTab={(node: TabNode, renderValues: any) => {
+                setTitleOnRenderTab(model);
+                const nodeId = node.getId();
+                if (node.isVisible() && nodeId !== "app-drawer" && nodeId !== "dashboard") {
+                    renderValues.buttons.push(<div style={{zIndex: 999, transform: "scale(0.7)"}} onClick={async () => {
+                        const config = node.getConfig();
+                        delete config.undefine;
+                        const uid = await window.unigraph.addObject({
+                            name: node.getName(),
+                            env: "react-explorer",
+                            view: node.getComponent(),
+                            props: JSON.stringify({config: config}) 
+                        }, "$/schema/view");
+                        await window.unigraph.runExecutable("$/package/unigraph.core/0.0.1/executable/add-item-to-list", {
+                            item: uid[0],
+                            where: "$/entity/favorite_bar"
+                        })
+                    }}><StarOutlined></StarOutlined></div>) 
                 }
-            }, 0)
-        }}/>
+                
+                renderValues.buttons.push(<div id={"tabId"+nodeId}></div>);
+                setTimeout(() => {
+                    const el = document.getElementById('tabId'+nodeId);
+                    if (el && el.parentElement && node.isEnableClose()) {
+                        el.parentElement.addEventListener("mousedown", (event) => {
+                            if (typeof event === 'object') {
+                                switch (event.button) {
+                                case 1:
+                                    model.doAction(Actions.deleteTab(nodeId))
+                                    break;
+                                default:
+                                    break;
+                                }
+                            }
+                        })
+                    }
+                }, 0)
+            }}/>
+        </DndProvider>
     </NavigationContext.Provider>
 
 }
