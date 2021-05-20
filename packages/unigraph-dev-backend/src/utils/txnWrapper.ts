@@ -162,6 +162,7 @@ export function insertsToUpsert(inserts: any[]): UnigraphUpsert {
         //console.log(JSON.stringify(currentObject, null, 4))
 
         if (currentObject['dgraph.type']?.includes('Entity')) {
+            currentOrigin = JSON.parse(JSON.stringify(currentOrigin));
             if (!currentObject.uid) currentObject.uid = genUid.next().value;
             if (!currentObject['unigraph.origin']) currentObject['unigraph.origin'] = {uid: currentObject.uid};
             if (currentObject['unigraph.origin'] && !Array.isArray(currentObject['unigraph.origin'])) currentObject['unigraph.origin'] = [currentObject['unigraph.origin']];
