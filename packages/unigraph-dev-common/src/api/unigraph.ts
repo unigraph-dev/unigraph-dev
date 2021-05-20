@@ -17,17 +17,17 @@ export function buildGraph(objects: any[]): any[] {
 
     const objs: any[] = JSON.parse(JSON.stringify(objects))
     const dict: any = {}
-    objs.forEach(object => {if (object.uid) dict[object.uid] = object})
+    objs.forEach(object => {if (object?.uid) dict[object.uid] = object})
 
     function buildGraphRecurse(obj: any) {
-        if (typeof obj === "object" && Array.isArray(obj)) {
+        if (obj && typeof obj === "object" && Array.isArray(obj)) {
             obj.forEach((val, index) => {
-                if(val.uid && dict[val.uid]) obj[index] = dict[val.uid];
+                if(val?.uid && dict[val.uid]) obj[index] = dict[val.uid];
                 buildGraphRecurse(val)
             })
-        } else if (typeof obj === "object") {
+        } else if (obj && typeof obj === "object") {
             Object.entries(obj).forEach(([key, value]: [key: string, value: any]) => {
-                if(value.uid && dict[value.uid]) obj[key] = dict[value.uid];
+                if(value?.uid && dict[value.uid]) obj[key] = dict[value.uid];
                 buildGraphRecurse(value)
             })
         }

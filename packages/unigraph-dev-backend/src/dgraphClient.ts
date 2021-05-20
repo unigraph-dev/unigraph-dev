@@ -232,7 +232,8 @@ export default class DgraphClient {
     return this.queryData<T>(`
     query findByName($a: string) {
       entities(func: eq(unigraph.id, $a)) @recurse {
-        expand(_predicate_)
+        unigraph.id
+        expand(_userpredicate_)
       }
     }
   `, {$a: id})
@@ -243,7 +244,8 @@ export default class DgraphClient {
     query findByName() {
       entities(func: eq(dgraph.type, "Type")) @recurse {
         uid
-        expand(_predicate_)
+        unigraph.id
+        expand(_userpredicate_)
       }
     }
   `, {})
@@ -255,7 +257,8 @@ export default class DgraphClient {
     query findByName() {
       entities(func: eq(unigraph.id, "$/meta/namespace_map")) @recurse {
         uid
-        expand(_predicate_)
+        unigraph.id
+        expand(_userpredicate_)
       }
     }
   `, {}))[0]
@@ -266,7 +269,8 @@ export default class DgraphClient {
     query findByName() {
       entities(func: eq(dgraph.type, "Package")) @recurse {
         uid
-        expand(_predicate_)
+        unigraph.id
+        expand(_userpredicate_)
       }
     }
   `, {})
@@ -277,7 +281,8 @@ export default class DgraphClient {
     query findByName() {
       entities(func: eq(dgraph.type, "Executable")) @recurse {
         uid
-        expand(_predicate_)
+        unigraph.id
+        expand(_userpredicate_)
       }
     }
   `, {})
@@ -298,7 +303,8 @@ export default class DgraphClient {
 export const queries: Record<string, (a: string) => string> = {
   "queryAny": (a) => `(func: uid(es${a}), orderdesc: val(cca${a}), first: 100) @recurse(depth: 8) {
     uid
-    expand(_predicate_)
+    unigraph.id
+    expand(_userpredicate_)
   }
   
   es${a} as var(func: type(Entity)) @filter((NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true)))
@@ -310,7 +316,8 @@ export const queries: Record<string, (a: string) => string> = {
     }`,
   "queryAnyAll": (a) => `(func: uid(es${a}), orderdesc: val(cca${a})) @recurse {
       uid
-      expand(_predicate_)
+      unigraph.id
+      expand(_userpredicate_)
     }
     
     es${a} as var(func: type(Entity)) @filter((NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true)))
@@ -320,5 +327,5 @@ export const queries: Record<string, (a: string) => string> = {
         }
         cca${a} as min(val(ca${a}))
       }`,
-  "queryAny-withInh": (_) => `(func: type(Entity)) @recurse { uid expand(_predicate_) }`
+  "queryAny-withInh": (_) => `(func: type(Entity)) @recurse { uid unigraph.id expand(_userpredicate_) }`
 }

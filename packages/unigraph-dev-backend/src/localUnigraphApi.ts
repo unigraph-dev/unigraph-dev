@@ -105,6 +105,10 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         // latertodo
         updateSimpleObject: async (object, predicate, value) => {throw Error("Not implemented")},
         updateObject: async (uid, newObject, isUpsert = true, pad = true) => {
+            const newUid = uid ? uid : newObject.uid
+            // Get new object's unigraph.origin first
+            let origin = newObject['unigraph.origin'] ? newObject['unigraph.origin'] : (await client.queryData<any>(`query { entity(func: uid(${newUid})) { <unigraph.origin> { uid } }}`, []))[0]?.['unigraph.origin']
+            if (!Array.isArray(origin)) origin = [origin];
             const origObject = (await client.queryUID(uid))[0];
             let finalUpdater = newObject;
             if (pad) {
@@ -114,7 +118,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             } else {
                 finalUpdater = processAutorefUnigraphId(finalUpdater);
             }
-            const upsert = {...finalUpdater, uid: uid};
+            const upsert = {...finalUpdater, uid: newUid, 'unigraph.origin': origin};
             console.log(finalUpdater, upsert)
             const finalUpsert = insertsToUpsert([upsert]);
             console.log(finalUpsert)

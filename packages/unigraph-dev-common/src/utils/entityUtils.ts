@@ -2,6 +2,7 @@
 
 import { jsonToGraphQLQuery } from "json-to-graphql-query";
 import _ from "lodash";
+import { buildGraph } from "../api/unigraph";
 import { ComposerUnionInstance, Definition, EntityDgraph, Field, RefUnigraphIdType, Schema, UnigraphIdType, UnigraphTypeString } from "../types/json-ts";
 
 //function uid<IdType extends string>(id: IdType): UidType<IdType> {return {"uid": id}}
@@ -74,7 +75,8 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
     let unigraphPartValue: any = undefined;
     let predicate = "_value";
     let noPredicate = false;
-    const rawPartUnigraphType = getUnigraphType(rawPart, localSchema.type?.['unigraph.id']);
+    const rawPartUnigraphType = getUnigraphType(rawPart, localSchema?.type?.['unigraph.id']);
+    if (!localSchema) console.log(localSchema, rawPart)
 
     if (localSchema.type?.['unigraph.id'] === "$/schema/any" && typeof rawPart?.type?.['unigraph.id'] === "string") {
         // If schema is any object and the object has a type (that we can check), 
@@ -624,4 +626,9 @@ export function prepareExportObject(obj: any, exportSchemas: boolean) {
  */
 export function prepareExportObjects(objects: any[], exportSchemas: boolean = false) {
     return objects.map(it => prepareExportObject(it, exportSchemas))
+}
+
+export function buildGraphFromMap(objs: any) {
+    const ret = buildGraph(Object.values(objs));
+    return Object.fromEntries(Object.keys(objs).map((el, index) => [el, ret[index]]))
 }
