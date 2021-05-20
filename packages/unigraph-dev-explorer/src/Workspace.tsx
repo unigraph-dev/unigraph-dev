@@ -167,10 +167,10 @@ export function WorkSpace(this: any) {
                 if (nodeId === "search-pane") {
                     renderValues.content = <Search/>;
                 }
-                if (node.isVisible() && nodeId !== "app-drawer" && nodeId !== "dashboard") {
+                if (node.isVisible() && nodeId !== "app-drawer" && nodeId !== "dashboard" && nodeId !== "search-pane") {
                     renderValues.buttons.push(<div style={{zIndex: 999, transform: "scale(0.7)"}} onClick={async () => {
                         const config = node.getConfig();
-                        delete config.undefine;
+                        if (config) delete config.undefine;
                         const uid = await window.unigraph.addObject({
                             name: node.getName(),
                             env: "react-explorer",

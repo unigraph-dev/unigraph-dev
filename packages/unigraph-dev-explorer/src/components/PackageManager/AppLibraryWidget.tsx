@@ -1,5 +1,5 @@
 import { Avatar, Grid, Typography } from "@material-ui/core"
-import { Apps, Bookmarks, Email, Inbox, PlaylistAddCheck, RssFeed } from "@material-ui/icons"
+import { Apps, Bookmarks, Email, Inbox, PlaylistAddCheck, RssFeed, Search } from "@material-ui/icons"
 import React from "react"
 import { NavigationContext } from "../../utils"
 
@@ -8,6 +8,11 @@ export const AppLibraryWidget = ({}) => {
         <Typography variant="h5">Recommended Apps</Typography>
         <NavigationContext.Consumer>
         { (navigator: any) => <Grid container>
+            <div style={{display: "flex", flexDirection: "column", alignItems: "center", padding: "16px"}}
+                onClick={() =>navigator('/search')}>
+                <Avatar><Search/></Avatar>
+                Search
+            </div>
             <div style={{display: "flex", flexDirection: "column", alignItems: "center", padding: "16px"}}
                 onClick={() =>navigator('/examples/todo')}>
                 <Avatar><PlaylistAddCheck></PlaylistAddCheck></Avatar>

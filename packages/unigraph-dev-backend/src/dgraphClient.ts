@@ -141,7 +141,7 @@ export default class DgraphClient {
     }
     /* eslint-disable */
     !test ? true : console.log("upsert details above================================================")
-    return data.mutations.map((el, index) => response.getUidsMap().get(el.uid ? el.uid : `upsert${index}`));
+    return data.mutations.map((el, index) => response.getUidsMap().get(el.uid ? (el.uid.startsWith('_:') ? el.uid.slice(2) : el.uid) : `upsert${index}`));
   }
 
   async createDgraphUpsert(data: {query: string | false, mutations: Mutation[]}) {
@@ -274,14 +274,31 @@ export default class DgraphClient {
 					uu as uid
         }
       }
-      qq(func: uid(uu)) @recurse(depth: 10) {
+      qq(func: uid(uu)) {
         uid
-        unigraph.id
-        expand(_userpredicate_)
+        <unigraph.origin> {
+          uuu as uid
+        }
       }
-    
+      qqq(func: uid(uuu)) {
+        uid
+        <unigraph.origin> {
+          uuuu as uid
+        }
+      }
+      qqqq(func: uid(uuuu)) {
+        uid
+        <unigraph.origin> {
+          uuuuu as uid
+        }
+      }
+      qqqqq(func: uid(uuuuu, uuuu, uuu, uu)) @recurse(depth: 10) {
+        uid
+        expand(_userpredicate_)
+        unigraph.id
+      }
     }`));
-    return {results: res[0] as any[], entities: res[1] as any[]};
+    return {results: res[0] as any[], entities: res[4] as any[]};
   }
 
   async getPackages() {

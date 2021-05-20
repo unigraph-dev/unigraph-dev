@@ -146,7 +146,7 @@ export const AutoDynamicView: DynamicViewRenderer = ({ object, callbacks }) => {
     } else {
         el = <StringObjectViewer object={object}/>
     }
-    return <div id={"object-view-"+object?.uid} style={{opacity: isDragging ? 0.5 : 1, display: "inline-flex", alignItems: "center"}} ref={attach}>
+    return <div id={"object-view-"+object?.uid} style={{opacity: isDragging ? 0.5 : 1, display: "inline-flex", alignItems: "center", width: "100%"}} ref={attach}>
         {el}
     </div>;
 }
