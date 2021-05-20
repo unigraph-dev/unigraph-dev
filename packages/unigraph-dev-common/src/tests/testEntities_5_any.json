@@ -22,6 +22,15 @@
             }]
         }
     },
+    "typealias-todo-object-uidref": {
+        "name": "Hello world",
+        "done": false,
+        "semantic_properties": {
+            "tags": [{
+                "uid": "0x1"
+            }]
+        }
+    },
     "$/schema/semantic_properties": {
         "uid": "0x18",
         "_definition": {
