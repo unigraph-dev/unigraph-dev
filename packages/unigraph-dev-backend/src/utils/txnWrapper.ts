@@ -102,7 +102,14 @@ export function wrapUpsertFromUpdater(orig: any, queryHead: string, hasUid: stri
 
 }
 
+function* nextUid() {
+    let index = 0;
 
+    while (true) {
+        yield `_:${index}`
+        index++;
+    }
+}
 
 /**
  * Converts a list of objects or schemas to a dgraph upsert operation.
@@ -112,8 +119,9 @@ export function wrapUpsertFromUpdater(orig: any, queryHead: string, hasUid: stri
 export function insertsToUpsert(inserts: any[]): UnigraphUpsert {
 
     const refUids: string[] = [];
+    const genUid = nextUid();
 
-    function insertsToUpsertRecursive(inserts: any[], appends: any[], queries: string[], currentObject: any) {
+    function insertsToUpsertRecursive(inserts: any[], appends: any[], queries: string[], currentObject: any, currentOrigin: any[]) {
         // If this is a reference object
         if (currentObject) {
             if (currentObject.uid && currentObject.uid.startsWith('0x')) { 
@@ -129,7 +137,7 @@ export function insertsToUpsert(inserts: any[]): UnigraphUpsert {
                     // definitely switch to same UID import
                     refUid = "unigraphref" + currentObject.uid.slice(2)
                 } 
-    
+                currentOrigin?.map(el => {if (el?.uid === currentObject.uid) el.uid = `uid(${refUid})`;})
                 const query = currentObject['$ref'].query;
                 delete currentObject['$ref'];
                 // FIXME: Some objects (e.g. with standoff properties or type aliases) doesn't use `_value`
@@ -152,17 +160,29 @@ export function insertsToUpsert(inserts: any[]): UnigraphUpsert {
         }
         //console.log('++++++++++++++++++++++++++++++++++')
         //console.log(JSON.stringify(currentObject, null, 4))
+
+        if (currentObject['dgraph.type']?.includes('Entity')) {
+            currentOrigin = currentOrigin ? JSON.parse(JSON.stringify(currentOrigin)) : undefined;
+            if (!currentObject.uid) currentObject.uid = genUid.next().value;
+            if (!currentObject['unigraph.origin']) currentObject['unigraph.origin'] = {uid: currentObject.uid};
+            if (currentObject['unigraph.origin'] && !Array.isArray(currentObject['unigraph.origin'])) currentObject['unigraph.origin'] = [currentObject['unigraph.origin']];
+            if (!currentOrigin) currentOrigin = [];
+            currentOrigin.push(...currentObject['unigraph.origin']);
+        }
     
         const objectValues = Object.values(currentObject);
         for(let i=0; i<objectValues.length; ++i) {
             if (typeof objectValues[i] === "object" && !Array.isArray(objectValues[i])) {
-                insertsToUpsertRecursive(inserts, appends, queries, objectValues[i]);
+                insertsToUpsertRecursive(inserts, appends, queries, objectValues[i], currentOrigin);
             } else if (typeof objectValues[i] === "object" && Array.isArray(objectValues[i])) {
                 for(let j=0; j<(objectValues[i] as any[]).length; ++j) {
-                    insertsToUpsertRecursive(inserts, appends, queries, (objectValues[i] as any[])[j]);
+                    if (!Object.keys(currentObject).includes('unigraph.origin')) insertsToUpsertRecursive(inserts, appends, queries, (objectValues[i] as any[])[j], currentOrigin);
                 }
             }
         }
+
+        if (typeof currentObject === 'object' && !Array.isArray(currentObject) && currentOrigin) currentObject['unigraph.origin'] = currentOrigin;
+
         //console.log("-----------------------2", currentObject)
     }
 
@@ -170,10 +190,16 @@ export function insertsToUpsert(inserts: any[]): UnigraphUpsert {
     const queries: any[] = []
     const appends: any[] = []
     for(let i=0; i<insertsCopy.length; ++i) {
-        insertsToUpsertRecursive(insertsCopy, appends, queries, insertsCopy[i])
+        const curr = insertsCopy[i];
+        if (!curr.uid) curr.uid = genUid.next().value;
+        let origin = curr['unigraph.origin'];
+        if (!origin && (!curr['dgraph.type'] || curr['dgraph.type'].includes['Entity'])) origin = {uid: curr.uid};
+        if (origin && !Array.isArray(origin)) origin = [origin];
+        insertsToUpsertRecursive(insertsCopy, appends, queries, curr, origin);
     }
-    console.log("Upsert processed!")
-    console.log(JSON.stringify({queries: queries, mutations: insertsCopy, appends: appends}, null, 4));
+    //console.log("Upsert processed!")
+    //const util = require('util')
+    //console.log(util.inspect({queries: queries, mutations: insertsCopy, appends: appends}, false, null, true /* enable colors */))
     return {queries: queries, mutations: insertsCopy, appends: appends}
 }
 

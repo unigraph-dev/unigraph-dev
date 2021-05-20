@@ -135,6 +135,13 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param fragments Array of DQL (GraphQL+-) Query fragments - such as `(func: fn1(something)){ uid expand(_predicate_) }`
      */
     getQueries(fragments: string[]): any;
+    /**
+     * Gets search results given a search query.
+     * 
+     * @param query A string of the desired query. Such as: `minecraft memes`. The query will be stemmed and searched similar to a search engine.
+     * @param method A string describing what kind of search to perform. Default is 'fulltext'
+     */
+    getSearchResults(query: string, method?: string): Promise<{results: any[], entities: any[]}>;
     /** Deletes an object by its UID. */
     deleteObject(uid: string): any;
     /**

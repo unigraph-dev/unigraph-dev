@@ -32,6 +32,7 @@ import { Bookmarks } from './examples/bookmarks/Bookmarks';
 import { NotificationCenter } from './components/UnigraphCore/Notification';
 import { Inbox } from './components/UnigraphInbox/Inbox';
 import { EmailList } from './examples/email/Email';
+import { UnigraphSearch } from './components/UnigraphCore/UnigraphSearch';
 
 // TODO: custom theme
 const useStyles = makeStyles(theme => ({
@@ -125,6 +126,10 @@ export const pages: Record<string, any> = {
   'notification-center': {
     'constructor': () => <NotificationCenter />,
     'name': "Notification Center"
+  },
+  'search': {
+    'constructor': () => <UnigraphSearch />,
+    'name': "Search"
   }
 }
 

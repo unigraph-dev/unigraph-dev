@@ -3,7 +3,7 @@ import WebSocket from 'ws';
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import DgraphClient, { queries } from './dgraphClient';
 import { insertsToUpsert } from './utils/txnWrapper';
-import { EventAddNotification, EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteItemFromArray, EventDeleteRelation, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventGetPackages, EventGetSchemas, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventResponser, EventRunExecutable, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
+import { EventAddNotification, EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteItemFromArray, EventDeleteRelation, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventGetPackages, EventGetSchemas, EventGetSearchResults, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventResponser, EventRunExecutable, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
 import { buildUnigraphEntity, getUpsertFromUpdater, makeQueryFragmentFromType, processAutoref, dectxObjects, unpad, processAutorefUnigraphId, isPaddedObject } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { addUnigraphPackage, checkOrCreateDefaultDataModel, createPackageCache, createSchemaCache } from './datamodelManager';
 import { Cache } from './caches';
@@ -15,7 +15,7 @@ import fetch from 'node-fetch';
 import { uniqueId } from 'lodash';
 import { buildExecutable, createExecutableCache } from './executableManager';
 import { getLocalUnigraphAPI } from './localUnigraphApi';
-import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
+import unigraph, { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { addNotification } from './notifications';
 import { Unigraph } from 'unigraph-dev-common/lib/types/unigraph';
 import stringify from 'json-stable-stringify';
@@ -91,7 +91,7 @@ export default async function startServer(client: DgraphClient) {
     })
   }, `(func: eq(<unigraph.id>, "$/meta/namespace_map")) {
     uid
-    expand(_predicate_) {
+    expand(_userpredicate_) {
       uid
   }}`);
 
@@ -172,7 +172,7 @@ export default async function startServer(client: DgraphClient) {
     },
 
     "subscribe_to_query": function (event: EventSubscribeObject, ws: IWebsocket) {
-      const query = `(func: uid(par${event.id})) @recurse {uid expand(_predicate_)}
+      const query = `(func: uid(par${event.id})) @recurse {uid unigraph.id expand(_userpredicate_)}
       par${event.id} as var${event.queryFragment}`
       if (verbose >= 2) console.log(query)
       eventRouter["subscribe_to_object"]({...event, queryFragment: query}, ws)
@@ -295,11 +295,15 @@ export default async function startServer(client: DgraphClient) {
      * @param ws Websocket connection
      */
     "update_object": async function (event: EventUpdateObject, ws: IWebsocket) {
+      const newUid = event.uid ? event.uid : event.newObject.uid
+      // Get new object's unigraph.origin first
+      let origin = event.newObject['unigraph.origin'] ? event.newObject['unigraph.origin'] : (await dgraphClient.queryData<any>(`query { entity(func: uid(${newUid})) { <unigraph.origin> }}`, []))[0]?.['unigraph.origin']
+      if (!Array.isArray(origin)) origin = [origin];
       if (typeof event.upsert === "boolean" && !event.upsert) {
         if (!isPaddedObject(event.newObject)) { 
           ws.send(makeResponse(event, false, {"error": "In non-upsert mode, you have to supply a padded object, since we are mutating metadata explicitely as well."})) 
         } else {
-          let newObject = {...event.newObject, uid: event.uid ? event.uid : event.newObject.uid}; // If specifying UID, override with it
+          let newObject = {...event.newObject, uid: newUid, 'unigraph.origin': origin}; // If specifying UID, override with it
           let autorefObject = processAutorefUnigraphId(newObject);
           const upsert = insertsToUpsert([autorefObject]);
           dgraphClient.createUnigraphUpsert(upsert).then(_ => {
@@ -316,7 +320,7 @@ export default async function startServer(client: DgraphClient) {
           finalUpdater = processAutoref({...paddedUpdater, uid: event.uid}, schema, caches['schemas'].data);
           //console.log(upsert);
         } else {
-          const updater = {...event.newObject, uid: event.uid ? event.uid : event.newObject.uid};
+          const updater = {...event.newObject, uid: event.uid ? event.uid : event.newObject.uid, 'unigraph.origin': origin};
           finalUpdater = processAutorefUnigraphId(updater);
         }
         
@@ -413,6 +417,12 @@ export default async function startServer(client: DgraphClient) {
       callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches});
       ws.send(makeResponse(event, true));
     },
+
+    "get_search_results": async function (event: EventGetSearchResults, ws: IWebsocket) {
+      const res = await serverStates.localApi.getSearchResults(event.query, event.method)
+        .catch((e: any) => ws.send(makeResponse(event, false, {"error": e})));
+      ws.send(makeResponse(event, true, {results: res}));
+    }
   };
 
   const server = new WebSocket.Server({

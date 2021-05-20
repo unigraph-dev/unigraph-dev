@@ -48,14 +48,14 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         },
         subscribeToObject: async (uid, callback: any, eventId = undefined) => {
             eventId = getRandomInt();
-            const frag = `(func: uid(${uid})) @recurse { uid expand(_predicate_) }`
+            const frag = `(func: uid(${uid})) @recurse { uid unigraph.id expand(_userpredicate_) }`
             const newSub = createSubscriptionLocal(eventId, callback, frag);
             states.subscriptions.push(newSub);
             callHooks(states.hooks, "after_subscription_added", {newSubscriptions: states.subscriptions});
         },
         subscribeToQuery: async (fragment, callback: any, eventId = undefined) => {
             eventId = getRandomInt();
-            const query = `(func: uid(par${eventId})) @recurse {uid expand(_predicate_)}
+            const query = `(func: uid(par${eventId})) @recurse {uid unigraph.id expand(_userpredicate_)}
             par${eventId} as var${fragment}`
             const newSub = createSubscriptionLocal(eventId, callback, query);
             states.subscriptions.push(newSub);
@@ -83,7 +83,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         },
         getType: async (name) => {
             const eventId = getRandomInt();
-            const queryAny = `query {entities(func: type(Entity)) @recurse { uid expand(_predicate_) }}`
+            const queryAny = `query {entities(func: type(Entity)) @recurse { uid unigraph.id expand(_userpredicate_) }}`
             const query = name === "any" ? queryAny : `query {entities(func: uid(par${eventId})) 
             ${makeQueryFragmentFromType(name, states.caches["schemas"].data)}
             par${eventId} as var(func: has(type)) @filter((NOT type(Deleted)) AND type(Entity)) @cascade {
@@ -93,7 +93,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             return res;
         },
         getQueries: async (fragments) => {
-            const allQueries = fragments.map((it, index) => `query${index}(func: uid(par${index})) @recurse {uid expand(_predicate_)}
+            const allQueries = fragments.map((it, index) => `query${index}(func: uid(par${index})) @recurse {uid unigraph.id expand(_userpredicate_)}
             par${index} as var${it}`);
             const res = await client.queryDgraph(`query {${allQueries.join('\n')}}`);
             return res;
@@ -105,6 +105,10 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         // latertodo
         updateSimpleObject: async (object, predicate, value) => {throw Error("Not implemented")},
         updateObject: async (uid, newObject, isUpsert = true, pad = true) => {
+            const newUid = uid ? uid : newObject.uid
+            // Get new object's unigraph.origin first
+            let origin = newObject['unigraph.origin'] ? newObject['unigraph.origin'] : (await client.queryData<any>(`query { entity(func: uid(${newUid})) { <unigraph.origin> { uid } }}`, []))[0]?.['unigraph.origin']
+            if (!Array.isArray(origin)) origin = [origin];
             const origObject = (await client.queryUID(uid))[0];
             let finalUpdater = newObject;
             if (pad) {
@@ -114,7 +118,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             } else {
                 finalUpdater = processAutorefUnigraphId(finalUpdater);
             }
-            const upsert = {...finalUpdater, uid: uid};
+            const upsert = {...finalUpdater, uid: newUid, 'unigraph.origin': origin};
             console.log(finalUpdater, upsert)
             const finalUpsert = insertsToUpsert([upsert]);
             console.log(finalUpsert)
@@ -175,5 +179,10 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         addState: (...params) => {throw Error('Not available in server side')},
         getState: (...params) => {throw Error('Not available in server side')},
         deleteState: (...params) => {throw Error('Not available in server side')},
+        getSearchResults: async (query: string, method = "fulltext") => {
+            let res: {results: any[], entities: any[]} = {results: [], entities: []};
+            if (method === 'fulltext') res = await client.getTextSearchResults(query);
+            return res;
+        }
     }
 }

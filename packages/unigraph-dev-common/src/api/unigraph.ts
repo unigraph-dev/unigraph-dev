@@ -17,17 +17,17 @@ export function buildGraph(objects: any[]): any[] {
 
     const objs: any[] = JSON.parse(JSON.stringify(objects))
     const dict: any = {}
-    objs.forEach(object => {if (object.uid) dict[object.uid] = object})
+    objs.forEach(object => {if (object?.uid) dict[object.uid] = object})
 
     function buildGraphRecurse(obj: any) {
-        if (typeof obj === "object" && Array.isArray(obj)) {
+        if (obj && typeof obj === "object" && Array.isArray(obj)) {
             obj.forEach((val, index) => {
-                if(val.uid && dict[val.uid]) obj[index] = dict[val.uid];
+                if(val?.uid && dict[val.uid]) obj[index] = dict[val.uid];
                 buildGraphRecurse(val)
             })
-        } else if (typeof obj === "object") {
+        } else if (obj && typeof obj === "object") {
             Object.entries(obj).forEach(([key, value]: [key: string, value: any]) => {
-                if(value.uid && dict[value.uid]) obj[key] = dict[value.uid];
+                if(value?.uid && dict[value.uid]) obj[key] = dict[value.uid];
                 buildGraphRecurse(value)
             })
         }
@@ -165,7 +165,7 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
                 else reject(response);
             };
             subscriptions[id] = (result: any) => callback(result[0]);
-            const frag = `(func: uid(${uid})) @recurse { uid expand(_predicate_) }`
+            const frag = `(func: uid(${uid})) @recurse { uid unigraph.id expand(_userpredicate_) }`
             sendEvent(connection, "subscribe_to_object", {queryFragment: frag}, id);
         }), 
         subscribeToQuery: (fragment, callback, eventId = undefined) => new Promise((resolve, reject) => {
@@ -285,6 +285,14 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
                 else reject(response);
             };
             sendEvent(connection, "add_notification", {item: item}, id);
+        }),
+        getSearchResults: (query, method = "fulltext") => new Promise((resolve, reject) => {
+            const id = getRandomInt();
+            callbacks[id] = (response: any) => {
+                if (response.success && response.results) resolve(response.results);
+                else reject(response);
+            };
+            sendEvent(connection, "get_search_results", {query: query, method: method}, id);
         })
     }
 }

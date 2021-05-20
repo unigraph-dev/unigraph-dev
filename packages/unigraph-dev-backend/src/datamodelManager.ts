@@ -10,7 +10,7 @@ import { insertsToUpsert } from "./utils/txnWrapper";
 import { Cache } from './caches';
 import { PackageDeclaration } from "unigraph-dev-common/lib/types/packages";
 import { ComposerUnionInstance } from "unigraph-dev-common/lib/types/json-ts";
-import { buildUnigraphEntity, processAutoref, processAutorefUnigraphId, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
+import { buildGraphFromMap, buildUnigraphEntity, processAutoref, processAutorefUnigraphId, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { getRefQueryUnigraphId } from "unigraph-dev-common/lib/utils/utils";
 
 export async function checkOrCreateDefaultDataModel(client: DgraphClient) {
@@ -51,11 +51,13 @@ export function createSchemaCache(client: DgraphClient): Cache<any> {
 
     cache.updateNow = async () => { 
         const newdata = await client.getSchemasFromTable();
+        //cache.data = buildGraphFromMap(cache.data);
         cache.data = newdata ? newdata : [];
         // Remove all non-schema objects items first
         Object.entries(cache.data).forEach(([k, v]: any) => {
             if (k.startsWith("$/schema/interface/")) {
                 const defn = v._definition as ComposerUnionInstance;
+                //console.log(k, v, defn);
                 defn._parameters._definitions = [];
             }
             if (!k.startsWith('$/schema')) {
@@ -72,10 +74,11 @@ export function createSchemaCache(client: DgraphClient): Cache<any> {
                     (cache.data[`$/schema/interface/${revPath[0]}`]._definition as ComposerUnionInstance)
                         ._parameters._definitions?.push(...defn._parameters._definitions)
             } 
-            if (obj && typeof obj["unigraph.id"] === "string" && obj["unigraph.id"].includes('/schema/')) {
+            if (obj && typeof obj["unigraph.id"] === "string" && obj["unigraph.id"].includes('/schema/') && !cache.data[obj["unigraph.id"]]) {
                 cache.data[obj["unigraph.id"]] = obj;
             }
         })
+        //cache.data = buildGraphFromMap(cache.data);
     };
 
     cache.updateNow();
@@ -144,6 +147,7 @@ export async function addUnigraphPackage(client: DgraphClient, pkg: PackageDecla
     for(let i=0; i<schemas.length; ++i) {
         const schemaShorthandRef = {
             "unigraph.id": `$/schema/${Object.keys(pkg.pkgSchemas)[i]}`,
+            "dgraph.type": ['Type'],
             "_value[": getRefQueryUnigraphId(schemas[i]["unigraph.id"])
         }
         const schemaAutoref = processAutorefUnigraphId(schemas[i])

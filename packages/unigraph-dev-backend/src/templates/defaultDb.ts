@@ -13,7 +13,7 @@ export const defaultTypes = `<_value>: uid .
 <_value.#i>: int .
 <_value.#>: float .
 <_value.?>: bool .
-<_value.%>: string .
+<_value.%>: string @index(fulltext) .
 <_value.>: default .
 <_value[>: [uid] .
 <_value.%dt>: dateTime @index(hour) .
@@ -21,6 +21,7 @@ export const defaultTypes = `<_value>: uid .
 <type>: uid .
 <pkgManifest>: uid .
 <unigraph.id>: string @index(exact) .
+<unigraph.origin>: [uid] @reverse .
 <_timestamp>: uid .
 <_createdAt>: dateTime @index(hour) .
 <_updatedAt>: dateTime @index(hour) .
