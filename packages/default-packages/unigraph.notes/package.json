@@ -1,0 +1,13 @@
+{
+    "displayName": "Notes",
+    "version": "0.0.1",
+    "description": "Notetaking system by Unigraph",
+    "unigraph": {
+        "schemas": [
+            {"id": "note_block", "src": "schemas/note_block.json"}, 
+            {"id": "interface/semantic", "src": "schemas/semantic.json"},
+            {"id": "interface/textual", "src": "schemas/textual.json"}
+        ],
+        "package_name": "unigraph.notes"
+    }
+}
