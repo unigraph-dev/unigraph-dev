@@ -76,7 +76,7 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
     let predicate = "_value";
     let noPredicate = false;
     const rawPartUnigraphType = getUnigraphType(rawPart, localSchema?.type?.['unigraph.id']);
-    if (!localSchema) console.log(localSchema, rawPart)
+    console.log(localSchema, rawPart)
 
     if (localSchema.type?.['unigraph.id'] === "$/schema/any" && typeof rawPart?.type?.['unigraph.id'] === "string") {
         // If schema is any object and the object has a type (that we can check), 
@@ -87,11 +87,11 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
         throw new TypeError('`$/schema/any` directive must have a corresponding type declaration in object!')
     }
 
-    // TODO: Allow for selecting union types too
-
-    delete rawPart.type;
-
-    try {
+    if (rawPart?.type?.['unigraph.id'] && schemaMap[rawPart.type['unigraph.id']]?.['_definition']) {
+        const userType = rawPart.type;
+        delete rawPart.type;
+        unigraphPartValue = buildUnigraphEntity(rawPart, userType['unigraph.id'], schemaMap, true, options, propDesc);
+    } else try {
         // Check for localSchema accordance
         if (rawPart && rawPart.uid && rawPart.uid.startsWith && rawPart.uid.startsWith('0x') && Object.keys(rawPart).length === 1) {
             // Is UID reference, don't check for accordance
@@ -370,7 +370,7 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
                 //console.log(localSchema, currentEntity)
                 if (Array.isArray(currentEntity)) {
                     currentEntity.forEach(e => recurse(unpadValue(e), schemas, localSchema['_parameters']['_element']));
-                } else if (localSchema.type?.['unigraph.id'] === "$/composer/Object") {
+                } else if (localSchema?.type?.['unigraph.id'] === "$/composer/Object") {
                     // Is object, check for various stuff
 
                     // 1. Can we do autoref based on reserved words?
