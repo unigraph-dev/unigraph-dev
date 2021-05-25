@@ -1,4 +1,4 @@
-import { Typography } from "@material-ui/core";
+import { List, Typography } from "@material-ui/core";
 import React from "react";
 import { registerDetailedDynamicViews, registerDynamicViews } from "unigraph-dev-common/lib/api/unigraph-react";
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
@@ -9,7 +9,9 @@ import Paragraph from '@ckeditor/ckeditor5-paragraph/src/paragraph';
 import Bold from '@ckeditor/ckeditor5-basic-styles/src/bold';
 import Italic from '@ckeditor/ckeditor5-basic-styles/src/italic';
 import Autosave from '@ckeditor/ckeditor5-autosave/src/autosave'; 
+import Markdown from '@ckeditor/ckeditor5-markdown-gfm/src/markdown'; 
 import { useEffectOnce } from "react-use";
+import { buildGraph } from "unigraph-dev-common/lib/api/unigraph";
 
 export const getSubentities = (data: any) => {
     let subentities: any, otherChildren: any;
@@ -25,13 +27,27 @@ export const getSubentities = (data: any) => {
 }
 
 export const NoteBody = ({text, children}: any) => {
-    return <div>
+    return <div style={{width: "100%"}}>
         <Typography variant="body1">{text}</Typography>
         {children.map((el: any) => <AutoDynamicView object={el} />)}
     </div>
 }
 
-export const NoteBodyDetailed = ({data}: any) => {
+const addSibling = (sourceUid: string, index: number) => {
+    window.unigraph.updateObject(sourceUid, {
+        semantic_properties: {
+            children: [{
+                type: {"unigraph.id": "$/schema/subentity"},
+                _value: {
+                    type: {"unigraph.id": "$/schema/note_block"},
+                    text: "Hi new object"
+                }
+            }]
+        }
+    }, true, true)
+}
+
+export const NoteBodyDetailed = ({data, callbacks}: any) => {
     const [subentities, otherChildren] = getSubentities(data);
     const unpadded = unpad(data);
     const bodyId = `ckeditor-${data.uid}`;
@@ -39,44 +55,60 @@ export const NoteBodyDetailed = ({data}: any) => {
     useEffectOnce(() => {
         BalloonEditor.create(document.querySelector(`#${bodyId}`), {
             plugins: [
-                Essentials, Paragraph, Bold, Italic, Autosave,
+                Markdown, Essentials, Paragraph, Bold, Italic, Autosave,
             ],
             toolbar: [ 'bold', 'italic'],
 
             autosave: {
                 save(editor: any) {
-                    console.log(editor.getData());
+                    const newTxt = editor.getData();
+                    if (newTxt !== unpadded.text) window.unigraph.updateObject(data.uid, {text: newTxt}, true, true);
                 }
             },
         })
             .then((editor: any) => {
+                editor.editing.view.document.on( 'enter', ( event: any, data: any ) => {
+                    callbacks.addSibling()
+                    data.preventDefault();
+                    event.stop();
+                    return;
+                }, { priority: 'high' } );
             })
     })
 
-    return <div>
-        <Typography variant="body1" id={bodyId}>{unpadded.text}</Typography>
+    return <div style={{width: "100%"}}>
+        <Typography variant="body1" id={bodyId} style={{width: "100%"}}>{unpadded.text}</Typography>
         {otherChildren.map((el: any) => <AutoDynamicView object={el} />)}
-        {subentities.map((el: any) => <AutoDynamicView object={el} component={NoteBodyDetailed}/>)}
+        <List>
+            {subentities.map((el: any, index: number) => <AutoDynamicView object={el} callbacks={{
+                addSibling: () => addSibling(data.uid, index)
+            }} component={NoteBodyDetailed}/>)}
+        </List>
     </div>
 }
 
 export const NoteBlock = ({data} : any) => {
-    const [subentities, otherChildren] = getSubentities(data);
+    let [subentities, otherChildren] = getSubentities(data);
+    subentities = buildGraph(subentities);
     const unpadded = unpad(data);
 
-    return <div onClick={() => {window.wsnavigator(`/library/object?uid=${data.uid}`)}}>
+    return <div style={{width: "100%"}} onClick={() => {window.wsnavigator(`/library/object?uid=${data.uid}`)}}>
         <NoteBody text={unpadded.text} children={otherChildren} />
         <Typography variant="body2" color="textSecondary">{subentities.length ? " and " + subentities.length + " children" : " no children"}</Typography>
     </div>
 }
 
 export const DetailedNoteBlock = ({data}: any) => {
-    const [subentities, otherChildren] = getSubentities(data);
-
-    return <div>
+    let [subentities, otherChildren] = getSubentities(data);
+    subentities = buildGraph(subentities);
+    return <div style={{width: "100%"}}>
         <Typography variant="h4">{data['_value']['text']["_value.%"]}</Typography>
         {otherChildren.map((el: any) => <AutoDynamicView object={el} />)}
-        {subentities.map((el: any) => <AutoDynamicView object={el} component={NoteBodyDetailed}/>)}
+        <List>
+            {subentities.map((el: any, index: number) => <AutoDynamicView object={el} callbacks={{
+                addSibling: () => addSibling(data.uid, index)
+            }} component={{"$/schema/note_block": NoteBodyDetailed}}/>)}
+        </List>
     </div>
 }
 

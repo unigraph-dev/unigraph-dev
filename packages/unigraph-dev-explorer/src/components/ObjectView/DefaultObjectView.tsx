@@ -123,7 +123,7 @@ export const AutoDynamicView = ({ object, callbacks, component }: any) => {
     }))
 
     const [, dropSub] = useDrop(() => ({
-        accept: ["$/schema/note_block"],
+        accept: ["$/schema/note_block", "$/schema/todo"],
         drop: (item: {uid: string}, monitor) => {
           window.unigraph.updateObject(object?.uid, {
               semantic_properties: {
@@ -155,7 +155,7 @@ export const AutoDynamicView = ({ object, callbacks, component }: any) => {
     //console.log(object) 
     let el;
     if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViews).includes(object.type['unigraph.id'])) {
-        el = React.createElement(component ? component : DynamicViews[object.type['unigraph.id']], {
+        el = React.createElement(component && component[object.type['unigraph.id']] ? component[object.type['unigraph.id']] : DynamicViews[object.type['unigraph.id']], {
             data: object, callbacks: callbacks ? callbacks : undefined
         });
     } else if (object) {

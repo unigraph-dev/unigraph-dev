@@ -90,7 +90,7 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
     if (rawPart?.type?.['unigraph.id'] && schemaMap[rawPart.type['unigraph.id']]?.['_definition']) {
         const userType = rawPart.type;
         delete rawPart.type;
-        unigraphPartValue = buildUnigraphEntity(rawPart, userType['unigraph.id'], schemaMap, true, options, propDesc);
+        unigraphPartValue = buildUnigraphEntity(rawPart['_value'] ? rawPart['_value'] : rawPart, userType['unigraph.id'], schemaMap, true, options, propDesc);
     } else try {
         // Check for localSchema accordance
         if (rawPart && rawPart.uid && rawPart.uid.startsWith && rawPart.uid.startsWith('0x') && Object.keys(rawPart).length === 1) {
