@@ -3,6 +3,13 @@ import React from "react";
 import { registerDetailedDynamicViews, registerDynamicViews } from "unigraph-dev-common/lib/api/unigraph-react";
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
+import BalloonEditor from '@ckeditor/ckeditor5-editor-balloon/src/ballooneditor';
+import Essentials from '@ckeditor/ckeditor5-essentials/src/essentials'; 
+import Paragraph from '@ckeditor/ckeditor5-paragraph/src/paragraph';
+import Bold from '@ckeditor/ckeditor5-basic-styles/src/bold';
+import Italic from '@ckeditor/ckeditor5-basic-styles/src/italic';
+import Autosave from '@ckeditor/ckeditor5-autosave/src/autosave'; 
+import { useEffectOnce } from "react-use";
 
 export const getSubentities = (data: any) => {
     let subentities: any, otherChildren: any;
@@ -27,9 +34,27 @@ export const NoteBody = ({text, children}: any) => {
 export const NoteBodyDetailed = ({data}: any) => {
     const [subentities, otherChildren] = getSubentities(data);
     const unpadded = unpad(data);
+    const bodyId = `ckeditor-${data.uid}`;
+
+    useEffectOnce(() => {
+        BalloonEditor.create(document.querySelector(`#${bodyId}`), {
+            plugins: [
+                Essentials, Paragraph, Bold, Italic, Autosave,
+            ],
+            toolbar: [ 'bold', 'italic'],
+
+            autosave: {
+                save(editor: any) {
+                    console.log(editor.getData());
+                }
+            },
+        })
+            .then((editor: any) => {
+            })
+    })
 
     return <div>
-        <Typography variant="body1">{unpadded.text}</Typography>
+        <Typography variant="body1" id={bodyId}>{unpadded.text}</Typography>
         {otherChildren.map((el: any) => <AutoDynamicView object={el} />)}
         {subentities.map((el: any) => <AutoDynamicView object={el} component={NoteBodyDetailed}/>)}
     </div>
