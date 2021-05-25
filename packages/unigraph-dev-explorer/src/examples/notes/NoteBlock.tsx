@@ -1,15 +1,12 @@
 import { Typography } from "@material-ui/core";
-import React from "react";
+import React, { useMemo } from "react";
 import { registerDetailedDynamicViews, registerDynamicViews } from "unigraph-dev-common/lib/api/unigraph-react";
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
-import BalloonEditor from '@ckeditor/ckeditor5-editor-balloon/src/ballooneditor';
-import Essentials from '@ckeditor/ckeditor5-essentials/src/essentials'; 
-import Paragraph from '@ckeditor/ckeditor5-paragraph/src/paragraph';
-import Bold from '@ckeditor/ckeditor5-basic-styles/src/bold';
-import Italic from '@ckeditor/ckeditor5-basic-styles/src/italic';
-import Autosave from '@ckeditor/ckeditor5-autosave/src/autosave'; 
-import { useEffectOnce } from "react-use";
+
+import { createEditor } from 'slate'
+import { Slate, Editable, withReact } from 'slate-react'
+import { buildGraph } from "unigraph-dev-common/lib/api/unigraph";
 
 export const getSubentities = (data: any) => {
     let subentities: any, otherChildren: any;
@@ -24,39 +21,32 @@ export const getSubentities = (data: any) => {
     return [subentities, otherChildren];
 }
 
+const dataToView: (data: any) => any = (data) => {
+    if (data?.type?.['unigraph.id'] === "$/schema/note_block") {
+        const [subentities, otherChildren] = getSubentities(data);
+        return {type: "outliner", children: [{text: data?.['_value']?.['text']?.["_value.%"] || ""}, ...buildGraph(subentities).map(dataToView)], semantic_children: otherChildren.map(dataToView), data: data}
+    } else {
+        return {type: "autodynamicview", data: data, children: [{text: ""}]}
+    }
+}
+
+const renderer = ({attributes, children, element}: any) => {
+    switch (element.type) {
+        case 'outliner':
+            attributes = {...attributes, style: {...attributes.style, flexDirection: "column"}}
+            return <AutoDynamicView object={element.data} component={{"$/schema/note_block": () => <React.Fragment>
+                <Typography variant="body1">{children[0]}</Typography>
+                <ul>{children.slice(1).map((el: any) => <li>{el}</li>)}</ul>
+            </React.Fragment>}} attributes={attributes}/>
+        default:
+            return <AutoDynamicView object={JSON.parse(JSON.stringify(element.data))} attributes={attributes} /> 
+    }
+}
+
 export const NoteBody = ({text, children}: any) => {
     return <div>
         <Typography variant="body1">{text}</Typography>
         {children.map((el: any) => <AutoDynamicView object={el} />)}
-    </div>
-}
-
-export const NoteBodyDetailed = ({data}: any) => {
-    const [subentities, otherChildren] = getSubentities(data);
-    const unpadded = unpad(data);
-    const bodyId = `ckeditor-${data.uid}`;
-
-    useEffectOnce(() => {
-        BalloonEditor.create(document.querySelector(`#${bodyId}`), {
-            plugins: [
-                Essentials, Paragraph, Bold, Italic, Autosave,
-            ],
-            toolbar: [ 'bold', 'italic'],
-
-            autosave: {
-                save(editor: any) {
-                    console.log(editor.getData());
-                }
-            },
-        })
-            .then((editor: any) => {
-            })
-    })
-
-    return <div>
-        <Typography variant="body1" id={bodyId}>{unpadded.text}</Typography>
-        {otherChildren.map((el: any) => <AutoDynamicView object={el} />)}
-        {subentities.map((el: any) => <AutoDynamicView object={el} component={NoteBodyDetailed}/>)}
     </div>
 }
 
@@ -71,12 +61,14 @@ export const NoteBlock = ({data} : any) => {
 }
 
 export const DetailedNoteBlock = ({data}: any) => {
-    const [subentities, otherChildren] = getSubentities(data);
+    const [viewData, setViewData] = React.useState([dataToView(data)]);
+    const editor = useMemo(() => withReact(createEditor() as any), [])
+    
 
     return <div>
-        <Typography variant="h4">{data['_value']['text']["_value.%"]}</Typography>
-        {otherChildren.map((el: any) => <AutoDynamicView object={el} />)}
-        {subentities.map((el: any) => <AutoDynamicView object={el} component={NoteBodyDetailed}/>)}
+        <Slate editor={editor} value={viewData} onChange={(change) => {console.log(change);}}>
+            <Editable renderElement={renderer} />
+        </Slate>
     </div>
 }
 
