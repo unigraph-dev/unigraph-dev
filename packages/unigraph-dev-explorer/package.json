@@ -32,6 +32,8 @@
     "react-scripts": "^4.0.3",
     "react-sizeme": "^3.0.1",
     "react-use": "^15.3.4",
+    "slate": "^0.63.0",
+    "slate-react": "^0.63.0",
     "timeago.js": "^4.0.2",
     "typeface-roboto": "^1.1.13",
     "typescript": "^4.2.2",

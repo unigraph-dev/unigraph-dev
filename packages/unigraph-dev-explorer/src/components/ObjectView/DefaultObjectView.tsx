@@ -99,7 +99,7 @@ const DynamicViewsDetailed: Record<string, DynamicViewRenderer> = {
 
 window.DynamicViewsDetailed = DynamicViewsDetailed;
 
-export const AutoDynamicView = ({ object, callbacks, component }: any) => {
+export const AutoDynamicView = ({ object, callbacks, component, attributes }: any) => {
 
     const [{ isDragging }, drag] = useDrag(() => ({
         type: object?.['type']?.['unigraph.id'] || "$/schema/any",
@@ -155,13 +155,13 @@ export const AutoDynamicView = ({ object, callbacks, component }: any) => {
     //console.log(object) 
     let el;
     if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViews).includes(object.type['unigraph.id'])) {
-        el = React.createElement(component ? component : DynamicViews[object.type['unigraph.id']], {
+        el = React.createElement(component?.[object.type['unigraph.id']] ? component[object.type['unigraph.id']] : DynamicViews[object.type['unigraph.id']], {
             data: object, callbacks: callbacks ? callbacks : undefined
         });
     } else if (object) {
         el = <StringObjectViewer object={object}/>
     }
-    return el ? <div id={"object-view-"+object?.uid} style={{opacity: isDragging ? 0.5 : 1, display: "inline-flex", alignItems: "center", width: "100%"}} ref={attach}>
+    return el ? <div id={"object-view-"+object?.uid} style={{opacity: isDragging ? 0.5 : 1, display: "inline-flex", alignItems: "center", width: "100%"}} ref={attach} {...(attributes ? attributes : {})}>
         {el}
     </div> : <React.Fragment/>;
 }
