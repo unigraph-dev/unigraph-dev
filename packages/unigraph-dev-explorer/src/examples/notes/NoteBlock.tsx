@@ -1,4 +1,4 @@
-import { List, Typography } from "@material-ui/core";
+import { Typography } from "@material-ui/core";
 import React from "react";
 import { registerDetailedDynamicViews, registerDynamicViews } from "unigraph-dev-common/lib/api/unigraph-react";
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
@@ -40,7 +40,7 @@ const addSibling = (sourceUid: string, index: number) => {
                 type: {"unigraph.id": "$/schema/subentity"},
                 _value: {
                     type: {"unigraph.id": "$/schema/note_block"},
-                    text: "Hi new object"
+                    text: ""
                 }
             }]
         }
@@ -79,11 +79,11 @@ export const NoteBodyDetailed = ({data, callbacks}: any) => {
     return <div style={{width: "100%"}}>
         <Typography variant="body1" id={bodyId} style={{width: "100%"}}>{unpadded.text}</Typography>
         {otherChildren.map((el: any) => <AutoDynamicView object={el} />)}
-        <List>
-            {subentities.map((el: any, index: number) => <AutoDynamicView object={el} callbacks={{
+        <ul>
+            {subentities.map((el: any, index: number) => <li><AutoDynamicView object={el} callbacks={{
                 addSibling: () => addSibling(data.uid, index)
-            }} component={NoteBodyDetailed}/>)}
-        </List>
+            }} component={{"$/schema/note_block": NoteBodyDetailed}}/></li>)}
+        </ul>
     </div>
 }
 
@@ -104,11 +104,11 @@ export const DetailedNoteBlock = ({data}: any) => {
     return <div style={{width: "100%"}}>
         <Typography variant="h4">{data['_value']['text']["_value.%"]}</Typography>
         {otherChildren.map((el: any) => <AutoDynamicView object={el} />)}
-        <List>
-            {subentities.map((el: any, index: number) => <AutoDynamicView object={el} callbacks={{
+        <ul>
+            {subentities.map((el: any, index: number) => <li><AutoDynamicView object={el} callbacks={{
                 addSibling: () => addSibling(data.uid, index)
-            }} component={{"$/schema/note_block": NoteBodyDetailed}}/>)}
-        </List>
+            }} component={{"$/schema/note_block": NoteBodyDetailed}}/></li>)}
+        </ul>
     </div>
 }
 
