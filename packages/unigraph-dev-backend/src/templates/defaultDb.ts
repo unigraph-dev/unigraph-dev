@@ -8,6 +8,7 @@ import {pkg as semantic} from 'unigraph-dev-common/lib/data/unigraph.semantic.pk
 import {pkg as core} from 'unigraph-dev-common/lib/data/unigraph.core.pkg';
 import {pkg as coreuser} from 'unigraph-dev-common/lib/data/unigraph.coreuser.pkg';
 import {pkg as execexample} from 'unigraph-dev-common/lib/data/unigraph.execexample.pkg';
+import {pkg as notes} from 'unigraph-dev-common/lib/data/unigraph.notes.pkg';
 
 export const defaultTypes = `<_value>: uid .
 <_value.#i>: int .
@@ -209,5 +210,5 @@ export const defaultUserlandSchemas = [
 ]
 
 export const defaultPackages = [
-    semantic, core, execexample, coreuser
+    semantic, core, execexample, coreuser, notes
 ]
