@@ -4,7 +4,7 @@
         "type": { "unigraph.id": "$/composer/Union" },
         "_parameters": {
             "_definitions": [{
-                "type": { "unigraph.id": "$/schema/subentity" }
+                "type": { "unigraph.id": "$/schema/note_block" }
             }]
         }
     }
