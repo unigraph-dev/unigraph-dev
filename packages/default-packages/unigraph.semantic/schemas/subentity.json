@@ -1,6 +1,0 @@
-{
-    "dgraph.type": "Type",
-    "_definition": {
-        "type": { "unigraph.id": "$/schema/any" }
-    }
-}
