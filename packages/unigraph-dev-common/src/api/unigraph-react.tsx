@@ -40,3 +40,7 @@ export function withUnigraphSubscription(WrappedComponent: React.FC<{data: any}>
 export const registerDynamicViews = (views: Record<string, React.FC>) => {
     Object.entries(views).forEach(([k, v]) => (window as any).DynamicViews ? (window as any).DynamicViews[k] = v : null)
 }
+
+export const registerDetailedDynamicViews = (views: Record<string, React.FC>) => {
+    Object.entries(views).forEach(([k, v]) => (window as any).DynamicViewsDetailed ? (window as any).DynamicViewsDetailed[k] = v : null)
+}

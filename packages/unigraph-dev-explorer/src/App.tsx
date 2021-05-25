@@ -33,6 +33,8 @@ import { NotificationCenter } from './components/UnigraphCore/Notification';
 import { Inbox } from './components/UnigraphInbox/Inbox';
 import { EmailList } from './examples/email/Email';
 import { UnigraphSearch } from './components/UnigraphCore/UnigraphSearch';
+import { init as nb_init } from './examples/notes/NoteBlock';
+nb_init();
 
 // TODO: custom theme
 const useStyles = makeStyles(theme => ({
