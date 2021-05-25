@@ -6,7 +6,6 @@
         "package_name": "unigraph.semantic",
         "schemas": [
             {"id": "color", "src": "schemas/color.json"},
-            {"id": "subentity", "src": "schemas/subentity.json"},
             {"id": "person", "src": "schemas/person.json"},
             {"id": "tag", "src": "schemas/tag.json"},
             {"id": "note", "src": "schemas/note.json"},

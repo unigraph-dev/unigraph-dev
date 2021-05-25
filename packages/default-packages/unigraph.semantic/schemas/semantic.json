@@ -3,9 +3,7 @@
     "_definition": {
         "type": { "unigraph.id": "$/composer/Union" },
         "_parameters": {
-            "_definitions": [{
-                "type": { "unigraph.id": "$/schema/subentity" }
-            }]
+            "_definitions": []
         }
     }
 }

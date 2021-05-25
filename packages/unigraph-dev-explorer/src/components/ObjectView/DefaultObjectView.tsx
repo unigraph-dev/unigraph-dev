@@ -97,12 +97,12 @@ const DynamicViewsDetailed: Record<string, DynamicViewRenderer> = {
     "$/schema/executable": ExecutableCodeEditor
 }
 
-window.DynamicViewsDetailed = DynamicViewsDetailed;
+window.DynamicViewsDetailed = DynamicViews;
 
-export const AutoDynamicView = ({ object, style, callbacks, component }: any) => {
+export const AutoDynamicView: DynamicViewRenderer = ({ object, callbacks }) => {
 
     const [{ isDragging }, drag] = useDrag(() => ({
-        type: object?.['type']?.['unigraph.id'] || "$/schema/any",
+        type: object['type']['unigraph.id'] || "$/schema/any",
         item: {uid: object?.uid},
         collect: (monitor) => ({
           isDragging: !!monitor.isDragging()
@@ -122,24 +122,9 @@ export const AutoDynamicView = ({ object, style, callbacks, component }: any) =>
           },
     }))
 
-    const [, dropSub] = useDrop(() => ({
-        accept: ["$/schema/note_block", "$/schema/todo"],
-        drop: (item: {uid: string}, monitor) => {
-          window.unigraph.updateObject(object?.uid, {
-              semantic_properties: {
-                  children: [{
-                      type: {"unigraph.id": "$/schema/subentity"},
-                      uid: item.uid
-                  }]
-              }
-          })
-        },
-  }))
-
     const attach = React.useCallback((domElement) => {
         drag(domElement);
         drop(domElement);
-        dropSub(domElement);
         if (!isDragging) domElement?.addEventListener('contextmenu', (event: any) => {
             event.preventDefault();
             window.unigraph.getState('global/contextMenu').setValue({
@@ -155,15 +140,15 @@ export const AutoDynamicView = ({ object, style, callbacks, component }: any) =>
     //console.log(object) 
     let el;
     if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViews).includes(object.type['unigraph.id'])) {
-        el = React.createElement(component && component[object.type['unigraph.id']] ? component[object.type['unigraph.id']] : DynamicViews[object.type['unigraph.id']], {
+        el = React.createElement(DynamicViews[object.type['unigraph.id']], {
             data: object, callbacks: callbacks ? callbacks : undefined
         });
-    } else if (object) {
+    } else {
         el = <StringObjectViewer object={object}/>
     }
-    return el ? <div id={"object-view-"+object?.uid} style={{opacity: isDragging ? 0.5 : 1, display: "inline-flex", alignItems: "center", width: "100%", ...(style ? style: {})}} ref={attach}>
+    return <div id={"object-view-"+object?.uid} style={{opacity: isDragging ? 0.5 : 1, display: "inline-flex", alignItems: "center", width: "100%"}} ref={attach}>
         {el}
-    </div> : <React.Fragment/>;
+    </div>;
 }
 
 export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, callbacks }) => {
