@@ -1,12 +1,12 @@
 import { Typography } from "@material-ui/core";
-import React, { useMemo } from "react";
+import React, { FormEvent, useMemo } from "react";
 import { registerDetailedDynamicViews, registerDynamicViews } from "unigraph-dev-common/lib/api/unigraph-react";
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
 
-import { createEditor } from 'slate'
-import { Slate, Editable, withReact } from 'slate-react'
+import _ from "lodash";
 import { buildGraph } from "unigraph-dev-common/lib/api/unigraph";
+import { useEffectOnce } from "react-use";
 
 export const getSubentities = (data: any) => {
     let subentities: any, otherChildren: any;
@@ -19,28 +19,6 @@ export const getSubentities = (data: any) => {
         }, [[], []])
     }
     return [subentities, otherChildren];
-}
-
-const dataToView: (data: any) => any = (data) => {
-    if (data?.type?.['unigraph.id'] === "$/schema/note_block") {
-        const [subentities, otherChildren] = getSubentities(data);
-        return {type: "outliner", children: [{text: data?.['_value']?.['text']?.["_value.%"] || ""}, ...buildGraph(subentities).map(dataToView)], semantic_children: otherChildren.map(dataToView), data: data}
-    } else {
-        return {type: "autodynamicview", data: data, children: [{text: ""}]}
-    }
-}
-
-const renderer = ({attributes, children, element}: any) => {
-    switch (element.type) {
-        case 'outliner':
-            attributes = {...attributes, style: {...attributes.style, flexDirection: "column"}}
-            return <AutoDynamicView object={element.data} component={{"$/schema/note_block": () => <React.Fragment>
-                <Typography variant="body1">{children[0]}</Typography>
-                <ul>{children.slice(1).map((el: any) => <li>{el}</li>)}</ul>
-            </React.Fragment>}} attributes={attributes}/>
-        default:
-            return <AutoDynamicView object={JSON.parse(JSON.stringify(element.data))} attributes={attributes} /> 
-    }
 }
 
 export const NoteBody = ({text, children}: any) => {
@@ -60,15 +38,61 @@ export const NoteBlock = ({data} : any) => {
     </div>
 }
 
-export const DetailedNoteBlock = ({data}: any) => {
-    const [viewData, setViewData] = React.useState([dataToView(data)]);
-    const editor = useMemo(() => withReact(createEditor() as any), [])
-    
+const onNoteInput = (inputDebounced: any, event: FormEvent<HTMLSpanElement>) => {
+    const newInput = event.currentTarget.textContent;
 
-    return <div>
-        <Slate editor={editor} value={viewData} onChange={(change) => {console.log(change);}}>
-            <Editable renderElement={renderer} />
-        </Slate>
+    inputDebounced(newInput);
+}
+
+const noteBlockCommands = {
+    "create-sibling": (data: any, index: number) => {
+        window.unigraph.updateObject(data.uid, {
+            semantic_properties: {
+                children: [{
+                    type: {"unigraph.id": "$/schema/subentity"},
+                    _value: {
+                        type: {"unigraph.id": "$/schema/note_block"},
+                        text: ""
+                    }
+                }]
+            }
+        })
+    }
+}
+
+export const DetailedNoteBlock = ({data, isChildren, callbacks}: any) => {
+    const [subentities, otherChildren] = getSubentities(data);
+    const inputDebounced = React.useRef(_.throttle((text: string) => {
+        window.unigraph.updateObject(data.uid, {
+            text: text
+        })
+    }, 2000)).current
+    const [currentText, setCurrentText] = React.useState(data?.['_value']['text']['_value.%']);
+    const [edited, setEdited] = React.useState(false);
+
+    React.useEffect(() => {
+        if (currentText !== data?.['_value']['text']['_value.%'] && !edited) setCurrentText(data?.['_value']['text']['_value.%'])
+        else if (currentText === data?.['_value']['text']['_value.%'] && !edited) setEdited(false);
+    }, [data])
+
+    return <div style={{width: "100%"}}>
+        <Typography 
+            variant={isChildren ? "body1" : "h4"} 
+            contentEditable={true} 
+            onInput={(ev) => {onNoteInput(inputDebounced, ev); setEdited(true)}}
+            onKeyDown={(ev) => {
+                if (ev.code === "Enter") {
+                    ev.preventDefault();
+                    callbacks['create-sibling']?.();
+                } 
+            }}
+        >
+            {currentText}
+        </Typography>
+        {buildGraph(otherChildren).map((el: any) => <AutoDynamicView object={el}/>)}
+        <ul>
+            {buildGraph(subentities).map((el: any, elindex) => <li><AutoDynamicView object={el} callbacks={Object.fromEntries(Object.entries(noteBlockCommands).map(([k, v]: any) => [k, (() => v(data, elindex))]))} component={{"$/schema/note_block": DetailedNoteBlock}} attributes={{isChildren: true}}/></li>)}
+        </ul>
     </div>
 }
 
