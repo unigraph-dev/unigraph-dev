@@ -156,7 +156,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes }: an
     let el;
     if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViews).includes(object.type['unigraph.id'])) {
         el = React.createElement(component?.[object.type['unigraph.id']] ? component[object.type['unigraph.id']] : DynamicViews[object.type['unigraph.id']], {
-            data: object, callbacks: callbacks ? callbacks : undefined
+            data: object, callbacks: callbacks ? callbacks : undefined, ...(attributes ? attributes : {})
         });
     } else if (object) {
         el = <StringObjectViewer object={object}/>
