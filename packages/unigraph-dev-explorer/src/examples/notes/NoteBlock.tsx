@@ -1,25 +1,28 @@
 import { Typography } from "@material-ui/core";
 import React, { FormEvent, useMemo } from "react";
 import { registerDetailedDynamicViews, registerDynamicViews } from "unigraph-dev-common/lib/api/unigraph-react";
-import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
+import { byElementIndex, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
 
 import _ from "lodash";
 import { buildGraph } from "unigraph-dev-common/lib/api/unigraph";
 import { useEffectOnce } from "react-use";
+import { AnyMxRecord } from "dns";
 
 export const getSubentities = (data: any) => {
     let subentities: any, otherChildren: any;
     if (!(data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.['children']?.['_value['])) {
         [subentities, otherChildren] = [[], []];
     } else {
-        [subentities, otherChildren] = data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.['children']?.['_value['].reduce((prev: any, el: any) => {
+        [subentities, otherChildren] = data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.['children']?.['_value['].sort(byElementIndex).reduce((prev: any, el: any) => {
             if ('$/schema/subentity' !== el?.['_value']?.type?.['unigraph.id']) return [prev[0], [...prev[1], el['_value']]];
             else return [[...prev[0], el['_value']['_value']], prev[1]]
         }, [[], []])
     }
     return [subentities, otherChildren];
 }
+
+const getSemanticChildren = (data: any) => data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.['children']
 
 export const NoteBody = ({text, children}: any) => {
     return <div>
@@ -45,7 +48,7 @@ const onNoteInput = (inputDebounced: any, event: FormEvent<HTMLSpanElement>) => 
 }
 
 const noteBlockCommands = {
-    "create-sibling": (data: any, index: number) => {
+    "create-child": (data: any, index: number) => {
         window.unigraph.updateObject(data.uid, {
             semantic_properties: {
                 children: [{
@@ -57,6 +60,59 @@ const noteBlockCommands = {
                 }]
             }
         })
+    },
+    /**
+     * Indents a child node into their last sibling (or a specified element).
+     * 
+     * The index is relative to all subentities (outliner children).
+     * 
+     * TODO: This code is very poorly written. We need to change it after we have unigraph object prototypes.
+     */
+    "indent-child": (data: any, index: number, parent?: number) => {
+        if (!parent && index !== 0) {
+            parent = index - 1;
+        } else if (!parent) {
+            return;
+        }
+        let currSubentity = -1;
+        let isDeleted = false;
+        let parIndex: number | undefined = undefined;
+        let newUid = {uid: undefined}
+        const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
+        const newChildren = children?.map((el: any, elindex: any) => {
+            if (el?.['_value']?.['type']?.['unigraph.id'] === "$/schema/subentity") {
+                currSubentity ++;
+                if (currSubentity === index) {
+                    isDeleted = true;
+                    newUid.uid = el['_value'].uid;
+                    return undefined;
+                } else if (currSubentity === parent) {
+                    parIndex = elindex;
+                    return el;
+                } else {
+                    if (isDeleted) return {uid: el.uid, '_index': {'_value.#i': el['_index']['_value.#i'] - 1}}
+                    else return {uid: el.uid}
+                }
+            } else return {uid: el.uid};
+        })
+        if (parIndex !== undefined) newChildren[parIndex] = _.mergeWith({}, newChildren[parIndex], {'_value': { '_value': { '_value': {
+            'semantic_properties': {
+                '_propertyType': 'inheritance',
+                '_value': { 'dgraph.type': 'Entity', type: {'unigraph.id': '$/schema/semantic_properties'}, '_propertyType': 'inheritance', '_value': {
+                    children: {'_value[': [{
+                        '_index': {'_value.#i': getSemanticChildren(newChildren[parIndex]['_value']['_value'])?.['_value[']?.length || 0}, // always append at bottom
+                        '_value': newUid
+                    }]}
+                }
+            }}}}
+        }}, function (objValue: any, srcValue: any) {
+            if (_.isArray(objValue)) {
+              return objValue.concat(srcValue);
+            }
+          })
+        const finalChildren = newChildren.filter((el: any) => el !== undefined);
+        console.log(finalChildren)
+        window.unigraph.updateObject(data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.uid, {'children': {'_value[': finalChildren}}, false, false);
     }
 }
 
@@ -81,10 +137,20 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks}: any) => {
             contentEditable={true} 
             onInput={(ev) => {onNoteInput(inputDebounced, ev); setEdited(true)}}
             onKeyDown={(ev) => {
-                if (ev.code === "Enter") {
-                    ev.preventDefault();
-                    callbacks['create-sibling']?.();
-                } 
+                switch (ev.code) {
+                    case 'Enter':
+                        ev.preventDefault();
+                        callbacks['create-child']?.();
+                        break;
+                    
+                    case 'Tab':
+                        ev.preventDefault();
+                        callbacks['indent-child']?.();
+                        break;
+                
+                    default:
+                        break;
+                }
             }}
         >
             {currentText}
