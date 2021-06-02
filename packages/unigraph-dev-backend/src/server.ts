@@ -300,7 +300,7 @@ export default async function startServer(client: DgraphClient) {
       let origin = event.newObject['unigraph.origin'] ? event.newObject['unigraph.origin'] : (await dgraphClient.queryData<any>(`query { entity(func: uid(${newUid})) { <unigraph.origin> { uid }}}`, []))[0]?.['unigraph.origin']
       if (!Array.isArray(origin)) origin = [origin];
       if (typeof event.upsert === "boolean" && !event.upsert) {
-        if (!isPaddedObject(event.newObject)) { 
+        if (event.pad) { 
           ws.send(makeResponse(event, false, {"error": "In non-upsert mode, you have to supply a padded object, since we are mutating metadata explicitely as well."})) 
         } else {
           let newObject = {...event.newObject, uid: newUid, 'unigraph.origin': origin}; // If specifying UID, override with it
