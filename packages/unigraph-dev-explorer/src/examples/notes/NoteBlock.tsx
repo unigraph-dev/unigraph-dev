@@ -48,18 +48,56 @@ const onNoteInput = (inputDebounced: any, event: FormEvent<HTMLSpanElement>) => 
 }
 
 const noteBlockCommands = {
-    "create-child": (data: any, index: number) => {
-        window.unigraph.updateObject(data.uid, {
-            semantic_properties: {
-                children: [{
-                    type: {"unigraph.id": "$/schema/subentity"},
-                    _value: {
-                        type: {"unigraph.id": "$/schema/note_block"},
-                        text: ""
+    "unsplit-child": (data: any, index: number) => {
+        let currSubentity = -1;
+        const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
+        const delAt = children?.reduce((prev: any[], el: any, elindex: any) => {
+            if (el?.['_value']?.['type']?.['unigraph.id'] === "$/schema/subentity") {
+                currSubentity ++;
+                if (currSubentity === index) return elindex;
+                else return prev;
+            } else return prev;
+        }, 0)
+        if (children[delAt]?.['_value']?.['_value']?.['_value']?.['text']?.['_value.%'] === "")
+            window.unigraph.deleteItemFromArray(getSemanticChildren(data).uid, children[delAt].uid)
+    },
+    "split-child": (data: any, index: number, at: number) => {
+        console.log(data, index, at)
+        let currSubentity = -1;
+        let isInserted = false;
+        const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
+        const newChildren = children?.reduce((prev: any[], el: any, elindex: any) => {
+            if (el?.['_value']?.['type']?.['unigraph.id'] === "$/schema/subentity") {
+                currSubentity ++;
+                if (currSubentity === index) {
+                    isInserted = true;
+                    const newel = {
+                        '_index': {'_value.#i': elindex},
+                        '_value': {
+                            'dgraph.type': ['Entity'],
+                            'type': {'unigraph.id': '$/schema/subentity'},
+                            '_value': {
+                                'dgraph.type': ['Entity'],
+                                'type': {'unigraph.id': '$/schema/note_block'},
+                                '_value': {
+                                    'text': {
+                                        '_value.%': el['_value']['_value']['_value']['text']['_value.%'].slice(0, at)
+                                    }
+                                }
+                            }
+                        }
                     }
-                }]
-            }
-        })
+                    el['_index']['_value.#i'] = elindex + 1;
+                    el['_value']['_value']['_value']['text']['_value.%'] = el['_value']['_value']['_value']['text']['_value.%'].slice(at);
+                    return [...prev, newel, el];
+                } else {
+                    if (isInserted) return [...prev, {uid: el.uid, '_index': {'_value.#i': el['_index']['_value.#i'] + 1}}]
+                    else return [...prev, {uid: el.uid}]
+                }
+            } else return [...prev, {uid: el.uid}];
+        }, [])
+        console.log(newChildren)
+        window.unigraph.updateObject(data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.uid, {'children': {'_value[': newChildren}}, false, false);
     },
     /**
      * Indents a child node into their last sibling (or a specified element).
@@ -122,7 +160,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks}: any) => {
         window.unigraph.updateObject(data.uid, {
             text: text
         })
-    }, 2000)).current
+    }, 1000)).current
     const [currentText, setCurrentText] = React.useState(data?.['_value']['text']['_value.%']);
     const [edited, setEdited] = React.useState(false);
 
@@ -140,15 +178,24 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks}: any) => {
                 switch (ev.code) {
                     case 'Enter':
                         ev.preventDefault();
-                        callbacks['create-child']?.();
+                        console.log(ev);
+                        const caret = document.getSelection()?.anchorOffset;
+                        callbacks['split-child']?.(caret);
                         break;
                     
                     case 'Tab':
                         ev.preventDefault();
                         callbacks['indent-child']?.();
                         break;
+
+                    case 'Backspace':
+                        ev.preventDefault();
+                        const bscaret = document.getSelection()?.anchorOffset;
+                        if (bscaret === 0) callbacks['unsplit-child']();
+                        break;
                 
                     default:
+                        console.log(ev);
                         break;
                 }
             }}
@@ -157,7 +204,13 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks}: any) => {
         </Typography>
         {buildGraph(otherChildren).map((el: any) => <AutoDynamicView object={el}/>)}
         <ul>
-            {buildGraph(subentities).map((el: any, elindex) => <li><AutoDynamicView object={el} callbacks={Object.fromEntries(Object.entries(noteBlockCommands).map(([k, v]: any) => [k, (() => v(data, elindex))]))} component={{"$/schema/note_block": DetailedNoteBlock}} attributes={{isChildren: true}}/></li>)}
+            {buildGraph(subentities).map((el: any, elindex) => <li>
+                <AutoDynamicView 
+                    object={el} 
+                    callbacks={Object.fromEntries(Object.entries(noteBlockCommands).map(([k, v]: any) => [k, v.bind(this, data, elindex)]))} 
+                    component={{"$/schema/note_block": DetailedNoteBlock}} attributes={{isChildren: true}}
+                />
+            </li>)}
         </ul>
     </div>
 }
