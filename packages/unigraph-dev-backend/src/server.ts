@@ -387,11 +387,11 @@ export default async function startServer(client: DgraphClient) {
       const dectx_raw: any[] = JSON.parse(JSON.stringify(dectxObjects(parsed)));
       const dectx: any[] = dectx_raw.filter(el => !(el['dgraph.type']?.includes('Executable') || el['dgraph.type']?.includes('Named')))
       const ref = dectx.map(el => processAutoref(JSON.parse(JSON.stringify(el)), el.type['unigraph.id'], caches['schemas'].data));
-      console.log(JSON.stringify(ref, null, 2))
+      //console.log(JSON.stringify(ref, null, 2))
       const upsert = insertsToUpsert(ref);
       //const anchor = anchorBatchUpsert(upsert);
       //console.log(JSON.stringify(anchor, null, 2))
-      console.log(JSON.stringify(upsert, null, 2))/*
+      /*console.log(JSON.stringify(upsert, null, 2))/*
       dgraphClient.createUnigraphUpsert(anchor).then(_ => {
         dgraphClient.createUnigraphUpsert(upsert).then(_ => {
           callHooks(hooks, "after_object_changed", {subscriptions: subscriptions, caches: caches})

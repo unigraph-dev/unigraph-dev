@@ -338,7 +338,7 @@ export default class DgraphClient {
 }
 
 export const queries: Record<string, (a: string) => string> = {
-  "queryAny": (a) => `(func: uid(es${a}), orderdesc: val(cca${a}), first: 100) @recurse(depth: 10) {
+  "queryAny": (a) => `(func: uid(es${a}), orderdesc: val(cca${a}), first: 100) @recurse(depth: 15) {
     uid
     unigraph.id
     expand(_userpredicate_)
