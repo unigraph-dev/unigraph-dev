@@ -34,7 +34,12 @@ const getComponentFromPage = (location: string, params: any = {}) => {return {
 }}
 
 const newWindowActions = {
-    "new-tab": (model: Model, initJson: any) => model.doAction(Actions.addNode(initJson, "workspace-main-tabset", DockLocation.CENTER, -1)),
+    "new-tab": (model: Model, initJson: any) => {
+        let newJson = {...initJson, id: getRandomInt().toString()};
+        newJson.config = newJson.config || {};
+        newJson.config.id = newJson.id;
+        model.doAction(Actions.addNode(newJson, "workspace-main-tabset", DockLocation.CENTER, -1));
+    },
     "new-pane": (model: Model, initJson: any) => {
         let node = getComponentFromPage(initJson);
         let action = Actions.addNode(node, "workspace-main-tabset", DockLocation.RIGHT, 0, true)
@@ -170,7 +175,7 @@ export function WorkSpace(this: any) {
                 if (node.isVisible() && nodeId !== "app-drawer" && nodeId !== "dashboard" && nodeId !== "search-pane") {
                     renderValues.buttons.push(<div style={{zIndex: 999, transform: "scale(0.7)"}} onClick={async () => {
                         const config = node.getConfig();
-                        if (config) delete config.undefine;
+                        if (config) {delete config.undefine; delete config.id};
                         const uid = await window.unigraph.addObject({
                             name: node.getName(),
                             env: "react-explorer",

@@ -16,6 +16,7 @@ type ObjectViewOptions = {
     unpad?: boolean,
     canEdit?: boolean,
     showContextMenu?: boolean,
+    viewId?: any
 };
 
 type ObjectListViewOptions = {
@@ -170,7 +171,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, 
     //console.log(object)
     if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViewsDetailed).includes(object.type['unigraph.id'])) {
         return React.createElement(DynamicViewsDetailed[object.type['unigraph.id']], {
-            data: object, callbacks: callbacks ? callbacks : undefined
+            data: object, callbacks: callbacks, options: options || {}
         });
     } else {
         return <JsontreeObjectViewer object={object} options={options}/>

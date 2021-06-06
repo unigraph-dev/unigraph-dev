@@ -6,6 +6,7 @@ import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
 
 import _ from "lodash";
 import { buildGraph } from "unigraph-dev-common/lib/api/unigraph";
+import { Actions } from "flexlayout-react";
 
 export const getSubentities = (data: any) => {
     let subentities: any, otherChildren: any;
@@ -52,8 +53,6 @@ type NoteEditorContext = {
 }
 
 const focusUid = (uid: string) => {
-    console.log(`object-view-${uid}`);
-    console.log(document.getElementById(`object-view-${uid}`));
     (document.getElementById(`object-view-${uid}`)?.children[0].children[0] as any)?.focus();
 }
 
@@ -80,7 +79,7 @@ const noteBlockCommands = {
         }
     },
     "split-child": (data: any, context: NoteEditorContext, index: number, at: number) => {
-        console.log(JSON.stringify([data, index, at], null, 4))
+        //console.log(JSON.stringify([data, index, at], null, 4))
         let currSubentity = -1;
         let isInserted = false;
         const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
@@ -117,7 +116,7 @@ const noteBlockCommands = {
                 }
             } else return [...prev, {uid: el.uid}];
         }, [])
-        console.log(newChildren)
+        //console.log(newChildren)
         window.unigraph.updateObject(data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.uid, {'children': {'_value[': newChildren}}, false, false);
         context.setEdited(true);
         context.setCommand(() => noteBlockCommands['set-focus'].bind(this, data, context, index + 1))
@@ -181,7 +180,7 @@ const noteBlockCommands = {
     }
 }
 
-export const DetailedNoteBlock = ({data, isChildren, callbacks}: any) => {
+export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) => {
     const [subentities, otherChildren] = getSubentities(data);
     const [command, setCommand] = React.useState<() => any | undefined>();
     const inputter = (text: string) => {
@@ -192,7 +191,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks}: any) => {
     const dataref = React.useRef<any>();
     const childrenref = React.useRef<any>();
     const inputDebounced = React.useRef(_.throttle(inputter, 1000)).current
-    const [currentText, setCurrentText] = React.useState(data?.['_value']['text']['_value.%']);
+    const setCurrentText = (text: string) => {textInput.current.textContent = text};
     const [edited, setEdited] = React.useState(false);
     const textInput: any = React.useRef();
     const editorContext = {
@@ -201,14 +200,15 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks}: any) => {
 
     React.useEffect(() => {
         dataref.current = data;
-        console.log(data?.['_value']['text']['_value.%'], edited, textInput.current.textContent, currentText)
-        if (textInput.current.textContent !== data?.['_value']['text']['_value.%'] && !edited) {setCurrentText(data?.['_value']['text']['_value.%']); textInput.current.textContent = currentText;}
-        else if (currentText !== data?.['_value']['text']['_value.%'] && !edited) {setCurrentText(data?.['_value']['text']['_value.%']); textInput.current.textContent = currentText;}
-        else if (textInput.current.textContent === data?.['_value']['text']['_value.%'] && edited) setEdited(false);
+        const dataText = data?.['_value']['text']['_value.%']
+        if (dataText && options?.viewId) window.layoutModel.doAction(Actions.renameTab(options.viewId, `Note: ${dataText}`))
+        //console.log(dataText, edited, textInput.current.textContent)
+        if (textInput.current.textContent !== dataText && !edited) {setCurrentText(dataText); textInput.current.textContent = dataText;}
+        else if (textInput.current.textContent === dataText && edited) setEdited(false);
     }, [data])
 
     React.useEffect(() => {
-        console.log(edited, command)
+        //console.log(edited, command)
         if (!edited && command) {
             command();
             setCommand(undefined);
@@ -250,7 +250,6 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks}: any) => {
                 }
             }}
         >
-            {currentText}
         </Typography>
         {buildGraph(otherChildren).map((el: any) => <AutoDynamicView object={el}/>)}
         <ul ref={childrenref}>
