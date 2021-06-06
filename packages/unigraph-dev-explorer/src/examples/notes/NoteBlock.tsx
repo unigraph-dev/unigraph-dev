@@ -1,13 +1,11 @@
 import { Typography } from "@material-ui/core";
-import React, { FormEvent, useMemo } from "react";
+import React, { FormEvent } from "react";
 import { registerDetailedDynamicViews, registerDynamicViews } from "unigraph-dev-common/lib/api/unigraph-react";
 import { byElementIndex, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
 
 import _ from "lodash";
 import { buildGraph } from "unigraph-dev-common/lib/api/unigraph";
-import { useEffectOnce } from "react-use";
-import { AnyMxRecord } from "dns";
 
 export const getSubentities = (data: any) => {
     let subentities: any, otherChildren: any;
@@ -47,8 +45,23 @@ const onNoteInput = (inputDebounced: any, event: FormEvent<HTMLSpanElement>) => 
     inputDebounced(newInput);
 }
 
+type NoteEditorContext = {
+    setEdited: (a: boolean) => any;
+    setCommand: (a: any) => any;
+    childrenref: any
+}
+
+const focusUid = (uid: string) => {
+    console.log(`object-view-${uid}`);
+    console.log(document.getElementById(`object-view-${uid}`));
+    (document.getElementById(`object-view-${uid}`)?.children[0].children[0] as any)?.focus();
+}
+
 const noteBlockCommands = {
-    "unsplit-child": async (data: any, index: number) => {
+    "set-focus": (data: any, context: NoteEditorContext, index: number) => {
+        console.log(context.childrenref.current.children[index].children[0].children[0].children[0].focus());
+    },
+    "unsplit-child": async (data: any, context: NoteEditorContext, index: number) => {
         let currSubentity = -1;
         const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
         const delAt = children?.reduce((prev: any[], el: any, elindex: any) => {
@@ -60,10 +73,14 @@ const noteBlockCommands = {
         }, 0)
         if (children[delAt]?.['_value']?.['_value']?.['_value']?.['text']?.['_value.%'] === "") {
             await window.unigraph.deleteItemFromArray(getSemanticChildren(data).uid, children[delAt].uid);
+            if (index !== 0) {
+                context.setEdited(true);
+                context.setCommand(() => noteBlockCommands['set-focus'].bind(this, data, context, index - 1))
+            }
         }
     },
-    "split-child": (data: any, index: number, at: number) => {
-        console.log(data, index, at)
+    "split-child": (data: any, context: NoteEditorContext, index: number, at: number) => {
+        console.log(JSON.stringify([data, index, at], null, 4))
         let currSubentity = -1;
         let isInserted = false;
         const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
@@ -102,6 +119,8 @@ const noteBlockCommands = {
         }, [])
         console.log(newChildren)
         window.unigraph.updateObject(data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.uid, {'children': {'_value[': newChildren}}, false, false);
+        context.setEdited(true);
+        context.setCommand(() => noteBlockCommands['set-focus'].bind(this, data, context, index + 1))
     },
     /**
      * Indents a child node into their last sibling (or a specified element).
@@ -110,7 +129,7 @@ const noteBlockCommands = {
      * 
      * TODO: This code is very poorly written. We need to change it after we have unigraph object prototypes.
      */
-    "indent-child": (data: any, index: number, parent?: number) => {
+    "indent-child": (data: any, context: NoteEditorContext, index: number, parent?: number) => {
         if (!parent && index !== 0) {
             parent = index - 1;
         } else if (!parent) {
@@ -119,7 +138,7 @@ const noteBlockCommands = {
         let currSubentity = -1;
         let isDeleted = false;
         let parIndex: number | undefined = undefined;
-        let newUid = {uid: undefined}
+        let newUid: any = {uid: undefined}
         const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
         const newChildren = children?.map((el: any, elindex: any) => {
             if (el?.['_value']?.['type']?.['unigraph.id'] === "$/schema/subentity") {
@@ -127,6 +146,7 @@ const noteBlockCommands = {
                 if (currSubentity === index) {
                     isDeleted = true;
                     newUid.uid = el['_value'].uid;
+                    newUid['_value'] = {uid: el['_value']['_value'].uid}
                     return undefined;
                 } else if (currSubentity === parent) {
                     parIndex = elindex;
@@ -155,47 +175,72 @@ const noteBlockCommands = {
         const finalChildren = newChildren.filter((el: any) => el !== undefined);
         console.log(finalChildren)
         window.unigraph.updateObject(data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.uid, {'children': {'_value[': finalChildren}}, false, false);
+        context.setEdited(true);
+        context.setCommand(() => () => focusUid(newUid['_value'].uid));
+        //context.setCommand(() => noteBlockCommands['set-focus'].bind(this, data, {...context, childrenref: {current: context.childrenref.current.children[parent as number].children[0].children[0].children[1]}}, -1))
     }
 }
 
 export const DetailedNoteBlock = ({data, isChildren, callbacks}: any) => {
     const [subentities, otherChildren] = getSubentities(data);
+    const [command, setCommand] = React.useState<() => any | undefined>();
     const inputter = (text: string) => {
         return window.unigraph.updateObject(data.uid, {
             text: text
         })
     }
+    const dataref = React.useRef<any>();
+    const childrenref = React.useRef<any>();
     const inputDebounced = React.useRef(_.throttle(inputter, 1000)).current
     const [currentText, setCurrentText] = React.useState(data?.['_value']['text']['_value.%']);
     const [edited, setEdited] = React.useState(false);
+    const textInput: any = React.useRef();
+    const editorContext = {
+        setEdited, setCommand, childrenref
+    }
 
     React.useEffect(() => {
-        if (currentText !== data?.['_value']['text']['_value.%'] && !edited) setCurrentText(data?.['_value']['text']['_value.%'])
-        else if (currentText === data?.['_value']['text']['_value.%'] && edited) setEdited(false);
+        dataref.current = data;
+        console.log(data?.['_value']['text']['_value.%'], edited, textInput.current.textContent, currentText)
+        if (textInput.current.textContent !== data?.['_value']['text']['_value.%'] && !edited) {setCurrentText(data?.['_value']['text']['_value.%']); textInput.current.textContent = currentText;}
+        else if (currentText !== data?.['_value']['text']['_value.%'] && !edited) {setCurrentText(data?.['_value']['text']['_value.%']); textInput.current.textContent = currentText;}
+        else if (textInput.current.textContent === data?.['_value']['text']['_value.%'] && edited) setEdited(false);
     }, [data])
+
+    React.useEffect(() => {
+        console.log(edited, command)
+        if (!edited && command) {
+            command();
+            setCommand(undefined);
+        }
+    }, [command, edited])
 
     return <div style={{width: "100%"}}>
         <Typography 
             variant={isChildren ? "body1" : "h4"} 
             contentEditable={true} 
-            onInput={(ev) => {onNoteInput(inputDebounced, ev); setEdited(true)}}
+            ref={textInput}
+            onInput={(ev) => {onNoteInput(inputDebounced, ev); if (ev.currentTarget.textContent !== data?.['_value']['text']['_value.%'] && !edited) setEdited(true)}}
             onKeyDown={async (ev) => {
                 const caret = document.getSelection()?.anchorOffset;
                 switch (ev.code) {
                     case 'Enter':
                         ev.preventDefault();
-                        callbacks['split-child']?.(caret);
+                        inputDebounced.flush();
+                        setCommand(() => callbacks['split-child']?.bind(this, caret))
                         break;
                     
                     case 'Tab':
                         ev.preventDefault();
-                        callbacks['indent-child']?.();
+                        inputDebounced.flush();
+                        setCommand(() => callbacks['indent-child']?.bind(this));
                         break;
 
                     case 'Backspace':
                         if (caret === 0 && document.getSelection()?.type === "Caret") {
                             ev.preventDefault();
-                            callbacks['unsplit-child']();
+                            inputDebounced.flush();
+                            setCommand(() => callbacks['unsplit-child'].bind(this));
                         }
                         break;
                 
@@ -208,11 +253,11 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks}: any) => {
             {currentText}
         </Typography>
         {buildGraph(otherChildren).map((el: any) => <AutoDynamicView object={el}/>)}
-        <ul>
-            {buildGraph(subentities).map((el: any, elindex) => <li>
+        <ul ref={childrenref}>
+            {buildGraph(subentities).map((el: any, elindex) => <li key={el.uid}>
                 <AutoDynamicView 
                     object={el} 
-                    callbacks={Object.fromEntries(Object.entries(noteBlockCommands).map(([k, v]: any) => [k, v.bind(this, data, elindex)]))} 
+                    callbacks={Object.fromEntries(Object.entries(noteBlockCommands).map(([k, v]: any) => [k, (...args: any[]) => v(dataref.current, editorContext, elindex, ...args)]))} 
                     component={{"$/schema/note_block": DetailedNoteBlock}} attributes={{isChildren: true}}
                 />
             </li>)}
