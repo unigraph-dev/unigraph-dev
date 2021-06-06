@@ -7,6 +7,7 @@ import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { AutoDynamicView, DefaultObjectListView } from "../../components/ObjectView/DefaultObjectView";
 import { DynamicViewRenderer } from "../../global";
 import * as timeago from 'timeago.js';
+import { download, upload } from "../../utils";
 
 export type ARSSFeed = {
     uid?: string,
@@ -63,15 +64,16 @@ const RSSItem: DynamicViewRenderer = ({data, callbacks}) => {
         </ListItemIcon>
         <ListItemText
             primary={<a href={unpadded.item_data?.url}>{unpadded.item_data?.name}</a>}
-            secondary={`Added: ${timeago.format(new Date(unpadded?.item_data?.date_created))}, updated: ${timeago.format(new Date(unpadded?._timestamp?._updatedAt))}`} 
+            secondary={<div>
+                <div>Added: {timeago.format(new Date(unpadded?.item_data?.date_created))}, updated: {timeago.format(new Date(unpadded?._timestamp?._updatedAt))}</div>
+                {unpadded?.content?.abstract ? <div style={{color: 'black'}}>{unpadded.content.abstract}</div> : ''}
+            </div>} 
         />
     </React.Fragment>
 }
 
 const RSSFeed: DynamicViewRenderer = ({data, callbacks}) => {
-    return <React.Fragment>
-        {JSON.stringify(unpad(data))}
-    </React.Fragment>
+    return <AutoDynamicView object={data['_value']['site_info']['_value']}/>
 }
 
 const dynamicComponents = {
@@ -86,11 +88,20 @@ const RSSFeedsBody: React.FC<{data: ARSSFeed[]}> = ({data}) => {
 
     return <div>
         <Typography variant="body2">Here are all your RSS feeds:</Typography> 
-        <DefaultObjectListView component={List} objects={data.map((el: any) => {let site = el._value.site_info._value; return site})} />
+        {data.map(el => <ListItem key={el.uid}><AutoDynamicView object={el}/></ListItem>)}
         <TextField value={newUrl} onChange={(e) => setNewUrl(e.target.value)}></TextField>
         <Button onClick={() => 
             window.unigraph.runExecutable<ParserParam>(getExecutableId(rssReaderPackage, "add-feed"), {url: newUrl})
         }>Add feed</Button>
+        <Button onClick={() => {
+            upload((f: File) => {
+                f.text().then((text: string) => {
+                    window.unigraph.runExecutable(getExecutableId(rssReaderPackage, "import-opml"), {opmlText: text});
+                })
+            })
+        }}>Import from OPML</Button>
+        <Button>Export to OPML</Button>
+        <Button onClick={() => {download('feeds.json', JSON.stringify(data, null, 4))}}>Export as entities</Button>
         <Divider/>
     </div>
 }

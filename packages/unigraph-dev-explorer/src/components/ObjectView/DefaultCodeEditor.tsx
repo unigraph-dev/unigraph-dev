@@ -6,6 +6,7 @@ import { Accordion, AccordionDetails, AccordionSummary, Button, IconButton, List
 import { ExpandMore, Save } from "@material-ui/icons";
 import { SizeMe } from "react-sizeme";
 import { Actions } from "flexlayout-react";
+import { useEffectOnce } from "react-use";
 
 loader.config({ paths: { vs: './vendor/monaco-editor_at_0.23.0/min/vs' } });
 
@@ -34,9 +35,9 @@ export const ExecutableCodeEditor = ({data, options}: any) => {
         setCurrentCode(value);
     }
 
-    React.useEffect(() => {
+    useEffectOnce(() => {
         if (options?.viewId) { window.layoutModel.doAction(Actions.renameTab(options.viewId, `Code: ${unpadded['unigraph.id'].split('/').slice(-1).join('')}`)) }
-    }, [options])    
+    })    
 
     return <div style={{width: "100%"}}>
         <div style={{display: 'flex'}}>

@@ -19,6 +19,18 @@
             "src": "executables/addFeed.js",
             "editable": true,
             "name": "Add a feed to RSS feeds list"
+        }, {
+            "id": "import-opml",
+            "env": "routine/js",
+            "src": "executables/importOpml.js",
+            "editable": true,
+            "name": "Import RSS feeds via OPML"
+        }, {
+            "id": "export-opml",
+            "env": "routine/js",
+            "src": "executables/exportOpml.js",
+            "editable": true,
+            "name": "Export RSS feeds to OPML"
         }]
     }
 }
