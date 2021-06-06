@@ -64,7 +64,10 @@ const RSSItem: DynamicViewRenderer = ({data, callbacks}) => {
         </ListItemIcon>
         <ListItemText
             primary={<a href={unpadded.item_data?.url}>{unpadded.item_data?.name}</a>}
-            secondary={`Added: ${timeago.format(new Date(unpadded?.item_data?.date_created))}, updated: ${timeago.format(new Date(unpadded?._timestamp?._updatedAt))}`} 
+            secondary={<div>
+                <div>Added: {timeago.format(new Date(unpadded?.item_data?.date_created))}, updated: {timeago.format(new Date(unpadded?._timestamp?._updatedAt))}</div>
+                {unpadded?.content?.abstract ? <div style={{color: 'black'}}>{unpadded.content.abstract}</div> : ''}
+            </div>} 
         />
     </React.Fragment>
 }
