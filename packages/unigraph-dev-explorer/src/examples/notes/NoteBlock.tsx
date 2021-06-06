@@ -53,8 +53,6 @@ type NoteEditorContext = {
 }
 
 const focusUid = (uid: string) => {
-    console.log(`object-view-${uid}`);
-    console.log(document.getElementById(`object-view-${uid}`));
     (document.getElementById(`object-view-${uid}`)?.children[0].children[0] as any)?.focus();
 }
 
@@ -81,7 +79,7 @@ const noteBlockCommands = {
         }
     },
     "split-child": (data: any, context: NoteEditorContext, index: number, at: number) => {
-        console.log(JSON.stringify([data, index, at], null, 4))
+        //console.log(JSON.stringify([data, index, at], null, 4))
         let currSubentity = -1;
         let isInserted = false;
         const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
@@ -118,7 +116,7 @@ const noteBlockCommands = {
                 }
             } else return [...prev, {uid: el.uid}];
         }, [])
-        console.log(newChildren)
+        //console.log(newChildren)
         window.unigraph.updateObject(data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.uid, {'children': {'_value[': newChildren}}, false, false);
         context.setEdited(true);
         context.setCommand(() => noteBlockCommands['set-focus'].bind(this, data, context, index + 1))
@@ -204,13 +202,13 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
         dataref.current = data;
         const dataText = data?.['_value']['text']['_value.%']
         if (dataText && options?.viewId) window.layoutModel.doAction(Actions.renameTab(options.viewId, `Note: ${dataText}`))
-        console.log(dataText, edited, textInput.current.textContent)
+        //console.log(dataText, edited, textInput.current.textContent)
         if (textInput.current.textContent !== dataText && !edited) {setCurrentText(dataText); textInput.current.textContent = dataText;}
         else if (textInput.current.textContent === dataText && edited) setEdited(false);
     }, [data])
 
     React.useEffect(() => {
-        console.log(edited, command)
+        //console.log(edited, command)
         if (!edited && command) {
             command();
             setCommand(undefined);
