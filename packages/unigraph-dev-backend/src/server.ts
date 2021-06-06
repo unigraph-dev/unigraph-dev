@@ -472,7 +472,8 @@ export default async function startServer(client: DgraphClient) {
 
   Object.entries(eventRouter).forEach(([key, fn]) => {
     httpserver.get('/' + key, (req, res) => {
-      fn(req.params, res as any);
+      console.log(req.query)
+      fn(req.query, res as any);
     })
   })
 
