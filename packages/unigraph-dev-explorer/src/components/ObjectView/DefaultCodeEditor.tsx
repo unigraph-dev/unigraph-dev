@@ -2,8 +2,10 @@ import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { loader } from '@monaco-editor/react';
 import Editor from "@monaco-editor/react";
 import React from "react";
-import { Button } from "@material-ui/core";
-import { Save } from "@material-ui/icons";
+import { Accordion, AccordionDetails, AccordionSummary, Button, IconButton, List, ListItem, Typography } from "@material-ui/core";
+import { ExpandMore, Save } from "@material-ui/icons";
+import { SizeMe } from "react-sizeme";
+import { Actions } from "flexlayout-react";
 
 loader.config({ paths: { vs: './vendor/monaco-editor_at_0.23.0/min/vs' } });
 
@@ -18,11 +20,12 @@ let decl = unigraphDecl.substring(
 decl = decl.replace(/export declare type /g, "declare type ")
 decl = decl.replace("export interface ", "declare interface ")
 
-export const ExecutableCodeEditor = ({data}: any) => {
+export const ExecutableCodeEditor = ({data, options}: any) => {
     
     const unpadded = unpad(data);
 
     const [currentCode, setCurrentCode] = React.useState(unpadded['src'])
+    const [optionsOpen, setOptionsOpen] = React.useState(false);
 
     const updateCode = (newSrc: string) => 
         {window.unigraph.updateObject(data.uid, {src: newSrc})}
@@ -31,18 +34,40 @@ export const ExecutableCodeEditor = ({data}: any) => {
         setCurrentCode(value);
     }
 
-    const displayData = {...unpadded};
-    delete displayData['src']
-    
+    React.useEffect(() => {
+        if (options?.viewId) { window.layoutModel.doAction(Actions.renameTab(options.viewId, `Code: ${unpadded['unigraph.id'].split('/').slice(-1).join('')}`)) }
+    }, [options])    
 
-    return <div>
-        <div>
-            {JSON.stringify(displayData)}
-            <Button onClick={() => updateCode(currentCode)}><Save/></Button>
+    return <div style={{width: "100%"}}>
+        <div style={{display: 'flex'}}>
+        <Accordion expanded={optionsOpen} onChange={() => setOptionsOpen(!optionsOpen)} variant={"outlined"} style={{flexGrow: 1, marginBottom: '16px'}}> 
+        <AccordionSummary  
+          expandIcon={<ExpandMore />}
+          aria-controls="panel1bh-content"
+          id="panel1bh-header"
+        >
+          <Typography style={{flexBasis: '50%', flexShrink: 0}}>{unpadded.name}</Typography>
+          <Typography color='textSecondary'>{unpadded.env}</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+            <List>
+                <ListItem>
+                    <Typography style={{flexBasis: '33.33%', flexShrink: 0}}>unigraph.id</Typography>
+                    <Typography color='textSecondary'>{unpadded['unigraph.id']}</Typography>
+                </ListItem>
+                <ListItem>
+                    <Typography style={{flexBasis: '33.33%', flexShrink: 0}}>Periodic</Typography>
+                    <Typography color='textSecondary'>{unpadded.periodic || "none"}</Typography>
+                </ListItem>
+            </List>
+
+        </AccordionDetails>
+      </Accordion>
+      <IconButton onClick={() => updateCode(currentCode)}><Save/></IconButton>
         </div>
-        <Editor
-            height="70vh"
-            width="100vh"
+        <SizeMe>{({size}: any) => <div><Editor
+            height={"70vh"}
+            width={`${size.width}px`}
             defaultLanguage="javascript"
             beforeMount={(monaco) => {
                 monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
@@ -61,7 +86,7 @@ export const ExecutableCodeEditor = ({data}: any) => {
             }}
             defaultValue={currentCode}
             onChange={handleEditorChange}
-        />
+        /></div>}</SizeMe>
     </div>
 
 }
