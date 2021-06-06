@@ -59,7 +59,7 @@ function BookmarksBody ({data}: { data: ABookmark[] }) {
 export const Bookmarks = withUnigraphSubscription(
     // @ts-ignore
     BookmarksBody,
-    { defaultData: [], schemas: [], packages: [bookmarkPackage]},
+    { defaultData: Array(10).fill({'type': {'unigraph.id': '$/skeleton/default'}}), schemas: [], packages: [bookmarkPackage]},
     { afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
         window.unigraph.subscribeToType("$/schema/web_bookmark", (result: ABookmark[]) => {setData(result)}, subsId);
     }}

@@ -1,5 +1,6 @@
 import { Button, ButtonGroup, Checkbox, FormControlLabel, IconButton, List, ListItemIcon, ListItemText, Typography } from '@material-ui/core';
 import { MoreVert, PlayArrow } from '@material-ui/icons';
+import { Skeleton } from '@material-ui/lab';
 import React, { FC, ReactElement } from 'react';
 import { useDrag, useDrop} from 'react-dnd';
 import ReactJson, { InteractionProps } from 'react-json-view';
@@ -46,6 +47,10 @@ const StringObjectViewer = ({object}: {object: any}) => {
     </div>;
 }
 
+const DefaultSkeleton = () => {
+    return <div style={{width: "100%"}}><Skeleton /> <Skeleton /> <Skeleton /></div>
+}
+
 const onPropertyEdit = (edit: InteractionProps, pad: boolean) => { 
     //console.log(edit);
     let refUpdateHost: any = edit.existing_src;
@@ -89,7 +94,8 @@ const Executable: DynamicViewRenderer = ({data, callbacks}) => {
 
 
 const DynamicViews: Record<string, DynamicViewRenderer> = {
-    "$/schema/executable": Executable
+    "$/schema/executable": Executable,
+    "$/skeleton/default": DefaultSkeleton
 }
 
 window.DynamicViews = DynamicViews;
@@ -236,7 +242,7 @@ const DefaultObjectList: FC<DefaultObjectListViewProps> = ({component, objects, 
     if (!options?.filters?.showDeleted) finalObjects = filterPresets['no-deleted'](finalObjects);
     if (!options?.filters?.showNoView) finalObjects = filterPresets['no-noview'](finalObjects, DynamicViews);
 
-    return <div>{finalObjects.map(obj => React.createElement(
+    return <div>{(finalObjects.length ? finalObjects : Array(10).fill({'type': {'unigraph.id': '$/skeleton/default'}})).map(obj => React.createElement(
         component, {}, 
         [<DefaultObjectView object={obj} 
             options={{

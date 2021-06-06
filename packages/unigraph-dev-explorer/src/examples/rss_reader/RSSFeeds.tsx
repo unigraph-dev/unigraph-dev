@@ -108,7 +108,7 @@ const RSSFeedsBody: React.FC<{data: ARSSFeed[]}> = ({data}) => {
 
 export const RSSFeedsList = withUnigraphSubscription(
     RSSFeedsBody,
-    { schemas: [], defaultData: [], packages: [rssReaderPackage]},
+    { schemas: [], defaultData: Array(10).fill({'type': {'unigraph.id': '$/skeleton/default'}}), packages: [rssReaderPackage]},
     { afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
         window.unigraph.subscribeToType("$/schema/rss_feed", (result: ARSSFeed[]) => {setData(result)}, subsId);
     }}
@@ -127,7 +127,7 @@ const RSSItemsListBody: React.FC<{data: ARSSItem[]}> = ({data}) => {
 
 export const RSSItemsList = withUnigraphSubscription(
     RSSItemsListBody,
-    { schemas: [], defaultData: [], packages: [rssReaderPackage]},
+    { schemas: [], defaultData: Array(10).fill({'type': {'unigraph.id': '$/skeleton/default'}}), packages: [rssReaderPackage]},
     { afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
         window.unigraph.subscribeToType("$/schema/rss_item", (result: ARSSItem[]) => {setData(result.reverse())}, subsId);
     }}

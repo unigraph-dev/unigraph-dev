@@ -140,7 +140,7 @@ registerDynamicViews({"$/schema/todo": TodoItem})
 export const TodoList = withUnigraphSubscription( 
     // @ts-ignore
     TodoListBody,
-    { schemas: [], defaultData: [], packages: [todoPackage]
+    { schemas: [], defaultData: Array(10).fill({'type': {'unigraph.id': '$/skeleton/default'}}), packages: [todoPackage]
     },
     { afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
         window.unigraph.subscribeToType("$/schema/todo", (result: ATodoList[]) => {setData(result)}, subsId);
