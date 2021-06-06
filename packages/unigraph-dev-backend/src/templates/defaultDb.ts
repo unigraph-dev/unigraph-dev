@@ -19,7 +19,7 @@ export const defaultTypes = `<_value>: uid .
 <_value[>: [uid] .
 <_value.%dt>: dateTime @index(hour) .
 <_definition>: uid .
-<type>: uid .
+<type>: uid @reverse .
 <pkgManifest>: uid .
 <unigraph.id>: string @index(exact) .
 <unigraph.origin>: [uid] @reverse .

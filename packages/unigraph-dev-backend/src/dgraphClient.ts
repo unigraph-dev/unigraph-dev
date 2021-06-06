@@ -292,7 +292,7 @@ export default class DgraphClient {
           uuuuu as uid
         }
       }
-      qqqqq(func: uid(uuuuu, uuuu, uuu, uu)) @recurse(depth: 10) {
+      qqqqq(func: uid(uuuuu, uuuu, uuu, uu)) @filter(type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) @recurse(depth: 10) {
         uid
         expand(_userpredicate_)
         unigraph.id
