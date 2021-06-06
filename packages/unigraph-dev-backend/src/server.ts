@@ -1,4 +1,5 @@
 import { Application } from 'express-ws';
+import express from 'express';
 import WebSocket from 'ws';
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import DgraphClient, { queries } from './dgraphClient';
@@ -21,6 +22,7 @@ import { Unigraph } from 'unigraph-dev-common/lib/types/unigraph';
 import stringify from 'json-stable-stringify';
 
 const PORT = 3001;
+const PORT_HTTP = 4001;
 const verbose = 5;
 
 export default async function startServer(client: DgraphClient) {
@@ -465,6 +467,16 @@ export default async function startServer(client: DgraphClient) {
       }))
       console.log('opened socket connection');
   })
+
+  const httpserver = express()
+
+  Object.entries(eventRouter).forEach(([key, fn]) => {
+    httpserver.get('/' + key, (req, res) => {
+      fn(req.params, res as any);
+    })
+  })
+
+  httpserver.listen(PORT_HTTP);
 
   const debugServer = repl.start("unigraph> ");
   // @ts-ignore /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
