@@ -193,7 +193,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
     const dataref = React.useRef<any>();
     const childrenref = React.useRef<any>();
     const inputDebounced = React.useRef(_.throttle(inputter, 1000)).current
-    const [currentText, setCurrentText] = React.useState(data?.['_value']['text']['_value.%']);
+    const setCurrentText = (text: string) => {textInput.current.textContent = text};
     const [edited, setEdited] = React.useState(false);
     const textInput: any = React.useRef();
     const editorContext = {
@@ -204,9 +204,8 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
         dataref.current = data;
         const dataText = data?.['_value']['text']['_value.%']
         if (dataText && options?.viewId) window.layoutModel.doAction(Actions.renameTab(options.viewId, `Note: ${dataText}`))
-        console.log(dataText, edited, textInput.current.textContent, currentText)
-        if (textInput.current.textContent !== dataText && !edited) {setCurrentText(dataText); textInput.current.textContent = currentText;}
-        else if (currentText !== dataText && !edited) {setCurrentText(dataText); textInput.current.textContent = currentText;}
+        console.log(dataText, edited, textInput.current.textContent)
+        if (textInput.current.textContent !== dataText && !edited) {setCurrentText(dataText); textInput.current.textContent = dataText;}
         else if (textInput.current.textContent === dataText && edited) setEdited(false);
     }, [data])
 
@@ -253,7 +252,6 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
                 }
             }}
         >
-            {currentText}
         </Typography>
         {buildGraph(otherChildren).map((el: any) => <AutoDynamicView object={el}/>)}
         <ul ref={childrenref}>
