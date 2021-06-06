@@ -48,7 +48,7 @@ const onNoteInput = (inputDebounced: any, event: FormEvent<HTMLSpanElement>) => 
 }
 
 const noteBlockCommands = {
-    "unsplit-child": (data: any, index: number) => {
+    "unsplit-child": async (data: any, index: number) => {
         let currSubentity = -1;
         const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
         const delAt = children?.reduce((prev: any[], el: any, elindex: any) => {
@@ -58,8 +58,9 @@ const noteBlockCommands = {
                 else return prev;
             } else return prev;
         }, 0)
-        if (children[delAt]?.['_value']?.['_value']?.['_value']?.['text']?.['_value.%'] === "")
-            window.unigraph.deleteItemFromArray(getSemanticChildren(data).uid, children[delAt].uid)
+        if (children[delAt]?.['_value']?.['_value']?.['_value']?.['text']?.['_value.%'] === "") {
+            await window.unigraph.deleteItemFromArray(getSemanticChildren(data).uid, children[delAt].uid);
+        }
     },
     "split-child": (data: any, index: number, at: number) => {
         console.log(data, index, at)
@@ -76,8 +77,10 @@ const noteBlockCommands = {
                         '_value': {
                             'dgraph.type': ['Entity'],
                             'type': {'unigraph.id': '$/schema/subentity'},
+                            '_hide': true,
                             '_value': {
                                 'dgraph.type': ['Entity'],
+                                '_hide': true,
                                 'type': {'unigraph.id': '$/schema/note_block'},
                                 '_value': {
                                     'text': {
@@ -88,6 +91,7 @@ const noteBlockCommands = {
                         }
                     }
                     el['_index']['_value.#i'] = elindex + 1;
+                    el['_value']['_hide'] = true; el['_value']['_value']['_hide'] = true;
                     el['_value']['_value']['_value']['text']['_value.%'] = el['_value']['_value']['_value']['text']['_value.%'].slice(at);
                     return [...prev, newel, el];
                 } else {
@@ -156,17 +160,18 @@ const noteBlockCommands = {
 
 export const DetailedNoteBlock = ({data, isChildren, callbacks}: any) => {
     const [subentities, otherChildren] = getSubentities(data);
-    const inputDebounced = React.useRef(_.throttle((text: string) => {
-        window.unigraph.updateObject(data.uid, {
+    const inputter = (text: string) => {
+        return window.unigraph.updateObject(data.uid, {
             text: text
         })
-    }, 1000)).current
+    }
+    const inputDebounced = React.useRef(_.throttle(inputter, 1000)).current
     const [currentText, setCurrentText] = React.useState(data?.['_value']['text']['_value.%']);
     const [edited, setEdited] = React.useState(false);
 
     React.useEffect(() => {
         if (currentText !== data?.['_value']['text']['_value.%'] && !edited) setCurrentText(data?.['_value']['text']['_value.%'])
-        else if (currentText === data?.['_value']['text']['_value.%'] && !edited) setEdited(false);
+        else if (currentText === data?.['_value']['text']['_value.%'] && edited) setEdited(false);
     }, [data])
 
     return <div style={{width: "100%"}}>
@@ -174,12 +179,11 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks}: any) => {
             variant={isChildren ? "body1" : "h4"} 
             contentEditable={true} 
             onInput={(ev) => {onNoteInput(inputDebounced, ev); setEdited(true)}}
-            onKeyDown={(ev) => {
+            onKeyDown={async (ev) => {
+                const caret = document.getSelection()?.anchorOffset;
                 switch (ev.code) {
                     case 'Enter':
                         ev.preventDefault();
-                        console.log(ev);
-                        const caret = document.getSelection()?.anchorOffset;
                         callbacks['split-child']?.(caret);
                         break;
                     
@@ -189,9 +193,10 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks}: any) => {
                         break;
 
                     case 'Backspace':
-                        ev.preventDefault();
-                        const bscaret = document.getSelection()?.anchorOffset;
-                        if (bscaret === 0) callbacks['unsplit-child']();
+                        if (caret === 0 && document.getSelection()?.type === "Caret") {
+                            ev.preventDefault();
+                            callbacks['unsplit-child']();
+                        }
                         break;
                 
                     default:
