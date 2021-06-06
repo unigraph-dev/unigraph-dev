@@ -58,43 +58,43 @@ const useStyles = makeStyles(theme => ({
 
 export const pages: Record<string, any> = {
   'datamodel-playground': {
-    'constructor': () => <DataModelPlayground />,
+    'constructor': (props: any) => <DataModelPlayground {...props} />,
     'name': "DataModel Playground",
   },
   'examples/todo': {
-    'constructor': () => <TodoList />,
+    'constructor': (props: any) => <TodoList {...props} />,
     'name': 'Todo List',
   },
   'examples/bookmarks': {
-    'constructor': () => <Bookmarks />,
+    'constructor': (props: any) => <Bookmarks {...props} />,
     'name': 'Web Bookmarks',
   },
   'examples/rss_reader': {
-    'constructor': () => <RSSReader />,
+    'constructor': (props: any) => <RSSReader {...props} />,
     'name': 'RSS Reader',
   },
   'request': {
-    'constructor': () => <Request />,
+    'constructor': (props: any) => <Request {...props} />,
     'name': 'Request',
   },
   'about': {
-    'constructor': () => <About />,
+    'constructor': (props: any) => <About {...props} />,
     'name': 'About',
   },
   'email': {
-    'constructor': () => <EmailList />,
+    'constructor': (props: any) => <EmailList {...props} />,
     'name': 'Email',
   },
   'library': {
-    'constructor': () => <UserLibraryAll />,
+    'constructor': (props: any) => <UserLibraryAll {...props} />,
     'name': 'Library',
   },
   'settings': {
-    'constructor': () => <Settings />,
+    'constructor': (props: any) => <Settings {...props} />,
     'name': 'Settings',
   },
   'package-manager': {
-    'constructor': () => <PackageManager />,
+    'constructor': (props: any) => <PackageManager {...props} />,
     'name': 'Package Manager'
   },
   'library/object': {
@@ -102,15 +102,15 @@ export const pages: Record<string, any> = {
     'name': 'Object View',
   },
   'schema/new': {
-    'constructor': () => <AddSchema />,
+    'constructor': (props: any) => <AddSchema {...props} />,
     'name': 'New Schema',
   },
   'home': {
-    'constructor': () => <ExplorerHome />,
+    'constructor': (props: any) => <ExplorerHome {...props} />,
     'name': 'Dashboard',
   },
   'inbox': {
-    'constructor': () => <Inbox />,
+    'constructor': (props: any) => <Inbox {...props} />,
     'name': 'Inbox',
   },
   'semantic/tagresults': {
@@ -118,26 +118,26 @@ export const pages: Record<string, any> = {
     'name': 'Tag Results'
   },
   'object-editor': {
-    'constructor': () => <ObjectEditor />,
+    'constructor': (props: any) => <ObjectEditor {...props} />,
     'name': 'Object Editor'
   },
   'app-library': {
-    'constructor': () => <AppLibrary/>,
+    'constructor': (props: any) => <AppLibrary {...props}/>,
     'name': 'App Library'
   },
   'notification-center': {
-    'constructor': () => <NotificationCenter />,
+    'constructor': (props: any) => <NotificationCenter {...props} />,
     'name': "Notification Center"
   },
   'search': {
-    'constructor': () => <UnigraphSearch />,
+    'constructor': (props: any) => <UnigraphSearch {...props} />,
     'name': "Search"
   }
 }
 
 export const components: Record<string, any> = {
   'appdrawer': {
-    'constructor': () => <AppDrawer />,
+    'constructor': (props: any) => <AppDrawer {...props} />,
   },
 }
 

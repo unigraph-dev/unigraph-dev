@@ -6,6 +6,7 @@ import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
 
 import _ from "lodash";
 import { buildGraph } from "unigraph-dev-common/lib/api/unigraph";
+import { Actions } from "flexlayout-react";
 
 export const getSubentities = (data: any) => {
     let subentities: any, otherChildren: any;
@@ -181,7 +182,7 @@ const noteBlockCommands = {
     }
 }
 
-export const DetailedNoteBlock = ({data, isChildren, callbacks}: any) => {
+export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) => {
     const [subentities, otherChildren] = getSubentities(data);
     const [command, setCommand] = React.useState<() => any | undefined>();
     const inputter = (text: string) => {
@@ -201,10 +202,12 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks}: any) => {
 
     React.useEffect(() => {
         dataref.current = data;
-        console.log(data?.['_value']['text']['_value.%'], edited, textInput.current.textContent, currentText)
-        if (textInput.current.textContent !== data?.['_value']['text']['_value.%'] && !edited) {setCurrentText(data?.['_value']['text']['_value.%']); textInput.current.textContent = currentText;}
-        else if (currentText !== data?.['_value']['text']['_value.%'] && !edited) {setCurrentText(data?.['_value']['text']['_value.%']); textInput.current.textContent = currentText;}
-        else if (textInput.current.textContent === data?.['_value']['text']['_value.%'] && edited) setEdited(false);
+        const dataText = data?.['_value']['text']['_value.%']
+        if (dataText && options?.viewId) window.layoutModel.doAction(Actions.renameTab(options.viewId, `Note: ${dataText}`))
+        console.log(dataText, edited, textInput.current.textContent, currentText)
+        if (textInput.current.textContent !== dataText && !edited) {setCurrentText(dataText); textInput.current.textContent = currentText;}
+        else if (currentText !== dataText && !edited) {setCurrentText(dataText); textInput.current.textContent = currentText;}
+        else if (textInput.current.textContent === dataText && edited) setEdited(false);
     }, [data])
 
     React.useEffect(() => {
