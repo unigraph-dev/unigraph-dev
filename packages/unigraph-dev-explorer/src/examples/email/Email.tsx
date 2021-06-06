@@ -46,7 +46,7 @@ registerDynamicViews({'$/schema/email_message': EmailMessage})
 
 export const EmailList = withUnigraphSubscription(
     EmailListBody,
-    { schemas: [], defaultData: [], packages: [emailPackage]},
+    { schemas: [], defaultData: Array(10).fill({'type': {'unigraph.id': '$/skeleton/default'}}), packages: [emailPackage]},
     { afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
         window.unigraph.subscribeToType("$/schema/email_message", (result: any[]) => {setData(result.reverse())}, subsId);
     }}
