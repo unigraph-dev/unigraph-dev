@@ -19,6 +19,11 @@ export const AppLibraryWidget = ({}) => {
                 Todo List
             </div>
             <div style={{display: "flex", flexDirection: "column", alignItems: "center", padding: "16px"}}
+                onClick={() =>navigator('/notes-list')}>
+                <Avatar><PlaylistAddCheck></PlaylistAddCheck></Avatar>
+                Notes
+            </div>
+            <div style={{display: "flex", flexDirection: "column", alignItems: "center", padding: "16px"}}
                 onClick={() =>navigator('/examples/bookmarks')}>
                 <Avatar><Bookmarks/></Avatar>
                 Bookmarks

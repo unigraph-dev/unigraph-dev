@@ -34,6 +34,7 @@ import { Inbox } from './components/UnigraphInbox/Inbox';
 import { EmailList } from './examples/email/Email';
 import { UnigraphSearch } from './components/UnigraphCore/UnigraphSearch';
 import { init as nb_init } from './examples/notes/NoteBlock';
+import { NotesList } from './examples/notes/NotesList';
 nb_init();
 
 // TODO: custom theme
@@ -132,6 +133,10 @@ export const pages: Record<string, any> = {
   'search': {
     'constructor': (props: any) => <UnigraphSearch {...props} />,
     'name': "Search"
+  },
+  'notes-list': {
+    'constructor': (props: any) => <NotesList {...props} />,
+    'name': "Notes"
   }
 }
 
