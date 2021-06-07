@@ -242,14 +242,14 @@ const DefaultObjectList: FC<DefaultObjectListViewProps> = ({component, objects, 
     if (!options?.filters?.showDeleted) finalObjects = filterPresets['no-deleted'](finalObjects);
     if (!options?.filters?.showNoView) finalObjects = filterPresets['no-noview'](finalObjects, DynamicViews);
 
-    return <div>{(finalObjects.length ? finalObjects : Array(10).fill({'type': {'unigraph.id': '$/skeleton/default'}})).map(obj => React.createElement(
-        component, {}, 
+    return <React.Fragment>{(finalObjects.length ? finalObjects : Array(10).fill({'type': {'unigraph.id': '$/skeleton/default'}})).map(obj => React.createElement(
+        component, {key: obj.uid}, 
         [<DefaultObjectView object={obj} 
             options={{
                 unpad: false, 
                 showContextMenu: true,
                 viewer: "dynamic-view",
-            }} />]))}</div>
+            }} />]))}</React.Fragment>
 }
 
 const DefaultObjectListView: FC<DefaultObjectListViewProps> = ({component, objects}) => {
