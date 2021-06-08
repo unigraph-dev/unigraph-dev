@@ -384,7 +384,7 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
                 //console.log(localSchema, currentEntity)
                 if (Array.isArray(currentEntity)) {
                     currentEntity.forEach(e => recurse(unpadValue(e), schemas, localSchema['_parameters']['_element']));
-                } else if (localSchema?.type?.['unigraph.id'] === "$/composer/Object") {
+                } else if (localSchema?.type?.['unigraph.id'] === "$/composer/Object" || Object.keys(currentEntity).includes('unigraph.id')) {
                     // Is object, check for various stuff
 
                     // 1. Can we do autoref based on reserved words?
