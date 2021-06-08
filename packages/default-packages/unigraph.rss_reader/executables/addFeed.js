@@ -9,7 +9,10 @@ const feedObj = {
         url: feed.link,
         favicon: feed.link + "/favicon.ico",
         creative_work: {
-            abstract: feed.description
+            abstract: {
+                type: {'unigraph.id': '$/schema/html'},
+                _value: feed.description
+            }
         }
     }
 }

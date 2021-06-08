@@ -10,6 +10,8 @@
             {"id": "person", "src": "schemas/person.json"},
             {"id": "tag", "src": "schemas/tag.json"},
             {"id": "note", "src": "schemas/note.json"},
+            {"id": "html", "src": "schemas/html.json"},
+            {"id": "markdown", "src": "schemas/markdown.json"},
             {"id": "interface/textual", "src": "schemas/textual.json"},
             {"id": "interface/semantic", "src": "schemas/semantic.json"},
             {"id": "semantic_properties", "src": "schemas/semantic_properties.json"},

@@ -23,7 +23,7 @@ export const parseTodoObject: (arg0: string) => ATodoList = (todoString: string)
     todoString = todoString.replace(priority_regex, '');
 
     return {
-        name: todoString,
+        name: {type: {"unigraph.id": "$/schema/markdown"}, _value: todoString},
         done: false,
         priority: priority_num,
         semantic_properties: {
@@ -34,7 +34,7 @@ export const parseTodoObject: (arg0: string) => ATodoList = (todoString: string)
 
 type ATodoList = {
     uid?: string,
-    name: string,
+    name: string | any,
     done: boolean,
     priority: number,
     semantic_properties: {

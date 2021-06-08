@@ -13,7 +13,10 @@ const getQuery = (msgid) => `(func: type(Entity)) @cascade {
 
 const dest = parsed.map((el) => {
     return {
-        name: el.subject,
+        name: {
+            type: {"unigraph.id": "$/schema/note"},
+            _value: el.subject
+        },
         message_id: el.messageId,
         message: {
             date_received: el.date.toISOString(),
@@ -21,8 +24,14 @@ const dest = parsed.map((el) => {
             recipient: [el.to?.text].filter(it => it !== undefined),
         },
         content: {
-            abstract: el?.text?.slice(0, 100) || "No preview available",
-            text: el.html || el.textAsHtml || el.text
+            abstract: {
+                type: {"unigraph.id": "$/schema/note"},
+                _value: el?.text?.slice(0, 100) || "No preview available",
+            },
+            text: {
+                type: {"unigraph.id": "$/schema/html"},
+                _value: el.html || el.textAsHtml || el.text
+            }
         },
         _timestamp: {
             _updatedAt: el.date.toISOString()

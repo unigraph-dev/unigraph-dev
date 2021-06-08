@@ -10,7 +10,10 @@ const feedObjs = feeds.map(el => {
             url: el.getAttribute('htmlUrl'),
             favicon: el.getAttribute('htmlUrl') + '/favicon.ico',
             creative_work: {
-                abstract: el.getAttribute('description').length ? el.getAttribute('description') : undefined
+                abstract: {
+                    type: {'unigraph.id': '$/schema/html'},
+                    _value: el.getAttribute('description').length ? el.getAttribute('description') : undefined
+                }
             }
         }
     }

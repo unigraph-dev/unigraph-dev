@@ -30,7 +30,7 @@ export function createNotificationsCache(client: DgraphClient): Cache<UnigraphNo
 }
 
 export async function addNotification(item: UnigraphNotification, caches: any, client: DgraphClient) {
-    const obj = buildUnigraphEntity(item, "$/schema/notification", caches['schemas'].data);
+    const obj = buildUnigraphEntity({...item, content: {_value: item.content, type: {'unigraph.id': '$/schema/note'}}}, "$/schema/notification", caches['schemas'].data);
     const autoRefObj = processAutoref(obj, "$/schema/notification", caches['schemas'].data);
     await client.createUnigraphUpsert(insertsToUpsert([autoRefObj]));
     // TODO: make use of the notification center object

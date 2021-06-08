@@ -14,8 +14,8 @@ export const getSubentities = (data: any) => {
         [subentities, otherChildren] = [[], []];
     } else {
         [subentities, otherChildren] = data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.['children']?.['_value['].sort(byElementIndex).reduce((prev: any, el: any) => {
-            if ('$/schema/subentity' !== el?.['_value']?.type?.['unigraph.id']) return [prev[0], [...prev[1], el['_value']]];
-            else return [[...prev[0], el['_value']['_value']], prev[1]]
+            if ('$/schema/subentity' !== el?.['_value']?.['_value']?.type?.['unigraph.id']) return [prev[0], [...prev[1], el['_value']?.['_value']]];
+            else return [[...prev[0], el['_value']?.['_value']['_value']], prev[1]]
         }, [[], []])
     }
     return [subentities, otherChildren];
@@ -64,13 +64,13 @@ const noteBlockCommands = {
         let currSubentity = -1;
         const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
         const delAt = children?.reduce((prev: any[], el: any, elindex: any) => {
-            if (el?.['_value']?.['type']?.['unigraph.id'] === "$/schema/subentity") {
+            if (el?.['_value']?.['_value']?.['type']?.['unigraph.id'] === "$/schema/subentity") {
                 currSubentity ++;
                 if (currSubentity === index) return elindex;
                 else return prev;
             } else return prev;
         }, 0)
-        if (children[delAt]?.['_value']?.['_value']?.['_value']?.['text']?.['_value.%'] === "") {
+        if (children[delAt]?.['_value']?.['_value']?.['_value']?.['_value']?.['text']?.['_value']?.['_value']?.['_value.%'] === "") {
             await window.unigraph.deleteItemFromArray(getSemanticChildren(data).uid, children[delAt].uid);
             if (index !== 0) {
                 context.setEdited(true);
@@ -84,31 +84,45 @@ const noteBlockCommands = {
         let isInserted = false;
         const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
         const newChildren = children?.reduce((prev: any[], el: any, elindex: any) => {
-            if (el?.['_value']?.['type']?.['unigraph.id'] === "$/schema/subentity") {
+            if (el?.['_value']?.['_value']?.['type']?.['unigraph.id'] === "$/schema/subentity") {
                 currSubentity ++;
                 if (currSubentity === index) {
                     isInserted = true;
                     const newel = {
                         '_index': {'_value.#i': elindex},
                         '_value': {
-                            'dgraph.type': ['Entity'],
-                            'type': {'unigraph.id': '$/schema/subentity'},
+                            'dgraph.type': ['Interface'],
+                            'type': {'unigraph.id': '$/schema/interface/semantic'},
                             '_hide': true,
                             '_value': {
                                 'dgraph.type': ['Entity'],
+                                'type': {'unigraph.id': '$/schema/subentity'},
                                 '_hide': true,
-                                'type': {'unigraph.id': '$/schema/note_block'},
                                 '_value': {
-                                    'text': {
-                                        '_value.%': el['_value']['_value']['_value']['text']['_value.%'].slice(0, at)
+                                    'dgraph.type': ['Entity'],
+                                    '_hide': true,
+                                    'type': {'unigraph.id': '$/schema/note_block'},
+                                    '_value': {
+                                        'text': {
+                                            '_value': {
+                                                'dgraph.type': ['Interface'],
+                                                'type': {'unigraph.id': '$/schema/interface/textual'},
+                                                '_value': {
+                                                    'dgraph.type': ['Entity'],
+                                                    'type': {'unigraph.id': '$/schema/markdown'},
+                                                    '_value.%': el['_value']['_value']['_value']['_value']['text']?.['_value']?.['_value']['_value.%'].slice(0, at)
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                     }
+                    console.log(el)
                     el['_index']['_value.#i'] = elindex + 1;
-                    el['_value']['_hide'] = true; el['_value']['_value']['_hide'] = true;
-                    el['_value']['_value']['_value']['text']['_value.%'] = el['_value']['_value']['_value']['text']['_value.%'].slice(at);
+                    el['_value']['_hide'] = true; el['_value']['_value']['_hide'] = true; el['_value']['_value']['_value']['_hide'] = true;
+                    el['_value']['_value']['_value']['_value']['text']['_value']['_value']['_value.%'] = el['_value']['_value']['_value']['_value']['text']?.['_value']?.['_value']['_value.%'].slice(at);
                     return [...prev, newel, el];
                 } else {
                     if (isInserted) return [...prev, {uid: el.uid, '_index': {'_value.#i': el['_index']['_value.#i'] + 1}}]
@@ -140,7 +154,7 @@ const noteBlockCommands = {
         let newUid: any = {uid: undefined}
         const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
         const newChildren = children?.map((el: any, elindex: any) => {
-            if (el?.['_value']?.['type']?.['unigraph.id'] === "$/schema/subentity") {
+            if (el?.['_value']?.['_value']?.['type']?.['unigraph.id'] === "$/schema/subentity") {
                 currSubentity ++;
                 if (currSubentity === index) {
                     isDeleted = true;
@@ -156,7 +170,7 @@ const noteBlockCommands = {
                 }
             } else return {uid: el.uid};
         })
-        if (parIndex !== undefined) newChildren[parIndex] = _.mergeWith({}, newChildren[parIndex], {'_value': { '_value': { '_value': {
+        if (parIndex !== undefined) newChildren[parIndex] = _.mergeWith({}, newChildren[parIndex], {'_value': {'_value': { '_value': { '_value': {
             'semantic_properties': {
                 '_propertyType': 'inheritance',
                 '_value': { 'dgraph.type': 'Entity', type: {'unigraph.id': '$/schema/semantic_properties'}, '_propertyType': 'inheritance', '_value': {
@@ -165,7 +179,7 @@ const noteBlockCommands = {
                         '_value': newUid
                     }]}
                 }
-            }}}}
+            }}}}}
         }}, function (objValue: any, srcValue: any) {
             if (_.isArray(objValue)) {
               return objValue.concat(srcValue);
@@ -185,7 +199,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
     const [command, setCommand] = React.useState<() => any | undefined>();
     const inputter = (text: string) => {
         return window.unigraph.updateObject(data.uid, {
-            text: text
+            text: {type: {'unigraph.id': "$/schema/markdown"}, _value: text}
         })
     }
     const dataref = React.useRef<any>();
@@ -200,7 +214,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
 
     React.useEffect(() => {
         dataref.current = data;
-        const dataText = data?.['_value']['text']['_value.%']
+        const dataText = data?.['_value']['text']?.['_value']?.['_value']['_value.%']
         if (dataText && options?.viewId) window.layoutModel.doAction(Actions.renameTab(options.viewId, `Note: ${dataText}`))
         //console.log(dataText, edited, textInput.current.textContent)
         if (textInput.current.textContent !== dataText && !edited) {setCurrentText(dataText); textInput.current.textContent = dataText;}
@@ -220,7 +234,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
             variant={isChildren ? "body1" : "h4"} 
             contentEditable={true} 
             ref={textInput}
-            onInput={(ev) => {onNoteInput(inputDebounced, ev); if (ev.currentTarget.textContent !== data?.['_value']['text']['_value.%'] && !edited) setEdited(true)}}
+            onInput={(ev) => {onNoteInput(inputDebounced, ev); if (ev.currentTarget.textContent !== data?.['_value']['text']?.['_value']?.['_value']['_value.%'] && !edited) setEdited(true)}}
             onKeyDown={async (ev) => {
                 const caret = document.getSelection()?.anchorOffset;
                 switch (ev.code) {

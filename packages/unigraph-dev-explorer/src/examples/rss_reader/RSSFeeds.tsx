@@ -21,8 +21,8 @@ export type ARSSFeed = {
             children: any[]
         },
         creative_work?: {
-            text?: string,
-            abstract?: string,
+            text?: any,
+            abstract?: any,
             author?: string
         }
     }
@@ -33,8 +33,8 @@ export type ARSSItem = {
     feed: ARSSFeed,
     content: {
         uid?: string
-        text: string,
-        abstract: string,
+        text: any,
+        abstract: any,
         author: string
     },
     item_data: {
