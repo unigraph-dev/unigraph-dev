@@ -2,9 +2,26 @@
 
 import { typeMap } from '../types/consts'
 import { PackageDeclaration } from '../types/packages';
-import { Unigraph, AppState } from '../types/unigraph';
+import { Unigraph, AppState, UnigraphObject as IUnigraphObject } from '../types/unigraph';
 import { base64ToBlob, isJsonString } from '../utils/utils';
 import stringify from 'json-stable-stringify';
+
+export function UnigraphObject(obj: Object): IUnigraphObject {
+    Object.defineProperty(obj, 'get', {value: (path: string | string[]) => {
+        return 'hello'
+    }});
+    Object.defineProperty(obj, 'getMetadata', {value: () => {
+
+    }});
+    Object.defineProperty(obj, 'getType', {value: () => {
+
+    }});
+    Object.defineProperty(obj, 'getRefType', {value: () => {
+
+    }});
+    // @ts-expect-error: Defining object prototypes
+    return obj;
+}
 
 /**
  * Implement a graph-like data structure based on js pointers from uid references.
@@ -80,6 +97,7 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
             if (parsed.type === "subscription" && parsed.id && subscriptions[parsed.id]) subscriptions[parsed.id](parsed.result);
         } catch (e) {
             console.error("Returned non-JSON reply!")
+            console.log(e)
             console.log(ev.data);
         }
     }
@@ -149,7 +167,7 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
                 if (response.success) resolve(id);
                 else reject(response);
             };
-            subscriptions[id] = (result: any) => callback(buildGraph(result));
+            subscriptions[id] = (result: any[]) => callback(buildGraph(result.map((el: any) => UnigraphObject(el))));
             sendEvent(connection, "subscribe_to_type", {schema: name, all: all}, id);
         }),
         // eslint-disable-next-line no-async-promise-executor
@@ -168,7 +186,7 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
                 if (response.success) resolve(id);
                 else reject(response);
             };
-            subscriptions[id] = (result: any) => callback(result[0]);
+            subscriptions[id] = (result: any) => callback(UnigraphObject(result[0]));
             const frag = `(func: uid(${uid})) @recurse { uid unigraph.id expand(_userpredicate_) }`
             sendEvent(connection, "subscribe_to_object", {queryFragment: frag}, id);
         }), 
@@ -178,7 +196,7 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
                 if (response.success) resolve(id);
                 else reject(response);
             };
-            subscriptions[id] = (result: any) => callback(result);
+            subscriptions[id] = (result: any[]) => callback(result.map((el: any) => UnigraphObject(el)));
             sendEvent(connection, "subscribe_to_query", {queryFragment: fragment}, id);
         }), 
         unsubscribe: (id) => {
