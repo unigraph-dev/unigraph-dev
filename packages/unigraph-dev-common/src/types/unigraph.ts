@@ -37,6 +37,16 @@ export type UnigraphNotification = {
 }
 
 /**
+ * Prototype of Unigraph objects, which extends on raw objects but with helpful functions.
+ */
+export interface UnigraphObject {
+    get: (path: string | string[]) => any,
+    getMetadata: () => any,
+    getType: () => string,
+    getRefType: () => "ref" | "value"    
+}
+
+/**
  * Global Unigraph API for applications.
  * 
  * Can be either accessed over WebSocket or directly from the main server thread. If 
