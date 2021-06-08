@@ -14,6 +14,7 @@ declare global {
         newTab: any,
         crcTable: any,
         wsnavigator: (sth: string) => any,
+        electronPreload: any,
     }
 };
 

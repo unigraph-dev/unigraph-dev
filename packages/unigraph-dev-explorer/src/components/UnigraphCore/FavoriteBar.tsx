@@ -8,7 +8,6 @@ import { DynamicViewRenderer } from "../../global";
 import { AutoDynamicView } from "../ObjectView/DefaultObjectView";
 
 const ViewItem: DynamicViewRenderer = ({data, callbacks}) => {
-    console.log(data);
     let unpadded: any = unpad(data);
 
     return <React.Fragment>
@@ -29,6 +28,7 @@ registerDynamicViews({"$/schema/view": ViewItem})
 export const FavoriteBar = () => {
 
     const [fav, setFav] = React.useState<any[]>([]);
+    const favState = window.unigraph.addState('favorites', [])
     
     useEffectOnce(() => {
         const id = getRandomInt();
@@ -36,7 +36,10 @@ export const FavoriteBar = () => {
         window.unigraph.subscribeToObject("$/entity/favorite_bar", (fav: any) => {
             const children = fav?.['_value']?.children?.['_value[']
             children.sort(byElementIndex)
-            if (children) setFav(children);
+            if (children) {
+                setFav(children); 
+                favState.setValue(children.map((el: any) => {let unpadded = unpad(el); return {name: unpadded.name, component: unpadded.view, config: JSON.parse(unpadded.props).config}}))
+            };
         }, id);
 
         return function cleanup() {

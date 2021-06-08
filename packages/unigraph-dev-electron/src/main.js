@@ -2,6 +2,13 @@ const { app, BrowserWindow, Menu, Tray, nativeImage } = require('electron')
 const path = require('path')
 const { spawn } = require("child_process");
 const { fixPathForAsarUnpack } = require('electron-util');
+const { ipcMain } = require('electron');
+const { createTrayMenu } = require('./tray')
+
+const Store = require('electron-store');
+var net = require('net');
+
+const store = new Store();
 
 const userData = app.getPath('userData')
 
@@ -9,43 +16,69 @@ const unigraph_trayIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAA
 
 let logs = [];
 let mainWindow = null;
+let tray = null;
+let trayMenu = null;
+let alpha, zero;
 
-let oldConsoleLog = console.log;
-console.log = (...data) => { logs.push(...data); checkIfUComplete(...data); return oldConsoleLog(...data) }
-
-let alpha = spawn(fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', 'dgraph')), ["alpha", '--wal', path.join(userData, 'w'), '--postings', path.join(userData, 'p')])
-let zero = spawn(fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', 'dgraph')), ["zero", '--wal', path.join(userData, 'zw')])
-
-let completedLog = "ResetCors closed" // When this is logged we know it's completed
-let completedULog = "Unigraph server listening on port"
-
-function checkIfComplete(str) {
-  if (str.includes && str.includes(completedLog)) dgraphLoaded();
+function isUnigraphPortOpen(port) {
+  return new Promise((resolve, reject) => {
+    var server = net.createServer(function(socket) {
+      socket.write('Echo server\r\n');
+      socket.pipe(socket);
+    });
+    server.listen(port, '127.0.0.1');
+    server.on('error', function (e) {
+      resolve(true);
+    });
+    server.on('listening', function (e) {
+      server.close();
+      resolve(false);
+    });
+  })
 }
 
-function checkIfUComplete(str) {
-  if (str.includes && str.includes(completedULog)) unigraphLoaded();
+async function startServer() {
+  const portopen = await isUnigraphPortOpen(3000);
+  if (store.get('startServer') && !portopen) {
+    let oldConsoleLog = console.log;
+    console.log = (...data) => { logs.push(...data); checkIfUComplete(...data); return oldConsoleLog(...data) }
+    alpha = spawn(fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', 'dgraph')), ["alpha", '--wal', path.join(userData, 'w'), '--postings', path.join(userData, 'p')])
+    zero = spawn(fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', 'dgraph')), ["zero", '--wal', path.join(userData, 'zw')])
+
+    let completedLog = "ResetCors closed" // When this is logged we know it's completed
+    let completedULog = "Unigraph server listening on port"
+
+    function checkIfComplete(str) {
+      if (str.includes && str.includes(completedLog)) dgraphLoaded();
+    }
+
+    function checkIfUComplete(str) {
+      if (str.includes && str.includes(completedULog)) unigraphLoaded();
+    }
+
+    alpha.stdout.on('data', function (data) {
+      console.log('alpha_stdout: ' + data.toString());
+      checkIfComplete(data.toString())
+    });
+
+    zero.stdout.on('data', function (data) {
+      console.log('zero_stdout: ' + data.toString());
+      checkIfComplete(data.toString())
+    });
+
+    alpha.stderr.on('data', function (data) {
+      console.log('alpha_stderr: ' + data.toString());
+      checkIfComplete(data.toString())
+    });
+
+    zero.stderr.on('data', function (data) {
+      console.log('zero_stderr: ' + data.toString());
+      checkIfComplete(data.toString())
+    });
+  } else {
+    unigraphLoaded();
+  }
 }
-
-alpha.stdout.on('data', function (data) {
-  console.log('alpha_stdout: ' + data.toString());
-  checkIfComplete(data.toString())
-});
-
-zero.stdout.on('data', function (data) {
-  console.log('zero_stdout: ' + data.toString());
-  checkIfComplete(data.toString())
-});
-
-alpha.stderr.on('data', function (data) {
-  console.log('alpha_stderr: ' + data.toString());
-  checkIfComplete(data.toString())
-});
-
-zero.stderr.on('data', function (data) {
-  console.log('zero_stderr: ' + data.toString());
-  checkIfComplete(data.toString())
-});
 
 function createMainWindow() {
   const win = new BrowserWindow({
@@ -53,7 +86,8 @@ function createMainWindow() {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, '..', 'src', 'preload.js'),
-      nativeWindowOpen: true
+      nativeWindowOpen: true,
+      contextIsolation: false,
     }
   })
 
@@ -68,7 +102,8 @@ function createMainWindowNoLoad() {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, '..', 'src', 'preload.js'),
-      nativeWindowOpen: true
+      nativeWindowOpen: true,
+      contextIsolation: false,
     }
   })
 
@@ -82,28 +117,39 @@ function dgraphLoaded() {
 }
 
 function unigraphLoaded() {
-  if (mainWindow) mainWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'))
+  //if (mainWindow) mainWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'))
+  if (mainWindow) mainWindow.loadURL('http://localhost:3000')
 }
+
+let isAppClosing = false;
 
 app.whenReady().then(() => {
   tray = new Tray(nativeImage.createFromDataURL(unigraph_trayIcon))
-  const contextMenu = Menu.buildFromTemplate([
-    { label: 'Item1', type: 'radio' },
-    { label: 'Item2', type: 'radio' },
-    { label: 'Item3', type: 'radio', checked: true },
-    { label: 'Item4', type: 'radio' }
-  ])
   tray.setToolTip('Unigraph')
-  tray.setContextMenu(contextMenu)
+  trayMenu = createTrayMenu((newTemplate) => {tray.setContextMenu(Menu.buildFromTemplate(newTemplate))});
   setTimeout(() => {
     mainWindow = createMainWindow()
-
+    trayMenu.setMainWindow(mainWindow)
+    startServer();
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) {
         createMainWindowNoLoad()
       }
+      if (mainWindow) {
+        mainWindow.show();
+      }
+    })
+    mainWindow.on('close', (event) => {
+      if (!isAppClosing) {
+        event.preventDefault();
+        mainWindow.hide();
+      }
     })
   }, 0)
+})
+
+ipcMain.on('favorites_updated', (event, args) => {
+  if (trayMenu) trayMenu.setFavorites(args)
 })
 
 app.on('window-all-closed', () => {
@@ -111,8 +157,8 @@ app.on('window-all-closed', () => {
 })
 
 app.on('quit', () => {
-  alpha.kill();
-  zero.kill();
+  if (alpha) alpha.kill();
+  if (zero) zero.kill();
 })
 
 app.on('will-quit', async function (e) {
@@ -125,4 +171,8 @@ app.on('will-quit', async function (e) {
   if (choice.response === 1) {
     e.preventDefault();
   }
+});
+
+app.on('before-quit', function() {
+  isAppClosing = true;
 });

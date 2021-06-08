@@ -73,7 +73,7 @@ const RSSItem: DynamicViewRenderer = ({data, callbacks}) => {
 }
 
 const RSSFeed: DynamicViewRenderer = ({data, callbacks}) => {
-    return <AutoDynamicView object={data['_value']['site_info']['_value']}/>
+    return <AutoDynamicView object={data?.['_value']?.['site_info']?.['_value']}/>
 }
 
 const dynamicComponents = {

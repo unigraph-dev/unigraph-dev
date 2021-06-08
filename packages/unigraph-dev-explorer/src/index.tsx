@@ -31,6 +31,8 @@ if (window.location.pathname === '/pages') {
       nfState.setValue(data);
     })
 
+    if (typeof window.electronPreload === "function") window.electronPreload();
+
     render(<WorkSpace />);
   };
   

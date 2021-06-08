@@ -14,10 +14,11 @@
         "electron-builder": "^22.10.5"
     },
     "dependencies": {
+        "electron-store": "^8.0.0",
         "electron-util": "^0.15.1",
+        "json-stable-stringify": "^1.0.1",
         "unigraph-dev-backend": "0.1.0",
-        "unigraph-dev-common": "0.0.1",
-        "json-stable-stringify": "^1.0.1"
+        "unigraph-dev-common": "0.0.1"
     },
     "electronVersion": "^12.0.5",
     "build": {
@@ -35,6 +36,8 @@
         "asar": {
             "smartUnpack": true
         },
-        "asarUnpack": ["dgraph/*"]
+        "asarUnpack": [
+            "dgraph/*"
+        ]
     }
 }
