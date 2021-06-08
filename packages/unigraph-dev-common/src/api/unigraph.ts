@@ -6,7 +6,7 @@ import { Unigraph, AppState, UnigraphObject as IUnigraphObject } from '../types/
 import { base64ToBlob, isJsonString } from '../utils/utils';
 import stringify from 'json-stable-stringify';
 
-export function UnigraphObject(obj: Object): IUnigraphObject {
+export function UnigraphObject(obj: any): IUnigraphObject {
     Object.defineProperty(obj, 'get', {value: (path: string | string[]) => {
         return 'hello'
     }});
@@ -19,7 +19,6 @@ export function UnigraphObject(obj: Object): IUnigraphObject {
     Object.defineProperty(obj, 'getRefType', {value: () => {
         return undefined;
     }});
-    // @ts-expect-error: Defining object prototypes
     return obj;
 }
 
