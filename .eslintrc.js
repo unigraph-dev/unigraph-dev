@@ -13,6 +13,7 @@ module.exports = {
       "**/lib/**/*.*",
       "**/dist/**/*.*",
       "**/build/**/*.*",
+      "**/vendor/**/*.*",
       "**/*.test.ts",
       "**/*.config.js"
     ]
