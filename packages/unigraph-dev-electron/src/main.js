@@ -2,6 +2,8 @@ const { app, BrowserWindow, Menu, Tray, nativeImage } = require('electron')
 const path = require('path')
 const { spawn } = require("child_process");
 const { fixPathForAsarUnpack } = require('electron-util');
+const { ipcMain } = require('electron');
+const { createTrayMenu } = require('./tray')
 
 const Store = require('electron-store');
 var net = require('net');
@@ -14,6 +16,9 @@ const unigraph_trayIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAA
 
 let logs = [];
 let mainWindow = null;
+let tray = null;
+let trayMenu = null;
+let alpha, zero;
 
 function isUnigraphPortOpen(port) {
   return new Promise((resolve, reject) => {
@@ -37,8 +42,8 @@ async function startServer() {
   if (store.get('startServer') && !portopen) {
     let oldConsoleLog = console.log;
     console.log = (...data) => { logs.push(...data); checkIfUComplete(...data); return oldConsoleLog(...data) }
-    let alpha = spawn(fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', 'dgraph')), ["alpha", '--wal', path.join(userData, 'w'), '--postings', path.join(userData, 'p')])
-    let zero = spawn(fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', 'dgraph')), ["zero", '--wal', path.join(userData, 'zw')])
+    alpha = spawn(fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', 'dgraph')), ["alpha", '--wal', path.join(userData, 'w'), '--postings', path.join(userData, 'p')])
+    zero = spawn(fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', 'dgraph')), ["zero", '--wal', path.join(userData, 'zw')])
 
     let completedLog = "ResetCors closed" // When this is logged we know it's completed
     let completedULog = "Unigraph server listening on port"
@@ -81,7 +86,8 @@ function createMainWindow() {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, '..', 'src', 'preload.js'),
-      nativeWindowOpen: true
+      nativeWindowOpen: true,
+      contextIsolation: false,
     }
   })
 
@@ -96,7 +102,8 @@ function createMainWindowNoLoad() {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, '..', 'src', 'preload.js'),
-      nativeWindowOpen: true
+      nativeWindowOpen: true,
+      contextIsolation: false,
     }
   })
 
@@ -110,23 +117,19 @@ function dgraphLoaded() {
 }
 
 function unigraphLoaded() {
-  if (mainWindow) mainWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'))
+  //if (mainWindow) mainWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'))
+  if (mainWindow) mainWindow.loadURL('http://localhost:3000')
 }
 
 let isAppClosing = false;
 
 app.whenReady().then(() => {
   tray = new Tray(nativeImage.createFromDataURL(unigraph_trayIcon))
-  const contextMenu = Menu.buildFromTemplate([
-    { label: 'Item1', type: 'radio' },
-    { label: 'Item2', type: 'radio' },
-    { label: 'Item3', type: 'radio', checked: true },
-    { label: 'Item4', type: 'radio' }
-  ])
   tray.setToolTip('Unigraph')
-  tray.setContextMenu(contextMenu)
+  trayMenu = createTrayMenu((newTemplate) => {tray.setContextMenu(Menu.buildFromTemplate(newTemplate))});
   setTimeout(() => {
     mainWindow = createMainWindow()
+    trayMenu.setMainWindow(mainWindow)
     startServer();
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) {
@@ -143,6 +146,10 @@ app.whenReady().then(() => {
       }
     })
   }, 0)
+})
+
+ipcMain.on('favorites_updated', (event, args) => {
+  if (trayMenu) trayMenu.setFavorites(args)
 })
 
 app.on('window-all-closed', () => {
@@ -163,7 +170,9 @@ app.on('will-quit', async function (e) {
   })
   if (choice.response === 1) {
     e.preventDefault();
-  } else {
-    isAppClosing = true;
   }
+});
+
+app.on('before-quit', function() {
+  isAppClosing = true;
 });

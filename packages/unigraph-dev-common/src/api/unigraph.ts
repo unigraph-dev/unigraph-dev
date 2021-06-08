@@ -86,21 +86,25 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
     
 
     return {
-        getState: (name) => states[name],
+        getState: (name) => states[name] ,
         addState: (name, initialValue) => {
-            const subs: ((newValue: any) => any)[] = [];
-            const state = {
-                value: initialValue,
-                subscribers: subs,
-                subscribe: (subscriber: (newValue: any) => any) => subs.push(subscriber),
-                setValue: undefined as any
+            if (!states[name]) {
+                const subs: ((newValue: any) => any)[] = [];
+                const state = {
+                    value: initialValue,
+                    subscribers: subs,
+                    subscribe: (subscriber: (newValue: any) => any) => subs.push(subscriber),
+                    setValue: undefined as any
+                }
+                state.setValue = (newValue: any) => {
+                    state.value = newValue;
+                    subs.forEach(sub => sub(state.value));
+                }
+                states[name] = state;
+                return state;
+            } else {
+                return states[name];
             }
-            state.setValue = (newValue: any) => {
-                state.value = newValue;
-                subs.forEach(sub => sub(state.value));
-            }
-            states[name] = state;
-            return state;
         },
         deleteState: (name) => delete states[name],
         backendConnection: connection,
