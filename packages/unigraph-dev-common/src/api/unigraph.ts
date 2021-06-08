@@ -11,13 +11,13 @@ export function UnigraphObject(obj: Object): IUnigraphObject {
         return 'hello'
     }});
     Object.defineProperty(obj, 'getMetadata', {value: () => {
-
+        return undefined;
     }});
     Object.defineProperty(obj, 'getType', {value: () => {
-
+        return undefined;
     }});
     Object.defineProperty(obj, 'getRefType', {value: () => {
-
+        return undefined;
     }});
     // @ts-expect-error: Defining object prototypes
     return obj;

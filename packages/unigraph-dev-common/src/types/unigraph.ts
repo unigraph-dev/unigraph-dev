@@ -39,10 +39,10 @@ export type UnigraphNotification = {
 /**
  * Prototype of Unigraph objects, which extends on raw objects but with helpful functions.
  */
-export interface UnigraphObject extends Object {
-    get: (path: string | string[]) => Object,
-    getMetadata: () => Object,
-    getType: () => String,
+export interface UnigraphObject {
+    get: (path: string | string[]) => any,
+    getMetadata: () => any,
+    getType: () => string,
     getRefType: () => "ref" | "value"    
 }
 
