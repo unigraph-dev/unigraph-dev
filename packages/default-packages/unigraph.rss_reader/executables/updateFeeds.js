@@ -31,8 +31,8 @@ const results = await unigraph.getQueries(queries.map(el => el.query));
 const objects = results.map((els, index) => els.length >= 1 ? undefined : {
     feed: {uid: feeds[queries[index].feedId].uid},
     content: {
-        text: queries[index].item.content,
-        abstract: queries[index].item.contentSnippet,
+        text: {type: {'unigraph.id': '$/schema/html'}, _value: queries[index].item.content},
+        abstract: {type: {'unigraph.id': '$/schema/note'}, _value: queries[index].item.contentSnippet?.slice(0, 100) || queries[index].item.content?.slice(0, 100) || "No preview available"},
     },
     item_data: {
         name: queries[index].item.title,

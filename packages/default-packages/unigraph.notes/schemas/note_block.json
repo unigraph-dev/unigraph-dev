@@ -10,7 +10,7 @@
             {
                 "_key": "text",
                 "_definition": {
-                    "type": { "unigraph.id": "$/primitive/string" }
+                    "type": { "unigraph.id": "$/schema/interface/textual" }
                 }
             },
             {

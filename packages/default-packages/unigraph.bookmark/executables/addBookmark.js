@@ -12,7 +12,10 @@ const result = {
         children: tags.map(tagName => {return {name: tagName}}),
     },
     creative_work: {
-        abstract: res?.general?.description || res?.openGraph?.description || res?.twitter?.description
+        abstract: {
+            type: {'unigraph.id': '$/schema/html'},
+            _value: res?.general?.description || res?.openGraph?.description || res?.twitter?.description
+        }
     }
 }
 

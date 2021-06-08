@@ -5,6 +5,10 @@
         "_parameters": {
             "_definitions": [{
                 "type": { "unigraph.id": "$/schema/note" }
+            }, {
+                "type": { "unigraph.id": "$/schema/html" }
+            }, {
+                "type": { "unigraph.id": "$/schema/markdown" }
             }]
         }
     }

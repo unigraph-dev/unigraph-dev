@@ -58,6 +58,11 @@ export function isTypeAlias(localSchema: Record<string, any>, rawPartUnigraphTyp
     return (localSchema?.type['unigraph.id'] === rawPartUnigraphType) && (!rawPartUnigraphType.startsWith('$/composer/'));
 }
 
+function isUnion(schemaString: string, schemaMap: Record<string, any>): boolean {
+    if (!schemaString) return false;
+    return schemaString.startsWith('$/schema/interface') || schemaString === "$/composer/Union" || isUnion(schemaMap[schemaString]?.type?.['unigraph.id'], schemaMap)
+}
+
 /**
  * Process an induction step of building unigraph entity.
  * 
@@ -87,10 +92,11 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
         throw new TypeError('`$/schema/any` directive must have a corresponding type declaration in object!')
     }
 
-    if (rawPart?.type?.['unigraph.id'] && schemaMap[rawPart.type['unigraph.id']]?.['_definition']) {
+    if (rawPart?.type?.['unigraph.id'] && schemaMap[rawPart.type['unigraph.id']]?.['_definition'] && 
+        (rawPart?.type?.['unigraph.id'] === localSchema.type?.['unigraph.id'] || localSchema.type?.['unigraph.id'] === "$/schema/any") && !isUnion(localSchema.type?.['unigraph.id'], schemaMap)) {
         const userType = rawPart.type;
         delete rawPart.type;
-        unigraphPartValue = buildUnigraphEntity(rawPart?.['_value'] ? rawPart['_value'] : rawPart, userType['unigraph.id'], schemaMap, true, options, propDesc);
+        unigraphPartValue = buildUnigraphEntity((rawPart['_value'] || rawPart['_value'] === '') ? rawPart['_value'] : rawPart, userType['unigraph.id'], schemaMap, true, options, propDesc);
     } else try {
         // Check for localSchema accordance
         if (rawPart && rawPart.uid && rawPart.uid.startsWith && rawPart.uid.startsWith('0x') && Object.keys(rawPart).length === 1) {
@@ -164,9 +170,6 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
                 default:
                     break;
             }
-        } else if (Object.keys(rawPart).length === 1 && typeof rawPart.uid === "string" && rawPart.uid.startsWith("0x")) {
-            // Case 2: References another schema using UID, passing through.
-            unigraphPartValue = rawPart
         } else if (localSchema.type?.['unigraph.id']?.startsWith('$/schema/') && rawPartUnigraphType === "$/composer/Object" ) {
             // Case 2: References another schema.
             unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options, propDesc);
@@ -180,7 +183,14 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
             // Case 3: Local schema is a union: we should compare against all possible choices recursively
             noPredicate = true;
             let unionSchema = localSchema as ComposerUnionInstance;
-            let choicesResults = unionSchema._parameters._definitions.map(defn => {
+            let definitions = unionSchema._parameters._definitions;
+            if (rawPart?.type?.['unigraph.id']) {
+                const userType = rawPart.type;
+                //delete rawPart.type;
+                definitions = unionSchema._parameters._definitions.filter((el: any) => el.type['unigraph.id'] === userType['unigraph.id'])
+                //rawPart = (rawPart['_value'] || rawPart['_value'] === '') ? rawPart['_value'] : rawPart;
+            }
+            let choicesResults = definitions.map(defn => {
                 try {
                     return [defn, buildUnigraphEntityPart(rawPart, options, schemaMap, defn)]
                 } catch (e) {console.log(e); return undefined};
@@ -339,6 +349,8 @@ function unpadValue(something: any) {
     return ret
 }
 
+function getKey(object: any, key: string) {return object['_value'][key]}
+
 /**
  * 
  * @param entity An already-processed entity for autoref
@@ -361,7 +373,9 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
         const paddedEntity = currentEntity;
         currentEntity = unpadValue(currentEntity);
         if (paddedEntity?.type) recurse(paddedEntity.type, schemas, localSchema) // Check for type references as well 
-        console.log(localSchema, JSON.stringify(currentEntity))
+        //console.log(localSchema, JSON.stringify(currentEntity))
+        if (currentEntity?.type?.['unigraph.id'] && currentEntity.type['unigraph.id'] !== paddedEntity?.type?.['unigraph.id']) 
+            recurse(currentEntity, schemas, schemas[currentEntity?.type?.['unigraph.id']]['_definition'])
         switch (typeof currentEntity) {
             case "object":
                 if (localSchema.type?.['unigraph.id']?.startsWith('$/schema/')) {
@@ -399,6 +413,8 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
                                 //currentEntity[key] = undefined; - shouldn't remove the reference. let dgraph match mutations.
                             }
                             recurse(unpadValue(value), schemas, localSchema["_definition"]);
+                        } else if (typeof value === "object" && (value as any)?.type?.['unigraph.id']) {
+                            recurse(unpadValue(value), schemas, schemas[(value as any)?.type?.['unigraph.id']]['_definition'])
                         }
                     })
                 }
@@ -407,7 +423,7 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
             default:
                 break;
         }
-        //console.log("=====================outro")
+        console.log("=====================outro")
     }
     entity = JSON.parse(JSON.stringify(entity))
     recurse(entity, schemas, schemas[schema]._definition);
