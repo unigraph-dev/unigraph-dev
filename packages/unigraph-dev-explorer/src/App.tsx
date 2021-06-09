@@ -34,8 +34,9 @@ import { Inbox } from './components/UnigraphInbox/Inbox';
 import { EmailList } from './examples/email/Email';
 import { UnigraphSearch } from './components/UnigraphCore/UnigraphSearch';
 import { init as nb_init } from './examples/notes/NoteBlock';
+import { init as ht_init } from './examples/semantic/Html';
 import { NotesList } from './examples/notes/NotesList';
-nb_init();
+nb_init(); ht_init();
 
 // TODO: custom theme
 const useStyles = makeStyles(theme => ({

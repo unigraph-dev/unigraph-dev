@@ -25,7 +25,7 @@ export function WorkspacePageComponent({ children }: any) {
     </Container>
 }
 
-const getComponentFromPage = (location: string, params: any = {}) => {return {
+export const getComponentFromPage = (location: string, params: any = {}) => {return {
     type: 'tab',
     config: params,
     name: pages[location.slice(1)].name,

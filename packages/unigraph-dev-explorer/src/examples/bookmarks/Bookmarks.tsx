@@ -67,6 +67,7 @@ export const Bookmarks = withUnigraphSubscription(
 
 export const BookmarkItem: DynamicViewRenderer = ({data, callbacks}) => {
     let unpadded: ABookmark = unpad(data);
+    console.log(unpadded)
     let totalCallbacks = callbacks || {
         'onUpdate': (data: Record<string, any>) => {
             throw new Error("not implemented")
