@@ -309,6 +309,7 @@ export default async function startServer(client: DgraphClient) {
           let newObject = {...event.newObject, uid: newUid, 'unigraph.origin': origin}; // If specifying UID, override with it
           let autorefObject = processAutorefUnigraphId(newObject);
           const upsert = insertsToUpsert([autorefObject]);
+          //console.log(JSON.stringify(upsert, null, 4))
           dgraphClient.createUnigraphUpsert(upsert).then(_ => {
             callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
             ws.send(makeResponse(event, true))

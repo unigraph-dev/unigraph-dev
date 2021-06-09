@@ -84,7 +84,7 @@ export function wrapUpsertFromUpdater(orig: any, queryHead: string, hasUid: stri
         } else if (typeof origNow == 'object' && !Array.isArray(origNow)) {
             return Object.fromEntries([
                 ...Object.entries(origNow).map(([key, value]) => {
-                    if (key !== '_value[' && key !== '$ref' && key !== 'type') {
+                    if (key !== '_value[' && key !== '$ref' && key !== 'type') { // FIXME: This currently ignores subsequent UIDs if one is specified. Fix ASAP!
                         return [key, recurse(origNow[key], buildQuery(thisUid, key, hasUid))]
                     } else if (key !== '$ref' && key !== 'type') {
                         return [key, recurse(origNow[key], thisUid)]

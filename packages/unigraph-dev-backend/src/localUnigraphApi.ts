@@ -142,7 +142,8 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             const create_json = new dgraph.Mutation();
             create_json.setSetJson({
                 uid: `${uid}`,
-                "_value[": newValues
+                "_value[": newValues,
+                "_predicate_": ["_value["]
             });
             const result = await client.createDgraphUpsert({
                 query: false,
