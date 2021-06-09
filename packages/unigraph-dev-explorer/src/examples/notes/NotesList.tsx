@@ -1,11 +1,13 @@
-import { TextField, Button } from "@material-ui/core";
+import { TextField, Button, List, ListItem } from "@material-ui/core";
 import React from "react";
 import { withUnigraphSubscription } from "unigraph-dev-common/lib/api/unigraph-react"
 import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
 
 export const NotesListBody = ({data}: any) => {
     return <div>
-        {data.map((el: any) => <AutoDynamicView object={el}/>)}
+        <List>
+            {data.map((el: any) => <ListItem key={el.uid}><AutoDynamicView object={el}/></ListItem>)}
+        </List>
     </div>
 }
 

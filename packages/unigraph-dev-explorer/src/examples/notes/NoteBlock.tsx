@@ -57,6 +57,24 @@ const focusUid = (uid: string) => {
 }
 
 const noteBlockCommands = {
+    "add-child": (data: any, context: NoteEditorContext) => {
+        window.unigraph.updateObject(data.uid, {
+            semantic_properties: {
+                children: [{
+                    type: {"unigraph.id": "$/schema/subentity"},
+                    _value: {
+                        type: {"unigraph.id": "$/schema/note_block"},
+                        text: {
+                            type: {"unigraph.id": "$/schema/markdown"},
+                            _value: ""
+                        }
+                    }
+                }]
+            }
+        });
+        context.setEdited(true);
+        context.setCommand(() => noteBlockCommands['set-focus'].bind(this, data, context, 0));
+    },
     "set-focus": (data: any, context: NoteEditorContext, index: number) => {
         console.log(context.childrenref.current.children[index].children[0].children[0].children[0].focus());
     },
@@ -250,6 +268,14 @@ const noteBlockCommands = {
     }
 }
 
+export const PlaceholderNoteBlock = ({ callbacks }: any) => {
+    return <div style={{width: "100%"}}>
+        <Typography variant="body1" style={{fontStyle: "italic"}}
+            onClick={() => {callbacks['add-child']();}}
+        >Click here to start writing</Typography>
+    </div>
+}
+
 export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) => {
     const [subentities, otherChildren] = getSubentities(data);
     const [command, setCommand] = React.useState<() => any | undefined>();
@@ -327,7 +353,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
         </Typography>
         {buildGraph(otherChildren).map((el: any) => <AutoDynamicView object={el}/>)}
         <ul ref={childrenref}>
-            {buildGraph(subentities).map((el: any, elindex) => <li key={el.uid}>
+            {(subentities.length || isChildren) ? buildGraph(subentities).map((el: any, elindex) => <li key={el.uid}>
                 <AutoDynamicView 
                     object={el} 
                     callbacks={{
@@ -336,7 +362,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
                     }} 
                     component={{"$/schema/note_block": DetailedNoteBlock}} attributes={{isChildren: true}}
                 />
-            </li>)}
+            </li>) : <li><PlaceholderNoteBlock callbacks={{"add-child": () => noteBlockCommands['add-child'](dataref.current, editorContext)}}/></li>}
         </ul>
     </div>
 }
