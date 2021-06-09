@@ -40,7 +40,11 @@ const EmailMessage: DynamicViewRenderer = ({data, callbacks}) => {
     return <ListItem>
         <ListItemAvatar><Avatar>{unpadded.message.sender[0][0]}</Avatar></ListItemAvatar>
         <ListItemText primary={unpadded.name} secondary={<div>
-            <Link onClick={() => {const htmlUid = data?.['_value']?.['content']?.['_value']?.['_value']?.['text']?.['_value']?.['_value']?.['uid']; if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid}))}}></Link>
+            <Link onClick={() => {
+                const htmlUid = data?.['_value']?.['content']?.['_value']?.['_value']?.['text']?.['_value']?.['_value']?.['uid']; 
+                if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid}));
+                if (callbacks?.['delete-from-inbox']) callbacks['delete-from-inbox']();
+            }}></Link>
             {unpadded.content?.abstract+"..."}
         </div>}></ListItemText>
         <ListItemText style={{flex: "none"}} secondary={timeago.format(new Date(unpadded?.message?.date_received))}></ListItemText>

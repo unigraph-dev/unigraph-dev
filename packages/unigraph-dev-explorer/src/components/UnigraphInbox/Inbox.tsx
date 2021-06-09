@@ -112,7 +112,9 @@ export const Inbox = () => {
                     <ListItemIcon onClick={() => {
                         window.unigraph.deleteItemFromArray(listUid, el['uid'])
                     }} ><ClearAll/></ListItemIcon>
-                    <AutoDynamicView object={el['_value']} />
+                    <AutoDynamicView object={el['_value']} callbacks={{
+                                    "delete-from-inbox": () => { window.unigraph.deleteItemFromArray(listUid, el['uid'])}
+                                }} />
                 </ListItem>
             </React.Fragment>
         }) : grouper[groupBy](inbox.map(it => it['_value'])).map((el: Group) => {
@@ -124,7 +126,12 @@ export const Inbox = () => {
                             <ListItemIcon onClick={() => {
                                 window.unigraph.deleteItemFromArray(listUid, it['uid'])
                             }} ><ClearAll/></ListItemIcon>
-                            <AutoDynamicView object={it} />
+                            <AutoDynamicView 
+                                object={it}
+                                callbacks={{
+                                    "delete-from-inbox": () => { window.unigraph.deleteItemFromArray(listUid, it['uid'])}
+                                }} 
+                            />
                         </ListItem>
                 </React.Fragment>
                 })}
