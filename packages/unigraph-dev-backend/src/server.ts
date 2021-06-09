@@ -163,7 +163,7 @@ export default async function startServer(client: DgraphClient) {
         done(false);
         const queryAny = queries.queryAny(getRandomInt().toString())
         const queryAnyAll = queries.queryAnyAll(getRandomInt().toString())
-        const query = event.schema === "any" ? (event.all ? queryAnyAll : queryAny) : `(func: uid(par${event.id})) @filter((type(Entity)) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true)))
+        const query = event.schema === "any" ? (event.all ? queryAnyAll : queryAny) : `(func: uid(par${event.id})) @filter((type(Entity)) AND (NOT eq(<_propertyType>, "inheritance")))
         ${makeQueryFragmentFromType(event.schema, caches["schemas"].data)}
         var(func: eq(<unigraph.id>, "${event.schema}")) {
           <~type> {
