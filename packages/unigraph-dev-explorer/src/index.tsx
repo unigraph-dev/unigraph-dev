@@ -29,7 +29,7 @@ if (window.location.pathname === '/pages') {
     window.unigraph.subscribeToType("$/schema/notification", (data: any[]) => {
       const nfState = window.unigraph.getState('notification-center/notifications');
       nfState.setValue(data);
-    })
+    }, undefined, false, true)
 
     if (typeof window.electronPreload === "function") window.electronPreload();
 

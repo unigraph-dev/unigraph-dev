@@ -104,6 +104,7 @@ declare type EventSubscribeType = {
   all?: boolean,
   schema: string,
   connId: string,
+  showHidden?: boolean
 }
 
 declare type EventUnsubscribeById = {
