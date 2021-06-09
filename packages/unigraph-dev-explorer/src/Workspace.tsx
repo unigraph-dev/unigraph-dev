@@ -88,9 +88,9 @@ const setTitleOnRenderTab = (model: Model) => {
         // @ts-expect-error: using private API
         selName = model.getActiveTabset()?._children?.[selIndex]?.getName();
     } catch (e) {}
-    const titleStr = `${selName} and ${count-1} other tabs - Unigraph`
+    const titleStr = `${selName} and ${count-2} other tabs - Unigraph`
     const titleStrZero = `${selName} - Unigraph`
-    const finalTitle = count-1 ? titleStr : titleStrZero
+    const finalTitle = count-2 ? titleStr : titleStrZero
     document.title = finalTitle;
 }
 

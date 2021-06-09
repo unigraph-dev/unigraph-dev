@@ -92,10 +92,27 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             const res = await client.queryData(query);
             return res;
         },
-        getQueries: async (fragments) => {
-            const allQueries = fragments.map((it, index) => `query${index}(func: uid(par${index})) @recurse {uid unigraph.id expand(_userpredicate_)}
-            par${index} as var${it}`);
-            const res = await client.queryDgraph(`query {${allQueries.join('\n')}}`);
+        getQueries: async (fragments, getAll = false, batch = 50) => {
+            let allQueries;
+            if (getAll) allQueries = fragments.map((it, index) => `query${index}(func: uid(par${index})) @recurse {uid unigraph.id expand(_userpredicate_)}
+            par${index} as var${it}`)
+            else allQueries = fragments.map((it, index) => `query${index}${it}`)
+            if (!batch) batch = allQueries.length;
+            const batchedQueries = allQueries.reduce((resultArray, item, index) => { 
+                const chunkIndex = Math.floor(index/batch)
+              
+                if(!resultArray[chunkIndex]) {
+                  resultArray[chunkIndex] = [] // start a new chunk
+                }
+              
+                resultArray[chunkIndex].push(item)
+              
+                return resultArray
+              }, [] as any)
+            const res: any[] = [];
+            for (let i=0; i<batchedQueries.length; ++i) {
+                res.push(...(await client.queryDgraph(`query {${batchedQueries[i].join('\n')}}`)))
+            }
             return res;
         },
         deleteObject: async (uid) => {

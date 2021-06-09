@@ -19,7 +19,9 @@ let decl = unigraphDecl.substring(
     unigraphDecl.lastIndexOf(endStr)    
 )
 decl = decl.replace(/export declare type /g, "declare type ")
-decl = decl.replace("export interface ", "declare interface ")
+decl = decl.replace(/export interface /g, "declare interface ")
+decl = decl + "\ndeclare var unigraph: Unigraph<WebSocket>; declare const unpad = (a:any) => any;declare const require = (a:any) => any;\ndeclare var context = {params: any}";
+console.log(decl);
 
 export const ExecutableCodeEditor = ({data, options}: any) => {
     
@@ -83,7 +85,7 @@ export const ExecutableCodeEditor = ({data, options}: any) => {
                     allowNonTsExtensions: true
                 });
 
-                monaco.languages.typescript.javascriptDefaults.addExtraLib(decl + "\ndeclare var unigraph: Unigraph<WebSocket>; declare const unpad = (a:any) => any;declare const require = (a:any) => any;\ndeclare var context = {params: any}")
+                monaco.languages.typescript.javascriptDefaults.addExtraLib(decl)
             }}
             defaultValue={currentCode}
             onChange={handleEditorChange}
