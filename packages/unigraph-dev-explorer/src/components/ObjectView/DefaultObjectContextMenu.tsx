@@ -1,25 +1,26 @@
 import { Menu, MenuItem } from '@material-ui/core';
 import React from 'react';
-import { useHistory } from "react-router-dom";
 import { NavigationContext } from '../../utils';
 
 export const defaultContextMenu = [
     (uid: string, object: any, handleClose: () => any) => <MenuItem onClick={() => {handleClose(); window.wsnavigator(`/library/object?uid=${uid}&viewer=${"dynamic-view-detailed"}`)}}>
     View object with its default
     </MenuItem>,
-    (uid: string, object: any, handleClose: () => any) => <MenuItem onClick={() => {handleClose(); window.wsnavigator(`/library/object?uid=${uid}&viewer=${"dynamic-view-detailed"}`)}}>
-    View object with object editor (🚧)
-</MenuItem>,
+//    (uid: string, object: any, handleClose: () => any) => <MenuItem onClick={() => {handleClose(); window.wsnavigator(`/library/object?uid=${uid}&viewer=${"dynamic-view-detailed"}`)}}>
+//    View object with object editor (🚧)
+//</MenuItem>,
     (uid: string, object: any, handleClose: () => any) => <MenuItem onClick={() => {handleClose(); window.wsnavigator(`/library/object?uid=${uid}&viewer=${"json-tree"}`)}}>
     View object with JSON tree viewer
 </MenuItem>,
     (uid: string, object: any, handleClose: () => any) => <MenuItem onClick={() => {handleClose(); window.unigraph.runExecutable('$/executable/add-item-to-list', {where: "$/entity/inbox", item: uid})}}>
     Add item to inbox
+</MenuItem>,
+    (uid: string, object: any, handleClose: () => any) => <MenuItem onClick={() => {handleClose(); window.unigraph.deleteObject(uid)}}>
+    Delete item (set as deleted)
 </MenuItem>]
 
 export const DefaultObjectContextMenu = ({uid, object, anchorEl, handleClose}: 
     {uid: string, object: any, anchorEl: null|HTMLElement, handleClose: any}) => {
-    //const history = useHistory();
 
     return (<Menu
         id={`context-menu-${uid}`}
