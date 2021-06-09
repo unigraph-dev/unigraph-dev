@@ -365,11 +365,11 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
      * @param schemas 
      */
     function recurse(currentEntity: any, schemas: Record<string, Schema>, localSchema: Definition | any) {
-        console.log("=====================")
+        //console.log("=====================")
         if (currentEntity.type?.['unigraph.id']?.includes('$/schema/')) {
             localSchema = schemas[currentEntity.type['unigraph.id']]._definition
         }
-        console.log(JSON.stringify(currentEntity), JSON.stringify(localSchema))
+        //console.log(JSON.stringify(currentEntity), JSON.stringify(localSchema))
         const paddedEntity = currentEntity;
         currentEntity = unpadValue(currentEntity);
         if (paddedEntity?.type) recurse(paddedEntity.type, schemas, localSchema) // Check for type references as well 
@@ -389,10 +389,10 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
 
                     // 1. Can we do autoref based on reserved words?
                     const kv = Object.entries(currentEntity);
-                    const keysMap = localSchema['_properties']?.reduce((accu: any, now: any) => {
+                    const keysMap = localSchema?.['_properties']?.reduce((accu: any, now: any) => {
                         accu[now["_key"]] = now;
                         return accu;
-                    }, {}) // TODO: Redundent code, abstract it somehow!
+                    }, {}) || {} // TODO: Redundent code, abstract it somehow!
                     
                     kv.forEach(([key, value]) => {
                         if (key === "unigraph.id") {
@@ -423,7 +423,7 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
             default:
                 break;
         }
-        console.log("=====================outro")
+        //console.log("=====================outro")
     }
     entity = JSON.parse(JSON.stringify(entity))
     recurse(entity, schemas, schemas[schema]._definition);

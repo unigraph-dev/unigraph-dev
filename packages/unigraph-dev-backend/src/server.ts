@@ -163,7 +163,7 @@ export default async function startServer(client: DgraphClient) {
         done(false);
         const queryAny = queries.queryAny(getRandomInt().toString())
         const queryAnyAll = queries.queryAnyAll(getRandomInt().toString())
-        const query = event.schema === "any" ? (event.all ? queryAnyAll : queryAny) : `(func: uid(par${event.id})) @filter((type(Entity)) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true)))
+        const query = event.schema === "any" ? (event.all ? queryAnyAll : queryAny) : `(func: uid(par${event.id})) @filter((type(Entity)) AND (NOT eq(<_propertyType>, "inheritance")))
         ${makeQueryFragmentFromType(event.schema, caches["schemas"].data)}
         var(func: eq(<unigraph.id>, "${event.schema}")) {
           <~type> {
@@ -309,6 +309,7 @@ export default async function startServer(client: DgraphClient) {
           let newObject = {...event.newObject, uid: newUid, 'unigraph.origin': origin}; // If specifying UID, override with it
           let autorefObject = processAutorefUnigraphId(newObject);
           const upsert = insertsToUpsert([autorefObject]);
+          //console.log(JSON.stringify(upsert, null, 4))
           dgraphClient.createUnigraphUpsert(upsert).then(_ => {
             callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
             ws.send(makeResponse(event, true))
