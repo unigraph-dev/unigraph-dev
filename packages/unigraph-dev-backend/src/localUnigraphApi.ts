@@ -109,7 +109,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
               
                 return resultArray
               }, [] as any)
-            let res: any[] = [];
+            const res: any[] = [];
             for (let i=0; i<batchedQueries.length; ++i) {
                 res.push(...(await client.queryDgraph(`query {${batchedQueries[i].join('\n')}}`)))
             }
