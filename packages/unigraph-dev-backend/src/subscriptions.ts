@@ -28,14 +28,18 @@ export type MsgCallbackFn = (id: number | string, updated: any, msgPort: IWebsoc
  * @param subs 
  * @param client 
  */
-export async function pollSubscriptions(subs: Subscription[], client: DgraphClient, msgCallback: MsgCallbackFn) {
+export async function pollSubscriptions(subs: Subscription[], client: DgraphClient, msgCallback: MsgCallbackFn, ids?: any[]) {
+    if (!ids) ids = subs.map(el => el.id);
     if (subs.length >= 1) {
-        const query = buildPollingQuery(subs);
-        let results: any[] = await client.queryDgraph(query).catch(e => {console.log(e); return []});
-        results.forEach((val, id) => { // FIXME: Beware race conditions
-            if (stringify(val) !== stringify(subs[id].data)) {
-                subs[id].data = val;
-                msgCallback(subs[id].id, val, subs[id].msgPort!, subs[id]);
+        subs.map(el => ids?.includes(el.id) ? el : false).forEach(async (el, index) => {
+            if (el) {
+                const query = buildPollingQuery([el]);
+                let results: any[] = await client.queryDgraph(query).catch(e => {console.log(e); return []});
+                const val = results[0];
+                if (stringify(val) !== stringify(subs[index].data)) {
+                    subs[index].data = val;
+                    msgCallback(subs[index].id, val, subs[index].msgPort!, subs[index]);
+                }
             }
         })
     }

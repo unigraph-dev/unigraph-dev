@@ -44,14 +44,14 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             }`
             const newSub = createSubscriptionLocal(eventId, callback, query);
             states.subscriptions.push(newSub);
-            callHooks(states.hooks, "after_subscription_added", {newSubscriptions: states.subscriptions});
+            callHooks(states.hooks, "after_subscription_added", {newSubscriptions: states.subscriptions, ids: [eventId]});
         },
         subscribeToObject: async (uid, callback: any, eventId = undefined) => {
             eventId = getRandomInt();
             const frag = `(func: uid(${uid})) @recurse { uid unigraph.id expand(_userpredicate_) }`
             const newSub = createSubscriptionLocal(eventId, callback, frag);
             states.subscriptions.push(newSub);
-            callHooks(states.hooks, "after_subscription_added", {newSubscriptions: states.subscriptions});
+            callHooks(states.hooks, "after_subscription_added", {newSubscriptions: states.subscriptions, ids: [eventId]});
         },
         subscribeToQuery: async (fragment, callback: any, eventId = undefined) => {
             eventId = getRandomInt();
@@ -59,7 +59,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             par${eventId} as var${fragment}`
             const newSub = createSubscriptionLocal(eventId, callback, query);
             states.subscriptions.push(newSub);
-            callHooks(states.hooks, "after_subscription_added", {newSubscriptions: states.subscriptions});
+            callHooks(states.hooks, "after_subscription_added", {newSubscriptions: states.subscriptions, ids: [eventId]});
         },
         unsubscribe: async (id) => {
             states.subscriptions = states.subscriptions.reduce((prev: Subscription[], curr: Subscription) => {
