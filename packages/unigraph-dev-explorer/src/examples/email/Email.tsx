@@ -6,6 +6,8 @@ import { unpad, byUpdatedAt } from "unigraph-dev-common/lib/utils/entityUtils";
 import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
 import { DynamicViewRenderer } from "../../global";
 import * as timeago from 'timeago.js';
+import { Link } from "@material-ui/icons";
+import { getComponentFromPage } from "../../Workspace";
 
 type AEmail = {
     name: string,
@@ -37,7 +39,10 @@ const EmailMessage: DynamicViewRenderer = ({data, callbacks}) => {
     console.log(unpadded);
     return <ListItem>
         <ListItemAvatar><Avatar>{unpadded.message.sender[0][0]}</Avatar></ListItemAvatar>
-        <ListItemText primary={unpadded.name} secondary={unpadded.content?.abstract+"..."}></ListItemText>
+        <ListItemText primary={unpadded.name} secondary={<div>
+            <Link onClick={() => {const htmlUid = data?.['_value']?.['content']?.['_value']?.['_value']?.['text']?.['_value']?.['_value']?.['uid']; if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid}))}}></Link>
+            {unpadded.content?.abstract+"..."}
+        </div>}></ListItemText>
         <ListItemText style={{flex: "none"}} secondary={timeago.format(new Date(unpadded?.message?.date_received))}></ListItemText>
     </ListItem>
 }
