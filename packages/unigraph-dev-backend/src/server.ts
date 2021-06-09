@@ -58,7 +58,7 @@ export default async function startServer(client: DgraphClient) {
 
   const hooks: Hooks = {
     "after_subscription_added": [async (context: HookAfterSubscriptionAddedParams) => {
-      pollSubscriptions(context.subscriptions, dgraphClient, pollCallback);
+      pollSubscriptions(context.subscriptions, dgraphClient, pollCallback, context.ids);
     }],
     "after_schema_updated": [async (context: HookAfterSchemaUpdatedParams) => {
       await context.caches["schemas"].updateNow();
@@ -154,7 +154,7 @@ export default async function startServer(client: DgraphClient) {
     "subscribe_to_object": function (event: EventSubscribeObject, ws: IWebsocket) {
       const newSub = createSubscriptionWS(event.id, ws, event.queryFragment, event.connId);
       serverStates.subscriptions.push(newSub);
-      callHooks(hooks, "after_subscription_added", {subscriptions: serverStates.subscriptions});
+      callHooks(hooks, "after_subscription_added", {subscriptions: serverStates.subscriptions, ids: [event.id]});
       ws.send(makeResponse(event, true));
     },
 

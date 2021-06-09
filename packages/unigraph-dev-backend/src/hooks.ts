@@ -11,6 +11,7 @@ export async function callHooks<T>(hooks: Hooks, type: string, context: T) {
 // Default hooks
 export type HookAfterSubscriptionAddedParams = { 
     subscriptions: Subscription[],
+    ids?: any[] | undefined,
 }
 
 export type HookAfterSchemaUpdatedParams = {
