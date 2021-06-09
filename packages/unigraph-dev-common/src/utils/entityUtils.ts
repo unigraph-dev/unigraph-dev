@@ -263,7 +263,7 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
     }
 }
 
-export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<string, any>, maxDepth = 10, toString = true) {
+export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<string, any>, maxDepth = 15, toString = true) {
 
     const timestampQuery = {
         _timestamp: {
@@ -272,15 +272,15 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
         }
     };
 
-    function makePart(localSchema: Definition | any, depth = 0, isRoot = false) {
+    function makePart(localSchema: Definition | any, depth = 0, isRoot = false, uidOnly = false) {
         if (depth > maxDepth) return {};
-        let entries: any = {"uid": {}, "<unigraph.id>": {}, 'type': { "<unigraph.id>": {} }};
+        let entries: any = {"uid": {}, "unigraph.id": {}, 'type': { "unigraph.id": {} }};
         let type = localSchema.type["unigraph.id"];
 
         if (type === '$/schema/any') {
-            entries = { "uid": {}, "<expand(_predicate_)>": makePart(localSchema, depth+1) }
+            entries = { "uid": {}, "unigraph.id": {}, "expand(_userpredicate_)": makePart(localSchema, depth+1) }
         } else if (type.startsWith('$/schema/')) {
-            entries = _.merge(entries, {"_value": makePart(schemaMap[type]._definition, depth+1, true)}, makePart(schemaMap[type]._definition, depth+1, true)) // Possibly non-object data
+            entries = _.merge(entries, {"_value": makePart(schemaMap[type]._definition, depth+1, true)})
         };
         switch (type) {
             case "$/composer/Object":
@@ -289,49 +289,57 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
                     if (!p._isDetailed) {
                         let ret: any = {}; ret[p._key] = makePart(p._definition, depth+1);
                         return ret
+                    } else {
+                        let ret: any = {}; ret[p._key] = makePart(p._definition, depth+1, false, true);
+                        return ret
                     }
                 })
                 entries = _.merge(entries, {"_value": _.merge({}, ...properties)});
                 break;
 
             case "$/composer/Union":
+                /*
                 let defn = localSchema as ComposerUnionInstance;
                 const options = defn._parameters._definitions.map(defnel => {
                     let children: any = makePart(defnel, depth+1)
                     entries = _.merge(entries, children);
                     //console.log(children)
                 });
-                entries = {"_value": entries}
+                entries = {"_value": entries}*/
+                entries = { "uid": {}, "unigraph.id": {}, "expand(_userpredicate_)": makePart({type: {'unigraph.id': '$/schema/any'}}, depth+1) }
                 break;
 
             case "$/composer/Array":
-                entries = _.merge(entries, {"<_value[>": {
+                entries = _.merge({}, {"<_value[>": {
                     ...makePart(localSchema._parameters._element, depth+1), 
                     "<_index>": { "<_value.#i>": {}, "<_value.#>": {} }
                 }});
+                if(!entries['unigraph.id']) entries['unigraph.id'] = {};
+                if(!entries['uid']) entries['uid'] = {};
+                if(!entries['type'] && !entries['expand(_userpredicate_)']) entries['type'] = {"unigraph.id": {}};
                 break;
             
             case "$/primitive/string":
-                entries["<_value.%>"] = {};
+                if (!uidOnly) entries["<_value.%>"] = {};
                 break;
 
             case "$/primitive/datetime":
-                entries["<_value.%dt>"] = {};
+                if (!uidOnly) entries["<_value.%dt>"] = {};
                 break;
                 
             case "$/primitive/boolean":
-                entries["<_value.!>"] = {};
+                if (!uidOnly) entries["<_value.!>"] = {};
                 break;
                 
             case "$/primitive/number":
-                entries["<_value.#>"] = {};
-                entries["<_value.#i>"] = {};
+                if (!uidOnly) entries["<_value.#>"] = {};
+                if (!uidOnly) entries["<_value.#i>"] = {};
                 break;
 
             default:
                 break;
         }
-        if (isRoot) _.merge(entries, timestampQuery)
+        if (isRoot && !entries['expand(_userpredicate_)']) _.merge(entries, timestampQuery)
         return entries;
     }
     const localSchema = schemaMap[schemaName]._definition;
