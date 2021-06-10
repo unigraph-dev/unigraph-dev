@@ -145,7 +145,15 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         deleteRelation: async (uid, relation) => {await client.deleteRelationbyJson({uid: uid, ...relation})},
         deleteItemFromArray: async (uid, item) => {
             const items = Array.isArray(item) ? item : [item]
-            const origObject = (await client.queryUID(uid))[0];
+            const query = `query { res(func: uid(${uid})) {
+                uid
+                <_value[> {
+                    uid
+                    _index { uid <_value.#i> }
+                    _value { uid }
+                }
+            }}`
+            const origObject = (await client.queryDgraph(query))[0][0];
             if (!origObject || !(Array.isArray(origObject['_value[']))) {
                 throw Error("Cannot delete as source item is not an array!");
             }

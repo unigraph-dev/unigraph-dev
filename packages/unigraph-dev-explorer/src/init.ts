@@ -16,18 +16,18 @@ export default function init() {
     window.DynamicViewsDetailed = DynamicViewsDetailed;
 
     const defaultSettings: UserSettings = {
-    serverLocation: `ws://${hst}:3001`,
-    newWindow: "new-tab",
-    nativeNotifications: true,
-    developerMode: false
+        serverLocation: `ws://${hst}:3001`,
+        newWindow: "new-tab",
+        nativeNotifications: true,
+        developerMode: false
     }
 
     let userSettings = defaultSettings;
 
     if (!isJsonString(window.localStorage.getItem('userSettings'))) {
-    window.localStorage.setItem('userSettings', JSON.stringify(defaultSettings));
+        window.localStorage.setItem('userSettings', JSON.stringify(defaultSettings));
     } else { // @ts-ignore: checked type already
-    userSettings = JSON.parse(window.localStorage.getItem('userSettings')) 
+        userSettings = JSON.parse(window.localStorage.getItem('userSettings')) 
     }
 
     // Connect to Unigraph
@@ -35,13 +35,13 @@ export default function init() {
 
     const nfState = window.unigraph.addState('notification-center/notifications', []);
     nfState.subscribe((el: any[]) => {
-    el = JSON.parse(JSON.stringify(el)).pop();
-    const unpadded: ANotification = unpad(el); 
-    let updated = new Date(unpadded?._timestamp?._updatedAt);
-    let current = new Date();
-    if (current.valueOf() - updated.valueOf() < 5000) {
-        const nfn = new Notification(unpadded.name, {body: unpadded.from + ": " + unpadded.content})
-    }
+        el = JSON.parse(JSON.stringify(el)).pop();
+        const unpadded: ANotification = unpad(el); 
+        let updated = new Date(unpadded?._timestamp?._updatedAt);
+        let current = new Date();
+        if (current.valueOf() - updated.valueOf() < 5000) {
+            const nfn = new Notification(unpadded.name, {body: unpadded.from + ": " + unpadded.content})
+        }
     });
 
     const devState = window.unigraph.addState('settings/developerMode', userSettings.developerMode);

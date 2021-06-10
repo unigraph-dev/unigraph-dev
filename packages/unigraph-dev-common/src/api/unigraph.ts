@@ -160,14 +160,14 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
             };
             sendEvent(connection, "ensure_unigraph_package", {packageName: packageName, fallback: fallback}, id)
         }),
-        subscribeToType: (name, callback, eventId = undefined, all = false) => new Promise((resolve, reject) => {
+        subscribeToType: (name, callback, eventId = undefined, all = false, showHidden: false) => new Promise((resolve, reject) => {
             const id = typeof eventId === "number" ? eventId : getRandomInt();
             callbacks[id] = (response: any) => {
                 if (response.success) resolve(id);
                 else reject(response);
             };
             subscriptions[id] = (result: any[]) => callback(buildGraph(result.map((el: any) => UnigraphObject(el))));
-            sendEvent(connection, "subscribe_to_type", {schema: name, all: all}, id);
+            sendEvent(connection, "subscribe_to_type", {schema: name, all, showHidden}, id);
         }),
         // eslint-disable-next-line no-async-promise-executor
         subscribeToObject: (uid, callback, eventId = undefined) => new Promise(async (resolve, reject) => {
