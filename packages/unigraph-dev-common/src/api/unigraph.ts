@@ -4,17 +4,31 @@ import { typeMap } from '../types/consts'
 import { PackageDeclaration } from '../types/packages';
 import { Unigraph, AppState, UnigraphObject as IUnigraphObject } from '../types/unigraph';
 import { base64ToBlob, isJsonString } from '../utils/utils';
-import stringify from 'json-stable-stringify';
 
+function getPath (obj: any, path: string | string[]): any {
+    if (path.length === 0) return obj;
+    if (!Array.isArray(path)) path = path.split('/').filter(e => e.length);
+    const values = Object.keys(obj).filter(el => el.startsWith('_value'));
+    if (values.length > 1) {
+        throw new TypeError('Object should have one value only');
+    } else if (values.length === 1) {
+        return getPath(obj[values[0]], path);
+    } else if (Object.keys(obj).includes(path[0])){
+        return getPath(obj[path[0]], path.slice(1));
+    } else {
+        throw new RangeError('Requested path doesn\'t exist')
+    }
+}
+
+// TODO: Switch to prototype-based, faster helper functions
+// TODO: Benchmark these helper functions
 export function UnigraphObject(obj: any): IUnigraphObject {
-    Object.defineProperty(obj, 'get', {value: (path: string | string[]) => {
-        return 'hello'
-    }});
+    Object.defineProperty(obj, 'get', {value: (path: string | string[]) => getPath(obj, path)});
     Object.defineProperty(obj, 'getMetadata', {value: () => {
         return undefined;
     }});
     Object.defineProperty(obj, 'getType', {value: () => {
-        return undefined;
+        return obj['type']['unigraph.id'];
     }});
     Object.defineProperty(obj, 'getRefType', {value: () => {
         return undefined;
@@ -70,8 +84,6 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
         // @ts-expect-error: already checked if not JSON
         namespaceMap: isJsonString(window.localStorage.getItem("caches/namespaceMap")) ? JSON.parse(window.localStorage.getItem("caches/namespaceMap")) : false 
     };
-
-    console.log(caches);
 
     function sendEvent(conn: WebSocket, name: string, params: any, id?: number | undefined) {
         if (!id) id = getRandomInt();
