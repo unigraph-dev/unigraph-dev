@@ -41,9 +41,6 @@ export class UnigraphObject extends Object {
     }
 }
 
-// @ts-ignore
-window.one = new UnigraphObject({foo: "bar"})
-
 /**
  * Implement a graph-like data structure based on js pointers from uid references.
  * 
