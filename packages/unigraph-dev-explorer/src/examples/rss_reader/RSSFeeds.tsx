@@ -68,7 +68,7 @@ const RSSItem: DynamicViewRenderer = ({data, callbacks}) => {
             primary={<a href={unpadded.item_data?.url}>{unpadded.item_data?.name}</a>}
             secondary={<div>
                 <Link onClick={() => {
-                    const htmlUid = data?.['_value']?.['content']?.['_value']?.['_value']?.['text']?.['_value']?.['_value']?.['uid']; 
+                    const htmlUid = data?.get('content/text')?.['_value']?.['_value']?.['uid']; 
                     if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid}));
                     if (callbacks?.['delete-from-inbox']) callbacks['delete-from-inbox']();
                 }}></Link>

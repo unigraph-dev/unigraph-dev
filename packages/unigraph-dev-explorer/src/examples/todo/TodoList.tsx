@@ -65,7 +65,6 @@ const filterFns = {
 }
 
 function TodoListBody ({data}: { data: ATodoList[] }) {
-    
     const todoList = data;
     const [newName, setNewName] = useState("");
 
@@ -117,7 +116,7 @@ export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
         <ListItemIcon>
             <Checkbox checked={unpadded.done} onClick={_ => {
                 //window.unigraph.updateSimpleObject(todo, "done", !unpadded.done);
-                data['_value']['done']['_value.!'] = !data['_value']['done']['_value.!'];
+                data.get('done')['_value.!'] = !data.get('done')['_value.!'];
                 totalCallbacks['onUpdate'](data);
             }} />
         </ListItemIcon>
