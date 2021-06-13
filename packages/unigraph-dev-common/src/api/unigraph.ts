@@ -22,18 +22,23 @@ function getPath (obj: any, path: string | string[]): any {
 
 // TODO: Switch to prototype-based, faster helper functions
 // TODO: Benchmark these helper functions
-export function UnigraphObject(obj: any): IUnigraphObject {
-    Object.defineProperty(obj, 'get', {value: (path: string | string[]) => getPath(obj, path)});
-    Object.defineProperty(obj, 'getMetadata', {value: () => {
+export class UnigraphObject extends Object {
+
+    constructor(obj: any) {
+        super(obj);
+        Object.setPrototypeOf(this, UnigraphObject.prototype)
+    }
+
+    get = (path: string | string[]) => getPath(this, path);
+    getMetadata = () => {
         return undefined;
-    }});
-    Object.defineProperty(obj, 'getType', {value: () => {
-        return obj['type']['unigraph.id'];
-    }});
-    Object.defineProperty(obj, 'getRefType', {value: () => {
+    }
+    getType = () => {
+        return (this as any).type['unigraph.id'];
+    }
+    getRefType = () => {
         return undefined;
-    }});
-    return obj;
+    }
 }
 
 /**
@@ -43,9 +48,9 @@ export function UnigraphObject(obj: any): IUnigraphObject {
  * 
  * @param objects Objects with uid references
  */
-export function buildGraph(objects: any[]): any[] {
+export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
 
-    const objs: any[] = JSON.parse(JSON.stringify(objects))
+    const objs: any[] = JSON.parse(JSON.stringify(objects)).map((el: any) => new UnigraphObject(el))
     const dict: any = {}
     objs.forEach(object => {if (object?.uid) dict[object.uid] = object})
 
@@ -178,7 +183,7 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
                 if (response.success) resolve(id);
                 else reject(response);
             };
-            subscriptions[id] = (result: any[]) => callback(buildGraph(result.map((el: any) => UnigraphObject(el))));
+            subscriptions[id] = (result: any[]) => callback(buildGraph(result.map((el: any) => new UnigraphObject(el))));
             sendEvent(connection, "subscribe_to_type", {schema: name, all, showHidden}, id);
         }),
         // eslint-disable-next-line no-async-promise-executor
@@ -197,7 +202,7 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
                 if (response.success) resolve(id);
                 else reject(response);
             };
-            subscriptions[id] = (result: any) => callback(UnigraphObject(result[0]));
+            subscriptions[id] = (result: any) => callback(new UnigraphObject(result[0]));
             const frag = `(func: uid(${uid})) @recurse { uid unigraph.id expand(_userpredicate_) }`
             sendEvent(connection, "subscribe_to_object", {queryFragment: frag}, id);
         }), 
@@ -207,7 +212,7 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
                 if (response.success) resolve(id);
                 else reject(response);
             };
-            subscriptions[id] = (result: any[]) => callback(result.map((el: any) => UnigraphObject(el)));
+            subscriptions[id] = (result: any[]) => callback(result.map((el: any) => new UnigraphObject(el)));
             sendEvent(connection, "subscribe_to_query", {queryFragment: fragment}, id);
         }), 
         unsubscribe: (id) => {

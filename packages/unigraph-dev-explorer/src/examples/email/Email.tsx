@@ -36,12 +36,12 @@ const EmailListBody: React.FC<{data: any[]}> = ({data}) => {
 
 const EmailMessage: DynamicViewRenderer = ({data, callbacks}) => {
     let unpadded: AEmail = unpad(data);
-    console.log(unpadded);
+    console.log(data);
     return <ListItem>
-        <ListItemAvatar><Avatar>{unpadded.message.sender[0][0]}</Avatar></ListItemAvatar>
-        <ListItemText primary={unpadded.name} secondary={<div>
+        <ListItemAvatar><Avatar>{unpadded.message?.sender?.[0]?.[0]}</Avatar></ListItemAvatar>
+        <ListItemText primary={data?.get('name')?.['_value']?.['_value']?.['_value.%']} secondary={<div>
             <Link onClick={() => {
-                const htmlUid = data?.['_value']?.['content']?.['_value']?.['_value']?.['text']?.['_value']?.['_value']?.['uid']; 
+                const htmlUid = data?.get('content/text')?.['_value']?.['_value']?.['uid'];
                 if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid}));
                 if (callbacks?.['delete-from-inbox']) callbacks['delete-from-inbox']();
             }}></Link>

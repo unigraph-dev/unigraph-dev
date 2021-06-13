@@ -2,7 +2,7 @@ import { Accordion, AccordionDetails, AccordionSummary, ListItem, ListItemIcon, 
 import { ClearAll, ExpandMore } from "@material-ui/icons";
 import React from "react";
 import { useEffectOnce } from "react-use"
-import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
+import { getRandomInt, UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
 import { byElementIndex } from "unigraph-dev-common/lib/utils/entityUtils";
 import { AutoDynamicView } from "../ObjectView/DefaultObjectView";
 
@@ -112,7 +112,7 @@ export const Inbox = () => {
                     <ListItemIcon onClick={() => {
                         window.unigraph.deleteItemFromArray(listUid, el['uid'])
                     }} ><ClearAll/></ListItemIcon>
-                    <AutoDynamicView object={el['_value']} callbacks={{
+                    <AutoDynamicView object={new UnigraphObject(el['_value'])} callbacks={{
                                     "delete-from-inbox": () => { window.unigraph.deleteItemFromArray(listUid, el['uid'])}
                                 }} />
                 </ListItem>
@@ -127,7 +127,7 @@ export const Inbox = () => {
                                 window.unigraph.deleteItemFromArray(listUid, it['uid'])
                             }} ><ClearAll/></ListItemIcon>
                             <AutoDynamicView 
-                                object={it}
+                                object={new UnigraphObject(it)}
                                 callbacks={{
                                     "delete-from-inbox": () => { window.unigraph.deleteItemFromArray(listUid, it['uid'])}
                                 }} 
