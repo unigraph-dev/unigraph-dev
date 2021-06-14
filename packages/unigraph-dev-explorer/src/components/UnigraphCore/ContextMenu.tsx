@@ -11,7 +11,7 @@ export const ContextMenu = () => {
 
     const handleClose = () => ctxMenuState.setValue({show: false})
 
-    React.useMemo(() => ctxMenuState.subscribe(v => {setState(v); console.log(v)}), []);
+    React.useMemo(() => ctxMenuState.subscribe(v => setState(v)), []);
 
     return <div><Popover
         id="context-menu"
