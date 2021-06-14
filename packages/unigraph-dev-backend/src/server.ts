@@ -368,7 +368,8 @@ export default async function startServer(client: DgraphClient) {
 
     "get_schemas": async function (event: EventGetSchemas, ws: IWebsocket) {
       // TODO: Option to get only a couple of schemas in cache
-      ws.send(makeResponse(event, true, {"schemas": caches['schemas'].data}));
+      const schemas = await serverStates.localApi.getSchemas(event.schemas, event.resolve);
+      ws.send(makeResponse(event, true, {"schemas": schemas}));
     },
 
     "get_packages": async function (event: EventGetPackages, ws: IWebsocket) {

@@ -269,7 +269,7 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
                 else reject(response);
             };
             sendEvent(connection, "get_schemas", {
-                schemas: [],
+                schemas: schemas,
                 resolve: resolve
             }, id);
         }),
@@ -319,6 +319,7 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
             sendEvent(connection, "run_executable", {"unigraph.id": unigraphid, params: params ? params : {}}, id);
         }),
         getNamespaceMapUid: (name) => {throw Error("Not implemented")},
+        getNamespaceMap: () => caches.namespaceMap,
         getType: (name) => {throw Error("Not implemented")},
         getQueries: (name) => {throw Error("Not implemented")},
         addNotification: (item) => new Promise((resolve, reject) => {

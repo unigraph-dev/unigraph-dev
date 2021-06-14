@@ -183,7 +183,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         // latertodo
         getReferenceables: async (key = "unigraph.id", asMapWithContent = false) => {return Error('Not implemented')},
         getSchemas: async (schemas: string[] | undefined, resolve = false) => {
-            return states.caches['schemas'].data;
+            return Object.fromEntries(Object.entries(states.caches['schemas'].data).filter(([k, _]) => !schemas?.length || schemas?.includes(k))) as any;
         },
         getPackages: async (packages) => {
             return states.caches['packages'].data;
