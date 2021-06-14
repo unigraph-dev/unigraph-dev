@@ -210,7 +210,7 @@ const noteBlockCommands = {
         context.setCommand(() => () => focusUid(newUid['_value'].uid));
         //context.setCommand(() => noteBlockCommands['set-focus'].bind(this, data, {...context, childrenref: {current: context.childrenref.current.children[parent as number].children[0].children[0].children[1]}}, -1))
     },
-    "unindent-child": (data: any, context: NoteEditorContext, parent: number, index: number) => {
+    "unindent-child": async (data: any, context: NoteEditorContext, parent: number, index: number) => {
         console.log(parent, index)
         let currSubentity = -1;
         let isCompleted = false;
@@ -261,7 +261,7 @@ const noteBlockCommands = {
             };
         }, [])
         console.log(newChildren);
-        window.unigraph.updateObject(data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.uid, {'children': {'_value[': newChildren}}, false, false);
+        await window.unigraph.updateObject(data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.uid, {'children': {'_value[': newChildren}}, false, false);
         window.unigraph.deleteItemFromArray(delUidPar, delUidChild)
         context.setEdited(true);
         context.setCommand(() => noteBlockCommands['set-focus'].bind(this, data, context, parent + 1))

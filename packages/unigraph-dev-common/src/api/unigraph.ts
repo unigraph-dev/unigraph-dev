@@ -233,9 +233,14 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
             const predicateUid = object['_value'][predicate].uid;
             sendEvent(connection, "update_spo", {uid: predicateUid, predicate: typeMap[typeof value], value: value})
         },
-        updateObject: (uid, newObject, upsert = true, pad = true) => {
-            sendEvent(connection, "update_object", {uid: uid, newObject: newObject, upsert: upsert, pad: pad});
-        },
+        updateObject: (uid, newObject, upsert = true, pad = true) => new Promise((resolve, reject) => {
+            const id = getRandomInt();
+            callbacks[id] = (response: any) => {
+                if (response.success) resolve(id);
+                else reject(response);
+            };
+            sendEvent(connection, "update_object", {uid: uid, newObject: newObject, upsert: upsert, pad: pad, id: id});
+        }),
         deleteRelation: (uid, relation) => {
             sendEvent(connection, "delete_relation", {uid: uid, relation: relation});
         },
