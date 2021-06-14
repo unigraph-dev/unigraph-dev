@@ -28,6 +28,7 @@ registerDynamicViews({"$/schema/view": ViewItem})
 export const FavoriteBar = () => {
 
     const [fav, setFav] = React.useState<any[]>([]);
+    const [favEntity, setFavEntity] = React.useState<any>({});
     const favState = window.unigraph.addState('favorites', [])
     
     useEffectOnce(() => {
@@ -40,6 +41,7 @@ export const FavoriteBar = () => {
                 setFav(children); 
                 favState.setValue(children.map((el: any) => {let unpadded = unpad(el); return {name: unpadded.name, component: unpadded.view, config: JSON.parse(unpadded.props).config}}))
             };
+            setFavEntity(fav);
         }, id);
 
         return function cleanup() {
@@ -48,8 +50,8 @@ export const FavoriteBar = () => {
     })
 
     return <React.Fragment>
-        {fav.map(el => <ListItem>
-            <AutoDynamicView object={el['_value']}/>
+        {fav.map((el, index) => <ListItem>
+            <AutoDynamicView object={el['_value']} callbacks={{context: favEntity, removeFromContext: () => window.unigraph.deleteItemFromArray(favEntity?.['_value']?.children?.uid, index)}}/>
         </ListItem>)}
     </React.Fragment>
 

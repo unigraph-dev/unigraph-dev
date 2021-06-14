@@ -159,7 +159,6 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     }))
 
     const contextEntity = typeof callbacks?.context === "object" ? callbacks.context : null; 
-    console.log(contextEntity)
 
     const attach = React.useCallback((domElement) => {
         drag(domElement);
