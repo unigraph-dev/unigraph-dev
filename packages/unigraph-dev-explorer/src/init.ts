@@ -46,7 +46,7 @@ export default function init() {
 
     const devState = window.unigraph.addState('settings/developerMode', userSettings.developerMode);
     devState.subscribe((val: boolean) => {
-    window.localStorage.setItem('userSettings', JSON.stringify({...JSON.parse(window.localStorage.getItem('userSettings')!), developerMode: val}))
+        window.localStorage.setItem('userSettings', JSON.stringify({...JSON.parse(window.localStorage.getItem('userSettings')!), developerMode: val}))
     });
 
     initContextMenu();
