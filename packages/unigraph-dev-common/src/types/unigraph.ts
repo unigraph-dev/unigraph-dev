@@ -133,6 +133,8 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param name Name of the named entity/executable/schema, usually starts with `$/`
      */
     getNamespaceMapUid(name: string): string;
+    /** Gets the current namespace map. */
+    getNamespaceMap?(): any;
     /** 
      * Gets all objects of a certain type name. 
      * 

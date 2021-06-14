@@ -7,9 +7,10 @@ import ReactJson, { InteractionProps } from 'react-json-view';
 import { useEffectOnce } from 'react-use';
 import { prepareExportObjects, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { DynamicViewRenderer } from '../../global';
+import { AutoDynamicViewProps } from '../../types/ObjectView';
 import { download } from '../../utils';
 import { ExecutableCodeEditor } from './DefaultCodeEditor';
-import { defaultContextMenu, DefaultObjectContextMenu } from './DefaultObjectContextMenu';
+import { defaultContextContextMenu, defaultContextMenu, DefaultObjectContextMenu } from './DefaultObjectContextMenu';
 import { filterPresets } from './objectViewFilters';
 
 type ObjectViewOptions = {
@@ -106,7 +107,35 @@ const DynamicViewsDetailed: Record<string, DynamicViewRenderer> = {
 
 window.DynamicViewsDetailed = DynamicViewsDetailed;
 
-export const AutoDynamicView = ({ object, callbacks, component, attributes, inline }: any) => {
+const SubentityDropAcceptor = ({ uid }: any) => {
+    const [{ isOver, canDrop }, dropSub] = useDrop(() => ({
+        // @ts-expect-error: already checked for namespace map
+        accept: Object.keys(window.unigraph.getNamespaceMap() || {}),
+        drop: (item: {uid: string}, monitor) => {
+          window.unigraph.updateObject(uid, {
+              semantic_properties: {
+                  children: [{
+                      type: {"unigraph.id": "$/schema/subentity"},
+                      uid: item.uid
+                  }]
+              }
+          })
+        },
+        collect: (monitor) => ({
+            isOver: !!monitor.isOver(),
+            canDrop: !!monitor.canDrop(),
+        })
+    }))
+
+    const opacities: Record<string, number> = {"truetrue": 1, "truefalse": 0.5, "falsefalse": 0, "falsetrue": 0}
+
+    return <div ref={dropSub} style={{opacity: opacities[canDrop + "" + isOver], width: "100%", height: canDrop ? "16px" : "2px"}}>
+        <hr style={{height: "50%", backgroundColor: "gray", marginLeft: "48px"}}/>
+    </div>
+}
+
+export const AutoDynamicView = ({ object, callbacks, component, attributes, inline, allowSubentity }: AutoDynamicViewProps) => {
+    allowSubentity = allowSubentity === true;
 
     const [{ isDragging }, drag] = useDrag(() => ({
         type: object?.['type']?.['unigraph.id'] || "$/schema/any",
@@ -117,7 +146,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     }))
 
     const [, drop] = useDrop(() => ({
-          accept: ["$/schema/tag", "$/schema/interface/textual"],
+          accept: window.unigraph.getState('referenceables/semantic_children').value,
           drop: (item: {uid: string}, monitor) => {
             window.unigraph.updateObject(object?.uid, {
                 semantic_properties: {
@@ -129,35 +158,29 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
           },
     }))
 
-    const [, dropSub] = useDrop(() => ({
-        accept: ["$/schema/note_block"],
-        drop: (item: {uid: string}, monitor) => {
-          window.unigraph.updateObject(object?.uid, {
-              semantic_properties: {
-                  children: [{
-                      type: {"unigraph.id": "$/schema/subentity"},
-                      uid: item.uid
-                  }]
-              }
-          })
-        },
-  }))
+    const contextEntity = typeof callbacks?.context === "object" ? callbacks.context : null; 
 
     const attach = React.useCallback((domElement) => {
         drag(domElement);
         drop(domElement);
-        dropSub(domElement);
         if (!isDragging) domElement?.addEventListener('contextmenu', (event: any) => {
             event.preventDefault();
             window.unigraph.getState('global/contextMenu').setValue({
                 anchorPosition: {top: event.y, left: event.x},
                 menuContent: defaultContextMenu,
+                menuContextContent: defaultContextContextMenu,
                 contextObject: object,
                 contextUid: object?.uid,
-                show: true
+                show: true,
+                ...(contextEntity ? {
+                    contextContextObject: contextEntity,
+                    contextContextUid: contextEntity.uid,
+                    getContext: contextEntity
+                } : {}),
+                ...(callbacks?.removeFromContext ? {removeFromContext: callbacks.removeFromContext} : {})
             })
         })
-    }, [isDragging, drag])
+    }, [isDragging, drag, callbacks])
 
     //console.log(object) 
     let el;
@@ -168,9 +191,12 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     } else if (object) {
         el = <StringObjectViewer object={object}/>
     }
-    return el ? <div id={"object-view-"+object?.uid} style={{opacity: isDragging ? 0.5 : 1, display: "inline-flex", alignItems: "center", ...(inline ? {} : {width: "100%"})}} ref={attach} {...(attributes ? attributes : {})}>
-        {el}
-    </div> : <React.Fragment/>;
+    return el ? <React.Fragment>
+        <div id={"object-view-"+object?.uid} style={{opacity: isDragging ? 0.5 : 1, display: "inline-flex", alignItems: "center", ...(inline ? {} : {width: "100%"})}} ref={attach} {...(attributes ? attributes : {})}>
+            {el}
+        </div>
+        {allowSubentity ? <SubentityDropAcceptor /> : []}
+    </React.Fragment> : <React.Fragment/>;
 }
 
 export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, callbacks }) => {
@@ -209,7 +235,7 @@ const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options }) => {
 
     switch (options.viewer) {
         case "dynamic-view":
-            FinalObjectViewer = <AutoDynamicView object={object} />;
+            FinalObjectViewer = <AutoDynamicView object={object} allowSubentity />;
             break;
 
         case "dynamic-view-detailed":
@@ -233,7 +259,7 @@ const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options }) => {
         {ContextMenuButton} {ContextMenu}
         <div style={{alignSelf: "center",width: "100%",
                 alignItems: "center",
-                display: "flex"}}>{FinalObjectViewer}</div>
+                display: "flex", flexFlow: "wrap"}}>{FinalObjectViewer}</div>
     </div>
 }
 
@@ -242,14 +268,19 @@ const DefaultObjectList: FC<DefaultObjectListViewProps> = ({component, objects, 
     if (!options?.filters?.showDeleted) finalObjects = filterPresets['no-deleted'](finalObjects);
     if (!options?.filters?.showNoView) finalObjects = filterPresets['no-noview'](finalObjects, DynamicViews);
 
-    return <React.Fragment>{(finalObjects.length ? finalObjects : Array(10).fill({'type': {'unigraph.id': '$/skeleton/default'}})).map(obj => React.createElement(
-        component, {key: obj.uid}, 
-        [<DefaultObjectView object={obj} 
-            options={{
-                unpad: false, 
-                showContextMenu: true,
-                viewer: "dynamic-view",
-            }} />]))}</React.Fragment>
+    return <React.Fragment>
+        {(finalObjects.length ? finalObjects : Array(10).fill({'type': {'unigraph.id': '$/skeleton/default'}})).map(obj => React.createElement(
+            component, 
+            {key: obj.uid}, 
+            [<DefaultObjectView object={obj} 
+                options={{
+                    unpad: false, 
+                    showContextMenu: true,
+                    viewer: "dynamic-view",
+                }} 
+            />]
+        ))}
+    </React.Fragment>
 }
 
 const DefaultObjectListView: FC<DefaultObjectListViewProps> = ({component, objects}) => {

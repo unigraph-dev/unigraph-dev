@@ -11,7 +11,7 @@ export const ContextMenu = () => {
 
     const handleClose = () => ctxMenuState.setValue({show: false})
 
-    ctxMenuState.subscribe(v => setState(v));
+    React.useMemo(() => ctxMenuState.subscribe(v => setState(v)), []);
 
     return <div><Popover
         id="context-menu"
@@ -28,8 +28,14 @@ export const ContextMenu = () => {
         horizontal: 'center',
         }}
     >
-        {<Typography variant="body1" style={{padding: "8px"}}>Object uid: {state.contextUid}; type: {state.contextObject?.type?.['unigraph.id']}</Typography>}
+        <Typography variant="body1" style={{padding: "8px"}}>Object uid: {state.contextUid}; type: {state.contextObject?.type?.['unigraph.id']}</Typography>
         <Divider />
         {state.menuContent?.map(el => el(state.contextUid!, state.contextObject, handleClose))}
+        {state.contextContextUid ? <React.Fragment>
+            <Divider/>
+            <Typography variant="body1" style={{padding: "8px"}}>Context uid: {state.contextContextUid}; type: {state.contextContextObject?.type?.['unigraph.id']}</Typography>
+            <Divider/>
+            {state.menuContextContent?.map(el => el(state.contextUid!, state.contextObject, handleClose, {removeFromContext: state.removeFromContext}))}
+        </React.Fragment>: []}
     </Popover></div>
 }
