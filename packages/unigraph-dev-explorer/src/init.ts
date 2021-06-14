@@ -54,9 +54,13 @@ export default function init() {
 
 export type ContextMenuState = {
     anchorPosition: {top: number, left: number},
-    menuContent: ((uid: string, object: any, onfire: () => any) => React.ReactElement)[],
+    menuContent: ((uid: string, object: any, onfire: () => any, callbacks?: any) => React.ReactElement)[],
     contextObject: any,
     contextUid: string,
+    menuContextContent: ((uid: string, object: any, onfire: () => any, callbacks?: any) => React.ReactElement)[],
+    contextContextObject?: any,
+    contextContextUid?: string,
+    removeFromContext?: string
     show: boolean
 }
 

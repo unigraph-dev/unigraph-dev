@@ -7,9 +7,10 @@ import ReactJson, { InteractionProps } from 'react-json-view';
 import { useEffectOnce } from 'react-use';
 import { prepareExportObjects, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { DynamicViewRenderer } from '../../global';
+import { AutoDynamicViewProps } from '../../types/ObjectView';
 import { download } from '../../utils';
 import { ExecutableCodeEditor } from './DefaultCodeEditor';
-import { defaultContextMenu, DefaultObjectContextMenu } from './DefaultObjectContextMenu';
+import { defaultContextContextMenu, defaultContextMenu, DefaultObjectContextMenu } from './DefaultObjectContextMenu';
 import { filterPresets } from './objectViewFilters';
 
 type ObjectViewOptions = {
@@ -133,7 +134,7 @@ const SubentityDropAcceptor = ({ uid }: any) => {
     </div>
 }
 
-export const AutoDynamicView = ({ object, callbacks, component, attributes, inline, allowSubentity }: any) => {
+export const AutoDynamicView = ({ object, callbacks, component, attributes, inline, allowSubentity }: AutoDynamicViewProps) => {
     allowSubentity = allowSubentity === true;
 
     const [{ isDragging }, drag] = useDrag(() => ({
@@ -157,6 +158,9 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
           },
     }))
 
+    const contextEntity = typeof callbacks?.context === "object" ? callbacks.context : null; 
+    console.log(contextEntity)
+
     const attach = React.useCallback((domElement) => {
         drag(domElement);
         drop(domElement);
@@ -165,12 +169,19 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
             window.unigraph.getState('global/contextMenu').setValue({
                 anchorPosition: {top: event.y, left: event.x},
                 menuContent: defaultContextMenu,
+                menuContextContent: defaultContextContextMenu,
                 contextObject: object,
                 contextUid: object?.uid,
-                show: true
+                show: true,
+                ...(contextEntity ? {
+                    contextContextObject: contextEntity,
+                    contextContextUid: contextEntity.uid,
+                    getContext: contextEntity
+                } : {}),
+                ...(callbacks?.removeFromContext ? {removeFromContext: callbacks.removeFromContext} : {})
             })
         })
-    }, [isDragging, drag])
+    }, [isDragging, drag, callbacks])
 
     //console.log(object) 
     let el;

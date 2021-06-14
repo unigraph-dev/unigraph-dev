@@ -50,10 +50,13 @@ const grouper: any = {
 export const Inbox = () => {
 
     const [inbox, setInbox] = React.useState<any[]>([]);
+    const [inboxEntity, setInboxEntity] = React.useState<any>({});
     const [listUid, setListUid] = React.useState("");
 
     const [optionsOpen, setOptionsOpen] = React.useState(false);
     const [groupBy, setGroupBy] = React.useState('');
+
+    const getContext = () => inboxEntity;
 
     useEffectOnce(() => {
         const id = getRandomInt();
@@ -67,6 +70,7 @@ export const Inbox = () => {
             } else {
                 setInbox([]);
             };
+            setInboxEntity(inbox);
         }, id);
 
         return function cleanup() {
@@ -113,7 +117,8 @@ export const Inbox = () => {
                         window.unigraph.deleteItemFromArray(listUid, el['uid'])
                     }} ><ClearAll/></ListItemIcon>
                     <AutoDynamicView object={new UnigraphObject(el['_value'])} callbacks={{
-                                    "delete-from-inbox": () => { window.unigraph.deleteItemFromArray(listUid, el['uid'])}
+                                    context: inboxEntity,
+                                    removeFromContext: () => { window.unigraph.deleteItemFromArray(listUid, el['uid'])}
                                 }} />
                 </ListItem>
             </React.Fragment>
@@ -129,7 +134,8 @@ export const Inbox = () => {
                             <AutoDynamicView 
                                 object={new UnigraphObject(it)}
                                 callbacks={{
-                                    "delete-from-inbox": () => { window.unigraph.deleteItemFromArray(listUid, it['uid'])}
+                                    getContext: getContext,
+                                    removeFromContext: () => { window.unigraph.deleteItemFromArray(listUid, it['uid'])}
                                 }} 
                             />
                         </ListItem>
