@@ -15,7 +15,10 @@ export const defaultContextMenu: Array<ContextMenuGenerator> = [
     </MenuItem>,
     (uid, object, handleClose, callbacks) => <MenuItem onClick={() => {handleClose(); window.unigraph.deleteObject(uid)}}>
         Delete item (set as deleted)
-    </MenuItem>
+    </MenuItem>,
+    (uid, object, handleClose, callbacks) => <MenuItem onClick={() => {handleClose(); window.wsnavigator(`/graph?uid=${uid}`)}}>
+        Show Graph view
+    </MenuItem>,
 ]
 
 export const defaultContextContextMenu: Array<ContextMenuGenerator> = [

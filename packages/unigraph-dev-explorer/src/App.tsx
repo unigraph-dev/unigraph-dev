@@ -36,6 +36,7 @@ import { UnigraphSearch } from './components/UnigraphCore/UnigraphSearch';
 import { init as nb_init } from './examples/notes/NoteBlock';
 import { init as ht_init } from './examples/semantic/Html';
 import { NotesList } from './examples/notes/NotesList';
+import { GraphView } from './components/ObjectView/GraphView';
 nb_init(); ht_init();
 
 // TODO: custom theme
@@ -90,6 +91,10 @@ export const pages: Record<string, any> = {
   'library': {
     'constructor': (props: any) => <UserLibraryAll {...props} />,
     'name': 'Library',
+  },
+  'graph': {
+    'constructor': (props: any) => <GraphView {...props} />,
+    'name': 'Graph View'
   },
   'settings': {
     'constructor': (props: any) => <Settings {...props} />,

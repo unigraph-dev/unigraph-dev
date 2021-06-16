@@ -39,6 +39,9 @@ const getFieldsFromDefinition = (def: Definition, schemas: any, rootObj: any, pa
     } else if (def.type['unigraph.id'].startsWith('$/composer/Array')) {
         return "This is an array..."
         // @ts-ignore
+    } else if (def.type['unigraph.id'].startsWith('$/composer/Union')) {
+        return "This is a union..."
+        // @ts-ignore
     } else if (def.type['unigraph.id'].startsWith('$/primitive')) {
         let onFChange = recursiveBindField(path, rootObj)
         let val: Function = (v: string) => v;
