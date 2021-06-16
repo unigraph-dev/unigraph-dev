@@ -7,6 +7,7 @@ import * as serviceWorker from './serviceWorker';
 import App from './App';
 import { SplashScreen, DisconnectedSplashScreen} from './pages/SplashScreen';
 import { WorkSpace } from './Workspace';
+import Settings from './pages/Settings';
 
 
 init();
@@ -18,10 +19,15 @@ function render(component: any) {
   )
 }
 
+const notConnectedScreen = React.createElement(React.Fragment, {}, [
+  React.createElement(SplashScreen),
+  React.createElement(Settings)
+])
+
 if (window.location.pathname === '/pages') {
   render(<App />)
 } else {
-  render(<SplashScreen />);
+  render(notConnectedScreen);
   
   window.unigraph.backendConnection.onopen = () => {
     // Register notification center
@@ -43,7 +49,7 @@ if (window.location.pathname === '/pages') {
   
   window.unigraph.backendConnection.onclose = () => {
     setTimeout(() => {window.location.reload()}, 1000) 
-    render(<DisconnectedSplashScreen />,)
+    render(notConnectedScreen,)
   };
 }
 
