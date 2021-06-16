@@ -81,7 +81,7 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
     let predicate = "_value";
     let noPredicate = false;
     const rawPartUnigraphType = getUnigraphType(rawPart, localSchema?.type?.['unigraph.id']);
-    console.log(localSchema, rawPart)
+    //console.log(localSchema, rawPart)
 
     if (localSchema.type?.['unigraph.id'] === "$/schema/any" && typeof rawPart?.type?.['unigraph.id'] === "string") {
         // If schema is any object and the object has a type (that we can check), 
@@ -193,7 +193,7 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
             let choicesResults = definitions.map(defn => {
                 try {
                     return [defn, buildUnigraphEntityPart(rawPart, options, schemaMap, defn)]
-                } catch (e) {console.log(e); return undefined};
+                } catch (e) {console.log(e.message || e); return undefined};
             }).filter(x => x !== undefined);
             if (choicesResults.length !== 1 && rawPartUnigraphType !== "$/primitive/undefined") {
                 throw new TypeError("Union type does not allow ambiguous or nonexistent selections!" + JSON.stringify(rawPart) + JSON.stringify(localSchema) + rawPartUnigraphType)
