@@ -51,5 +51,8 @@
     "react-dom": "^17.0.1",
     "schema-utils": "^3.0.0",
     "yargs": "^17.0.1"
-  }
+  },
+  "resolutions": {
+    "bezier-js": "4.0.3"
+ }
 }

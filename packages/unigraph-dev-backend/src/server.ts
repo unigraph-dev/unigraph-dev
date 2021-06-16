@@ -175,7 +175,7 @@ export default async function startServer(client: DgraphClient) {
     },
 
     "subscribe_to_query": function (event: EventSubscribeObject, ws: IWebsocket) {
-      const query = `(func: uid(par${event.id})) @recurse {uid unigraph.id expand(_userpredicate_)}
+      const query = event.noExpand ? event.queryFragment : `(func: uid(par${event.id})) @recurse {uid unigraph.id expand(_userpredicate_)}
       par${event.id} as var${event.queryFragment}`
       if (verbose >= 2) console.log(query)
       eventRouter["subscribe_to_object"]({...event, queryFragment: query}, ws)
