@@ -3,7 +3,7 @@ import { UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
 
 export type AutoDynamicViewCallbacks = {
     context?: any,
-    removeFromContext?: () => any,
+    removeFromContext?: (where: "left" | "right" | undefined) => any,
 } & Record<string, any>
 
 export type AutoDynamicViewProps = {

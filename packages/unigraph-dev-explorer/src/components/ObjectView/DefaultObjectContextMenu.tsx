@@ -22,6 +22,9 @@ export const defaultContextMenu = [
 export const defaultContextContextMenu = [
     (uid: string, object: any, handleClose: () => any, callbacks?: any) => <MenuItem onClick={() => {handleClose(); callbacks?.removeFromContext?.()}}>
     Remove item from context
+    </MenuItem>,
+    (uid: string, object: any, handleClose: () => any, callbacks?: any) => <MenuItem onClick={() => {handleClose(); callbacks?.removeFromContext?.("left")}}>
+    Remove all items above (on the left) from context
     </MenuItem>
 ]
 export const DefaultObjectContextMenu = ({uid, object, anchorEl, handleClose}: 

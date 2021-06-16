@@ -128,7 +128,7 @@ export const Inbox = () => {
         <IconButton onClick={() => window.unigraph.deleteItemFromArray(listUid, inbox.map((el, idx) => idx))}><ClearAll/></IconButton>
         </div>
             
-            {!groupBy.length ? inbox.map(el => {
+            {!groupBy.length ? inbox.map((el, index) => {
                 return <React.Fragment>
                     <ListItem>
                         <ListItemIcon onClick={() => {
@@ -136,7 +136,11 @@ export const Inbox = () => {
                         }} ><ClearAll/></ListItemIcon>
                         <AutoDynamicView object={new UnigraphObject(el['_value'])} callbacks={{
                                         context: inboxEntity,
-                                        removeFromContext: () => { window.unigraph.deleteItemFromArray(listUid, el['uid'])}
+                                        removeFromContext: (where: undefined | "left" | "right") => { 
+                                            let uids = {"left": Array.from(Array(index).keys()), "right": undefined, "": undefined}[where || ""] || [el['uid']]
+                                            console.log(uids)
+                                            window.unigraph.deleteItemFromArray(listUid, uids)
+                                        }
                                     }} />
                     </ListItem>
                 </React.Fragment>
