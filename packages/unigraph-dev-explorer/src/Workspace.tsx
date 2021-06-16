@@ -19,7 +19,7 @@ import { DndProvider } from "react-dnd";
 import { HTML5Backend } from 'react-dnd-html5-backend'
 
 export function WorkspacePageComponent({ children }: any) {
-    return <Container maxWidth="lg" disableGutters style={{paddingTop: "12px"}}>
+    return <Container maxWidth="lg" disableGutters style={{paddingTop: "12px", height: "100%"}}>
         <CssBaseline/>
         {children}
     </Container>

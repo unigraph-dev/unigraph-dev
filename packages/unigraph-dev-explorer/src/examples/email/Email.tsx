@@ -43,7 +43,7 @@ const EmailMessage: DynamicViewRenderer = ({data, callbacks}) => {
             <Link onClick={() => {
                 const htmlUid = data?.get('content/text')?.['_value']?.['_value']?.['uid'];
                 if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid}));
-                if (callbacks?.['delete-from-inbox']) callbacks['delete-from-inbox']();
+                if (callbacks?.removeFromContext) callbacks.removeFromContext();
             }}></Link>
             {unpadded.content?.abstract+"..."}
         </div>}></ListItemText>

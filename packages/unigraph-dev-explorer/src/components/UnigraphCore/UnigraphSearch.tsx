@@ -23,7 +23,7 @@ export const UnigraphSearch = () => {
             setResults([]);
             setEntities([]);
         }
-    }, 200), [])
+    }, 1000), [])
 
     React.useEffect(() => {
         search(query)

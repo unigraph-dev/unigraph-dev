@@ -70,7 +70,7 @@ const RSSItem: DynamicViewRenderer = ({data, callbacks}) => {
                 <Link onClick={() => {
                     const htmlUid = data?.get('content/text')?.['_value']?.['_value']?.['uid']; 
                     if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid}));
-                    if (callbacks?.['delete-from-inbox']) callbacks['delete-from-inbox']();
+                    if (callbacks?.removeFromContext) callbacks.removeFromContext();
                 }}></Link>
                 <div>Added: {timeago.format(new Date(unpadded?.item_data?.date_created))}, updated: {timeago.format(new Date(unpadded?._timestamp?._updatedAt))}</div>
                 {unpadded?.content?.abstract ? <div style={{color: 'black'}}>{unpadded.content.abstract+"..."}</div> : ''}
