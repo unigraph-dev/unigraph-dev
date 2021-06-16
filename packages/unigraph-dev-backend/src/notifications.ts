@@ -1,7 +1,7 @@
 import DgraphClient from "./dgraphClient";
 import { Cache } from './caches';
 import { buildUnigraphEntity, processAutoref } from "unigraph-dev-common/lib/utils/entityUtils";
-import { insertsToUpsert } from "./utils/txnWrapper";
+import { insertsToUpsert } from "unigraph-dev-common/lib/utils/txnWrapper";
 import { UnigraphNotification } from "unigraph-dev-common/lib/types/unigraph";
 
 export function createNotificationsCache(client: DgraphClient): Cache<UnigraphNotification[]> {

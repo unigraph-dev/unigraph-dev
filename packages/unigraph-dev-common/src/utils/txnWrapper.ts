@@ -1,7 +1,7 @@
-import { UnigraphUpsert } from "@/custom"
+import { UnigraphUpsert } from "../types/unigraph"
 import _, { has, uniqueId } from "lodash";
 
-import { typeMap } from 'unigraph-dev-common/lib/types/consts'
+import { typeMap } from '../types/consts'
 
 function buildDgraphFunctionFromRefQuery(query: {key: string, value: string}[]) {
     let string = "";

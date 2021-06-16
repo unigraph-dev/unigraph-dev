@@ -2,6 +2,12 @@ import { SchemaDgraph } from "./json-ts"
 import { PackageDeclaration } from "./packages"
 
 /** Unigraph interface */ // Don't remove this line - needed for Monaco to work
+export type UnigraphUpsert = {
+    queries: string[],
+    mutations: any[],
+    appends: any[]
+  }
+
 export type AppState<T = any> = {
     value: T,
     subscribers: ((newValue: T) => any)[],
