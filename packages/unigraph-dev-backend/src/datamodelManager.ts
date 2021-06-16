@@ -6,7 +6,7 @@
 
 import DgraphClient from "./dgraphClient";
 import { defaultPackages, defaultTypes, defaultUserlandSchemas, packageManifestSchema } from "./templates/defaultDb"
-import { insertsToUpsert } from "./utils/txnWrapper";
+import { insertsToUpsert } from "unigraph-dev-common/lib/utils/txnWrapper";
 import { Cache } from './caches';
 import { PackageDeclaration } from "unigraph-dev-common/lib/types/packages";
 import { ComposerUnionInstance } from "unigraph-dev-common/lib/types/json-ts";

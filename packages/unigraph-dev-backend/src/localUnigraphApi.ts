@@ -7,7 +7,7 @@ import { buildExecutable } from "./executableManager";
 import { callHooks } from "./hooks";
 import { addNotification } from "./notifications";
 import { Subscription, createSubscriptionLocal } from "./subscriptions";
-import { insertsToUpsert } from "./utils/txnWrapper";
+import { insertsToUpsert } from "unigraph-dev-common/lib/utils/txnWrapper";
 import { Cache } from './caches';
 import dgraph from "dgraph-js";
 

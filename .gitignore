@@ -10,3 +10,4 @@ node_modules
 */node_modules
 packages/*/dist
 .ignore
+coverage/
