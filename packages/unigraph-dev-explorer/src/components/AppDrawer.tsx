@@ -22,9 +22,6 @@ const useStyles = makeStyles(theme => ({
   drawerPaper: {
     width: drawerWidth,
   },
-  toolbar: {
-    minHeight: '48px !important'
-  },
 }));
 
 export default function DrawerRouter() {
@@ -44,8 +41,6 @@ export default function DrawerRouter() {
           }}
           anchor="left"
         >
-          
-          <div className={classes.toolbar} />
           <List>
             <ListSubheader component="div" id="subheader-home"> Home </ListSubheader>
             <ListItem button onClick={()=>navigator('/about')}>
