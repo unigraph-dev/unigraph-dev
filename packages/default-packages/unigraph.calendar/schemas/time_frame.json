@@ -14,22 +14,15 @@
                 }
             },
             {
-                "_key": "done",
+                "_key": "start",
                 "_definition": {
-                    "type": { "unigraph.id": "$/primitive/boolean" }
+                    "type": { "unigraph.id": "$/schema/time_point" }
                 }
             },
             {
-                "_key": "priority",
+                "_key": "end",
                 "_definition": {
-                    "type": { "unigraph.id": "$/primitive/number" }
-                }
-            },
-            {
-                "_key": "time_frame",
-                "_propertyType": "inheritance",
-                "_definition": {
-                    "type": { "unigraph.id": "$/schema/time_frame" }
+                    "type": { "unigraph.id": "$/schema/time_point" }
                 }
             },
             {

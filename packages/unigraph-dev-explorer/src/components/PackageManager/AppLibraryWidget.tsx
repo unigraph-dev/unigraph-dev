@@ -1,53 +1,32 @@
 import { Avatar, Grid, Typography } from "@material-ui/core"
-import { Apps, Bookmarks, Email, Inbox, Note, PlaylistAddCheck, RssFeed, Search } from "@material-ui/icons"
-import React from "react"
+import { Apps, Bookmarks, CalendarToday, Email, Inbox, Note, PlaylistAddCheck, RssFeed, Search } from "@material-ui/icons"
 import { NavigationContext } from "../../utils"
+
+type AppShortcutProps = {avatar: React.ReactElement<any>, address: string, text: string}
+
+export const AppShortcut = ({avatar, address, text}: AppShortcutProps) => {
+    return <div style={{display: "flex", flexDirection: "column", alignItems: "center", padding: "16px"}}
+        onClick={() => window.wsnavigator(address)}>
+        <Avatar>{avatar}</Avatar>
+        {text}
+    </div>
+}
 
 export const AppLibraryWidget = ({}) => {
     return <div>
         <Typography variant="h5">Recommended Apps</Typography>
         <NavigationContext.Consumer>
         { (navigator: any) => <Grid container>
-            <div style={{display: "flex", flexDirection: "column", alignItems: "center", padding: "16px"}}
-                onClick={() =>navigator('/search')}>
-                <Avatar><Search/></Avatar>
-                Search
-            </div>
-            <div style={{display: "flex", flexDirection: "column", alignItems: "center", padding: "16px"}}
-                onClick={() =>navigator('/examples/todo')}>
-                <Avatar><PlaylistAddCheck></PlaylistAddCheck></Avatar>
-                Todo List
-            </div>
-            <div style={{display: "flex", flexDirection: "column", alignItems: "center", padding: "16px"}}
-                onClick={() =>navigator('/notes-list')}>
-                <Avatar><Note/></Avatar>
-                Notes
-            </div>
-            <div style={{display: "flex", flexDirection: "column", alignItems: "center", padding: "16px"}}
-                onClick={() =>navigator('/examples/bookmarks')}>
-                <Avatar><Bookmarks/></Avatar>
-                Bookmarks
-            </div>
-            <div style={{display: "flex", flexDirection: "column", alignItems: "center", padding: "16px"}}
-                onClick={() =>navigator('/examples/rss_reader')}>
-                <Avatar><RssFeed/></Avatar>
-                RSS Reader
-            </div>
-            <div style={{display: "flex", flexDirection: "column", alignItems: "center", padding: "16px"}}
-                onClick={() =>navigator('/inbox')}>
-                <Avatar><Inbox/></Avatar>
-                Inbox
-            </div>
-            <div style={{display: "flex", flexDirection: "column", alignItems: "center", padding: "16px"}}
-                onClick={() =>navigator('/email')}>
-                <Avatar><Email/></Avatar>
-                Email
-            </div>
-            <div style={{display: "flex", flexDirection: "column", alignItems: "center", padding: "16px"}}
-                onClick={() =>navigator('/app-library')}>
-                <Avatar><Apps/></Avatar>
-                All Apps
-            </div>
+            <AppShortcut avatar={<Search/>} address="/search" text="Search" />
+            <AppShortcut avatar={<PlaylistAddCheck/>} address="/examples/todo" text="Todo List" />
+            <AppShortcut avatar={<Note/>} address="/notes-list" text="Notes" />
+            <AppShortcut avatar={<Bookmarks/>} address="/examples/bookmarks" text="Bookmarks" />
+            <AppShortcut avatar={<RssFeed/>} address="/examples/rss_reader" text="RSS Reader" />
+            <AppShortcut avatar={<Inbox/>} address="/inbox" text="Inbox" />
+            <AppShortcut avatar={<Email/>} address="/email" text="Email" />
+            <AppShortcut avatar={<CalendarToday/>} address="/current-events" text="Current Events" />
+            <AppShortcut avatar={<CalendarToday/>} address="/calendar" text="Calendar" />
+            <AppShortcut avatar={<Apps/>} address="/app-library" text="All Apps" />
         </Grid>
         }</NavigationContext.Consumer>
     </div>

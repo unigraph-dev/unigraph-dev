@@ -14,15 +14,15 @@
                 }
             },
             {
-                "_key": "done",
+                "_key": "about",
                 "_definition": {
-                    "type": { "unigraph.id": "$/primitive/boolean" }
+                    "type": { "unigraph.id": "$/schema/interface/semantic" }
                 }
             },
             {
-                "_key": "priority",
+                "_key": "location",
                 "_definition": {
-                    "type": { "unigraph.id": "$/primitive/number" }
+                    "type": { "unigraph.id": "$/schema/interface/semantic" }
                 }
             },
             {
@@ -30,6 +30,32 @@
                 "_propertyType": "inheritance",
                 "_definition": {
                     "type": { "unigraph.id": "$/schema/time_frame" }
+                }
+            },
+            {
+                "_key": "attendee",
+                "_definition": {
+                    "type": {
+                        "unigraph.id": "$/composer/Array"
+                    },
+                    "_parameters": {
+                        "_element": {
+                            "type": { "unigraph.id": "$/schema/person" }
+                        }
+                    }
+                }
+            },
+            {
+                "_key": "organizer",
+                "_definition": {
+                    "type": {
+                        "unigraph.id": "$/composer/Array"
+                    },
+                    "_parameters": {
+                        "_element": {
+                            "type": { "unigraph.id": "$/schema/person" }
+                        }
+                    }
                 }
             },
             {

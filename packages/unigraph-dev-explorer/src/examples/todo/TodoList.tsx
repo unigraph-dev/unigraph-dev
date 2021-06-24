@@ -1,5 +1,5 @@
 import { Button, Checkbox, Chip, IconButton, List, ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, TextField } from '@material-ui/core';
-import { Delete, PriorityHigh } from '@material-ui/icons';
+import { CalendarToday, Delete, PriorityHigh } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { DynamicViewRenderer } from '../../global';
 
@@ -9,6 +9,17 @@ import { Tag } from '../semantic/Tag';
 import { Autocomplete } from '@material-ui/lab';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { AutoDynamicView } from '../../components/ObjectView/DefaultObjectView';
+import Sugar from 'sugar';
+
+const maxDateStamp = 8640000000000000;
+
+const getMinDate = () => new Date(0);
+const getMaxDate = () => new Date(maxDateStamp);
+
+const setHours = (date: Date, h: number, m: number, s: number, ms: number) => {
+    if (!date.getHours() && !date.getMinutes() && !date.getSeconds() && !date.getMilliseconds()) date.setHours(h, m, s, ms);
+    return date
+}
 
 export const parseTodoObject: (arg0: string) => ATodoList = (todoString: string) => {
     // TODO: Using regex for now, we can switch to a more centralized parsing solution later
@@ -22,13 +33,27 @@ export const parseTodoObject: (arg0: string) => ATodoList = (todoString: string)
     let priority_num = parseInt(priority[0]?.slice(1)) || 0
     todoString = todoString.replace(priority_regex, '');
 
+    let calendar_regex = /@([^- \t\n\r"]+|"[^-"]+")(?:-([^- \t\n\r"]+|"[^-"]+"))? ?/m;
+    let calendar_matches = (todoString.match(calendar_regex) || []).map(el => el?.startsWith('"') ? el.replace(/"/g, '') : el);
+    let time_frame = undefined
+    if (calendar_matches[1]?.length) {
+        let calendar = calendar_matches[2] ? calendar_matches : ["", "", calendar_matches[1]];
+        console.log(calendar, Sugar.Date.create("tomorrow"))
+        time_frame = {
+            start: (!calendar[1]?.length ? undefined : setHours(Sugar.Date.create(calendar[1]), 0, 0, 0, 0)) || getMinDate(),
+            end: (!calendar[2]?.length ? undefined : setHours(Sugar.Date.create(calendar[2]), 23, 59, 59, 999)) || getMaxDate()
+        }
+        todoString = todoString.replace(calendar_regex, '');
+    }
+
     return {
         name: {type: {"unigraph.id": "$/schema/markdown"}, _value: todoString},
         done: false,
         priority: priority_num,
         semantic_properties: {
             children: tags.map(tagName => {return {name: tagName}})
-        }
+        },
+        time_frame
     }
 }
 
@@ -39,6 +64,10 @@ type ATodoList = {
     priority: number,
     semantic_properties: {
         children: any[]
+    },
+    time_frame?: {
+        start: Date,
+        end: Date
     }
 }
 
@@ -98,7 +127,16 @@ function TodoListBody ({data}: { data: ATodoList[] }) {
             </ListItem>)}
         </List>
         <TextField value={newName} onChange={(e) => setNewName(e.target.value)}></TextField>
-        <Button onClick={() => window.unigraph.addObject(parseTodoObject(newName), "$/schema/todo")}>Add</Button>
+        <Button onClick={
+            () => window.unigraph.addObject(parseTodoObject(newName), "$/schema/todo")
+            //() => console.log(parseTodoObject(newName))
+        }>Add</Button>
+        <p>
+            Examples: <br/>
+            @tomorrow-"next Friday" #unigraph hello world     // doable from tomorrow, due next Friday<br/>
+            @tomorrow #unigraph hello world     // due tomorrow<br/>
+            !5 very important stuff     // priority 5
+        </p>
     </div>
 }
 
@@ -124,7 +162,9 @@ export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
             primary={unpadded.name}
             secondary={[...(!unpadded.semantic_properties?.children?.map ? [] :
                 unpadded.semantic_properties?.children?.map(it => <Tag data={it}/>
-            )), ...(unpadded.priority > 0 ? [<Chip size="small" icon={<PriorityHigh/>} label={"Priority " + unpadded.priority}/>]: [])]}
+            )), ...(unpadded.priority > 0 ? [<Chip size="small" icon={<PriorityHigh/>} label={"Priority " + unpadded.priority}/>]: []),
+            ...(unpadded.time_frame?.start && (new Date(unpadded.time_frame?.start)).getTime() !== 0 ? [<Chip size="small" icon={<CalendarToday/>} label={"Start: " + Sugar.Date.create(unpadded.time_frame?.start)} ></Chip>] : []),
+            ...(unpadded.time_frame?.end && (new Date(unpadded.time_frame?.start)).getTime() !== maxDateStamp ? [<Chip size="small" icon={<CalendarToday/>} label={"End: " + Sugar.Date.create(unpadded.time_frame?.end)} ></Chip>] : [])]}
         />
         <ListItemSecondaryAction>
             <IconButton aria-label="delete" onClick={() => window.unigraph.deleteObject(unpadded.uid!)}>

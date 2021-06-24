@@ -37,6 +37,8 @@ import { init as nb_init } from './examples/notes/NoteBlock';
 import { init as ht_init } from './examples/semantic/Html';
 import { NotesList } from './examples/notes/NotesList';
 import { GraphView } from './components/ObjectView/GraphView';
+import { CurrentEvents } from './examples/calendar/CurrentEvents';
+import { Calendar } from './examples/calendar/Calendar';
 nb_init(); ht_init();
 
 // TODO: custom theme
@@ -143,6 +145,14 @@ export const pages: Record<string, any> = {
   'notes-list': {
     'constructor': (props: any) => <NotesList {...props} />,
     'name': "Notes"
+  },
+  'current-events': {
+    'constructor': (props: any) => <CurrentEvents {...props} />,
+    'name': "Current Events"
+  },
+  'calendar': {
+    'constructor': (props: any) => <Calendar {...props} />,
+    'name': "Calendar"
   }
 }
 
