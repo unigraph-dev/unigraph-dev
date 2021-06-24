@@ -1,12 +1,7 @@
-import React from 'react';
-import { Router, Route, Switch } from 'react-router-dom';
 import { createBrowserHistory } from "history";
 import 'typeface-roboto';
 
-import AppBar from '@material-ui/core/AppBar';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { AppDrawer } from './components';
@@ -39,6 +34,8 @@ import { NotesList } from './examples/notes/NotesList';
 import { GraphView } from './components/ObjectView/GraphView';
 import { CurrentEvents } from './examples/calendar/CurrentEvents';
 import { Calendar } from './examples/calendar/Calendar';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 nb_init(); ht_init();
 
 // TODO: custom theme
@@ -165,53 +162,16 @@ export const components: Record<string, any> = {
 function App() {
   const classes = useStyles();
   const history = createBrowserHistory();
+  const componentPathName = window.location.pathname.replace("/pages/", "");
+  const config = getParameters(window.location.search.replace('?', ''));
 
   return (
     <NavigationContext.Provider value={(location: string) => {history.push(location)}}>
       <div className={classes.root}>
         <CssBaseline />
-        <Router history={history}>
-          <AppBar position="fixed" className={classes.appBar}>
-            <Toolbar variant="dense">
-              <Typography variant="h6" noWrap>
-                unigraph-dev-explorer
-              </Typography>
-            </Toolbar>
-          </AppBar>
-
-          {components['appdrawer'].constructor()}
-
-          <main className={classes.content}>
-            <div className={classes.toolbar} />
-            <Switch>
-              <Route path="/datamodel-playground">
-                {pages['datamodel-playground'].constructor()}
-              </Route>
-              <Route path="/examples/todo">
-                {pages['examples/todo'].constructor()}
-              </Route>
-              <Route path="/request">
-                {pages['request'].constructor()}
-              </Route>
-              <Route path="/about">
-                {pages['about'].constructor()}
-              </Route>
-              <Route 
-                path="/library/object"
-                render={routeProps => pages['library/object'].constructor(getParameters(routeProps.location.search))}  
-              />
-              <Route path="/library">
-                {pages['library'].constructor()}
-              </Route>
-              <Route path="/schema/new">
-                {pages['schema/new'].constructor()}
-              </Route>
-              <Route path="/">
-                {pages['home'].constructor()}
-              </Route>
-            </Switch>
-          </main>
-        </Router>
+        <DndProvider backend={HTML5Backend}>
+          {pages[componentPathName].constructor(config)}
+        </DndProvider>
       </div>
     </NavigationContext.Provider>
   );
