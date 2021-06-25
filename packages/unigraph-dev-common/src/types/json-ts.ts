@@ -17,14 +17,14 @@ export type Field<T extends ComposerObjectIndexs> = {
     _key: PrimitiveType[T],
     _unique?: boolean,
     _propertyType?: "inheritance" | "internal",
+    _indexAs?: string,
     _definition: Definition
 }
 
 export type ComposerObjectInstance<T extends ComposerObjectIndexs> = {
     type: UnigraphIdType<"$/composer/Object">,
     _parameters?: {
-        _indexedBy: UnigraphIdType<T>,
-        _indexes: PrimitiveType[T][]
+        _indexedBy: UnigraphIdType<T>
     },
     _properties: Field<T>[]
 }

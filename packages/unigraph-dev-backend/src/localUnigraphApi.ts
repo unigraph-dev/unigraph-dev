@@ -130,7 +130,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             let finalUpdater = newObject;
             if (pad) {
                 const schema = origObject['type']['unigraph.id'];
-                const paddedUpdater = buildUnigraphEntity(newObject, schema, states.caches['schemas'].data, true, {validateSchema: true, isUpdate: true});
+                const paddedUpdater = buildUnigraphEntity(newObject, schema, states.caches['schemas'].data, true, {validateSchema: true, isUpdate: true, states: {}});
                 finalUpdater = processAutoref(paddedUpdater, schema, states.caches['schemas'].data);
             } else {
                 finalUpdater = processAutorefUnigraphId(finalUpdater);

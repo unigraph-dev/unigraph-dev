@@ -320,7 +320,7 @@ export default async function startServer(client: DgraphClient) {
         if (event.pad !== false) {
           const origObject = (await dgraphClient.queryUID(event.uid))[0];
           const schema = origObject['type']['unigraph.id'];
-          const paddedUpdater = buildUnigraphEntity(event.newObject, schema, caches['schemas'].data, true, {validateSchema: true, isUpdate: true});
+          const paddedUpdater = buildUnigraphEntity(event.newObject, schema, caches['schemas'].data, true, {validateSchema: true, isUpdate: true, states: {}});
           finalUpdater = processAutoref({...paddedUpdater, uid: event.uid}, schema, caches['schemas'].data);
           //console.log(upsert);
         } else {
