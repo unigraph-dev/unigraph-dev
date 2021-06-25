@@ -344,7 +344,7 @@ export default async function startServer(client: DgraphClient) {
     },
 
     "delete_item_from_array": async function (event: EventDeleteItemFromArray, ws: IWebsocket) {
-      localApi.deleteItemFromArray(event.uid, event.item).then((_: any) => {
+      localApi.deleteItemFromArray(event.uid, event.item, event.relUid).then((_: any) => {
         callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
         ws.send(makeResponse(event, true))
       }).catch((e: any) => ws.send(makeResponse(event, false, {"error": e})));

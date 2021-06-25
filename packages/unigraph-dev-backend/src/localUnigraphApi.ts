@@ -143,7 +143,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
         },
         deleteRelation: async (uid, relation) => {await client.deleteRelationbyJson({uid: uid, ...relation})},
-        deleteItemFromArray: async (uid, item) => {
+        deleteItemFromArray: async (uid, item, relUid) => {
             const items = Array.isArray(item) ? item : [item]
             const query = `query { res(func: uid(${uid})) {
                 uid
@@ -159,11 +159,13 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             }
             origObject['_value['].sort((a: any, b: any) => (a["_index"]?.["_value.#i"] || 0) - (b["_index"]?.["_value.#i"] || 0));
             const newValues: any[] = [];
+            let toDel = "";
             origObject['_value['].forEach((el: any, index: number) => {
                 if (!items.includes(index) && !items.includes(el.uid) && !items.includes(el['_value']?.uid)) {newValues.push({...el, _index: {"_value.#i": index}})}
+                else if (relUid) { toDel += "<" + el['_value'].uid + "> <unigraph.origin> <" +  + relUid + "> .\n"}
             });
             const delete_array = new dgraph.Mutation();
-            delete_array.setDelNquads(`<${uid}> <_value[> * .`)
+            delete_array.setDelNquads(`<${uid}> <_value[> * .` + "\n" + toDel)
             const create_json = new dgraph.Mutation();
             create_json.setSetJson({
                 uid: `${uid}`,

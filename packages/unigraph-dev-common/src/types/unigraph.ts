@@ -192,8 +192,9 @@ export interface Unigraph<TT = WebSocket | false> {
      * 
      * @param uid The uid of the target list - must be of type `$/composer/Array`
      * @param item Either the UID (outer) or the index of an item, or an array of such items.
+     * @param relationUid Optional. Specifies the uid of the entity this array belongs to. If present, entity relation to it will also be deleted.
      */
-    deleteItemFromArray(uid: string, item: (number | string) | (number | string)[]): any;
+    deleteItemFromArray(uid: string, item: (number | string) | (number | string)[], relationUid?: string): any;
     /** Gets all referenceables from the library (like primitives, schemas, shorthands, etc) */
     getReferenceables(): Promise<any>;
     /** Deprecated: get selected referenceables. */

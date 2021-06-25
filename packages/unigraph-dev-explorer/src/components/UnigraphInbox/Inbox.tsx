@@ -125,21 +125,21 @@ export const Inbox = () => {
 
             </AccordionDetails>
         </Accordion>
-        <IconButton onClick={() => window.unigraph.deleteItemFromArray(listUid, inbox.map((el, idx) => idx))}><ClearAll/></IconButton>
+        <IconButton onClick={() => window.unigraph.deleteItemFromArray(listUid, inbox.map((el, idx) => idx), inboxEntity['uid'])}><ClearAll/></IconButton>
         </div>
             
             {!groupBy.length ? inbox.map((el, index) => {
                 return <React.Fragment>
                     <ListItem>
                         <ListItemIcon onClick={() => {
-                            window.unigraph.deleteItemFromArray(listUid, el['uid'])
+                            window.unigraph.deleteItemFromArray(listUid, el['uid'], inboxEntity['uid'])
                         }} ><ClearAll/></ListItemIcon>
                         <AutoDynamicView object={new UnigraphObject(el['_value'])} callbacks={{
                                         context: inboxEntity,
                                         removeFromContext: (where: undefined | "left" | "right") => { 
                                             let uids = {"left": Array.from(Array(index).keys()), "right": undefined, "": undefined}[where || ""] || [el['uid']]
                                             console.log(uids)
-                                            window.unigraph.deleteItemFromArray(listUid, uids)
+                                            window.unigraph.deleteItemFromArray(listUid, uids, inboxEntity['uid'])
                                         }
                                     }} />
                     </ListItem>
@@ -151,13 +151,13 @@ export const Inbox = () => {
                         return <React.Fragment>
                             <ListItem>
                                 <ListItemIcon onClick={() => {
-                                    window.unigraph.deleteItemFromArray(listUid, it['uid'])
+                                    window.unigraph.deleteItemFromArray(listUid, it['uid'], inboxEntity['uid'])
                                 }} ><ClearAll/></ListItemIcon>
                                 <AutoDynamicView 
                                     object={new UnigraphObject(it)}
                                     callbacks={{
                                         getContext: getContext,
-                                        removeFromContext: () => { window.unigraph.deleteItemFromArray(listUid, it['uid'])}
+                                        removeFromContext: () => { window.unigraph.deleteItemFromArray(listUid, it['uid'], inboxEntity['uid'])}
                                     }} 
                                 />
                             </ListItem>

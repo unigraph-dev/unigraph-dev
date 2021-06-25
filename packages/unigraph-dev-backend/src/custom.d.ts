@@ -174,7 +174,8 @@ declare type EventDeleteItemFromArray = {
   event: "delete_item_from_array",
   id: number,
   uid: string,
-  item: any
+  item: any,
+  relUid?: string
 }
 
 declare type EventResponser = (event: any, ws: IWebsocket) => any
