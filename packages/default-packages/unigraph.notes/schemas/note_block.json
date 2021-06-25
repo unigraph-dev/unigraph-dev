@@ -3,15 +3,15 @@
     "_definition": {
         "type": { "unigraph.id": "$/composer/Object" },
         "_parameters": {
-            "_indexedBy": { "unigraph.id": "$/primitive/string" },
-            "_indexes": []
+            "_indexedBy": { "unigraph.id": "$/primitive/string" }
         },
         "_properties": [
             {
                 "_key": "text",
                 "_definition": {
                     "type": { "unigraph.id": "$/schema/interface/textual" }
-                }
+                },
+                "_indexAs": "name"
             },
             {
                 "_key": "semantic_properties",

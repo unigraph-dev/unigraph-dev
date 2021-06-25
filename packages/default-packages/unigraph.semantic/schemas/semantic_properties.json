@@ -3,8 +3,7 @@
     "_definition": {
         "type": { "unigraph.id": "$/composer/Object" },
         "_parameters": {
-            "_indexedBy": { "unigraph.id": "$/primitive/string" },
-            "_indexes": ["name"]
+            "_indexedBy": { "unigraph.id": "$/primitive/string" }
         },
         "_properties": [
             {

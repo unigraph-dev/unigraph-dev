@@ -53,8 +53,7 @@ export const packageManifestSchema = {
         "_parameters": {
             "_indexedBy": {
                 "unigraph.id": "$/primitive/string"
-            },
-            "_indexes": [ ]
+            }
         },
         "_properties": [
             {
@@ -63,7 +62,8 @@ export const packageManifestSchema = {
                     "type": {
                         "unigraph.id": "$/primitive/string"
                     }
-                }
+                },
+                "_indexAs": "name"
             },
             {
                 "_key": "package_name",
@@ -104,8 +104,7 @@ export const packageExecutableSchema = {
         "_parameters": {
             "_indexedBy": {
                 "unigraph.id": "$/primitive/string"
-            },
-            "_indexes": [ ]
+            }
         },
         "_properties": [
             {
@@ -114,7 +113,8 @@ export const packageExecutableSchema = {
                     "type": {
                         "unigraph.id": "$/primitive/string"
                     }
-                }
+                },
+                "_indexAs": "name"
             },
             {
                 "_key": "env",

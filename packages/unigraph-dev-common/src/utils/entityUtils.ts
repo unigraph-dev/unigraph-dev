@@ -45,7 +45,7 @@ function getUnigraphType (object: any, schemaType: UnigraphTypeString): Unigraph
     return typeString;
 }
 
-type BuildEntityOptions = {validateSchema: boolean, isUpdate: boolean}
+type BuildEntityOptions = {validateSchema: boolean, isUpdate: boolean, states: any}
 type PropertyDescription = Partial<Field<any>>
 
 /* Schema checking spec list:
@@ -143,6 +143,11 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
                         const propDesc: PropertyDescription = _.pickBy({_propertyType: keysMap[key]._propertyType}, _.identity)
                         if (!localSchema) throw new TypeError("Schema check failure for object: " + JSON.stringify(rawPart));
                         unigraphPartValue[key] = buildUnigraphEntityPart(value, options, schemaMap, localSchema, propDesc);
+                        if (typeof keysMap[key]?.['_indexAs'] === "string") {
+                            const linkUid = unigraphPartValue[key]['uid'] || "_:link" + (options.states.nextUid++)
+                            unigraphPartValue[key]['uid'] = linkUid;
+                            options.states.indexes[keysMap[key]['_indexAs']] = {uid: linkUid}
+                        }
                     })
                     break;
 
@@ -229,7 +234,13 @@ export function validatePaddedEntity(object: Record<string, any>) {
  * @param validateSchema Whether to validate schema. Defaults to false. If validation is on and the schema does not match the object, an error would be returned instead.
  * @param padding Whether to pad the raw object, used to create/change objects with predicate-properties defined. If this is false and the object does not follow the data model, an error would be returned instead.
  */
-export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any", schemaMap: Record<string, Schema>, padding = true, options: BuildEntityOptions = {validateSchema: true, isUpdate: false}, propDesc: any = {}): EntityDgraph<string> | TypeError {
+export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any", schemaMap: Record<string, Schema>, padding = true, options: BuildEntityOptions = {validateSchema: true, isUpdate: false, states: {}}, propDesc: any = {}): EntityDgraph<string> | TypeError {
+    // initialize states
+    if (!options?.states?.nextUid) options.states.nextUid = 0;
+    if (!options?.states?.indexes || propDesc?.['_propertyType'] !== "inheritance") {
+        options = JSON.parse(JSON.stringify(options));
+        options.states.indexes = {}
+    }
     // Check for unvalidated entity
     if (padding === false && !validatePaddedEntity(raw)) {
         throw new TypeError("Entity validation failed for entity " + raw)
@@ -251,7 +262,8 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
             "dgraph.type": "Entity",
             ...bodyObject,
             "_timestamp": timestamp,
-            ...propDesc
+            ...propDesc,
+            "unigraph.indexes": options.states.indexes
         };
         if (result.type?.['unigraph.id']?.startsWith('$/schema/interface')) result['dgraph.type'] = 'Interface'
         // @ts-ignore

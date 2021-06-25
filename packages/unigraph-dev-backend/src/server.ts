@@ -320,7 +320,7 @@ export default async function startServer(client: DgraphClient) {
         if (event.pad !== false) {
           const origObject = (await dgraphClient.queryUID(event.uid))[0];
           const schema = origObject['type']['unigraph.id'];
-          const paddedUpdater = buildUnigraphEntity(event.newObject, schema, caches['schemas'].data, true, {validateSchema: true, isUpdate: true});
+          const paddedUpdater = buildUnigraphEntity(event.newObject, schema, caches['schemas'].data, true, {validateSchema: true, isUpdate: true, states: {}});
           finalUpdater = processAutoref({...paddedUpdater, uid: event.uid}, schema, caches['schemas'].data);
           //console.log(upsert);
         } else {
@@ -344,7 +344,7 @@ export default async function startServer(client: DgraphClient) {
     },
 
     "delete_item_from_array": async function (event: EventDeleteItemFromArray, ws: IWebsocket) {
-      localApi.deleteItemFromArray(event.uid, event.item).then((_: any) => {
+      localApi.deleteItemFromArray(event.uid, event.item, event.relUid).then((_: any) => {
         callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
         ws.send(makeResponse(event, true))
       }).catch((e: any) => ws.send(makeResponse(event, false, {"error": e})));

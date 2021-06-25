@@ -244,8 +244,8 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
         deleteRelation: (uid, relation) => {
             sendEvent(connection, "delete_relation", {uid: uid, relation: relation});
         },
-        deleteItemFromArray: (uid, item) => {
-            sendEvent(connection, "delete_item_from_array", {uid: uid, item: item});
+        deleteItemFromArray: (uid, item, relUid) => {
+            sendEvent(connection, "delete_item_from_array", {uid: uid, item: item, relUid: relUid});
         },
         getReferenceables: (key = "unigraph.id", asMapWithContent = false) => new Promise((resolve, reject) => {
             const id = getRandomInt();

@@ -3,15 +3,15 @@
     "_definition": {
         "type": { "unigraph.id": "$/composer/Object" },
         "_parameters": {
-            "_indexedBy": { "unigraph.id": "$/primitive/string" },
-            "_indexes": ["name"]
+            "_indexedBy": { "unigraph.id": "$/primitive/string" }
         },
         "_properties": [
             {
                 "_key": "name",
                 "_definition": {
                     "type": { "unigraph.id": "$/primitive/string" }
-                }
+                },
+                "_indexAs": "name"
             },
             {
                 "_key": "url",
