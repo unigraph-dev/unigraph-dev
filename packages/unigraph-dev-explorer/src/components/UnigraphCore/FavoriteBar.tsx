@@ -36,8 +36,8 @@ export const FavoriteBar = () => {
 
         window.unigraph.subscribeToObject("$/entity/favorite_bar", (fav: any) => {
             const children = fav?.['_value']?.children?.['_value[']
-            children.sort(byElementIndex)
             if (children) {
+                children.sort(byElementIndex)
                 setFav(children); 
                 favState.setValue(children.map((el: any) => {let unpadded = unpad(el); return {name: unpadded.name, component: unpadded.view, config: JSON.parse(unpadded.props).config}}))
             };

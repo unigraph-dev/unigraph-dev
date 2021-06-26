@@ -606,7 +606,7 @@ export function unpadRecurse(object: any, visitedUids: any[] = []) {
 
 export function unpad(object: any) {
     
-    return {...unpadRecurse(object, []), uid: object.uid, type: object.type}
+    return {...unpadRecurse(object, []), uid: object?.uid, type: object?.type}
 }
 
 export function clearEmpties(o: any) {

@@ -20,6 +20,25 @@ function getPath (obj: any, path: string | string[]): any {
     }
 }
 
+function getObjectAsRecursivePrimitive (object: any) {
+    let targetValue: any = undefined;
+    Object.keys(object).forEach(el => {
+        if (el.startsWith("_value.")) {
+            targetValue = object[el];
+        } else if (el.startsWith("_value") && typeof object[el] === "object") {
+            const subObj = getObjectAsRecursivePrimitive(object[el]);
+            if (subObj) targetValue = subObj;
+        }
+    });
+    return targetValue;
+}
+
+export const getObjectAs = (object: any, type: "primitive") => {
+    if (type === "primitive") {
+        return getObjectAsRecursivePrimitive(object);
+    }
+}
+
 // TODO: Switch to prototype-based, faster helper functions
 // TODO: Benchmark these helper functions
 export class UnigraphObject extends Object {
@@ -39,6 +58,7 @@ export class UnigraphObject extends Object {
     getRefType = () => {
         return undefined;
     }
+    as = (type: string) => getObjectAs(this, type as any)
 }
 
 /**
@@ -101,21 +121,23 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
     }
 
     connection.onmessage = (ev) => {
+        let parsed;
         try {
-            const parsed = JSON.parse(ev.data);
-            messages.push(parsed);
-            eventTarget.dispatchEvent(new Event("onmessage", parsed));
-            if (parsed.type === "response" && parsed.id && callbacks[parsed.id]) callbacks[parsed.id](parsed);
-            if (parsed.type === "cache_updated" && parsed.name) {
-                caches[parsed.name] = parsed.result;
-                window.localStorage.setItem("caches/"+parsed.name, JSON.stringify(parsed.result))
-            }
-            if (parsed.type === "subscription" && parsed.id && subscriptions[parsed.id]) subscriptions[parsed.id](parsed.result);
+            parsed = JSON.parse(ev.data);
         } catch (e) {
             console.error("Returned non-JSON reply!")
             console.log(e)
             console.log(ev.data);
+            return false;
         }
+        messages.push(parsed);
+        eventTarget.dispatchEvent(new Event("onmessage", parsed));
+        if (parsed.type === "response" && parsed.id && callbacks[parsed.id]) callbacks[parsed.id](parsed);
+        if (parsed.type === "cache_updated" && parsed.name) {
+            caches[parsed.name] = parsed.result;
+            window.localStorage.setItem("caches/"+parsed.name, JSON.stringify(parsed.result))
+        }
+        if (parsed.type === "subscription" && parsed.id && subscriptions[parsed.id]) subscriptions[parsed.id](parsed.result);
     }
     
 
