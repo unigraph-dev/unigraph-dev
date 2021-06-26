@@ -2,6 +2,7 @@ import React from "react"
 import { getRandomInt, UnigraphObject } from "unigraph-dev-common/lib/api/unigraph"
 import ForceGraph2D from 'react-force-graph-2d';
 import { SizeMe } from "react-sizeme";
+import _ from "lodash";
 
 export const GraphView = ({uid}: any) => {
     const [entities, setEntities] = React.useState<any>([]);
@@ -23,14 +24,26 @@ export const GraphView = ({uid}: any) => {
                 }
                 <type> { <unigraph.id> }
             }
+            <~unigraph.origin> @filter((NOT eq(<_hide>, true)) AND (NOT eq(<_propertyType>, "inheritance"))) {
+                uid 
+                unigraph.indexes {
+                    uid
+                    name {
+                        uid 
+                        expand(_userpredicate_) { uid expand(_userpredicate_) { uid expand(_userpredicate_) { 
+                            uid expand(_userpredicate_) { uid expand(_userpredicate_) { uid expand(_userpredicate_) } } } } }
+                    }
+                }
+                <type> { <unigraph.id> }
+            }
         }`, (res: any) => {
             console.log(res);
-            const entities = res[0]['unigraph.origin'].filter((el: any) => el.type !== undefined).map((el: any) => { return {
+            const [entitiesInto, entitiesOutof] = ([res[0]['unigraph.origin'], res[0]['~unigraph.origin']]).map(el => el.filter((el: any) => el.type !== undefined).map((el: any) => { return {
                 id: el.uid,
                 type: el['type']?.['unigraph.id'],
                 name: (new UnigraphObject(el?.['unigraph.indexes']?.['name'])).as("primitive") || "No name"
-            }})
-            setEntities(entities);
+            }}))
+            setEntities(_.uniqBy([...entitiesInto, ...entitiesOutof], el => el.id));
         }, id, true);
 
         return function cleanup () { window.unigraph.unsubscribe(id); }
