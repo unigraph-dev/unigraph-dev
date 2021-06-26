@@ -215,5 +215,6 @@ declare type EventGetSearchResults = {
   event: "get_search_results",
   id: number,
   query: string,
-  method: string
+  method: string,
+  display?: string
 }
