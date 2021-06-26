@@ -38,7 +38,7 @@ function buildDgraphFunctionFromRefQuery(query: {key: string, value: string}[]) 
  * @param object 
  * @param string The first couple of characters passed in as uids
  */
-export function wrapUpsertFromUpdater(orig: any, queryHead: string, hasUid: string | false = false): any {
+export function wrapUpsertFromUpdater(orig: any, queryHead: string, hasUid: string | false = false, blankUidsToRef: any): any {
 
     const queries: string[] = []
 
@@ -82,7 +82,7 @@ export function wrapUpsertFromUpdater(orig: any, queryHead: string, hasUid: stri
                 return origNow;
             } else return origNow;
         } else if (typeof origNow == 'object' && !Array.isArray(origNow)) {
-            return Object.fromEntries([
+            const res = Object.fromEntries([
                 ...Object.entries(origNow).map(([key, value]) => {
                     if (key !== '_value[' && key !== '$ref' && key !== 'type') { // FIXME: This currently ignores subsequent UIDs if one is specified. Fix ASAP!
                         return [key, recurse(origNow[key], buildQuery(thisUid, key, hasUid))]
@@ -93,6 +93,8 @@ export function wrapUpsertFromUpdater(orig: any, queryHead: string, hasUid: stri
                 }),
                 ["uid",  hasUid ? hasUid : `uid(${thisUid})`] // Must have UID to do anything with it
             ]);
+            if (origNow.uid?.startsWith?.('_:')) blankUidsToRef[origNow.uid] = res.uid;
+            return res;
         }
     }
 
@@ -120,15 +122,19 @@ export function insertsToUpsert(inserts: any[]): UnigraphUpsert {
 
     const refUids: string[] = [];
     const genUid = nextUid();
+    const blankUids: any[] = [];
+    const blankUidsToRef: Record<string, string> = {}
 
     function insertsToUpsertRecursive(inserts: any[], appends: any[], queries: string[], currentObject: any, currentOrigin: any[]) {
+        let isBlankUid = false;
         // If this is a reference object
         if (currentObject) {
+            if (currentObject.uid?.startsWith('_:')) isBlankUid = true;
             if (currentObject.uid && currentObject.uid.startsWith('0x')) { 
                 // uid takes precedence over $ref: when specifying explicit; otherwise doesnt care
                 delete currentObject['$ref'];
                 const refUid = "unigraphquery" + (queries.length + 1);
-                const [upsertObject, upsertQueries] = wrapUpsertFromUpdater({"_value": currentObject['_value']}, refUid, currentObject.uid);
+                const [upsertObject, upsertQueries] = wrapUpsertFromUpdater({"_value": currentObject['_value']}, refUid, currentObject.uid, blankUidsToRef);
                 queries.push(...upsertQueries);
                 currentObject = Object.assign(currentObject, upsertObject);
             } else if (currentObject["$ref"] && currentObject["$ref"].query) {
@@ -141,7 +147,7 @@ export function insertsToUpsert(inserts: any[]): UnigraphUpsert {
                 const query = currentObject['$ref'].query;
                 delete currentObject['$ref'];
                 // FIXME: Some objects (e.g. with standoff properties or type aliases) doesn't use `_value`
-                const [upsertObject, upsertQueries] = wrapUpsertFromUpdater({"_value": currentObject['_value']}, refUid);
+                const [upsertObject, upsertQueries] = wrapUpsertFromUpdater({"_value": currentObject['_value']}, refUid, false, blankUidsToRef);
 
                 if (!refUids.includes(refUid)) {
                     refUids.push(refUid)
@@ -157,6 +163,7 @@ export function insertsToUpsert(inserts: any[]): UnigraphUpsert {
                 query.forEach(({key, value}: any) => {if (key === "unigraph.id") append[key] = value});
                 appends.push(append)
             }
+            if (isBlankUid) blankUids.push(currentObject)
         }
         //console.log('++++++++++++++++++++++++++++++++++')
         //console.log(JSON.stringify(currentObject, null, 4))
@@ -180,6 +187,12 @@ export function insertsToUpsert(inserts: any[]): UnigraphUpsert {
                 }
             }
         }
+
+        blankUids.forEach(el => {
+            if (el.uid?.startsWith('_:') && Object.keys(blankUidsToRef).includes(el.uid)) {
+                el.uid = blankUidsToRef[el.uid]
+            }
+        })
 
         if (typeof currentObject === 'object' && !Array.isArray(currentObject) && currentOrigin) currentObject['unigraph.origin'] = currentOrigin;
 

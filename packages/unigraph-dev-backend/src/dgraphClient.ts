@@ -264,40 +264,8 @@ export default class DgraphClient {
   `, {}))[0]
   }
 
-  async getTextSearchResults(search: string) {
-    const res = (await this.queryDgraph(`
-    query {
-			q(func:alloftext(<_value.%>, "${search}")) {
-   			uid
-    		<_value.%>
-    		<unigraph.origin> {
-					uu as uid
-        }
-      }
-      qq(func: uid(uu)) {
-        uid
-        <unigraph.origin> {
-          uuu as uid
-        }
-      }
-      qqq(func: uid(uuu)) {
-        uid
-        <unigraph.origin> {
-          uuuu as uid
-        }
-      }
-      qqqq(func: uid(uuuu)) {
-        uid
-        <unigraph.origin> {
-          uuuuu as uid
-        }
-      }
-      qqqqq(func: uid(uuuuu, uuuu, uuu, uu)) @filter(type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) @recurse(depth: 10) {
-        uid
-        expand(_userpredicate_)
-        unigraph.id
-      }
-    }`));
+  async getTextSearchResults(search: string, display: any) {
+    const res = (await this.queryDgraph(display === "indexes" ? queries['querySearch_indexes'](search) : queries['querySearch'](search)));
     return {results: res[0] as any[], entities: res[4] as any[]};
   }
 
@@ -338,6 +306,79 @@ export default class DgraphClient {
 }
 
 export const queries: Record<string, (a: string) => string> = {
+  "querySearch": (search: string) => `query {
+    q(func:alloftext(<_value.%>, "${search}")) {
+       uid
+      <_value.%>
+      <unigraph.origin> {
+        uu as uid
+      }
+    }
+    qq(func: uid(uu)) {
+      uid
+      <unigraph.origin> {
+        uuu as uid
+      }
+    }
+    qqq(func: uid(uuu)) {
+      uid
+      <unigraph.origin> {
+        uuuu as uid
+      }
+    }
+    qqqq(func: uid(uuuu)) {
+      uid
+      <unigraph.origin> {
+        uuuuu as uid
+      }
+    }
+    qqqqq(func: uid(uuuuu, uuuu, uuu, uu)) @filter(type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) @recurse(depth: 10) {
+      uid
+      expand(_userpredicate_)
+      unigraph.id
+    }
+  }`,
+  
+  "querySearch_indexes": (search: string) => `query {
+    q(func:alloftext(<_value.%>, "${search}")) {
+       uid
+      <_value.%>
+      <unigraph.origin> {
+        uu as uid
+      }
+    }
+    qq(func: uid(uu)) {
+      uid
+      <unigraph.origin> {
+        uuu as uid
+      }
+    }
+    qqq(func: uid(uuu)) {
+      uid
+      <unigraph.origin> {
+        uuuu as uid
+      }
+    }
+    qqqq(func: uid(uuuu)) {
+      uid
+      <unigraph.origin> {
+        uuuuu as uid
+      }
+    }
+    qqqqq(func: uid(uuuuu, uuuu, uuu, uu)) @filter(type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) {
+      uid
+      type {
+        unigraph.id
+      }
+      unigraph.id
+      unigraph.indexes {
+        uid 
+        expand(_userpredicate_) { uid expand(_userpredicate_) { uid expand(_userpredicate_) { 
+          uid expand(_userpredicate_) { uid expand(_userpredicate_) { uid expand(_userpredicate_) } } } } }
+      }
+    }
+  }`,
+
   "queryAny": (a) => `(func: uid(es${a}), orderdesc: val(cca${a}), first: 100) @recurse(depth: 15) {
     uid
     unigraph.id
