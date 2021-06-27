@@ -8,6 +8,7 @@ import _ from "lodash";
 import { buildGraph } from "unigraph-dev-common/lib/api/unigraph";
 import { Actions } from "flexlayout-react";
 import { addChild, indentChild, setFocus, splitChild, unindentChild, unsplitChild } from "./commands";
+import { onUnigraphContextMenu } from "../../components/ObjectView/DefaultObjectContextMenu";
 
 export const getSubentities = (data: any) => {
     let subentities: any, otherChildren: any;
@@ -47,16 +48,11 @@ const onNoteInput = (inputDebounced: any, event: FormEvent<HTMLSpanElement>) => 
     inputDebounced(newInput);
 }
 
-
-
-
-
 const noteBlockCommands = {
     "add-child": addChild,
     "set-focus": setFocus,
     "unsplit-child": unsplitChild,
     "split-child": splitChild,
-    
     "indent-child": indentChild,
     "unindent-child": unindentChild
 }
@@ -105,6 +101,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
     return <div style={{width: "100%"}}>
         <Typography 
             variant={isChildren ? "body1" : "h4"} 
+            onContextMenu={isChildren ? undefined : (event) => onUnigraphContextMenu(event, data, undefined, callbacks)}
             contentEditable={true} 
             ref={textInput}
             onInput={(ev) => {onNoteInput(inputDebounced, ev); if (ev.currentTarget.textContent !== data.get('text').as('primitive') && !edited) setEdited(true)}}
