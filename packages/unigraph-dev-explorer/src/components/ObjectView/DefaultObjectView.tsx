@@ -93,16 +93,15 @@ const Executable: DynamicViewRenderer = ({data, callbacks}) => {
     </React.Fragment>
 }
 
-
 const DynamicViews: Record<string, DynamicViewRenderer> = {
     "$/schema/executable": Executable,
-    "$/skeleton/default": DefaultSkeleton
+    "$/skeleton/default": DefaultSkeleton,
 }
 
 window.DynamicViews = DynamicViews;
 
 const DynamicViewsDetailed: Record<string, DynamicViewRenderer> = {
-    "$/schema/executable": ExecutableCodeEditor
+    "$/schema/executable": ExecutableCodeEditor,
 }
 
 window.DynamicViewsDetailed = DynamicViewsDetailed;
@@ -129,12 +128,12 @@ const SubentityDropAcceptor = ({ uid }: any) => {
 
     const opacities: Record<string, number> = {"truetrue": 1, "truefalse": 0.5, "falsefalse": 0, "falsetrue": 0}
 
-    return <div ref={dropSub} style={{opacity: opacities[canDrop + "" + isOver], width: "100%", height: canDrop ? "16px" : "2px"}}>
-        <hr style={{height: "50%", backgroundColor: "gray", marginLeft: "48px"}}/>
+    return <div ref={dropSub} style={{opacity: opacities[canDrop + "" + isOver], width: "100%", height: canDrop ? "16px" : "0px", margin: "0px"}}>
+        <hr style={{height: "50%", backgroundColor: "gray", margin: "0px", marginLeft: "48px"}}/>
     </div>
 }
 
-export const AutoDynamicView = ({ object, callbacks, component, attributes, inline, allowSubentity }: AutoDynamicViewProps) => {
+export const AutoDynamicView = ({ object, callbacks, component, attributes, inline, allowSubentity, style }: AutoDynamicViewProps) => {
     allowSubentity = allowSubentity === true;
 
     const [{ isDragging }, drag] = useDrag(() => ({
@@ -184,7 +183,8 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
                 backgroundColor: hasContextMenu ? "whitesmoke" : "unset",
                 opacity: isDragging ? 0.5 : 1, 
                 display: "inline-flex", alignItems: "center",
-                ...(inline ? {} : {width: "100%"})
+                ...(inline ? {} : {width: "100%"}),
+                ...style
             }} 
             ref={attach} 
             onContextMenu={(event) => onUnigraphContextMenu(event, object, contextEntity, callbacks)}
@@ -192,7 +192,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
         >
             {el}
         </div>
-        {allowSubentity ? <SubentityDropAcceptor /> : []}
+        {allowSubentity ? <SubentityDropAcceptor uid={object?.uid} /> : []}
     </React.Fragment> : <React.Fragment/>;
 }
 
