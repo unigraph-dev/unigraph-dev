@@ -10,6 +10,7 @@ import { TagWidget } from '../examples/semantic/TagWidget';
 import './home.css';
 import { ExecutablesWidget } from '../components/UnigraphCore/ExecutablesWidget';
 import { isTouchDevice } from '../utils';
+import { UnigraphWidget } from '../components/UnigraphCore/UnigraphWidget';
 
 function ExplorerHome({ size } : SizeMeProps) {
 
@@ -30,18 +31,10 @@ function ExplorerHome({ size } : SizeMeProps) {
         compactType="horizontal"
         isDraggable={!isTouchDevice()}
       >
-        <div key="a"><Card variant="outlined" style={{height: "100%", padding: "16px"}}> 
-          <TagWidget/>
-        </Card></div>
-        <div key="b"><Card variant="outlined" style={{height: "100%", padding: "16px"}}> 
-          <AppLibraryWidget/>
-        </Card></div>
-        <div key="c"><Card variant="outlined" style={{height: "100%", padding: "16px"}}> 
-          <ConnectionWidget/>
-        </Card></div>
-        <div key="d"><Card variant="outlined" style={{height: "100%", padding: "16px"}}> 
-          <ExecutablesWidget/> 
-        </Card></div>
+        <div key="a"><UnigraphWidget> <TagWidget/> </UnigraphWidget></div>
+        <div key="b"><UnigraphWidget> <AppLibraryWidget/> </UnigraphWidget></div>
+        <div key="c"><UnigraphWidget> <ConnectionWidget/> </UnigraphWidget></div>
+        <div key="d"><UnigraphWidget> <ExecutablesWidget/> </UnigraphWidget></div>
       </ResponsiveGridLayout>
     </React.Fragment>
   )

@@ -18,8 +18,9 @@ import { ContextMenu } from "./components/UnigraphCore/ContextMenu";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from 'react-dnd-html5-backend'
 
-export function WorkspacePageComponent({ children }: any) {
-    return <Container maxWidth="lg" disableGutters style={{paddingTop: "12px", height: "100%"}}>
+export function WorkspacePageComponent({ children, maximize }: any) {
+    console.log(maximize)
+    return <Container maxWidth={maximize ? false : "lg"} disableGutters style={{paddingTop: maximize ? "0px" : "12px", height: "100%"}}>
         <CssBaseline/>
         {children}
     </Container>
@@ -146,8 +147,10 @@ export function WorkSpace(this: any) {
         var component = node.getComponent();
         var config = node.getConfig() || {};
         if (component.startsWith('/pages/')) {
-            return <WorkspacePageComponent>
-                {pages[(component.replace('/pages/', '') as string)].constructor(config)}
+            const page = pages[(component.replace('/pages/', '') as string)]
+            console.log(page)
+            return <WorkspacePageComponent maximize={page.maximize}>
+                {page.constructor(config)}
             </WorkspacePageComponent>
         } else if (component.startsWith('/components/')) {
             return components[(component.replace('/components/', '') as string)].constructor(config)

@@ -1,5 +1,5 @@
 import { Avatar, Grid, Typography } from "@material-ui/core"
-import { Apps, Bookmarks, CalendarToday, Email, Inbox, Note, PlaylistAddCheck, RssFeed, Search } from "@material-ui/icons"
+import { Apps, Bookmarks, CalendarToday, Email, Inbox, Note, PlaylistAddCheck, RssFeed, Search, Timer } from "@material-ui/icons"
 import { NavigationContext } from "../../utils"
 
 type AppShortcutProps = {avatar: React.ReactElement<any>, address: string, text: string}
@@ -17,6 +17,7 @@ export const AppLibraryWidget = ({}) => {
         <Typography variant="h5">Recommended Apps</Typography>
         <NavigationContext.Consumer>
         { (navigator: any) => <Grid container>
+            <AppShortcut avatar={<Timer/>} address="/today" text="Today" />
             <AppShortcut avatar={<Search/>} address="/search" text="Search" />
             <AppShortcut avatar={<PlaylistAddCheck/>} address="/examples/todo" text="Todo List" />
             <AppShortcut avatar={<Note/>} address="/notes-list" text="Notes" />
