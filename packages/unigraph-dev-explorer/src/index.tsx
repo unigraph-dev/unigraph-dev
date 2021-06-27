@@ -42,7 +42,7 @@ window.unigraph.backendConnection.onopen = () => {
 
   if (typeof window.electronPreload === "function") window.electronPreload();
 
-  render(window.location.pathname.startsWith('/pages') ? <App/> :<WorkSpace />);
+  render((new URLSearchParams(window.location.search)).get('pageName') ? <App/> :<WorkSpace />);
 
   
   window.unigraph.backendConnection.onclose = () => {

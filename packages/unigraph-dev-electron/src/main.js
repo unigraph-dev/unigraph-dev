@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, Tray, nativeImage } = require('electron')
+const { app, BrowserWindow, Menu, Tray, nativeImage, globalShortcut } = require('electron')
 const path = require('path')
 const { spawn } = require("child_process");
 const { fixPathForAsarUnpack } = require('electron-util');
@@ -16,6 +16,7 @@ const unigraph_trayIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAA
 
 let logs = [];
 let mainWindow = null;
+let todayWindow = null;
 let tray = null;
 let trayMenu = null;
 let alpha, zero;
@@ -96,6 +97,23 @@ function createMainWindow() {
   return win;
 }
 
+function createTodayWindow() {
+  const win = new BrowserWindow({
+    transparent: true,
+    frame: false,
+    backgroundColor: '#00ffffff',
+    webPreferences: {
+      preload: path.join(__dirname, '..', 'src', 'preload.js'),
+      nativeWindowOpen: true,
+      contextIsolation: false,
+    }
+  })
+
+  win.loadFile(path.join(__dirname, '..', 'buildweb', 'loading_bar.html'))
+
+  return win;
+}
+
 function createMainWindowNoLoad() {
   const win = new BrowserWindow({
     width: 800,
@@ -117,8 +135,8 @@ function dgraphLoaded() {
 }
 
 function unigraphLoaded() {
-  //if (mainWindow) mainWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'))
-  if (mainWindow) mainWindow.loadURL('http://localhost:3000')
+  if (mainWindow) mainWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'))
+  if (todayWindow) {todayWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'), {query: {"pageName": "today"}}); todayWindow.hide(); }
 }
 
 let isAppClosing = false;
@@ -127,9 +145,17 @@ app.whenReady().then(() => {
   tray = new Tray(nativeImage.createFromDataURL(unigraph_trayIcon))
   tray.setToolTip('Unigraph')
   trayMenu = createTrayMenu((newTemplate) => {tray.setContextMenu(Menu.buildFromTemplate(newTemplate))});
+  const ret = globalShortcut.register('Alt+Tab', () => {
+    if (todayWindow) {
+      todayWindow.isVisible() ? todayWindow.hide() : todayWindow.show();
+    };
+  })
   setTimeout(() => {
     mainWindow = createMainWindow()
+    todayWindow = createTodayWindow()
+    todayWindow.maximize();
     trayMenu.setMainWindow(mainWindow)
+    trayMenu.setTodayWindow(todayWindow)
     startServer();
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) {
@@ -143,6 +169,12 @@ app.whenReady().then(() => {
       if (!isAppClosing) {
         event.preventDefault();
         mainWindow.hide();
+      }
+    })
+    todayWindow.on('close', (event) => {
+      if (!isAppClosing) {
+        event.preventDefault();
+        todayWindow.hide();
       }
     })
   }, 0)
