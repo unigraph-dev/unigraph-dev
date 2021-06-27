@@ -36,6 +36,7 @@ import { CurrentEvents } from './examples/calendar/CurrentEvents';
 import { Calendar } from './examples/calendar/Calendar';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TodayView } from "./examples/calendar/TodayView";
 nb_init(); ht_init();
 
 // TODO: custom theme
@@ -150,6 +151,11 @@ export const pages: Record<string, any> = {
   'calendar': {
     'constructor': (props: any) => <Calendar {...props} />,
     'name': "Calendar"
+  },
+  'today': {
+    'constructor': (props: any) => <TodayView {...props} />,
+    'maximize': true,
+    'name': "Today View"
   }
 }
 

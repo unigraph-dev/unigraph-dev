@@ -8,7 +8,8 @@
         "entities": [
             {"id": "notification_center", "src": "entities/notification_center.json"},
             {"id": "favorite_bar", "src": "entities/favorite_bar.json"},
-            {"id": "inbox", "src": "entities/inbox.json"}
+            {"id": "inbox", "src": "entities/inbox.json"},
+            {"id": "focus", "src": "entities/focus.json"}
         ]
     }
 }

@@ -280,6 +280,11 @@ const DefaultObjectList: FC<DefaultObjectListViewProps> = ({component, objects, 
     </React.Fragment>
 }
 
+/**
+ * This one is deprecated and sucks a lot. Please don't use this one.
+ * @param param0 
+ * @returns 
+ */
 const DefaultObjectListView: FC<DefaultObjectListViewProps> = ({component, objects}) => {
 
     const [showDeleted, setShowDeleted] = React.useState(false);
