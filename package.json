@@ -20,7 +20,8 @@
     "link-common": "cd packages/unigraph-dev-common && yarn link && cd ../unigraph-dev-explorer && yarn link 'unigraph-dev-common' && cd ../unigraph-dev-backend && yarn link 'unigraph-dev-common'",
     "dev": "bash scripts/start_server.sh",
     "lint": "yarn eslint . --ext .ts,.tsx",
-    "electron-dist": "bash scripts/prepare_for_electron.sh && yarn workspace unigraph-dev-electron dist"
+    "electron-dist": "bash scripts/prepare_for_electron.sh && yarn workspace unigraph-dev-electron dist",
+    "electron-start": "yarn workspace unigraph-dev-electron start"
   },
   "engines": {
     "node": "^15.14.0",
