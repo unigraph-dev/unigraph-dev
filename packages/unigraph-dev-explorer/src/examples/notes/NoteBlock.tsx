@@ -9,6 +9,8 @@ import { buildGraph } from "unigraph-dev-common/lib/api/unigraph";
 import { Actions } from "flexlayout-react";
 import { addChild, indentChild, setFocus, splitChild, unindentChild, unsplitChild } from "./commands";
 import { onUnigraphContextMenu } from "../../components/ObjectView/DefaultObjectContextMenu";
+import { pages } from "../../App";
+import { DynamicViewRenderer } from "../../global";
 
 export const getSubentities = (data: any) => {
     let subentities: any, otherChildren: any;
@@ -63,6 +65,11 @@ export const PlaceholderNoteBlock = ({ callbacks }: any) => {
             onClick={() => {callbacks['add-child']();}}
         >Click here to start writing</Typography>
     </div>
+}
+
+const ViewViewDetailed: DynamicViewRenderer = ({data}) => {
+    return pages[data.get('view').as('primitive').replace('/pages/', '')]
+        .constructor(JSON.parse(data.get('props').as('primitive')).config)
 }
 
 export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) => {
@@ -148,7 +155,8 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
                         ...Object.fromEntries(Object.entries(noteBlockCommands).map(([k, v]: any) => [k, (...args: any[]) => v(dataref.current, editorContext, elindex, ...args)])), 
                         "unindent-child-in-parent": () => {callbacks['unindent-child'](elindex)}
                     }} 
-                    component={{"$/schema/note_block": DetailedNoteBlock}} attributes={{isChildren: true}}
+                    component={{"$/schema/note_block": DetailedNoteBlock, "$/schema/view": ViewViewDetailed}} attributes={{isChildren: true}} allowSubentity
+                    style={el.type['unigraph.id'] === "$/schema/note_block" ? {} : { border: "gray", borderStyle: "solid", borderWidth: 'thin' }}
                 />
             </li>) : <li><PlaceholderNoteBlock callbacks={{"add-child": () => noteBlockCommands['add-child'](dataref.current, editorContext)}}/></li>}
         </ul>
