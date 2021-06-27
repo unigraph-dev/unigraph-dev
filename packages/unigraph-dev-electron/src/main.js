@@ -19,7 +19,12 @@ let mainWindow = null;
 let todayWindow = null;
 let tray = null;
 let trayMenu = null;
+let index = null;
 let alpha, zero;
+
+function isDev() {
+  return process.argv[2] == '--dev';
+}
 
 function isUnigraphPortOpen(port) {
   return new Promise((resolve, reject) => {
@@ -57,31 +62,22 @@ async function startServer() {
       if (str.includes && str.includes(completedULog)) unigraphLoaded();
     }
 
-    alpha.stdout.on('data', function (data) {
-      console.log('alpha_stdout: ' + data.toString());
+    function processData (data, header) {
+      console.log(header + ': ' + data.toString());
       checkIfComplete(data.toString())
-    });
+    }
 
-    zero.stdout.on('data', function (data) {
-      console.log('zero_stdout: ' + data.toString());
-      checkIfComplete(data.toString())
-    });
-
-    alpha.stderr.on('data', function (data) {
-      console.log('alpha_stderr: ' + data.toString());
-      checkIfComplete(data.toString())
-    });
-
-    zero.stderr.on('data', function (data) {
-      console.log('zero_stderr: ' + data.toString());
-      checkIfComplete(data.toString())
-    });
+    alpha.stdout.on('data', (data) => processData(data, "alpha_stdout"));
+    alpha.stderr.on('data', (data) => processData(data, "alpha_stderr"));
+    zero.stdout.on('data', (data) => processData(data, "zero_stdout"));
+    zero.stderr.on('data', (data) => processData(data, "zero_stderr"));
+    
   } else {
     unigraphLoaded();
   }
 }
 
-function createMainWindow() {
+function createMainWindow(props, mainPage) {
   const win = new BrowserWindow({
     width: 800,
     height: 600,
@@ -89,54 +85,30 @@ function createMainWindow() {
       preload: path.join(__dirname, '..', 'src', 'preload.js'),
       nativeWindowOpen: true,
       contextIsolation: false,
-    }
+    },
+    ...(props ? props : {})
   })
 
-  win.loadFile(path.join(__dirname, '..', 'buildweb', 'loading_bar.html'))
+  win.loadFile(path.join(__dirname, '..', 'buildweb', mainPage || 'loading_bar.html'))
 
   return win;
 }
 
-function createTodayWindow() {
-  const win = new BrowserWindow({
-    transparent: true,
-    frame: false,
-    backgroundColor: '#00ffffff',
-    webPreferences: {
-      preload: path.join(__dirname, '..', 'src', 'preload.js'),
-      nativeWindowOpen: true,
-      contextIsolation: false,
-    }
-  })
+const createTodayWindow = () => createMainWindow({
+  transparent: true,
+  frame: false,
+  backgroundColor: '#00ffffff'
+});
 
-  win.loadFile(path.join(__dirname, '..', 'buildweb', 'loading_bar.html'))
-
-  return win;
-}
-
-function createMainWindowNoLoad() {
-  const win = new BrowserWindow({
-    width: 800,
-    height: 600,
-    webPreferences: {
-      preload: path.join(__dirname, '..', 'src', 'preload.js'),
-      nativeWindowOpen: true,
-      contextIsolation: false,
-    }
-  })
-
-  win.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'))
-
-  return win;
-}
+const createMainWindowNoLoad = () => createMainWindow(null, 'index.html')
 
 function dgraphLoaded() {
-  let index = require(path.join(__dirname, '..', 'distnode', 'index.js'))
+  index = require(path.join(__dirname, '..', 'distnode', 'index.js'))
 }
 
 function unigraphLoaded() {
-  if (mainWindow) mainWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'))
-  if (todayWindow) {todayWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'), {query: {"pageName": "today"}}); todayWindow.hide(); }
+  if (mainWindow) !isDev() ? mainWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html')) : mainWindow.loadURL('http://localhost:3000/')
+  if (todayWindow) {!isDev() ? todayWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html') , {query: {"pageName": "today"}}) : todayWindow.loadURL('http://localhost:3000/?pageName=today'); todayWindow.hide(); }
 }
 
 let isAppClosing = false;
@@ -151,11 +123,9 @@ app.whenReady().then(() => {
     };
   })
   setTimeout(() => {
-    mainWindow = createMainWindow()
-    todayWindow = createTodayWindow()
+    mainWindow = createMainWindow(), todayWindow = createTodayWindow()
     todayWindow.maximize();
-    trayMenu.setMainWindow(mainWindow)
-    trayMenu.setTodayWindow(todayWindow)
+    trayMenu.setMainWindow(mainWindow), trayMenu.setTodayWindow(todayWindow)
     startServer();
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) {
@@ -165,18 +135,16 @@ app.whenReady().then(() => {
         mainWindow.show();
       }
     })
-    mainWindow.on('close', (event) => {
+    const windows = [mainWindow, todayWindow]
+    windows.map(el => el.on('close', (event) => {
       if (!isAppClosing) {
         event.preventDefault();
-        mainWindow.hide();
+        el.hide();
       }
-    })
-    todayWindow.on('close', (event) => {
-      if (!isAppClosing) {
-        event.preventDefault();
-        todayWindow.hide();
-      }
-    })
+    }))
+    windows.map(el => el.on('hide', (event) => {
+      
+    }))
   }, 0)
 })
 
