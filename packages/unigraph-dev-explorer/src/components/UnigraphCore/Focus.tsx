@@ -9,7 +9,11 @@ export const Focus = () => {
     const [focusEntity, setFocusEntity] = React.useState<any>({});
     const [listUid, setListUid] = React.useState("");
 
-    
+    React.useEffect(() => {
+        if (window.unigraph.getState('calendar/focusItems')) {
+            window.unigraph.getState('calendar/focusItems').setValue({items: focus.map(el => el['_value'].uid), listUid, contextUid: focusEntity['uid']})
+        } else {window.unigraph.addState('calendar/focusItems', {items: focus.map(el => el['_value'].uid), listUid, contextUid: focusEntity['uid']})}
+    }, [focus, listUid, focusEntity])
 
     useEffectOnce(() => {
         const id = getRandomInt();

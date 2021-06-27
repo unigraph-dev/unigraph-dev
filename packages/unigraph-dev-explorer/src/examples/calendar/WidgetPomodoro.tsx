@@ -1,4 +1,4 @@
-import { Button, Typography } from "@material-ui/core";
+import { Button, FormControlLabel, Switch, Typography } from "@material-ui/core";
 import React from "react";
 import { useEffectOnce } from "react-use";
 
@@ -29,25 +29,34 @@ const scheduleData: Record<length, any> = {
     },
 }
 
+const moveFocusToInbox = async () => {
+    // TODO: move focus to inbox
+    const {items, listUid, contextUid} = window.unigraph.getState('calendar/focusItems').value;
+    await window.unigraph.deleteItemFromArray(listUid, items, contextUid);
+    window.unigraph.runExecutable("$/executable/add-item-to-list", {where: "$/entity/inbox", item: items})
+}
+
 export const WidgetPomodoro = () => {
     const [currSchedules, setCurrSchedules] = React.useState("default");
     const [currSchedulePos, setCurrSchedulePos] = React.useState(0);
     const [timerActive, setTimerActive] = React.useState(false);
     const [timeLeft, setTimeLeft] = React.useState(lengths[schedules[currSchedules][currSchedulePos]]);
+    const [moveToInbox, setMoveToInbox] = React.useState(false);
     const [_rs0, _rs1] = React.useState(false);
     const reset = () => _rs1(!_rs0);
     const next = (currSchedulePos: any, currSchedules: string) => schedules[currSchedules].length-1 === currSchedulePos ? setCurrSchedulePos(0) : setCurrSchedulePos(currSchedulePos + 1);
 
-    const stateRef = React.useRef({ currSchedulePos, currSchedules, timerActive, timeLeft })
-    React.useEffect(() => {stateRef.current = { currSchedulePos, currSchedules, timerActive, timeLeft }})
+    const stateRef = React.useRef({ currSchedulePos, currSchedules, timerActive, timeLeft, moveToInbox })
+    React.useEffect(() => {stateRef.current = { currSchedulePos, currSchedules, timerActive, timeLeft, moveToInbox }})
 
     useEffectOnce(() => { const onTick = setInterval(() => {
-        const { currSchedulePos, currSchedules, timerActive, timeLeft } = stateRef.current
+        const { currSchedulePos, currSchedules, timerActive, timeLeft, moveToInbox } = stateRef.current
         if (timeLeft > 0 && timerActive) {
             setTimeLeft(timeLeft - 1);
         } else if (timerActive) {
             next(currSchedulePos, currSchedules);
             window.unigraph.addNotification({from: "Pomodoro", name: "Pomodoro complete!", content: "Pomodoro complete!"})
+            if (moveToInbox && schedules[currSchedules][currSchedulePos] === "work") moveFocusToInbox();
         }
     }, 1000); return function cleanup () {clearInterval(onTick)}})
 
@@ -65,8 +74,14 @@ export const WidgetPomodoro = () => {
     return <div style={{height: "120px"}} ref={el}>
         <Typography variant={"body1"}>Current schedule: {scheduleData[schedules[currSchedules][currSchedulePos]].name}</Typography>
         <Typography variant={"h2"}>{Math.floor(timeLeft / 60)} : {timeLeft % 60}</Typography>
-        <Button onClick={() => setTimerActive(!timerActive)}>{timerActive ? "Stop" : "Start"}</Button>
-        <Button onClick={reset}>Reset</Button>
-        <Button onClick={() => next(currSchedulePos, currSchedules)}>Next</Button>
+        <div>
+            <Button onClick={() => setTimerActive(!timerActive)}>{timerActive ? "Stop" : "Start"}</Button>
+            <Button onClick={reset}>Reset</Button>
+            <Button onClick={() => next(currSchedulePos, currSchedules)}>Next</Button>
+        </div>
+        <FormControlLabel
+            control={<Switch checked={moveToInbox} onChange={() => setMoveToInbox(!moveToInbox)} name={"moveToInbox"} />}
+            label={"Move Focus to Inbox after \"Work\" timer complete"}
+        />
     </div>
 }
