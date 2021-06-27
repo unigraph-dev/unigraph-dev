@@ -72,12 +72,14 @@ export const DynamicObjectListView = ({items, listUid, context}: {items: any[], 
     const [groupBy, setGroupBy] = React.useState('');
 
     const getContext = () => context;
+    const contextRef = React.useRef(context);
+    React.useEffect(() => contextRef.current = context, [context]);
 
     const [{ canDrop }, drop] = useDrop(() => ({
         // @ts-expect-error: already checked for namespace map
         accept: Object.keys(window.unigraph.getNamespaceMap() || {}),
         drop: (item: {uid: string}) => {
-          window.unigraph.runExecutable('$/executable/add-item-to-list', {where: context.uid, item: item.uid})
+          window.unigraph.runExecutable('$/executable/add-item-to-list', {where: contextRef.current.uid, item: item.uid})
         },
         collect: (monitor) => ({
             isOver: !!monitor.isOver(),
