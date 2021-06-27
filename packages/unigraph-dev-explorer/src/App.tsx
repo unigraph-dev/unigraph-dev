@@ -43,6 +43,7 @@ nb_init(); ht_init();
 const useStyles = makeStyles(theme => ({
   root: {
     display: 'flex',
+    height: "90vh"
   },
   appBar: {
     width: '100vw',
@@ -168,15 +169,16 @@ export const components: Record<string, any> = {
 function App() {
   const classes = useStyles();
   const history = createBrowserHistory();
-  const componentPathName = window.location.pathname.replace("/pages/", "");
+  const componentPathName = (new URLSearchParams(window.location.search)).get('pageName');
   const config = getParameters(window.location.search.replace('?', ''));
+  console.log(config)
+  document.body.style.backgroundColor = "unset"
 
   return (
     <NavigationContext.Provider value={(location: string) => {history.push(location)}}>
       <div className={classes.root}>
-        <CssBaseline />
         <DndProvider backend={HTML5Backend}>
-          {pages[componentPathName].constructor(config)}
+          {componentPathName ? pages[componentPathName].constructor(config) : []}
         </DndProvider>
       </div>
     </NavigationContext.Provider>

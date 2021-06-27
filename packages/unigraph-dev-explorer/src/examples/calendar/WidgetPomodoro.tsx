@@ -65,7 +65,7 @@ export const WidgetPomodoro = () => {
     }, [currSchedules, currSchedulePos, _rs0]);
 
     React.useEffect(() => {
-        if (!timerActive && el.current) (el as any).current.parentElement.style.backgroundColor = "unset"; 
+        if (!timerActive && el.current) (el as any).current.parentElement.style.backgroundColor = ""; 
         else if (el.current) (el as any).current.parentElement.style.backgroundColor = scheduleData[schedules[currSchedules][currSchedulePos]].color
     })
 

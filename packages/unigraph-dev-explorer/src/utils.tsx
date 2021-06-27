@@ -7,9 +7,9 @@ export function getParameters(search: string) {
     // Params obj
     var params: any = {};
     // To lowercase
-    var url1 = search.substr(1);
+    //var url1 = search.substr(1);
     // To array
-    var url = url1.split('&');
+    var url = search.split('&');
 
     // Iterate over URL parameters array
     var length = url.length;

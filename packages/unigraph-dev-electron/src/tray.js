@@ -2,9 +2,11 @@ const { ipcMain } = require("electron");
 
 const createTrayMenu = (onNewTemplate) => {
     let mainWindow = undefined;
+    let todayWindow = undefined;
 
     let menuTemplateMain = [
-        {label: 'Show main window'}
+        {label: 'Show main window'},
+        {label: 'Show today window', click: () => todayWindow.show()}
     ];
     let menuTemplateFavorites = [];
 
@@ -34,7 +36,8 @@ const createTrayMenu = (onNewTemplate) => {
             }});
             setTemplate();
         },
-        setMainWindow: (window) => {mainWindow = window}
+        setMainWindow: (window) => {mainWindow = window},
+        setTodayWindow: (window) => {todayWindow = window}
     }
 }
 
