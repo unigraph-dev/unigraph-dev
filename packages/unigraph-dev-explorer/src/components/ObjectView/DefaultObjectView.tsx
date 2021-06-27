@@ -10,7 +10,7 @@ import { DynamicViewRenderer } from '../../global';
 import { AutoDynamicViewProps } from '../../types/ObjectView';
 import { download } from '../../utils';
 import { ExecutableCodeEditor } from './DefaultCodeEditor';
-import { defaultContextContextMenu, defaultContextMenu, DefaultObjectContextMenu } from './DefaultObjectContextMenu';
+import { defaultContextContextMenu, defaultContextMenu, DefaultObjectContextMenu, onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import { filterPresets } from './objectViewFilters';
 
 type ObjectViewOptions = {
@@ -159,27 +159,13 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     }))
 
     const contextEntity = typeof callbacks?.context === "object" ? callbacks.context : null; 
+    const [hasContextMenu, setHasContextMenu] = React.useState(false);
+    const contextMenuState = window.unigraph.getState('global/contextMenu');
+    contextMenuState.subscribe((menu: any) => {setHasContextMenu((menu.show && menu.contextUid === object.uid))})
 
     const attach = React.useCallback((domElement) => {
         drag(domElement);
         drop(domElement);
-        if (!isDragging) domElement?.addEventListener('contextmenu', (event: any) => {
-            event.preventDefault();
-            window.unigraph.getState('global/contextMenu').setValue({
-                anchorPosition: {top: event.y, left: event.x},
-                menuContent: defaultContextMenu,
-                menuContextContent: defaultContextContextMenu,
-                contextObject: object,
-                contextUid: object?.uid,
-                show: true,
-                ...(contextEntity ? {
-                    contextContextObject: contextEntity,
-                    contextContextUid: contextEntity.uid,
-                    getContext: contextEntity
-                } : {}),
-                ...(callbacks?.removeFromContext ? {removeFromContext: callbacks.removeFromContext} : {})
-            })
-        })
     }, [isDragging, drag, callbacks])
 
     //console.log(object) 
@@ -192,7 +178,18 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
         el = <StringObjectViewer object={object}/>
     }
     return el ? <React.Fragment>
-        <div id={"object-view-"+object?.uid} style={{opacity: isDragging ? 0.5 : 1, display: "inline-flex", alignItems: "center", ...(inline ? {} : {width: "100%"})}} ref={attach} {...(attributes ? attributes : {})}>
+        <div 
+            id={"object-view-"+object?.uid} 
+            style={{
+                backgroundColor: hasContextMenu ? "whitesmoke" : "unset",
+                opacity: isDragging ? 0.5 : 1, 
+                display: "inline-flex", alignItems: "center",
+                ...(inline ? {} : {width: "100%"})
+            }} 
+            ref={attach} 
+            onContextMenu={(event) => onUnigraphContextMenu(event, object, contextEntity, callbacks)}
+            {...(attributes ? attributes : {})}
+        >
             {el}
         </div>
         {allowSubentity ? <SubentityDropAcceptor /> : []}

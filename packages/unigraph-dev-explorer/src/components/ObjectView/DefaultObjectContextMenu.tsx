@@ -1,6 +1,7 @@
 import { Menu, MenuItem } from '@material-ui/core';
 import React from 'react';
-import { ContextMenuGenerator } from '../../types/ObjectView';
+import { UnigraphObject } from '../../../../unigraph-dev-common/lib/api/unigraph';
+import { AutoDynamicViewCallbacks, ContextMenuGenerator } from '../../types/ObjectView';
 import { NavigationContext } from '../../utils';
 
 export const defaultContextMenu: Array<ContextMenuGenerator> = [
@@ -50,3 +51,21 @@ export const DefaultObjectContextMenu = ({uid, object, anchorEl, handleClose}:
     </Menu>)
 }
 
+export const onUnigraphContextMenu = (event: React.MouseEvent, object: UnigraphObject | any, context?: UnigraphObject | any, callbacks?: AutoDynamicViewCallbacks) => {
+    event.preventDefault();
+    event.stopPropagation();
+    window.unigraph.getState('global/contextMenu').setValue({
+        anchorPosition: {top: event.clientY, left: event.clientX},
+        menuContent: defaultContextMenu,
+        menuContextContent: defaultContextContextMenu,
+        contextObject: object,
+        contextUid: object?.uid,
+        show: true,
+        ...(context ? {
+            contextContextObject: context,
+            contextContextUid: context.uid,
+            getContext: context
+        } : {}),
+        ...(callbacks?.removeFromContext ? {removeFromContext: callbacks.removeFromContext} : {})
+    })
+}

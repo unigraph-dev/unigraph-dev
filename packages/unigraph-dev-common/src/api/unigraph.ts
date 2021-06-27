@@ -6,7 +6,7 @@ import { Unigraph, AppState, UnigraphObject as IUnigraphObject } from '../types/
 import { base64ToBlob, isJsonString } from '../utils/utils';
 
 function getPath (obj: any, path: string | string[]): any {
-    if (path.length === 0) return obj;
+    if (path.length === 0) return new UnigraphObject(obj);
     if (!Array.isArray(path)) path = path.split('/').filter(e => e.length);
     const values = Object.keys(obj).filter(el => el.startsWith('_value'));
     if (values.length > 1) {
