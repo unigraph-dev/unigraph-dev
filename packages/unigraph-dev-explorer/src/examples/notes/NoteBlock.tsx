@@ -87,6 +87,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
     const inputDebounced = React.useRef(_.throttle(inputter, 1000)).current
     const setCurrentText = (text: string) => {textInput.current.textContent = text};
     const [edited, setEdited] = React.useState(false);
+    const [isEditing, setIsEditing] = React.useState(false);
     const textInput: any = React.useRef();
     const editorContext = {
         setEdited, setCommand, childrenref
@@ -96,9 +97,9 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
         dataref.current = data;
         const dataText = data.get('text').as('primitive')
         if (dataText && options?.viewId) window.layoutModel.doAction(Actions.renameTab(options.viewId, `Note: ${dataText}`))
-        if (textInput.current.textContent !== dataText && !edited) {setCurrentText(dataText); textInput.current.textContent = dataText;}
-        else if (textInput.current.textContent === dataText && edited) setEdited(false);
-    }, [data])
+        if (textInput.current && textInput.current.textContent !== dataText && !edited) {setCurrentText(dataText); textInput.current.textContent = dataText;}
+        else if (textInput.current && textInput.current?.textContent === dataText && edited) setEdited(false);
+    }, [data, isEditing])
 
     React.useEffect(() => {
         if (!edited && command) {
@@ -107,47 +108,49 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
         }
     }, [command, edited])
 
-    return <div style={{width: "100%"}}>
-        <Typography 
-            variant={isChildren ? "body1" : "h4"} 
-            onContextMenu={isChildren ? undefined : (event) => onUnigraphContextMenu(event, data, undefined, callbacks)}
-            contentEditable={true} 
-            ref={textInput}
-            onInput={(ev) => {onNoteInput(inputDebounced, ev); if (ev.currentTarget.textContent !== data.get('text').as('primitive') && !edited) setEdited(true)}}
-            onKeyDown={async (ev) => {
-                const caret = document.getSelection()?.anchorOffset;
-                switch (ev.code) {
-                    case 'Enter':
-                        ev.preventDefault();
-                        inputDebounced.flush();
-                        setCommand(() => callbacks['split-child']?.bind(this, caret))
-                        break;
-                    
-                    case 'Tab':
-                        ev.preventDefault();
-                        inputDebounced.flush();
-                        if (ev.shiftKey) {
-                            setCommand(() => callbacks['unindent-child-in-parent']?.bind(this))
-                        } else {
-                            setCommand(() => callbacks['indent-child']?.bind(this));
-                        }
-                        break;
-
-                    case 'Backspace':
-                        if (caret === 0 && document.getSelection()?.type === "Caret") {
+    return <div style={{width: "100%"}} >
+        <div onClick={(ev) => {setIsEditing(true); setTimeout(() => textInput.current?.focus(), 0)}} onBlur={(ev) => {setIsEditing(false)}}>
+            {isEditing ? <Typography 
+                variant={isChildren ? "body1" : "h4"} 
+                onContextMenu={isChildren ? undefined : (event) => onUnigraphContextMenu(event, data, undefined, callbacks)}
+                contentEditable={true} 
+                ref={textInput}
+                onInput={(ev) => {onNoteInput(inputDebounced, ev); if (ev.currentTarget.textContent !== data.get('text').as('primitive') && !edited) setEdited(true)}}
+                onKeyDown={async (ev) => {
+                    const caret = document.getSelection()?.anchorOffset;
+                    switch (ev.code) {
+                        case 'Enter':
                             ev.preventDefault();
                             inputDebounced.flush();
-                            setCommand(() => callbacks['unsplit-child'].bind(this));
-                        }
-                        break;
-                
-                    default:
-                        console.log(ev);
-                        break;
-                }
-            }}
-        >
-        </Typography>
+                            setCommand(() => callbacks['split-child']?.bind(this, caret))
+                            break;
+                        
+                        case 'Tab':
+                            ev.preventDefault();
+                            inputDebounced.flush();
+                            if (ev.shiftKey) {
+                                setCommand(() => callbacks['unindent-child-in-parent']?.bind(this))
+                            } else {
+                                setCommand(() => callbacks['indent-child']?.bind(this));
+                            }
+                            break;
+
+                        case 'Backspace':
+                            if (caret === 0 && document.getSelection()?.type === "Caret") {
+                                ev.preventDefault();
+                                inputDebounced.flush();
+                                setCommand(() => callbacks['unsplit-child'].bind(this));
+                            }
+                            break;
+                    
+                        default:
+                            console.log(ev);
+                            break;
+                    }
+                }}
+            >
+            </Typography> : <AutoDynamicView object={data.get('text')['_value']['_value']} attributes={{isHeading: !isChildren}} />}
+        </div>
         {buildGraph(otherChildren).map((el: any) => <AutoDynamicView object={el}/>)}
         <ul ref={childrenref} style={{listStyle: "disc"}}>
             {(subentities.length || isChildren) ? buildGraph(subentities).map((el: any, elindex) => <li key={el.uid}>

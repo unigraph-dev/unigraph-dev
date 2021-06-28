@@ -29,7 +29,7 @@ import { Inbox } from './components/UnigraphInbox/Inbox';
 import { EmailList } from './examples/email/Email';
 import { UnigraphSearch } from './components/UnigraphCore/UnigraphSearch';
 import { init as nb_init } from './examples/notes/NoteBlock';
-import { init as ht_init } from './examples/semantic/Html';
+import { init as sm_init } from './examples/semantic/init';
 import { NotesList } from './examples/notes/NotesList';
 import { GraphView } from './components/ObjectView/GraphView';
 import { CurrentEvents } from './examples/calendar/CurrentEvents';
@@ -37,7 +37,7 @@ import { Calendar } from './examples/calendar/Calendar';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TodayView } from "./examples/calendar/TodayView";
-nb_init(); ht_init();
+nb_init(); sm_init();
 
 // TODO: custom theme
 const useStyles = makeStyles(theme => ({
