@@ -14,8 +14,7 @@ frames as var(func: type(Entity)) @cascade {
       <unigraph.id>
   }
   _value {
-      
-      name @filter(eq(<_value.%>, "unigraph")) {
+      name @filter(eq(<_value.%>, "${name}")) {
           <_value.%>
       }
       
