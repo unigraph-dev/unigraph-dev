@@ -69,7 +69,7 @@ window.newTab = newTab;
 const workspaceNavigator = (model: Model, location: string) => {
     let search = "?" + location.split('?')[1];
     location = location.split('?')[0];
-    newTab(model, getComponentFromPage(location, getParameters(search)))
+    newTab(model, getComponentFromPage(location, getParameters(search.slice(1))))
 }
 
 const mainTabsetId = 'workspace-main-tabset';

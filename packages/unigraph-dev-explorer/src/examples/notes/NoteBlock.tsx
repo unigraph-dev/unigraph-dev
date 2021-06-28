@@ -18,7 +18,7 @@ export const getSubentities = (data: any) => {
         [subentities, otherChildren] = [[], []];
     } else {
         [subentities, otherChildren] = data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.['children']?.['_value['].sort(byElementIndex).reduce((prev: any, el: any) => {
-            if ('$/schema/subentity' !== el?.['_value']?.['_value']?.type?.['unigraph.id']) return [prev[0], [...prev[1], el['_value']?.['_value']]];
+            if ('$/schema/subentity' !== el?.['_value']?.['_value']?.type?.['unigraph.id']) return [prev[0], [...prev[1], el['_value']]];
             else return [[...prev[0], el['_value']?.['_value']['_value']], prev[1]]
         }, [[], []])
     }
@@ -74,6 +74,8 @@ const ViewViewDetailed: DynamicViewRenderer = ({data}) => {
 
 export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) => {
     const [subentities, otherChildren] = getSubentities(data);
+
+    console.log(subentities, otherChildren)
     const [command, setCommand] = React.useState<() => any | undefined>();
     const inputter = (text: string) => {
         return window.unigraph.updateObject(data.uid, {
