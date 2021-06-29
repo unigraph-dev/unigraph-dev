@@ -64,6 +64,11 @@ export default async function startServer(client: DgraphClient) {
       await context.caches["schemas"].updateNow();
       await context.caches["packages"].updateNow();
       await context.caches["executables"].updateNow();
+      Object.values(connections).forEach(el => el.send(stringify({
+        "type": "cache_updated",
+        "name": "schemaMap",
+        result: serverStates.caches['schemas'].data
+      })))
     }],
     "after_object_changed": [async (context: HookAfterObjectChangedParams) => {
       pollSubscriptions(context.subscriptions, dgraphClient, pollCallback);
@@ -91,11 +96,11 @@ export default async function startServer(client: DgraphClient) {
         result: data[0]
       }))
     })
-  }, `(func: eq(<unigraph.id>, "$/meta/namespace_map")) {
+  }, `(func: eq(<unigraph.id>, "$/meta/namespace_map")) @recurse {
     uid
-    expand(_userpredicate_) {
-      uid
-  }}`);
+    <unigraph.id>
+    expand(_userpredicate_)
+  }`);
 
   serverStates.subscriptions.push(namespaceSub);
   await pollSubscriptions(serverStates.subscriptions, dgraphClient, pollCallback);
@@ -318,7 +323,7 @@ export default async function startServer(client: DgraphClient) {
           let newObject = {...event.newObject, uid: newUid, 'unigraph.origin': origin}; // If specifying UID, override with it
           let autorefObject = processAutorefUnigraphId(newObject);
           const upsert = insertsToUpsert([autorefObject]);
-          //console.log(JSON.stringify(upsert, null, 4))
+          console.log(JSON.stringify(upsert, null, 4))
           dgraphClient.createUnigraphUpsert(upsert).then(_ => {
             callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
             ws.send(makeResponse(event, true))
@@ -476,6 +481,11 @@ export default async function startServer(client: DgraphClient) {
         "type": "cache_updated",
         "name": "namespaceMap",
         result: serverStates.namespaceMap
+      }))
+      ws.send(stringify({
+        "type": "cache_updated",
+        "name": "schemaMap",
+        result: serverStates.caches['schemas'].data
       }))
       console.log('opened socket connection');
   })
