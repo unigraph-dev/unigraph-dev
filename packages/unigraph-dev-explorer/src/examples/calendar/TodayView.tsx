@@ -30,9 +30,9 @@ export const TodayView = ({pageName}: any) => {
         </div>
         {pageName ? <div style={{width: "32px"}}/> : []}
         {showInboxes ? <div style={{flexGrow: 1, padding: "8px 16px 16px 8px", display: "flex", flexDirection: "column"}}>
-            <UnigraphWidget style={{overflow: "auto"}}><div style={{flex: 1}}>{pages['inbox'].constructor()}</div></UnigraphWidget> 
+            <UnigraphWidget style={{overflow: "auto"}}><div style={{flex: 1, height: "100%"}}>{pages['inbox'].constructor()}</div></UnigraphWidget> 
             <div style={{height: "16px"}}></div>
-            <UnigraphWidget style={{overflow: "auto"}}><div style={{flex: 1}}>{pages['current-events'].constructor()}</div></UnigraphWidget>
+            <UnigraphWidget style={{overflow: "auto"}}><div style={{flex: 1, height: "100%"}}>{pages['current-events'].constructor()}</div></UnigraphWidget>
         </div>: []}
     </div>
 }
