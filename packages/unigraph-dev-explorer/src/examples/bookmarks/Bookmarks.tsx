@@ -59,7 +59,7 @@ function BookmarksBody ({data}: { data: ABookmark[] }) {
 export const Bookmarks = withUnigraphSubscription(
     // @ts-ignore
     BookmarksBody,
-    { defaultData: Array(10).fill({'type': {'unigraph.id': '$/skeleton/default'}}), schemas: [], packages: [bookmarkPackage]},
+    { defaultData: [], schemas: [], packages: [bookmarkPackage]},
     { afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
         window.unigraph.subscribeToType("$/schema/web_bookmark", (result: ABookmark[]) => {setData(result)}, subsId);
     }}
@@ -80,11 +80,13 @@ export const BookmarkItem: DynamicViewRenderer = ({data, callbacks}) => {
         <ListItemText 
             primary={unpadded.name}
             secondary={<div style={{display: "flex", alignContent: "center"}}>
-                <Link onClick={() => {window.open(unpadded.url, "_blank")}}></Link>
+                <Link onClick={() => {
+                    window.open(unpadded.url, "_blank")
+                }}/>
                 {!unpadded.semantic_properties?.children?.map ? [] :
                 unpadded.semantic_properties?.children?.map(it => <Tag data={it}/>)}
                 {unpadded.creative_work?.abstract ? unpadded.creative_work?.abstract : []}
-                </div>}
+            </div>}
         />
         <ListItemSecondaryAction>
             <IconButton aria-label="delete" onClick={() => window.unigraph.deleteObject(unpadded.uid!)}>

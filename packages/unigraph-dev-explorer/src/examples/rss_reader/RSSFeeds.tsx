@@ -6,10 +6,10 @@ import { pkg as rssReaderPackage } from 'unigraph-dev-common/lib/data/unigraph.r
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { AutoDynamicView, DefaultObjectListView } from "../../components/ObjectView/DefaultObjectView";
 import { DynamicViewRenderer } from "../../global";
-import * as timeago from 'timeago.js';
 import { download, upload } from "../../utils";
 import { Link } from "@material-ui/icons";
 import { getComponentFromPage } from "../../Workspace";
+import Sugar from "sugar";
 
 export type ARSSFeed = {
     uid?: string,
@@ -68,11 +68,11 @@ const RSSItem: DynamicViewRenderer = ({data, callbacks}) => {
             primary={<a href={unpadded.item_data?.url}>{unpadded.item_data?.name}</a>}
             secondary={<div>
                 <Link onClick={() => {
-                    const htmlUid = data?.get('content/text')?.['_value']?.['_value']?.['uid']; 
+                    const htmlUid = data?.get('content/text')?.['_value']?.['_value']?.['uid'];
                     if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid}));
                     if (callbacks?.removeFromContext) callbacks.removeFromContext();
-                }}></Link>
-                <div>Added: {timeago.format(new Date(unpadded?.item_data?.date_created))}, updated: {timeago.format(new Date(unpadded?._timestamp?._updatedAt))}</div>
+                }}/>
+                <div>Added: {Sugar.Date.relative(new Date(unpadded?.item_data?.date_created))}, updated: {Sugar.Date.relative(new Date(unpadded?._timestamp?._updatedAt))}</div>
                 {unpadded?.content?.abstract ? <div style={{color: 'black'}}>{unpadded.content.abstract+"..."}</div> : ''}
             </div>} 
         />
@@ -96,7 +96,7 @@ const RSSFeedsBody: React.FC<{data: ARSSFeed[]}> = ({data}) => {
     return <div>
         <Typography variant="body2">Here are all your RSS feeds:</Typography> 
         {data.map(el => <ListItem key={el.uid}><AutoDynamicView object={el}/></ListItem>)}
-        <TextField value={newUrl} onChange={(e) => setNewUrl(e.target.value)}></TextField>
+        <TextField value={newUrl} onChange={(e) => setNewUrl(e.target.value)}/>
         <Button onClick={() => 
             window.unigraph.runExecutable<ParserParam>(getExecutableId(rssReaderPackage, "add-feed"), {url: newUrl})
         }>Add feed</Button>
@@ -115,7 +115,7 @@ const RSSFeedsBody: React.FC<{data: ARSSFeed[]}> = ({data}) => {
 
 export const RSSFeedsList = withUnigraphSubscription(
     RSSFeedsBody,
-    { schemas: [], defaultData: Array(10).fill({'type': {'unigraph.id': '$/skeleton/default'}}), packages: [rssReaderPackage]},
+    { schemas: [], defaultData: [], packages: [rssReaderPackage]},
     { afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
         window.unigraph.subscribeToType("$/schema/rss_feed", (result: ARSSFeed[]) => {setData(result)}, subsId);
     }}

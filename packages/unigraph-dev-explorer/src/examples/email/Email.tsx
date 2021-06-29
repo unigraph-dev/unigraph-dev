@@ -5,7 +5,7 @@ import { pkg as emailPackage } from 'unigraph-dev-common/lib/data/unigraph.email
 import { unpad, byUpdatedAt } from "unigraph-dev-common/lib/utils/entityUtils";
 import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
 import { DynamicViewRenderer } from "../../global";
-import * as timeago from 'timeago.js';
+import Sugar from 'sugar';
 import { Link } from "@material-ui/icons";
 import { getComponentFromPage } from "../../Workspace";
 
@@ -39,15 +39,18 @@ const EmailMessage: DynamicViewRenderer = ({data, callbacks}) => {
     console.log(data);
     return <ListItem>
         <ListItemAvatar><Avatar>{unpadded.message?.sender?.[0]?.[0]}</Avatar></ListItemAvatar>
-        <ListItemText primary={data?.get('name')?.['_value']?.['_value']?.['_value.%']} secondary={<div>
-            <Link onClick={() => {
-                const htmlUid = data?.get('content/text')?.['_value']?.['_value']?.['uid'];
-                if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid}));
-                if (callbacks?.removeFromContext) callbacks.removeFromContext();
-            }}></Link>
-            {unpadded.content?.abstract+"..."}
-        </div>}></ListItemText>
-        <ListItemText style={{flex: "none"}} secondary={timeago.format(new Date(unpadded?.message?.date_received))}></ListItemText>
+        <ListItemText
+            primary={data?.get('name')?.['_value']?.['_value']?.['_value.%']}
+            secondary={<div>
+                <Link onClick={() => {
+                    const htmlUid = data?.get('content/text')?.['_value']?.['_value']?.['uid'];
+                    if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid}));
+                    if (callbacks?.removeFromContext) callbacks.removeFromContext();
+                }}/>
+                {unpadded.content?.abstract + "..."}
+            </div>}
+        />
+        <ListItemText style={{flex: "none"}} secondary={Sugar.Date.relative(new Date(unpadded?.message?.date_received))}/>
     </ListItem>
 }
 
