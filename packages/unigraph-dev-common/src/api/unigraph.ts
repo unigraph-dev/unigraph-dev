@@ -343,7 +343,14 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
         getNamespaceMapUid: (name) => {throw Error("Not implemented")},
         getNamespaceMap: () => caches.namespaceMap,
         getType: (name) => {throw Error("Not implemented")},
-        getQueries: (name) => {throw Error("Not implemented")},
+        getQueries: (queries: any[]) => new Promise((resolve, reject) => {
+            const id = getRandomInt();
+            callbacks[id] = (response: any) => {
+                if (response.success) resolve(response.results ? response.results : {});
+                else reject(response);
+            };
+            sendEvent(connection, "get_queries", {"fragments": queries}, id);
+        }),
         addNotification: (item) => new Promise((resolve, reject) => {
             const id = getRandomInt();
             callbacks[id] = (response: any) => {

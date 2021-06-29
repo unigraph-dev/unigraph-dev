@@ -98,6 +98,13 @@ declare type EventSubscribeObject = {
   noExpand?: boolean,
 }
 
+declare type EventGetQueries = {
+  type: "event",
+  event: "get_queries",
+  id: number | string
+  fragments: any[]
+}
+
 declare type EventSubscribeType = {
   type: "event",
   event: "subscribe_to_type",
