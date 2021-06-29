@@ -133,7 +133,7 @@ const SubentityDropAcceptor = ({ uid }: any) => {
     </div>
 }
 
-export const AutoDynamicView = ({ object, callbacks, component, attributes, inline, allowSubentity, style, noDrag, noDrop }: AutoDynamicViewProps) => {
+export const AutoDynamicView = ({ object, callbacks, component, attributes, inline, allowSubentity, style, noDrag, noDrop, noContextMenu }: AutoDynamicViewProps) => {
     allowSubentity = allowSubentity === true;
 
     const [{ isDragging }, drag] = useDrag(() => ({
@@ -187,7 +187,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
                 ...style
             }} 
             ref={attach} 
-            onContextMenu={(event) => onUnigraphContextMenu(event, object, contextEntity, callbacks)}
+            onContextMenu={noContextMenu ? () => {} : (event) => onUnigraphContextMenu(event, object, contextEntity, callbacks)}
             {...(attributes ? attributes : {})}
         >
             {el}

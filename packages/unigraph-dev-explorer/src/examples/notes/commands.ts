@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { byElementIndex } from "unigraph-dev-common/lib/utils/entityUtils";
+import { buildUnigraphEntity, byElementIndex } from "unigraph-dev-common/lib/utils/entityUtils";
 import { NoteEditorContext } from "./types";
 
 export const focusUid = (uid: string) => {
@@ -35,6 +35,15 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
     const newChildren = children?.reduce((prev: any[], el: any, elindex: any) => {
         if (el?.['_value']?.['_value']?.['type']?.['unigraph.id'] === "$/schema/subentity" && ++currSubentity === index) {
             isInserted = true;
+            /* */
+            const splittedEntity = buildUnigraphEntity({
+                text: {
+                    type: {"unigraph.id": "$/schema/markdown"}, 
+                    _value: el['_value']['_value']['_value']['_value']['text']?.['_value']?.['_value']['_value.%'].slice(0, at)
+                }
+            }, "$/schema/note_block", (window.unigraph as any).getSchemaMap());
+            (splittedEntity as any)['_hide'] = true;
+            console.log(splittedEntity)
             const newel = {
                 '_index': {'_value.#i': elindex},
                 '_value': {
@@ -45,24 +54,7 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
                         'dgraph.type': ['Entity'],
                         'type': {'unigraph.id': '$/schema/subentity'},
                         '_hide': true,
-                        '_value': {
-                            'dgraph.type': ['Entity'],
-                            '_hide': true,
-                            'type': {'unigraph.id': '$/schema/note_block'},
-                            '_value': {
-                                'text': {
-                                    '_value': {
-                                        'dgraph.type': ['Interface'],
-                                        'type': {'unigraph.id': '$/schema/interface/textual'},
-                                        '_value': {
-                                            'dgraph.type': ['Entity'],
-                                            'type': {'unigraph.id': '$/schema/markdown'},
-                                            '_value.%': el['_value']['_value']['_value']['_value']['text']?.['_value']?.['_value']['_value.%'].slice(0, at)
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        '_value': splittedEntity
                     }
                 }
             }
@@ -102,7 +94,7 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
 }
 
 export const setFocus = (data: any, context: NoteEditorContext, index: number) => {
-    console.log(context.childrenref.current.children[index].children[0].children[0].children[0].focus());
+    console.log(context.childrenref.current?.children[index]?.children[0]?.children[0]?.children[0]?.click());
 }
 
 /**

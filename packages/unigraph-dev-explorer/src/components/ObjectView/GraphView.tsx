@@ -4,7 +4,7 @@ import ForceGraph2D from 'react-force-graph-2d';
 import { SizeMe } from "react-sizeme";
 import _ from "lodash";
 
-const queryNameIndex = `@filter((NOT eq(<_hide>, true)) AND (NOT eq(<_propertyType>, "inheritance"))) {
+const queryNameIndex = `@filter((NOT eq(<_propertyType>, "inheritance"))) {
     uid 
     unigraph.indexes {
         uid

@@ -74,8 +74,6 @@ const ViewViewDetailed: DynamicViewRenderer = ({data}) => {
 
 export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) => {
     const [subentities, otherChildren] = getSubentities(data);
-
-    console.log(subentities, otherChildren)
     const [command, setCommand] = React.useState<() => any | undefined>();
     const inputter = (text: string) => {
         return window.unigraph.updateObject(data.uid, {
@@ -83,6 +81,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
         })
     }
     const dataref = React.useRef<any>();
+    const textref = React.useRef<any>();
     const childrenref = React.useRef<any>();
     const inputDebounced = React.useRef(_.throttle(inputter, 1000)).current
     const setCurrentText = (text: string) => {textInput.current.textContent = text};
@@ -97,8 +96,8 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
         dataref.current = data;
         const dataText = data.get('text').as('primitive')
         if (dataText && options?.viewId) window.layoutModel.doAction(Actions.renameTab(options.viewId, `Note: ${dataText}`))
-        if (textInput.current && textInput.current.textContent !== dataText && !edited) {setCurrentText(dataText); textInput.current.textContent = dataText;}
-        else if (textInput.current && textInput.current?.textContent === dataText && edited) setEdited(false);
+        if (isEditing && textref.current !== dataText && !edited) {setCurrentText(dataText); textInput.current.textContent = dataText;}
+        else if (textref.current === dataText && edited || textref.current === undefined) setEdited(false);
     }, [data, isEditing])
 
     React.useEffect(() => {
@@ -115,7 +114,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
                 onContextMenu={isChildren ? undefined : (event) => onUnigraphContextMenu(event, data, undefined, callbacks)}
                 contentEditable={true} 
                 ref={textInput}
-                onInput={(ev) => {onNoteInput(inputDebounced, ev); if (ev.currentTarget.textContent !== data.get('text').as('primitive') && !edited) setEdited(true)}}
+                onInput={(ev) => {textref.current = ev.currentTarget.textContent; onNoteInput(inputDebounced, ev); if (ev.currentTarget.textContent !== data.get('text').as('primitive') && !edited) setEdited(true)}}
                 onKeyDown={async (ev) => {
                     const caret = document.getSelection()?.anchorOffset;
                     switch (ev.code) {
@@ -136,6 +135,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
                             break;
 
                         case 'Backspace':
+                            console.log(caret, document.getSelection()?.type)
                             if (caret === 0 && document.getSelection()?.type === "Caret") {
                                 ev.preventDefault();
                                 inputDebounced.flush();
@@ -149,7 +149,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
                     }
                 }}
             >
-            </Typography> : <AutoDynamicView object={data.get('text')['_value']['_value']} attributes={{isHeading: !isChildren}} noDrag />}
+            </Typography> : <AutoDynamicView object={data.get('text')['_value']['_value']} attributes={{isHeading: !isChildren}} noDrag noContextMenu />}
         </div>
         {buildGraph(otherChildren).map((el: any) => <AutoDynamicView object={el}/>)}
         <ul ref={childrenref} style={{listStyle: "disc"}}>

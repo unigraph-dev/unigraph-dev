@@ -36,7 +36,7 @@ window.unigraph.backendConnection.onopen = () => {
   }, undefined, false, true)
 
   const semanticChildrenState = window.unigraph.addState('referenceables/semantic_children', []);
-  window.unigraph.getSchemas(['$/schema/interface/semantic']).then(schemas => { 
+  window.unigraph.getSchemas(['$/schema/interface/semantic']).then((schemas: any) => { 
     semanticChildrenState.setValue((schemas['$/schema/interface/semantic']?._definition as any)?._parameters?._definitions.map((el: any) => el?.type?.['unigraph.id']) || []) 
   })
 

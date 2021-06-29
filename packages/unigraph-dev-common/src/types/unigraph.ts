@@ -260,5 +260,11 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param name Name of the state object - this is globally (to the app) unique
      */
     deleteState(name: string): any;
+    /**
+     * Gets the schema map in cache.
+     * @param schemas 
+     * @param resolve 
+     */
+    getSchemaMap?(schemas?: string[] | undefined, resolve?: boolean): any;
 }
 /** End of unigraph interface */ // Don't remove this line - needed for Monaco to work

@@ -27,7 +27,7 @@ function getObjectAsRecursivePrimitive (object: any) {
             targetValue = object[el];
         } else if (el.startsWith("_value") && typeof object[el] === "object") {
             const subObj = getObjectAsRecursivePrimitive(object[el]);
-            if (subObj) targetValue = subObj;
+            if (subObj || subObj === "" || subObj === 0 || subObj === false) targetValue = subObj;
         }
     });
     return targetValue;
@@ -366,7 +366,8 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
                 else reject(response);
             };
             sendEvent(connection, "get_search_results", {query: query, method: method}, id);
-        })
+        }),
+        getSchemaMap: () => caches.schemaMap
     }
 }
 
