@@ -3,6 +3,7 @@ import { resourceLimits } from "worker_threads";
 import { IWebsocket } from "./custom";
 import DgraphClient from "./dgraphClient";
 import stringify from 'json-stable-stringify';
+import {buildExecutable} from "./executableManager";
 
 export type Subscription = {
     data: any,
@@ -28,12 +29,17 @@ export type MsgCallbackFn = (id: number | string, updated: any, msgPort: IWebsoc
  * @param subs 
  * @param client 
  */
-export async function pollSubscriptions(subs: Subscription[], client: DgraphClient, msgCallback: MsgCallbackFn, ids?: any[]) {
+export async function pollSubscriptions(subs: Subscription[], client: DgraphClient, msgCallback: MsgCallbackFn, ids: any[] | undefined, serverStates: any) {
     if (!ids) ids = subs.map(el => el.id);
     if (subs.length >= 1) {
         subs.map(el => ids?.includes(el.id) ? el : false).forEach(async (el, index) => {
             if (el) {
-                const query = buildPollingQuery([el]);
+                let query;
+                if (el.queryFragment.startsWith("$/executable/")) {
+                    const exec = serverStates.caches["executables"].data[el.queryFragment];
+                    const executed = await buildExecutable(exec, {"hello": "ranfromExecutable", params: (el as any).params, definition: exec}, serverStates.localApi)();
+                    query = buildPollingQuery([{...el, queryFragment: executed}])
+                } else query = buildPollingQuery([el]);
                 let results: any[] = await client.queryDgraph(query).catch(e => {console.log(e); return []});
                 const val = results[0];
                 if (stringify(val) !== stringify(subs[index].data)) {

@@ -53,9 +53,9 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             states.subscriptions.push(newSub);
             callHooks(states.hooks, "after_subscription_added", {newSubscriptions: states.subscriptions, ids: [eventId]});
         },
-        subscribeToQuery: async (fragment, callback: any, eventId = undefined) => {
+        subscribeToQuery: async (fragment, callback: any, eventId = undefined, noExpand) => {
             eventId = getRandomInt();
-            const query = `(func: uid(par${eventId})) @recurse {uid unigraph.id expand(_userpredicate_)}
+            const query = (noExpand || fragment.startsWith('$/executable/')) ? fragment : `(func: uid(par${eventId})) @recurse {uid unigraph.id expand(_userpredicate_)}
             par${eventId} as var${fragment}`
             const newSub = createSubscriptionLocal(eventId, callback, query);
             states.subscriptions.push(newSub);
@@ -142,7 +142,10 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             await client.createUnigraphUpsert(finalUpsert);
             callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
         },
-        deleteRelation: async (uid, relation) => {await client.deleteRelationbyJson({uid: uid, ...relation})},
+        deleteRelation: async (uid, relation) => {
+            await client.deleteRelationbyJson({uid: uid, ...relation});
+            callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
+        },
         deleteItemFromArray: async (uid, item, relUid) => {
             const items = Array.isArray(item) ? item : [item]
             const query = `query { res(func: uid(${uid})) {

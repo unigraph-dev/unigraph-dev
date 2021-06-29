@@ -1,11 +1,11 @@
 export function perfLogStartPreprocessing () {
-    console.log("Started preprocessing - " + (new Date()).getUTCDate)
+    console.log("[PERF] Started preprocessing - " + (new Date()).getTime())
 }
 
 export function perfLogStartDbTransaction () {
-    console.log("Started transaction - " + (new Date()).getUTCDate)
+    console.log("[PERF] Started transaction - " + (new Date()).getTime())
 }
 
 export function perfLogAfterDbTransaction () {
-    console.log("Completed transaction - " + (new Date()).getUTCDate)
+    console.log("[PERF] Completed transaction - " + (new Date()).getTime())
 }
