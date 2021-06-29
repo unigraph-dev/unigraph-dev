@@ -174,7 +174,11 @@ export default async function startServer(client: DgraphClient) {
       });
     },
 
-    "subscribe_to_query": function (event: EventSubscribeObject, ws: IWebsocket) {
+    "subscribe_to_query": async function (event: EventSubscribeObject, ws: IWebsocket) {
+      if (event.queryFragment?.startsWith('$/executable')){
+        const exec = serverStates.caches["executables"].data[event.queryFragment];
+        event.queryFragment = await buildExecutable(exec, {"hello": "ranfromExecutable", params: (event as any).params, definition: exec}, localApi)();
+      }
       const query = event.noExpand ? event.queryFragment : `(func: uid(par${event.id})) @recurse {uid unigraph.id expand(_userpredicate_)}
       par${event.id} as var${event.queryFragment}`
       if (verbose >= 2) console.log(query)

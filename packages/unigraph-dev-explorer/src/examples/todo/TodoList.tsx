@@ -146,7 +146,12 @@ export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
     //console.log(unpadded)
     let totalCallbacks = {...(callbacks || {}), 
         'onUpdate': (data: Record<string, any>) => {
-            window.unigraph.updateObject(data.uid, {"done": unpad(data).done});
+            window.unigraph.updateObject(data.uid, {
+                "_value": {
+                    "done": { "_value.!": data.get('done')['_value.!'] },
+                },
+                "_hide": data.get('done')['_value.!']
+            }, true, false);
         }
     };
     //console.log(data.uid, unpadded)
@@ -159,7 +164,7 @@ export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
             }} />
         </ListItemIcon>
         <ListItemText 
-            primary={<AutoDynamicView object={data.get('name')['_value']['_value']} />}
+            primary={<AutoDynamicView object={data.get('name')['_value']['_value']} noDrag />}
             secondary={[...(!unpadded.semantic_properties?.children?.map ? [] :
                 unpadded.semantic_properties?.children?.map(it => <Tag data={it}/>
             )), ...(unpadded.priority > 0 ? [<Chip size="small" icon={<PriorityHigh/>} label={"Priority " + unpadded.priority}/>]: []),
@@ -182,6 +187,6 @@ export const TodoList = withUnigraphSubscription(
     { schemas: [], defaultData: Array(10).fill({'type': {'unigraph.id': '$/skeleton/default'}}), packages: [todoPackage]
     },
     { afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
-        window.unigraph.subscribeToType("$/schema/todo", (result: ATodoList[]) => {setData(result)}, subsId);
+        window.unigraph.subscribeToType("$/schema/todo", (result: ATodoList[]) => {setData(result)}, subsId, undefined, true);
     }}
 )

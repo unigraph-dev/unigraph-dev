@@ -133,7 +133,7 @@ const SubentityDropAcceptor = ({ uid }: any) => {
     </div>
 }
 
-export const AutoDynamicView = ({ object, callbacks, component, attributes, inline, allowSubentity, style }: AutoDynamicViewProps) => {
+export const AutoDynamicView = ({ object, callbacks, component, attributes, inline, allowSubentity, style, noDrag, noDrop }: AutoDynamicViewProps) => {
     allowSubentity = allowSubentity === true;
 
     const [{ isDragging }, drag] = useDrag(() => ({
@@ -163,8 +163,8 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     contextMenuState.subscribe((menu: any) => {setHasContextMenu((menu.show && menu.contextUid === object.uid))})
 
     const attach = React.useCallback((domElement) => {
-        drag(domElement);
-        drop(domElement);
+        if (!noDrag) drag(domElement);
+        if (!noDrop) drop(domElement);
     }, [isDragging, drag, callbacks])
 
     //console.log(object) 
@@ -192,7 +192,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
         >
             {el}
         </div>
-        {allowSubentity ? <SubentityDropAcceptor uid={object?.uid} /> : []}
+        {(allowSubentity && !noDrop) ? <SubentityDropAcceptor uid={object?.uid} /> : []}
     </React.Fragment> : <React.Fragment/>;
 }
 

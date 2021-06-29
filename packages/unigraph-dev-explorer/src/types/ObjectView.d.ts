@@ -14,6 +14,8 @@ export type AutoDynamicViewProps = {
     inline?: boolean,
     allowSubentity?: boolean,
     style?: React.CSSProperties,
+    noDrag?: boolean,
+    noDrop?: boolean,
 }
 
 export type ContextMenuGenerator = (uid: string, object: any, handleClose: () => any, callbacks?: any) => React.ReactElement<any>
