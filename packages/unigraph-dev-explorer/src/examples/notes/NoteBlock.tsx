@@ -149,7 +149,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
                     }
                 }}
             >
-            </Typography> : <AutoDynamicView object={data.get('text')['_value']['_value']} attributes={{isHeading: !isChildren}} />}
+            </Typography> : <AutoDynamicView object={data.get('text')['_value']['_value']} attributes={{isHeading: !isChildren}} noDrag />}
         </div>
         {buildGraph(otherChildren).map((el: any) => <AutoDynamicView object={el}/>)}
         <ul ref={childrenref} style={{listStyle: "disc"}}>

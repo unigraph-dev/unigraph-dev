@@ -10,39 +10,14 @@ export const CurrentEvents = () => {
     React.useEffect(() => {
         const id = getRandomInt();
 
-        window.unigraph.subscribeToQuery(`(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted)) AND (NOT eq(<_propertyType>, "inheritance"))) @recurse {
-            uid
-            <unigraph.id>
-            expand(_userpredicate_)
-        }
-        frames as var(func: type(Entity)) @cascade {
-            type @filter(eq(<unigraph.id>, "$/schema/time_frame")) {
-                <unigraph.id>
-            }
-            _value {
-                start {
-                    _value @filter(le(<_value.%dt>, "${currentDate.toJSON()}")) {
-                        <_value.%dt>
-                    }
-                }
-                end {
-                    _value @filter(ge(<_value.%dt>, "${currentDate.toJSON()}")) {
-                        <_value.%dt>
-                    }
-                }
-            }
-        }
-        var(func: uid(frames)) {
-            <unigraph.origin> {
-                res as uid
-            }
-        }`, (res: any) => {
+        window.unigraph.subscribeToQuery("$/executable/get-current-events", (res: any) => {
             setCurrentEvents(res);
+            setCurrentDate(new Date());
         }, id, true);
 
         return function cleanup() { window.unigraph.unsubscribe(id); }
 
-    }, [currentDate])
+    }, [])
 
     return <div>
         <Typography>It's currently {currentDate.toString()}!</Typography>

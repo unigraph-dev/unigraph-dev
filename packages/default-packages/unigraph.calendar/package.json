@@ -8,6 +8,15 @@
             {"id": "time_point", "src": "schemas/time_point.json"},
             {"id": "time_frame", "src": "schemas/time_frame.json"},
             {"id": "calendar_event", "src": "schemas/calendar_event.json"}
+        ],
+        "executables": [
+            {
+                "name": "Query - get current events",
+                "env": "routine/js",
+                "id": "get-current-events",
+                "src": "executables/get-current-events.js",
+                "editable": true
+            }
         ]
     }
 }
