@@ -11,13 +11,13 @@ const getQuery = (name: string) => `(func: eq(<unigraph.id>, "${name}")) {
 export const ConnectionWidget: React.FC = ({}) => {
 
     const [content, setContent]: any = React.useState({})
-    const nsmap = (window.unigraph?.getNamespaceMap?.() || {});
+    const nsmap = Object.keys(window.unigraph?.getNamespaceMap?.() || {}).filter(el => el.startsWith('$/schema'));
     const [counts, setCounts] = React.useState<any[]>([])
 
     useEffectOnce(() => {
         window.unigraph.getStatus().then((st: any) => setContent(st))
-        window.unigraph.getQueries(Object.keys(nsmap).filter(el => el.startsWith('$/schema')).map(el => getQuery(el))).then((res: any[]) => [
-            setCounts(res.map((el, index) => [Object.keys(nsmap)[index], el[0]['objects']]))
+        window.unigraph.getQueries(nsmap.map(el => getQuery(el))).then((res: any[]) => [
+            setCounts(res.map((el, index) => [nsmap[index], el[0]['objects']]))
         ])
     })
 
@@ -34,6 +34,6 @@ export const ConnectionWidget: React.FC = ({}) => {
             <Button onClick={() => window.unigraph.subscribeToType('any', (data: any) => {download("unigraph_export_all.json", JSON.stringify(data))}, (new Date()).getTime(), true)}>Export all objects</Button>
         </div>
         <b>Objects count</b> <br/>
-        {counts.sort((a, b) => a[1] - b[1]).map(el => <div><b>{el[0]}</b> {el[1]}</div>)}
+        {counts.sort((a, b) => b[1] - a[1]).map(el => <div><b>{el[0]}</b> {el[1]}</div>)}
     </div>
 }
