@@ -20,12 +20,12 @@ export const ContextMenu = () => {
         anchorPosition={state.anchorPosition}
         onClose={handleClose}
         anchorOrigin={{ 
-        vertical: 'bottom',
-        horizontal: 'center',
+            vertical: 'bottom',
+            horizontal: 'center',
         }}
         transformOrigin={{
-        vertical: 'top',
-        horizontal: 'center',
+            vertical: 'top',
+            horizontal: 'center',
         }}
     >
         <Typography variant="body1" style={{padding: "8px"}}>Object uid: {state.contextUid}; type: {state.contextObject?.type?.['unigraph.id']}</Typography>

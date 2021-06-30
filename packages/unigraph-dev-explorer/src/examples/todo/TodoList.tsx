@@ -168,14 +168,9 @@ export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
             secondary={[...(!unpadded.semantic_properties?.children?.map ? [] :
                 unpadded.semantic_properties?.children?.map(it => <Tag data={it}/>
             )), ...(unpadded.priority > 0 ? [<Chip size="small" icon={<PriorityHigh/>} label={"Priority " + unpadded.priority}/>]: []),
-            ...(unpadded.time_frame?.start && (new Date(unpadded.time_frame?.start)).getTime() !== 0 ? [<Chip size="small" icon={<CalendarToday/>} label={"Start: " + Sugar.Date.create(unpadded.time_frame?.start)} ></Chip>] : []),
-            ...(unpadded.time_frame?.end && (new Date(unpadded.time_frame?.start)).getTime() !== maxDateStamp ? [<Chip size="small" icon={<CalendarToday/>} label={"End: " + Sugar.Date.create(unpadded.time_frame?.end)} ></Chip>] : [])]}
+            ...(unpadded.time_frame?.start && (new Date(unpadded.time_frame?.start)).getTime() !== 0 ? [<Chip size="small" icon={<CalendarToday/>} label={"Start: " + Sugar.Date.relative(new Date(unpadded.time_frame?.start))} />] : []),
+            ...(unpadded.time_frame?.end && (new Date(unpadded.time_frame?.start)).getTime() !== maxDateStamp ? [<Chip size="small" icon={<CalendarToday/>} label={"End: " + Sugar.Date.relative(new Date(unpadded.time_frame?.end))} />] : [])]}
         />
-        <ListItemSecondaryAction>
-            <IconButton aria-label="delete" onClick={() => window.unigraph.deleteObject(unpadded.uid!)}>
-                <Delete/>
-            </IconButton>
-        </ListItemSecondaryAction>
     </React.Fragment>
 }
 
@@ -184,7 +179,7 @@ registerDynamicViews({"$/schema/todo": TodoItem})
 export const TodoList = withUnigraphSubscription( 
     // @ts-ignore
     TodoListBody,
-    { schemas: [], defaultData: Array(10).fill({'type': {'unigraph.id': '$/skeleton/default'}}), packages: [todoPackage]
+    { schemas: [], defaultData: [], packages: [todoPackage]
     },
     { afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
         window.unigraph.subscribeToType("$/schema/todo", (result: ATodoList[]) => {setData(result)}, subsId, undefined, true);
