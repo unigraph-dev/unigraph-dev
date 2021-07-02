@@ -89,7 +89,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
     const [isEditing, setIsEditing] = React.useState(false);
     const textInput: any = React.useRef();
     const editorContext = {
-        setEdited, setCommand, childrenref
+        setEdited, setCommand, childrenref, callbacks
     }
 
     React.useEffect(() => {
@@ -157,6 +157,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
                 <AutoDynamicView 
                     object={el} 
                     callbacks={{
+                        ...callbacks,
                         ...Object.fromEntries(Object.entries(noteBlockCommands).map(([k, v]: any) => [k, (...args: any[]) => v(dataref.current, editorContext, elindex, ...args)])), 
                         "unindent-child-in-parent": () => {callbacks['unindent-child'](elindex)}
                     }} 

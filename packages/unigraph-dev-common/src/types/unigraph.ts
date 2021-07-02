@@ -178,8 +178,9 @@ export interface Unigraph<TT = WebSocket | false> {
      * not upserting, the new object is going to be the only values of that UID. Thus,
      * make sure your update is minimal.
      * @param pad Whether to pad the new object - for partial update this should be false.
+     * @param subIds Subscriptions (if known) associated with the updated object.
      */
-    updateObject(uid: string, newObject: any, upsert?: boolean, pad?: boolean): any;
+    updateObject(uid: string, newObject: any, upsert?: boolean, pad?: boolean, subIds?: any[] | any): any;
     /**
      * Deletes relationships by supplying the origin UID and JSONs to delete.
      * 
@@ -190,12 +191,13 @@ export interface Unigraph<TT = WebSocket | false> {
     deleteRelation(uid: string, relation: any): any;
     /**
      * Deletes an item from an array (ordered list).
-     * 
+     *
      * @param uid The uid of the target list - must be of type `$/composer/Array`
      * @param item Either the UID (outer) or the index of an item, or an array of such items.
      * @param relationUid Optional. Specifies the uid of the entity this array belongs to. If present, entity relation to it will also be deleted.
+     * @param subIds Optional, either an ID or an array of ID with relevant subscriptions.
      */
-    deleteItemFromArray(uid: string, item: (number | string) | (number | string)[], relationUid?: string): any;
+     deleteItemFromArray(uid: string, item: (number | string) | (number | string)[], relationUid?: string, subIds?: any[] | any): any;
     /** Gets all referenceables from the library (like primitives, schemas, shorthands, etc) */
     getReferenceables(): Promise<any>;
     /** Deprecated: get selected referenceables. */

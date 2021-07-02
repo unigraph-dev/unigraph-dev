@@ -255,19 +255,19 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
             const predicateUid = object['_value'][predicate].uid;
             sendEvent(connection, "update_spo", {uid: predicateUid, predicate: typeMap[typeof value], value: value})
         },
-        updateObject: (uid, newObject, upsert = true, pad = true) => new Promise((resolve, reject) => {
+        updateObject: (uid, newObject, upsert = true, pad = true, subIds) => new Promise((resolve, reject) => {
             const id = getRandomInt();
             callbacks[id] = (response: any) => {
                 if (response.success) resolve(id);
                 else reject(response);
             };
-            sendEvent(connection, "update_object", {uid: uid, newObject: newObject, upsert: upsert, pad: pad, id: id});
+            sendEvent(connection, "update_object", {uid: uid, newObject: newObject, upsert: upsert, pad: pad, id: id, subIds: subIds});
         }),
         deleteRelation: (uid, relation) => {
             sendEvent(connection, "delete_relation", {uid: uid, relation: relation});
         },
-        deleteItemFromArray: (uid, item, relUid) => {
-            sendEvent(connection, "delete_item_from_array", {uid: uid, item: item, relUid: relUid});
+        deleteItemFromArray: (uid, item, relUid, subIds) => {
+            sendEvent(connection, "delete_item_from_array", {uid: uid, item: item, relUid: relUid, subIds: subIds});
         },
         getReferenceables: (key = "unigraph.id", asMapWithContent = false) => new Promise((resolve, reject) => {
             const id = getRandomInt();

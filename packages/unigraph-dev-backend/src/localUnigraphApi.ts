@@ -121,7 +121,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         },
         // latertodo
         updateSimpleObject: async (object, predicate, value) => {throw Error("Not implemented")},
-        updateObject: async (uid, newObject, isUpsert = true, pad = true) => {
+        updateObject: async (uid, newObject, isUpsert = true, pad = true, subIds) => {
             const newUid = uid ? uid : newObject.uid
             // Get new object's unigraph.origin first
             let origin = newObject['unigraph.origin'] ? newObject['unigraph.origin'] : (await client.queryData<any>(`query { entity(func: uid(${newUid})) { <unigraph.origin> { uid } }}`, []))[0]?.['unigraph.origin']
@@ -140,13 +140,13 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             const finalUpsert = insertsToUpsert([upsert]);
             console.log(finalUpsert)
             await client.createUnigraphUpsert(finalUpsert);
-            callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
+            callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches, subIds: subIds})
         },
         deleteRelation: async (uid, relation) => {
             await client.deleteRelationbyJson({uid: uid, ...relation});
             callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
         },
-        deleteItemFromArray: async (uid, item, relUid) => {
+        deleteItemFromArray: async (uid, item, relUid, subIds) => {
             const items = Array.isArray(item) ? item : [item]
             const query = `query { res(func: uid(${uid})) {
                 uid
@@ -182,7 +182,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
                     create_json
                 ]
             });
-            callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
+            callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches, subIds: subIds})
             return result
         },
         // latertodo

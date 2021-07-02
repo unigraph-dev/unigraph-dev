@@ -21,4 +21,5 @@ export type HookAfterSchemaUpdatedParams = {
 export type HookAfterObjectChangedParams = {
     subscriptions: Subscription[],
     caches: Record<string, Cache<any>>,
+    subIds?: any[],
 }

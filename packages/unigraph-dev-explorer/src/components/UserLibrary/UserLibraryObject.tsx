@@ -29,6 +29,6 @@ export default function DetailedObjectView ({ uid, viewer, id }: any) {
             canEdit: true,
             unpad: !showPadded,
             viewId: id
-        }}></DefaultObjectView>
+        }} callbacks={{subsId: myid}}></DefaultObjectView>
     </div>)
 }

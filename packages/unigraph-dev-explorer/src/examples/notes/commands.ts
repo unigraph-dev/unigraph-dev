@@ -22,7 +22,7 @@ export const addChild = (data: any, context: NoteEditorContext) => {
                 }
             }]
         }
-    });
+    }, undefined, undefined, context.callbacks.subsId);
     context.setEdited(true);
     context.setCommand(() => setFocus.bind(this, data, context, 0));
 }
@@ -69,7 +69,7 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
         };
     }, [])
     //console.log(newChildren)
-    window.unigraph.updateObject(data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.uid, {'children': {'_value[': newChildren}}, false, false);
+    window.unigraph.updateObject(data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.uid, {'children': {'_value[': newChildren}}, false, false, context.callbacks.subsId);
     context.setEdited(true);
     context.setCommand(() => setFocus.bind(this, data, context, index + 1))
 }
@@ -85,7 +85,7 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
         } else return prev;
     }, 0)
     if (children[delAt]?.['_value']?.['_value']?.['_value']?.['_value']?.['text']?.['_value']?.['_value']?.['_value.%'] === "") {
-        await window.unigraph.deleteItemFromArray(getSemanticChildren(data).uid, children[delAt].uid);
+        await window.unigraph.deleteItemFromArray(getSemanticChildren(data).uid, children[delAt].uid, data.uid, context.callbacks.subsId);
         if (index !== 0) {
             context.setEdited(true);
             context.setCommand(() => setFocus.bind(this, data, context, index - 1))
@@ -152,7 +152,7 @@ export const indentChild = (data: any, context: NoteEditorContext, index: number
       })
     const finalChildren = newChildren.filter((el: any) => el !== undefined);
     console.log(finalChildren)
-    window.unigraph.updateObject(data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.uid, {'children': {'_value[': finalChildren}}, false, false);
+    window.unigraph.updateObject(data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.uid, {'children': {'_value[': finalChildren}}, false, false, context.callbacks.subsId);
     context.setEdited(true);
     
     context.setCommand(() => () => {focusUid(newUid['_value']['_value'].uid)});
@@ -210,7 +210,7 @@ export const unindentChild = async (data: any, context: NoteEditorContext, paren
         };
     }, [])
     console.log(newChildren);
-    await window.unigraph.updateObject(data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.uid, {'children': {'_value[': newChildren}}, false, false);
+    await window.unigraph.updateObject(data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.uid, {'children': {'_value[': newChildren}}, false, false, context.callbacks.subsId);
     window.unigraph.deleteItemFromArray(delUidPar, delUidChild)
     context.setEdited(true);
     context.setCommand(() => setFocus.bind(this, data, context, parent + 1))
