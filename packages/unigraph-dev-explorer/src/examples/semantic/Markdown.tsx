@@ -2,6 +2,9 @@ import { Typography } from "@material-ui/core";
 import React from "react";
 import { DynamicViewRenderer } from "../../global";
 import ReactMarkdown from 'react-markdown'
+import remarkMath from 'remark-math'
+import rehypeKatex from 'rehype-katex'
+import 'katex/dist/katex.min.css'
 
 const compFactory = (name: string, {node, inline, className, children, ...props}: any) => {
     return React.createElement(name, {
@@ -21,7 +24,8 @@ export const Markdown: DynamicViewRenderer = ({data, callbacks, isHeading}) => {
     return <Typography
         variant={!isHeading ? "body1" : "h4"}
     >
-        <ReactMarkdown children={data['_value.%']} components={{
+        <ReactMarkdown children={data['_value.%']} remarkPlugins={[remarkMath]}
+            rehypePlugins={[rehypeKatex]} components={{
             p: compFactory.bind(this, "p"),
             strong: compFactory.bind(this, "strong"),
             em: compFactory.bind(this, "em"),

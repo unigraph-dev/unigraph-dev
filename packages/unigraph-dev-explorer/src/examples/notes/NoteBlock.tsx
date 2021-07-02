@@ -104,7 +104,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
     }, [data, isEditing])
 
     React.useEffect(() => {
-        if (isEditing && textInput.current?.textContent === "") {console.log(textref, textInput.current.textContent); textInput.current.textContent = textref.current}
+        if (isEditing && textInput.current?.textContent === "" && data.get('text').as('primitive')) {console.log(textref, textInput.current.textContent); textInput.current.textContent = textref.current}
     }, [isEditing])
 
     React.useEffect(() => {
