@@ -11,6 +11,7 @@ cp -r packages/unigraph-dev-explorer/build packages/unigraph-dev-electron/buildw
 # copy backend code
 yarn workspace unigraph-dev-backend build
 cp -r packages/unigraph-dev-backend/dist packages/unigraph-dev-electron/distnode
+cp ./secrets.env.json packages/unigraph-dev-electron/distnode
 
 # copy dgraph
 rm -rf packages/unigraph-dev-electron/dgraph

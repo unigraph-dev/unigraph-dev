@@ -268,5 +268,10 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param resolve 
      */
     getSchemaMap?(schemas?: string[] | undefined, resolve?: boolean): any;
+    /**
+     * Get a secret key, from a scope that the current executable has access too.
+     * @param key 
+     */
+    getSecret?(scope: string, key: string): string;
 }
 /** End of unigraph interface */ // Don't remove this line - needed for Monaco to work

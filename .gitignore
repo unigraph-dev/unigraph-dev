@@ -11,3 +11,6 @@ node_modules
 packages/*/dist
 .ignore
 coverage/
+
+# Secrets
+secrets.env.json
