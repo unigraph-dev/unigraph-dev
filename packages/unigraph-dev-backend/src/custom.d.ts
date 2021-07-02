@@ -166,6 +166,7 @@ declare type EventUpdateObject = {
   newObject: any,
   upsert: boolean | undefined,
   pad: boolean | undefined,
+  subIds?: any[] | any,
 }
 
 declare type EventDeleteRelation = {
@@ -182,7 +183,8 @@ declare type EventDeleteItemFromArray = {
   id: number,
   uid: string,
   item: any,
-  relUid?: string
+  relUid?: string,
+  subIds: any[] | any,
 }
 
 declare type EventResponser = (event: any, ws: IWebsocket) => any

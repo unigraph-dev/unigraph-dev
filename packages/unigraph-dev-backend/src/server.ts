@@ -74,7 +74,8 @@ export default async function startServer(client: DgraphClient) {
       })))
     }],
     "after_object_changed": [async (context: HookAfterObjectChangedParams) => {
-      pollSubscriptions(context.subscriptions, dgraphClient, pollCallback, undefined, serverStates);
+      if (context.subIds && !Array.isArray(context.subIds)) context.subIds = [context.subIds]
+      pollSubscriptions(context.subscriptions, dgraphClient, pollCallback, context.subIds, serverStates);
       await context.caches["executables"].updateNow();
     }],
   }
@@ -329,7 +330,7 @@ export default async function startServer(client: DgraphClient) {
           perfLogStartDbTransaction();
           dgraphClient.createUnigraphUpsert(upsert).then(_ => {
             perfLogAfterDbTransaction();
-            callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
+            callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches, subIds: event.subIds})
             ws.send(makeResponse(event, true))
           }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
         }
@@ -348,7 +349,7 @@ export default async function startServer(client: DgraphClient) {
 
         const finalUpsert = insertsToUpsert([finalUpdater]);
         dgraphClient.createUnigraphUpsert(finalUpsert).then(_ => {
-          callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
+          callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches, subIds: event.subIds})
           ws.send(makeResponse(event, true))
         }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
       }
@@ -361,7 +362,7 @@ export default async function startServer(client: DgraphClient) {
     },
 
     "delete_item_from_array": async function (event: EventDeleteItemFromArray, ws: IWebsocket) {
-      localApi.deleteItemFromArray(event.uid, event.item, event.relUid).then((_: any) => {
+      localApi.deleteItemFromArray(event.uid, event.item, event.relUid, event.subIds).then((_: any) => {
         ws.send(makeResponse(event, true))
       }).catch((e: any) => ws.send(makeResponse(event, false, {"error": e})));
     },

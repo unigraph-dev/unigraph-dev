@@ -31,6 +31,7 @@ type ObjectListViewOptions = {
 type DefaultObjectViewProps = {
     object: any,
     options: ObjectViewOptions,
+    callbacks?: Record<string, any>
 };
 
 type DefaultObjectListViewProps = {
@@ -207,7 +208,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, 
     }
 }
 
-const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options }) => {
+const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options, callbacks }) => {
     //const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
     const [ContextMenu, setContextMenu] = React.useState<any>(null);
@@ -232,11 +233,11 @@ const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options }) => {
 
     switch (options.viewer) {
         case "dynamic-view":
-            FinalObjectViewer = <AutoDynamicView object={object} allowSubentity />;
+            FinalObjectViewer = <AutoDynamicView object={object} allowSubentity callbacks={callbacks}/>;
             break;
 
         case "dynamic-view-detailed":
-            FinalObjectViewer = <AutoDynamicViewDetailed object={object} options={options}/>;
+            FinalObjectViewer = <AutoDynamicViewDetailed object={object} options={options} callbacks={callbacks}/>;
             break;
 
         case "json-tree":
