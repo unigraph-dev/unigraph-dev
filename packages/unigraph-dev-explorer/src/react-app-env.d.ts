@@ -8,5 +8,3 @@ declare module '*.pkg' {
     const pkg: any;
     export { pkg };
 }
-declare module '@ckeditor/ckeditor5-editor-balloon/src/ballooneditor';
-declare module '@ckeditor/ckeditor5-autosave/src/autosave';
