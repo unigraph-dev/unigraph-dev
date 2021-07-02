@@ -1,0 +1,49 @@
+{
+    "dgraph.type": "Type",
+    "_hide": true,
+    "_definition": {
+        "type": { "unigraph.id": "$/composer/Object" },
+        "_parameters": {
+            "_indexedBy": { "unigraph.id": "$/primitive/string" }
+        },
+        "_properties": [
+            {
+                "_key": "name",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                },
+                "_indexAs": "name"
+            },
+            {
+                "_key": "site",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/web_bookmark" }
+                }
+            },
+            {
+                "_key": "username",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                }
+            },
+            {
+                "_key": "password",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                }
+            },
+            {
+                "_key": "access_token",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                }
+            },
+            {
+                "_key": "access_token_secret",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                }
+            }
+        ]
+    }
+}
