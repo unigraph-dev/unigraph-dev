@@ -80,8 +80,11 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
             text: {type: {'unigraph.id': "$/schema/markdown"}, _value: text}
         })
     }
+    /** Reference for the data object (for children) */
     const dataref = React.useRef<any>();
+    /** Reference for text content as a string */
     const textref = React.useRef<any>();
+    /** Reference for HTML Element for list of children */
     const childrenref = React.useRef<any>();
     const inputDebounced = React.useRef(_.throttle(inputter, 1000)).current
     const setCurrentText = (text: string) => {textInput.current.textContent = text};
@@ -97,8 +100,12 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
         const dataText = data.get('text').as('primitive')
         if (dataText && options?.viewId) window.layoutModel.doAction(Actions.renameTab(options.viewId, `Note: ${dataText}`))
         if (isEditing && textref.current !== dataText && !edited) {setCurrentText(dataText); textInput.current.textContent = dataText;}
-        else if (textref.current === dataText && edited || textref.current === undefined) setEdited(false);
+        else if ((textref.current === dataText && edited) || textref.current === undefined) setEdited(false);
     }, [data, isEditing])
+
+    React.useEffect(() => {
+        if (isEditing && textInput.current?.textContent === "") {console.log(textref, textInput.current.textContent); textInput.current.textContent = textref.current}
+    }, [isEditing])
 
     React.useEffect(() => {
         if (!edited && command) {
@@ -108,13 +115,34 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
     }, [command, edited])
 
     return <div style={{width: "100%"}} >
-        <div onClick={(ev) => {setIsEditing(true); setTimeout(() => textInput.current?.focus(), 0)}} onBlur={(ev) => {setIsEditing(false)}}>
+        <div onClick={(ev) => { if (!isEditing) {
+                setIsEditing(true);
+                const caretPos = Number((ev.target as HTMLElement).getAttribute("markdownPos") || 0);
+            
+                setTimeout(() => {
+                    textInput.current?.focus()
+                    
+                    if (textInput.current.firstChild) {
+                        let range = document.createRange()
+                        let sel = window.getSelection()
+                        range.setStart(textInput.current.firstChild, caretPos || textInput.current?.textContent?.length)
+                        range.collapse(true)
+                        
+                        sel?.removeAllRanges()
+                        sel?.addRange(range)
+                    }
+                }, 0)
+            }}} onBlur={(ev) => {setIsEditing(false)}}>
             {isEditing ? <Typography 
                 variant={isChildren ? "body1" : "h4"} 
                 onContextMenu={isChildren ? undefined : (event) => onUnigraphContextMenu(event, data, undefined, callbacks)}
                 contentEditable={true} 
                 ref={textInput}
-                onInput={(ev) => {textref.current = ev.currentTarget.textContent; onNoteInput(inputDebounced, ev); if (ev.currentTarget.textContent !== data.get('text').as('primitive') && !edited) setEdited(true)}}
+                onInput={(ev) => {
+                    textref.current = ev.currentTarget.textContent; 
+                    onNoteInput(inputDebounced, ev); 
+                    if (ev.currentTarget.textContent !== data.get('text').as('primitive') && !edited) setEdited(true)
+                }}
                 onKeyDown={async (ev) => {
                     const caret = document.getSelection()?.anchorOffset;
                     switch (ev.code) {
