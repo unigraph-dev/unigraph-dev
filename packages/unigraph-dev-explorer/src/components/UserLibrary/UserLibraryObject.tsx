@@ -13,7 +13,8 @@ export default function DetailedObjectView ({ uid, viewer, id }: any) {
 
     const [showPadded, setShowPadded] = React.useState(false);
 
-    useEffectOnce(() => {
+    React.useEffect(() => {
+        
         window.unigraph.subscribeToObject(objectId, (object: any) => {
             setObject(object)
         }, myid);
@@ -21,9 +22,11 @@ export default function DetailedObjectView ({ uid, viewer, id }: any) {
         return function cleanup () {
             window.unigraph.unsubscribe(myid);
         }
-    })
+    }, [myid])
 
-    return (<div>
+    React.useEffect(() => {setId(Date.now())}, [uid])
+
+    return (<div key={object?.uid}>
         <DefaultObjectView object={object} options={{
             viewer: viewerId,
             canEdit: true,

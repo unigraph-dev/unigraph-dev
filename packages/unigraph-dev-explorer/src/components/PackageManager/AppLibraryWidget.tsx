@@ -1,5 +1,5 @@
 import { Avatar, Grid, Typography } from "@material-ui/core"
-import { Apps, Bookmarks, CalendarToday, Email, Inbox, Note, PlaylistAddCheck, RssFeed, Search, Timer } from "@material-ui/icons"
+import { Apps, Bookmarks, CalendarToday, CodeRounded, Email, Inbox, Note, PlaylistAddCheck, RssFeed, Search, Timer } from "@material-ui/icons"
 import { NavigationContext } from "../../utils"
 
 type AppShortcutProps = {avatar: React.ReactElement<any>, address: string, text: string}

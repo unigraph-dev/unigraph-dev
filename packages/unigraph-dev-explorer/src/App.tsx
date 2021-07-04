@@ -39,6 +39,7 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TodayView } from "./examples/calendar/TodayView";
 import { TwitterSettings } from "./examples/twitter/TwitterSettings";
+import { CodeEditor } from "./components/UnigraphCore/CodeEditor";
 nb_init(); sm_init(); tw_init();
 
 // TODO: custom theme
@@ -134,6 +135,11 @@ export const pages: Record<string, any> = {
   'object-editor': {
     'constructor': (props: any) => <ObjectEditor {...props} />,
     'name': 'Object Editor'
+  },
+  'code-editor': {
+    'constructor': (props: any) => <CodeEditor {...props} />,
+    'name': "Code Editor",
+    'maximize': true
   },
   'app-library': {
     'constructor': (props: any) => <AppLibrary {...props}/>,
