@@ -41,35 +41,35 @@ export const ExecutableCodeEditor = ({data, options}: any) => {
         if (options?.viewId) { window.layoutModel.doAction(Actions.renameTab(options.viewId, `Code: ${unpadded['unigraph.id'].split('/').slice(-1).join('')}`)) }
     })    
 
-    return <div style={{width: "100%"}}>
+    return <div style={{width: "100%", display: "flex", flexDirection: "column", height: "calc(100vh - 75px)"}}>
         <div style={{display: 'flex'}}>
-        <Accordion expanded={optionsOpen} onChange={() => setOptionsOpen(!optionsOpen)} variant={"outlined"} style={{flexGrow: 1, marginBottom: '16px'}}> 
-        <AccordionSummary  
-          expandIcon={<ExpandMore />}
-          aria-controls="panel1bh-content"
-          id="panel1bh-header"
-        >
-          <Typography style={{flexBasis: '50%', flexShrink: 0}}>{unpadded.name}</Typography>
-          <Typography color='textSecondary'>{unpadded.env}</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-            <List>
-                <ListItem>
-                    <Typography style={{flexBasis: '33.33%', flexShrink: 0}}>unigraph.id</Typography>
-                    <Typography color='textSecondary'>{unpadded['unigraph.id']}</Typography>
-                </ListItem>
-                <ListItem>
-                    <Typography style={{flexBasis: '33.33%', flexShrink: 0}}>Periodic</Typography>
-                    <Typography color='textSecondary'>{unpadded.periodic || "none"}</Typography>
-                </ListItem>
-            </List>
+            <Accordion expanded={optionsOpen} onChange={() => setOptionsOpen(!optionsOpen)} variant={"outlined"} style={{flexGrow: 1, marginBottom: '16px'}}> 
+                <AccordionSummary  
+                expandIcon={<ExpandMore />}
+                aria-controls="panel1bh-content"
+                id="panel1bh-header"
+                >
+                <Typography style={{flexBasis: '50%', flexShrink: 0}}>{unpadded.name}</Typography>
+                <Typography color='textSecondary'>{unpadded.env}</Typography>
+                </AccordionSummary>
+                <AccordionDetails>
+                    <List>
+                        <ListItem>
+                            <Typography style={{flexBasis: '33.33%', flexShrink: 0}}>unigraph.id</Typography>
+                            <Typography color='textSecondary'>{unpadded['unigraph.id']}</Typography>
+                        </ListItem>
+                        <ListItem>
+                            <Typography style={{flexBasis: '33.33%', flexShrink: 0}}>Periodic</Typography>
+                            <Typography color='textSecondary'>{unpadded.periodic || "none"}</Typography>
+                        </ListItem>
+                    </List>
 
-        </AccordionDetails>
-      </Accordion>
-      <IconButton onClick={() => updateCode(currentCode)}><Save/></IconButton>
+                </AccordionDetails>
+            </Accordion>
+            <IconButton onClick={() => updateCode(currentCode)}><Save/></IconButton>
         </div>
-        <SizeMe>{({size}: any) => <div><Editor
-            height={"70vh"}
+        <div style={{flexGrow: 1}}><SizeMe>{({size}: any) => <Editor
+            height={size.height ? `${size.height}px` : undefined}
             width={`${size.width}px`}
             defaultLanguage="javascript"
             beforeMount={(monaco) => {
@@ -89,7 +89,7 @@ export const ExecutableCodeEditor = ({data, options}: any) => {
             }}
             defaultValue={currentCode}
             onChange={handleEditorChange}
-        /></div>}</SizeMe>
-    </div>
+        />}</SizeMe></div>
+        </div>
 
 }

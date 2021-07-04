@@ -7,7 +7,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import { makeStyles } from '@material-ui/core/styles';
-import { Bookmarks, Category, Comment, CompareArrows, FileCopy, Home, Info, LibraryBooks, PlaylistAddCheck, Settings, Storage } from '@material-ui/icons';
+import { Bookmarks, Category, CodeRounded, Comment, CompareArrows, FileCopy, Home, Info, LibraryBooks, Notifications, PlaylistAddCheck, Settings, Storage } from '@material-ui/icons';
 import { ListSubheader } from '@material-ui/core';
 import { NavigationContext } from '../utils';
 import { FavoriteBar } from './UnigraphCore/FavoriteBar';
@@ -43,28 +43,28 @@ export default function DrawerRouter() {
         >
           <List>
             <ListSubheader component="div" id="subheader-home"> Home </ListSubheader>
-            <ListItem button onClick={()=>navigator('/about')}>
-              <ListItemIcon><Info /></ListItemIcon>
-              <ListItemText primary="About" />
-            </ListItem>
+            
             <ListItem button onClick={()=>navigator('/library')}>
               <ListItemIcon><LibraryBooks /></ListItemIcon>
               <ListItemText primary="Library" />
             </ListItem>
-            <ListItem button onClick={()=>navigator('/schema/new')}>
-              <ListItemIcon><Storage /></ListItemIcon>
-              <ListItemText primary="Add Schema" />
-            </ListItem>
+            
             <ListItem button onClick={()=>navigator('/object-editor')}>
               <ListItemIcon><FileCopy /></ListItemIcon>
               <ListItemText primary="Object Editor" />
             </ListItem>
+            <ListItem button onClick={()=>navigator('/code-editor')}>
+              <ListItemIcon><CodeRounded /></ListItemIcon>
+              <ListItemText primary="Code Editor" />
+            </ListItem>
+            <Divider/>
+            <ListSubheader component="div" id="subheader-unigraph"> Unigraph </ListSubheader>
             <ListItem button onClick={()=>navigator('/settings')}>
               <ListItemIcon><Settings /></ListItemIcon>
               <ListItemText primary="Settings" />
             </ListItem>
             <ListItem button onClick={()=>navigator('/notification-center')}>
-              <ListItemIcon><Settings /></ListItemIcon>
+              <ListItemIcon><Notifications /></ListItemIcon>
               <ListItemText primary="Notifications" />
             </ListItem>
             <ListItem button onClick={()=>navigator('/package-manager')}>
@@ -74,6 +74,10 @@ export default function DrawerRouter() {
             <Divider/>
             <div style={{display: devMode ? "inherit" : "none"}}>
               <ListSubheader component="div" id="subheader-developer-tools"> Developer Tools </ListSubheader>
+              <ListItem button onClick={()=>navigator('/about')}>
+                <ListItemIcon><Info /></ListItemIcon>
+                <ListItemText primary="About" />
+              </ListItem>
               <ListItem button onClick={()=>navigator('/request')}>
                 <ListItemIcon><Comment /></ListItemIcon>
                 <ListItemText primary="Request" />
@@ -81,6 +85,10 @@ export default function DrawerRouter() {
               <ListItem button onClick={()=>navigator('/datamodel-playground')}>
                 <ListItemIcon><CompareArrows /></ListItemIcon>
                 <ListItemText primary="DataModel Playground" />
+              </ListItem>
+              <ListItem button onClick={()=>navigator('/schema/new')}>
+                <ListItemIcon><Storage /></ListItemIcon>
+                <ListItemText primary="Add Schema" />
               </ListItem>
               <Divider/>
             </div>
