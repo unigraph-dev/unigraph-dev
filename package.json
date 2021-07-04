@@ -10,7 +10,7 @@
     ]
   },
   "scripts": {
-    "postinstall": "mkdir packages/unigraph-dev-explorer/public/vendor/ && cp -R ./node_modules/monaco-editor/ packages/unigraph-dev-explorer/public/vendor/monaco-editor_at_0.23.0/",
+    "postinstall": "(mkdir packages/unigraph-dev-explorer/public/vendor/ && cp -R ./node_modules/monaco-editor/ packages/unigraph-dev-explorer/public/vendor/monaco-editor_at_0.23.0/) || true",
     "backend-build": "yarn workspace unigraph-dev-backend build",
     "backend-start": "yarn workspace unigraph-dev-backend start",
     "explorer-start": "yarn workspace unigraph-dev-explorer start",

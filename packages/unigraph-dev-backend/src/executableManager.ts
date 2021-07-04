@@ -88,6 +88,8 @@ export type ExecContext = {
     package?: PackageDeclaration;
     /** Definition of the executable */
     definition: Executable;
+    /** A function that send events */
+    send?: any
     [x: string]: any 
 }
 
@@ -100,7 +102,8 @@ export const runEnvRoutineJs: ExecRunner = (src, context, unigraph) => {
     //const fn = () => eval(src);
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor
-    const fn = new AsyncFunction("require", "unpad", "context", "unigraph", `try {${src}} catch (e) {
+    const fn = new AsyncFunction("require", "unpad", "context", "unigraph", `try {${src}
+} catch (e) {
         unigraph.addNotification({
             from: "Executable manager", 
             name: "Failed to run executable " + context.definition["unigraph.id"], 

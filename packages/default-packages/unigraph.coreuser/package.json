@@ -4,7 +4,10 @@
     "description": "Provides core utilities for enhancing the user experience.",
     "unigraph": {
         "package_name": "unigraph.coreuser",
-        "schemas": [{"id": "notification", "src": "schemas/notification.json"}],
+        "schemas": [
+            {"id": "notification", "src": "schemas/notification.json"},
+            {"id": "internet_account", "src": "schemas/internet_account.json"}
+        ],
         "entities": [
             {"id": "notification_center", "src": "entities/notification_center.json"},
             {"id": "favorite_bar", "src": "entities/favorite_bar.json"},

@@ -1,0 +1,37 @@
+{
+    "dgraph.type": "Type",
+    "_definition": {
+        "type": { "unigraph.id": "$/composer/Object" },
+        "_parameters": {
+            "_indexedBy": { "unigraph.id": "$/primitive/string" }
+        },
+        "_properties": [
+            {
+                "_key": "name",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                },
+                "_indexAs": "name"
+            },
+            {
+                "_key": "description",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/interface/textual" }
+                }
+            },
+            {
+                "_key": "twitter_id",
+                "_unique": true,
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                }
+            },
+            {
+                "_key": "last_id_fetched",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                }
+            }
+        ]
+    }
+}
