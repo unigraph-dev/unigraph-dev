@@ -8,7 +8,6 @@ import { AppLibraryWidget } from '../components/PackageManager/AppLibraryWidget'
 import { ConnectionWidget } from '../components/UnigraphCore/ConnectionWidget';
 import { TagWidget } from '../examples/semantic/TagWidget';
 import './home.css';
-import { ExecutablesWidget } from '../components/UnigraphCore/ExecutablesWidget';
 import { isTouchDevice } from '../utils';
 import { UnigraphWidget } from '../components/UnigraphCore/UnigraphWidget';
 
@@ -16,9 +15,8 @@ function ExplorerHome({ size } : SizeMeProps) {
 
   const layout = [
     {i: 'a', x: 0, y: 0, w: 6, h: 8},
-    {i: 'b', x: 0, y: 8, w: 6, h: 8},
+    {i: 'b', x: 0, y: 8, w: 12, h: 8},
     {i: 'c', x: 6, y: 0, w: 6, h: 8},
-    {i: 'd', x: 6, y: 8, w: 6, h: 8},
   ];
   return (
     <React.Fragment>
@@ -34,7 +32,6 @@ function ExplorerHome({ size } : SizeMeProps) {
         <div key="a"><UnigraphWidget> <TagWidget/> </UnigraphWidget></div>
         <div key="b"><UnigraphWidget> <AppLibraryWidget/> </UnigraphWidget></div>
         <div key="c"><UnigraphWidget> <ConnectionWidget/> </UnigraphWidget></div>
-        <div key="d"><UnigraphWidget> <ExecutablesWidget/> </UnigraphWidget></div>
       </ResponsiveGridLayout>
     </React.Fragment>
   )

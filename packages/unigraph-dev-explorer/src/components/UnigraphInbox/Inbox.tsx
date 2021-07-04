@@ -21,7 +21,7 @@ export const Inbox = () => {
             const children = inbox?.['_value']?.children?.['_value[']
             if (children) {
                 setListUid(inbox?.['_value']?.children?.uid);
-                children.sort(byElementIndex);
+                children.sort(byElementIndex).reverse();
                 setInbox(children); 
             } else {
                 setInbox([]);
