@@ -17,7 +17,7 @@ export const ConnectionWidget: React.FC = ({}) => {
     useEffectOnce(() => {
         window.unigraph.getStatus().then((st: any) => setContent(st))
         window.unigraph.getQueries(nsmap.map(el => getQuery(el))).then((res: any[]) => {
-            setCounts(res.map((el, index) => [nsmap[index], el[0]['objects']]))
+            setCounts(res.map((el, index) => [nsmap[index], el[0]?.['objects']]))
         })
     })
 

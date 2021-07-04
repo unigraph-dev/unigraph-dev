@@ -1,4 +1,4 @@
-import { Accordion, AccordionSummary, Typography, AccordionDetails, List, ListItem, Select, MenuItem, IconButton, ListItemIcon, ListSubheader } from "@material-ui/core";
+import { Accordion, AccordionSummary, Typography, AccordionDetails, List, ListItem, Select, MenuItem, IconButton, ListItemIcon, ListSubheader, Fade, Grow, Collapse } from "@material-ui/core";
 import { ExpandMore, ClearAll } from "@material-ui/icons";
 import React from "react";
 import { useDrop } from "react-dnd";
@@ -50,19 +50,21 @@ const groupers: Record<string, Grouper> = {
 
 const DynamicListItem = ({listUid, item, index, context}: any) => {
     return <React.Fragment>
-        <ListItem>
-            <ListItemIcon onClick={() => {
-                if (listUid) window.unigraph.deleteItemFromArray(listUid, item['uid'], context['uid'])
-            }} ><ClearAll/></ListItemIcon>
-            <AutoDynamicView object={new UnigraphObject(item)} callbacks={{
-                context: context,
-                removeFromContext: listUid ? (where: undefined | "left" | "right") => { 
-                    let uids = {"left": Array.from(Array(index).keys()), "right": undefined, "": undefined}[where || ""] || [item['uid']]
-                    console.log(uids)
-                    window.unigraph.deleteItemFromArray(listUid, uids, context['uid'])
-                } : undefined
-            }} />
-        </ListItem>
+        <Grow in key={item.uid}>
+            <ListItem>
+                <ListItemIcon onClick={() => {
+                    if (listUid) window.unigraph.deleteItemFromArray(listUid, item['uid'], context['uid'])
+                }} ><ClearAll/></ListItemIcon>
+                <AutoDynamicView object={new UnigraphObject(item)} callbacks={{
+                    context: context,
+                    removeFromContext: listUid ? (where: undefined | "left" | "right") => { 
+                        let uids = {"left": Array.from(Array(index).keys()), "right": undefined, "": undefined}[where || ""] || [item['uid']]
+                        console.log(uids)
+                        window.unigraph.deleteItemFromArray(listUid, uids, context['uid'])
+                    } : undefined
+                }} />
+            </ListItem>
+        </Grow>
     </React.Fragment>
 }
 

@@ -28,7 +28,7 @@ export const CodeEditor = ({id}: any) => {
     return <SplitterLayout primaryIndex={1} secondaryInitialSize={360}>
         <div>
             <List style={{overflow: "auto"}}>
-                {execcontent.map((it: any) => <ListItem key={it.uid} onClick={() => {setCurrentUid(it.uid)}}>
+                {execcontent.map((it: any) => <ListItem key={it.uid} selected={currentUid === it.uid} onClick={() => {setCurrentUid(it.uid)}}>
                     <AutoDynamicView object={it} />
                 </ListItem>)}
             </List>
