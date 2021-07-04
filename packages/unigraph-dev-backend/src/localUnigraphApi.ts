@@ -12,7 +12,7 @@ import { Cache } from './caches';
 import dgraph from "dgraph-js";
 import path from "path";
 
-export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Record<string, Cache<any>>, subscriptions: Subscription[], hooks: any, namespaceMap: any, localApi: Unigraph}): Unigraph {
+export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Record<string, Cache<any>>, subscriptions: Subscription[], hooks: any, namespaceMap: any, localApi: Unigraph, httpCallbacks: any}): Unigraph {
     const messages: any[] = [];
     const eventTarget: any = {};
 
@@ -131,7 +131,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             let finalUpdater = newObject;
             if (pad) {
                 const schema = origObject['type']['unigraph.id'];
-                const paddedUpdater = buildUnigraphEntity(newObject, schema, states.caches['schemas'].data, true, {validateSchema: true, isUpdate: true, states: {}});
+                const paddedUpdater = buildUnigraphEntity(newObject, schema, states.caches['schemas'].data, true, {validateSchema: true, isUpdate: true, states: {}, globalStates: {}});
                 finalUpdater = processAutoref(paddedUpdater, schema, states.caches['schemas'].data);
             } else {
                 finalUpdater = processAutorefUnigraphId(finalUpdater);
@@ -221,6 +221,11 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             const keyfile = require(path.join(__dirname, "secrets.env.json"));
             if (keyfile?.[scope]?.[key]) return keyfile[scope][key];
             else return "";
+        },
+        awaitHttpCallback: (key: string) => {
+            return new Promise((resolve, _) => {
+                states.httpCallbacks[key] = resolve;
+            })
         }
     }
 }

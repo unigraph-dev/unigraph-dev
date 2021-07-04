@@ -87,7 +87,8 @@ export default async function startServer(client: DgraphClient) {
     subscriptions: _subscriptions,
     hooks: hooks,
     namespaceMap: namespaceMap,
-    localApi: {} as Unigraph
+    localApi: {} as Unigraph,
+    httpCallbacks: {}
   }
 
   const namespaceSub = createSubscriptionLocal(getRandomInt(), (data) => {
@@ -339,7 +340,7 @@ export default async function startServer(client: DgraphClient) {
         if (event.pad !== false) {
           const origObject = (await dgraphClient.queryUID(event.uid))[0];
           const schema = origObject['type']['unigraph.id'];
-          const paddedUpdater = buildUnigraphEntity(event.newObject, schema, caches['schemas'].data, true, {validateSchema: true, isUpdate: true, states: {}});
+          const paddedUpdater = buildUnigraphEntity(event.newObject, schema, caches['schemas'].data, true, {validateSchema: true, isUpdate: true, states: {}, globalStates: {}});
           finalUpdater = processAutoref({...paddedUpdater, uid: event.uid}, schema, caches['schemas'].data);
           //console.log(upsert);
         } else {
@@ -418,7 +419,7 @@ export default async function startServer(client: DgraphClient) {
 
     "run_executable": async function (event: EventRunExecutable, ws: IWebsocket) {
       const exec = serverStates.caches["executables"].data[event['unigraph.id']];
-      buildExecutable(exec, {"hello": "ranfromExecutable", params: event.params, definition: exec}, localApi)()
+      buildExecutable(exec, {"hello": "ranfromExecutable", params: event.params, definition: exec, send: (st: string) => {ws.send(st)}}, localApi)()
         .then((ret: any) => ws.send(makeResponse(event, true, {returns: ret})));
     },
 
@@ -494,6 +495,14 @@ export default async function startServer(client: DgraphClient) {
 
   httpserver.get('/', (req, res) => {
     res.send(`<!DOCTYPE HTML><head></head><body>${Object.entries(eventRouter).map(el => el[0] + "<br>")}</body>`)
+  })
+
+  httpserver.get('/callback', (req, res) => {
+    if (typeof req.query.key === 'string' && Object.keys(serverStates.httpCallbacks).includes(req.query.key)) {
+      serverStates.httpCallbacks[req.query.key]({headers: req.headers, body: req.body, query: req.query});
+      res.send("Complete callback!");
+      delete serverStates.httpCallbacks[req.query.key];
+    } else res.send("No callback!")
   })
 
   httpserver.listen(PORT_HTTP);

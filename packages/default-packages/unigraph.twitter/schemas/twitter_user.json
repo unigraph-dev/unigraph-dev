@@ -14,44 +14,36 @@
                 "_indexAs": "name"
             },
             {
-                "_key": "site",
-                "_definition": {
-                    "type": { "unigraph.id": "$/schema/web_bookmark" }
-                }
-            },
-            {
                 "_key": "username",
                 "_definition": {
                     "type": { "unigraph.id": "$/primitive/string" }
+                },
+                "_indexAs": "username"
+            },
+            {
+                "_key": "description",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/interface/textual" }
                 }
             },
             {
-                "_key": "password",
+                "_key": "twitter_id",
+                "_unique": true,
                 "_definition": {
                     "type": { "unigraph.id": "$/primitive/string" }
                 }
             },
             {
-                "_key": "access_token",
+                "_key": "profile_image",
                 "_definition": {
-                    "type": { "unigraph.id": "$/primitive/string" }
+                    "type": { "unigraph.id": "$/schema/url" }
                 }
             },
             {
-                "_key": "access_token_secret",
+                "_key": "semantic_properties",
+                "_propertyType": "inheritance",
                 "_definition": {
-                    "type": { "unigraph.id": "$/primitive/string" }
-                }
-            },
-            {
-                "_key": "subscriptions",
-                "_definition": {
-                    "type": { "unigraph.id": "$/composer/Array" },
-                    "_parameters": {
-                        "_element": {
-                            "type": { "unigraph.id": "$/schema/any" }
-                        }
-                    }
+                    "type": { "unigraph.id": "$/schema/semantic_properties" }
                 }
             }
         ]

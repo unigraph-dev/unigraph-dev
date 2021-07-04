@@ -264,7 +264,7 @@ const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options, callba
 const DefaultObjectList: FC<DefaultObjectListViewProps> = ({component, objects, options}) => {
     let finalObjects = objects;
     if (!options?.filters?.showDeleted) finalObjects = filterPresets['no-deleted'](finalObjects);
-    if (!options?.filters?.showNoView) finalObjects = filterPresets['no-noview'](finalObjects, DynamicViews);
+    if (!options?.filters?.showNoView) finalObjects = filterPresets['no-noview'](finalObjects, {...DynamicViews, "$/schema/markdown": undefined});
 
     return <React.Fragment>
         {(finalObjects.length ? finalObjects : Array(10).fill({'type': {'unigraph.id': '$/skeleton/default'}})).map(obj => React.createElement(

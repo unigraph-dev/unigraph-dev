@@ -76,6 +76,12 @@ export default function Settings () {
                     />
                 </ListItemSecondaryAction>
             </ListItem>
+            <ListSubheader component="div" id="nested-list-subheader">
+            App Settings
+            </ListSubheader>
+            <ListItem button onClick={e => {window.wsnavigator("/settings/twitter")}}>
+                <ListItemText id="switch-list-label-developer-mode" primary="Twitter settings" secondary="Connect your Twitter account to Unigraph" />
+            </ListItem>
         </List>
         <Popover
             id={JSON.stringify(activePopover)}

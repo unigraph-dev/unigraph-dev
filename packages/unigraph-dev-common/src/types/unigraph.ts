@@ -273,5 +273,9 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param key 
      */
     getSecret?(scope: string, key: string): string;
+    /**
+     * Returns a promise that resolves to the request when the HTTP callback endpoint is visited.
+     */
+    awaitHttpCallback?(key: string): Promise<any>
 }
 /** End of unigraph interface */ // Don't remove this line - needed for Monaco to work

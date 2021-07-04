@@ -30,6 +30,7 @@ import { EmailList } from './examples/email/Email';
 import { UnigraphSearch } from './components/UnigraphCore/UnigraphSearch';
 import { init as nb_init } from './examples/notes/NoteBlock';
 import { init as sm_init } from './examples/semantic/init';
+import { init as tw_init } from './examples/twitter/Tweet';
 import { NotesList } from './examples/notes/NotesList';
 import { GraphView } from './components/ObjectView/GraphView';
 import { CurrentEvents } from './examples/calendar/CurrentEvents';
@@ -37,7 +38,8 @@ import { Calendar } from './examples/calendar/Calendar';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TodayView } from "./examples/calendar/TodayView";
-nb_init(); sm_init();
+import { TwitterSettings } from "./examples/twitter/TwitterSettings";
+nb_init(); sm_init(); tw_init();
 
 // TODO: custom theme
 const useStyles = makeStyles(theme => ({
@@ -100,6 +102,10 @@ export const pages: Record<string, any> = {
   'settings': {
     'constructor': (props: any) => <Settings {...props} />,
     'name': 'Settings',
+  },
+  'settings/twitter': {
+    'constructor': (props: any) => <TwitterSettings {...props} />,
+    'name': 'Twitter Settings',
   },
   'package-manager': {
     'constructor': (props: any) => <PackageManager {...props} />,

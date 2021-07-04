@@ -138,6 +138,7 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
             window.localStorage.setItem("caches/"+parsed.name, JSON.stringify(parsed.result))
         }
         if (parsed.type === "subscription" && parsed.id && subscriptions[parsed.id]) subscriptions[parsed.id](parsed.result);
+        if (parsed.type === "open_url" && window) window.open(parsed.url, "_blank") 
     }
     
 
