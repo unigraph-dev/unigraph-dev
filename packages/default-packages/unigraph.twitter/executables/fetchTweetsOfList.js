@@ -16,29 +16,33 @@ const oauth = new OAuth.OAuth(
     'HMAC-SHA1'
 );
 
-const objects = await (new Promise((resolve, reject) => oauth.get(`https://api.twitter.com/1.1/lists/statuses.json?list_id=${id}&tweet_mode=extended&count=100&`, access_token, access_token_secret, (err, result, response) => {
-    const resObjects = JSON.parse(result);
-    const unigraphObjects = resObjects.map(el => {if (el.truncated) console.log("Truncated"); return {
-        _timestamp: {
-            _updatedAt: (new Date(el['created_at'])).toISOString()
-        },
-        text: {
-            type: {"unigraph.id": "$/schema/markdown"},
-            _value: el['full_text']
-        },
-        from_user: {
-            twitter_id: el.user['id_str'],
-            name: el.user['name'],
-            username: el.user['screen_name'],
-            description: {
-                type: {"unigraph.id": "$/schema/markdown"},
-                _value: el.user['description']
+const objects = await (new Promise((resolve, reject) => oauth.get(`https://api.twitter.com/1.1/lists/statuses.json?list_id=${id}&tweet_mode=extended&count=100&since_id=${last_id_fetched}`, access_token, access_token_secret, (err, result, response) => {
+    if (!result) {
+        resolve([]);
+    } else {
+        const resObjects = JSON.parse(result);
+        const unigraphObjects = resObjects?.map(el => {if (el.truncated) console.log("Truncated"); return {
+            _timestamp: {
+                _updatedAt: (new Date(el['created_at'])).toISOString()
             },
-            profile_image: el.user['profile_image_url_https']
-        },
-        twitter_id: el['id_str']
-    }});
-    resolve(unigraphObjects);
+            text: {
+                type: {"unigraph.id": "$/schema/markdown"},
+                _value: el['full_text']
+            },
+            from_user: {
+                twitter_id: el.user['id_str'],
+                name: el.user['name'],
+                username: el.user['screen_name'],
+                description: {
+                    type: {"unigraph.id": "$/schema/markdown"},
+                    _value: el.user['description'] || "No description"
+                },
+                profile_image: el.user['profile_image_url_https']
+            },
+            twitter_id: el['id_str']
+        }});
+        resolve(unigraphObjects);
+    }
 })))
 
 const getQuery = (twid) => `(func: type(Entity)) @cascade { 
@@ -62,6 +66,17 @@ for (let i=0; i<objects.length; ++i) {
         const uid = await unigraph.addObject(objects[i], '$/schema/tweet');
         inbox_els.push(uid[0]);
     }
+}
+
+if (objects?.[0]?.['twitter_id']) {
+    console.log("p", context.params)
+    await unigraph.updateObject(uid, {
+        _value: {
+            last_id_fetched: {
+                "_value.%": objects[0]['twitter_id']
+            }
+        }
+    }, true, false)
 }
 
 await unigraph.runExecutable("$/executable/add-item-to-list", {where: "$/entity/inbox", item: inbox_els.reverse()});

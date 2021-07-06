@@ -35,7 +35,7 @@ const addAccount = async (userAccToken, userAccTokenSecret) => {
             twitter_id: subObj?.id_str,
             name: subObj?.name,
             description: subObj?.description,
-            last_id_fetched: "0"
+            last_id_fetched: "1"
         }]
     };
     //console.log(account)

@@ -18,6 +18,7 @@ const account = (await unigraph.getQueries([`(func: type(Entity)) @cascade {
         subscriptions {
             <_value[> {
                 _value {
+                    uid
                     _value {
                         name { <_value.%> }
                         twitter_id { <_value.%> }

@@ -41,7 +41,7 @@ const EmailMessage: DynamicViewRenderer = ({data, callbacks}) => {
         <ListItemAvatar><Avatar>{unpadded.message?.sender?.[0]?.[0]}</Avatar></ListItemAvatar>
         <ListItemText
             primary={data?.get('name')?.['_value']?.['_value']?.['_value.%']}
-            secondary={<div>
+            secondary={<div style={{display: "flex", alignItems: "center"}}>
                 <Link onClick={() => {
                     const htmlUid = data?.get('content/text')?.['_value']?.['_value']?.['uid'];
                     if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid}));

@@ -11,29 +11,29 @@ export const Inbox = () => {
     const [inbox, setInbox] = React.useState<any[]>([]);
     const [inboxEntity, setInboxEntity] = React.useState<any>({});
     const [listUid, setListUid] = React.useState("");
+    const [subsId, setSubsId] = React.useState(getRandomInt);
 
     
 
     useEffectOnce(() => {
-        const id = getRandomInt();
 
         window.unigraph.subscribeToObject("$/entity/inbox", (inbox: any) => {
             const children = inbox?.['_value']?.children?.['_value[']
             if (children) {
                 setListUid(inbox?.['_value']?.children?.uid);
-                children.sort(byElementIndex).reverse();
+                children.sort(byElementIndex);
                 setInbox(children); 
             } else {
                 setInbox([]);
             };
             setInboxEntity(inbox);
-        }, id);
+        }, subsId);
 
         return function cleanup() {
-            window.unigraph.unsubscribe(id);
+            window.unigraph.unsubscribe(subsId);
         }
     })
 
-    return <DynamicObjectListView items={inbox} context={inboxEntity} listUid={listUid} />
+    return <DynamicObjectListView items={inbox} context={inboxEntity} listUid={listUid} callbacks={{subsId}}/>
 
 }
