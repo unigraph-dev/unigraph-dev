@@ -67,12 +67,12 @@ const RSSItem: DynamicViewRenderer = ({data, callbacks}) => {
         <ListItemText
             primary={<a href={unpadded.item_data?.url}>{unpadded.item_data?.name}</a>}
             secondary={<div>
-                <Link onClick={() => {
+                <div style={{display: "flex", alignItems: "center"}}><Link onClick={() => {
                     const htmlUid = data?.get('content/text')?.['_value']?.['_value']?.['uid'];
                     if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid}));
                     if (callbacks?.removeFromContext) callbacks.removeFromContext();
                 }}/>
-                <div>Added: {Sugar.Date.relative(new Date(unpadded?.item_data?.date_created))}, updated: {Sugar.Date.relative(new Date(unpadded?._timestamp?._updatedAt))}</div>
+                <div>Added: {Sugar.Date.relative(new Date(unpadded?.item_data?.date_created))}, updated: {Sugar.Date.relative(new Date(unpadded?._timestamp?._updatedAt))}</div></div>
                 {unpadded?.content?.abstract ? <div style={{color: 'black'}}>{unpadded.content.abstract+"..."}</div> : ''}
             </div>} 
         />

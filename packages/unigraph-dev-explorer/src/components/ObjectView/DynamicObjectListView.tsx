@@ -1,4 +1,4 @@
-import { Accordion, AccordionSummary, Typography, AccordionDetails, List, ListItem, Select, MenuItem, IconButton, ListItemIcon, ListSubheader, Fade, Grow, Collapse } from "@material-ui/core";
+import { Accordion, AccordionSummary, Typography, AccordionDetails, List, ListItem, Select, MenuItem, IconButton, ListItemIcon, ListSubheader, Fade, Grow, Collapse, FormControlLabel, Switch } from "@material-ui/core";
 import { ExpandMore, ClearAll } from "@material-ui/icons";
 import React from "react";
 import { useDrop } from "react-dnd";
@@ -48,19 +48,19 @@ const groupers: Record<string, Grouper> = {
     },
 }
 
-const DynamicListItem = ({listUid, item, index, context}: any) => {
+const DynamicListItem = ({listUid, item, index, context, callbacks}: any) => {
     return <React.Fragment>
         <Grow in key={item.uid}>
             <ListItem>
                 <ListItemIcon onClick={() => {
-                    if (listUid) window.unigraph.deleteItemFromArray(listUid, item['uid'], context['uid'])
+                    if (listUid) window.unigraph.deleteItemFromArray(listUid, item['uid'], context['uid'], callbacks?.subsId)
                 }} ><ClearAll/></ListItemIcon>
-                <AutoDynamicView object={new UnigraphObject(item)} callbacks={{
+                <AutoDynamicView object={new UnigraphObject(item)} callbacks={{...callbacks, 
                     context: context,
                     removeFromContext: listUid ? (where: undefined | "left" | "right") => { 
                         let uids = {"left": Array.from(Array(index).keys()), "right": undefined, "": undefined}[where || ""] || [item['uid']]
                         console.log(uids)
-                        window.unigraph.deleteItemFromArray(listUid, uids, context['uid'])
+                        window.unigraph.deleteItemFromArray(listUid, uids, context['uid'], callbacks?.subsId)
                     } : undefined
                 }} />
             </ListItem>
@@ -68,10 +68,17 @@ const DynamicListItem = ({listUid, item, index, context}: any) => {
     </React.Fragment>
 }
 
-export const DynamicObjectListView = ({items, listUid, context}: {items: any[], listUid?: string, context: any}) => {
+export const DynamicObjectListView = ({items, listUid, context, callbacks}: {items: any[], listUid?: string, context: any, callbacks?: any}) => {
     
     const [optionsOpen, setOptionsOpen] = React.useState(false);
     const [groupBy, setGroupBy] = React.useState('');
+    const [reverseOrder, setReverseOrder] = React.useState(false);
+
+    const [procItems, setProcItems] = React.useState<any[]>([]);
+    React.useEffect(() => {
+        if (reverseOrder) setProcItems([...items].reverse());
+        else setProcItems([...items]);
+    }, [reverseOrder, items])
 
     const getContext = () => context;
     const contextRef = React.useRef(context);
@@ -102,7 +109,7 @@ export const DynamicObjectListView = ({items, listUid, context}: {items: any[], 
             id="panel1bh-header"
             >
             <Typography style={{flexBasis: '33.33%', flexShrink: 0}}>View options</Typography>
-            <Typography>{items.length} items</Typography>
+            <Typography>{procItems.length} items</Typography>
             </AccordionSummary>
             <AccordionDetails>
                 <List>
@@ -119,18 +126,24 @@ export const DynamicObjectListView = ({items, listUid, context}: {items: any[], 
                             <MenuItem value={'type'}>Item type</MenuItem>
                         </Select>
                     </ListItem>
+                    <ListItem>
+                    <FormControlLabel
+                        control={<Switch checked={reverseOrder} onChange={() => setReverseOrder(!reverseOrder)} name={"moveToInbox"} />}
+                        label={"Latest items on top"}
+                    />
+                    </ListItem>
                 </List>
 
             </AccordionDetails>
         </Accordion>
-        <IconButton onClick={() => {if (listUid) window.unigraph.deleteItemFromArray(listUid, items.map((el, idx) => idx), context['uid'])}}><ClearAll/></IconButton>
+        <IconButton onClick={() => {if (listUid) window.unigraph.deleteItemFromArray(listUid, procItems.map((el, idx) => idx), context['uid'])}}><ClearAll/></IconButton>
         </div>
             
             {!groupBy.length ? 
-                items.map((el, index) => <DynamicListItem item={el['_value']} index={index} context={context} listUid={listUid} />) : 
-                groupers[groupBy](items.map(it => it['_value'])).map((el: Group) => <React.Fragment>
+                procItems.map((el, index) => <DynamicListItem item={el['_value']} index={index} context={context} listUid={listUid} callbacks={callbacks} />) : 
+                groupers[groupBy](procItems.map(it => it['_value'])).map((el: Group) => <React.Fragment>
                     <ListSubheader>{el.name}</ListSubheader>
-                    {el.items.map((it, index) => <DynamicListItem item={it} index={index} context={context} listUid={listUid} />)}
+                    {el.items.map((it, index) => <DynamicListItem item={it} index={index} context={context} listUid={listUid} callbacks={callbacks} />)}
                 </React.Fragment>)
             }
     </div>

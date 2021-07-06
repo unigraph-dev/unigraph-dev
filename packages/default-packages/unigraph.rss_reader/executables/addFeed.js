@@ -11,7 +11,7 @@ const feedObj = {
         creative_work: {
             abstract: {
                 type: {'unigraph.id': '$/schema/html'},
-                _value: feed.description
+                _value: feed.description || "No description"
             }
         }
     }

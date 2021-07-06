@@ -15,7 +15,7 @@ export const Tweet: DynamicViewRenderer = ({data, callbacks}) => {
         }}
         badgeContent={<Avatar style={{height: "16px", width: "16px"}} alt="Twitter" src="https://abs.twimg.com/responsive-web/client-web/icon-ios.b1fc7275.png" />}
       >
-        <Avatar src={data.get('from_user/profile_image').as('primitive')} onClick={() => {window.open(`https://twitter.com/${data.get("from_user/username").as("primitive")}/status/${data.get('twitter_id').as("primitive")}`, "_blank")}}></Avatar>
+        <Avatar src={data.get('from_user/profile_image').as('primitive')} onClick={() => {window.open(`https://twitter.com/${data.get("from_user/username").as("primitive")}/status/${data.get('twitter_id').as("primitive")}`, "_blank"); if (callbacks?.removeFromContext) callbacks.removeFromContext();}}></Avatar>
       </Badge>
         </div>
         
