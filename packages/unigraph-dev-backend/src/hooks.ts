@@ -1,3 +1,4 @@
+import _ from "lodash";
 import { Cache } from "./caches";
 import { Subscription } from "./subscriptions";
 
@@ -6,6 +7,10 @@ export type Hooks = Record<string, Function[]>
 
 export async function callHooks<T>(hooks: Hooks, type: string, context: T) {
     if (Object.keys(hooks).includes(type)) await Promise.all(hooks[type].map(val => val(context)));
+}
+
+export function addHook(hooks: Hooks, type: string, fn: any) {
+    return _.merge({}, hooks, {[type]: [fn]});
 }
 
 // Default hooks

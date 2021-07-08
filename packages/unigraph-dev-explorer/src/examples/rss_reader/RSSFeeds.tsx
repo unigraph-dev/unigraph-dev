@@ -7,7 +7,7 @@ import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { AutoDynamicView, DefaultObjectListView } from "../../components/ObjectView/DefaultObjectView";
 import { DynamicViewRenderer } from "../../global";
 import { download, upload } from "../../utils";
-import { Link } from "@material-ui/icons";
+import { Description, Link } from "@material-ui/icons";
 import { getComponentFromPage } from "../../Workspace";
 import Sugar from "sugar";
 
@@ -45,7 +45,8 @@ export type ARSSItem = {
         url: string,
         favicon: string,
         source: string,
-        date_created: string
+        date_created: string,
+        creative_work?: any
     },
     semantic_properties?: {
         children: any[]
@@ -72,6 +73,11 @@ const RSSItem: DynamicViewRenderer = ({data, callbacks}) => {
                     if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid}));
                     if (callbacks?.removeFromContext) callbacks.removeFromContext();
                 }}/>
+                {unpadded.item_data?.creative_work?.text ? <Description onClick={() => {
+                    const htmlUid = data?.get('item_data/creative_work/text')?.['_value']?.['_value']?.['uid'];
+                    if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid}));
+                    if (callbacks?.removeFromContext) callbacks.removeFromContext();
+                }}/> : []}
                 <div>Added: {Sugar.Date.relative(new Date(unpadded?.item_data?.date_created))}, updated: {Sugar.Date.relative(new Date(unpadded?._timestamp?._updatedAt))}</div></div>
                 {unpadded?.content?.abstract ? <div style={{color: 'black'}}>{unpadded.content.abstract+"..."}</div> : ''}
             </div>} 

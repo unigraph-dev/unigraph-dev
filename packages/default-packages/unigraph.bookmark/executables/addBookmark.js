@@ -24,4 +24,6 @@ if (result.favicon?.startsWith("/")) {
     result.favicon = site.origin + result.favicon;
 }
 
-unigraph.addObject(result, "$/schema/web_bookmark")
+const uid = await unigraph.addObject(result, "$/schema/web_bookmark");
+
+unigraph.callHook('after_bookmark_updated', {uids: [uid[0]]});

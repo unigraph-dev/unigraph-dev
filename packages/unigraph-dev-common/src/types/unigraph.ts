@@ -283,5 +283,11 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param options Options for export
      */
     exportObjects?(uids: string[], options: any): any;
+    /**
+     * Calls all executors of a given (user) hook by name sequentially.
+     * @param name Name of the (user) hook
+     * @param params Params object
+     */
+    callHook?(name: string, params: any): any;
 }
 /** End of unigraph interface */ // Don't remove this line - needed for Monaco to work

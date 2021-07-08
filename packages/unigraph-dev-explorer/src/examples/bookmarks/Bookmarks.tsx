@@ -4,12 +4,13 @@ import { pkg as bookmarkPackage } from 'unigraph-dev-common/lib/data/unigraph.bo
 
 import { DynamicViewRenderer } from "../../global";
 import { List, ListItem, TextField, Button, Chip, IconButton, ListItemSecondaryAction, ListItemText, ListItemIcon, Avatar } from "@material-ui/core";
-import { Delete, Link } from "@material-ui/icons";
+import { Delete, Description, Link } from "@material-ui/icons";
 import { registerDynamicViews, withUnigraphSubscription } from 'unigraph-dev-common/lib/api/unigraph-react'
 import { Tag } from "../semantic/Tag";
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { getExecutableId } from "unigraph-dev-common/lib/api/unigraph";
 import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
+import { getComponentFromPage } from "../../Workspace";
 
 type ABookmark = {
     uid?: string,
@@ -83,6 +84,11 @@ export const BookmarkItem: DynamicViewRenderer = ({data, callbacks}) => {
                 <Link onClick={() => {
                     window.open(unpadded.url, "_blank")
                 }}/>
+                {unpadded.creative_work?.text ? <Description onClick={() => {
+                    const htmlUid = data?.get('creative_work/text')?.['_value']?.['_value']?.['uid'];
+                    if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid}));
+                    if (callbacks?.removeFromContext) callbacks.removeFromContext();
+                }}/> : []}
                 {!unpadded.semantic_properties?.children?.map ? [] :
                 unpadded.semantic_properties?.children?.map(it => <Tag data={it}/>)}
                 {unpadded.creative_work?.abstract ? unpadded.creative_work?.abstract : []}
