@@ -1,71 +1,49 @@
-import { Button, TextField } from '@material-ui/core';
+/* eslint-disable react-hooks/rules-of-hooks */ // Using maps as React functional components
+import { Button, TextField, Typography } from '@material-ui/core';
+import _ from 'lodash';
 import React from 'react';
 import { useEffectOnce } from 'react-use';
 import { Definition, SchemaDgraph } from 'unigraph-dev-common/lib/types/json-ts';
 import { ReferenceableSelectorControlled } from './ReferenceableSelector';
 
-const recursiveBindField = (path: string, rootObj: any) => {
-    const [currentObject, setCurrentObject]: any = rootObj;
+// TODO: Support for adding entries
+// TODO: Support for padding unpadded (with entityUtils)
 
-    const onChange = (newValue: any) => {
-        let newObj: any = {};
-        let paths = path.split('/')
-        let curr = newObj;
-        //console.log(newValue)
-        paths.slice(1, paths.length-1).forEach(key => {
-            newObj[key] = {};
-            curr = newObj[key];
-        })
-        curr[paths[paths.length-1]] = newValue;
-        // @ts-ignore
-        window.b = setCurrentObject
-        setCurrentObject(JSON.parse(JSON.stringify({...currentObject, ...newObj})))
+const TypedObjectPartEditor: any = {
+    "$/composer/Object": ({localSchema, localObject, setLocalObject}: any) => {
+        const [fields, setFields] = React.useState<[any, any][]>([]);
+
+        return <React.Fragment>
+            {fields.map(([key, value]) => <div>
+                <Typography variant="body1">{key}</Typography>
+                <ObjectPartEditor
+                    localSchema={(localSchema['_definition']['_properties']).filter((el: any) => el['_key'] === key)[0]}
+                    localObject={localObject['_value'][key]}
+                    setLocalObject={(newVal: any) => setLocalObject(_.merge({}, localObject, {_value: {[key]: newVal}}))}
+                />
+            </div>)}
+        </React.Fragment>
     }
-
-    return onChange;
 }
 
-const getFieldsFromDefinition = (def: Definition, schemas: any, rootObj: any, path = "") => {
-    //console.log(schemas)
-    // @ts-ignore
-    if (def.type['unigraph.id'].startsWith('$/schema')) def = schemas[def.type['unigraph.id']]._definition;
+function getPartEditor(type: string) {
+    return Object.keys(TypedObjectPartEditor).includes(type) ? TypedObjectPartEditor[type] : TypedObjectPartEditor['default']
+}
 
-    // @ts-ignore
-    if(def.type['unigraph.id'] === '$/composer/Object') { // Generate object fields
-        // @ts-ignore: already have properties. fix type later
-        return def._properties.map((el) => <div>
-            {[el._key, getFieldsFromDefinition(el._definition, schemas, rootObj, path+`/${el._key}`)]}
-        </div>) // @ts-ignore
-    } else if (def.type['unigraph.id'].startsWith('$/composer/Array')) {
-        return "This is an array..."
-        // @ts-ignore
-    } else if (def.type['unigraph.id'].startsWith('$/composer/Union')) {
-        return "This is a union..."
-        // @ts-ignore
-    } else if (def.type['unigraph.id'].startsWith('$/primitive')) {
-        let onFChange = recursiveBindField(path, rootObj)
-        let val: Function = (v: string) => v;
-        // @ts-ignore
-        switch (def.type['unigraph.id']) {
-            case "$/primitive/number":
-                val = (v: string) => Number(v);
-                break;
-            case "$/primitive/boolean":
-                val = (v: string) => Boolean(v);
-                break;
-            default:
-                break;
-        }
-        return <TextField variant="outlined" onChange={(event) => {
-            let newValue = event.target.value;
-            onFChange(val(newValue));
-        }}/>
-    }
+export const ObjectPartEditor = ({localSchema, localObject, setLocalObject}: any) => {
+
+    let innerEl = React.createElement(getPartEditor(localSchema['_definition']['type']['unigraph.id']), {
+        localSchema, localObject, setLocalObject
+    });
+
+    return <div>
+        {innerEl}
+    </div>
 }
 
 export const ObjectEditor = () => {
 
-    const [currentSchema, setCurrentSchema]: [null | SchemaDgraph, Function] = React.useState(null)
+    const [currentSchema, setCurrentSchema]: [any, Function] = React.useState(null)
     const [currentSchemaSHName, setCurrentSchemaSHName]: any = React.useState(null)
     const [referenceables, setReferenceables] = React.useState([]);
     const [allSchemas, setAllSchemas] = React.useState({});
@@ -82,11 +60,10 @@ export const ObjectEditor = () => {
             referenceables={referenceables}
             onChange={(schema: string) => window.unigraph.getSchemas()
                 .then((schemas: Record<string, SchemaDgraph>) => {setCurrentSchema(schemas[schema]); setCurrentSchemaSHName(schema)})}
-            value={// @ts-ignore
-                (currentSchema as unknown as SchemaDgraph)?._definition.type['unigraph.id']}
+            value={currentSchema?._definition?.type['unigraph.id']}
         />
         {currentSchema ? <div>
-            {getFieldsFromDefinition((currentSchema as any)._definition, allSchemas, [currentObject, setCurrentObject])}
+            <ObjectPartEditor localSchema={currentSchema} localObject={currentObject} setLocalObject={setCurrentObject} />
             {JSON.stringify(currentObject)}
         </div> : []}
         <Button onClick={()=> {window.unigraph.addObject(currentObject, currentSchemaSHName)}}>Submit (WIP)</Button>

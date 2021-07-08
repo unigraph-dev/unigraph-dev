@@ -29,12 +29,14 @@ export const UnigraphSearch = () => {
         search(query)
     }, [query])
 
+    const dynamicViews = window.unigraph.getState('registry/dynamicView').value
+
     return <div>
         <TextField id="search-box" label="Search" value={query} onChange={(event) => {setQuery(event?.target.value)}}/>
         {response ? entities.length + " results" : []}
         <List style={{fontSize: "8px"}}>
             {buildGraph(entities).map((el: any) => 
-                (el.type?.['unigraph.id'] && Object.keys(window.DynamicViews).includes(el.type?.['unigraph.id'])) ? <ListItem><AutoDynamicView object={el} /></ListItem> : []
+                (el.type?.['unigraph.id'] && Object.keys(dynamicViews).includes(el.type?.['unigraph.id'])) ? <ListItem><AutoDynamicView object={el} /></ListItem> : []
             )}
         </List>
     </div>

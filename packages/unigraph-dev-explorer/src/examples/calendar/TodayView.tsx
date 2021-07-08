@@ -1,10 +1,11 @@
 import { Button, Typography } from "@material-ui/core"
 import React from "react"
-import { pages } from "../../App"
 import { UnigraphWidget } from "../../components/UnigraphCore/UnigraphWidget"
 import { WidgetFocus } from "./WidgetFocus"
 import { WidgetPomodoro } from "./WidgetPomodoro"
 import Sugar from "sugar"
+
+const pages = window.unigraph.getState('registry/pages')
 
 export const TodayView = ({pageName}: any) => {
 
@@ -30,9 +31,9 @@ export const TodayView = ({pageName}: any) => {
         </div>
         {pageName ? <div style={{width: "32px"}}/> : []}
         {showInboxes ? <div style={{flexGrow: 1, padding: "8px 16px 16px 8px", display: "flex", flexDirection: "column"}}>
-            <UnigraphWidget style={{overflow: "auto"}}><div style={{flex: 1, height: "100%"}}>{pages['inbox'].constructor()}</div></UnigraphWidget> 
+            <UnigraphWidget style={{overflow: "auto"}}><div style={{flex: 1, height: "100%"}}>{pages.value['inbox'].constructor()}</div></UnigraphWidget> 
             <div style={{height: "16px"}}></div>
-            <UnigraphWidget style={{overflow: "auto"}}><div style={{flex: 1, height: "100%"}}>{pages['current-events'].constructor()}</div></UnigraphWidget>
+            <UnigraphWidget style={{overflow: "auto"}}><div style={{flex: 1, height: "100%"}}>{pages.value['current-events'].constructor()}</div></UnigraphWidget>
         </div>: []}
     </div>
 }
