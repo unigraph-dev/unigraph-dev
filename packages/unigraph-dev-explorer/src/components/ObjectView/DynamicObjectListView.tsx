@@ -140,7 +140,7 @@ export const DynamicObjectListView = ({items, listUid, context, callbacks}: {ite
         </div>
             
             {!groupBy.length ? 
-                procItems.map((el, index) => <div>{el['_index']['_value.#i']}<DynamicListItem item={el['_value']} index={index} context={context} listUid={listUid} callbacks={callbacks} /></div>) : 
+                procItems.map((el, index) => <DynamicListItem item={el['_value']} index={index} context={context} listUid={listUid} callbacks={callbacks} />) : 
                 groupers[groupBy](procItems.map(it => it['_value'])).map((el: Group) => <React.Fragment>
                     <ListSubheader>{el.name}</ListSubheader>
                     {el.items.map((it, index) => <DynamicListItem item={it} index={index} context={context} listUid={listUid} callbacks={callbacks} />)}
