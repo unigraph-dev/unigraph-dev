@@ -613,7 +613,7 @@ export function unpad(object: any) {
 
 export function clearEmpties(o: any) {
     for (var k in o) {
-      if (!o[k]) {
+      if (typeof o[k] === "undefined" || o[k] === null) {
           delete o[k];
           continue
       } else if (typeof o[k] !== "object") {
