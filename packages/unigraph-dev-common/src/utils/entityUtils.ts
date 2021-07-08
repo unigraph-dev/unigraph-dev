@@ -404,7 +404,7 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
                     localSchema = schemas[localSchema.type['unigraph.id']]._definition
                 }
                 //console.log(localSchema, currentEntity)
-                if (Array.isArray(currentEntity)) {
+                if (Array.isArray(currentEntity) && localSchema['type']?.['unigraph.id'] === "$/composer/Array") {
                     currentEntity.forEach(e => recurse(unpadValue(e), schemas, localSchema['_parameters']['_element']));
                 } else if (localSchema?.type?.['unigraph.id'] === "$/composer/Object" || Object.keys(currentEntity).includes('unigraph.id')) {
                     // Is object, check for various stuff
@@ -669,4 +669,50 @@ export function prepareExportObjects(objects: any[], exportSchemas: boolean = fa
 export function buildGraphFromMap(objs: any) {
     const ret = buildGraph(Object.values(objs));
     return Object.fromEntries(Object.keys(objs).map((el, index) => [el, ret[index]]))
+}
+
+export function flatten(objs: any[]) {
+
+    let entities: any = {}
+
+    function flattenRecurse(curr: any) {
+        if (typeof curr === "object" && curr && Array.isArray(curr)) {
+            curr.forEach(flattenRecurse);
+        } else if (typeof curr === "object" && curr) {
+            if (curr.uid && (curr['dgraph.type']?.includes?.('Entity') || curr['dgraph.type']?.includes?.('Interface'))) {
+                // Flatten entities
+                if (!entities[curr.uid]) entities[curr.uid] = curr;
+                else Object.keys(curr).forEach(el => {if (el !== "uid") delete curr[el];});
+                // Remove type
+                if (curr['type']['_value[']) delete curr['type']['_value['];
+            }
+            // Continue recursion
+            Object.values(curr).forEach(flattenRecurse)
+        }
+        // If primitive, don't recurse anymore
+    }
+
+    objs.forEach(flattenRecurse);
+
+    return entities;
+
+}
+
+export function unflatten(objsMap: any, targets: string[]) {
+
+    function unflattenRecurse(curr: any, target: string) {
+        if (typeof curr === "object" && curr && Array.isArray(curr)) {
+            curr.forEach((el: any) => unflattenRecurse(el, target));
+        } else if (typeof curr === "object" && curr) {
+            Object.entries(curr).forEach(([key, value]: any) => {
+                if (value.uid && objsMap[value.uid] && !targets.includes(value.uid)) {
+                    curr[key] = objsMap[value.uid];
+                    unflattenRecurse(curr[key], target)
+                } else unflattenRecurse(curr[key], target)
+            })
+        }
+    }
+
+    targets.forEach(el => unflattenRecurse(objsMap[el], el));
+    return targets.map(el => objsMap[el]);
 }

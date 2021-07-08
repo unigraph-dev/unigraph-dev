@@ -80,7 +80,7 @@ const RSSItem: DynamicViewRenderer = ({data, callbacks}) => {
 }
 
 const RSSFeed: DynamicViewRenderer = ({data, callbacks}) => {
-    return <AutoDynamicView object={data?.['_value']?.['site_info']?.['_value']}/>
+    return <AutoDynamicView object={data?.['_value']?.['site_info']?.['_value']} noContextMenu noDrop/>
 }
 
 const dynamicComponents = {
@@ -108,7 +108,7 @@ const RSSFeedsBody: React.FC<{data: ARSSFeed[]}> = ({data}) => {
             })
         }}>Import from OPML</Button>
         <Button>Export to OPML</Button>
-        <Button onClick={() => {download('feeds.json', JSON.stringify(data, null, 4))}}>Export as entities</Button>
+        <Button onClick={() => {window.unigraph.exportObjects?.(data.map(el => el['uid']) as string[], {}).then((results: any[]) => {download('feeds.json', JSON.stringify(results))})}}>Export as entities</Button>
         <Divider/>
     </div>
 }

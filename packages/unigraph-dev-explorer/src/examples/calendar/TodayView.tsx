@@ -15,7 +15,7 @@ export const TodayView = ({pageName}: any) => {
 
     console.log(pageName)
     return <div style={{display: "flex", height: "100%", width: "100%"}}>
-        <div style={{width: pageName ? "" : "33%", padding: "8px 16px 16px 8px", display: "flex", height: "100%", flexDirection: "column"}}>
+        <div style={{width: pageName ? "" : "33%", padding: "8px 16px 16px 8px", display: "flex", height: "100%", flexDirection: "column", flexGrow: 1}}>
             <UnigraphWidget style={{flex: 1}}>
                 <div style={{height: "120px"}}>
                     <Typography variant={"h2"}>{Sugar.Date.format(currentTime, '{hh}:{mm}:{ss}')}</Typography>

@@ -1,6 +1,6 @@
 import { buildGraph, getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
 import { Unigraph } from "unigraph-dev-common/lib/types/unigraph";
-import { processAutorefUnigraphId, makeQueryFragmentFromType, clearEmpties, buildUnigraphEntity, processAutoref, getUpsertFromUpdater } from "unigraph-dev-common/lib/utils/entityUtils";
+import { processAutorefUnigraphId, makeQueryFragmentFromType, clearEmpties, buildUnigraphEntity, processAutoref, getUpsertFromUpdater, flatten, unflatten } from "unigraph-dev-common/lib/utils/entityUtils";
 import { UnigraphUpsert } from "./custom";
 import DgraphClient, { queries } from "./dgraphClient";
 import { buildExecutable } from "./executableManager";
@@ -176,7 +176,6 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             delete_array.setDelNquads(toDel)
             const create_json = new dgraph.Mutation();
             create_json.setSetNquads(newValues.join('\n'));
-            console.log(newValues);
             const result = await client.createDgraphUpsert({
                 query: false,
                 mutations: [
@@ -227,6 +226,15 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             return new Promise((resolve, _) => {
                 states.httpCallbacks[key] = resolve;
             })
+        },
+        exportObjects: async (uids, options) => {
+            const queries = uids.map(el => `(func: uid(${el})) @recurse {uid unigraph.id expand(_userpredicate_) }`);
+            const res: any[] = (await states.localApi.getQueries(queries)).map((el: any[]) => el[0]);
+            const entityMap = flatten(res);
+            const indexesQueries = Object.keys(entityMap).map(el => `(func: uid(${el})) {unigraph.indexes {expand(_userpredicate_) {uid } }}`);
+            const indexesRes = await states.localApi.getQueries(indexesQueries);
+            indexesRes.forEach((el: any, idx: number) => {if (el[0]) entityMap[Object.keys(entityMap)[idx]]['unigraph.indexes'] = el[0]['unigraph.indexes'];});
+            return unflatten(entityMap, uids);
         }
     }
 }

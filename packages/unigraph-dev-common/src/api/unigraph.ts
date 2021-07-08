@@ -368,7 +368,15 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
             };
             sendEvent(connection, "get_search_results", {query: query, method: method}, id);
         }),
-        getSchemaMap: () => caches.schemaMap
+        getSchemaMap: () => caches.schemaMap,
+        exportObjects: (uids, options) => new Promise((resolve, reject) => {
+            const id = getRandomInt();
+            callbacks[id] = (response: any) => {
+                if (response.success && response.result) resolve(response.result);
+                else reject(response);
+            };
+            sendEvent(connection, "export_objects", {uids, options}, id);
+        })
     }
 }
 

@@ -227,3 +227,11 @@ declare type EventGetSearchResults = {
   method: string,
   display?: string
 }
+
+declare type EventExportObjects = {
+  type: "event",
+  event: "export_objects",
+  id: number,
+  uids: string[],
+  options: any
+}
