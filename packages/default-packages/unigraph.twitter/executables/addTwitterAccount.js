@@ -34,7 +34,7 @@ const addAccount = async (userAccToken, userAccTokenSecret) => {
             type: {"unigraph.id": "$/schema/twitter_list"},
             twitter_id: subObj?.id_str,
             name: subObj?.name,
-            description: subObj?.description,
+            //description: subObj?.description,
             last_id_fetched: "1"
         }]
     };

@@ -165,17 +165,18 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             const newValues: any[] = [];
             let toDel = "";
             origObject['_value['].forEach((el: any, index: number) => {
-                if (!items.includes(index) && !items.includes(el.uid) && !items.includes(el['_value']?.uid)) {newValues.push({...el, _index: {"_value.#i": index}})}
-                else if (relUid) { toDel += "<" + el['_value'].uid + "> <unigraph.origin> <" +  + relUid + "> .\n"}
+                if (!items.includes(index) && !items.includes(el.uid) && !items.includes(el['_value']?.uid)) {
+                    newValues.push(`<${el['_index'].uid}> <_value.#i> "${newValues.length.toString()}" .`)
+                } else { 
+                    if (relUid) toDel += "<" + el['_value'].uid + "> <unigraph.origin> <" +  + relUid + "> .\n";
+                    toDel += `<${uid}> <_value[> <${el.uid}> .\n`;
+                }
             });
             const delete_array = new dgraph.Mutation();
-            delete_array.setDelNquads(`<${uid}> <_value[> * .` + "\n" + toDel)
+            delete_array.setDelNquads(toDel)
             const create_json = new dgraph.Mutation();
-            create_json.setSetJson({
-                uid: `${uid}`,
-                "_value[": newValues,
-                "_predicate_": ["_value["]
-            });
+            create_json.setSetNquads(newValues.join('\n'));
+            console.log(newValues);
             const result = await client.createDgraphUpsert({
                 query: false,
                 mutations: [

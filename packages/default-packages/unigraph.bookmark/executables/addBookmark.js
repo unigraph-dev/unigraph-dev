@@ -14,7 +14,7 @@ const result = {
     creative_work: {
         abstract: {
             type: {'unigraph.id': '$/schema/html'},
-            _value: res?.general?.description || res?.openGraph?.description || res?.twitter?.description || "<br/>"
+            _value: res?.general?.description || res?.openGraph?.description || res?.twitter?.description || ""
         }
     }
 }
