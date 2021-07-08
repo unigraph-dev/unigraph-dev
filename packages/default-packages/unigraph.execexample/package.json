@@ -9,6 +9,7 @@
             "env": "routine/js",
             "id": "hello",
             "src": "executables/hello.js",
+            "on_hook": "after_textual_updated",
             "editable": true
         },
         {

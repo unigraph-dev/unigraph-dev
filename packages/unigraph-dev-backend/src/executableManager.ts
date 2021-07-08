@@ -11,6 +11,7 @@ import cron from 'node-cron';
 
 import _ from "lodash";
 import { PackageDeclaration } from "unigraph-dev-common/lib/types/packages";
+import { addHook } from "./hooks";
 
 export type Executable = {
     name?: string,
@@ -18,6 +19,7 @@ export type Executable = {
     src: string,
     env: string,
     periodic?: string,
+    on_hook?: string,
     editable?: boolean,
     edited?: boolean,
     semantic_properties?: any
@@ -53,7 +55,7 @@ export function createExecutableCache(client: DgraphClient, context: Partial<Exe
             if (k.startsWith('$/executable') && !cache.data[k]) cache.data[k] = unpad(v);
         })
         
-        initExecutables(Object.entries(cache.data), context, unigraph, schedule)
+        initExecutables(Object.entries(cache.data), context, unigraph, schedule, states)
     };
 
     cache.updateNow();
@@ -70,11 +72,16 @@ export function buildExecutable(exec: Executable, context: ExecContext, unigraph
     return undefined;
 }
 
-export function initExecutables(executables: [string, Executable][], context: Partial<ExecContext>, unigraph: Unigraph, schedule: Record<string, cron.ScheduledTask>) {
+export function initExecutables(executables: [string, Executable][], context: Partial<ExecContext>, unigraph: Unigraph, schedule: Record<string, cron.ScheduledTask>, states: any) {
     executables.forEach(([key, el]) => {
         if (key.startsWith("0x") && el.periodic) {
             schedule[el["unigraph.id"]]?.stop();
             schedule[el["unigraph.id"]] = cron.schedule(el.periodic, buildExecutable(el, {...context, definition: el, params: {}}, unigraph))
+        }
+        if (key.startsWith("0x") && el.on_hook) {
+            states.hooks = addHook(states.hooks, el.on_hook, async (params: any) => {
+                return (buildExecutable(el, {...context, definition: el, params}, unigraph))();
+            })
         }
     })
 }

@@ -123,25 +123,33 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         // latertodo
         updateSimpleObject: async (object, predicate, value) => {throw Error("Not implemented")},
         updateObject: async (uid, newObject, isUpsert = true, pad = true, subIds) => {
+            clearEmpties(newObject);
             const newUid = uid ? uid : newObject.uid
             // Get new object's unigraph.origin first
+            console.log("update: 1")
             let origin = newObject['unigraph.origin'] ? newObject['unigraph.origin'] : (await client.queryData<any>(`query { entity(func: uid(${newUid})) { <unigraph.origin> { uid } }}`, []))[0]?.['unigraph.origin']
             if (!Array.isArray(origin)) origin = [origin];
+            console.log("update: 2", uid)
             const origObject = (await client.queryUID(uid))[0];
             let finalUpdater = newObject;
-            if (pad) {
-                const schema = origObject['type']['unigraph.id'];
-                const paddedUpdater = buildUnigraphEntity(newObject, schema, states.caches['schemas'].data, true, {validateSchema: true, isUpdate: true, states: {}, globalStates: {}});
-                finalUpdater = processAutoref(paddedUpdater, schema, states.caches['schemas'].data);
-            } else {
-                finalUpdater = processAutorefUnigraphId(finalUpdater);
+            console.log("update: 3", uid)
+            try {
+                if (pad) {
+                    const schema = origObject['type']['unigraph.id'];
+                    const paddedUpdater = buildUnigraphEntity(newObject, schema, states.caches['schemas'].data, true, {validateSchema: true, isUpdate: true, states: {}, globalStates: {}});
+                    finalUpdater = processAutoref(paddedUpdater, schema, states.caches['schemas'].data);
+                } else {
+                    finalUpdater = processAutorefUnigraphId(finalUpdater);
+                }
+                const upsert = {...finalUpdater, uid: newUid, 'unigraph.origin': origin};
+                //console.log(finalUpdater, upsert)
+                const finalUpsert = insertsToUpsert([upsert]);
+                //console.log(finalUpsert)
+                await client.createUnigraphUpsert(finalUpsert);
+                callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches, subIds: subIds})
+            } catch (e) {
+                console.log(e, uid, newObject)
             }
-            const upsert = {...finalUpdater, uid: newUid, 'unigraph.origin': origin};
-            console.log(finalUpdater, upsert)
-            const finalUpsert = insertsToUpsert([upsert]);
-            console.log(finalUpsert)
-            await client.createUnigraphUpsert(finalUpsert);
-            callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches, subIds: subIds})
         },
         deleteRelation: async (uid, relation) => {
             await client.deleteRelationbyJson({uid: uid, ...relation});
@@ -235,6 +243,9 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             const indexesRes = await states.localApi.getQueries(indexesQueries);
             indexesRes.forEach((el: any, idx: number) => {if (el[0]) entityMap[Object.keys(entityMap)[idx]]['unigraph.indexes'] = el[0]['unigraph.indexes'];});
             return unflatten(entityMap, uids);
+        },
+        callHook: async (name, params) => {
+            await callHooks(states.hooks, name, params)
         }
     }
 }

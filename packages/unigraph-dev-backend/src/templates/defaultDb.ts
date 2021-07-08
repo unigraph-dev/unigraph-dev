@@ -133,6 +133,14 @@ export const packageExecutableSchema = {
                 }
             },
             {
+                "_key": "on_hook",
+                "_definition": {
+                    "type": {
+                        "unigraph.id": "$/primitive/string"
+                    }
+                }
+            },
+            {
                 "_key": "src",
                 "_definition": {
                     "type": {

@@ -332,7 +332,7 @@ export const queries: Record<string, (a: string) => string> = {
         uuuuu as uid
       }
     }
-    qqqqq(func: uid(uuuuu, uuuu, uuu, uu)) @filter(type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) @recurse(depth: 10) {
+    qqqqq(func: uid(uuuuu, uuuu, uuu, uu)) @filter(type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) @recurse(depth: 15) {
       uid
       expand(_userpredicate_)
       unigraph.id

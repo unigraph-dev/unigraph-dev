@@ -54,6 +54,11 @@ for(let i=0; i<objects.length; ++i) {
   const uid = await unigraph.addObject(objects[i], "$/schema/rss_item");
   uids.push(uid[0])
 }
+const bookmarks = (await unigraph.getQueries(uids.map(el => `(func: uid(${el})) {_value {item_data {_value {uid}}}}`)))
+  .map(el => el[0]?.['_value']['item_data']['_value']['uid'])
+  .filter(el => el !== undefined)
+
 if (uids.length) unigraph.runExecutable("$/package/unigraph.core/0.0.1/executable/add-item-to-list", {where: "$/entity/inbox", item: uids.reverse()});
 // TODO: fix this race condition by enforcing 
 setTimeout(() => unigraph.addNotification({name: "Feeds updated", from: "unigraph.rss_reader", content: "Added " + objects.length + " items.", actions: []}), 1000);
+setTimeout(() => unigraph.callHook("after_bookmark_updated", {uids: bookmarks}), 2000)
