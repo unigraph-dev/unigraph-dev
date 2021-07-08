@@ -276,6 +276,12 @@ export interface Unigraph<TT = WebSocket | false> {
     /**
      * Returns a promise that resolves to the request when the HTTP callback endpoint is visited.
      */
-    awaitHttpCallback?(key: string): Promise<any>
+    awaitHttpCallback?(key: string): Promise<any>;
+    /**
+     * Exports a list of specified objects into a JSON file.
+     * @param uids The list of objects in a UID string array
+     * @param options Options for export
+     */
+    exportObjects?(uids: string[], options: any): any;
 }
 /** End of unigraph interface */ // Don't remove this line - needed for Monaco to work
