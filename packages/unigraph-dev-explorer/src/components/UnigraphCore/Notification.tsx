@@ -1,6 +1,5 @@
 import { List, ListItem, ListItemText, Typography } from "@material-ui/core";
 import React from "react";
-import { registerDynamicViews, withUnigraphSubscription } from "unigraph-dev-common/lib/api/unigraph-react";
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { DynamicViewRenderer } from "../../global";
 import * as timeago from 'timeago.js';
@@ -16,7 +15,7 @@ export type ANotification = {
     }
 }
 
-const Notification: DynamicViewRenderer = ({data, callbacks}) => {
+export const Notification: DynamicViewRenderer = ({data, callbacks}) => {
     let unpadded: ANotification = unpad(data);
 
     return <React.Fragment>
@@ -38,8 +37,6 @@ const Notification: DynamicViewRenderer = ({data, callbacks}) => {
         />
     </React.Fragment>
 }
-
-registerDynamicViews({"$/schema/notification": Notification});
 
 export const NotificationCenterBody: React.FC<{data: ANotification[]}> = ({data}) => {
     data = JSON.parse(JSON.stringify(data)).reverse()

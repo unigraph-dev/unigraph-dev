@@ -49,7 +49,7 @@ const StringObjectViewer = ({object}: {object: any}) => {
     </div>;
 }
 
-const DefaultSkeleton = () => {
+export const DefaultSkeleton = () => {
     return <div style={{width: "100%"}}><Skeleton /> <Skeleton /> <Skeleton /></div>
 }
 
@@ -85,7 +85,7 @@ const JsontreeObjectViewer = ({object, options}: {object: any, options: ObjectVi
     </div>
 }
 
-const Executable: DynamicViewRenderer = ({data, callbacks}) => {
+export const Executable: DynamicViewRenderer = ({data, callbacks}) => {
     const unpadded = unpad(data);
 
     return <React.Fragment>
@@ -93,19 +93,6 @@ const Executable: DynamicViewRenderer = ({data, callbacks}) => {
         <ListItemText primary={"Run code: " + unpadded.name} secondary={`Environment: ${unpadded.env}`} />
     </React.Fragment>
 }
-
-const DynamicViews: Record<string, DynamicViewRenderer> = {
-    "$/schema/executable": Executable,
-    "$/skeleton/default": DefaultSkeleton,
-}
-
-window.DynamicViews = DynamicViews;
-
-const DynamicViewsDetailed: Record<string, DynamicViewRenderer> = {
-    "$/schema/executable": ExecutableCodeEditor,
-}
-
-window.DynamicViewsDetailed = DynamicViewsDetailed;
 
 const SubentityDropAcceptor = ({ uid }: any) => {
     const [{ isOver, canDrop }, dropSub] = useDrop(() => ({
@@ -132,6 +119,12 @@ const SubentityDropAcceptor = ({ uid }: any) => {
     return <div ref={dropSub} style={{opacity: opacities[canDrop + "" + isOver], width: "100%", height: canDrop ? "16px" : "0px", margin: "0px"}}>
         <hr style={{height: "50%", backgroundColor: "gray", margin: "0px", marginLeft: "48px"}}/>
     </div>
+}
+
+export const ViewViewDetailed: DynamicViewRenderer = ({data}) => {
+    const pages = window.unigraph.getState('registry/pages').value;
+    return pages[data.get('view').as('primitive').replace('/pages/', '')]
+        .constructor(JSON.parse(data.get('props').as('primitive')).config)
 }
 
 export const AutoDynamicView = ({ object, callbacks, component, attributes, inline, allowSubentity, style, noDrag, noDrop, noContextMenu }: AutoDynamicViewProps) => {
@@ -170,6 +163,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
 
     //console.log(object) 
     let el;
+    const DynamicViews = window.unigraph.getState('registry/dynamicView').value
     if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViews).includes(object.type['unigraph.id'])) {
         el = React.createElement(component?.[object.type['unigraph.id']] ? component[object.type['unigraph.id']] : DynamicViews[object.type['unigraph.id']], {
             data: object, callbacks: callbacks ? callbacks : undefined, ...(attributes ? attributes : {})
@@ -198,7 +192,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
 }
 
 export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, callbacks }) => {
-    //console.log(object)
+    const DynamicViewsDetailed = window.unigraph.getState('registry/dynamicViewDetailed').value
     if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViewsDetailed).includes(object.type['unigraph.id'])) {
         return React.createElement(DynamicViewsDetailed[object.type['unigraph.id']], {
             data: object, callbacks: callbacks, options: options || {}
@@ -263,6 +257,7 @@ const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options, callba
 
 const DefaultObjectList: FC<DefaultObjectListViewProps> = ({component, objects, options}) => {
     let finalObjects = objects;
+    const DynamicViews = window.unigraph.getState('registry/dynamicView').value
     if (!options?.filters?.showDeleted) finalObjects = filterPresets['no-deleted'](finalObjects);
     if (!options?.filters?.showNoView) finalObjects = filterPresets['no-noview'](finalObjects, {...DynamicViews, "$/schema/markdown": undefined});
 
@@ -320,4 +315,4 @@ const DefaultObjectListView: FC<DefaultObjectListViewProps> = ({component, objec
 
 }
 
-export { DefaultObjectView, DefaultObjectList, DefaultObjectListView, DynamicViews, DynamicViewsDetailed };
+export { DefaultObjectView, DefaultObjectList, DefaultObjectListView };

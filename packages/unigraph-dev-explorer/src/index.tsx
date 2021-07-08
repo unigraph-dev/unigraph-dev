@@ -1,16 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import init from './init';
+import './init';
+import './pages';
 import * as serviceWorker from './serviceWorker';
 
 import App from './App';
 import { SplashScreen, DisconnectedSplashScreen} from './pages/SplashScreen';
 import { WorkSpace } from './Workspace';
 import Settings from './pages/Settings';
-
-
-init();
 
 function render(component: any) {
   ReactDOM.render(

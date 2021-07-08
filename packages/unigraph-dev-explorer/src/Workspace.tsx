@@ -4,7 +4,7 @@
 
 import React, { ReactElement } from "react";
 
-import { pages, components } from './App';
+import { components } from './App';
 
 import FlexLayout, { Actions, DockLocation, Model, Node, TabNode } from 'flexlayout-react';
 import 'flexlayout-react/style/light.css'
@@ -18,6 +18,8 @@ import { ContextMenu } from "./components/UnigraphCore/ContextMenu";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from 'react-dnd-html5-backend'
 
+const pages = window.unigraph.getState('registry/pages')
+
 export function WorkspacePageComponent({ children, maximize }: any) {
     console.log(maximize)
     return <Container maxWidth={maximize ? false : "lg"} disableGutters style={{paddingTop: maximize ? "0px" : "12px", height: "100%"}}>
@@ -29,7 +31,7 @@ export function WorkspacePageComponent({ children, maximize }: any) {
 export const getComponentFromPage = (location: string, params: any = {}) => {return {
     type: 'tab',
     config: params,
-    name: pages[location.slice(1)].name,
+    name: pages.value[location.slice(1)].name,
     component: '/pages' + location,
     enableFloat: 'true'
 }}
@@ -147,7 +149,7 @@ export function WorkSpace(this: any) {
         var component = node.getComponent();
         var config = node.getConfig() || {};
         if (component.startsWith('/pages/')) {
-            const page = pages[(component.replace('/pages/', '') as string)]
+            const page = pages.value[(component.replace('/pages/', '') as string)]
             console.log(page)
             return <WorkspacePageComponent maximize={page.maximize}>
                 {page.constructor(config)}

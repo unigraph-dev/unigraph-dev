@@ -143,7 +143,13 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
     
 
     return {
-        getState: (name) => states[name] ,
+        getState: (name) => {
+            if (name && states[name]) {
+                return states[name];
+            } else if (!name) {
+                return states
+            } else return undefined as any;
+        },
         addState: (name, initialValue) => {
             if (!states[name]) {
                 const subs: ((newValue: any) => any)[] = [];

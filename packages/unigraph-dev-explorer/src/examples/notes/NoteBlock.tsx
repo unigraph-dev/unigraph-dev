@@ -2,14 +2,13 @@ import { Typography } from "@material-ui/core";
 import React, { FormEvent } from "react";
 import { registerDetailedDynamicViews, registerDynamicViews } from "unigraph-dev-common/lib/api/unigraph-react";
 import { byElementIndex, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
-import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
+import { AutoDynamicView, ViewViewDetailed } from "../../components/ObjectView/DefaultObjectView";
 
 import _ from "lodash";
 import { buildGraph } from "unigraph-dev-common/lib/api/unigraph";
 import { Actions } from "flexlayout-react";
 import { addChild, indentChild, setFocus, splitChild, unindentChild, unsplitChild } from "./commands";
 import { onUnigraphContextMenu } from "../../components/ObjectView/DefaultObjectContextMenu";
-import { pages } from "../../App";
 import { DynamicViewRenderer } from "../../global";
 
 export const getSubentities = (data: any) => {
@@ -65,11 +64,6 @@ export const PlaceholderNoteBlock = ({ callbacks }: any) => {
             onClick={() => {callbacks['add-child']();}}
         >Click here to start writing</Typography>
     </div>
-}
-
-const ViewViewDetailed: DynamicViewRenderer = ({data}) => {
-    return pages[data.get('view').as('primitive').replace('/pages/', '')]
-        .constructor(JSON.parse(data.get('props').as('primitive')).config)
 }
 
 export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) => {

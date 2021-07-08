@@ -1,19 +1,21 @@
 import { unigraph } from "unigraph-dev-common";
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { isJsonString } from "unigraph-dev-common/lib/utils/utils";
-import { DynamicViews, DynamicViewsDetailed } from "./components/ObjectView/DefaultObjectView";
-import { ANotification } from "./components/UnigraphCore/Notification";
+import { ExecutableCodeEditor } from "./components/ObjectView/DefaultCodeEditor";
+import { DefaultSkeleton, Executable, ViewViewDetailed } from "./components/ObjectView/DefaultObjectView";
+import { ANotification, Notification as CNotification } from "./components/UnigraphCore/Notification";
 import { UserSettings } from "./global";
+
+import { init as nb_init } from './examples/notes/NoteBlock';
+import { init as sm_init } from './examples/semantic/init';
+import { init as tw_init } from './examples/twitter/Tweet';
 
 /**
  * Things to do when Unigraph explorer loads
  */
-export default function init() {
+function init() {
+    console.log("initialized!")
     let hst = window.location.hostname.length ? window.location.hostname : "localhost";
-
-    // Load dynamic views registry
-    window.DynamicViews = DynamicViews;
-    window.DynamicViewsDetailed = DynamicViewsDetailed;
 
     const defaultSettings: UserSettings = {
         serverLocation: `ws://${hst}:3001`,
@@ -40,7 +42,7 @@ export default function init() {
         let updated = new Date(unpadded?._timestamp?._updatedAt);
         let current = new Date();
         if (current.valueOf() - updated.valueOf() < 5000) {
-            const nfn = new Notification(unpadded.name, {body: unpadded.from + ": " + unpadded.content})
+            new Notification(unpadded.name, {body: unpadded.from + ": " + unpadded.content})
         }
     });
 
@@ -50,6 +52,8 @@ export default function init() {
     });
 
     initContextMenu();
+    initRegistry();
+    initPackages();
 }
 
 export type ContextMenuState = {
@@ -67,3 +71,23 @@ export type ContextMenuState = {
 function initContextMenu() {
     window.unigraph.addState('global/contextMenu', {show: false});
 }
+
+function initRegistry() {
+    window.unigraph.addState('registry/dynamicView', {
+        "$/schema/executable": Executable,
+        "$/skeleton/default": DefaultSkeleton,
+        "$/schema/notification": CNotification
+    });
+    window.unigraph.addState('registry/dynamicViewDetailed', {
+        "$/schema/executable": ExecutableCodeEditor,
+        "$/schema/view": ViewViewDetailed
+    });
+    window.unigraph.addState('registry/pages', {});
+    window.unigraph.addState('registry/widgets', {});
+}
+
+function initPackages() {
+    nb_init(); sm_init(); tw_init();
+}
+
+init();

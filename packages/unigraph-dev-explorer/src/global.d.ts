@@ -4,12 +4,8 @@ import { Unigraph } from "unigraph-dev-common/lib/types/unigraph";
 
 declare global {
     interface Window {
-        unigraph: Unigraph<WebSocket>;
-        layoutModel: Model
-        DynamicViews: Record<string, DynamicViewRenderer>,
-        DynamicViewsDetailed: Record<string, DynamicViewRenderer>
-        notificationCallbacks: ((data: any[]) => any)[],
-        notifications: any[],
+        unigraph: Unigraph<WebSocket>,
+        layoutModel: Model,
         registerNotifications: (callback: ((data: any[]) => any)) => any,
         newTab: any,
         crcTable: any,
