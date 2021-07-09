@@ -161,6 +161,26 @@ export function WorkSpace(this: any) {
 
     const [model, setModel] = React.useState(FlexLayout.Model.fromJson(json));
 
+    let memoMDFn: any = {}
+    const getMouseDownFn = (id: string) => {
+        const fn = (event: any) => {
+            if (typeof event === 'object') {
+                switch (event.button) {
+                case 1:
+                    model.doAction(Actions.deleteTab(id))
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+ 
+        if (!memoMDFn[id]) {
+            memoMDFn[id] = fn;
+        }
+        return memoMDFn[id];
+    }
+
     window.layoutModel = model;
 
     window.wsnavigator = workspaceNavigator.bind(this, model);
@@ -199,18 +219,11 @@ export function WorkSpace(this: any) {
                 renderValues.buttons.push(<div id={"tabId"+nodeId}></div>);
                 setTimeout(() => {
                     const el = document.getElementById('tabId'+nodeId);
+                    
                     if (el && el.parentElement && node.isEnableClose()) {
-                        el.parentElement.addEventListener("mousedown", (event) => {
-                            if (typeof event === 'object') {
-                                switch (event.button) {
-                                case 1:
-                                    model.doAction(Actions.deleteTab(nodeId))
-                                    break;
-                                default:
-                                    break;
-                                }
-                            }
-                        })
+                        const fn = getMouseDownFn(nodeId);
+                        el.parentElement.removeEventListener("mousedown", fn)
+                        el.parentElement.addEventListener("mousedown", fn)
                     }
                 }, 0)
             }}/>
