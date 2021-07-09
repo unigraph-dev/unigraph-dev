@@ -1,4 +1,6 @@
+import AsyncLock from 'async-lock';
 import dgraph, { DgraphClient as ActualDgraphClient, DgraphClientStub, Operation, Mutation, Check } from 'dgraph-js';
+import { getAsyncLock, withLock } from './asyncManager';
 import { UnigraphUpsert } from './custom';
 
 /**
@@ -8,6 +10,7 @@ import { UnigraphUpsert } from './custom';
 export default class DgraphClient {
   private dgraphClient: ActualDgraphClient;
   private dgraphClientStub: DgraphClientStub;
+  private txnlock: AsyncLock
 
   constructor(connectionUri: string) {
     this.dgraphClientStub = new DgraphClientStub(connectionUri, undefined, {'grpc.max_receive_message_length': 1024 * 1024 * 1024});
@@ -16,6 +19,7 @@ export default class DgraphClient {
     }})
     this.dgraphClient = new ActualDgraphClient(this.dgraphClientStub);
     // TODO(haojixu): Check if default db exists - if not, set default
+    this.txnlock = getAsyncLock();
   }
 
   async getStatus() {
@@ -95,7 +99,7 @@ export default class DgraphClient {
       req.setMutationsList(mutations);
       req.setCommitNow(true);
 
-      await txn.doRequest(req);
+      await withLock(this.txnlock, 'txn', () => txn.doRequest(req));
     } catch (e) {
       console.error('Error: ', e);
     } finally {
@@ -131,7 +135,7 @@ export default class DgraphClient {
       req.setMutationsList(mutations);
       req.setCommitNow(true);
 
-      response = await txn.doRequest(req);
+      response = await withLock(this.txnlock, 'txn', () => txn.doRequest(req));
       !test ? true : console.log(JSON.stringify(response, null, 2))
       
     } catch (e) {
@@ -152,7 +156,7 @@ export default class DgraphClient {
       if (data.query) req.setQuery(data.query);
       req.setMutationsList(data.mutations);
       req.setCommitNow(true);
-      response = await txn.doRequest(req);
+      response = await withLock(this.txnlock, 'txn', () => txn.doRequest(req));
     } catch (e) {
       console.error('Error: ', e);
     } finally {
@@ -165,7 +169,7 @@ export default class DgraphClient {
     const txn = this.dgraphClient.newTxn();
     const mu = new dgraph.Mutation();
     mu.setDeleteJson(data);
-    return await txn.mutate(mu);
+    return await withLock(this.txnlock, 'txn', () => txn.mutate(mu));;
   }
 
   async queryData<T = unknown>(query: string, vars: Record<string, any> = {}) {
