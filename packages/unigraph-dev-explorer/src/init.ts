@@ -64,7 +64,8 @@ export type ContextMenuState = {
     menuContextContent: ((uid: string, object: any, onfire: () => any, callbacks?: any) => React.ReactElement)[],
     contextContextObject?: any,
     contextContextUid?: string,
-    removeFromContext?: string
+    removeFromContext?: string,
+    callbacks?: any,
     show: boolean
 }
 
@@ -84,6 +85,7 @@ function initRegistry() {
     });
     window.unigraph.addState('registry/pages', {});
     window.unigraph.addState('registry/widgets', {});
+    window.unigraph.addState('registry/contextMenu', {});
 }
 
 function initPackages() {

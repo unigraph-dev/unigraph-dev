@@ -1,9 +1,10 @@
 import _ from "lodash";
 import { buildUnigraphEntity, byElementIndex } from "unigraph-dev-common/lib/utils/entityUtils";
+import { parseTodoObject } from "../todo/parseTodoObject";
 import { NoteEditorContext } from "./types";
 
 export const focusUid = (uid: string) => {
-    (document.getElementById(`object-view-${uid}`)?.children[0].children[0] as any)?.focus();
+    (document.getElementById(`object-view-${uid}`)?.children[0].children[0] as any)?.click();
 }
 
 export const getSemanticChildren = (data: any) => data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.['children']
@@ -214,4 +215,39 @@ export const unindentChild = async (data: any, context: NoteEditorContext, paren
     window.unigraph.deleteItemFromArray(delUidPar, delUidChild)
     context.setEdited(true);
     context.setCommand(() => setFocus.bind(this, data, context, parent + 1))
+}
+
+export const convertChildToTodo = async (data: any, context: NoteEditorContext, index: number) => {
+    console.log(index);
+    let currSubentity = -1;
+    const stubConverted = {uid: ""}
+    let textIt = "";
+    const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
+    const newChildren = children?.reduce((prev: any[], el: any, elindex: any) => {
+        if (el?.['_value']?.['_value']?.['type']?.['unigraph.id'] === "$/schema/subentity" && ++currSubentity === index) {
+            /* something something*/
+            const newel = {
+                '_index': {'_value.#i': elindex},
+                '_value': {
+                    'dgraph.type': ['Interface'],
+                    'type': {'unigraph.id': '$/schema/interface/semantic'},
+                    '_hide': true,
+                    '_value': {
+                        'dgraph.type': ['Entity'],
+                        'type': {'unigraph.id': '$/schema/subentity'},
+                        '_hide': true,
+                        '_value': stubConverted,
+                    }
+                }
+            }
+            textIt = el['_value']['_value']['_value']['_value']['text']['_value']['_value']['_value.%'];
+            return [...prev, newel];
+        } else {
+            return [...prev, {uid: el.uid}]
+        };
+    }, []);
+    console.log(textIt, newChildren, )
+    const newUid = await window.unigraph.addObject(parseTodoObject(textIt), "$/schema/todo")
+    stubConverted.uid = newUid[0];
+    await window.unigraph.updateObject(data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.uid, {'children': {'_value[': newChildren}}, false, false, context.callbacks.subsId);
 }
