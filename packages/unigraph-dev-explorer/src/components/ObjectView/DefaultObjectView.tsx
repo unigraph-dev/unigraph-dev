@@ -191,11 +191,11 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     </React.Fragment> : <React.Fragment/>;
 }
 
-export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, callbacks }) => {
+export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, callbacks, context }) => {
     const DynamicViewsDetailed = window.unigraph.getState('registry/dynamicViewDetailed').value
     if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViewsDetailed).includes(object.type['unigraph.id'])) {
         return React.createElement(DynamicViewsDetailed[object.type['unigraph.id']], {
-            data: object, callbacks: callbacks, options: options || {}
+            data: object, callbacks, options: options || {}, context
         });
     } else {
         return <JsontreeObjectViewer object={object} options={options}/>

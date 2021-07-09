@@ -1,4 +1,4 @@
-import { Accordion, AccordionSummary, Typography, AccordionDetails, List, ListItem, Select, MenuItem, IconButton, ListItemIcon, ListSubheader, Fade, Grow, Collapse, FormControlLabel, Switch } from "@material-ui/core";
+import { Accordion, AccordionSummary, Typography, AccordionDetails, List, ListItem, Select, MenuItem, IconButton, ListItemIcon, ListSubheader, Fade, Grow, Collapse, FormControlLabel, Switch, Button } from "@material-ui/core";
 import { ExpandMore, ClearAll } from "@material-ui/icons";
 import React from "react";
 import { useDrop } from "react-dnd";
@@ -131,6 +131,9 @@ export const DynamicObjectListView = ({items, listUid, context, callbacks}: {ite
                         control={<Switch checked={reverseOrder} onChange={() => setReverseOrder(!reverseOrder)} name={"moveToInbox"} />}
                         label={"Latest items on top"}
                     />
+                    </ListItem>
+                    <ListItem>
+                        <Button onClick={() => {window.wsnavigator(`/graph?uid=${context.uid}`)}}>Show Graph view</Button>
                     </ListItem>
                 </List>
 
