@@ -20,6 +20,7 @@ export default function DetailedObjectView ({ uid, viewer, id, context }: any) {
         }, myid);
 
         if (context?.startsWith?.('0x')) {
+            setContextObj({type: {"unigraph.id": "$/skeleton/default"}, uid: "0x0"})
             window.unigraph.subscribeToObject(context, (obj: any) => setContextObj(obj), myid+1)
         }
 
