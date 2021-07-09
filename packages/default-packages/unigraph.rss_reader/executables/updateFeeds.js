@@ -20,19 +20,19 @@ const queries = []
 const feeds = (await unigraph.getType("$/schema/rss_feed")).map(el => unpad(el));
 const urls = feeds.map(el => el.feed_url);
 let Parser = require('rss-parser');
-let parser = new Parser();
+let parser = new Parser({timeout: 10000});
 
 const totalItems = await Promise.all(urls.map((el, index) => new Promise((resolve, reject) => {
 const rresolve = (its) => {console.log(`RSS Feed #${index} loaded.`); resolve(its)}
 parser.parseURL(el).then(res => rresolve(res.items)).catch((e) => {
   parser.parseURL(el).then(res => rresolve(res.items)).catch((e) => {
-    parser.parseURL(el).then(res => rresolve(res.items)).catch(reject)
+    parser.parseURL(el).then(res => rresolve(res.items)).catch((e) => rresolve([]))
   })
 })
 })))
 totalItems.forEach((items, i) => items.forEach(item => queries.push({query: getQuery(item.link), item: item, feedId: i})));
 
-//console.log(queries);
+console.log("All items loaded!");
 const results = await unigraph.getQueries(queries.map(el => el.query));
 console.log("Got current entities!")
 //console.log(results)
