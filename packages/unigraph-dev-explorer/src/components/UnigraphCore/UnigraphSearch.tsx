@@ -1,7 +1,7 @@
-import { List, ListItem, TextField } from "@material-ui/core"
+import { List, ListItem, TextField, Typography } from "@material-ui/core"
+import _ from "lodash";
 import React from "react"
 import { buildGraph } from "unigraph-dev-common/lib/api/unigraph";
-import { debounce } from "../../utils"
 import { AutoDynamicView } from "../ObjectView/DefaultObjectView";
 
 export const UnigraphSearch = () => {
@@ -11,7 +11,7 @@ export const UnigraphSearch = () => {
     const [entities, setEntities] = React.useState<any[]>([]);
     const [response, setResponse] = React.useState(false);
 
-    const search = React.useMemo(() => debounce((query: string) => {
+    const search = React.useMemo(() => _.debounce((query: string) => {
         setResponse(false);
         if (query.length) {
             window.unigraph.getSearchResults(query).then(res => {
@@ -32,8 +32,11 @@ export const UnigraphSearch = () => {
     const dynamicViews = window.unigraph.getState('registry/dynamicView').value
 
     return <div>
-        <TextField id="search-box" label="Search" value={query} onChange={(event) => {setQuery(event?.target.value)}}/>
-        {response ? entities.length + " results" : []}
+        <div style={{display: "flex", flexDirection: "column", marginLeft: "16px", marginRight: "16px"}}>
+            <TextField id="search-box" label="Search" variant="outlined" value={query} onChange={(event) => {setQuery(event?.target.value);}}
+                onKeyDown={(ev) => { if (ev.code === "Enter") { search.flush(); } }} />
+        </div>
+        <Typography variant="body1" style={{marginLeft: "16px", marginTop: "8px", marginBottom: "8px"}}>{response ? entities.length + " results" : "Press Enter to search"}</Typography>
         <List style={{fontSize: "8px"}}>
             {buildGraph(entities).map((el: any) => 
                 (el.type?.['unigraph.id'] && Object.keys(dynamicViews).includes(el.type?.['unigraph.id'])) ? <ListItem><AutoDynamicView object={el} /></ListItem> : []

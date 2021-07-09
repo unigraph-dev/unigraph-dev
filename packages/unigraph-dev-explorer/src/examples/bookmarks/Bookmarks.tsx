@@ -86,7 +86,7 @@ export const BookmarkItem: DynamicViewRenderer = ({data, callbacks}) => {
                 }}/>
                 {unpadded.creative_work?.text ? <Description onClick={() => {
                     const htmlUid = data?.get('creative_work/text')?.['_value']?.['_value']?.['uid'];
-                    if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid}));
+                    if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid, context: data.uid}));
                     if (callbacks?.removeFromContext) callbacks.removeFromContext();
                 }}/> : []}
                 {!unpadded.semantic_properties?.children?.map ? [] :

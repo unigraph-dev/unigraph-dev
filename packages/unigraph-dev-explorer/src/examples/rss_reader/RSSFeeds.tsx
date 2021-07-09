@@ -70,12 +70,12 @@ const RSSItem: DynamicViewRenderer = ({data, callbacks}) => {
             secondary={<div>
                 <div style={{display: "flex", alignItems: "center"}}><Link onClick={() => {
                     const htmlUid = data?.get('content/text')?.['_value']?.['_value']?.['uid'];
-                    if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid}));
+                    if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid, context: data.uid}));
                     if (callbacks?.removeFromContext) callbacks.removeFromContext();
                 }}/>
                 {unpadded.item_data?.creative_work?.text ? <Description onClick={() => {
                     const htmlUid = data?.get('item_data/creative_work/text')?.['_value']?.['_value']?.['uid'];
-                    if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid}));
+                    if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid, context: data.uid}));
                     if (callbacks?.removeFromContext) callbacks.removeFromContext();
                 }}/> : []}
                 <div>Added: {Sugar.Date.relative(new Date(unpadded?.item_data?.date_created))}, updated: {Sugar.Date.relative(new Date(unpadded?._timestamp?._updatedAt))}</div></div>

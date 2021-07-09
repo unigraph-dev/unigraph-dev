@@ -1,14 +1,14 @@
 import React from 'react';
 
-import { useEffectOnce } from 'react-use';
-import { DefaultObjectView } from '../ObjectView/DefaultObjectView';
+import { AutoDynamicViewDetailed, DefaultObjectView } from '../ObjectView/DefaultObjectView';
 
-export default function DetailedObjectView ({ uid, viewer, id }: any) {
+export default function DetailedObjectView ({ uid, viewer, id, context }: any) {
     let objectId: any = uid;
 
     const viewerId = viewer ? viewer : "dynamic-view-detailed"
 
     const [object, setObject]: [any, Function] = React.useState(undefined);
+    const [contextObj, setContextObj] = React.useState<any>(undefined);
     const [myid, setId] = React.useState(Date.now());
 
     const [showPadded, setShowPadded] = React.useState(false);
@@ -19,19 +19,28 @@ export default function DetailedObjectView ({ uid, viewer, id }: any) {
             setObject(object)
         }, myid);
 
+        if (context?.startsWith?.('0x')) {
+            window.unigraph.subscribeToObject(context, (obj: any) => setContextObj(obj), myid+1)
+        }
+
         return function cleanup () {
             window.unigraph.unsubscribe(myid);
+            window.unigraph.unsubscribe(myid+1);
         }
     }, [myid])
 
     React.useEffect(() => {setId(Date.now())}, [uid])
 
-    return (<div key={object?.uid}>
+    return (viewer ? <div key={object?.uid}>
         <DefaultObjectView object={object} options={{
             viewer: viewerId,
             canEdit: true,
             unpad: !showPadded,
             viewId: id
         }} callbacks={{subsId: myid}}></DefaultObjectView>
+    </div> : <div key={object?.uid} style={{height: "100%", width: "100%", opacity: object?.uid ? 1: 0}}>
+        <AutoDynamicViewDetailed object={object} options={{
+            viewId: id
+        }} callbacks={{subsId: myid}} context={contextObj}></AutoDynamicViewDetailed>
     </div>)
 }

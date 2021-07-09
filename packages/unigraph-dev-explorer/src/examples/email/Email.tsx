@@ -44,7 +44,7 @@ const EmailMessage: DynamicViewRenderer = ({data, callbacks}) => {
             secondary={<div style={{display: "flex", alignItems: "center"}}>
                 <Link onClick={() => {
                     const htmlUid = data?.get('content/text')?.['_value']?.['_value']?.['uid'];
-                    if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid}));
+                    if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid, context: data.uid}));
                     if (callbacks?.removeFromContext) callbacks.removeFromContext();
                 }}/>
                 {unpadded.content?.abstract + "..."}

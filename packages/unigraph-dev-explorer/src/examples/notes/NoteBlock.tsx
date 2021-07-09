@@ -184,7 +184,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
                         "unindent-child-in-parent": () => {callbacks['unindent-child'](elindex)}
                     }} 
                     component={{"$/schema/note_block": DetailedNoteBlock, "$/schema/view": ViewViewDetailed}} attributes={{isChildren: true}} allowSubentity
-                    style={el.type?.['unigraph.id'] === "$/schema/note_block" ? {} : { border: "lightgray", borderStyle: "solid", borderWidth: 'thin', margin: "4px", borderRadius: "8px" }}
+                    style={el.type?.['unigraph.id'] === "$/schema/note_block" ? {} : { border: "lightgray", borderStyle: "solid", borderWidth: 'thin', margin: "4px", borderRadius: "8px", width: "calc(100% - 8px)" }}
                 />
             </li>) : <li><PlaceholderNoteBlock callbacks={{"add-child": () => noteBlockCommands['add-child'](dataref.current, editorContext)}}/></li>}
         </ul>
