@@ -684,7 +684,11 @@ export function flatten(objs: any[]) {
                 if (!entities[curr.uid]) entities[curr.uid] = curr;
                 else Object.keys(curr).forEach(el => {if (el !== "uid") delete curr[el];});
                 // Remove type
-                if (curr['type']['_value[']) delete curr['type']['_value['];
+                if (curr['type']['_value[']) {
+                    delete curr['type']['_value['];
+                    delete curr['type']['uid'];
+                    delete curr['type']['dgraph.type'];
+                }
             }
             // Continue recursion
             Object.values(curr).forEach(flattenRecurse)
