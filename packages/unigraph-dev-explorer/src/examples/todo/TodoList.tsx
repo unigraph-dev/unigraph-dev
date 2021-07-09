@@ -86,7 +86,7 @@ export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
             }} />
         </ListItemIcon>
         <ListItemText 
-            primary={<AutoDynamicView object={data.get('name')['_value']['_value']} noDrag />}
+            primary={<AutoDynamicView object={data.get('name')['_value']['_value']} noDrag noContextMenu />}
             secondary={[...(!unpadded.semantic_properties?.children?.map ? [] :
                 unpadded.semantic_properties?.children?.map(it => <Tag data={it}/>
             )), ...(unpadded.priority > 0 ? [<Chip size="small" icon={<PriorityHigh/>} label={"Priority " + unpadded.priority}/>]: []),
