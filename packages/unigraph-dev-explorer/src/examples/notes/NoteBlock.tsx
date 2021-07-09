@@ -1,15 +1,14 @@
-import { Typography } from "@material-ui/core";
+import { MenuItem, Typography } from "@material-ui/core";
 import React, { FormEvent } from "react";
-import { registerDetailedDynamicViews, registerDynamicViews } from "unigraph-dev-common/lib/api/unigraph-react";
+import { registerDetailedDynamicViews, registerDynamicViews, registerContextMenuItems } from "unigraph-dev-common/lib/api/unigraph-react";
 import { byElementIndex, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { AutoDynamicView, ViewViewDetailed } from "../../components/ObjectView/DefaultObjectView";
 
 import _ from "lodash";
 import { buildGraph } from "unigraph-dev-common/lib/api/unigraph";
 import { Actions } from "flexlayout-react";
-import { addChild, indentChild, setFocus, splitChild, unindentChild, unsplitChild } from "./commands";
+import { addChild, convertChildToTodo, indentChild, setFocus, splitChild, unindentChild, unsplitChild } from "./commands";
 import { onUnigraphContextMenu } from "../../components/ObjectView/DefaultObjectContextMenu";
-import { DynamicViewRenderer } from "../../global";
 
 export const getSubentities = (data: any) => {
     let subentities: any, otherChildren: any;
@@ -55,7 +54,8 @@ const noteBlockCommands = {
     "unsplit-child": unsplitChild,
     "split-child": splitChild,
     "indent-child": indentChild,
-    "unindent-child": unindentChild
+    "unindent-child": unindentChild,
+    "convert-child-to-todo": convertChildToTodo,
 }
 
 export const PlaceholderNoteBlock = ({ callbacks }: any) => {
@@ -194,4 +194,10 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
 export const init = () => {
     registerDynamicViews({"$/schema/note_block": NoteBlock})
     registerDetailedDynamicViews({"$/schema/note_block": DetailedNoteBlock})
+
+    registerContextMenuItems("$/schema/note_block", [(uid: any, object: any, handleClose: any, callbacks: any) => <MenuItem onClick={() => {
+        handleClose(); callbacks['convert-child-to-todo']();
+    }}>
+        Convert note as TODO
+    </MenuItem>])
 }

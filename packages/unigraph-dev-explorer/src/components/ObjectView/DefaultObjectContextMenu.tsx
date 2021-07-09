@@ -66,6 +66,7 @@ export const onUnigraphContextMenu = (event: React.MouseEvent, object: UnigraphO
             contextContextUid: context.uid,
             getContext: context
         } : {}),
+        callbacks,
         ...(callbacks?.removeFromContext ? {removeFromContext: callbacks.removeFromContext} : {})
     })
 }

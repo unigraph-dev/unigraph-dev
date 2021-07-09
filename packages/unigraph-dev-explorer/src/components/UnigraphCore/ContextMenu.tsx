@@ -30,12 +30,16 @@ export const ContextMenu = () => {
     >
         <Typography variant="body1" style={{padding: "8px"}}>Object uid: {state.contextUid}; type: {state.contextObject?.type?.['unigraph.id']}</Typography>
         <Divider />
-        {state.menuContent?.map(el => el(state.contextUid!, state.contextObject, handleClose))}
+        {state.menuContent?.map(el => el(state.contextUid!, state.contextObject, handleClose, state.callbacks))}
+        {Object.keys(window.unigraph.getState('registry/contextMenu').value).includes(state.contextObject?.['type']?.['unigraph.id']) ? <React.Fragment>
+            <Divider/>
+            {window.unigraph.getState('registry/contextMenu').value[state.contextObject?.['type']?.['unigraph.id']].map((el: any) => el(state.contextUid!, state.contextObject, handleClose, {...state.callbacks, removeFromContext: state.removeFromContext}))}
+        </React.Fragment> : []}
         {state.contextContextUid ? <React.Fragment>
             <Divider/>
             <Typography variant="body1" style={{padding: "8px"}}>Context uid: {state.contextContextUid}; type: {state.contextContextObject?.type?.['unigraph.id']}</Typography>
             <Divider/>
-            {state.menuContextContent?.map(el => el(state.contextUid!, state.contextObject, handleClose, {removeFromContext: state.removeFromContext}))}
+            {state.menuContextContent?.map(el => el(state.contextUid!, state.contextObject, handleClose, {...state.callbacks, removeFromContext: state.removeFromContext}))}
         </React.Fragment>: []}
     </Popover></div>
 }

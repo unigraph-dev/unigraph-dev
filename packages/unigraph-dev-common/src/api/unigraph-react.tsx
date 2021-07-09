@@ -37,12 +37,17 @@ export function withUnigraphSubscription(WrappedComponent: React.FC<{data: any}>
 
 }
 
-export const registerDynamicViews = (views: Record<string, React.FC>) => {
+export const registerDynamicViews = (views: Record<string, React.FC>): void => {
     const state = (window as any).unigraph.getState('registry/dynamicView');
-    state.setValue({...state.value, ...views})
+    state.setValue({...state.value, ...views});
 }
 
-export const registerDetailedDynamicViews = (views: Record<string, React.FC>) => {
+export const registerDetailedDynamicViews = (views: Record<string, React.FC>): void => {
     const state = (window as any).unigraph.getState('registry/dynamicViewDetailed');
-    state.setValue({...state.value, ...views})
+    state.setValue({...state.value, ...views});
+}
+
+export const registerContextMenuItems = (schema: string, items: any[]): void => {
+    const state = (window as any).unigraph.getState('registry/contextMenu');
+    state.setValue({...state, [schema]: [...(state[schema] || []), ...items]});
 }
