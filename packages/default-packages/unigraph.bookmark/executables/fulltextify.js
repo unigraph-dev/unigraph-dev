@@ -8,7 +8,9 @@ const timeout = setTimeout(() => {controller.abort();}, 10000)
 
 console.log("Downloading full text of url: " + context.params.url)
 try {
-    context.params.html = await (await fetch(context.params.url, {signal: controller.signal})).text();
+    context.params.html = await (await fetch(context.params.url, {signal: controller.signal, headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+    }})).text();
 } catch (error) {
     context.params.html = ""
 } finally {clearTimeout(timeout)}
