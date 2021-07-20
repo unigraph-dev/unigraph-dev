@@ -7,7 +7,7 @@ import { AutoDynamicView, ViewViewDetailed } from "../../components/ObjectView/D
 import _ from "lodash";
 import { buildGraph } from "unigraph-dev-common/lib/api/unigraph";
 import { Actions } from "flexlayout-react";
-import { addChild, convertChildToTodo, indentChild, setFocus, splitChild, unindentChild, unsplitChild } from "./commands";
+import { addChild, convertChildToTodo, focusLastDFSNode, focusNextDFSNode, focusUid, getSemanticChildren, indentChild, setCaret, setFocus, splitChild, unindentChild, unsplitChild } from "./commands";
 import { onUnigraphContextMenu } from "../../components/ObjectView/DefaultObjectContextMenu";
 
 export const getSubentities = (data: any) => {
@@ -16,8 +16,9 @@ export const getSubentities = (data: any) => {
         [subentities, otherChildren] = [[], []];
     } else {
         [subentities, otherChildren] = data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.['children']?.['_value['].sort(byElementIndex).reduce((prev: any, el: any) => {
-            if ('$/schema/subentity' !== el?.['_value']?.['_value']?.type?.['unigraph.id']) return [prev[0], [...prev[1], el['_value']]];
-            else return [[...prev[0], el['_value']?.['_value']['_value']], prev[1]]
+            if ('$/schema/subentity' !== el?.['_value']?.['_value']?.type?.['unigraph.id'] && !el['_key']) return [prev[0], [...prev[1], el['_value']]];
+            else if (!el['_key']) return [[...prev[0], el['_value']?.['_value']['_value']], prev[1]];
+            else return prev;
         }, [[], []])
     }
     return [subentities, otherChildren];
@@ -80,14 +81,24 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
     const textref = React.useRef<any>();
     /** Reference for HTML Element for list of children */
     const childrenref = React.useRef<any>();
+    /** Reference for the box of this element. Used for positioning only */
+    const boxRef = React.useRef<any>();
     const inputDebounced = React.useRef(_.throttle(inputter, 1000)).current
     const setCurrentText = (text: string) => {textInput.current.textContent = text};
     const [edited, setEdited] = React.useState(false);
     const [isEditing, setIsEditing] = React.useState(false);
     const textInput: any = React.useRef();
+    const nodesState = window.unigraph.addState(`${options?.viewId || callbacks['get-view-id']()}/nodes`, [])
     const editorContext = {
-        setEdited, setCommand, childrenref, callbacks
+        setEdited, setCommand, childrenref, callbacks, nodesState
     }
+
+    
+
+    React.useEffect(() => {
+        const newNodes = _.unionBy([{uid: data.uid, children: subentities.map((el: any) => el.uid), root: !isChildren}], nodesState.value, 'uid');
+        nodesState.setValue(newNodes)
+    }, [data])
 
     React.useEffect(() => {
         dataref.current = data;
@@ -108,7 +119,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
         }
     }, [command, edited])
 
-    return <div style={{width: "100%"}} >
+    return <div style={{width: "100%"}} ref={boxRef} >
         <div onClick={(ev) => { if (!isEditing) {
                 setIsEditing(true);
                 const caretPos = Number((ev.target as HTMLElement).getAttribute("markdownPos") || 0);
@@ -117,13 +128,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
                     textInput.current?.focus()
                     
                     if (textInput.current.firstChild) {
-                        let range = document.createRange()
-                        let sel = window.getSelection()
-                        range.setStart(textInput.current.firstChild, caretPos || textInput.current?.textContent?.length)
-                        range.collapse(true)
-                        
-                        sel?.removeAllRanges()
-                        sel?.addRange(range)
+                        setCaret(document, textInput.current.firstChild, caretPos || textInput.current?.textContent?.length)
                     }
                 }, 0)
             }}} onBlur={(ev) => {setIsEditing(false)}}>
@@ -131,14 +136,63 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
                 variant={isChildren ? "body1" : "h4"} 
                 onContextMenu={isChildren ? undefined : (event) => onUnigraphContextMenu(event, data, undefined, callbacks)}
                 contentEditable={true} 
+                suppressContentEditableWarning={true}
                 ref={textInput}
                 onInput={(ev) => {
                     textref.current = ev.currentTarget.textContent; 
                     onNoteInput(inputDebounced, ev); 
                     if (ev.currentTarget.textContent !== data.get('text').as('primitive') && !edited) setEdited(true)
+
+                    const caret = (document.getSelection()?.anchorOffset) as number;
+                    // Check if inside a reference block
+                    const placeholder = /\[\[([^[\]]*)\]\]/g;
+
+                    let hasMatch = false;
+                    for (let match; (match = placeholder.exec(textInput.current.textContent)) !== null;) {
+                        if (match.index <= caret && placeholder.lastIndex >= caret) {
+                            hasMatch = true;
+                            window.unigraph.getState('global/searchPopup').setValue({show: true, search: match[1], anchorEl: boxRef.current,
+                                onSelected: async (newName: string, newUid: string) => {
+                                    console.log(newName, newUid);
+                                    // This is an ADDITION operation
+                                    console.log(data);
+                                    const semChildren = data?.['_value']?.['semantic_properties']?.['_value']?.['_value'];
+                                    await window.unigraph.updateObject(data.uid, {
+                                        '_value': {
+                                            'semantic_properties': {
+                                                '_propertyType': "inheritance",
+                                                "_value": {
+                                                    'dgraph.type': ['Entity'],
+                                                    'type': {'unigraph.id': '$/schema/semantic_properties'},
+                                                    '_propertyType': "inheritance",
+                                                    "_value": {
+                                                        children: {
+                                                            '_value[': [{
+                                                                '_index': {'_value.#i': semChildren?.['children']?.['_value[']?.length || 0},
+                                                                '_key': `[[${newName}]]`,
+                                                                '_value': {
+                                                                    'dgraph.type': ['Interface'],
+                                                                    'type': {'unigraph.id': '$/schema/interface/semantic'},
+                                                                    '_hide': true,
+                                                                    '_value': {uid: newUid},
+                                                                }
+                                                                
+                                                            }]
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }, true, false);
+                                    window.unigraph.getState('global/searchPopup').setValue({show: false})
+                                }
+                            })
+                        }
+                    }
+                    if (!hasMatch) window.unigraph.getState('global/searchPopup').setValue({show: false})
                 }}
                 onKeyDown={async (ev) => {
-                    const caret = document.getSelection()?.anchorOffset;
+                    const caret = (document.getSelection()?.anchorOffset) as number;
                     switch (ev.code) {
                         case 'Enter':
                             ev.preventDefault();
@@ -164,6 +218,24 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
                                 setCommand(() => callbacks['unsplit-child'].bind(this));
                             }
                             break;
+                        
+                        case 'ArrowUp':
+                            ev.preventDefault();
+                            inputDebounced.flush();
+                            setCommand(() => callbacks['focus-last-dfs-node'].bind(this, data, editorContext, 0))
+                            break;
+                        
+                        case 'ArrowDown':
+                            ev.preventDefault();
+                            inputDebounced.flush();
+                            setCommand(() => callbacks['focus-next-dfs-node'].bind(this, data, editorContext, 0))
+                            break;
+
+                        case 'BracketLeft':
+                            ev.preventDefault();
+                            document.execCommand('insertText', false, '[]');
+                            setCaret(document, textInput.current.firstChild, caret+1)
+                            break;
                     
                         default:
                             console.log(ev);
@@ -171,7 +243,14 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
                     }
                 }}
             >
-            </Typography> : <AutoDynamicView object={data.get('text')['_value']['_value']} attributes={{isHeading: !isChildren}} noDrag noContextMenu />}
+            </Typography> : <AutoDynamicView 
+                object={data.get('text')['_value']['_value']} 
+                attributes={{isHeading: !isChildren}} 
+                noDrag noContextMenu 
+                callbacks={{'get-semantic-properties': () => {
+                    return data?.['_value']?.['semantic_properties']?.['_value'];
+                }}}
+            />}
         </div>
         {buildGraph(otherChildren).map((el: any) => <AutoDynamicView object={el}/>)}
         <ul ref={childrenref} style={{listStyle: "disc"}}>
@@ -179,9 +258,12 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
                 <AutoDynamicView 
                     object={el} 
                     callbacks={{
+                        "get-view-id": () => options?.viewId, // only useful at root
                         ...callbacks,
                         ...Object.fromEntries(Object.entries(noteBlockCommands).map(([k, v]: any) => [k, (...args: any[]) => v(dataref.current, editorContext, elindex, ...args)])), 
-                        "unindent-child-in-parent": () => {callbacks['unindent-child'](elindex)}
+                        "unindent-child-in-parent": () => {callbacks['unindent-child'](elindex)},
+                        "focus-last-dfs-node": focusLastDFSNode,
+                        "focus-next-dfs-node": focusNextDFSNode,
                     }} 
                     component={{"$/schema/note_block": DetailedNoteBlock, "$/schema/view": ViewViewDetailed}} attributes={{isChildren: true}} allowSubentity
                     style={el.type?.['unigraph.id'] === "$/schema/note_block" ? {} : { border: "lightgray", borderStyle: "solid", borderWidth: 'thin', margin: "4px", borderRadius: "8px", width: "calc(100% - 8px)" }}

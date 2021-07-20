@@ -3472,10 +3472,10 @@ bcrypt-pbkdf@^1.0.0:
   dependencies:
     tweetnacl "^0.14.3"
 
-bezier-js@^4.1.1:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/bezier-js/-/bezier-js-4.1.1.tgz#414df656833104e86765c0fa5e31439fb3e83a34"
-  integrity sha512-oVOS6SSFFFlfnZdzC+lsfvhs/RRcbxJ47U04M4s5QIBaJmr3YWmTIL3qmrOK9uW+nUUcl9Jccmo/xpTrG+bBoQ==
+bezier-js@4.0.3, bezier-js@^4.1.1:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/bezier-js/-/bezier-js-4.0.3.tgz#9e076d66f609bca9fc08dd22201596d52d3cc49d"
+  integrity sha512-w85AFcZ7EkszFgxuHYQ2/BI2G7H5bEotZD9vcg8+Hx4S8zF2odJBoFSFvGbcFDH5ScSxG27/IhW03SigVmkXNQ==
 
 bfj@^7.0.2:
   version "7.0.2"
@@ -9445,7 +9445,7 @@ mdast-util-to-hast@^10.2.0:
     unist-util-position "^3.0.0"
     unist-util-visit "^2.0.0"
 
-mdast-util-to-markdown@^0.6.0:
+mdast-util-to-markdown@^0.6.0, mdast-util-to-markdown@^0.6.5:
   version "0.6.5"
   resolved "https://registry.yarnpkg.com/mdast-util-to-markdown/-/mdast-util-to-markdown-0.6.5.tgz#b33f67ca820d69e6cc527a93d4039249b504bebe"
   integrity sha512-XeV9sDE7ZlOQvs45C9UKMtfTcctcaj/pGwH8YLbMHoMOXNNCn2LsqVQOqrF1+/NU8lKDAqozme9SCXWyo9oAcQ==
@@ -9461,6 +9461,14 @@ mdast-util-to-string@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/mdast-util-to-string/-/mdast-util-to-string-2.0.0.tgz#b8cfe6a713e1091cb5b728fc48885a4767f8b97b"
   integrity sha512-AW4DRS3QbBayY/jJmD8437V1Gombjf8RSOUCMFBuo5iHi58AGEgVCKQ+ezHkZZDpAQS75hcBMpLqjpJTjtUL7w==
+
+mdast-util-wiki-link@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/mdast-util-wiki-link/-/mdast-util-wiki-link-0.0.2.tgz#f9cb957febafa3ddc4cf1567ec159400217e1690"
+  integrity sha512-lSsR10/dPuYIxzjGZIGA4oYzsnEnqcsD6DTXL0pqdbBzNB9teKVZB2aIzZcUsdg31v/NoHOstkVwzbN6VrQLtw==
+  dependencies:
+    "@babel/runtime" "^7.12.1"
+    mdast-util-to-markdown "^0.6.5"
 
 mdn-data@2.0.14:
   version "2.0.14"
@@ -9542,6 +9550,13 @@ micromark-extension-math@^0.1.0:
   dependencies:
     katex "^0.12.0"
     micromark "~2.11.0"
+
+micromark-extension-wiki-link@^0.0.4:
+  version "0.0.4"
+  resolved "https://registry.yarnpkg.com/micromark-extension-wiki-link/-/micromark-extension-wiki-link-0.0.4.tgz#f4750a0f24051bf0521bbafaf64f291f9266d2a4"
+  integrity sha512-dJc8AfnoU8BHkN+7fWZvIS20SMsMS1ZlxQUn6We67MqeKbOiEDZV5eEvCpwqGBijbJbxX3Kxz879L4K9HIiOvw==
+  dependencies:
+    "@babel/runtime" "^7.12.1"
 
 micromark@~2.11.0:
   version "2.11.4"
@@ -12253,6 +12268,15 @@ remark-rehype@^8.0.0:
   integrity sha512-EbCu9kHgAxKmW1yEYjx3QafMyGY3q8noUbNUI5xyKbaFP89wbhDrKxyIQNukNYthzjNHZu6J7hwFg7hRm1svYA==
   dependencies:
     mdast-util-to-hast "^10.2.0"
+
+remark-wiki-link@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/remark-wiki-link/-/remark-wiki-link-1.0.4.tgz#f3ac7688ce822e494bb3732a5957082293a59a42"
+  integrity sha512-kLgRlXn5cBMa3Fa+OgcI6L4yyYdI74TdIiynBtOvrZN9q7o4mDCYrfAAt7VgLvQyuLBrPARPM1g67ZuAWA1yFg==
+  dependencies:
+    "@babel/runtime" "^7.4.4"
+    mdast-util-wiki-link "^0.0.2"
+    micromark-extension-wiki-link "^0.0.4"
 
 remove-trailing-separator@^1.0.1:
   version "1.1.0"

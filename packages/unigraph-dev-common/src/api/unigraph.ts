@@ -141,14 +141,13 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
         if (parsed.type === "open_url" && window) window.open(parsed.url, "_blank") 
     }
     
-
-    return {
+    const api: Unigraph<WebSocket>  = {
         getState: (name) => {
             if (name && states[name]) {
                 return states[name];
             } else if (!name) {
                 return states
-            } else return undefined as any;
+            } else return api.addState(name, undefined);
         },
         addState: (name, initialValue) => {
             if (!states[name]) {
@@ -366,13 +365,13 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
             };
             sendEvent(connection, "add_notification", {item: item}, id);
         }),
-        getSearchResults: (query, method = "fulltext") => new Promise((resolve, reject) => {
+        getSearchResults: (query, method = "fulltext", display) => new Promise((resolve, reject) => {
             const id = getRandomInt();
             callbacks[id] = (response: any) => {
                 if (response.success && response.results) resolve(response.results);
                 else reject(response);
             };
-            sendEvent(connection, "get_search_results", {query: query, method: method}, id);
+            sendEvent(connection, "get_search_results", {query: query, method: method, display: display}, id);
         }),
         getSchemaMap: () => caches.schemaMap,
         exportObjects: (uids, options) => new Promise((resolve, reject) => {
@@ -384,6 +383,8 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
             sendEvent(connection, "export_objects", {uids, options}, id);
         })
     }
+
+    return api;
 }
 
 export function getExecutableId(pkg: PackageDeclaration, name: string) { 

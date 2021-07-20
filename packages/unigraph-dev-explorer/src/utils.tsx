@@ -134,3 +134,21 @@ export const debounce = (func: any, wait: number) => {
       timeout = setTimeout(later, wait);
     };
   };
+
+type TreeNode = {uid: string, children: string[], root?: boolean};
+export const dfs = (nodes: TreeNode[]) => {
+    const root = nodes.filter(el => el.root)[0];
+    const nmap: Record<string, TreeNode> = Object.fromEntries(nodes.map(el => [el.uid, el]));
+    let traversal: TreeNode[] = [];
+
+    const recurse = (current: TreeNode) => {
+        if (current?.children) { // Ignores nodes referenced by but without uid
+            traversal.push(current);
+            current.children.forEach(el => recurse(nmap[el]));
+        } else if (current) {
+            traversal.push(current);
+        }
+    }
+    recurse(root);
+    return traversal;
+}

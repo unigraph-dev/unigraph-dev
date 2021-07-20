@@ -10,13 +10,14 @@ import FlexLayout, { Actions, DockLocation, Model, Node, TabNode } from 'flexlay
 import 'flexlayout-react/style/light.css'
 import './workspace.css'
 import { getParameters, NavigationContext } from "./utils";
-import { Button, Container, CssBaseline } from "@material-ui/core";
+import { Container, CssBaseline } from "@material-ui/core";
 import { isJsonString } from "unigraph-dev-common/lib/utils/utils";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
-import { Search, Star, StarOutlined, Menu } from "@material-ui/icons";
+import { Search, StarOutlined, Menu } from "@material-ui/icons";
 import { ContextMenu } from "./components/UnigraphCore/ContextMenu";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from 'react-dnd-html5-backend'
+import { InlineSearch } from "./components/UnigraphCore/InlineSearchPopup";
 
 const pages = window.unigraph.getState('registry/pages')
 
@@ -188,6 +189,7 @@ export function WorkSpace(this: any) {
     return <NavigationContext.Provider value={workspaceNavigator.bind(this, model)}>
         <div id="global-elements">
             <ContextMenu />
+            <InlineSearch />
         </div>
         <DndProvider backend={HTML5Backend}>
             <FlexLayout.Layout model={model} factory={factory} popoutURL={"./popout_page.html"} onRenderTab={(node: TabNode, renderValues: any) => {
