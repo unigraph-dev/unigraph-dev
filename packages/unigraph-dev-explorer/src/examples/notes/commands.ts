@@ -1,10 +1,21 @@
 import _ from "lodash";
 import { buildUnigraphEntity, byElementIndex } from "unigraph-dev-common/lib/utils/entityUtils";
+import { dfs } from "../../utils";
 import { parseTodoObject } from "../todo/parseTodoObject";
 import { NoteEditorContext } from "./types";
 
 export const focusUid = (uid: string) => {
     (document.getElementById(`object-view-${uid}`)?.children[0].children[0] as any)?.click();
+}
+
+export const setCaret = (document: Document, element: any, pos: number) => {
+    let range = document.createRange()
+    let sel = document.getSelection()
+    range.setStart(element, pos)
+    range.collapse(true)
+    
+    sel?.removeAllRanges()
+    sel?.addRange(range)
 }
 
 export const getSemanticChildren = (data: any) => data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.['children']
@@ -215,6 +226,18 @@ export const unindentChild = async (data: any, context: NoteEditorContext, paren
     window.unigraph.deleteItemFromArray(delUidPar, delUidChild)
     context.setEdited(true);
     context.setCommand(() => setFocus.bind(this, data, context, parent + 1))
+}
+
+export const focusLastDFSNode = (data: any, context: NoteEditorContext, _: number) => {
+    const orderedNodes = dfs(context.nodesState.value);
+    const newIndex = orderedNodes.findIndex(el => el.uid === data.uid) - 1;
+    if (orderedNodes[newIndex] && !orderedNodes[newIndex].root) context.setCommand(() => focusUid(orderedNodes[newIndex].uid));
+}
+
+export const focusNextDFSNode = (data: any, context: NoteEditorContext, _: number) => {
+    const orderedNodes = dfs(context.nodesState.value);
+    const newIndex = orderedNodes.findIndex(el => el.uid === data.uid) + 1;
+    if (orderedNodes[newIndex] && !orderedNodes[newIndex].root) context.setCommand(() => focusUid(orderedNodes[newIndex].uid));
 }
 
 export const convertChildToTodo = async (data: any, context: NoteEditorContext, index: number) => {

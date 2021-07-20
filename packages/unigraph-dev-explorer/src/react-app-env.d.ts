@@ -8,3 +8,6 @@ declare module '*.pkg' {
     const pkg: any;
     export { pkg };
 }
+
+declare module 'remark-wiki-link';
+declare module 'micromark-extension-wiki-link';

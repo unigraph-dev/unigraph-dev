@@ -69,8 +69,17 @@ export type ContextMenuState = {
     show: boolean
 }
 
+export type SearchPopupState = {
+    anchorPosition?: {top: number, left: number},
+    anchorEl?: any,
+    show: boolean,
+    search?: string,
+    onSelected?: (newName: string, newUid: string) => any;
+}
+
 function initContextMenu() {
     window.unigraph.addState('global/contextMenu', {show: false});
+    window.unigraph.addState('global/searchPopup', {show: false});
 }
 
 function initRegistry() {
