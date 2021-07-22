@@ -1,34 +1,43 @@
 /* eslint-disable react-hooks/rules-of-hooks */ // Using maps as React functional components
-import { Button, Checkbox, Divider, TextField, Typography } from '@material-ui/core';
+import { Button, Checkbox, Divider, makeStyles, Paper, TextField, Typography } from '@material-ui/core';
 import _ from 'lodash';
 import React from 'react';
 import { useEffectOnce } from 'react-use';
 import { Definition, SchemaDgraph } from 'unigraph-dev-common/lib/types/json-ts';
+import { KeyboardDateTimePicker } from "@material-ui/pickers";
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { ReferenceableSelectorControlled } from './ReferenceableSelector';
 
-// TODO: Support for adding entries
-// TODO: Support for padding unpadded (with entityUtils)
+const useStyles = makeStyles({
+    editorFrame: {
+        padding: "16px"
+    },
+    editorColumn: {}
+});
+
 
 const TypedObjectPartEditor: any = {
     "$/composer/Object": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
         const [fields, setFields] = React.useState<any[]>(_.intersection(Object.keys(localObject['_value']), localSchema['_properties'].map((el: any) => el['_key'])));
-
+        const classes = useStyles();
         return <React.Fragment>
-            {fields.map((key) => <div style={{display: "flex"}}>
-                <Typography variant="body1">{key}</Typography>
-                : 
-                <ObjectPartEditor
-                    localSchema={(localSchema['_properties']).filter((el: any) => el['_key'] === key)[0]['_definition']}
-                    localObject={localObject['_value'][key]} schemaMap={schemaMap}
-                    setLocalObject={(newVal: any) => window.unigraph.updateObject(localObject['_value'][key]['uid'], newVal, false, false)}
-                />
-            </div>)}
+            <Paper variant="outlined" className={classes.editorFrame}>
+                {fields.map((key) => <div style={{display: "flex", alignItems: "baseline", paddingTop: "8px"}}>
+                    <Typography variant="body1" style={{paddingRight: "8px"}}>{key}:</Typography>
+                    <ObjectPartEditor
+                        localSchema={(localSchema['_properties']).filter((el: any) => el['_key'] === key)[0]['_definition']}
+                        localObject={localObject['_value'][key]} schemaMap={schemaMap}
+                        setLocalObject={(newVal: any) => window.unigraph.updateObject(localObject['_value'][key]['uid'], newVal, false, false)}
+                    />
+                </div>)}
+            </Paper>
         </React.Fragment>
     },
     "$/composer/Union": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
+        console.log(localObject, localSchema)
         const currentUnionType = localObject['_value']['type']['unigraph.id'];
-        return <div>
+        const classes = useStyles();
+        return <Paper variant="outlined" className={classes.editorFrame}>
             <Typography>Union type - object type: {currentUnionType}</Typography>
             <ObjectPartEditor
                 localSchema={schemaMap[currentUnionType]['_definition']}
@@ -36,12 +45,19 @@ const TypedObjectPartEditor: any = {
                 schemaMap={schemaMap}
                 setLocalObject={() => {}}
             />
-        </div>
+        </Paper>
     },
     "$/composer/Array": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
-        return <div>
+        const classes = useStyles();
+        console.log(localSchema, localObject)
+        return <Paper variant="outlined" className={classes.editorFrame}>
             <Typography>Array type</Typography>
-        </div>
+            {localObject['_value['].map((el: any) => <ObjectPartEditor
+                        localSchema={schemaMap[el['_value']['type']['unigraph.id']]['_definition']}
+                        localObject={el['_value']} schemaMap={schemaMap}
+                        setLocalObject={() => {}}
+                    />)}
+        </Paper>
     },
     "default": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
         return <Typography>Object part</Typography>
@@ -51,7 +67,7 @@ const TypedObjectPartEditor: any = {
 
         return <React.Fragment>
             <TextField onChange={(e) => {setCurrentInputValue(e.target.value)}} value={currentInputValue}></TextField>
-            <Button onClick={() => setLocalObject({"_value.#i": Number(currentInputValue)})}>Update</Button>
+            <Button onClick={() => window.unigraph.updateObject(localObject.uid, {"_value.#i": Number(currentInputValue)}, false, false)}>Update</Button>
         </React.Fragment>
     },
     "$/primitive/string": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
@@ -59,15 +75,15 @@ const TypedObjectPartEditor: any = {
 
         return <React.Fragment>
             <TextField onChange={(e) => {setCurrentInputValue(e.target.value)}} value={currentInputValue}></TextField>
-            <Button onClick={() => setLocalObject({"_value.%": currentInputValue})}>Update</Button>
+            <Button onClick={() => window.unigraph.updateObject(localObject.uid, {"_value.%": currentInputValue}, false, false)}>Update</Button>
         </React.Fragment>
     },
     "$/primitive/datetime": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
-        const [currentInputValue, setCurrentInputValue] = React.useState(localObject['_value.%dt']);
+        const [currentInputValue, setCurrentInputValue] = React.useState<any>(new Date(localObject['_value.%dt']));
 
         return <React.Fragment>
-            <TextField onChange={(e) => {setCurrentInputValue(e.target.value)}} value={currentInputValue}></TextField>
-            <Button onClick={() => setLocalObject({"_value.%dt": currentInputValue})}>Update</Button>
+            <KeyboardDateTimePicker onChange={setCurrentInputValue} value={currentInputValue} format="yyyy/MM/DD HH:mm" ampm={false}></KeyboardDateTimePicker>
+            <Button onClick={() => window.unigraph.updateObject(localObject.uid, {"_value.%dt": currentInputValue.toISOString()}, false, false)}>Update</Button>
         </React.Fragment>
     },
     "$/primitive/boolean": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
@@ -75,21 +91,25 @@ const TypedObjectPartEditor: any = {
 
         return <React.Fragment>
             <Checkbox onChange={(e) => {setCurrentInputValue(e.target.checked)}} checked={currentInputValue}></Checkbox>
-            <Button onClick={() => setLocalObject({"_value.!": currentInputValue})}>Update</Button>
+            <Button onClick={() => window.unigraph.updateObject(localObject.uid, {"_value.!": currentInputValue}, false, false)}>Update</Button>
         </React.Fragment>
     },
     "schemaRef": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
+        console.log(localSchema)
         if (typeof localSchema !== "string") localSchema = localSchema?.['type']?.['unigraph.id']
-        console.log(schemaMap[localSchema], localSchema, schemaMap)
-        return <div>
+        
+        const classes = useStyles();
+        const definition = localSchema === "$/schema/any" ? schemaMap[localObject[Object.keys(localObject).filter((s: string) => s.startsWith( '_value'))[0]]['type']['unigraph.id']]['_definition'] : schemaMap[localSchema]['_definition']
+        console.log(localSchema, localObject, definition)
+        return <Paper variant="outlined" className={classes.editorFrame}>
             <Typography>Schema ref: {localSchema}</Typography>
             <ObjectPartEditor
-                localSchema={schemaMap[localSchema]['_definition']}
+                localSchema={definition}
                 localObject={localObject[Object.keys(localObject).filter((s: string) => s.startsWith( '_value'))[0]]}
                 schemaMap={schemaMap}
                 setLocalObject={() => {}}
             />
-        </div>
+        </Paper>
     },
 }
 

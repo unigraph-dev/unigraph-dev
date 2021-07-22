@@ -212,6 +212,8 @@ export default class DgraphClient {
     const res = await this.dgraphClient
       .newTxn({ readOnly: true })
       .queryWithVars(query, vars).catch(e => {console.log(e); return e});
+    const tns = res.getLatency().getTotalNs();
+    if (tns > 100000000) console.log(`[PERF] Slow - Transaction complete - but took ${tns / 1000000.0} ms. ` + query.slice(0, 100) + '...')
     return Object.values(res.getJson());
   }
 

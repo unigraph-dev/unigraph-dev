@@ -18,7 +18,7 @@ export const InlineSearch = () => {
     React.useEffect(() => {
         if (state.search !== undefined && state.search.length > 1) window.unigraph.getSearchResults((state.search as string), "fulltext", "indexes").then((res: any) => {
             const results = res.entities.map((el: any) => { return {
-                name: (new UnigraphObject(el['unigraph.indexes']['name'] || {})).as('primitive'),
+                name: (new UnigraphObject(el['unigraph.indexes']?.['name'] || {})).as('primitive'),
                 uid: el.uid,
                 type: el['type']['unigraph.id']
             }}).filter((el: any) => el.name);
@@ -43,6 +43,13 @@ export const InlineSearch = () => {
             horizontal: 'left',
         }}
     >
+        {state.default?.map(el => <Typography variant="body1"
+            onClick={() => {
+                el.onSelected(state.search!).then((newUid: string) => {
+                    state.onSelected?.(state.search!, newUid)
+                })
+            }}
+        >{el.label(state.search!)}</Typography>)}
         {searchResults.map((el: any) => <Typography variant="body1"
             onClick={() => {state.onSelected?.(el.name, el.uid)}}
         >{el.name} - {el.type}</Typography>)}

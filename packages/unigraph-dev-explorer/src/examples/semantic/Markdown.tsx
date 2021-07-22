@@ -49,7 +49,9 @@ export const Markdown: DynamicViewRenderer = ({data, callbacks, isHeading}) => {
                                 if (matches[0]) window.wsnavigator(`/library/object?uid=${matches[0]._value._value.uid}&viewer=${"dynamic-view-detailed"}`)
                             },
                             ...props,
-                            style: {display: "contents", color: matches[0] ? "mediumblue" : "black"}
+                            style: {display: "contents", color: matches[0] ? "mediumblue" : "black", ':hover':{
+                                textDecoration: 'underline',
+                            }}
                         })}
                         <span style={{color: "darkgray"}}>]]</span>
                     </React.Fragment>

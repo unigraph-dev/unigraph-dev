@@ -20,7 +20,7 @@ function TodoListBody ({data}: { data: ATodoList[] }) {
     const [newName, setNewName] = useState("");
 
     const [filteredItems, setFilteredItems] = React.useState(todoList);
-    const [filterName, setFilterName] = React.useState(["no-filter"]);
+    const [filterName, setFilterName] = React.useState(["only-incomplete"]);
 
     React.useEffect(() => {
         let res = todoList;
@@ -86,7 +86,7 @@ export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
             }} />
         </ListItemIcon>
         <ListItemText 
-            primary={<AutoDynamicView object={data.get('name')['_value']['_value']} noDrag noContextMenu />}
+            primary={<AutoDynamicView object={data.get('name')['_value']['_value']} noDrag noDrop noContextMenu />}
             secondary={[...(!unpadded.semantic_properties?.children?.map ? [] :
                 unpadded.semantic_properties?.children?.map(it => <Tag data={it}/>
             )), ...(unpadded.priority > 0 ? [<Chip size="small" icon={<PriorityHigh/>} label={"Priority " + unpadded.priority}/>]: []),
