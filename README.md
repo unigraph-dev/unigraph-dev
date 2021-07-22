@@ -23,7 +23,7 @@ Quick links:
 
 ## Getting started
 
-1. You'll need the custom dgraph binary from <https://github.com/haojixu/dgraph>.
+1. You'll need the custom dgraph binary from <https://github.com/unigraph-dev/dgraph>.
 2. Use the script `scripts/start_server.sh -d "<data directorty>" -b "<dgraph binary location>"` to start the dgraph and unigraph servers.
 3. Use `yarn explorer-start` to start the frontend.
 

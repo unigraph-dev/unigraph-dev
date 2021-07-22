@@ -7,6 +7,7 @@ import { Definition, SchemaDgraph } from 'unigraph-dev-common/lib/types/json-ts'
 import { KeyboardDateTimePicker } from "@material-ui/pickers";
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { ReferenceableSelectorControlled } from './ReferenceableSelector';
+import { Save } from '@material-ui/icons';
 
 const useStyles = makeStyles({
     editorFrame: {
@@ -67,7 +68,7 @@ const TypedObjectPartEditor: any = {
 
         return <React.Fragment>
             <TextField onChange={(e) => {setCurrentInputValue(e.target.value)}} value={currentInputValue}></TextField>
-            <Button onClick={() => window.unigraph.updateObject(localObject.uid, {"_value.#i": Number(currentInputValue)}, false, false)}>Update</Button>
+            <Save onClick={() => window.unigraph.updateObject(localObject.uid, {"_value.#i": Number(currentInputValue)}, false, false)} opacity={Number(currentInputValue) === localObject['_value.#i'] ? 0 : 1}></Save>
         </React.Fragment>
     },
     "$/primitive/string": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
@@ -75,7 +76,7 @@ const TypedObjectPartEditor: any = {
 
         return <React.Fragment>
             <TextField onChange={(e) => {setCurrentInputValue(e.target.value)}} value={currentInputValue}></TextField>
-            <Button onClick={() => window.unigraph.updateObject(localObject.uid, {"_value.%": currentInputValue}, false, false)}>Update</Button>
+            <Save onClick={() => window.unigraph.updateObject(localObject.uid, {"_value.%": currentInputValue}, false, false)} opacity={currentInputValue === localObject['_value.%'] ? 0 : 1}></Save>
         </React.Fragment>
     },
     "$/primitive/datetime": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
@@ -83,7 +84,7 @@ const TypedObjectPartEditor: any = {
 
         return <React.Fragment>
             <KeyboardDateTimePicker onChange={setCurrentInputValue} value={currentInputValue} format="yyyy/MM/DD HH:mm" ampm={false}></KeyboardDateTimePicker>
-            <Button onClick={() => window.unigraph.updateObject(localObject.uid, {"_value.%dt": currentInputValue.toISOString()}, false, false)}>Update</Button>
+            <Save onClick={() => window.unigraph.updateObject(localObject.uid, {"_value.%dt": currentInputValue.toISOString()}, false, false)} opacity={currentInputValue.toISOString() === localObject['_value.%dt'] ? 0 : 1}></Save>
         </React.Fragment>
     },
     "$/primitive/boolean": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
@@ -91,7 +92,7 @@ const TypedObjectPartEditor: any = {
 
         return <React.Fragment>
             <Checkbox onChange={(e) => {setCurrentInputValue(e.target.checked)}} checked={currentInputValue}></Checkbox>
-            <Button onClick={() => window.unigraph.updateObject(localObject.uid, {"_value.!": currentInputValue}, false, false)}>Update</Button>
+            <Save onClick={() => window.unigraph.updateObject(localObject.uid, {"_value.!": currentInputValue}, false, false)} opacity={currentInputValue === localObject['_value.!'] ? 0 : 1}></Save>
         </React.Fragment>
     },
     "schemaRef": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {

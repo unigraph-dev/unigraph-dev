@@ -8,11 +8,11 @@ export const focusUid = (uid: string) => {
     (document.getElementById(`object-view-${uid}`)?.children[0].children[0] as any)?.click();
 }
 
-export const setCaret = (document: Document, element: any, pos: number) => {
+export const setCaret = (document: Document, element: any, pos: number, length?: number) => {
     let range = document.createRange()
     let sel = document.getSelection()
     range.setStart(element, pos)
-    range.collapse(true)
+    if (length) {range.setEnd(element, length+pos)} else {range.collapse(true)};
     
     sel?.removeAllRanges()
     sel?.addRange(range)
