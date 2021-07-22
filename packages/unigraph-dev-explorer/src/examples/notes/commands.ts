@@ -76,16 +76,18 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
             el['_value']['_hide'] = true; el['_value']['_value']['_hide'] = true; el['_value']['_value']['_value']['_hide'] = true;
             el['_value']['_value']['_value']['_value']['text']['_value']['_value']['_value.%'] = el['_value']['_value']['_value']['_value']['text']?.['_value']?.['_value']['_value.%'].slice(at);
             // distribute references accordingly
-            const oldChildren = el['_value']['_value']['_value']['_value']['semantic_properties']['_value']['_value']['children'];
-            let upchildren: any[] = [];
-            oldChildren['_value['] = oldChildren['_value['].filter((elc: any) => {
-                if (elc['_key'] && oldText.includes(elc['_key'])) {
-                    upchildren.push({...elc, "_index": {"_value.#i": upchildren.length}});
-                    return false;
-                } else return true;
-            }).map((ell: any, idx: number) => {return {...ell, "_index": {"_value.#i": idx}}})
-            //console.log(oldChildren);
-            _.merge(newel, {'_value': {'_value': {'_value': {'_value': {'semantic_properties': {'_value': {'_value': {'children': {'_value[': upchildren}}}}}}}}})
+            if (el?.['_value']?.['_value']?.['_value']?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.['children']) {
+                const oldChildren = el['_value']['_value']['_value']['_value']['semantic_properties']['_value']['_value']['children'];
+                let upchildren: any[] = [];
+                oldChildren['_value['] = oldChildren['_value['].filter((elc: any) => {
+                    if (elc['_key'] && oldText.includes(elc['_key'])) {
+                        upchildren.push({...elc, "_index": {"_value.#i": upchildren.length}});
+                        return false;
+                    } else return true;
+                }).map((ell: any, idx: number) => {return {...ell, "_index": {"_value.#i": idx}}})
+                //console.log(oldChildren);
+                _.merge(newel, {'_value': {'_value': {'_value': {'_value': {'semantic_properties': {'_value': {'_value': {'children': {'_value[': upchildren}}}}}}}}})
+            }
             return [...prev, newel, el];
         } else {
             if (isInserted) return [...prev, {uid: el.uid, '_index': {'_value.#i': el['_index']['_value.#i'] + 1}}]

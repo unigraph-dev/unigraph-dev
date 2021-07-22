@@ -20,7 +20,7 @@ function TodoListBody ({data}: { data: ATodoList[] }) {
     const [newName, setNewName] = useState("");
 
     const [filteredItems, setFilteredItems] = React.useState(todoList);
-    const [filterName, setFilterName] = React.useState(["no-filter"]);
+    const [filterName, setFilterName] = React.useState(["only-incomplete"]);
 
     React.useEffect(() => {
         let res = todoList;

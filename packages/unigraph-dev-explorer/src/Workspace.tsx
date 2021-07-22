@@ -5,6 +5,7 @@
 import React, { ReactElement } from "react";
 
 import { components } from './App';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 
 import FlexLayout, { Actions, DockLocation, Model, Node, TabNode } from 'flexlayout-react';
 import 'flexlayout-react/style/light.css'
@@ -18,6 +19,8 @@ import { ContextMenu } from "./components/UnigraphCore/ContextMenu";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import { InlineSearch } from "./components/UnigraphCore/InlineSearchPopup";
+
+import MomentUtils from '@date-io/moment';
 
 const pages = window.unigraph.getState('registry/pages')
 
@@ -187,49 +190,51 @@ export function WorkSpace(this: any) {
     window.wsnavigator = workspaceNavigator.bind(this, model);
 
     return <NavigationContext.Provider value={workspaceNavigator.bind(this, model)}>
-        <div id="global-elements">
-            <ContextMenu />
-            <InlineSearch />
-        </div>
-        <DndProvider backend={HTML5Backend}>
-            <FlexLayout.Layout model={model} factory={factory} popoutURL={"./popout_page.html"} onRenderTab={(node: TabNode, renderValues: any) => {
-                setTitleOnRenderTab(model);
-                const nodeId = node.getId();
-                if (nodeId === "app-drawer") {
-                    renderValues.content = <Menu/>;
-                }
-                if (nodeId === "search-pane") {
-                    renderValues.content = <Search/>;
-                }
-                if (node.isVisible() && nodeId !== "app-drawer" && nodeId !== "dashboard" && nodeId !== "search-pane") {
-                    renderValues.buttons.push(<div style={{zIndex: 999, transform: "scale(0.7)"}} onClick={async () => {
-                        const config = node.getConfig();
-                        if (config) {delete config.undefine; delete config.id};
-                        const uid = await window.unigraph.addObject({
-                            name: node.getName(),
-                            env: "react-explorer",
-                            view: node.getComponent(),
-                            props: JSON.stringify({config: config}) 
-                        }, "$/schema/view");
-                        await window.unigraph.runExecutable("$/package/unigraph.core/0.0.1/executable/add-item-to-list", {
-                            item: uid[0],
-                            where: "$/entity/favorite_bar"
-                        })
-                    }}><StarOutlined></StarOutlined></div>) 
-                }
-                
-                renderValues.buttons.push(<div id={"tabId"+nodeId}></div>);
-                setTimeout(() => {
-                    const el = document.getElementById('tabId'+nodeId);
-                    
-                    if (el && el.parentElement && node.isEnableClose()) {
-                        const fn = getMouseDownFn(nodeId);
-                        el.parentElement.removeEventListener("mousedown", fn)
-                        el.parentElement.addEventListener("mousedown", fn)
+        <MuiPickersUtilsProvider utils={MomentUtils}>
+            <div id="global-elements">
+                <ContextMenu />
+                <InlineSearch />
+            </div>
+            <DndProvider backend={HTML5Backend}>
+                <FlexLayout.Layout model={model} factory={factory} popoutURL={"./popout_page.html"} onRenderTab={(node: TabNode, renderValues: any) => {
+                    setTitleOnRenderTab(model);
+                    const nodeId = node.getId();
+                    if (nodeId === "app-drawer") {
+                        renderValues.content = <Menu/>;
                     }
-                }, 0)
-            }}/>
-        </DndProvider>
+                    if (nodeId === "search-pane") {
+                        renderValues.content = <Search/>;
+                    }
+                    if (node.isVisible() && nodeId !== "app-drawer" && nodeId !== "dashboard" && nodeId !== "search-pane") {
+                        renderValues.buttons.push(<div style={{zIndex: 999, transform: "scale(0.7)"}} onClick={async () => {
+                            const config = node.getConfig();
+                            if (config) {delete config.undefine; delete config.id};
+                            const uid = await window.unigraph.addObject({
+                                name: node.getName(),
+                                env: "react-explorer",
+                                view: node.getComponent(),
+                                props: JSON.stringify({config: config}) 
+                            }, "$/schema/view");
+                            await window.unigraph.runExecutable("$/package/unigraph.core/0.0.1/executable/add-item-to-list", {
+                                item: uid[0],
+                                where: "$/entity/favorite_bar"
+                            })
+                        }}><StarOutlined></StarOutlined></div>) 
+                    }
+                    
+                    renderValues.buttons.push(<div id={"tabId"+nodeId}></div>);
+                    setTimeout(() => {
+                        const el = document.getElementById('tabId'+nodeId);
+                        
+                        if (el && el.parentElement && node.isEnableClose()) {
+                            const fn = getMouseDownFn(nodeId);
+                            el.parentElement.removeEventListener("mousedown", fn)
+                            el.parentElement.addEventListener("mousedown", fn)
+                        }
+                    }, 0)
+                }}/>
+            </DndProvider>
+        </MuiPickersUtilsProvider>
     </NavigationContext.Provider>
 
 }

@@ -265,13 +265,13 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
                 }}}
             />}
         </div>
-        {buildGraph(otherChildren).map((el: any) => <AutoDynamicView object={el}/>)}
+        {buildGraph(otherChildren).filter((el: any) => el.type).map((el: any) => <AutoDynamicView object={el}/>)}
         <ul ref={childrenref} style={{listStyle: "disc"}}>
             {(subentities.length || isChildren) ? buildGraph(subentities).map((el: any, elindex) => <li key={el.uid}>
                 <AutoDynamicView 
                     object={el} 
                     callbacks={{
-                        "get-view-id": () => options?.viewId, // only useful at root
+                        "get-view-id": () => options?.viewId, // only used at root
                         ...callbacks,
                         ...Object.fromEntries(Object.entries(noteBlockCommands).map(([k, v]: any) => [k, (...args: any[]) => v(dataref.current, editorContext, elindex, ...args)])), 
                         "unindent-child-in-parent": () => {callbacks['unindent-child'](elindex)},
