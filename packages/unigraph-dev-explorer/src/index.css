@@ -16,3 +16,8 @@ code {
 span.wikilink:hover {
   text-decoration: underline;
 }
+
+[contenteditable] {
+  -webkit-user-select: text;
+  user-select: text;
+}
