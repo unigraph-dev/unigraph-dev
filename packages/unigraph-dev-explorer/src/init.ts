@@ -75,6 +75,10 @@ export type SearchPopupState = {
     show: boolean,
     search?: string,
     onSelected?: (newName: string, newUid: string) => any;
+    default: {
+        label: (search: string) => string;
+        onSelected: (search: string) => Promise<string>;
+    }[]
 }
 
 function initContextMenu() {

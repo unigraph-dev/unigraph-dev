@@ -92,7 +92,6 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
     const editorContext = {
         setEdited, setCommand, childrenref, callbacks, nodesState
     }
-
     
 
     React.useEffect(() => {
@@ -132,33 +131,35 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
                     }
                 }, 0)
             }}} onBlur={(ev) => {setIsEditing(false)}}>
-            {isEditing ? <Typography 
+            {(isEditing) ? <Typography 
                 variant={isChildren ? "body1" : "h4"} 
                 onContextMenu={isChildren ? undefined : (event) => onUnigraphContextMenu(event, data, undefined, callbacks)}
                 contentEditable={true} 
                 suppressContentEditableWarning={true}
                 ref={textInput}
                 onInput={(ev) => {
-                    textref.current = ev.currentTarget.textContent; 
-                    onNoteInput(inputDebounced, ev); 
+                    
                     if (ev.currentTarget.textContent !== data.get('text').as('primitive') && !edited) setEdited(true)
-
+                    const newContent = ev.currentTarget.textContent;
                     const caret = (document.getSelection()?.anchorOffset) as number;
                     // Check if inside a reference block
                     const placeholder = /\[\[([^[\]]*)\]\]/g;
 
                     let hasMatch = false;
-                    for (let match; (match = placeholder.exec(textInput.current.textContent)) !== null;) {
+                    for (let match: any; (match = placeholder.exec(textInput.current.textContent)) !== null;) {
                         if (match.index <= caret && placeholder.lastIndex >= caret) {
                             hasMatch = true;
+                            inputDebounced.flush();
                             window.unigraph.getState('global/searchPopup').setValue({show: true, search: match[1], anchorEl: boxRef.current,
                                 onSelected: async (newName: string, newUid: string) => {
-                                    console.log(newName, newUid);
+                                    const newStr = newContent?.slice?.(0, match.index) + '[[' + newName + ']]' + newContent?.slice?.(match.index+match[0].length);
+                                    console.log(newName, newUid, newStr, newContent);
                                     // This is an ADDITION operation
                                     console.log(data);
                                     const semChildren = data?.['_value']?.['semantic_properties']?.['_value']?.['_value'];
                                     await window.unigraph.updateObject(data.uid, {
                                         '_value': {
+                                            'text': {'_value': {'_value': {'_value.%': newStr}}},
                                             'semantic_properties': {
                                                 '_propertyType': "inheritance",
                                                 "_value": {
@@ -184,12 +185,24 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
                                             }
                                         }
                                     }, true, false);
-                                    window.unigraph.getState('global/searchPopup').setValue({show: false})
-                                }
+                                    window.unigraph.getState('global/searchPopup').setValue({show: false});
+                                }, default: [{
+                                    label: (search: string) => `Create new page named ${search}`,
+                                    onSelected: async (search: string) => {
+                                        const newUid = await window.unigraph.addObject({
+                                            'text': {_value: search, type: {'unigraph.id': "$/schema/markdown"}}
+                                        }, '$/schema/note_block');
+                                        console.log(newUid);
+                                        return newUid[0];
+                                    }
+                                }]
                             })
                         }
                     }
                     if (!hasMatch) window.unigraph.getState('global/searchPopup').setValue({show: false})
+
+                    textref.current = ev.currentTarget.textContent; 
+                    onNoteInput(inputDebounced, ev); 
                 }}
                 onKeyDown={async (ev) => {
                     const caret = (document.getSelection()?.anchorOffset) as number;

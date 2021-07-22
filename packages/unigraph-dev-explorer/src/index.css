@@ -11,3 +11,8 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Global styles properties */
+span.wikilink:hover {
+  text-decoration: underline;
+}
