@@ -76,7 +76,7 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
             el['_value']['_hide'] = true; el['_value']['_value']['_hide'] = true; el['_value']['_value']['_value']['_hide'] = true;
             el['_value']['_value']['_value']['_value']['text']['_value']['_value']['_value.%'] = el['_value']['_value']['_value']['_value']['text']?.['_value']?.['_value']['_value.%'].slice(at);
             // distribute references accordingly
-            if (el?.['_value']?.['_value']?.['_value']?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.['children']) {
+            if (el?.['_value']?.['_value']?.['_value']?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.['children']?.['_value[']) {
                 const oldChildren = el['_value']['_value']['_value']['_value']['semantic_properties']['_value']['_value']['children'];
                 let upchildren: any[] = [];
                 oldChildren['_value['] = oldChildren['_value['].filter((elc: any) => {

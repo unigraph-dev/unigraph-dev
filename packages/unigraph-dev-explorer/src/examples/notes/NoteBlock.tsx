@@ -71,9 +71,18 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
     const [subentities, otherChildren] = getSubentities(data);
     const [command, setCommand] = React.useState<() => any | undefined>();
     const inputter = (text: string) => {
+        if (data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.['children']?.['_value[']) {
+            let deadLinks: any = [];
+            data['_value']['semantic_properties']['_value']['_value']['children']['_value['].forEach((el: any) => {
+                if (el && el['_key'] && !text.includes(el['_key'])) deadLinks.push(el.uid)
+            });
+            if (deadLinks.length) window.unigraph.deleteItemFromArray(data['_value']['semantic_properties']['_value']['_value']['children']['uid'], deadLinks, data['uid'])
+        }
+
         return window.unigraph.updateObject(data.uid, {
             text: {type: {'unigraph.id': "$/schema/markdown"}, _value: text}
-        })
+        });
+
     }
     /** Reference for the data object (for children) */
     const dataref = React.useRef<any>();
