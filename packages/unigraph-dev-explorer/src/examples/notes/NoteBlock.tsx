@@ -204,6 +204,15 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
                                         console.log(newUid);
                                         return newUid[0];
                                     }
+                                }, {
+                                    label: (search: string) => `Create new tag named ${search}`,
+                                    onSelected: async (search: string) => {
+                                        const newUid = await window.unigraph.addObject({
+                                            'name': search
+                                        }, '$/schema/tag');
+                                        console.log(newUid);
+                                        return newUid[0];
+                                    }
                                 }]
                             })
                         }
@@ -214,7 +223,8 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
                     onNoteInput(inputDebounced, ev); 
                 }}
                 onKeyDown={async (ev) => {
-                    const caret = (document.getSelection()?.anchorOffset) as number;
+                    const sel = document.getSelection();
+                    const caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
                     switch (ev.code) {
                         case 'Enter':
                             ev.preventDefault();
@@ -255,8 +265,13 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
 
                         case 'BracketLeft':
                             ev.preventDefault();
-                            document.execCommand('insertText', false, '[]');
-                            setCaret(document, textInput.current.firstChild, caret+1)
+                            console.log(document.getSelection())
+                            let middle = document.getSelection()?.toString() || "";
+                            let end = "";
+                            if (middle.endsWith(' ')) {middle = middle.slice(0, middle.length-1); end = " ";}
+                            document.execCommand('insertText', false, '['+middle+']'+end);
+                            console.log(caret, document.getSelection(), middle)
+                            setCaret(document, textInput.current.firstChild, caret+1, middle.length)
                             break;
                     
                         default:
