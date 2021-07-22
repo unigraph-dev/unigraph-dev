@@ -1,4 +1,4 @@
-import { Popover, Typography } from "@material-ui/core"
+import { Divider, Popover, Typography } from "@material-ui/core"
 import React from "react";
 import { AppState } from "unigraph-dev-common/lib/types/unigraph";
 import { UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
@@ -42,16 +42,26 @@ export const InlineSearch = () => {
             vertical: 'top',
             horizontal: 'left',
         }}
+        PaperProps={{
+            style: { maxHeight: '320px', padding: "8px" },
+          }}
     >
-        {state.default?.map(el => <Typography variant="body1"
-            onClick={() => {
-                el.onSelected(state.search!).then((newUid: string) => {
-                    state.onSelected?.(state.search!, newUid)
-                })
-            }}
-        >{el.label(state.search!)}</Typography>)}
-        {searchResults.map((el: any) => <Typography variant="body1"
-            onClick={() => {state.onSelected?.(el.name, el.uid)}}
-        >{el.name} - {el.type}</Typography>)}
+        {state.default?.map(el => <React.Fragment>
+            <Typography variant="body1"
+                onClick={() => {
+                    el.onSelected(state.search!).then((newUid: string) => {
+                        state.onSelected?.(state.search!, newUid)
+                    })
+                }}
+            >{el.label(state.search!)}</Typography>
+            <Divider/>
+        </React.Fragment>)}
+        {searchResults.map((el: any) => <React.Fragment>
+            <div onClick={() => {state.onSelected?.(el.name, el.uid)}}>
+                <Typography variant="body1">{el.name}</Typography>
+                <Typography variant="body2" style={{color: "gray"}}>{el.type}</Typography>
+            </div>
+            <Divider/>
+        </React.Fragment>)}
     </Popover></div>
 }

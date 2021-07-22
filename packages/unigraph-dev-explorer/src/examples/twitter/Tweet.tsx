@@ -3,8 +3,14 @@ import { registerDynamicViews } from "unigraph-dev-common/lib/api/unigraph-react
 import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
 import { DynamicViewRenderer } from "../../global"
 import Sugar from "sugar";
+import { externalNamespaces } from "../../externalNamespaceStub";
 
 export const Tweet: DynamicViewRenderer = ({data, callbacks}) => {
+  const twid = data.get('from_user/twitter_id').as('primitive');
+  console.log(twid)
+  const nslnk = externalNamespaces.filter(el => el.participants.includes(twid))[0]?.createLink;
+  
+
     return <div style={{display: "flex"}}>
         <div style={{alignSelf: "center", marginRight: "16px"}}>
         <Badge
@@ -25,7 +31,7 @@ export const Tweet: DynamicViewRenderer = ({data, callbacks}) => {
                 <Typography variant="body2" style={{color: "gray"}}>@{data.get('from_user/username').as("primitive")}, {Sugar.Date.relative(new Date(data['_timestamp']['_updatedAt']))}</Typography>
             </div>
             
-            <AutoDynamicView object={data.get('text')['_value']['_value']} noContextMenu />
+            <AutoDynamicView object={data.get('text')['_value']['_value']} callbacks={{namespaceLink: nslnk}} noContextMenu />
         </div>
     </div>
 }

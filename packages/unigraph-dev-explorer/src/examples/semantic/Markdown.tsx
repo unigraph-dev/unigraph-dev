@@ -6,6 +6,7 @@ import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import remarkWikilink from './wikilink'
 import 'katex/dist/katex.min.css'
+import { Public } from "@material-ui/icons";
 
 const compFactory = (name: string, {node, inline, className, children, ...props}: any) => {
     return React.createElement(name, {
@@ -33,12 +34,13 @@ export const Markdown: DynamicViewRenderer = ({data, callbacks, isHeading}) => {
             em: compFactory.bind(this, "em"),
             code: compFactory.bind(this, "code"),
             span: ({node, inline, className, children, ...props}: any) => {
-                if (className.includes('wikilink') && callbacks?.['get-semantic-properties']) {
-                    const matches = (callbacks['get-semantic-properties']()?.['_value']?.['children']?.['_value['] || [])
+                if (className.includes('wikilink')) {
+                    const matches = (callbacks?.['get-semantic-properties']?.()?.['_value']?.['children']?.['_value['] || [])
                         .filter((el: any) => el['_key'] === `[[${children[0]}]]`);
-                    console.log(matches)
+                    console.log(matches, callbacks)
                     return <React.Fragment>
                         <span style={{color: "darkgray"}}>[[</span>
+                        {/*callbacks?.namespaceLink ? <Public style={{height: "16px"}}/> : []*/}
                         {React.createElement('span', {
                             className, children,
                             contentEditable: true,
@@ -46,10 +48,11 @@ export const Markdown: DynamicViewRenderer = ({data, callbacks, isHeading}) => {
                             onClick: (event: MouseEvent) => {
                                 event.stopPropagation();
                                 event.preventDefault();
-                                if (matches[0]) window.wsnavigator(`/library/object?uid=${matches[0]._value._value.uid}&viewer=${"dynamic-view-detailed"}`)
+                                if (matches[0]) window.wsnavigator(`/library/object?uid=${matches[0]._value._value.uid}&viewer=${"dynamic-view-detailed"}`);
+                                else if (callbacks?.namespaceLink) {window.open(callbacks.namespaceLink(children[0]), "_blank")}
                             },
                             ...props,
-                            style: {display: "contents", color: matches[0] ? "mediumblue" : "black", ':hover':{
+                            style: {display: "contents", color: (matches[0] || callbacks?.namespaceLink) ? "mediumblue" : "black", ':hover':{
                                 textDecoration: 'underline',
                             }}
                         })}
