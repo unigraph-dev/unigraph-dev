@@ -34,7 +34,7 @@ export const Markdown: DynamicViewRenderer = ({data, callbacks, isHeading}) => {
             em: compFactory.bind(this, "em"),
             code: compFactory.bind(this, "code"),
             span: ({node, inline, className, children, ...props}: any) => {
-                if (className.includes('wikilink')) {
+                if (className?.includes('wikilink')) {
                     const matches = (callbacks?.['get-semantic-properties']?.()?.['_value']?.['children']?.['_value['] || [])
                         .filter((el: any) => el['_key'] === `[[${children[0]}]]`);
                     console.log(matches, callbacks)
@@ -58,7 +58,10 @@ export const Markdown: DynamicViewRenderer = ({data, callbacks, isHeading}) => {
                         })}
                         <span style={{color: "darkgray"}}>]]</span>
                     </React.Fragment>
-                } else return compFactory('span', {node, inline, className, children, ...props})
+                } else return React.createElement('span', {
+                    className, children, inline, node,
+                    ...props
+                });
             }
         }} rawSourcePos/>
     </Typography>
