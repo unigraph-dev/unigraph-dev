@@ -93,6 +93,15 @@ declare type EventSubscribeObject = {
   type: "event",
   event: "subscribe_to_object",
   id: number | string,
+  uid: string,
+  connId: string,
+  noExpand?: boolean,
+}
+
+declare type EventSubscribeQuery = {
+  type: "event",
+  event: "subscribe_to_query",
+  id: number | string,
   queryFragment: string,
   connId: string,
   noExpand?: boolean,

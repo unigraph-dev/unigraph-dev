@@ -217,22 +217,12 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
         // eslint-disable-next-line no-async-promise-executor
         subscribeToObject: (uid, callback, eventId = undefined) => new Promise(async (resolve, reject) => {
             const id = typeof eventId === "number" ? eventId : getRandomInt();
-            if (uid.startsWith('$/')) {
-                // Is named entity
-                if (caches.namespaceMap) {
-                    uid = caches.namespaceMap[uid].uid;
-                } else {
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    uid = caches.namespaceMap[uid].uid;
-                }
-            }
             callbacks[id] = (response: any) => {
                 if (response.success) resolve(id);
                 else reject(response);
             };
             subscriptions[id] = (result: any) => callback(new UnigraphObject(result[0]));
-            const frag = `(func: uid(${uid})) @recurse { uid unigraph.id expand(_userpredicate_) }`
-            sendEvent(connection, "subscribe_to_object", {queryFragment: frag}, id);
+            sendEvent(connection, "subscribe_to_object", {uid}, id);
         }), 
         subscribeToQuery: (fragment, callback, eventId = undefined, noExpand = false) => new Promise((resolve, reject) => {
             const id = typeof eventId === "number" ? eventId : getRandomInt();

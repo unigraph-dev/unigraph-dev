@@ -4,7 +4,7 @@ import WebSocket from 'ws';
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import DgraphClient, { queries } from './dgraphClient';
 import { insertsToUpsert } from 'unigraph-dev-common/lib/utils/txnWrapper';
-import { EventAddNotification, EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteItemFromArray, EventDeleteRelation, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventExportObjects, EventGetPackages, EventGetQueries, EventGetSchemas, EventGetSearchResults, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventResponser, EventRunExecutable, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
+import { EventAddNotification, EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteItemFromArray, EventDeleteRelation, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventExportObjects, EventGetPackages, EventGetQueries, EventGetSchemas, EventGetSearchResults, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventResponser, EventRunExecutable, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeQuery, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
 import { buildUnigraphEntity, getUpsertFromUpdater, makeQueryFragmentFromType, processAutoref, dectxObjects, unpad, processAutorefUnigraphId, isPaddedObject } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { addUnigraphPackage, checkOrCreateDefaultDataModel, createPackageCache, createSchemaCache } from './datamodelManager';
 import { Cache } from './caches';
@@ -162,37 +162,21 @@ export default async function startServer(client: DgraphClient) {
     },
 
     "subscribe_to_object": function (event: EventSubscribeObject, ws: IWebsocket) {
-      const newSub = createSubscriptionWS(event.id, ws, event.queryFragment, event.connId);
-      serverStates.subscriptions.push(newSub);
-      callHooks(hooks, "after_subscription_added", {subscriptions: serverStates.subscriptions, ids: [event.id]});
-      ws.send(makeResponse(event, true));
+      serverStates.localApi.subscribeToObject(event.uid, {ws: ws, connId: event.connId}, event.id)
+        .then((res: any) => ws.send(makeResponse(event, true)));
     },
 
     "subscribe_to_type": function (event: EventSubscribeType, ws: IWebsocket) {
       lock.acquire('caches/schema', function(done: (any)) {
         done(false);
-        const queryAny = queries.queryAny(getRandomInt().toString())
-        const queryAnyAll = queries.queryAnyAll(getRandomInt().toString())
-        const query = event.schema === "any" ? (event.all ? queryAnyAll : queryAny) : `(func: uid(par${event.id})) @filter((type(Entity)) AND (NOT eq(<_propertyType>, "inheritance")) ${ event.showHidden ? "" : "AND (NOT eq(<_hide>, true))" } AND (NOT type(Deleted)))
-        ${makeQueryFragmentFromType(event.schema, caches["schemas"].data)}
-        var(func: eq(<unigraph.id>, "${event.schema}")) {
-          <~type> {
-          par${event.id} as uid
-       }}`
-        if (verbose >= 2) console.log(query)
-        eventRouter["subscribe_to_object"]({...event, queryFragment: query}, ws)
+        serverStates.localApi.subscribeToType(event.schema, {ws: ws, connId: event.connId}, event.id, event.all, event.showHidden)
+          .then((res: any) => ws.send(makeResponse(event, true)));
       });
     },
 
-    "subscribe_to_query": async function (event: EventSubscribeObject, ws: IWebsocket) {
-      /*if (event.queryFragment?.startsWith('$/executable')){
-        const exec = serverStates.caches["executables"].data[event.queryFragment];
-        event.queryFragment = await buildExecutable(exec, {"hello": "ranfromExecutable", params: (event as any).params, definition: exec}, localApi)();
-      }*/
-      const query = (event.noExpand || event.queryFragment.startsWith('$/executable/')) ? event.queryFragment : `(func: uid(par${event.id})) @recurse {uid unigraph.id expand(_userpredicate_)}
-      par${event.id} as var${event.queryFragment}`
-      if (verbose >= 2) console.log(query)
-      eventRouter["subscribe_to_object"]({...event, queryFragment: query}, ws)
+    "subscribe_to_query": async function (event: EventSubscribeQuery, ws: IWebsocket) {
+      serverStates.localApi.subscribeToQuery(event.queryFragment, {ws: ws, connId: event.connId}, event.id, event.noExpand)
+        .then((res: any) => ws.send(makeResponse(event, true)));
     },
 
     "get_queries": async function (event: EventGetQueries, ws: IWebsocket) {
