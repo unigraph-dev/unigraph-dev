@@ -1,6 +1,5 @@
-const getQuery = (targetUrl) => `(func: type(Entity)) @cascade { 
+const getQuery = (targetUrl, index) => `(func: uid(par${index.toString()})) @cascade { 
   uid
-type @filter(eq(<unigraph.id>, "$/schema/rss_item"))
   _value {
     item_data {
       _value {
@@ -11,6 +10,11 @@ type @filter(eq(<unigraph.id>, "$/schema/rss_item"))
         }
       }
     }
+  }
+}
+var(func: eq(unigraph.id, "$/schema/rss_item")) {
+  <unigraph.origin> {
+    par${index.toString()} as uid
   }
 }`
 
@@ -30,7 +34,7 @@ parser.parseURL(el).then(res => rresolve(res.items)).catch((e) => {
   })
 })
 })))
-totalItems.forEach((items, i) => items.forEach(item => queries.push({query: getQuery(item.link), item: item, feedId: i})));
+totalItems.forEach((items, i) => items.forEach((item, index) => queries.push({query: getQuery(item.link, i+'_'+index), item: item, feedId: i})));
 
 console.log("All items loaded!");
 const results = await unigraph.getQueries(queries.map(el => el.query));

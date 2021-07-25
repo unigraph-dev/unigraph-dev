@@ -31,7 +31,7 @@ export const ConnectionWidget: React.FC = ({}) => {
         <b>Total subscriptions </b> {content?.unigraph?.subscription?.length} <br/>
         <div>
             <Button onClick={() => upload((f: File) => {f.text().then((txt) => window.unigraph.importObjects(txt))})}>Import objects</Button> 
-            <Button onClick={() => window.unigraph.subscribeToType('any', (data: any) => {download("unigraph_export_all.json", JSON.stringify(data))}, (new Date()).getTime(), true)}>Export all objects</Button>
+            <Button onClick={() => window.unigraph.subscribeToType('any', (data: any) => {download("unigraph_export_all.json", JSON.stringify(data))}, (new Date()).getTime(), {all: true})}>Export all objects</Button>
         </div>
         <b>Objects count</b> <br/>
         {counts.sort((a, b) => b[1] - a[1]).map(el => <div><b>{el[0]}</b> {el[1]}</div>)}

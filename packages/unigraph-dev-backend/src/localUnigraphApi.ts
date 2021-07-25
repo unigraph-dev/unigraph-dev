@@ -6,7 +6,7 @@ import DgraphClient, { queries } from "./dgraphClient";
 import { buildExecutable } from "./executableManager";
 import { callHooks } from "./hooks";
 import { addNotification } from "./notifications";
-import { Subscription, createSubscriptionLocal } from "./subscriptions";
+import { Subscription, createSubscriptionLocal, createSubscriptionWS } from "./subscriptions";
 import { insertsToUpsert } from "unigraph-dev-common/lib/utils/txnWrapper";
 import { Cache } from './caches';
 import dgraph from "dgraph-js";
@@ -35,32 +35,47 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         ensureSchema: async (name, fallback) => {return Error('Not implemented')},
         // latertodo
         ensurePackage: async (packageName, fallback) => {return Error('Not implemented')},
-        subscribeToType: async (name, callback: any, eventId = undefined) => {
-            eventId = getRandomInt();
-            const queryAny = queries.queryAny(getRandomInt().toString());
-            const query = name === "any" ? queryAny : `(func: uid(par${eventId})) 
-            ${makeQueryFragmentFromType(name, states.caches["schemas"].data)}
-            par${eventId} as var(func: has(type)) @filter((NOT type(Deleted)) AND type(Entity)) @cascade {
-                type @filter(eq(<unigraph.id>, "${name}"))
-            }`
-            const newSub = createSubscriptionLocal(eventId, callback, query);
+        subscribeToType: async (name, callback: any, eventId = undefined, {all, showHidden, uidsOnly}: any) => {
+            eventId = eventId || getRandomInt();
+            const queryAny = queries.queryAny(eventId.toString())
+            const queryAnyAll = queries.queryAnyAll(eventId.toString())
+            const query = name === "any" ? (all ? queryAnyAll : queryAny) : `(func: uid(par${eventId})) 
+                @filter((type(Entity)) AND (NOT eq(<_propertyType>, "inheritance")) 
+                ${ showHidden ? "" : "AND (NOT eq(<_hide>, true))" } AND (NOT type(Deleted)))
+            ${uidsOnly ? "{ uid }" : makeQueryFragmentFromType(name, states.caches["schemas"].data)}
+            var(func: eq(<unigraph.id>, "${name}")) {
+            <~type> {
+            par${eventId} as uid
+            }}`;
+            const newSub = typeof callback === "function" ? 
+                createSubscriptionLocal(eventId, callback, query) : 
+                createSubscriptionWS(eventId, callback.ws, query, callback.connId);
             states.subscriptions.push(newSub);
-            callHooks(states.hooks, "after_subscription_added", {newSubscriptions: states.subscriptions, ids: [eventId]});
+            callHooks(states.hooks, "after_subscription_added", {subscriptions: states.subscriptions, ids: [eventId]});
         },
-        subscribeToObject: async (uid, callback: any, eventId = undefined) => {
-            eventId = getRandomInt();
-            const frag = `(func: uid(${uid})) @recurse { uid unigraph.id expand(_userpredicate_) }`
-            const newSub = createSubscriptionLocal(eventId, callback, frag);
+        subscribeToObject: async (uid, callback: any, eventId = undefined, {queryAsType}: any) => {
+            eventId = eventId || getRandomInt();
+            if (typeof uid === "string" && uid.startsWith('$/')) {
+                // Is named entity
+                uid = states.namespaceMap[uid].uid;
+            }
+            const frag = `(func: uid(${Array.isArray(uid) ? uid.reduce((prev: string, el: string) => prev + el + ",", "").slice(0, -1): uid })) 
+                ${queryAsType ? makeQueryFragmentFromType(queryAsType, states.caches["schemas"].data) : "@recurse { uid unigraph.id expand(_userpredicate_) }"}`
+            const newSub = typeof callback === "function" ? 
+                createSubscriptionLocal(eventId, callback, frag) :
+                createSubscriptionWS(eventId, callback.ws, frag, callback.connId);
             states.subscriptions.push(newSub);
-            callHooks(states.hooks, "after_subscription_added", {newSubscriptions: states.subscriptions, ids: [eventId]});
+            callHooks(states.hooks, "after_subscription_added", {subscriptions: states.subscriptions, ids: [eventId]});
         },
         subscribeToQuery: async (fragment, callback: any, eventId = undefined, noExpand) => {
-            eventId = getRandomInt();
+            eventId = eventId || getRandomInt();
             const query = (noExpand || fragment.startsWith('$/executable/')) ? fragment : `(func: uid(par${eventId})) @recurse {uid unigraph.id expand(_userpredicate_)}
             par${eventId} as var${fragment}`
-            const newSub = createSubscriptionLocal(eventId, callback, query);
+            const newSub = typeof callback === "function" ? 
+                createSubscriptionLocal(eventId, callback, query) :
+                createSubscriptionWS(eventId, callback.ws, query, callback.connId);
             states.subscriptions.push(newSub);
-            callHooks(states.hooks, "after_subscription_added", {newSubscriptions: states.subscriptions, ids: [eventId]});
+            callHooks(states.hooks, "after_subscription_added", {subscriptions: states.subscriptions, ids: [eventId]});
         },
         unsubscribe: async (id) => {
             states.subscriptions = states.subscriptions.reduce((prev: Subscription[], curr: Subscription) => {

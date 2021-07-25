@@ -205,34 +205,24 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
             };
             sendEvent(connection, "ensure_unigraph_package", {packageName: packageName, fallback: fallback}, id)
         }),
-        subscribeToType: (name, callback, eventId = undefined, all = false, showHidden: false) => new Promise((resolve, reject) => {
+        subscribeToType: (name, callback, eventId = undefined, options: any) => new Promise((resolve, reject) => {
             const id = typeof eventId === "number" ? eventId : getRandomInt();
             callbacks[id] = (response: any) => {
                 if (response.success) resolve(id);
                 else reject(response);
             };
             subscriptions[id] = (result: any[]) => callback(buildGraph(result.map((el: any) => new UnigraphObject(el))));
-            sendEvent(connection, "subscribe_to_type", {schema: name, all, showHidden}, id);
+            sendEvent(connection, "subscribe_to_type", {schema: name, options: options}, id);
         }),
         // eslint-disable-next-line no-async-promise-executor
-        subscribeToObject: (uid, callback, eventId = undefined) => new Promise(async (resolve, reject) => {
+        subscribeToObject: (uid, callback, eventId = undefined, options: any) => new Promise(async (resolve, reject) => {
             const id = typeof eventId === "number" ? eventId : getRandomInt();
-            if (uid.startsWith('$/')) {
-                // Is named entity
-                if (caches.namespaceMap) {
-                    uid = caches.namespaceMap[uid].uid;
-                } else {
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    uid = caches.namespaceMap[uid].uid;
-                }
-            }
             callbacks[id] = (response: any) => {
                 if (response.success) resolve(id);
                 else reject(response);
             };
-            subscriptions[id] = (result: any) => callback(new UnigraphObject(result[0]));
-            const frag = `(func: uid(${uid})) @recurse { uid unigraph.id expand(_userpredicate_) }`
-            sendEvent(connection, "subscribe_to_object", {queryFragment: frag}, id);
+            subscriptions[id] = (result: any) => result.length === 1 ? callback(new UnigraphObject(result[0])) : callback(result.map((el: any) => new UnigraphObject(el)));
+            sendEvent(connection, "subscribe_to_object", {uid, options}, id);
         }), 
         subscribeToQuery: (fragment, callback, eventId = undefined, noExpand = false) => new Promise((resolve, reject) => {
             const id = typeof eventId === "number" ? eventId : getRandomInt();

@@ -1,6 +1,6 @@
 import { Avatar, Button, Divider, List, ListItem, ListItemIcon, ListItemText, TextField, Typography } from "@material-ui/core";
 import React from "react";
-import { getExecutableId } from "unigraph-dev-common/lib/api/unigraph";
+import { getExecutableId, getRandomInt, UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
 import { registerDynamicViews, withUnigraphSubscription } from "unigraph-dev-common/lib/api/unigraph-react"
 import { pkg as rssReaderPackage } from 'unigraph-dev-common/lib/data/unigraph.rss_reader.pkg';
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
@@ -10,6 +10,8 @@ import { download, upload } from "../../utils";
 import { Description, Link } from "@material-ui/icons";
 import { getComponentFromPage } from "../../Workspace";
 import Sugar from "sugar";
+import InfiniteScroll from 'react-infinite-scroll-component';
+import _ from "lodash";
 
 export type ARSSFeed = {
     uid?: string,
@@ -127,26 +129,102 @@ export const RSSFeedsList = withUnigraphSubscription(
     }}
 )
 
-const RSSItemsListBody: React.FC<{data: ARSSItem[]}> = ({data}) => {
+const RSSItemsListBody: React.FC<{data: UnigraphObject[]}> = ({data}) => {
 
+    const [loadedItems, setLoadedItems] = React.useState<UnigraphObject[]>([]);
+    const [subs, setSubs] = React.useState<any[]>([]);
+    const subsRef = React.useRef<any>([]);
+    const currentDiv = React.useRef<any>([]);
+    const [reload, setReload] = React.useState(0);
+    const [chunks, setChunks] = React.useState<any[][]>(_.chunk(data, 50));
+
+    React.useEffect(() => { setChunks(_.chunk(data, 50)) }, [data]);
+
+    React.useEffect(() => { 
+        subsRef.current = subs;
+        if (!(loadedItems.length && !subs.length)) setLoadedItems(subs.reduce((prev: any[], current: any) => {prev.push(...current.results); return prev;}, []));
+    }, [subs]);
+
+    React.useEffect(() => {
+        if (reload !== 0 && subs.length === 0) {
+            for(let i=0; i<reload; ++i) {
+                nextGroup();
+            };
+            setReload(0);
+        }
+    }, [subs, reload])
+
+    const setSubResult = React.useCallback((data: any[], index: number) => {
+        let newSubs = [...subsRef.current];
+        if (newSubs[index]) {
+            newSubs[index].results = data;
+            setSubs(newSubs)
+        };
+    }, [subs]);
+    const nextGroup = () => {
+        console.log("Showing next group...", subs.length)
+        if (chunks[subs.length]?.length) {
+            const subId = getRandomInt();
+            const thisSub = {id: subId, results: [] };
+            console.log(chunks[subs.length].map((el: any) => el.uid));
+            window.unigraph.subscribeToObject(chunks[subs.length].map((el: any) => el.uid), (results: any[]) => {
+                let resultsMap: any = {};
+                results.forEach((el: any) => resultsMap[el.uid] = el);
+                setSubResult(chunks[subs.length].map((el: any) => resultsMap[el.uid]), subs.length);
+            }, subId, {queryAsType: "$/schema/rss_item"});
+            setSubs([...subs, thisSub]);
+        }
+    };
+
+    React.useEffect(() => {
+        const nextGroups = subs.length || 1;
+        const cleanup = () => {
+            subsRef.current.forEach((el: any) => {
+                window.unigraph.unsubscribe(el.id);
+        })};
+        cleanup();
+        setSubs([]);
+        setReload(nextGroups);
+        return cleanup;
+    }, [chunks])
+    console.log(currentDiv)
+    /*
     return <div>
         <List>
             {data.map(it => <ListItem button key={it.uid}>
                 <AutoDynamicView object={it} />
             </ListItem>)}
         </List>
+    </div>*/
+    return <div ref={currentDiv}>
+        <InfiniteScroll
+            dataLength={loadedItems.length} //This is important field to render the next data
+            next={nextGroup}
+            scrollableTarget="scrollableDiv"
+            hasMore={true}
+            loader={<h4>Loading...</h4>}
+            endMessage={
+                <p style={{ textAlign: 'center' }}>
+                <b>Yay! You have seen it all</b>
+                </p>
+            }
+        >
+            {(loadedItems || []).map((it: any) => <ListItem button key={it.uid}>
+                <AutoDynamicView object={it} />
+            </ListItem>)}
+        </InfiniteScroll>
     </div>
 }
 
 export const RSSItemsList = withUnigraphSubscription(
     RSSItemsListBody,
-    { schemas: [], defaultData: Array(10).fill({'type': {'unigraph.id': '$/skeleton/default'}}), packages: [rssReaderPackage]},
+    { schemas: [], defaultData: [], packages: [rssReaderPackage]},
     { afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
-        window.unigraph.subscribeToType("$/schema/rss_item", (result: ARSSItem[]) => {setData(result.reverse())}, subsId);
+        window.unigraph.subscribeToType("$/schema/rss_item", (result: ARSSItem[]) => {setData(result.reverse())}, subsId, {uidsOnly: true});
     }}
 )
 
-export const RSSFeeds = () => <React.Fragment>
+export const RSSFeeds = () => <div id="scrollableDiv" style={{overflow: "auto", height: "100%", width: "100%"}}>
     <RSSFeedsList/>
     <RSSItemsList/>
-</React.Fragment> 
+</div> 

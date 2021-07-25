@@ -11,7 +11,7 @@ const UserLibraryAll = () => {
     const [usingAll, setUsingAll] = React.useState(false);
 
     useEffectOnce(() => {
-        window.unigraph.subscribeToType("any", (objects: any[]) => { setObjects(objects) }, id, usingAll);
+        window.unigraph.subscribeToType("any", (objects: any[]) => { setObjects(objects) }, id, {all: usingAll});
 
         return function cleanup () {
             window.unigraph.unsubscribe(id);
@@ -21,7 +21,7 @@ const UserLibraryAll = () => {
     useEffect(() => {
         window.unigraph.unsubscribe(id);
         const newId = Date.now();
-        window.unigraph.subscribeToType("any", (objects: any[]) => { setObjects(objects) }, newId, usingAll);
+        window.unigraph.subscribeToType("any", (objects: any[]) => { setObjects(objects) }, newId, {all: usingAll});
         setId(newId);
 
         return function cleanup () {
