@@ -162,14 +162,14 @@ export default async function startServer(client: DgraphClient) {
     },
 
     "subscribe_to_object": function (event: EventSubscribeObject, ws: IWebsocket) {
-      serverStates.localApi.subscribeToObject(event.uid, {ws: ws, connId: event.connId}, event.id)
+      serverStates.localApi.subscribeToObject(event.uid, {ws: ws, connId: event.connId}, event.id, event.options || {})
         .then((res: any) => ws.send(makeResponse(event, true)));
     },
 
     "subscribe_to_type": function (event: EventSubscribeType, ws: IWebsocket) {
       lock.acquire('caches/schema', function(done: (any)) {
         done(false);
-        serverStates.localApi.subscribeToType(event.schema, {ws: ws, connId: event.connId}, event.id, event.all, event.showHidden)
+        serverStates.localApi.subscribeToType(event.schema, {ws: ws, connId: event.connId}, event.id, event.options || {})
           .then((res: any) => ws.send(makeResponse(event, true)));
       });
     },

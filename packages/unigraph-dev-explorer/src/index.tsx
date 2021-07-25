@@ -31,7 +31,7 @@ window.unigraph.backendConnection.onopen = () => {
   window.unigraph.subscribeToType("$/schema/notification", (data: any[]) => {
     const nfState = window.unigraph.getState('notification-center/notifications');
     nfState.setValue(data);
-  }, undefined, false, true)
+  }, undefined, {all: false, showHidden: true})
 
   const semanticChildrenState = window.unigraph.addState('referenceables/semantic_children', []);
   window.unigraph.getSchemas(['$/schema/interface/semantic']).then((schemas: any) => { 
