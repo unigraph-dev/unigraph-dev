@@ -132,7 +132,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
 
     const [{ isDragging }, drag] = useDrag(() => ({
         type: object?.['type']?.['unigraph.id'] || "$/schema/any",
-        item: {uid: object?.uid},
+        item: {uid: object?.uid, itemType: object?.type?.['unigraph.id']},
         collect: (monitor) => ({
           isDragging: !!monitor.isDragging()
         })
@@ -140,10 +140,11 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
 
     const [, drop] = useDrop(() => ({
           accept: window.unigraph.getState('referenceables/semantic_children').value,
-          drop: (item: {uid: string}, monitor) => {
+          drop: (item: {uid: string, itemType: string}, monitor) => {
             window.unigraph.updateObject(object?.uid, {
                 semantic_properties: {
                     children: [{
+                        "type": {"unigraph.id": item.itemType},
                         uid: item.uid
                     }]
                 }

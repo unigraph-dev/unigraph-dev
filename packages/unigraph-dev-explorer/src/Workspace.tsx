@@ -24,12 +24,14 @@ import MomentUtils from '@date-io/moment';
 
 const pages = window.unigraph.getState('registry/pages')
 
-export function WorkspacePageComponent({ children, maximize }: any) {
-    console.log(maximize)
-    return <Container maxWidth={maximize ? false : "lg"} disableGutters style={{paddingTop: maximize ? "0px" : "12px", height: "100%"}}>
-        <CssBaseline/>
-        {children}
-    </Container>
+export function WorkspacePageComponent({ children, maximize, id }: any) {
+    console.log(id)
+    return <div id={"workspaceContainer"+id} style={{width: "100%", height: "100%", overflow: "auto"}}>
+        <Container maxWidth={maximize ? false : "lg"} disableGutters style={{paddingTop: maximize ? "0px" : "12px", height: "100%"}}>
+            <CssBaseline/>
+            {children}
+        </Container>
+    </div>
 }
 
 export const getComponentFromPage = (location: string, params: any = {}) => {return {
@@ -155,7 +157,7 @@ export function WorkSpace(this: any) {
         if (component.startsWith('/pages/')) {
             const page = pages.value[(component.replace('/pages/', '') as string)]
             console.log(page)
-            return <WorkspacePageComponent maximize={page.maximize}>
+            return <WorkspacePageComponent maximize={page.maximize} id={config.id}>
                 {page.constructor(config)}
             </WorkspacePageComponent>
         } else if (component.startsWith('/components/')) {

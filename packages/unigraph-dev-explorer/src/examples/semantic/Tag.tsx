@@ -22,7 +22,7 @@ export const Tag: DynamicViewRenderer = ({data, callbacks}) => {
             variant={"outlined"}
             label={tag.name}
             onClick={() => {
-                navigator(`/semantic/tagresults?name=${tag.name}`)
+                navigator(`/library/object?uid=${tag.uid}`)
             }}
         />}
     </NavigationContext.Consumer>

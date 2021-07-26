@@ -311,7 +311,7 @@ export default class DgraphClient {
   }
 }
 
-export const queries: Record<string, (a: string) => string> = {
+export const queries: Record<string, (a: string, uidsOnly?: boolean) => string> = {
   "querySearch": (search: string) => `query {
     q(func:alloftext(<_value.%>, "${search}")) {
        uid
@@ -385,11 +385,11 @@ export const queries: Record<string, (a: string) => string> = {
     }
   }`,
 
-  "queryAny": (a) => `(func: uid(es${a}), orderdesc: val(cca${a}), first: 100) @recurse(depth: 15) {
+  "queryAny": (a: any, uidsOnly?: boolean) => `(func: uid(es${a}), orderdesc: val(cca${a}), first: 100) ${uidsOnly ? "{uid}" : `@recurse(depth: 15) {
     uid
     unigraph.id
     expand(_userpredicate_)
-  }
+  }`}
   
   es${a} as var(func: type(Entity)) @filter((NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true)))
     { 
@@ -398,11 +398,11 @@ export const queries: Record<string, (a: string) => string> = {
       }
       cca${a} as min(val(ca${a}))
     }`,
-  "queryAnyAll": (a) => `(func: uid(es${a}), orderdesc: val(cca${a})) @recurse {
+  "queryAnyAll": (a: any, uidsOnly?: boolean) => `(func: uid(es${a}), orderdesc: val(cca${a})) ${uidsOnly ? "{uid}" : `@recurse {
       uid
       unigraph.id
       expand(_userpredicate_)
-    }
+    }`}
     
     es${a} as var(func: type(Entity)) @filter((NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true)))
       { 

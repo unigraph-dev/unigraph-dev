@@ -81,7 +81,7 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
     let predicate = "_value";
     let noPredicate = false;
     const rawPartUnigraphType = getUnigraphType(rawPart, localSchema?.type?.['unigraph.id']);
-    //console.log(localSchema, rawPart)
+    console.log(localSchema, rawPart)
 
     if (localSchema.type?.['unigraph.id'] === "$/schema/any" && typeof rawPart?.type?.['unigraph.id'] === "string") {
         // If schema is any object and the object has a type (that we can check), 
@@ -175,10 +175,7 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
                 default:
                     break;
             }
-        } else if (localSchema.type?.['unigraph.id']?.startsWith('$/schema/') && rawPartUnigraphType === "$/composer/Object" ) {
-            // Case 2: References another schema.
-            unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options, propDesc);
-        } else if (localSchema.type?.['unigraph.id']?.startsWith('$/schema/') && rawPartUnigraphType !== "$/composer/Object" && rawPartUnigraphType) {
+        } else if (localSchema.type?.['unigraph.id']?.startsWith('$/schema/') && rawPartUnigraphType) {
             // Case 2.1: References another schema with primitive type (still needs predicate to indicate reference)
             unigraphPartValue = buildUnigraphEntity(rawPart, localSchema.type['unigraph.id'], schemaMap, true, options, propDesc);
         } else if (localSchema.type && isTypeAlias(schemaMap[localSchema.type['unigraph.id']]?._definition, rawPartUnigraphType)) {
@@ -191,7 +188,7 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
             let definitions = unionSchema._parameters._definitions;
             if (rawPart?.type?.['unigraph.id']) {
                 const userType = rawPart.type;
-                //delete rawPart.type;
+                if (Object.keys(rawPart).length === 2 && typeof rawPart.uid === "string" && rawPart.uid.startsWith('0x')) delete rawPart.type;
                 definitions = unionSchema._parameters._definitions.filter((el: any) => el.type['unigraph.id'] === userType['unigraph.id'])
                 //rawPart = (rawPart['_value'] || rawPart['_value'] === '') ? rawPart['_value'] : rawPart;
             }

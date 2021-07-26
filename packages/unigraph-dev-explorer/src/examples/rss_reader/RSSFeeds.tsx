@@ -129,7 +129,7 @@ export const RSSFeedsList = withUnigraphSubscription(
     }}
 )
 
-const RSSItemsListBody: React.FC<{data: UnigraphObject[]}> = ({data}) => {
+const RSSItemsListBody: React.FC<any> = ({data, viewId}) => {
 
     const [loadedItems, setLoadedItems] = React.useState<UnigraphObject[]>([]);
     const [subs, setSubs] = React.useState<any[]>([]);
@@ -196,11 +196,12 @@ const RSSItemsListBody: React.FC<{data: UnigraphObject[]}> = ({data}) => {
             </ListItem>)}
         </List>
     </div>*/
+    console.log("workspaceContainer"+viewId)
     return <div ref={currentDiv}>
         <InfiniteScroll
             dataLength={loadedItems.length} //This is important field to render the next data
             next={nextGroup}
-            scrollableTarget="scrollableDiv"
+            scrollableTarget={"workspaceContainer"+viewId}
             hasMore={true}
             loader={<h4>Loading...</h4>}
             endMessage={
@@ -216,7 +217,7 @@ const RSSItemsListBody: React.FC<{data: UnigraphObject[]}> = ({data}) => {
     </div>
 }
 
-export const RSSItemsList = withUnigraphSubscription(
+export const RSSItemsList: any = withUnigraphSubscription(
     RSSItemsListBody,
     { schemas: [], defaultData: [], packages: [rssReaderPackage]},
     { afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
@@ -224,7 +225,9 @@ export const RSSItemsList = withUnigraphSubscription(
     }}
 )
 
-export const RSSFeeds = () => <div id="scrollableDiv" style={{overflow: "auto", height: "100%", width: "100%"}}>
+export const RSSFeeds = ({id}: any) =>{ 
+    console.log(id)
+return <div>
     <RSSFeedsList/>
-    <RSSItemsList/>
-</div> 
+    <RSSItemsList viewId={id}/>
+</div> }

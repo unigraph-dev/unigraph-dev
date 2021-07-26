@@ -3,8 +3,8 @@ import React, { useState } from "react";
 import { pkg as bookmarkPackage } from 'unigraph-dev-common/lib/data/unigraph.bookmark.pkg';
 
 import { DynamicViewRenderer } from "../../global";
-import { List, ListItem, TextField, Button, Chip, IconButton, ListItemSecondaryAction, ListItemText, ListItemIcon, Avatar } from "@material-ui/core";
-import { Delete, Description, Link } from "@material-ui/icons";
+import { List, ListItem, TextField, Button, IconButton, ListItemSecondaryAction, ListItemText, ListItemIcon, Avatar } from "@material-ui/core";
+import { Delete, Description, Link, Public } from "@material-ui/icons";
 import { registerDynamicViews, withUnigraphSubscription } from 'unigraph-dev-common/lib/api/unigraph-react'
 import { Tag } from "../semantic/Tag";
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
@@ -77,21 +77,21 @@ export const BookmarkItem: DynamicViewRenderer = ({data, callbacks}) => {
     };
 
     return <React.Fragment>
-        <ListItemIcon><Avatar alt={"favicon of "+unpadded.name} src={unpadded.favicon}>I</Avatar></ListItemIcon>
+        <ListItemIcon><Avatar alt={"favicon of "+unpadded.name} src={unpadded.favicon}><Public/></Avatar></ListItemIcon>
         <ListItemText 
             primary={unpadded.name}
             secondary={<div style={{display: "flex", alignContent: "center"}}>
                 <Link onClick={() => {
                     window.open(unpadded.url, "_blank")
                 }}/>
-                {unpadded.creative_work?.text ? <Description onClick={() => {
+                {typeof unpadded.creative_work?.text === "string" ? <Description onClick={() => {
                     const htmlUid = data?.get('creative_work/text')?.['_value']?.['_value']?.['uid'];
                     if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid, context: data.uid}));
                     if (callbacks?.removeFromContext) callbacks.removeFromContext();
                 }}/> : []}
                 {!unpadded.semantic_properties?.children?.map ? [] :
                 unpadded.semantic_properties?.children?.map(it => <Tag data={it}/>)}
-                {unpadded.creative_work?.abstract ? unpadded.creative_work?.abstract : []}
+                {typeof unpadded.creative_work?.abstract === "string" ? unpadded.creative_work?.abstract : []}
             </div>}
         />
         <ListItemSecondaryAction>
