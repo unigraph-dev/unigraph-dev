@@ -306,6 +306,16 @@ export default class DgraphClient {
     })
   }
 
+  async deleteUnigraphObjectPermanently(uid: string) {
+    const txn = this.dgraphClient.newTxn({readOnly: false});
+    const mu = new dgraph.Mutation();
+    mu.setDeleteJson({uid: uid});
+    const req = new dgraph.Request();
+    req.setMutationsList([mu]);
+    req.setCommitNow(true);
+    return await withLock(this.txnlock, 'txn', () => txn.doRequest(req));;
+  }
+
   close() {
     this.dgraphClientStub.close();
   }

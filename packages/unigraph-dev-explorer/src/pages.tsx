@@ -23,6 +23,7 @@ import About from "./pages/About";
 import AddSchema from "./pages/AddSchema";
 import DataModelPlayground from "./pages/DataModelPlayground";
 import ExplorerHome from "./pages/ExplorerHome";
+import { TrashView } from './components/UnigraphCore/TrashView';
 
 const pages: Record<string, any> = {
     'datamodel-playground': {
@@ -60,6 +61,10 @@ const pages: Record<string, any> = {
     'graph': {
       'constructor': (props: any) => <GraphView {...props} />,
       'name': 'Graph View'
+    },
+    "trash": {
+      'constructor': (props: any) => <TrashView {...props} />,
+      'name': 'Trash Bin'
     },
     'settings': {
       'constructor': (props: any) => <Settings {...props} />,

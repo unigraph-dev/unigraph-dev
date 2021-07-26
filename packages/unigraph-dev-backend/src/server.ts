@@ -251,7 +251,7 @@ export default async function startServer(client: DgraphClient) {
     },
 
     "delete_unigraph_object": async function (event: EventDeleteUnigraphObject, ws: IWebsocket) {
-      await localApi.deleteObject(event.uid).catch((e: any) => ws.send(makeResponse(event, false, {error: e})));
+      await localApi.deleteObject(event.uid, event.permanent).catch((e: any) => ws.send(makeResponse(event, false, {error: e})));
     },
 
     /**

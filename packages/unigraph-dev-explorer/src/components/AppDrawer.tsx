@@ -7,7 +7,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import { makeStyles } from '@material-ui/core/styles';
-import { Bookmarks, Category, CodeRounded, Comment, CompareArrows, FileCopy, Home, Info, LibraryBooks, Notifications, PlaylistAddCheck, Settings, Storage } from '@material-ui/icons';
+import { Bookmarks, Category, CodeRounded, Comment, CompareArrows, Delete, FileCopy, Home, Info, LibraryBooks, Notifications, PlaylistAddCheck, Settings, Storage } from '@material-ui/icons';
 import { ListSubheader } from '@material-ui/core';
 import { NavigationContext } from '../utils';
 import { FavoriteBar } from './UnigraphCore/FavoriteBar';
@@ -56,6 +56,10 @@ export default function DrawerRouter() {
             <ListItem button onClick={()=>navigator('/code-editor')}>
               <ListItemIcon><CodeRounded /></ListItemIcon>
               <ListItemText primary="Code Editor" />
+            </ListItem>
+            <ListItem button onClick={()=>navigator('/trash')}>
+              <ListItemIcon><Delete /></ListItemIcon>
+              <ListItemText primary="Trash bin" />
             </ListItem>
             <Divider/>
             <ListSubheader component="div" id="subheader-unigraph"> Unigraph </ListSubheader>
