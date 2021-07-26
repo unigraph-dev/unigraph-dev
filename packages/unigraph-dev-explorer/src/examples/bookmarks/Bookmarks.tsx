@@ -84,14 +84,14 @@ export const BookmarkItem: DynamicViewRenderer = ({data, callbacks}) => {
                 <Link onClick={() => {
                     window.open(unpadded.url, "_blank")
                 }}/>
-                {unpadded.creative_work?.text ? <Description onClick={() => {
+                {typeof unpadded.creative_work?.text === "string" ? <Description onClick={() => {
                     const htmlUid = data?.get('creative_work/text')?.['_value']?.['_value']?.['uid'];
                     if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid, context: data.uid}));
                     if (callbacks?.removeFromContext) callbacks.removeFromContext();
                 }}/> : []}
                 {!unpadded.semantic_properties?.children?.map ? [] :
                 unpadded.semantic_properties?.children?.map(it => <Tag data={it}/>)}
-                {unpadded.creative_work?.abstract ? unpadded.creative_work?.abstract : []}
+                {typeof unpadded.creative_work?.abstract === "string" ? unpadded.creative_work?.abstract : []}
             </div>}
         />
         <ListItemSecondaryAction>

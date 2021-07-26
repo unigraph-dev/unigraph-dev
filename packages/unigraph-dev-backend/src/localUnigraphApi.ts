@@ -37,9 +37,9 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         ensurePackage: async (packageName, fallback) => {return Error('Not implemented')},
         subscribeToType: async (name, callback: any, eventId = undefined, {all, showHidden, uidsOnly}: any) => {
             eventId = eventId || getRandomInt();
-            const queryAny = queries.queryAny(eventId.toString())
-            const queryAnyAll = queries.queryAnyAll(eventId.toString())
-            const query = name === "any" ? (all ? queryAnyAll : queryAny) : `(func: uid(par${eventId})) 
+            const queryAny = queries.queryAny(eventId.toString(), uidsOnly)
+            const queryAnyAll = queries.queryAnyAll(eventId.toString(), uidsOnly)
+            const query = name === "any" ? ((all || uidsOnly) ? queryAnyAll : queryAny) : `(func: uid(par${eventId})) 
                 @filter((type(Entity)) AND (NOT eq(<_propertyType>, "inheritance")) 
                 ${ showHidden ? "" : "AND (NOT eq(<_hide>, true))" } AND (NOT type(Deleted)))
             ${uidsOnly ? "{ uid }" : makeQueryFragmentFromType(name, states.caches["schemas"].data)}
