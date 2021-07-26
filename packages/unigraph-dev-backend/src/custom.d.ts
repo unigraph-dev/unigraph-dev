@@ -52,7 +52,8 @@ declare type EventDeleteUnigraphObject = {
   type: "event",
   event: "delete_unigraph_object",
   id: number,
-  uid: string
+  uid: string,
+  permanent?: boolean
 }
 
 declare type EventDropAll = {

@@ -244,8 +244,8 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
             };
             sendEvent(connection, "create_unigraph_object", {object: object, schema: schema, id: id});
         }),
-        deleteObject: (uid) => {
-            sendEvent(connection, "delete_unigraph_object", {uid: uid});
+        deleteObject: (uid, permanent?) => {
+            sendEvent(connection, "delete_unigraph_object", {uid, permanent});
         },
         updateSimpleObject: (object, predicate, value) => { // TODO: This is very useless, should be removed once we get something better
             const predicateUid = object['_value'][predicate].uid;
