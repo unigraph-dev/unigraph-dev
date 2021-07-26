@@ -15,7 +15,6 @@ import { CurrentEvents } from "./examples/calendar/CurrentEvents";
 import { TodayView } from "./examples/calendar/TodayView";
 import { EmailList } from "./examples/email/Email";
 import { NotesList } from "./examples/notes/NotesList";
-import { TagResults } from "./examples/semantic/TagResults";
 import { TodoList } from "./examples/todo/TodoList";
 import { TwitterSettings } from "./examples/twitter/TwitterSettings";
 import Request from './pages/Request';
@@ -89,10 +88,6 @@ const pages: Record<string, any> = {
     'inbox': {
       'constructor': (props: any) => <Inbox {...props} />,
       'name': 'Inbox',
-    },
-    'semantic/tagresults': {
-      'constructor': (props: any) => <TagResults {...props} />,
-      'name': 'Tag Results'
     },
     'object-editor': {
       'constructor': (props: any) => <ObjectEditor {...props} />,
