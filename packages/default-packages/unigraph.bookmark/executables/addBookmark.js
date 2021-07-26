@@ -2,12 +2,12 @@ const url = context.params.url;
 const tags = context.params.tags ? context.params.tags : [];
 const scrape = require('html-metadata');
 
-const res = await scrape(url);
+const res = await scrape({url, headers: {'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'}});
 
 const result = {
     name: res?.general?.title || res?.openGraph?.title || res?.twitter?.title,
     url: url,
-    favicon: res?.general?.icons?.pop().href || res?.general?.icons[0]?.href || res?.openGraph?.image?.url || res?.twitter?.image?.src || res?.twitter?.image,
+    favicon: res?.general?.icons?.pop().href || res?.general?.icons?.[0]?.href || res?.openGraph?.image?.url || res?.twitter?.image?.src || res?.twitter?.image,
     semantic_properties: {
         children: tags.map(tagName => {return {name: tagName}}),
     },
