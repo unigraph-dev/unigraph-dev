@@ -14,7 +14,7 @@ export const Tag: DynamicViewRenderer = ({data, callbacks}) => {
     return <NavigationContext.Consumer>
         {(navigator) => <Chip
             size="small"
-            icon={<LocalOffer/>}
+            icon={<LocalOffer style={{filter: (bgc === "unset" || getContrast(bgc) === "black") ? "unset" : "invert(1)"}}/>}
             style={{
                 backgroundColor: bgc,
                 color: bgc.startsWith("#") ? getContrast(bgc) : "unset"

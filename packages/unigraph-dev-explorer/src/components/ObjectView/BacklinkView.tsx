@@ -21,7 +21,7 @@ export const BacklinkView = ({data}: any) => {
     const [id, setId] = React.useState(Date.now());
 
     useEffectOnce(() => {
-        window.unigraph.subscribeToQuery(getQuery(data.uid), (objects: any[]) => { setObjects(buildGraph(objects)) }, id);
+        window.unigraph.subscribeToQuery(getQuery(data.uid), (objects: any[]) => { setObjects(buildGraph(objects).filter((el: any) => el.uid !== data.uid)) }, id);
 
         return function cleanup () {
             window.unigraph.unsubscribe(id);
