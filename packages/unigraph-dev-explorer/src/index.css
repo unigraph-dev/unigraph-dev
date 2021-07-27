@@ -21,3 +21,11 @@ span.wikilink:hover {
   -webkit-user-select: text;
   user-select: text;
 }
+
+.showOnHover {
+  opacity: 0
+}
+
+.showOnHover:hover {
+  opacity: 1
+}

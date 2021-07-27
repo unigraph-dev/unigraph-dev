@@ -166,10 +166,13 @@ export default class DgraphClient {
   }
 
   async deleteRelationbyJson(data: any) {
-    const txn = this.dgraphClient.newTxn();
+    const txn = this.dgraphClient.newTxn({readOnly: false});
     const mu = new dgraph.Mutation();
     mu.setDeleteJson(data);
-    return await withLock(this.txnlock, 'txn', () => txn.mutate(mu));;
+    const req = new dgraph.Request();
+    req.setMutationsList([mu]);
+    req.setCommitNow(true);
+    return await withLock(this.txnlock, 'txn', () => txn.doRequest(req));;
   }
 
   async queryData<T = unknown>(query: string, vars: Record<string, any> = {}) {
