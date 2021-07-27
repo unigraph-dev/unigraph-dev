@@ -7,7 +7,7 @@ import { Definition, SchemaDgraph } from 'unigraph-dev-common/lib/types/json-ts'
 import { KeyboardDateTimePicker } from "@material-ui/pickers";
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { ReferenceableSelectorControlled } from './ReferenceableSelector';
-import { Save } from '@material-ui/icons';
+import { Delete, Save } from '@material-ui/icons';
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 
 const useStyles = makeStyles({
@@ -45,6 +45,7 @@ const TypedObjectPartEditor: any = {
                         localObject={localObject['_value'][key]} schemaMap={schemaMap}
                         setLocalObject={(newVal: any) => window.unigraph.updateObject(localObject['_value'][key]['uid'], newVal, false, false)}
                     />
+                    <Delete onClick={() => {window.unigraph.deleteRelation(localObject._value.uid, {[key]: null})}} className="showOnHover"/>
                 </div>)}
                 <div style={{display: "flex", alignItems: "baseline", paddingTop: "8px"}}>
                     <FormControl>
