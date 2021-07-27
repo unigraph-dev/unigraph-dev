@@ -134,7 +134,6 @@ const RSSItemsListBody: React.FC<any> = ({data, viewId}) => {
     const [loadedItems, setLoadedItems] = React.useState<UnigraphObject[]>([]);
     const [subs, setSubs] = React.useState<any[]>([]);
     const subsRef = React.useRef<any>([]);
-    const currentDiv = React.useRef<any>([]);
     const [reload, setReload] = React.useState(0);
     const [chunks, setChunks] = React.useState<any[][]>(_.chunk(data, 50));
 
@@ -187,17 +186,8 @@ const RSSItemsListBody: React.FC<any> = ({data, viewId}) => {
         setReload(nextGroups);
         return cleanup;
     }, [chunks])
-    console.log(currentDiv)
-    /*
+
     return <div>
-        <List>
-            {data.map(it => <ListItem button key={it.uid}>
-                <AutoDynamicView object={it} />
-            </ListItem>)}
-        </List>
-    </div>*/
-    console.log("workspaceContainer"+viewId)
-    return <div ref={currentDiv}>
         <InfiniteScroll
             dataLength={loadedItems.length} //This is important field to render the next data
             next={nextGroup}

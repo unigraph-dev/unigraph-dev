@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */ // Using maps as React functional components
-import { Button, Checkbox, Divider, makeStyles, Paper, TextField, Typography } from '@material-ui/core';
+import { Button, Checkbox, Divider, FormControl, FormHelperText, InputLabel, makeStyles, MenuItem, Paper, Select, TextField, Typography } from '@material-ui/core';
 import _ from 'lodash';
 import React from 'react';
 import { useEffectOnce } from 'react-use';
@@ -8,6 +8,7 @@ import { KeyboardDateTimePicker } from "@material-ui/pickers";
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { ReferenceableSelectorControlled } from './ReferenceableSelector';
 import { Save } from '@material-ui/icons';
+import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 
 const useStyles = makeStyles({
     editorFrame: {
@@ -17,12 +18,26 @@ const useStyles = makeStyles({
 });
 
 
+const defaultNewValues: any = {
+    "$/primitive/number": 0,
+    "$/primitive/string": "",
+    "$/primitive/datetime": (new Date()).toISOString(),
+    "$/primitive/boolean": false,
+    "schemaRef": {}
+}
+
 const TypedObjectPartEditor: any = {
     "$/composer/Object": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
-        const [fields, setFields] = React.useState<any[]>(_.intersection(Object.keys(localObject['_value']), localSchema['_properties'].map((el: any) => el['_key'])));
+        const fields = _.intersection(Object.keys(localObject['_value']), localSchema['_properties'].map((el: any) => el['_key']));
         const classes = useStyles();
+        const [selectedNewProp, setSelectedNewProp] = React.useState<any>();
+        const [currentInputValue, setCurrentInputValue] = React.useState<any>();
+        const [currentInputObjValue, setCurrentInputObjValue] = React.useState<any>();
+        React.useEffect(() => {if (JSON.stringify(currentInputObjValue) !== currentInputValue) setCurrentInputValue(JSON.stringify(currentInputObjValue))}, [currentInputObjValue]);
+        React.useEffect(() => {if (isJsonString(currentInputValue)) setCurrentInputObjValue(JSON.parse(currentInputValue))}, [currentInputValue])
         return <React.Fragment>
             <Paper variant="outlined" className={classes.editorFrame}>
+                <Typography>Object ID: {localObject.uid}, type: {localObject?.type?.['unigraph.id']}</Typography>
                 {fields.map((key) => <div style={{display: "flex", alignItems: "baseline", paddingTop: "8px"}}>
                     <Typography variant="body1" style={{paddingRight: "8px"}}>{key}:</Typography>
                     <ObjectPartEditor
@@ -31,11 +46,40 @@ const TypedObjectPartEditor: any = {
                         setLocalObject={(newVal: any) => window.unigraph.updateObject(localObject['_value'][key]['uid'], newVal, false, false)}
                     />
                 </div>)}
+                <div style={{display: "flex", alignItems: "baseline", paddingTop: "8px"}}>
+                    <FormControl>
+                        <InputLabel>New property</InputLabel>
+                        <Select
+                            value={selectedNewProp}
+                            onChange={(e: any) => {
+                                setSelectedNewProp(e.target.value);
+                                const propType = (localSchema['_properties']).filter((el: any) => el['_key'] === e.target.value)[0]['_definition']['type']['unigraph.id'];
+                                let deft = undefined;
+                                if (propType.startsWith?.('$/schema') || !Object.keys(defaultNewValues).includes(propType)) deft = defaultNewValues['schemaRef'];
+                                else deft = defaultNewValues[propType];
+                                console.log(schemaMap[propType])
+                                if (propType.startsWith?.('$/schema') && Object.keys(defaultNewValues).includes(schemaMap[propType]?.['_definition']?.type?.['unigraph.id'])) 
+                                    deft = defaultNewValues[schemaMap[propType]?.['_definition']?.type?.['unigraph.id']]
+                                setCurrentInputObjValue(deft);
+                            }}
+                            style={{width: "240px"}}
+                        >
+                            <MenuItem>
+                                <em>Select property</em>
+                            </MenuItem>
+                            {(localSchema['_properties'].map((el: any) => el['_key'])).map((el: string) => <MenuItem value={el}>{el}</MenuItem>)}
+                        </Select>
+                    </FormControl>
+                    <TextField onChange={(e) => {setCurrentInputValue(e.target.value)}} value={currentInputValue} style={{opacity: currentInputObjValue === undefined ? 0 : 1}}></TextField>
+                    {JSON.stringify(currentInputObjValue)}
+                    <Button onClick={() => window.unigraph.updateObject(localObject.uid, {[selectedNewProp]: currentInputObjValue})} style={{opacity: currentInputObjValue === undefined ? 0 : 1}}>Add</Button>
+                </div>
             </Paper>
         </React.Fragment>
     },
     "$/composer/Union": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
         console.log(localObject, localSchema)
+        if (!localObject['_value']['type']) return "Deleted object";
         const currentUnionType = localObject['_value']['type']['unigraph.id'];
         const classes = useStyles();
         return <Paper variant="outlined" className={classes.editorFrame}>
