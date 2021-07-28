@@ -15,8 +15,8 @@ export const UnigraphSearch = () => {
         setResponse(false);
         if (query.length) {
             window.unigraph.getSearchResults(query, "fulltext").then(res => {
-                setResults(res.results);
-                setEntities(res.entities);
+                //setResults(res.results.reverse());
+                setEntities(res.entities.reverse());
                 setResponse(true);
             })
         } else {

@@ -11,6 +11,7 @@ declare global {
         crcTable: any,
         wsnavigator: (sth: string) => any,
         electronPreload: any,
+        electronShell: any,
     }
 };
 

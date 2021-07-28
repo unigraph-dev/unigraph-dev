@@ -11,6 +11,7 @@ import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { getExecutableId } from "unigraph-dev-common/lib/api/unigraph";
 import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
 import { getComponentFromPage } from "../../Workspace";
+import { openUrl } from "../../utils";
 
 type ABookmark = {
     uid?: string,
@@ -82,7 +83,7 @@ export const BookmarkItem: DynamicViewRenderer = ({data, callbacks}) => {
             primary={unpadded.name}
             secondary={<div style={{display: "flex", alignContent: "center"}}>
                 <Link onClick={() => {
-                    window.open(unpadded.url, "_blank")
+                    openUrl(unpadded.url)
                 }}/>
                 {typeof unpadded.creative_work?.text === "string" ? <Description onClick={() => {
                     const htmlUid = data?.get('creative_work/text')?.['_value']?.['_value']?.['uid'];
@@ -94,11 +95,6 @@ export const BookmarkItem: DynamicViewRenderer = ({data, callbacks}) => {
                 {typeof unpadded.creative_work?.abstract === "string" ? unpadded.creative_work?.abstract : []}
             </div>}
         />
-        <ListItemSecondaryAction>
-            <IconButton aria-label="delete" onClick={() => window.unigraph.deleteObject(unpadded.uid!)}>
-                <Delete/>
-            </IconButton>
-        </ListItemSecondaryAction>
     </React.Fragment>
 }
 

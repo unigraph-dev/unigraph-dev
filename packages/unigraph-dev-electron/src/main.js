@@ -117,7 +117,7 @@ app.whenReady().then(() => {
   tray = new Tray(nativeImage.createFromDataURL(unigraph_trayIcon))
   tray.setToolTip('Unigraph')
   trayMenu = createTrayMenu((newTemplate) => {tray.setContextMenu(Menu.buildFromTemplate(newTemplate))});
-  const ret = globalShortcut.register('Alt+Tab', () => {
+  const _ = globalShortcut.register('Alt+Tab', () => {
     if (todayWindow) {
       todayWindow.isVisible() ? todayWindow.hide() : todayWindow.show();
     };
@@ -125,6 +125,8 @@ app.whenReady().then(() => {
   setTimeout(() => {
     mainWindow = createMainWindow(), todayWindow = createTodayWindow()
     todayWindow.maximize();
+    mainWindow.maximize();
+    todayWindow.setVisibleOnAllWorkspaces(true);
     trayMenu.setMainWindow(mainWindow), trayMenu.setTodayWindow(todayWindow)
     startServer();
     app.on('activate', () => {

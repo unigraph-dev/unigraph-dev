@@ -152,3 +152,16 @@ export const dfs = (nodes: TreeNode[]) => {
     recurse(root);
     return traversal;
 }
+
+export const isElectron = () => {
+    let userAgent = navigator.userAgent.toLowerCase();
+    return (userAgent.indexOf(' electron/') > -1 && window.electronShell);
+}
+
+export const openUrl = (url: string) => {
+    if (isElectron()) {
+        window.electronShell.openExternal(url);
+    } else {
+        window.open(url, "_blank")
+    }
+}
