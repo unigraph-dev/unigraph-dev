@@ -274,8 +274,8 @@ export default class DgraphClient {
   `, {}))[0]
   }
 
-  async getTextSearchResults(search: string, display: any, hops = 2) {
-    const query = makeSearchQuery(getFullTextQueryString(search), display, hops)
+  async getTextSearchResults(search: string, display: any, hops = 2, searchOptions: any) {
+    const query = makeSearchQuery(getFullTextQueryString(search), display, hops, searchOptions)
     console.log(query)
     const res = (await this.queryDgraph(query));
     return {results: res[0] as any[], entities: res[hops+1] as any[]};

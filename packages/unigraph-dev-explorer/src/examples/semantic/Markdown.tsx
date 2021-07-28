@@ -37,7 +37,6 @@ export const Markdown: DynamicViewRenderer = ({data, callbacks, isHeading}) => {
                 if (className?.includes('wikilink')) {
                     const matches = (callbacks?.['get-semantic-properties']?.()?.['_value']?.['children']?.['_value['] || [])
                         .filter((el: any) => el['_key'] === `[[${children[0]}]]`);
-                    console.log(matches, callbacks)
                     return <React.Fragment>
                         <span style={{color: "darkgray"}}>[[</span>
                         {/*callbacks?.namespaceLink ? <Public style={{height: "16px"}}/> : []*/}

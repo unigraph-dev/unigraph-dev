@@ -242,7 +242,8 @@ declare type EventGetSearchResults = {
   query: string,
   method: string,
   display?: string,
-  hops?: number
+  hops?: number,
+  searchOptions: any
 }
 
 declare type EventExportObjects = {
