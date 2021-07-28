@@ -263,7 +263,7 @@ const DefaultObjectList: FC<DefaultObjectListViewProps> = ({component, objects, 
     if (!options?.filters?.showNoView) finalObjects = filterPresets['no-noview'](finalObjects, {...DynamicViews, "$/schema/markdown": undefined});
 
     return <React.Fragment>
-        {(finalObjects.length ? finalObjects : Array(10).fill({'type': {'unigraph.id': '$/skeleton/default'}})).map(obj => React.createElement(
+        {(finalObjects.length ? finalObjects : []).map(obj => React.createElement(
             component, 
             {key: obj.uid}, 
             [<DefaultObjectView object={obj} 

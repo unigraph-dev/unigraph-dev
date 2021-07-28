@@ -9,6 +9,7 @@ import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { ReferenceableSelectorControlled } from './ReferenceableSelector';
 import { Delete, Save } from '@material-ui/icons';
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
+import { BacklinkView } from './BacklinkView';
 
 const useStyles = makeStyles({
     editorFrame: {
@@ -98,11 +99,14 @@ const TypedObjectPartEditor: any = {
         console.log(localSchema, localObject)
         return <Paper variant="outlined" className={classes.editorFrame}>
             <Typography>Array type</Typography>
-            {localObject['_value['].map((el: any) => <ObjectPartEditor
-                        localSchema={schemaMap[el['_value']['type']['unigraph.id']]['_definition']}
-                        localObject={el['_value']} schemaMap={schemaMap}
-                        setLocalObject={() => {}}
-                    />)}
+            {localObject['_value['].map((el: any) => <div style={{display: "flex", alignItems: "baseline", paddingTop: "8px"}}>
+                <ObjectPartEditor
+                            localSchema={schemaMap[el['_value']['type']['unigraph.id']]['_definition']}
+                            localObject={el['_value']} schemaMap={schemaMap}
+                            setLocalObject={() => {}}
+                />
+                <Delete onClick={() => {window.unigraph.deleteItemFromArray(localObject.uid, el.uid)}} className="showOnHover"/>
+            </div>)}
         </Paper>
     },
     "default": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
@@ -175,7 +179,7 @@ export const ObjectPartEditor = ({localSchema, localObject, setLocalObject, sche
     </div>
 }
 
-export const ObjectEditorSelector = ({currentUid, setCurrentUid}: any) => {
+export const ObjectEditorSelector = ({currentUid, setCurrentUid, style}: any) => {
 
     const [currentSchema, setCurrentSchema]: [any, Function] = React.useState(null)
     const [currentSchemaSHName, setCurrentSchemaSHName]: any = React.useState(null)
@@ -187,7 +191,7 @@ export const ObjectEditorSelector = ({currentUid, setCurrentUid}: any) => {
         window.unigraph.getReferenceables().then((refs: any) => setReferenceables(refs));
     })
 
-    return <div>
+    return <React.Fragment>
         <TextField onChange={(e) => {setCurrentInputUid(e.target.value)}} value={currentInputUid}></TextField>
         <Button onClick={() => setCurrentUid(currentInputUid)}>Load object</Button>
         Schema name: <ReferenceableSelectorControlled 
@@ -200,15 +204,21 @@ export const ObjectEditorSelector = ({currentUid, setCurrentUid}: any) => {
             const returnUid = await window.unigraph.addObject({}, currentSchemaSHName);
             setCurrentUid(returnUid);
         }}>Create with schema</Button>
-    </div>
+    </React.Fragment>
 }
 
 const ObjectEditorBody = ({currentObject, setCurrentObject, schemaMap}: any) => {
     const [currentSchema, setCurrentSchema]: [any, Function] = React.useState(currentObject['type']['_value['][0]['_definition'])
     
 
-    return <div>
-        <ObjectPartEditor localSchema={currentSchema} localObject={currentObject} setLocalObject={setCurrentObject} schemaMap={schemaMap} />
+    return <div style={{display: "flex"}}>
+        <div style={{width: "66%"}}>
+            <ObjectPartEditor localSchema={currentSchema} localObject={currentObject} setLocalObject={setCurrentObject} schemaMap={schemaMap} />
+        </div>
+        <div style={{width: "34%"}}>
+            <Typography>Backlinks</Typography>
+            <BacklinkView data={currentObject} hideHeader/>
+        </div>
     </div>
 }
 

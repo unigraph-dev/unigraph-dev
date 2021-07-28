@@ -1,3 +1,4 @@
+import Sugar from 'sugar';
 import { ATodoList, setHours, getMinDate, getMaxDate } from "./utils";
 
 export const parseTodoObject: (arg0: string) => ATodoList = (todoString: string) => {

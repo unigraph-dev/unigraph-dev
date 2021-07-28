@@ -4,7 +4,7 @@ import { useEffectOnce } from "react-use";
 import { buildGraph } from "unigraph-dev-common/lib/api/unigraph";
 import { DefaultObjectListView } from "../../components/ObjectView/DefaultObjectView";
 
-const getQuery = (uid: string) => `(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted)) AND (NOT eq(<_propertyType>, "inheritance"))) @recurse {
+const getQuery = (uid: string) => `(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted)) AND (NOT eq(<_propertyType>, "inheritance"))) @recurse(depth: 8) {
   uid
   <unigraph.id>
   expand(_userpredicate_)
@@ -15,13 +15,13 @@ var(func: uid(${uid})) {
   }
 }`
 
-export const BacklinkView = ({data}: any) => {
+export const BacklinkView = ({data, hideHeader}: any) => {
 
     const [objects, setObjects]: [any[], Function] = React.useState([]);
     const [id, setId] = React.useState(Date.now());
 
     useEffectOnce(() => {
-        window.unigraph.subscribeToQuery(getQuery(data.uid), (objects: any[]) => { setObjects(buildGraph(objects)) }, id);
+        window.unigraph.subscribeToQuery(getQuery(data.uid), (objects: any[]) => { setObjects(buildGraph(objects).filter((el: any) => el.uid !== data.uid)) }, id);
 
         return function cleanup () {
             window.unigraph.unsubscribe(id);
@@ -29,11 +29,9 @@ export const BacklinkView = ({data}: any) => {
     })
 
     return <div>
-        <Typography gutterBottom variant="h4">
-            Backlinks of: {data.get('name').as('primitive') || data.uid}
-            <DefaultObjectListView objects={objects} component={ListItem}/>
+        <Typography gutterBottom variant="h4" style={{display: hideHeader ? "none" : "unset"}}>
+            Backlinks of: {hideHeader || data.get('name').as('primitive') || data.uid}
         </Typography>
-        
-        
+        <DefaultObjectListView objects={objects} component={ListItem}/>
     </div>
 }

@@ -16,7 +16,8 @@ export const InlineSearch = () => {
 
     const [searchResults, setSearchResults] = React.useState<any[]>([]);
     React.useEffect(() => {
-        if (state.search !== undefined && state.search.length > 1) window.unigraph.getSearchResults((state.search as string), "fulltext", "indexes").then((res: any) => {
+        if (!state.show) setSearchResults([]);
+        if (state.search !== undefined && state.search.length > 1) window.unigraph.getSearchResults((state.search as string), "fulltext", "indexes", 2).then((res: any) => {
             const results = res.entities.map((el: any) => { return {
                 name: (new UnigraphObject(el['unigraph.indexes']?.['name'] || {})).as('primitive'),
                 uid: el.uid,
