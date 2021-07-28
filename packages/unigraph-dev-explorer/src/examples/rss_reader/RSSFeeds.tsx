@@ -1,7 +1,7 @@
 import { Avatar, Button, Divider, List, ListItem, ListItemIcon, ListItemText, TextField, Typography } from "@material-ui/core";
 import React from "react";
 import { getExecutableId, getRandomInt, UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
-import { registerDynamicViews, withUnigraphSubscription } from "unigraph-dev-common/lib/api/unigraph-react"
+import { registerDynamicViews, registerDetailedDynamicViews, withUnigraphSubscription } from "unigraph-dev-common/lib/api/unigraph-react"
 import { pkg as rssReaderPackage } from 'unigraph-dev-common/lib/data/unigraph.rss_reader.pkg';
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { AutoDynamicView, DefaultObjectListView } from "../../components/ObjectView/DefaultObjectView";
@@ -12,6 +12,7 @@ import { getComponentFromPage } from "../../Workspace";
 import Sugar from "sugar";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import _ from "lodash";
+import { Html } from "../semantic/Html";
 
 export type ARSSFeed = {
     uid?: string,
@@ -87,6 +88,10 @@ const RSSItem: DynamicViewRenderer = ({data, callbacks}) => {
     </React.Fragment>
 }
 
+const RSSItemDetailed = ({data, callbacks}: any) => {
+    return <Html context={data} data={data?.get('content/text')?.['_value']?.['_value']} />
+}
+
 const RSSFeed: DynamicViewRenderer = ({data, callbacks}) => {
     return <AutoDynamicView object={data?.['_value']?.['site_info']?.['_value']} noContextMenu noDrop/>
 }
@@ -97,6 +102,7 @@ const dynamicComponents = {
 }
 
 registerDynamicViews(dynamicComponents);
+registerDetailedDynamicViews({"$/schema/rss_item": RSSItemDetailed})
 
 const RSSFeedsBody: React.FC<{data: ARSSFeed[]}> = ({data}) => {
     const [newUrl, setNewUrl] = React.useState("");
