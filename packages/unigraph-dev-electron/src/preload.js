@@ -10,7 +10,8 @@ window.addEventListener('DOMContentLoaded', () => {
   })
 
 window.electronPreload = () => {
-  const { ipcRenderer } = require('electron')
+  const { ipcRenderer, shell } = require('electron');
+  window.electronShell = shell;
   let unigraph = window.unigraph;
   unigraph.addState('favorites', []).subscribe((newFavs) => {
     ipcRenderer.send("favorites_updated", newFavs);
