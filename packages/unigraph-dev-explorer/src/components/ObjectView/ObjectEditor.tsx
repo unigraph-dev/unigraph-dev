@@ -218,6 +218,8 @@ const ObjectEditorBody = ({currentObject, setCurrentObject, schemaMap}: any) => 
         <div style={{width: "34%"}}>
             <Typography>Backlinks</Typography>
             <BacklinkView data={currentObject} hideHeader/>
+            <Typography>Forward links</Typography>
+            <BacklinkView data={currentObject} hideHeader forward/>
         </div>
     </div>
 }

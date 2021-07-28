@@ -74,6 +74,20 @@ export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
     const dict: any = {}
     objs.forEach(object => {if (object?.uid) dict[object.uid] = object})
 
+    function buildDictRecurse(obj: any) {
+        if (obj && typeof obj === "object" && Array.isArray(obj)) {
+            obj.forEach((val, index) => {
+                if(val?.uid && !dict[val.uid] && Object.keys(val).length !== 1) dict[val.uid] = obj[index];
+                buildDictRecurse(val)
+            })
+        } else if (obj && typeof obj === "object") {
+            Object.entries(obj).forEach(([key, value]: [key: string, value: any]) => {
+                if(value?.uid && !dict[value.uid] && Object.keys(value).length !== 1) dict[value.uid] = obj[key];
+                buildDictRecurse(value)
+            })
+        }
+    }
+
     function buildGraphRecurse(obj: any) {
         if (obj && typeof obj === "object" && Array.isArray(obj)) {
             obj.forEach((val, index) => {
@@ -88,6 +102,7 @@ export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
         }
     }
 
+    objs.forEach(object => buildDictRecurse(object))
     objs.forEach(object => buildGraphRecurse(object))
 
     return objs
