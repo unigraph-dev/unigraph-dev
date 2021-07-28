@@ -16,7 +16,7 @@ export const TodayView = ({pageName}: any) => {
 
     console.log(pageName)
     return <div style={{display: "flex", height: "100%", width: "100%"}}>
-        <div style={{width: pageName ? "" : "33%", padding: "8px 16px 16px 8px", display: "flex", height: "100%", flexDirection: "column", flexGrow: 1}}>
+        <div style={{maxWidth: "33%", minWidth: "33%", padding: "8px 16px 16px 8px", display: "flex", height: "100%", flexDirection: "column", flexGrow: 1}}>
             <UnigraphWidget style={{flex: 1}}>
                 <div style={{height: "120px"}}>
                     <Typography variant={"h2"}>{Sugar.Date.format(currentTime, '{hh}:{mm}:{ss}')}</Typography>
@@ -30,10 +30,10 @@ export const TodayView = ({pageName}: any) => {
             <UnigraphWidget style={{flex: 1}}><WidgetFocus/></UnigraphWidget>
         </div>
         {pageName ? <div style={{width: "32px"}}/> : []}
-        {showInboxes ? <div style={{flexGrow: 1, padding: "8px 16px 16px 8px", display: "flex", flexDirection: "column"}}>
+        <div style={{flexGrow: 1, padding: "8px 16px 16px 8px", display: "flex", flexDirection: "column", opacity: showInboxes ? 1 : 0}}>
             <UnigraphWidget style={{overflow: "auto"}}><div style={{flex: 1, height: "100%"}}>{pages.value['inbox'].constructor()}</div></UnigraphWidget> 
             <div style={{height: "16px"}}></div>
             <UnigraphWidget style={{overflow: "auto"}}><div style={{flex: 1, height: "100%"}}>{pages.value['current-events'].constructor()}</div></UnigraphWidget>
-        </div>: []}
+        </div>
     </div>
 }
