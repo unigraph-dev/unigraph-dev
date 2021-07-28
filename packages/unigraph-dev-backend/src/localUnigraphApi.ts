@@ -234,9 +234,9 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         addState: (...params) => {throw Error('Not available in server side')},
         getState: (...params) => {throw Error('Not available in server side')},
         deleteState: (...params) => {throw Error('Not available in server side')},
-        getSearchResults: async (query: string, method = "fulltext", display: any) => {
+        getSearchResults: async (query: string, method = "fulltext", display: any, hops) => {
             let res: {results: any[], entities: any[]} = {results: [], entities: []};
-            if (method === 'fulltext') res = await client.getTextSearchResults(query, display);
+            if (method === 'fulltext') res = await client.getTextSearchResults(query, display, hops);
             return res;
         },
         getSecret: (scope, key) => {

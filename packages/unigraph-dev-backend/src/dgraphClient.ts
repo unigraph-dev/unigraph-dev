@@ -2,6 +2,7 @@ import AsyncLock from 'async-lock';
 import dgraph, { DgraphClient as ActualDgraphClient, DgraphClientStub, Operation, Mutation, Check } from 'dgraph-js';
 import { getAsyncLock, withLock } from './asyncManager';
 import { UnigraphUpsert } from './custom';
+import { getFullTextQueryString, makeSearchQuery } from './search';
 
 /**
  * Example client, adapted from:
@@ -273,9 +274,11 @@ export default class DgraphClient {
   `, {}))[0]
   }
 
-  async getTextSearchResults(search: string, display: any) {
-    const res = (await this.queryDgraph(display === "indexes" ? queries['querySearch_indexes'](search) : queries['querySearch'](search)));
-    return {results: res[0] as any[], entities: res[4] as any[]};
+  async getTextSearchResults(search: string, display: any, hops = 2) {
+    const query = makeSearchQuery(getFullTextQueryString(search), display, hops)
+    console.log(query)
+    const res = (await this.queryDgraph(query));
+    return {results: res[0] as any[], entities: res[hops+1] as any[]};
   }
 
   async getPackages() {
@@ -325,78 +328,6 @@ export default class DgraphClient {
 }
 
 export const queries: Record<string, (a: string, uidsOnly?: boolean) => string> = {
-  "querySearch": (search: string) => `query {
-    q(func:alloftext(<_value.%>, "${search}")) {
-       uid
-      <_value.%>
-      <unigraph.origin> {
-        uu as uid
-      }
-    }
-    qq(func: uid(uu)) {
-      uid
-      <unigraph.origin> {
-        uuu as uid
-      }
-    }
-    qqq(func: uid(uuu)) {
-      uid
-      <unigraph.origin> {
-        uuuu as uid
-      }
-    }
-    qqqq(func: uid(uuuu)) {
-      uid
-      <unigraph.origin> {
-        uuuuu as uid
-      }
-    }
-    qqqqq(func: uid(uuuuu, uuuu, uuu, uu)) @filter(type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) @recurse(depth: 15) {
-      uid
-      expand(_userpredicate_)
-      unigraph.id
-    }
-  }`,
-  
-  "querySearch_indexes": (search: string) => `query {
-    q(func:alloftext(<_value.%>, "${search}")) {
-       uid
-      <_value.%>
-      <unigraph.origin> {
-        uu as uid
-      }
-    }
-    qq(func: uid(uu)) {
-      uid
-      <unigraph.origin> {
-        uuu as uid
-      }
-    }
-    qqq(func: uid(uuu)) {
-      uid
-      <unigraph.origin> {
-        uuuu as uid
-      }
-    }
-    qqqq(func: uid(uuuu)) {
-      uid
-      <unigraph.origin> {
-        uuuuu as uid
-      }
-    }
-    qqqqq(func: uid(uuuuu, uuuu, uuu, uu)) @filter(type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) {
-      uid
-      type {
-        unigraph.id
-      }
-      unigraph.id
-      unigraph.indexes {
-        uid 
-        expand(_userpredicate_) { uid expand(_userpredicate_) { uid expand(_userpredicate_) { 
-          uid expand(_userpredicate_) { uid expand(_userpredicate_) { uid expand(_userpredicate_) } } } } }
-      }
-    }
-  }`,
 
   "queryAny": (a: any, uidsOnly?: boolean) => `(func: uid(es${a}), orderdesc: val(cca${a}), first: 100) ${uidsOnly ? "{uid}" : `@recurse(depth: 15) {
     uid

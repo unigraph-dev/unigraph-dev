@@ -165,9 +165,9 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param query A string of the desired query. Such as: `minecraft memes`. The query will be stemmed and searched similar to a search engine.
      * @param method A string describing what kind of search to perform. Default is 'fulltext'
      * @param display How to return the results to display. 'indexes' will only fetch the indexes.
-     * @param limit A number limit of how many search results to fetch.
+     * @param hops How many hops to fetch.
      */
-    getSearchResults(query: string, method?: string, display?: string, limit?: number): Promise<{results: any[], entities: any[]}>;
+    getSearchResults(query: string, method?: string, display?: string, hops?: number): Promise<{results: any[], entities: any[]}>;
     /** Deletes an object by its UID. */
     deleteObject(uid: string, permanent?: boolean): any;
     /**
@@ -204,7 +204,7 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param relationUid Optional. Specifies the uid of the entity this array belongs to. If present, entity relation to it will also be deleted.
      * @param subIds Optional, either an ID or an array of ID with relevant subscriptions.
      */
-     deleteItemFromArray(uid: string, item: (number | string) | (number | string)[], relationUid?: string, subIds?: any[] | any): any;
+    deleteItemFromArray(uid: string, item: (number | string) | (number | string)[], relationUid?: string, subIds?: any[] | any): any;
     /** Gets all referenceables from the library (like primitives, schemas, shorthands, etc) */
     getReferenceables(): Promise<any>;
     /** Deprecated: get selected referenceables. */
