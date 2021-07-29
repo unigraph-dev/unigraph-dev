@@ -4,7 +4,7 @@ import { getExecutableId, getRandomInt, UnigraphObject } from "unigraph-dev-comm
 import { registerDynamicViews, registerDetailedDynamicViews, withUnigraphSubscription } from "unigraph-dev-common/lib/api/unigraph-react"
 import { pkg as rssReaderPackage } from 'unigraph-dev-common/lib/data/unigraph.rss_reader.pkg';
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
-import { AutoDynamicView, DefaultObjectListView } from "../../components/ObjectView/DefaultObjectView";
+import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
 import { DynamicViewRenderer } from "../../global";
 import { download, upload } from "../../utils";
 import { Description, Link } from "@material-ui/icons";

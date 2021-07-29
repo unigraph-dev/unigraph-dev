@@ -42,6 +42,8 @@ export const registerDynamicViews = (views: Record<string, React.FC>): void => {
     state.setValue({...state.value, ...views});
 }
 
+export const getDynamicViews = () => Object.keys((window as any).unigraph.getState('registry/dynamicView').value)
+
 export const registerDetailedDynamicViews = (views: Record<string, React.FC>): void => {
     const state = (window as any).unigraph.getState('registry/dynamicViewDetailed');
     state.setValue({...state.value, ...views});

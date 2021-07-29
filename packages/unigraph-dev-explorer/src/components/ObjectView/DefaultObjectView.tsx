@@ -1,17 +1,14 @@
-import { Button, ButtonGroup, Checkbox, FormControlLabel, IconButton, List, ListItemIcon, ListItemText, Typography } from '@material-ui/core';
+import { Checkbox, FormControlLabel, IconButton, ListItemIcon, ListItemText, Typography } from '@material-ui/core';
 import { MoreVert, PlayArrow } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
-import React, { FC, ReactElement } from 'react';
+import React, { FC } from 'react';
 import { useDrag, useDrop} from 'react-dnd';
 import ReactJson, { InteractionProps } from 'react-json-view';
-import { useEffectOnce } from 'react-use';
-import { prepareExportObjects, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { DynamicViewRenderer } from '../../global';
 import { AutoDynamicViewProps } from '../../types/ObjectView';
-import { download } from '../../utils';
 import { ExecutableCodeEditor } from './DefaultCodeEditor';
-import { defaultContextContextMenu, defaultContextMenu, DefaultObjectContextMenu, onUnigraphContextMenu } from './DefaultObjectContextMenu';
-import { filterPresets } from './objectViewFilters';
+import { DefaultObjectContextMenu, onUnigraphContextMenu } from './DefaultObjectContextMenu';
 
 type ObjectViewOptions = {
     viewer?: "string" | "json-tree" | "dynamic-view" | "code-editor" | "dynamic-view-detailed",
@@ -21,23 +18,10 @@ type ObjectViewOptions = {
     viewId?: any
 };
 
-type ObjectListViewOptions = {
-    filters?: {
-        showDeleted?: boolean,
-        showNoView?: boolean,
-    },
-}
-
 type DefaultObjectViewProps = {
     object: any,
     options: ObjectViewOptions,
     callbacks?: Record<string, any>
-};
-
-type DefaultObjectListViewProps = {
-    component: (...args: any[]) => ReactElement<any, any>,
-    objects: any[],
-    options?: ObjectListViewOptions,
 };
 
 const StringObjectViewer = ({object}: {object: any}) => {
@@ -256,64 +240,4 @@ const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options, callba
     </div>
 }
 
-const DefaultObjectList: FC<DefaultObjectListViewProps> = ({component, objects, options}) => {
-    let finalObjects = objects;
-    const DynamicViews = window.unigraph.getState('registry/dynamicView').value
-    if (!options?.filters?.showDeleted) finalObjects = filterPresets['no-deleted'](finalObjects);
-    if (!options?.filters?.showNoView) finalObjects = filterPresets['no-noview'](finalObjects, {...DynamicViews, "$/schema/markdown": undefined});
-
-    return <React.Fragment>
-        {(finalObjects.length ? finalObjects : []).map(obj => React.createElement(
-            component, 
-            {key: obj.uid}, 
-            [<DefaultObjectView object={obj} 
-                options={{
-                    unpad: false, 
-                    showContextMenu: true,
-                    viewer: "dynamic-view",
-                }} 
-            />]
-        ))}
-    </React.Fragment>
-}
-
-/**
- * This one is deprecated and sucks a lot. Please don't use this one.
- * @param param0 
- * @returns 
- */
-const DefaultObjectListView: FC<DefaultObjectListViewProps> = ({component, objects}) => {
-
-    const [showDeleted, setShowDeleted] = React.useState(false);
-    const [showNoView, setShowNoView] = React.useState(false);
-
-    return <div>
-        <ButtonGroup color="primary" aria-label="outlined primary button group">
-            <Button onClick={() => {download(`export_unigraph_${new Date().toISOString()}.json`, JSON.stringify(prepareExportObjects(objects)))}}>Export All</Button>
-            <Button>Export Selected</Button>
-            <Button>Select All</Button>
-        </ButtonGroup>
-        <FormControlLabel control={<Checkbox
-            checked={showDeleted}
-            onChange={() => setShowDeleted(!showDeleted)}
-            name="showDeleted"
-            color="primary"
-        />} label="Show Deleted"/>
-        <FormControlLabel control={<Checkbox
-            checked={showNoView}
-            onChange={() => setShowNoView(!showNoView)}
-            name="showNoView"
-            color="primary"
-        />} label="Show Objects without a View"/>
-        <List>
-            <DefaultObjectList 
-                component={component}
-                objects={objects}
-                options={{filters: {showDeleted: showDeleted, showNoView: showNoView}}}
-            />
-        </List>
-    </div>
-
-}
-
-export { DefaultObjectView, DefaultObjectList, DefaultObjectListView };
+export { DefaultObjectView };

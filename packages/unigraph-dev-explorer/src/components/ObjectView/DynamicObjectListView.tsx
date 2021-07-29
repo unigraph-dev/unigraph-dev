@@ -1,8 +1,11 @@
-import { Accordion, AccordionSummary, Typography, AccordionDetails, List, ListItem, Select, MenuItem, IconButton, ListItemIcon, ListSubheader, Fade, Grow, Collapse, FormControlLabel, Switch, Button } from "@material-ui/core";
+import { Accordion, AccordionSummary, Typography, AccordionDetails, List, ListItem, Select, MenuItem, IconButton, ListItemIcon, ListSubheader, Fade, Grow, Collapse, FormControlLabel, Switch, Button, TextField } from "@material-ui/core";
 import { ExpandMore, ClearAll } from "@material-ui/icons";
+import { Autocomplete } from "@material-ui/lab";
+import _ from "lodash";
 import React from "react";
 import { useDrop } from "react-dnd";
 import { UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
+import { getDynamicViews } from "unigraph-dev-common/lib/api/unigraph-react";
 import { AutoDynamicView } from "./DefaultObjectView";
 
 type Group = {
@@ -48,39 +51,78 @@ const groupers: Record<string, Grouper> = {
     },
 }
 
-const DynamicListItem = ({listUid, item, index, context, callbacks, itemUids}: any) => {
+const DynamicListItem = ({listUid, item, index, context, callbacks, itemUids, itemRemover}: any) => {
     return <React.Fragment>
         <Grow in key={item.uid}>
             <ListItem>
                 <ListItemIcon onClick={() => {
-                    if (listUid) window.unigraph.deleteItemFromArray(listUid, item['uid'], context['uid'], callbacks?.subsId)
-                }} ><ClearAll/></ListItemIcon>
+                    itemRemover(item['uid'])
+                }} style={{display: itemRemover === _.noop ? "none" : ""}}><ClearAll/></ListItemIcon>
                 <AutoDynamicView object={new UnigraphObject(item)} callbacks={{...callbacks, 
                     context: context,
-                    removeFromContext: listUid ? (where: undefined | "left" | "right") => { 
-                        let uids = {"left": itemUids.slice(0, index), "right": undefined, "": undefined}[where || ""] || [item['uid']]
-                        console.log(uids)
-                        window.unigraph.deleteItemFromArray(listUid, uids, context['uid'], callbacks?.subsId)
-                    } : undefined
+                    removeFromContext: (where: undefined | "left" | "right") => { 
+                        let uids = {
+                            "left": itemUids.slice(0, index), 
+                            "right": undefined, 
+                            "": undefined
+                        }[where || ""] || [item['uid']]
+                        itemRemover(uids)
+                    }
                 }} />
             </ListItem>
         </Grow>
     </React.Fragment>
 }
 
-export const DynamicObjectListView = ({items, listUid, context, callbacks}: {items: any[], listUid?: string, context: any, callbacks?: any}) => {
+export type ItemRemover = (uids: string | string[] | number | number[]) => void;
+export type Filter = {id: string, fn: (_: any) => boolean}
+
+export type DynamicObjectListViewProps = {
+    items: any[], 
+    listUid?: string, 
+    context: any, 
+    callbacks?: any, 
+    itemGetter?: any, 
+    itemRemover?: ItemRemover, 
+    filters?: Filter[], 
+    defaultFilter?: string,
+    reverse?: boolean
+}
+
+/**
+ * Component for a list of objects with various functionalities.
+ * 
+ * items: UnigraphObject[] The list of items to display
+ * listUid: the UID of the list object (optional), used for deleting items from list
+ * 
+ * @param param0 
+ * @returns 
+ */
+export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({items, listUid, context, callbacks, itemGetter = _.identity, itemRemover = _.noop, filters = [], defaultFilter, reverse}) => {
     
     const [optionsOpen, setOptionsOpen] = React.useState(false);
     const [groupBy, setGroupBy] = React.useState('');
-    const [reverseOrder, setReverseOrder] = React.useState(false);
+    const [reverseOrder, setReverseOrder] = React.useState(reverse);
+
+    const totalFilters: Filter[] = [
+        {id: "no-filter", fn: () => true},
+        {id: "no-deleted", fn: (obj) => (obj?.['dgraph.type']?.includes?.('Deleted')) ? null : obj},
+        {id: "no-noview", fn: (obj) => getDynamicViews().includes(obj?.['type']?.['unigraph.id']) ? obj : null},
+        ...filters];
+    const [filtersUsed, setFiltersUsed] = React.useState([...(defaultFilter ? [defaultFilter] : []), 'no-deleted', 'no-noview']);
 
     const [procItems, setProcItems] = React.useState<any[]>([]);
     React.useEffect(() => {
-        if (reverseOrder) setProcItems([...items].reverse());
-        else setProcItems([...items]);
-    }, [reverseOrder, items])
+        let allItems: any[] = [];
+        if (reverseOrder) allItems = [...items].reverse();
+        else allItems = [...items];
+        filtersUsed.forEach(el => {
+            const filter = totalFilters.find((flt) => flt.id === el);
+            allItems = allItems.filter((it: any) => (filter?.fn || (() => true))(itemGetter(it)) );
+        })
+        setProcItems(allItems)
+    }, [reverseOrder, items, filtersUsed])
 
-    const getContext = () => context;
     const contextRef = React.useRef(context);
     React.useEffect(() => contextRef.current = context, [context]);
 
@@ -133,20 +175,44 @@ export const DynamicObjectListView = ({items, listUid, context, callbacks}: {ite
                     />
                     </ListItem>
                     <ListItem>
+                    <Autocomplete
+                        multiple
+                        value={filtersUsed}
+                        onChange={(event, newValue) => {
+                            setFiltersUsed(newValue)
+                        }}
+                        id="filter-selector"
+                        options={totalFilters.map(el => el.id)}
+                        style={{ width: 300 }}
+                        renderInput={(params) => <TextField {...params} label="Filter presets" variant="outlined" />}
+                    />
+                    </ListItem>
+                    <ListItem style={{display: context?.uid ? "" : "none"}}>
                         <Button onClick={() => {window.wsnavigator(`/graph?uid=${context.uid}`)}}>Show Graph view</Button>
                     </ListItem>
                 </List>
 
             </AccordionDetails>
         </Accordion>
-        <IconButton onClick={() => {if (listUid) window.unigraph.deleteItemFromArray(listUid, procItems.map((el, idx) => idx), context['uid'])}}><ClearAll/></IconButton>
+        <IconButton 
+            onClick={() => itemRemover(procItems.map((el, idx) => idx))}
+            style={{display: itemRemover === _.noop ? "none" : ""}}
+        ><ClearAll/></IconButton>
         </div>
-            
             {!groupBy.length ? 
-                procItems.map((el, index) => <DynamicListItem item={el['_value']} index={index} context={context} listUid={listUid} callbacks={callbacks} itemUids={procItems.map(el => el.uid)}/>) : 
-                groupers[groupBy](procItems.map(it => it['_value'])).map((el: Group) => <React.Fragment>
+                procItems.map((el, index) => 
+                    <DynamicListItem 
+                        item={itemGetter(el)} index={index} context={context} listUid={listUid} 
+                        callbacks={callbacks} itemUids={procItems.map(el => el.uid)} itemRemover={itemRemover}
+                    />) : 
+                groupers[groupBy](procItems.map(itemGetter)).map((el: Group) => <React.Fragment>
                     <ListSubheader>{el.name}</ListSubheader>
-                    {el.items.map((it, index) => <DynamicListItem item={it} index={index} context={context} listUid={listUid} callbacks={callbacks} itemUids={el.items.map(el => el.uid)}/>)}
+                    {el.items.map((it, index) => 
+                        <DynamicListItem 
+                            item={it} index={index} context={context} listUid={listUid} 
+                            callbacks={callbacks} itemUids={el.items.map(el => el.uid)} itemRemover={itemRemover}
+                        />)
+                    }
                 </React.Fragment>)
             }
     </div>

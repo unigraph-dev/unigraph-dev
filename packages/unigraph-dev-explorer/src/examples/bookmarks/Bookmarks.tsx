@@ -12,6 +12,7 @@ import { getExecutableId } from "unigraph-dev-common/lib/api/unigraph";
 import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
 import { getComponentFromPage } from "../../Workspace";
 import { openUrl } from "../../utils";
+import { DynamicObjectListView } from "../../components/ObjectView/DynamicObjectListView";
 
 type ABookmark = {
     uid?: string,
@@ -45,13 +46,10 @@ function BookmarksBody ({data}: { data: ABookmark[] }) {
     const [newName, setNewName] = useState("");
 
     return <div>
-        Hello bookmark!    <br/> 
-        There are currently {bookmarks.length} bookmarks!   <br/>
-        <List>
-            {bookmarks.map(it => <ListItem button key={it.uid}>
-                <AutoDynamicView object={it} />
-            </ListItem>)}
-        </List>
+        <DynamicObjectListView 
+            items={bookmarks}
+            context={null} reverse
+        />
         <TextField value={newName} onChange={(e) => setNewName(e.target.value)}></TextField>
         <Button onClick={() => createBookmark(newName).then((obj: any) => {return false;})}>Add</Button>
         For example, enter #tag1 https://example.com

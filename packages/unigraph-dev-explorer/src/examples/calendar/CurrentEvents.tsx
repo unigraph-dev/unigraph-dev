@@ -1,10 +1,9 @@
-import { ListItem, Typography } from "@material-ui/core";
+import { Typography } from "@material-ui/core";
 import React from "react"
 import { buildGraph, getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
-import { DefaultObjectListView } from "../../components/ObjectView/DefaultObjectView";
+import { DynamicObjectListView } from "../../components/ObjectView/DynamicObjectListView";
 
 export const CurrentEvents = () => {
-    const [currentDate, setCurrentDate] = React.useState(new Date());
     const [currentEvents, setCurrentEvents] = React.useState<any>([]);
 
     React.useEffect(() => {
@@ -12,7 +11,6 @@ export const CurrentEvents = () => {
 
         window.unigraph.subscribeToQuery("$/executable/get-current-events", (res: any) => {
             setCurrentEvents(buildGraph(res as any[]));
-            setCurrentDate(new Date());
         }, id, true);
 
         return function cleanup() { window.unigraph.unsubscribe(id); }
@@ -20,8 +18,10 @@ export const CurrentEvents = () => {
     }, [])
 
     return <div>
-        <Typography>It's currently {currentDate.toString()}!</Typography>
-        <Typography>Showing all events before this time:</Typography>
-        {currentEvents?.length ? <DefaultObjectListView objects={currentEvents} component={ListItem}/> : "Absolutely nothing"}
+        <Typography gutterBottom>Current Items</Typography>
+        <DynamicObjectListView 
+            items={currentEvents}
+            context={null}
+        />
     </div>
 }
