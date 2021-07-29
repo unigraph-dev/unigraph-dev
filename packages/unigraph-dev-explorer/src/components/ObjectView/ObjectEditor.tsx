@@ -209,7 +209,6 @@ export const ObjectEditorSelector = ({currentUid, setCurrentUid, style}: any) =>
 
 const ObjectEditorBody = ({currentObject, setCurrentObject, schemaMap}: any) => {
     const [currentSchema, setCurrentSchema]: [any, Function] = React.useState(currentObject['type']['_value['][0]['_definition'])
-    
 
     return <div style={{display: "flex"}}>
         <div style={{width: "66%"}}>
