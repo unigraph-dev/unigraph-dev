@@ -48,7 +48,7 @@ const groupers: Record<string, Grouper> = {
     },
 }
 
-const DynamicListItem = ({listUid, item, index, context, callbacks}: any) => {
+const DynamicListItem = ({listUid, item, index, context, callbacks, itemUids}: any) => {
     return <React.Fragment>
         <Grow in key={item.uid}>
             <ListItem>
@@ -58,7 +58,7 @@ const DynamicListItem = ({listUid, item, index, context, callbacks}: any) => {
                 <AutoDynamicView object={new UnigraphObject(item)} callbacks={{...callbacks, 
                     context: context,
                     removeFromContext: listUid ? (where: undefined | "left" | "right") => { 
-                        let uids = {"left": Array.from(Array(index).keys()), "right": undefined, "": undefined}[where || ""] || [item['uid']]
+                        let uids = {"left": itemUids.slice(0, index), "right": undefined, "": undefined}[where || ""] || [item['uid']]
                         console.log(uids)
                         window.unigraph.deleteItemFromArray(listUid, uids, context['uid'], callbacks?.subsId)
                     } : undefined
@@ -143,10 +143,10 @@ export const DynamicObjectListView = ({items, listUid, context, callbacks}: {ite
         </div>
             
             {!groupBy.length ? 
-                procItems.map((el, index) => <DynamicListItem item={el['_value']} index={index} context={context} listUid={listUid} callbacks={callbacks} />) : 
+                procItems.map((el, index) => <DynamicListItem item={el['_value']} index={index} context={context} listUid={listUid} callbacks={callbacks} itemUids={procItems.map(el => el.uid)}/>) : 
                 groupers[groupBy](procItems.map(it => it['_value'])).map((el: Group) => <React.Fragment>
                     <ListSubheader>{el.name}</ListSubheader>
-                    {el.items.map((it, index) => <DynamicListItem item={it} index={index} context={context} listUid={listUid} callbacks={callbacks} />)}
+                    {el.items.map((it, index) => <DynamicListItem item={it} index={index} context={context} listUid={listUid} callbacks={callbacks} itemUids={el.items.map(el => el.uid)}/>)}
                 </React.Fragment>)
             }
     </div>

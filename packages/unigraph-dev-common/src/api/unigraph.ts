@@ -74,6 +74,20 @@ export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
     const dict: any = {}
     objs.forEach(object => {if (object?.uid) dict[object.uid] = object})
 
+    function buildDictRecurse(obj: any) {
+        if (obj && typeof obj === "object" && Array.isArray(obj)) {
+            obj.forEach((val, index) => {
+                if(val?.uid && !dict[val.uid] && Object.keys(val).length !== 1) dict[val.uid] = obj[index];
+                buildDictRecurse(val)
+            })
+        } else if (obj && typeof obj === "object") {
+            Object.entries(obj).forEach(([key, value]: [key: string, value: any]) => {
+                if(value?.uid && !dict[value.uid] && Object.keys(value).length !== 1) dict[value.uid] = obj[key];
+                buildDictRecurse(value)
+            })
+        }
+    }
+
     function buildGraphRecurse(obj: any) {
         if (obj && typeof obj === "object" && Array.isArray(obj)) {
             obj.forEach((val, index) => {
@@ -88,6 +102,7 @@ export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
         }
     }
 
+    objs.forEach(object => buildDictRecurse(object))
     objs.forEach(object => buildGraphRecurse(object))
 
     return objs
@@ -355,13 +370,13 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
             };
             sendEvent(connection, "add_notification", {item: item}, id);
         }),
-        getSearchResults: (query, method = "fulltext", display, hops) => new Promise((resolve, reject) => {
+        getSearchResults: (query, method = "fulltext", display, hops, searchOptions) => new Promise((resolve, reject) => {
             const id = getRandomInt();
             callbacks[id] = (response: any) => {
                 if (response.success && response.results) resolve(response.results);
                 else reject(response);
             };
-            sendEvent(connection, "get_search_results", {query, method, display, hops}, id);
+            sendEvent(connection, "get_search_results", {query, method, display, hops, searchOptions}, id);
         }),
         getSchemaMap: () => caches.schemaMap,
         exportObjects: (uids, options) => new Promise((resolve, reject) => {

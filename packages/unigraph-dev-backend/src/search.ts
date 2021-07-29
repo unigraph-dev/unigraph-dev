@@ -29,6 +29,12 @@ const getQualUids = (h: number) => {
     return quals.join(', ')
 }
 
+const getQualFromOptions = (options: any) => {
+    let result = "";
+    if (options.limit) result += "first: " + options.limit
+    return result.length ? ", " + result : "";
+}
+
 /**
  * Construct GraphQL+- query for searches.
  * @param queryString Query in GraphQL+- format for entity parts. Example: `(func: alloftext(<_value.%>, "Hello world"))`
@@ -38,7 +44,8 @@ const getQualUids = (h: number) => {
 export const makeSearchQuery = (
     queryString: string, 
     display: "indexes" | "uids" | undefined,
-    hops = 2, // 1 to 4
+    hops = 2, // 1 to 4,
+    searchOptions: any = {},
 ): string => {
     const qhops: string[] = [];
     for (let i=0; i<hops; ++i) {
@@ -48,7 +55,7 @@ export const makeSearchQuery = (
             }
         }`)
     }
-    const resultQuery = resQueries[display || "default"](`func: uid(${getQualUids(hops)})`)
+    const resultQuery = resQueries[display || "default"](`func: uid(${getQualUids(hops)})${getQualFromOptions(searchOptions)}`)
     return `query {
         uhops0 as var${queryString}
         qhops0(func: uid(uhops0)) {
