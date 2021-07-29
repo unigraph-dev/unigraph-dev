@@ -8,6 +8,7 @@ export const Focus = () => {
     const [focus, setFocus] = React.useState<any[]>([]);
     const [focusEntity, setFocusEntity] = React.useState<any>({});
     const [listUid, setListUid] = React.useState("");
+    const [subsId, setSubsId] = React.useState(getRandomInt);
 
     React.useEffect(() => {
         if (window.unigraph.getState('calendar/focusItems')) {
@@ -16,8 +17,6 @@ export const Focus = () => {
     }, [focus, listUid, focusEntity])
 
     useEffectOnce(() => {
-        const id = getRandomInt();
-
         window.unigraph.subscribeToObject("$/entity/focus", (entity: any) => {
             const children = entity?.['_value']?.children?.['_value[']
             if (children) {
@@ -28,12 +27,16 @@ export const Focus = () => {
                 setFocus([]);
             };
             setFocusEntity(entity);
-        }, id);
+        }, subsId);
 
         return function cleanup() {
-            window.unigraph.unsubscribe(id);
+            window.unigraph.unsubscribe(subsId);
         }
     })
 
-    return <DynamicObjectListView items={focus} context={focusEntity} listUid={listUid} />
+    return <DynamicObjectListView 
+        items={focus} context={focusEntity} 
+        listUid={listUid} itemGetter={(el: any) => el['_value']}
+        itemRemover={(uids) => {window.unigraph.deleteItemFromArray(listUid, uids, focusEntity['uid'], subsId)}}
+    />
 }

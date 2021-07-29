@@ -1,17 +1,17 @@
-import { Button, Checkbox, Chip, IconButton, List, ListItem, ListItemIcon, ListItemSecondaryAction, ListItemText, TextField } from '@material-ui/core';
-import { CalendarToday, Delete, PriorityHigh } from '@material-ui/icons';
+import { Button, Checkbox, Chip, ListItemIcon, ListItemText, TextField } from '@material-ui/core';
+import { CalendarToday, PriorityHigh } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { DynamicViewRenderer } from '../../global';
 
 import { pkg as todoPackage } from 'unigraph-dev-common/lib/data/unigraph.todo.pkg';
 import { registerDynamicViews, withUnigraphSubscription } from 'unigraph-dev-common/lib/api/unigraph-react'
 import { Tag } from '../semantic/Tag';
-import { Autocomplete } from '@material-ui/lab';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { AutoDynamicView } from '../../components/ObjectView/DefaultObjectView';
 import Sugar from 'sugar';
 import { parseTodoObject } from './parseTodoObject';
-import { ATodoList, filterFns, maxDateStamp } from './utils';
+import { ATodoList, filters, maxDateStamp } from './utils';
+import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
 
 
 
@@ -20,34 +20,19 @@ function TodoListBody ({data}: { data: ATodoList[] }) {
     const [newName, setNewName] = useState("");
 
     const [filteredItems, setFilteredItems] = React.useState(todoList);
-    const [filterName, setFilterName] = React.useState(["only-incomplete"]);
 
     React.useEffect(() => {
         let res = todoList;
-        filterName.forEach(name => {
-            if (name && Object.keys(filterFns).includes(name)) // @ts-ignore: already accounted for
-            res = filterFns[name](res)
-        });
         setFilteredItems(res)
-    }, [filterName, todoList]) 
+    }, [todoList]) 
 
     return <div>
-        <Autocomplete
-            multiple
-            value={filterName}
-            onChange={(event, newValue) => {
-                setFilterName(newValue)
-            }}
-            id="filter-selector"
-            options={Object.keys(filterFns)}
-            style={{ width: 300 }}
-            renderInput={(params) => <TextField {...params} label="Filter presets" variant="outlined" />}
+        <DynamicObjectListView 
+            items={filteredItems}
+            context={null}
+            filters={filters}
+            defaultFilter={"only-incomplete"}
         />
-        <List>
-            {filteredItems.map(todo => <ListItem button key={todo.uid}>
-                <AutoDynamicView object={todo} />
-            </ListItem>)}
-        </List>
         <TextField value={newName} onChange={(e) => setNewName(e.target.value)}></TextField>
         <Button onClick={
             () => window.unigraph.addObject(parseTodoObject(newName), "$/schema/todo")

@@ -24,24 +24,23 @@ export type ATodoList = {
     }
 }
 
-export const filterFns = {
-    "no-filter": (objs: any[]) => objs,
-    "only-incomplete": (objs: any[]) => objs.filter(obj => {
+export const filters = [
+    {id: "only-incomplete", fn: ((obj: any) => {
         let r;
         try {r = unpad(obj)['done'] === false}
         catch (e) {r=false};
         return r;
-    }),
-    "only-complete": (objs: any[]) => objs.filter(obj => {
+    })},
+    {id: "only-complete", fn: ((obj: any) => {
         let r;
         try {r = unpad(obj)['done'] === true}
         catch (e) {r=false};
         return r;
-    }),
-    "high-priority": (objs: any[]) => objs.filter(obj => {
+    })},
+    {id: "high-priority", fn: ((obj: any) => {
         let r;
         try {r = unpad(obj)['priority'] >= 1}
         catch (e) {r=false};
         return r;
-    })
-}
+    })}
+]
