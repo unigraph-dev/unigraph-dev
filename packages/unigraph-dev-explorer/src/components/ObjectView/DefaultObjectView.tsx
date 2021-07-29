@@ -43,7 +43,7 @@ type DefaultObjectListViewProps = {
 const StringObjectViewer = ({object}: {object: any}) => {
     const finalObject = unpad(object)
 
-    return <div style={{height: "160px", width: "100%", overflowX: "auto"}}>
+    return <div style={{maxHeight: "160px", width: "100%", overflowX: "auto"}}>
         Type: {object?.type?.["unigraph.id"]}<br/>
         {JSON.stringify(finalObject, null, 2)}
     </div>;

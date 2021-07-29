@@ -205,13 +205,21 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
                                         return newUid[0];
                                     }
                                 }, {
-                                    label: (search: string) => `Create new tag named ${search}`,
+                                    label: (search: string) => `Create new tag and page named ${search}`,
                                     onSelected: async (search: string) => {
-                                        const newUid = await window.unigraph.addObject({
+                                        const newTagUid = await window.unigraph.addObject({
                                             'name': search
                                         }, '$/schema/tag');
-                                        console.log(newUid);
-                                        return newUid[0];
+                                        window.unigraph.addObject({
+                                            'text': {type: {'unigraph.id': "$/schema/markdown"}, _value: search},
+                                            semantic_properties: {
+                                                children: [{
+                                                    "type": {"unigraph.id": '$/schema/tag'},
+                                                    uid: newTagUid[0]
+                                                }]
+                                            }
+                                        }, '$/schema/note_block');
+                                        return newTagUid[0];
                                     }
                                 }]
                             })
