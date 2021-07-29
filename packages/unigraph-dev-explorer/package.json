@@ -35,6 +35,7 @@
     "react-splitter-layout": "^4.0.0",
     "react-use": "^15.3.4",
     "rehype-katex": "^5.0.0",
+    "remark-breaks": "^2.0.2",
     "remark-math": "^4.0.0",
     "remark-wiki-link": "^1.0.4",
     "sugar": "^2.0.6",

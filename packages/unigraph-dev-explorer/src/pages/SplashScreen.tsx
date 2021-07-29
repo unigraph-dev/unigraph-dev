@@ -1,13 +1,7 @@
-import React from "react";
+import { Typography } from "@material-ui/core";
 
 export function SplashScreen () {
     return <div>
-        <div style={{position: "absolute", left: "50%", top: "50%"}}> Loading... </div>
-    </div>
-}
-
-export function DisconnectedSplashScreen () {
-    return <div>
-        <div style={{position: "absolute", left: "50%", top: "50%"}}> Disconnected, retrying... </div>
+        <Typography variant="h4" gutterBottom>Connecting to Unigraph...</Typography>
     </div>
 }

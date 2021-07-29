@@ -6,7 +6,7 @@ import './pages';
 import * as serviceWorker from './serviceWorker';
 
 import App from './App';
-import { SplashScreen, DisconnectedSplashScreen} from './pages/SplashScreen';
+import { SplashScreen } from './pages/SplashScreen';
 import { WorkSpace } from './Workspace';
 import Settings from './pages/Settings';
 
@@ -27,11 +27,10 @@ render(notConnectedScreen);
 
 window.unigraph.backendConnection.onopen = () => {
   // Register notification center
-  // TODO: Do we need a state management library? Ask around and evaluate.
   window.unigraph.subscribeToType("$/schema/notification", (data: any[]) => {
     const nfState = window.unigraph.getState('notification-center/notifications');
     nfState.setValue(data);
-  }, undefined, {all: false, showHidden: true})
+  }, undefined, {all: false, showHidden: true, uidsOnly: true})
 
   const semanticChildrenState = window.unigraph.addState('referenceables/semantic_children', []);
   window.unigraph.getSchemas(['$/schema/interface/semantic']).then((schemas: any) => { 
@@ -44,7 +43,7 @@ window.unigraph.backendConnection.onopen = () => {
 
   
   window.unigraph.backendConnection.onclose = () => {
-    setTimeout(() => {window.location.reload()}, 1000) 
+    //setTimeout(() => {window.location.reload()}, 1000) 
     render(notConnectedScreen,)
   };
 }
