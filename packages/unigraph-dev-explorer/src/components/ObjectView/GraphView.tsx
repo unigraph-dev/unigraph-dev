@@ -3,6 +3,7 @@ import { getRandomInt, UnigraphObject } from "unigraph-dev-common/lib/api/unigra
 import ForceGraph2D from 'react-force-graph-2d';
 import { SizeMe } from "react-sizeme";
 import _ from "lodash";
+import { Checkbox, List, ListItem, Typography } from "@material-ui/core";
 
 const queryNameIndex = `@filter((NOT eq(<_propertyType>, "inheritance"))) {
     uid 
@@ -17,8 +18,14 @@ const queryNameIndex = `@filter((NOT eq(<_propertyType>, "inheritance"))) {
     <type> { <unigraph.id> }
 }`
 
+const excludableTypes = ['$/schema/subentity', '$/schema/semantic_properties', '$/schema/interface/textual']
+const getExcluded = (id: number) => excludableTypes.reduce((prev, curr, idx) => (!!((id >> idx) % 2)) ? [...prev, curr] : prev, [] as string[])
+
 export const GraphView = ({uid}: any) => {
     const [entities, setEntities] = React.useState<any>([]);
+    const [links, setLinks] = React.useState<any>([]);
+    const [refs, setRefs] = React.useState<any>();
+    const [typesExcluded, setTypesExcluded] = React.useState(7); // Bitmapped, types[0] => +-1, etc
 
     React.useEffect(() => {
         const id = getRandomInt();
@@ -28,20 +35,42 @@ export const GraphView = ({uid}: any) => {
             <unigraph.origin> ${queryNameIndex}
             <~unigraph.origin> ${queryNameIndex}
         }`, (res: any) => {
-            console.log(res);
-            const [entitiesInto, entitiesOutof] = ([res[0]['unigraph.origin'], res[0]['~unigraph.origin']]).map(el => el?.filter((el: any) => el.type !== undefined).map((el: any) => { return {
-                id: el.uid,
-                type: el['type']?.['unigraph.id'],
-                name: (new UnigraphObject(el?.['unigraph.indexes']?.['name'])).as("primitive") || "No name"
-            }}))
-            setEntities(_.uniqBy([...(entitiesInto || []), ...(entitiesOutof || [])], el => el.id));
+            setRefs(res);
         }, id, true);
 
         return function cleanup () { window.unigraph.unsubscribe(id); }
     }, [])
 
+    React.useEffect(() => {
+        if (refs?.[0]) {
+            console.log(refs);
+            const llinks: any[] = [];
+            const [entitiesInto, entitiesOutof] = ([refs[0]['unigraph.origin'], refs[0]['~unigraph.origin']])
+                .map((el, idx: number) => 
+                    el?.filter((el: any) => (el.type !== undefined && el.type['unigraph.id'].startsWith('$/schema') && !getExcluded(typesExcluded).includes(el.type['unigraph.id'])))
+                        .map((el: any) => {
+                            if (idx === 0) llinks.push({source: uid, target: el.uid})
+                            else llinks.push({source: el.uid, target: uid})
+                            return {
+                                id: el.uid,
+                                type: el['type']?.['unigraph.id'],
+                                name: (new UnigraphObject(el?.['unigraph.indexes']?.['name'])).as("primitive") || "No name"
+                            }
+                }
+            ))
+            setEntities(_.uniqBy([...(entitiesInto || []), ...(entitiesOutof || [])], el => el.id));
+            setLinks(llinks);
+        }
+    }, [refs, typesExcluded])
+
     return <div>
-        This is graph view! {uid}
+        <Typography>Graph view of object {uid}</Typography>
+        <List style={{position: "absolute"}}>
+            {excludableTypes.map((el, index) => <ListItem>
+                <Checkbox checked={!!((typesExcluded >> index) % 2)} onClick={() => (typesExcluded >> index) % 2 ? setTypesExcluded(typesExcluded - (1 << index)) : setTypesExcluded(typesExcluded + (1 << index))}/>
+                <Typography>{el}</Typography>
+            </ListItem>)}
+        </List>
         <SizeMe>{({size}) => <ForceGraph2D 
             width={size.width || undefined} height={size.height || undefined}
             nodeAutoColorBy={(node) => (node as any).type}
@@ -63,7 +92,13 @@ export const GraphView = ({uid}: any) => {
     
                 (node as any).__bckgDimensions = [w, h]; // to re-use in nodePointerAreaPaint
             }}
-            graphData={{nodes: entities, links: entities.map((el: any) => {return {source: uid, target: el['id']}})}} 
+            linkDirectionalArrowLength={3.5}
+            linkDirectionalArrowRelPos={1}
+            linkCurvature={0.1}
+            graphData={{nodes: entities, links: links}} 
+            onNodeClick={(node) => {
+                window.wsnavigator(`/object-editor?uid=${node.id}`)
+            }}
         />}</SizeMe>
     </div>
 }
