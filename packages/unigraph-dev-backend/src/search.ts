@@ -49,7 +49,7 @@ export const makeSearchQuery = (
 ): string => {
     const qhops: string[] = [];
     for (let i=0; i<hops; ++i) {
-        qhops.push(`qhops${(i+1).toString()}(func: uid(uhops${i.toString()})) {
+        qhops.push(`qhops${(i+1).toString()}(func: uid(uhops${i.toString()})${getQualFromOptions(searchOptions)}) {
             <unigraph.origin> {
                 ${i === hops-1 ? "" : `uhops${(i+1).toString()} as `}uid
             }
@@ -58,10 +58,10 @@ export const makeSearchQuery = (
     const resultQuery = resQueries[display || "default"](`func: uid(${getQualUids(hops)})${getQualFromOptions(searchOptions)}`)
     return `query {
         uhops0 as var${queryString}
-        qhops0(func: uid(uhops0)) {
+        ${searchOptions.noPrimitives ? "" : `qhops0(func: uid(uhops0)) {
             uid
             <_value.%>
-        }
+        }`}
         ${qhops.join('\n')}
         ${resultQuery}
     }`

@@ -278,7 +278,7 @@ export default class DgraphClient {
     const query = makeSearchQuery(getFullTextQueryString(search), display, hops, searchOptions)
     console.log(query)
     const res = (await this.queryDgraph(query));
-    return {results: res[0] as any[], entities: res[hops+1] as any[]};
+    return {results: (searchOptions.noPrimitives ? [] : res[0]) as any[], entities: res[hops+1-Number(!!searchOptions.noPrimitives)] as any[]};
   }
 
   async getPackages() {
