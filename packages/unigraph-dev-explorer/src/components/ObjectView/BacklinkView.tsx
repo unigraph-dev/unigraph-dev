@@ -4,7 +4,7 @@ import { useEffectOnce } from "react-use";
 import { buildGraph } from "unigraph-dev-common/lib/api/unigraph";
 import { DefaultObjectListView } from "../../components/ObjectView/DefaultObjectView";
 
-const getQuery = (uid: string, forward?: boolean) => `(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted)) AND (NOT eq(<_propertyType>, "inheritance"))) @recurse(depth: 8) {
+const getQuery = (uid: string, forward?: boolean) => `(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted))) @recurse(depth: 8) {
   uid
   <unigraph.id>
   expand(_userpredicate_)
@@ -21,7 +21,7 @@ export const BacklinkView = ({data, hideHeader, forward}: any) => {
     const [id, setId] = React.useState(Date.now());
 
     useEffectOnce(() => {
-        window.unigraph.subscribeToQuery(getQuery(data.uid, forward), (objects: any[]) => { setObjects(buildGraph(objects).filter((el: any) => el.uid !== data.uid)) }, id);
+        window.unigraph.subscribeToQuery(getQuery(data.uid, forward), (objects: any[]) => { setObjects(buildGraph(objects).filter((el: any) => (el.uid !== data.uid && el.type?.['unigraph.id'] !== "$/schema/semantic_properties"))) }, id);
 
         return function cleanup () {
             window.unigraph.unsubscribe(id);

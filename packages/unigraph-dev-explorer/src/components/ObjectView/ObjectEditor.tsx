@@ -7,9 +7,10 @@ import { Definition, SchemaDgraph } from 'unigraph-dev-common/lib/types/json-ts'
 import { KeyboardDateTimePicker } from "@material-ui/pickers";
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { ReferenceableSelectorControlled } from './ReferenceableSelector';
-import { Delete, Save } from '@material-ui/icons';
+import { Delete, Menu, Save } from '@material-ui/icons';
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import { BacklinkView } from './BacklinkView';
+import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
 
 const useStyles = makeStyles({
     editorFrame: {
@@ -27,9 +28,21 @@ const defaultNewValues: any = {
     "schemaRef": {}
 }
 
+const getMetadata = (localObject: any) => Object.entries(localObject).map(([k, v]) => k.startsWith('_') && !k.startsWith('_value') ? [k, v] : undefined).filter(el => el !== undefined);
+const MetadataDisplay = ({metadata}: any) => {
+    return metadata.length ? <div>
+        <Typography>Metadata:</Typography>
+        {metadata.map((el: any) => <div style={{display: "flex"}}>
+            <Typography style={{marginRight: "8px"}}>{el[0]}</Typography>
+            <Typography style={{color: "gray"}}>{JSON.stringify(el[1])}</Typography>
+        </div>)}
+    </div>: <React.Fragment/>
+}
+
 const TypedObjectPartEditor: any = {
     "$/composer/Object": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
         const fields = _.intersection(Object.keys(localObject['_value']), localSchema['_properties'].map((el: any) => el['_key']));
+        const metadata = getMetadata(localObject);
         const classes = useStyles();
         const [selectedNewProp, setSelectedNewProp] = React.useState<any>();
         const [currentInputValue, setCurrentInputValue] = React.useState<any>();
@@ -38,7 +51,8 @@ const TypedObjectPartEditor: any = {
         React.useEffect(() => {if (isJsonString(currentInputValue)) setCurrentInputObjValue(JSON.parse(currentInputValue))}, [currentInputValue])
         return <React.Fragment>
             <Paper variant="outlined" className={classes.editorFrame}>
-                <Typography>Object ID: {localObject.uid}, type: {localObject?.type?.['unigraph.id']}</Typography>
+                <Typography>Object ID: {localObject.uid}, type: {localObject?.type?.['unigraph.id']} <Menu onClick={(event) => onUnigraphContextMenu(event, localObject, undefined)}/></Typography>
+                <MetadataDisplay metadata={metadata} />
                 {fields.map((key) => <div style={{display: "flex", alignItems: "baseline", paddingTop: "8px"}}>
                     <Typography variant="body1" style={{paddingRight: "8px"}}>{key}:</Typography>
                     <ObjectPartEditor
@@ -96,9 +110,10 @@ const TypedObjectPartEditor: any = {
     },
     "$/composer/Array": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
         const classes = useStyles();
-        console.log(localSchema, localObject)
+        const metadata = getMetadata(localObject);
         return <Paper variant="outlined" className={classes.editorFrame}>
             <Typography>Array type</Typography>
+            <MetadataDisplay metadata={metadata} />
             {localObject['_value['].map((el: any) => <div style={{display: "flex", alignItems: "baseline", paddingTop: "8px"}}>
                 <ObjectPartEditor
                             localSchema={schemaMap[el['_value']['type']['unigraph.id']]['_definition']}
@@ -145,7 +160,7 @@ const TypedObjectPartEditor: any = {
         </React.Fragment>
     },
     "schemaRef": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
-        console.log(localSchema)
+        const metadata = getMetadata(localObject);
         if (typeof localSchema !== "string") localSchema = localSchema?.['type']?.['unigraph.id']
         
         const classes = useStyles();
@@ -153,6 +168,7 @@ const TypedObjectPartEditor: any = {
         console.log(localSchema, localObject, definition)
         return <Paper variant="outlined" className={classes.editorFrame}>
             <Typography>Schema ref: {localSchema}</Typography>
+            <MetadataDisplay metadata={metadata} />
             <ObjectPartEditor
                 localSchema={definition}
                 localObject={localObject[Object.keys(localObject).filter((s: string) => s.startsWith( '_value'))[0]]}
@@ -209,7 +225,6 @@ export const ObjectEditorSelector = ({currentUid, setCurrentUid, style}: any) =>
 
 const ObjectEditorBody = ({currentObject, setCurrentObject, schemaMap}: any) => {
     const [currentSchema, setCurrentSchema]: [any, Function] = React.useState(currentObject['type']['_value['][0]['_definition'])
-    
 
     return <div style={{display: "flex"}}>
         <div style={{width: "66%"}}>

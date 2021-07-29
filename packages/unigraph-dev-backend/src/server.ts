@@ -30,7 +30,7 @@ export default async function startServer(client: DgraphClient) {
   let app: Application;
   const dgraphClient = client;
 
-  const pollInterval = 10000;
+  const pollInterval = 20000;
 
   const caches: Record<string, Cache<any>> = {};
   const _subscriptions: Subscription[] = [];

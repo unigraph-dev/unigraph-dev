@@ -43,7 +43,7 @@ type DefaultObjectListViewProps = {
 const StringObjectViewer = ({object}: {object: any}) => {
     const finalObject = unpad(object)
 
-    return <div>
+    return <div style={{maxHeight: "160px", width: "100%", overflowX: "auto"}}>
         Type: {object?.type?.["unigraph.id"]}<br/>
         {JSON.stringify(finalObject, null, 2)}
     </div>;
@@ -155,7 +155,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     const contextEntity = typeof callbacks?.context === "object" ? callbacks.context : null; 
     const [hasContextMenu, setHasContextMenu] = React.useState(false);
     const contextMenuState = window.unigraph.getState('global/contextMenu');
-    contextMenuState.subscribe((menu: any) => {setHasContextMenu((menu.show && menu.contextUid === object.uid))})
+    contextMenuState.subscribe((menu: any) => {setHasContextMenu((menu.show && menu.contextUid === object?.uid))})
 
     const attach = React.useCallback((domElement) => {
         if (!noDrag) drag(domElement);
