@@ -5,8 +5,8 @@ import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import remarkWikilink from './wikilink'
+import remarkBreaks from 'remark-breaks'
 import 'katex/dist/katex.min.css'
-import { Public } from "@material-ui/icons";
 
 const compFactory = (name: string, {node, inline, className, children, ...props}: any) => {
     return React.createElement(name, {
@@ -27,7 +27,7 @@ export const Markdown: DynamicViewRenderer = ({data, callbacks, isHeading}) => {
     return <Typography
         variant={!isHeading ? "body1" : "h4"}
     >
-        <ReactMarkdown children={data['_value.%']} remarkPlugins={[remarkMath, remarkWikilink]}
+        <ReactMarkdown children={data['_value.%']} remarkPlugins={[remarkMath, remarkWikilink, remarkBreaks]}
             rehypePlugins={[rehypeKatex]} components={{
             p: compFactory.bind(this, "p"),
             strong: compFactory.bind(this, "strong"),

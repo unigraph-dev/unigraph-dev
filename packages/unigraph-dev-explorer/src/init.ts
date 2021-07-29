@@ -41,7 +41,7 @@ function init() {
         const unpadded: ANotification = unpad(el); 
         let updated = new Date(unpadded?._timestamp?._updatedAt);
         let current = new Date();
-        if (current.valueOf() - updated.valueOf() < 5000) {
+        if (current.valueOf() - updated.valueOf() < 5000 && Notification) {
             new Notification(unpadded.name, {body: unpadded.from + ": " + unpadded.content})
         }
     });
