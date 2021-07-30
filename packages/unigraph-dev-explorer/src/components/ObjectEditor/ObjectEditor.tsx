@@ -1,16 +1,18 @@
 /* eslint-disable react-hooks/rules-of-hooks */ // Using maps as React functional components
-import { Button, Checkbox, Divider, FormControl, FormHelperText, InputLabel, makeStyles, MenuItem, Paper, Select, TextField, Typography } from '@material-ui/core';
+import { Button, Checkbox, Divider, FormControl, FormHelperText, InputLabel, makeStyles, MenuItem, Paper, Select, Switch, TextField, Typography } from '@material-ui/core';
 import _ from 'lodash';
 import React from 'react';
 import { useEffectOnce } from 'react-use';
 import { Definition, SchemaDgraph } from 'unigraph-dev-common/lib/types/json-ts';
 import { KeyboardDateTimePicker } from "@material-ui/pickers";
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
-import { ReferenceableSelectorControlled } from './ReferenceableSelector';
+import { ReferenceableSelectorControlled } from '../ObjectView/ReferenceableSelector';
 import { Delete, Menu, Save } from '@material-ui/icons';
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
-import { BacklinkView } from './BacklinkView';
-import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
+import { BacklinkView } from '../ObjectView/BacklinkView';
+import { onUnigraphContextMenu } from '../ObjectView/DefaultObjectContextMenu';
+import { AutoDynamicView } from '../ObjectView/DefaultObjectView';
+import { getDynamicViews } from 'unigraph-dev-common/lib/api/unigraph-react';
 
 const useStyles = makeStyles({
     editorFrame: {
@@ -39,6 +41,8 @@ const MetadataDisplay = ({metadata}: any) => {
     </div>: <React.Fragment/>
 }
 
+const editorHeader = {display: "flex", alignItems: "baseline", paddingTop: "8px"};
+
 const TypedObjectPartEditor: any = {
     "$/composer/Object": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
         const fields = _.intersection(Object.keys(localObject['_value']), localSchema['_properties'].map((el: any) => el['_key']));
@@ -47,20 +51,26 @@ const TypedObjectPartEditor: any = {
         const [selectedNewProp, setSelectedNewProp] = React.useState<any>();
         const [currentInputValue, setCurrentInputValue] = React.useState<any>();
         const [currentInputObjValue, setCurrentInputObjValue] = React.useState<any>();
+        const [viewOrEdit, setViewOrEdit] = React.useState<any>(getDynamicViews().includes(localObject['type']?.['unigraph.id']) ? "view" : "edit")
         React.useEffect(() => {if (JSON.stringify(currentInputObjValue) !== currentInputValue) setCurrentInputValue(JSON.stringify(currentInputObjValue))}, [currentInputObjValue]);
         React.useEffect(() => {if (isJsonString(currentInputValue)) setCurrentInputObjValue(JSON.parse(currentInputValue))}, [currentInputValue])
         return <React.Fragment>
             <Paper variant="outlined" className={classes.editorFrame}>
-                <Typography>Object ID: {localObject.uid}, type: {localObject?.type?.['unigraph.id']} <Menu onClick={(event) => onUnigraphContextMenu(event, localObject, undefined)}/></Typography>
+                <div style={editorHeader}>
+                    <Typography>Object ID: {localObject.uid}, type: {localObject?.type?.['unigraph.id']} 
+                    <Menu onClick={(event) => onUnigraphContextMenu(event, localObject, undefined)} style={{marginLeft: "8px", marginRight: "8px", alignSelf: "flex-end"}}/></Typography>
+                    {viewOrEdit}
+                    <Switch checked={viewOrEdit === "view"} onChange={() => viewOrEdit === "view" ? setViewOrEdit("edit") : setViewOrEdit("view")}/>
+                </div>
                 <MetadataDisplay metadata={metadata} />
-                {fields.map((key) => <div style={{paddingTop: "8px"}}>
+                {viewOrEdit === "view" ? <AutoDynamicView object={localObject} /> : fields.map((key) => <div style={editorHeader}>
                     <Typography variant="body1" style={{paddingRight: "8px"}}>{key}:</Typography>
                     <ObjectPartEditor
                         localSchema={(localSchema['_properties']).filter((el: any) => el['_key'] === key)[0]['_definition']}
                         localObject={localObject['_value'][key]} schemaMap={schemaMap}
                         setLocalObject={(newVal: any) => window.unigraph.updateObject(localObject['_value'][key]['uid'], newVal, false, false)}
                     />
-                    <Delete onClick={() => {window.unigraph.deleteRelation(localObject._value.uid, {[key]: null})}} className="showOnHover"/>
+                    <Delete onClick={() => {window.unigraph.deleteRelation(localObject._value.uid, {[key]: null})}} className="showOnHover" style={{alignSelf: "baseline"}}/>
                 </div>)}
                 <div style={{display: "flex", alignItems: "baseline", paddingTop: "8px"}}>
                     <FormControl>
@@ -164,26 +174,32 @@ const TypedObjectPartEditor: any = {
         if (typeof localSchema !== "string") localSchema = localSchema?.['type']?.['unigraph.id']
         const [newValueUid, setNewValueUid] = React.useState('');
         const [showReplacer, setShowReplacer] = React.useState(false);
-        
+        const [viewOrEdit, setViewOrEdit] = React.useState<any>(getDynamicViews().includes(localObject['type']?.['unigraph.id']) ? "view" : "edit")
         const classes = useStyles();
         const definition = localSchema === "$/schema/any" ? schemaMap[localObject[Object.keys(localObject).filter((s: string) => s.startsWith( '_value'))[0]]['type']['unigraph.id']]['_definition'] : schemaMap[localSchema]['_definition']
         //console.log(localSchema, localObject, definition)
         return <Paper variant="outlined" className={classes.editorFrame}>
-            <Typography onClick={() => setShowReplacer(!showReplacer)}>Schema ref: {localSchema}, uid: {localObject.uid}</Typography>
-            <div style={{display: showReplacer ? "flex": "none", alignItems: "baseline", paddingTop: "8px"}}>
+            <div style={editorHeader}>
+                <Typography onClick={() => setShowReplacer(!showReplacer)} style={{marginRight: "8px"}}>Schema ref: {localSchema}, uid: {localObject.uid}</Typography>
+                {viewOrEdit}
+                <Switch checked={viewOrEdit === "view"} onChange={() => viewOrEdit === "view" ? setViewOrEdit("edit") : setViewOrEdit("view")}/>
+            </div>
+            <MetadataDisplay metadata={metadata} />
+            <div style={{...editorHeader, display: showReplacer ? "flex": "none"}}>
                 <TextField onChange={(e) => {setNewValueUid(e.target.value)}} value={newValueUid}></TextField>
                 <Button onClick={async () => {
                     await window.unigraph.deleteRelation(localObject.uid, {_value: null})
                     window.unigraph.updateObject(localObject.uid, {_value: {uid: newValueUid}}, true, false)
                 }}>Set new UID</Button>
             </div>
-            <MetadataDisplay metadata={metadata} />
-            <ObjectPartEditor
-                localSchema={definition}
-                localObject={localObject[Object.keys(localObject).filter((s: string) => s.startsWith( '_value'))[0]]}
-                schemaMap={schemaMap}
-                setLocalObject={() => {}}
-            />
+            {viewOrEdit === "view" ? <AutoDynamicView object={localObject} /> : <React.Fragment>
+                    <ObjectPartEditor
+                        localSchema={definition}
+                        localObject={localObject[Object.keys(localObject).filter((s: string) => s.startsWith( '_value'))[0]]}
+                        schemaMap={schemaMap}
+                        setLocalObject={() => {}}
+                    />
+                </React.Fragment>}
         </Paper>
     },
 }
