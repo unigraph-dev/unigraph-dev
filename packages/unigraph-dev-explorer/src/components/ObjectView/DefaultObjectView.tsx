@@ -4,11 +4,14 @@ import { Skeleton } from '@material-ui/lab';
 import React, { FC } from 'react';
 import { useDrag, useDrop} from 'react-dnd';
 import ReactJson, { InteractionProps } from 'react-json-view';
+import { useSwipeable } from 'react-swipeable';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { DynamicViewRenderer } from '../../global';
 import { AutoDynamicViewProps } from '../../types/ObjectView';
+import { isMobile } from '../../utils';
 import { ExecutableCodeEditor } from './DefaultCodeEditor';
 import { DefaultObjectContextMenu, onUnigraphContextMenu } from './DefaultObjectContextMenu';
+import {ErrorBoundary} from 'react-error-boundary'
 
 type ObjectViewOptions = {
     viewer?: "string" | "json-tree" | "dynamic-view" | "code-editor" | "dynamic-view-detailed",
@@ -82,15 +85,20 @@ const SubentityDropAcceptor = ({ uid }: any) => {
     const [{ isOver, canDrop }, dropSub] = useDrop(() => ({
         // @ts-expect-error: already checked for namespace map
         accept: Object.keys(window.unigraph.getNamespaceMap() || {}),
-        drop: (item: {uid: string}, monitor) => {
-          window.unigraph.updateObject(uid, {
-              semantic_properties: {
-                  children: [{
-                      type: {"unigraph.id": "$/schema/subentity"},
-                      uid: item.uid
-                  }]
-              }
-          })
+        drop: (item: {uid: string, itemType: string}, monitor) => {
+            if (!monitor.didDrop()) {
+                window.unigraph.updateObject(uid, {
+                    semantic_properties: {
+                        children: [{
+                            type: {"unigraph.id": "$/schema/subentity"},
+                            _value: {
+                                //"type": {"unigraph.id": item.itemType},
+                                uid: item.uid
+                            }
+                        }]
+                    }
+                })
+            }
         },
         collect: (monitor) => ({
             isOver: !!monitor.isOver(),
@@ -125,16 +133,22 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     const [, drop] = useDrop(() => ({
           accept: window.unigraph.getState('referenceables/semantic_children').value,
           drop: (item: {uid: string, itemType: string}, monitor) => {
-            window.unigraph.updateObject(object?.uid, {
-                semantic_properties: {
-                    children: [{
-                        "type": {"unigraph.id": item.itemType},
-                        uid: item.uid
-                    }]
-                }
-            })
+            if (!monitor.didDrop()) {
+                window.unigraph.updateObject(object?.uid, {
+                    semantic_properties: {
+                        children: [{
+                            "type": {"unigraph.id": item.itemType},
+                            uid: item.uid
+                        }]
+                    }
+                })
+            }
           },
     }))
+
+    const handlers = useSwipeable({
+        onSwipedRight: (eventData) => onUnigraphContextMenu(({clientX: eventData.absX, clientY: eventData.absY} as any), object, contextEntity, callbacks),
+      });
 
     const contextEntity = typeof callbacks?.context === "object" ? callbacks.context : null; 
     const [hasContextMenu, setHasContextMenu] = React.useState(false);
@@ -156,7 +170,10 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     } else if (object) {
         el = <StringObjectViewer object={object}/>
     }
-    return el ? <React.Fragment>
+    return el ? <ErrorBoundary  FallbackComponent={({error}) => <div style={{backgroundColor: "floralwhite", borderRadius: "8px"}}>
+        <Typography>Error in AutoDynamicView: </Typography>
+        <p>{JSON.stringify(error, null, 4)}</p>
+    </div>}>
         <div 
             id={"object-view-"+object?.uid} 
             style={{
@@ -164,24 +181,31 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
                 opacity: isDragging ? 0.5 : 1, 
                 display: "inline-flex", alignItems: "center",
                 ...(inline ? {} : {width: "100%"}),
+                ...(isMobile() ? {touchAction: "pan-y"} : {}),
                 ...style
             }} 
             ref={attach} 
             onContextMenu={noContextMenu ? () => {} : (event) => onUnigraphContextMenu(event, object, contextEntity, callbacks)}
             {...(attributes ? attributes : {})}
+            {...(isMobile() ? handlers : {})}
         >
             {el}
         </div>
         {(allowSubentity && !noDrop) ? <SubentityDropAcceptor uid={object?.uid} /> : []}
-    </React.Fragment> : <React.Fragment/>;
+    </ErrorBoundary> : <React.Fragment/>;
 }
 
 export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, callbacks, context }) => {
     const DynamicViewsDetailed = window.unigraph.getState('registry/dynamicViewDetailed').value
     if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViewsDetailed).includes(object.type['unigraph.id'])) {
-        return React.createElement(DynamicViewsDetailed[object.type['unigraph.id']], {
+        return <ErrorBoundary FallbackComponent={(error) => <div>
+            <Typography>Error in detailed AutoDynamicView: </Typography>
+            <p>{JSON.stringify(error, null, 4)}</p>
+        </div>}>
+            {React.createElement(DynamicViewsDetailed[object.type['unigraph.id']], {
             data: object, callbacks, options: options || {}, context
-        });
+        })}
+        </ErrorBoundary>;
     } else {
         return <JsontreeObjectViewer object={object} options={options}/>
     }

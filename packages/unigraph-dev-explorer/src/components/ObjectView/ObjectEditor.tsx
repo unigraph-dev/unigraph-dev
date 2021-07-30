@@ -53,7 +53,7 @@ const TypedObjectPartEditor: any = {
             <Paper variant="outlined" className={classes.editorFrame}>
                 <Typography>Object ID: {localObject.uid}, type: {localObject?.type?.['unigraph.id']} <Menu onClick={(event) => onUnigraphContextMenu(event, localObject, undefined)}/></Typography>
                 <MetadataDisplay metadata={metadata} />
-                {fields.map((key) => <div style={{display: "flex", alignItems: "baseline", paddingTop: "8px"}}>
+                {fields.map((key) => <div style={{paddingTop: "8px"}}>
                     <Typography variant="body1" style={{paddingRight: "8px"}}>{key}:</Typography>
                     <ObjectPartEditor
                         localSchema={(localSchema['_properties']).filter((el: any) => el['_key'] === key)[0]['_definition']}
@@ -73,7 +73,7 @@ const TypedObjectPartEditor: any = {
                                 let deft = undefined;
                                 if (propType.startsWith?.('$/schema') || !Object.keys(defaultNewValues).includes(propType)) deft = defaultNewValues['schemaRef'];
                                 else deft = defaultNewValues[propType];
-                                console.log(schemaMap[propType])
+                                //console.log(schemaMap[propType])
                                 if (propType.startsWith?.('$/schema') && Object.keys(defaultNewValues).includes(schemaMap[propType]?.['_definition']?.type?.['unigraph.id'])) 
                                     deft = defaultNewValues[schemaMap[propType]?.['_definition']?.type?.['unigraph.id']]
                                 setCurrentInputObjValue(deft);
@@ -94,12 +94,12 @@ const TypedObjectPartEditor: any = {
         </React.Fragment>
     },
     "$/composer/Union": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
-        console.log(localObject, localSchema)
+        //console.log(localObject, localSchema)
         if (!localObject['_value']['type']) return "Deleted object";
         const currentUnionType = localObject['_value']['type']['unigraph.id'];
         const classes = useStyles();
         return <Paper variant="outlined" className={classes.editorFrame}>
-            <Typography>Union type - object type: {currentUnionType}</Typography>
+            <Typography>Union type: {localObject['type']['unigraph.id']} - object type: {currentUnionType}</Typography>
             <ObjectPartEditor
                 localSchema={schemaMap[currentUnionType]['_definition']}
                 localObject={localObject[Object.keys(localObject).filter((s: string) => s.startsWith( '_value'))[0]]}
@@ -114,7 +114,7 @@ const TypedObjectPartEditor: any = {
         return <Paper variant="outlined" className={classes.editorFrame}>
             <Typography>Array type</Typography>
             <MetadataDisplay metadata={metadata} />
-            {localObject['_value['].map((el: any) => <div style={{display: "flex", alignItems: "baseline", paddingTop: "8px"}}>
+            {localObject['_value[']?.map((el: any) => <div style={{display: "flex", alignItems: "baseline", paddingTop: "8px"}}>
                 <ObjectPartEditor
                             localSchema={schemaMap[el['_value']['type']['unigraph.id']]['_definition']}
                             localObject={el['_value']} schemaMap={schemaMap}
@@ -162,12 +162,21 @@ const TypedObjectPartEditor: any = {
     "schemaRef": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
         const metadata = getMetadata(localObject);
         if (typeof localSchema !== "string") localSchema = localSchema?.['type']?.['unigraph.id']
+        const [newValueUid, setNewValueUid] = React.useState('');
+        const [showReplacer, setShowReplacer] = React.useState(false);
         
         const classes = useStyles();
         const definition = localSchema === "$/schema/any" ? schemaMap[localObject[Object.keys(localObject).filter((s: string) => s.startsWith( '_value'))[0]]['type']['unigraph.id']]['_definition'] : schemaMap[localSchema]['_definition']
-        console.log(localSchema, localObject, definition)
+        //console.log(localSchema, localObject, definition)
         return <Paper variant="outlined" className={classes.editorFrame}>
-            <Typography>Schema ref: {localSchema}</Typography>
+            <Typography onClick={() => setShowReplacer(!showReplacer)}>Schema ref: {localSchema}, uid: {localObject.uid}</Typography>
+            <div style={{display: showReplacer ? "flex": "none", alignItems: "baseline", paddingTop: "8px"}}>
+                <TextField onChange={(e) => {setNewValueUid(e.target.value)}} value={newValueUid}></TextField>
+                <Button onClick={async () => {
+                    await window.unigraph.deleteRelation(localObject.uid, {_value: null})
+                    window.unigraph.updateObject(localObject.uid, {_value: {uid: newValueUid}}, true, false)
+                }}>Set new UID</Button>
+            </div>
             <MetadataDisplay metadata={metadata} />
             <ObjectPartEditor
                 localSchema={definition}
@@ -224,12 +233,13 @@ export const ObjectEditorSelector = ({currentUid, setCurrentUid, style}: any) =>
 }
 
 const ObjectEditorBody = ({currentObject, setCurrentObject, schemaMap}: any) => {
-    const [currentSchema, setCurrentSchema]: [any, Function] = React.useState(currentObject['type']['_value['][0]['_definition'])
+    const currentSchema = currentObject['type']['_value['][0]['_definition']
 
     return <div style={{display: "flex"}}>
-        <div style={{width: "66%"}}>
+        <div style={{width: "66%", overflow: "auto"}}>
             <ObjectPartEditor localSchema={currentSchema} localObject={currentObject} setLocalObject={setCurrentObject} schemaMap={schemaMap} />
         </div>
+        <Divider orientation={"vertical"}/>
         <div style={{width: "34%"}}>
             <Typography>Backlinks</Typography>
             <BacklinkView data={currentObject} hideHeader/>

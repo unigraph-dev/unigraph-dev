@@ -45,7 +45,7 @@ export const Html: DynamicViewRenderer = ({data, context, callbacks}) => {
         }
     })
     React.useEffect(() => {
-        console.log(userStyle.current)
+        //console.log(userStyle.current)
         // @ts-expect-error: already checked for nullity
         if (userStyle.current) (userStyle.current as HTMLElement).innerHTML = makeCSS(style)
     }, [style])

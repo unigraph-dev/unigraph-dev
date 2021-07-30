@@ -96,6 +96,7 @@ const pages: Record<string, any> = {
     },
     'object-editor': {
       'constructor': (props: any) => <ObjectEditor {...props} />,
+      'maximize': true,
       'name': 'Object Editor'
     },
     'code-editor': {

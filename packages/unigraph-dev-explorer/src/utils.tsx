@@ -158,6 +158,12 @@ export const isElectron = () => {
     return (userAgent.indexOf(' electron/') > -1 && window.electronShell);
 }
 
+export const isMobile = () => {
+    return (('ontouchstart' in window) ||
+     (navigator.maxTouchPoints > 0) ||
+     (navigator.msMaxTouchPoints > 0));
+}
+
 export const openUrl = (url: string) => {
     if (isElectron()) {
         window.electronShell.openExternal(url);

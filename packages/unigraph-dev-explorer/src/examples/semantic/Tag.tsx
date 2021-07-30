@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Chip } from "@material-ui/core";
 import { LocalOffer } from '@material-ui/icons';
 import { getContrast, NavigationContext } from '../../utils';
@@ -8,8 +8,9 @@ import { registerDynamicViews } from 'unigraph-dev-common/lib/api/unigraph-react
 import { AutoDynamicView } from '../../components/ObjectView/DefaultObjectView';
 
 export const Tag: DynamicViewRenderer = ({data, callbacks}) => {
-    if (data['_value']) data = unpad(data);
-    const tag = data;
+    let tag = data;
+    let uid = data.uid
+    if (data['_value']) tag = unpad(data);
     const bgc = (tag?.color?.startsWith && tag.color.startsWith('#')) ? tag.color : "unset";
     return <NavigationContext.Consumer>
         {(navigator) => <Chip
@@ -22,14 +23,15 @@ export const Tag: DynamicViewRenderer = ({data, callbacks}) => {
             variant={"outlined"}
             label={tag.name}
             onClick={() => {
-                navigator(`/library/object?uid=${tag.uid}`)
+                //console.log(data)
+                navigator(`/library/object?uid=${uid}`)
             }}
         />}
     </NavigationContext.Consumer>
 }
 
 export const SemanticProperties = ({data}: any) => {
-    console.log(data);
+    //console.log(data);
 
     return (data?.['_value']?.['children']?.['_value[']) ? (data?.['_value']?.['children']?.['_value['].map((el: any) => {
         return <AutoDynamicView object={unpad(el['_value'])} />

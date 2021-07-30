@@ -56,7 +56,7 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
                 }
             }, "$/schema/note_block", (window.unigraph as any).getSchemaMap());
             (splittedEntity as any)['_hide'] = true;
-            console.log(splittedEntity)
+            //console.log(splittedEntity)
             let newel = {
                 '_index': {'_value.#i': elindex},
                 '_value': {
@@ -71,7 +71,7 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
                     }
                 }
             }
-            console.log(el)
+            //console.log(el)
             el['_index']['_value.#i'] = elindex + 1;
             el['_value']['_hide'] = true; el['_value']['_value']['_hide'] = true; el['_value']['_value']['_value']['_hide'] = true;
             el['_value']['_value']['_value']['_value']['text']['_value']['_value']['_value.%'] = el['_value']['_value']['_value']['_value']['text']?.['_value']?.['_value']['_value.%'].slice(at);
@@ -94,7 +94,7 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
             else return [...prev, {uid: el.uid}]
         };
     }, [])
-    console.log(newChildren)
+    //console.log(newChildren)
     window.unigraph.updateObject(data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.uid, {'children': {'_value[': newChildren}}, false, false, context.callbacks.subsId);
     context.setEdited(true);
     context.setCommand(() => setFocus.bind(this, data, context, index + 1))
@@ -177,7 +177,7 @@ export const indentChild = (data: any, context: NoteEditorContext, index: number
         }
       })
     const finalChildren = newChildren.filter((el: any) => el !== undefined);
-    console.log(finalChildren)
+    //console.log(finalChildren)
     window.unigraph.updateObject(data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.uid, {'children': {'_value[': finalChildren}}, false, false, context.callbacks.subsId);
     context.setEdited(true);
     
@@ -186,7 +186,7 @@ export const indentChild = (data: any, context: NoteEditorContext, index: number
 }
 
 export const unindentChild = async (data: any, context: NoteEditorContext, parent: number, index: number) => {
-    console.log(parent, index)
+    //console.log(parent, index)
     let currSubentity = -1;
     let isCompleted = false;
     const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
@@ -235,7 +235,7 @@ export const unindentChild = async (data: any, context: NoteEditorContext, paren
             else return [...prev, {uid: curr.uid}]
         };
     }, [])
-    console.log(newChildren);
+    //console.log(newChildren);
     await window.unigraph.updateObject(data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.uid, {'children': {'_value[': newChildren}}, false, false, context.callbacks.subsId);
     window.unigraph.deleteItemFromArray(delUidPar, delUidChild)
     context.setEdited(true);
@@ -255,7 +255,7 @@ export const focusNextDFSNode = (data: any, context: NoteEditorContext, _: numbe
 }
 
 export const convertChildToTodo = async (data: any, context: NoteEditorContext, index: number) => {
-    console.log(index);
+    //console.log(index);
     let currSubentity = -1;
     const stubConverted = {uid: ""}
     let textIt = "";
@@ -283,7 +283,7 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
             return [...prev, {uid: el.uid}]
         };
     }, []);
-    console.log(textIt, newChildren, )
+    //console.log(textIt, newChildren, )
     const newUid = await window.unigraph.addObject(parseTodoObject(textIt), "$/schema/todo")
     stubConverted.uid = newUid[0];
     await window.unigraph.updateObject(data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.uid, {'children': {'_value[': newChildren}}, false, false, context.callbacks.subsId);
