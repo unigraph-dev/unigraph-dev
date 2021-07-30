@@ -130,7 +130,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
     }, [data, isEditing])
 
     React.useEffect(() => {
-        if (isEditing && textInput.current?.textContent === "" && data.get('text').as('primitive')) {console.log(textref, textInput.current.textContent); textInput.current.textContent = textref.current}
+        if (isEditing && textInput.current?.textContent === "" && data.get('text').as('primitive')) {textInput.current.textContent = textref.current}
     }, [isEditing])
 
     React.useEffect(() => {
@@ -175,9 +175,9 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
                             window.unigraph.getState('global/searchPopup').setValue({show: true, search: match[1], anchorEl: boxRef.current,
                                 onSelected: async (newName: string, newUid: string) => {
                                     const newStr = newContent?.slice?.(0, match.index) + '[[' + newName + ']]' + newContent?.slice?.(match.index+match[0].length);
-                                    console.log(newName, newUid, newStr, newContent);
+                                    //console.log(newName, newUid, newStr, newContent);
                                     // This is an ADDITION operation
-                                    console.log(data);
+                                    //console.log(data);
                                     const semChildren = data?.['_value']?.['semantic_properties']?.['_value']?.['_value'];
                                     await window.unigraph.updateObject(data.uid, {
                                         '_value': {
@@ -214,7 +214,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
                                         const newUid = await window.unigraph.addObject({
                                             'text': {_value: search, type: {'unigraph.id': "$/schema/markdown"}}
                                         }, '$/schema/note_block');
-                                        console.log(newUid);
+                                        //console.log(newUid);
                                         return newUid[0];
                                     }
                                 }, {
@@ -264,7 +264,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
                             break;
 
                         case 'Backspace':
-                            console.log(caret, document.getSelection()?.type)
+                            //console.log(caret, document.getSelection()?.type)
                             if (caret === 0 && document.getSelection()?.type === "Caret") {
                                 ev.preventDefault();
                                 inputDebounced.flush();
@@ -286,17 +286,17 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
 
                         case 'BracketLeft':
                             ev.preventDefault();
-                            console.log(document.getSelection())
+                            //console.log(document.getSelection())
                             let middle = document.getSelection()?.toString() || "";
                             let end = "";
                             if (middle.endsWith(' ')) {middle = middle.slice(0, middle.length-1); end = " ";}
                             document.execCommand('insertText', false, '['+middle+']'+end);
-                            console.log(caret, document.getSelection(), middle)
+                            //console.log(caret, document.getSelection(), middle)
                             setCaret(document, textInput.current.firstChild, caret+1, middle.length)
                             break;
                     
                         default:
-                            console.log(ev);
+                            //console.log(ev);
                             break;
                     }
                 }}

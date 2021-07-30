@@ -23,7 +23,7 @@ export const Tag: DynamicViewRenderer = ({data, callbacks}) => {
             variant={"outlined"}
             label={tag.name}
             onClick={() => {
-                console.log(data)
+                //console.log(data)
                 navigator(`/library/object?uid=${uid}`)
             }}
         />}
@@ -31,7 +31,7 @@ export const Tag: DynamicViewRenderer = ({data, callbacks}) => {
 }
 
 export const SemanticProperties = ({data}: any) => {
-    console.log(data);
+    //console.log(data);
 
     return (data?.['_value']?.['children']?.['_value[']) ? (data?.['_value']?.['children']?.['_value['].map((el: any) => {
         return <AutoDynamicView object={unpad(el['_value'])} />

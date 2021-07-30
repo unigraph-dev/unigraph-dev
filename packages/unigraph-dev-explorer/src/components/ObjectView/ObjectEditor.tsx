@@ -73,7 +73,7 @@ const TypedObjectPartEditor: any = {
                                 let deft = undefined;
                                 if (propType.startsWith?.('$/schema') || !Object.keys(defaultNewValues).includes(propType)) deft = defaultNewValues['schemaRef'];
                                 else deft = defaultNewValues[propType];
-                                console.log(schemaMap[propType])
+                                //console.log(schemaMap[propType])
                                 if (propType.startsWith?.('$/schema') && Object.keys(defaultNewValues).includes(schemaMap[propType]?.['_definition']?.type?.['unigraph.id'])) 
                                     deft = defaultNewValues[schemaMap[propType]?.['_definition']?.type?.['unigraph.id']]
                                 setCurrentInputObjValue(deft);
@@ -94,7 +94,7 @@ const TypedObjectPartEditor: any = {
         </React.Fragment>
     },
     "$/composer/Union": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
-        console.log(localObject, localSchema)
+        //console.log(localObject, localSchema)
         if (!localObject['_value']['type']) return "Deleted object";
         const currentUnionType = localObject['_value']['type']['unigraph.id'];
         const classes = useStyles();
@@ -167,7 +167,7 @@ const TypedObjectPartEditor: any = {
         
         const classes = useStyles();
         const definition = localSchema === "$/schema/any" ? schemaMap[localObject[Object.keys(localObject).filter((s: string) => s.startsWith( '_value'))[0]]['type']['unigraph.id']]['_definition'] : schemaMap[localSchema]['_definition']
-        console.log(localSchema, localObject, definition)
+        //console.log(localSchema, localObject, definition)
         return <Paper variant="outlined" className={classes.editorFrame}>
             <Typography onClick={() => setShowReplacer(!showReplacer)}>Schema ref: {localSchema}, uid: {localObject.uid}</Typography>
             <div style={{display: showReplacer ? "flex": "none", alignItems: "baseline", paddingTop: "8px"}}>
