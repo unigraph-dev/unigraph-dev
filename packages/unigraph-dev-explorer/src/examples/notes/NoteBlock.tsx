@@ -9,6 +9,7 @@ import { buildGraph } from "unigraph-dev-common/lib/api/unigraph";
 import { Actions } from "flexlayout-react";
 import { addChild, convertChildToTodo, focusLastDFSNode, focusNextDFSNode, focusUid, getSemanticChildren, indentChild, setCaret, setFocus, splitChild, unindentChild, unsplitChild } from "./commands";
 import { onUnigraphContextMenu } from "../../components/ObjectView/DefaultObjectContextMenu";
+import { FiberManualRecord } from "@material-ui/icons";
 
 export const getSubentities = (data: any) => {
     let subentities: any, otherChildren: any;
@@ -67,7 +68,18 @@ export const PlaceholderNoteBlock = ({ callbacks }: any) => {
     </div>
 }
 
-export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) => {
+export const OutlineComponent = ({children, collapsed, setCollapsed, isChildren}: any) => {
+    return <div style={{flex: "0 0 auto", display: "flex", alignItems: "baseline", position: "relative"}}>
+        <div style={{position: "absolute", left: "-4px"}} className="showOnHover" onClick={() => setCollapsed(!collapsed)}>O</div>
+        <div style={{height: "100%", width: "1px", backgroundColor: "gray", position: "absolute", left: "-12px", display: isChildren ? "" : "none"}}></div>
+        <FiberManualRecord style={{fontSize: "0.5rem", marginLeft: "8px", marginRight: "8px", ...(collapsed ? {borderRadius: "4px", color: "lightgray", backgroundColor: "black"} : {})}}/>
+        <div style={{flexGrow: 1}}>
+            {children}
+        </div>
+    </div>
+}
+
+export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isCollapsed}: any) => {
     const [subentities, otherChildren] = getSubentities(data);
     const [command, setCommand] = React.useState<() => any | undefined>();
     const inputter = (text: string) => {
@@ -102,6 +114,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
         setEdited, setCommand, childrenref, callbacks, nodesState
     }
     
+    const [isChildrenCollapsed, setIsChildrenCollapsed] = React.useState<any>({});
 
     React.useEffect(() => {
         const newNodes = _.unionBy([{uid: data.uid, children: subentities.map((el: any) => el.uid), root: !isChildren}], nodesState.value, 'uid');
@@ -297,24 +310,31 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options}: any) =
                 }}}
             />}
         </div>
+        {!isChildren ? <div style={{height: "12px"}}/>: []}
         {buildGraph(otherChildren).filter((el: any) => el.type).map((el: any) => <AutoDynamicView object={el}/>)}
-        <ul ref={childrenref} style={{listStyle: "disc"}}>
-            {(subentities.length || isChildren) ? buildGraph(subentities).map((el: any, elindex) => <li key={el.uid}>
-                <AutoDynamicView 
-                    object={el} 
-                    callbacks={{
-                        "get-view-id": () => options?.viewId, // only used at root
-                        ...callbacks,
-                        ...Object.fromEntries(Object.entries(noteBlockCommands).map(([k, v]: any) => [k, (...args: any[]) => v(dataref.current, editorContext, elindex, ...args)])), 
-                        "unindent-child-in-parent": () => {callbacks['unindent-child'](elindex)},
-                        "focus-last-dfs-node": focusLastDFSNode,
-                        "focus-next-dfs-node": focusNextDFSNode,
-                    }} 
-                    component={{"$/schema/note_block": DetailedNoteBlock, "$/schema/view": ViewViewDetailed}} attributes={{isChildren: true}} allowSubentity
-                    style={el.type?.['unigraph.id'] === "$/schema/note_block" ? {} : { border: "lightgray", borderStyle: "solid", borderWidth: 'thin', margin: "4px", borderRadius: "8px", width: "calc(100% - 8px)" }}
-                />
-            </li>) : <li><PlaceholderNoteBlock callbacks={{"add-child": () => noteBlockCommands['add-child'](dataref.current, editorContext)}}/></li>}
-        </ul>
+        {!(isCollapsed === true) ? <div ref={childrenref} style={{width: "100%"}} >
+            {(subentities.length || isChildren) ? buildGraph(subentities).map((el: any, elindex) => {
+                const isCol = isChildrenCollapsed[el.uid];
+                return <OutlineComponent key={el.uid} isChildren={isChildren} collapsed={isCol} setCollapsed={(val: boolean) => setIsChildrenCollapsed({...isChildrenCollapsed, [el.uid]: val})}>
+                    <AutoDynamicView 
+                        object={el}
+                        callbacks={{
+                            "get-view-id": () => options?.viewId, // only used at root
+                            ...callbacks,
+                            ...Object.fromEntries(Object.entries(noteBlockCommands).map(([k, v]: any) => [k, (...args: any[]) => v(dataref.current, editorContext, elindex, ...args)])), 
+                            "unindent-child-in-parent": () => {callbacks['unindent-child'](elindex)},
+                            "focus-last-dfs-node": focusLastDFSNode,
+                            "focus-next-dfs-node": focusNextDFSNode,
+                        }} 
+                        component={{"$/schema/note_block": DetailedNoteBlock, "$/schema/view": ViewViewDetailed}} attributes={{isChildren: true, isCollapsed: isCol}} allowSubentity
+                        style={el.type?.['unigraph.id'] === "$/schema/note_block" ? {} : 
+                            { border: "lightgray", borderStyle: "solid", borderWidth: 'thin', margin: "4px", borderRadius: "8px", minWidth: "calc(100% - 8px)" }}
+                    />
+                </OutlineComponent>
+            }) : <OutlineComponent isChildren={isChildren}>
+                <PlaceholderNoteBlock callbacks={{"add-child": () => noteBlockCommands['add-child'](dataref.current, editorContext)}}/>
+            </OutlineComponent>}
+        </div>: []}
     </div>
 }
 

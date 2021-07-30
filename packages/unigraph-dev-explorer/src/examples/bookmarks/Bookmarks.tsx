@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { pkg as bookmarkPackage } from 'unigraph-dev-common/lib/data/unigraph.bookmark.pkg';
 
 import { DynamicViewRenderer } from "../../global";
-import { List, ListItem, TextField, Button, IconButton, ListItemSecondaryAction, ListItemText, ListItemIcon, Avatar } from "@material-ui/core";
+import { List, ListItem, TextField, Button, IconButton, ListItemSecondaryAction, ListItemText, ListItemIcon, Avatar, Typography } from "@material-ui/core";
 import { Delete, Description, Link, Public } from "@material-ui/icons";
 import { registerDynamicViews, withUnigraphSubscription } from 'unigraph-dev-common/lib/api/unigraph-react'
 import { Tag } from "../semantic/Tag";
@@ -77,9 +77,9 @@ export const BookmarkItem: DynamicViewRenderer = ({data, callbacks}) => {
 
     return <React.Fragment>
         <ListItemIcon><Avatar alt={"favicon of "+unpadded.name} src={unpadded.favicon}><Public/></Avatar></ListItemIcon>
-        <ListItemText 
-            primary={unpadded.name}
-            secondary={<div style={{display: "flex", alignContent: "center"}}>
+        <ListItemText>
+            <Typography>{data.get('name').as('primitive')}</Typography>
+            <div style={{display: "inline-flex", alignContent: "center", overflowWrap: "break-word", color: "gray"}}>
                 <Link onClick={() => {
                     openUrl(unpadded.url)
                 }}/>
@@ -91,8 +91,8 @@ export const BookmarkItem: DynamicViewRenderer = ({data, callbacks}) => {
                 {!unpadded.semantic_properties?.children?.map ? [] :
                 unpadded.semantic_properties?.children?.map(it => <Tag data={it}/>)}
                 {typeof unpadded.creative_work?.abstract === "string" ? unpadded.creative_work?.abstract : []}
-            </div>}
-        />
+            </div>
+        </ListItemText>
     </React.Fragment>
 }
 

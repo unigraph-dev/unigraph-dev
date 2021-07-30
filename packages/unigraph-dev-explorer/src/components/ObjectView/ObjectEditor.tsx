@@ -53,7 +53,7 @@ const TypedObjectPartEditor: any = {
             <Paper variant="outlined" className={classes.editorFrame}>
                 <Typography>Object ID: {localObject.uid}, type: {localObject?.type?.['unigraph.id']} <Menu onClick={(event) => onUnigraphContextMenu(event, localObject, undefined)}/></Typography>
                 <MetadataDisplay metadata={metadata} />
-                {fields.map((key) => <div style={{display: "flex", alignItems: "baseline", paddingTop: "8px"}}>
+                {fields.map((key) => <div style={{paddingTop: "8px"}}>
                     <Typography variant="body1" style={{paddingRight: "8px"}}>{key}:</Typography>
                     <ObjectPartEditor
                         localSchema={(localSchema['_properties']).filter((el: any) => el['_key'] === key)[0]['_definition']}
@@ -99,7 +99,7 @@ const TypedObjectPartEditor: any = {
         const currentUnionType = localObject['_value']['type']['unigraph.id'];
         const classes = useStyles();
         return <Paper variant="outlined" className={classes.editorFrame}>
-            <Typography>Union type - object type: {currentUnionType}</Typography>
+            <Typography>Union type: {localObject['type']['unigraph.id']} - object type: {currentUnionType}</Typography>
             <ObjectPartEditor
                 localSchema={schemaMap[currentUnionType]['_definition']}
                 localObject={localObject[Object.keys(localObject).filter((s: string) => s.startsWith( '_value'))[0]]}
@@ -233,12 +233,13 @@ export const ObjectEditorSelector = ({currentUid, setCurrentUid, style}: any) =>
 }
 
 const ObjectEditorBody = ({currentObject, setCurrentObject, schemaMap}: any) => {
-    const [currentSchema, setCurrentSchema]: [any, Function] = React.useState(currentObject['type']['_value['][0]['_definition'])
+    const currentSchema = currentObject['type']['_value['][0]['_definition']
 
     return <div style={{display: "flex"}}>
         <div style={{width: "66%", overflow: "auto"}}>
             <ObjectPartEditor localSchema={currentSchema} localObject={currentObject} setLocalObject={setCurrentObject} schemaMap={schemaMap} />
         </div>
+        <Divider orientation={"vertical"}/>
         <div style={{width: "34%"}}>
             <Typography>Backlinks</Typography>
             <BacklinkView data={currentObject} hideHeader/>

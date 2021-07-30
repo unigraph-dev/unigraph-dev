@@ -11,6 +11,7 @@ import { AutoDynamicViewProps } from '../../types/ObjectView';
 import { isMobile } from '../../utils';
 import { ExecutableCodeEditor } from './DefaultCodeEditor';
 import { DefaultObjectContextMenu, onUnigraphContextMenu } from './DefaultObjectContextMenu';
+import {ErrorBoundary} from 'react-error-boundary'
 
 type ObjectViewOptions = {
     viewer?: "string" | "json-tree" | "dynamic-view" | "code-editor" | "dynamic-view-detailed",
@@ -169,7 +170,10 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     } else if (object) {
         el = <StringObjectViewer object={object}/>
     }
-    return el ? <React.Fragment>
+    return el ? <ErrorBoundary  FallbackComponent={({error}) => <div style={{backgroundColor: "floralwhite", borderRadius: "8px"}}>
+        <Typography>Error in AutoDynamicView: </Typography>
+        <p>{JSON.stringify(error, null, 4)}</p>
+    </div>}>
         <div 
             id={"object-view-"+object?.uid} 
             style={{
@@ -188,15 +192,20 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
             {el}
         </div>
         {(allowSubentity && !noDrop) ? <SubentityDropAcceptor uid={object?.uid} /> : []}
-    </React.Fragment> : <React.Fragment/>;
+    </ErrorBoundary> : <React.Fragment/>;
 }
 
 export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, callbacks, context }) => {
     const DynamicViewsDetailed = window.unigraph.getState('registry/dynamicViewDetailed').value
     if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViewsDetailed).includes(object.type['unigraph.id'])) {
-        return React.createElement(DynamicViewsDetailed[object.type['unigraph.id']], {
+        return <ErrorBoundary FallbackComponent={(error) => <div>
+            <Typography>Error in detailed AutoDynamicView: </Typography>
+            <p>{JSON.stringify(error, null, 4)}</p>
+        </div>}>
+            {React.createElement(DynamicViewsDetailed[object.type['unigraph.id']], {
             data: object, callbacks, options: options || {}, context
-        });
+        })}
+        </ErrorBoundary>;
     } else {
         return <JsontreeObjectViewer object={object} options={options}/>
     }
