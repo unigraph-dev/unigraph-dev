@@ -2,7 +2,7 @@ import Settings from './pages/Settings';
 import { Inbox } from './components/UnigraphInbox/Inbox';
 import { Bookmarks } from './examples/bookmarks/Bookmarks';
 import { GraphView } from "./components/ObjectView/GraphView";
-import { ObjectEditor } from "./components/ObjectView/ObjectEditor";
+import { ObjectEditor } from "./components/ObjectEditor/ObjectEditor";
 import { AppLibrary } from "./components/PackageManager/AppLibrary";
 import { PackageManager } from "./components/PackageManager/PackageManager";
 import { CodeEditor } from "./components/UnigraphCore/CodeEditor";
