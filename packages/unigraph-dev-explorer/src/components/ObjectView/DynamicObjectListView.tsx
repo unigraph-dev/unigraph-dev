@@ -144,13 +144,13 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ite
             backgroundPosition: "center", 
             height: "100%"
         }} ref={drop}>
-            <div style={{display: "flex"}}><Accordion expanded={optionsOpen} onChange={() => setOptionsOpen(!optionsOpen)} variant={"outlined"} style={{flexGrow: 1}}> 
+            <div style={{display: "flex"}}><Accordion expanded={optionsOpen} onChange={() => setOptionsOpen(!optionsOpen)} variant={"outlined"} style={{flexGrow: 1, minWidth: 0}}> 
             <AccordionSummary  
             expandIcon={<ExpandMore />}
             aria-controls="panel1bh-content"
             id="panel1bh-header"
             >
-            <Typography style={{flexBasis: '33.33%', flexShrink: 0}}>View options</Typography>
+            <Typography style={{flexBasis: '50%', flexShrink: 0}}>View options</Typography>
             <Typography>{procItems.length} items</Typography>
             </AccordionSummary>
             <AccordionDetails>

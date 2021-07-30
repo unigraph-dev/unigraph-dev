@@ -55,8 +55,8 @@ export const DefaultObjectContextMenu = ({uid, object, anchorEl, handleClose}:
 }
 
 export const onUnigraphContextMenu = (event: React.MouseEvent, object: UnigraphObject | any, context?: UnigraphObject | any, callbacks?: AutoDynamicViewCallbacks) => {
-    event.preventDefault();
-    event.stopPropagation();
+    event.preventDefault?.();
+    event.stopPropagation?.();
     window.unigraph.getState('global/contextMenu').setValue({
         anchorPosition: {top: event.clientY, left: event.clientX},
         menuContent: defaultContextMenu,

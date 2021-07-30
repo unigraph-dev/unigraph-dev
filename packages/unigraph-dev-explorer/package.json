@@ -33,6 +33,7 @@
     "react-scripts": "^4.0.3",
     "react-sizeme": "^3.0.1",
     "react-splitter-layout": "^4.0.0",
+    "react-swipeable": "^6.1.2",
     "react-use": "^15.3.4",
     "rehype-katex": "^5.0.0",
     "remark-breaks": "^2.0.2",
