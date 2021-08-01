@@ -68,9 +68,10 @@ export const PlaceholderNoteBlock = ({ callbacks }: any) => {
     </div>
 }
 
-export const OutlineComponent = ({children, collapsed, setCollapsed, isChildren}: any) => {
+export const OutlineComponent = ({children, collapsed, setCollapsed, isChildren, createBelow}: any) => {
     return <div style={{flex: "0 0 auto", display: "flex", alignItems: "baseline", position: "relative"}}>
         <div style={{position: "absolute", left: "-4px"}} className="showOnHover" onClick={() => setCollapsed(!collapsed)}>O</div>
+        <div style={{position: "absolute", left: "-4px", top: "8px"}} className="showOnHover" onClick={() => createBelow()}>V</div>
         <div style={{height: "100%", width: "1px", backgroundColor: "gray", position: "absolute", left: "-12px", display: isChildren ? "" : "none"}}></div>
         <FiberManualRecord style={{fontSize: "0.5rem", marginLeft: "8px", marginRight: "8px", ...(collapsed ? {borderRadius: "4px", color: "lightgray", backgroundColor: "black"} : {})}}/>
         <div style={{flexGrow: 1}}>
@@ -315,7 +316,9 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
         {!(isCollapsed === true) ? <div ref={childrenref} style={{width: "100%"}} >
             {(subentities.length || isChildren) ? buildGraph(subentities).map((el: any, elindex) => {
                 const isCol = isChildrenCollapsed[el.uid];
-                return <OutlineComponent key={el.uid} isChildren={isChildren} collapsed={isCol} setCollapsed={(val: boolean) => setIsChildrenCollapsed({...isChildrenCollapsed, [el.uid]: val})}>
+                return <OutlineComponent key={el.uid} isChildren={isChildren} collapsed={isCol} setCollapsed={(val: boolean) => setIsChildrenCollapsed({...isChildrenCollapsed, [el.uid]: val})}
+                    createBelow={() => {addChild(dataref.current, editorContext)}}
+                >
                     <AutoDynamicView 
                         object={el}
                         callbacks={{

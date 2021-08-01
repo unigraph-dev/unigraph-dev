@@ -224,7 +224,7 @@ declare type EventRunExecutable = {
   type: "event",
   event: "run_executable",
   id: number,
-  "unigraph.id": string,
+  "uid": string,
   params: any,
 }
 

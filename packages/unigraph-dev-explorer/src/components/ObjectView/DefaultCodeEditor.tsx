@@ -38,7 +38,7 @@ export const ExecutableCodeEditor = ({data, options}: any) => {
     }
 
     useEffectOnce(() => {
-        if (options?.viewId) { window.layoutModel.doAction(Actions.renameTab(options.viewId, `Code: ${unpadded['unigraph.id'].split('/').slice(-1).join('')}`)) }
+        if (options?.viewId) { window.layoutModel.doAction(Actions.renameTab(options.viewId, `Code: ${unpadded['unigraph.id']?.split('/').slice(-1).join('') || data.uid}`)) }
     })    
 
     return <div style={{width: "100%", display: "flex", flexDirection: "column", height: "calc(100vh - 75px)"}}>

@@ -343,13 +343,13 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
             const id = getRandomInt();
             sendEvent(connection, "import_objects", {objects: objects}, id);
         }),
-        runExecutable: (unigraphid, params?) => new Promise((resolve, reject) => {
+        runExecutable: (uid, params?) => new Promise((resolve, reject) => {
             const id = getRandomInt();
             callbacks[id] = (response: any) => {
                 if (response.success) resolve(response.returns ? response.returns : {});
                 else reject(response);
             };
-            sendEvent(connection, "run_executable", {"unigraph.id": unigraphid, params: params ? params : {}}, id);
+            sendEvent(connection, "run_executable", {"uid": uid, params: params ? params : {}}, id);
         }),
         getNamespaceMapUid: (name) => {throw Error("Not implemented")},
         getNamespaceMap: () => caches.namespaceMap,

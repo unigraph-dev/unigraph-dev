@@ -249,7 +249,7 @@ export const ObjectEditorSelector = ({currentUid, setCurrentUid, style}: any) =>
 }
 
 const ObjectEditorBody = ({currentObject, setCurrentObject, schemaMap}: any) => {
-    const currentSchema = currentObject['type']['_value['][0]['_definition']
+    const currentSchema = currentObject['type']['_value[']?.[0]?.['_definition'] || schemaMap[currentObject['type']['unigraph.id']]['_definition']
 
     return <div style={{display: "flex"}}>
         <div style={{width: "66%", overflow: "auto"}}>
