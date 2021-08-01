@@ -1,6 +1,6 @@
 import { buildGraph, getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
 import { Unigraph } from "unigraph-dev-common/lib/types/unigraph";
-import { processAutorefUnigraphId, makeQueryFragmentFromType, clearEmpties, buildUnigraphEntity, processAutoref, getUpsertFromUpdater, flatten, unflatten } from "unigraph-dev-common/lib/utils/entityUtils";
+import { processAutorefUnigraphId, makeQueryFragmentFromType, clearEmpties, buildUnigraphEntity, processAutoref, getUpsertFromUpdater, flatten, unflatten, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { UnigraphUpsert } from "./custom";
 import DgraphClient, { queries } from "./dgraphClient";
 import { buildExecutable } from "./executableManager";
@@ -221,8 +221,8 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         proxyFetch: async (url, options?) => {return new Blob([])},
         // latertodo
         importObjects: async (objects) => {return Error('Not implemented')},
-        runExecutable: async (unigraphid, params) => {
-            const exec = states.caches["executables"].data[unigraphid];
+        runExecutable: async (uid, params) => {
+            const exec = uid.startsWith("0x") ? unpad((await client.queryUID(uid))[0]) : states.caches["executables"].data[uid];
             const ret = await buildExecutable(exec, {"params": params, "definition": exec}, states.localApi)();
             return ret;
         },

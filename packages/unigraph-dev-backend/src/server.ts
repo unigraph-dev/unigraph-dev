@@ -403,8 +403,7 @@ export default async function startServer(client: DgraphClient) {
     },
 
     "run_executable": async function (event: EventRunExecutable, ws: IWebsocket) {
-      const exec = serverStates.caches["executables"].data[event['unigraph.id']];
-      buildExecutable(exec, {"hello": "ranfromExecutable", params: event.params, definition: exec, send: (st: string) => {ws.send(st)}}, localApi)()
+      localApi.runExecutable(event.uid, event.params)
         .then((ret: any) => ws.send(makeResponse(event, true, {returns: ret})));
     },
 

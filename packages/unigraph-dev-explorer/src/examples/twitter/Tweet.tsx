@@ -8,7 +8,6 @@ import { openUrl } from "../../utils";
 
 export const Tweet: DynamicViewRenderer = ({data, callbacks}) => {
   const twid = data.get('from_user/twitter_id').as('primitive');
-  console.log(twid)
   const nslnk = externalNamespaces.filter(el => el.participants.includes(twid))[0]?.createLink;
   
 

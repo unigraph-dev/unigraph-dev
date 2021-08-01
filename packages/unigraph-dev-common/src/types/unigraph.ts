@@ -239,11 +239,11 @@ export interface Unigraph<TT = WebSocket | false> {
     /**
      * Runs an executable with the given global ID and parameters.
      * 
-     * @param unigraphid The global executable id of the form `$/package/xxx/xxx/executable/abc`.
+     * @param id The global executable id of the form `$/package/xxx/xxx/executable/abc`, or simply a database-wide UID.
      * You can use the global function `getExecutableId` to find it.
      * @param params The parameters defined for that executable.
      */
-    runExecutable<T>(unigraphid: string, params: T): Promise<any>;
+    runExecutable<T>(uid: string, params: T): Promise<any>;
     /**
      * Adds a notification to the global notification list.
      * 
