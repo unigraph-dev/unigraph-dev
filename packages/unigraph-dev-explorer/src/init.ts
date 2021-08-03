@@ -2,7 +2,7 @@ import { unigraph } from "unigraph-dev-common";
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { isJsonString } from "unigraph-dev-common/lib/utils/utils";
 import { ExecutableCodeEditor } from "./components/ObjectView/DefaultCodeEditor";
-import { DefaultSkeleton, Executable, ViewViewDetailed } from "./components/ObjectView/DefaultObjectView";
+import { CodeOrComponentView, DefaultSkeleton, Executable, ViewViewDetailed } from "./components/ObjectView/DefaultObjectView";
 import { ANotification, Notification as CNotification } from "./components/UnigraphCore/Notification";
 import { UserSettings } from "./global";
 
@@ -93,7 +93,7 @@ function initRegistry() {
         "$/schema/notification": CNotification
     });
     window.unigraph.addState('registry/dynamicViewDetailed', {
-        "$/schema/executable": ExecutableCodeEditor,
+        "$/schema/executable": CodeOrComponentView,
         "$/schema/view": ViewViewDetailed
     });
     window.unigraph.addState('registry/pages', {});

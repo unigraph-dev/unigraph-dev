@@ -12,6 +12,7 @@ import { isMobile } from '../../utils';
 import { ExecutableCodeEditor } from './DefaultCodeEditor';
 import { DefaultObjectContextMenu, onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import {ErrorBoundary} from 'react-error-boundary'
+import { DynamicComponentView } from './DynamicComponentView';
 
 type ObjectViewOptions = {
     viewer?: "string" | "json-tree" | "dynamic-view" | "code-editor" | "dynamic-view-detailed",
@@ -79,6 +80,14 @@ export const Executable: DynamicViewRenderer = ({data, callbacks}) => {
         <ListItemIcon style={{paddingLeft: "8px"}} onClick={() => {window.unigraph.runExecutable(unpadded['unigraph.id'] || data.uid, {})}}><PlayArrow/></ListItemIcon>
         <ListItemText primary={"Run code: " + unpadded.name} secondary={`Environment: ${unpadded.env}`} />
     </React.Fragment>
+}
+
+export const CodeOrComponentView = (props: any) => {
+    if (props.data.get('env').as('primitive') === "component/react-jsx") {
+        return <DynamicComponentView {...props} />
+    } else {
+        return <ExecutableCodeEditor {...props} />
+    }
 }
 
 const SubentityDropAcceptor = ({ uid }: any) => {
@@ -195,8 +204,8 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     </ErrorBoundary> : <React.Fragment/>;
 }
 
-export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, callbacks, context }) => {
-    const DynamicViewsDetailed = window.unigraph.getState('registry/dynamicViewDetailed').value
+export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, callbacks, context, component }) => {
+    const DynamicViewsDetailed = {...window.unigraph.getState('registry/dynamicViewDetailed').value, ...(component || {})}
     if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViewsDetailed).includes(object.type['unigraph.id'])) {
         return <ErrorBoundary FallbackComponent={(error) => <div>
             <Typography>Error in detailed AutoDynamicView: </Typography>

@@ -7,6 +7,7 @@ import { useEffectOnce } from 'react-use';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { AutoDynamicView } from '../ObjectView/DefaultObjectView';
 import DetailedObjectView from '../UserLibrary/UserLibraryObject';
+import { ExecutableCodeEditor } from '../ObjectView/DefaultCodeEditor';
 
 export const NewUserCode = ({}) => {
     const [displayName, setDisplayName] = React.useState("");
@@ -42,7 +43,7 @@ export const CodeEditor = ({id}: any) => {
 
     const [currentTab, setCurrentTab]: any = React.useState(0);
 
-    const currentView = <DetailedObjectView uid={currentUid} id={id} />
+    const currentView = <DetailedObjectView uid={currentUid} id={id} component={{"$/schema/executable": ExecutableCodeEditor}} />
 
 
     useEffectOnce(() => {
