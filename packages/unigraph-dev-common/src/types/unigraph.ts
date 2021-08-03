@@ -243,7 +243,7 @@ export interface Unigraph<TT = WebSocket | false> {
      * You can use the global function `getExecutableId` to find it.
      * @param params The parameters defined for that executable.
      */
-    runExecutable<T>(uid: string, params: T): Promise<any>;
+    runExecutable<T>(uid: string, params: T, context?: any): Promise<any>;
     /**
      * Adds a notification to the global notification list.
      * 

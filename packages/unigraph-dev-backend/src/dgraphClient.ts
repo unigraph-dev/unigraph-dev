@@ -137,6 +137,8 @@ export default class DgraphClient {
       req.setCommitNow(true);
 
       response = await withLock(this.txnlock, 'txn', () => txn.doRequest(req));
+      const fs = require('fs');
+      fs.writeFileSync('imports_uidslog.json', JSON.stringify(response.getUidsMap()));
       !test ? true : console.log(JSON.stringify(response, null, 2))
       
     } catch (e) {

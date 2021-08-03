@@ -12,6 +12,7 @@ import cron from 'node-cron';
 import _ from "lodash";
 import { PackageDeclaration } from "unigraph-dev-common/lib/types/packages";
 import { addHook } from "./hooks";
+import Babel from '@babel/core';
 
 export type Executable = {
     name?: string,
@@ -102,8 +103,9 @@ export type ExecContext = {
 
 /**
  * A type of functions that "runs" the executable once. 
+ * Takes the necessary contexts and returns a paramless function that executes ther executable when called.
  */
-export type ExecRunner = (src: string, context: ExecContext, unigraph: Unigraph) => () => any;
+export type ExecRunner = (src: string, context: ExecContext, unigraph: Unigraph) => (() => any & string);
 
 export const runEnvRoutineJs: ExecRunner = (src, context, unigraph) => {
     //const fn = () => eval(src);
@@ -123,7 +125,28 @@ export const runEnvRoutineJs: ExecRunner = (src, context, unigraph) => {
     return fn;
 }
 
+export const runEnvReactJSX: ExecRunner = (src, context, unigraph) => {
+    let transpiled: any;
+    try {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        transpiled = (require("@babel/core").transformSync(`function comp (params) {
+${src}
+}`, {presets: ['@babel/preset-react']}) as any).code;
+    } catch (e) {
+        unigraph.addNotification({
+            from: "Executable manager", 
+            name: "Failed to compile executable " + context.definition["unigraph.id"], 
+            content: "Error was: " + e.toString() + e.stack }
+        )
+    }
+    
+    return transpiled;
+}
+
 /** Environments */
 
-export const environmentRunners = {"routine/js": runEnvRoutineJs} /** List of all environments supported in Unigraph */
+export const environmentRunners = {
+    "routine/js": runEnvRoutineJs,
+    "component/react-jsx": runEnvReactJSX
+} /** List of all environments supported in Unigraph */
 

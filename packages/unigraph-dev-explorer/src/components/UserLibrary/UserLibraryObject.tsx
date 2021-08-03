@@ -2,7 +2,7 @@ import React from 'react';
 
 import { AutoDynamicViewDetailed, DefaultObjectView } from '../ObjectView/DefaultObjectView';
 
-export default function DetailedObjectView ({ uid, viewer, id, context }: any) {
+export default function DetailedObjectView ({ uid, viewer, id, context, component }: any) {
     let objectId: any = uid;
 
     const viewerId = viewer ? viewer : "dynamic-view-detailed"
@@ -42,6 +42,6 @@ export default function DetailedObjectView ({ uid, viewer, id, context }: any) {
     </div> : <div key={object?.uid} style={{height: "100%", width: "100%", opacity: object?.uid ? 1: 0}}>
         <AutoDynamicViewDetailed object={object} options={{
             viewId: id
-        }} callbacks={{subsId: myid}} context={contextObj}></AutoDynamicViewDetailed>
+        }} callbacks={{subsId: myid}} context={contextObj} component={component}></AutoDynamicViewDetailed>
     </div>)
 }

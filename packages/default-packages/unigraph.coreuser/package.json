@@ -8,11 +8,20 @@
             {"id": "notification", "src": "schemas/notification.json"},
             {"id": "internet_account", "src": "schemas/internet_account.json"}
         ],
+        "executables": [{
+            "name": "Speed reader",
+            "env": "component/react-jsx",
+            "id": "speed-reader",
+            "src": "executables/speed_reader.jsx",
+            "editable": true
+        }],
         "entities": [
             {"id": "notification_center", "src": "entities/notification_center.json"},
             {"id": "favorite_bar", "src": "entities/favorite_bar.json"},
             {"id": "inbox", "src": "entities/inbox.json"},
-            {"id": "focus", "src": "entities/focus.json"}
+            {"id": "focus", "src": "entities/focus.json"},
+            {"id": "read_later", "src": "entities/read_later.json"},
+            {"id": "speed_reader_context_menu", "src": "entities/speed_reader_context_menu.json"}
         ]
     }
 }

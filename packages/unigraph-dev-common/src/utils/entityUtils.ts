@@ -63,6 +63,11 @@ function isUnion(schemaString: string, schemaMap: Record<string, any>): boolean 
     return schemaString.startsWith('$/schema/interface') || schemaString === "$/composer/Union" || isUnion(schemaMap[schemaString]?.type?.['unigraph.id'], schemaMap)
 }
 
+function isRef (rawPart: any) {
+    return (Object.keys(rawPart).length === 1 && typeof rawPart.uid === "string" && rawPart.uid.startsWith("0x")) ||
+        (Object.keys(rawPart).length === 1 && typeof rawPart['unigraph.id'] === "string" && rawPart['unigraph.id'].startsWith("$/"))
+}
+
 /**
  * Process an induction step of building unigraph entity.
  * 
@@ -88,7 +93,7 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
         // we allow any rawPart by setting localSchema type to that of object.
         localSchema = JSON.parse(JSON.stringify(localSchema));
         localSchema.type['unigraph.id'] = rawPart.type['unigraph.id'];
-    } else if (localSchema.type?.['unigraph.id'] === "$/schema/any" && !(Object.keys(rawPart).length === 1 && typeof rawPart.uid === "string" && rawPart.uid.startsWith("0x"))) {
+    } else if (localSchema.type?.['unigraph.id'] === "$/schema/any" && !(isRef(rawPart))) {
         throw new TypeError('`$/schema/any` directive must have a corresponding type declaration in object!')
     }
 
@@ -99,7 +104,7 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
         unigraphPartValue = buildUnigraphEntity((rawPart['_value'] || rawPart['_value'] === '') ? rawPart['_value'] : rawPart, userType['unigraph.id'], schemaMap, true, options, propDesc);
     } else try {
         // Check for localSchema accordance
-        if (rawPart && rawPart.uid && rawPart.uid.startsWith && rawPart.uid.startsWith('0x') && Object.keys(rawPart).length === 1) {
+        if (rawPart && isRef(rawPart)) {
             // Is UID reference, don't check for accordance
             unigraphPartValue = rawPart;
         } else if (localSchema.type?.['unigraph.id'] === rawPartUnigraphType) {
@@ -433,7 +438,12 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
                             }
                             recurse(unpadValue(value), schemas, localSchema["_definition"]);
                         } else if (typeof value === "object" && (value as any)?.type?.['unigraph.id']) {
-                            recurse(unpadValue(value), schemas, schemas[(value as any)?.type?.['unigraph.id']]['_definition'])
+                            try {
+                                recurse(unpadValue(value), schemas, schemas[(value as any)?.type?.['unigraph.id']]['_definition'])
+                            } catch (e) {
+                                console.error(value)
+                                throw e;
+                            }
                         }
                     })
                 }
@@ -544,6 +554,7 @@ export function dectxObjects(objects: any[], prefix = "_:"): any[] {
                     currentEntity.forEach(el => recurse(el));
                 } else {
                     let kvs = Object.entries(currentEntity);
+                    let deleteThis = false;
                     for (let i=0; i<kvs.length; ++i) {
                         if (kvs[i][0] !== "uid") {
                             // not UID, recursing
@@ -554,9 +565,18 @@ export function dectxObjects(objects: any[], prefix = "_:"): any[] {
                             if (!Object.keys(uidMap).includes(value)) {
                                 uidMap[value] = prefix+nextUid.toString();
                                 nextUid += 1;
+                            } else {
+                                // UIDMap already having such a value, this means that the current uid is a duplicate
+                                deleteThis = true;
                             }
                             currentEntity.uid = uidMap[value];
                         }
+                    }
+                    if (deleteThis) {
+                        // TODO: fix dedup
+                        //kvs.forEach(([k, v]: any) => {if (k !== "uid") {
+                        //    delete currentEntity[k];
+                        //}})
                     }
                     // If we have unigraph.id in object we should delete the uid
                     if (Object.keys(currentEntity).includes('unigraph.id')) {
@@ -680,12 +700,12 @@ export function flatten(objs: any[]) {
                 // Flatten entities
                 if (!entities[curr.uid]) entities[curr.uid] = curr;
                 else Object.keys(curr).forEach(el => {if (el !== "uid") delete curr[el];});
-                // Remove type
-                if (curr['type']?.['dgraph.type']?.includes('Type')) {
-                    delete curr['type']['_value['];
-                    delete curr['type']['uid'];
-                    delete curr['type']['dgraph.type'];
-                }
+            }
+            // Remove type
+            if (curr['type']?.['dgraph.type']?.includes('Type')) {
+                delete curr['type']['_value['];
+                delete curr['type']['uid'];
+                delete curr['type']['dgraph.type'];
             }
             // Continue recursion
             Object.values(curr).forEach(flattenRecurse)

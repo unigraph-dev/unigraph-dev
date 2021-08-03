@@ -112,7 +112,14 @@ export function createPackageCache(client: DgraphClient): Cache<any> {
 
 }
 
-export async function addUnigraphPackage(client: DgraphClient, pkg: PackageDeclaration, caches: Record<string, Cache<any>>) {
+/**
+ * Adds a unigraph package into the current database.
+ * @param client 
+ * @param pkg 
+ * @param caches 
+ * @param update Whether it is an update. If true, we will not create duplicate package entities.
+ */
+export async function addUnigraphPackage(client: DgraphClient, pkg: PackageDeclaration, caches: Record<string, Cache<any>>, update = false) {
     // 1. Create all schemas associated with the package in the correct namespace
     const schemas = Object.entries(pkg.pkgSchemas).map(([key, schema]) => {
         return {
@@ -184,8 +191,10 @@ export async function addUnigraphPackage(client: DgraphClient, pkg: PackageDecla
         ]))
     }
     console.log(JSON.stringify(pkgObj, null, 4))
-    const upsert = insertsToUpsert([pkgObj]);
-    await client.createUnigraphUpsert(upsert);
+    if (!update) {
+        const upsert = insertsToUpsert([pkgObj]);
+        await client.createUnigraphUpsert(upsert);
+    }
     // 3. Update schema reference table for these schemas
     const upsert2 = insertsToUpsert([{
         ...getRefQueryUnigraphId("$/meta/namespace_map"),

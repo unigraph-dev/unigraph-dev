@@ -7,29 +7,29 @@
         },
         "_properties": [
             {
-                "_key": "text",
-                "_definition": {
-                    "type": { "unigraph.id": "$/schema/interface/textual" }
-                },
-                "_indexas": "name"
-            },
-            {
-                "_key": "twitter_id",
+                "_key": "name",
                 "_definition": {
                     "type": { "unigraph.id": "$/primitive/string" }
-                }
-            },
-            {
-                "_key": "from_user",
-                "_definition": {
-                    "type": { "unigraph.id": "$/schema/twitter_user" }
-                }
+                },
+                "_indexAs": "name"
             },
             {
                 "_key": "semantic_properties",
                 "_propertyType": "inheritance",
                 "_definition": {
                     "type": { "unigraph.id": "$/schema/semantic_properties" }
+                }
+            },
+            {
+                "_key": "view",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/executable" }
+                }
+            },
+            {
+                "_key": "item_type",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/any" }
                 }
             }
         ]
