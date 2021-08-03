@@ -3,7 +3,7 @@ import { Unigraph } from "unigraph-dev-common/lib/types/unigraph";
 import { processAutorefUnigraphId, makeQueryFragmentFromType, clearEmpties, buildUnigraphEntity, processAutoref, getUpsertFromUpdater, flatten, unflatten, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { UnigraphUpsert } from "./custom";
 import DgraphClient, { queries } from "./dgraphClient";
-import { buildExecutable } from "./executableManager";
+import { buildExecutable, ExecContext } from "./executableManager";
 import { callHooks } from "./hooks";
 import { addNotification } from "./notifications";
 import { Subscription, createSubscriptionLocal, createSubscriptionWS } from "./subscriptions";
@@ -221,9 +221,9 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         proxyFetch: async (url, options?) => {return new Blob([])},
         // latertodo
         importObjects: async (objects) => {return Error('Not implemented')},
-        runExecutable: async (uid, params) => {
+        runExecutable: async (uid: string, params: any, context?: ExecContext) => {
             const exec = uid.startsWith("0x") ? unpad((await client.queryUID(uid))[0]) : states.caches["executables"].data[uid];
-            const execFn = await buildExecutable(exec, {"params": params, "definition": exec}, states.localApi);
+            const execFn = await buildExecutable(exec, {"params": params, "definition": exec, ...context}, states.localApi);
             let ret;
             if (typeof execFn === "function") {
                 ret = execFn()

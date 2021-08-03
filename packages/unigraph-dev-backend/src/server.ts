@@ -394,7 +394,20 @@ export default async function startServer(client: DgraphClient) {
       const parsed = JSON.parse(event.objects);
       const dectx_raw: any[] = JSON.parse(JSON.stringify(dectxObjects(parsed)));
       const dectx: any[] = dectx_raw.filter(el => !(el['dgraph.type']?.includes('Executable') || el['dgraph.type']?.includes('Named')))
-      const ref = dectx.map(el => processAutoref(JSON.parse(JSON.stringify(el)), el.type['unigraph.id'], caches['schemas'].data));
+      const ref = dectx.map((el, index) => {
+        try {
+          return processAutorefUnigraphId(JSON.parse(JSON.stringify(el)));
+        } catch (e) {
+          if (Object.keys(el).length <= 2 && el.uid) {
+            return undefined;
+          } else {
+            console.error(el, index)
+            throw e;
+          }
+        }
+      }).filter(el => el !== undefined);
+      const fs = require('fs');
+      fs.writeFileSync('imports_log.json', JSON.stringify(ref));
       const upsert = insertsToUpsert(ref);
       dgraphClient.createUnigraphUpsert(upsert).then(_ => {
           callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
@@ -403,7 +416,7 @@ export default async function startServer(client: DgraphClient) {
     },
 
     "run_executable": async function (event: EventRunExecutable, ws: IWebsocket) {
-      localApi.runExecutable(event.uid, event.params)
+      localApi.runExecutable(event.uid, event.params, {send: (it: string) => {ws.send(it)}})
         .then((ret: any) => ws.send(makeResponse(event, true, {returns: ret})));
     },
 

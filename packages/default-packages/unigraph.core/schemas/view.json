@@ -22,7 +22,14 @@
             {
                 "_key": "view",
                 "_definition": {
-                    "type": { "unigraph.id": "$/primitive/string" }
+                    "type": { "unigraph.id": "$/composer/Union" },
+                    "_parameters": {
+                        "_definitions": [{
+                            "type": { "unigraph.id": "$/schema/executable" }
+                        }, {
+                            "type": { "unigraph.id": "$/primitive/string" }
+                        }]
+                    }
                 }
             },
             {

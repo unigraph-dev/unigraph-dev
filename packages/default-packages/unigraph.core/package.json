@@ -10,6 +10,9 @@
         }, {
             "id": "view",
             "src": "schemas/view.json"
+        }, {
+            "id": "context_menu_item",
+            "src": "schemas/context_menu_item.json"
         }],
         "executables": [{
             "id": "add-item-to-list",

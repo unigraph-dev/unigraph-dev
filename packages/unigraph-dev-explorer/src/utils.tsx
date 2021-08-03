@@ -24,11 +24,11 @@ export function getParameters(search: string) {
     return params;
 };
 
-/*!
+/**
  * Get the contrasting color for any hex color
  * (c) 2019 Chris Ferdinandi, MIT License, https://gomakethings.com
  * Derived from work by Brian Suda, https://24ways.org/2010/calculating-color-contrast/
- * @param  {String} A hexcolor value
+ * @param  {String} hexcolor A hexcolor value
  * @return {String} The contrasting color (black or white)
  */
 export const getContrast = function (hexcolor: string){
