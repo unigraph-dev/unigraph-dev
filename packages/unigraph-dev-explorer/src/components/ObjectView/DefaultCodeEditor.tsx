@@ -30,6 +30,8 @@ export const ExecutableCodeEditor = ({data, options}: any) => {
     const [currentCode, setCurrentCode] = React.useState(unpadded['src'])
     const [optionsOpen, setOptionsOpen] = React.useState(false);
 
+    const [previewComponent, setPreviewComponent] = React.useState<any>("");
+
     const updateCode = (newSrc: string) => 
         {window.unigraph.updateObject(data.uid, {src: newSrc})}
 
@@ -62,8 +64,13 @@ export const ExecutableCodeEditor = ({data, options}: any) => {
                             <Typography style={{flexBasis: '33.33%', flexShrink: 0}}>Periodic</Typography>
                             <Typography color='textSecondary'>{unpadded.periodic || "none"}</Typography>
                         </ListItem>
+                        <ListItem style={{display: unpadded.env?.startsWith?.("component") ? "" : "none"}}>
+                            <Button onClick={() => window.unigraph.runExecutable(unpadded['unigraph.id'] || data.uid, {}).then(
+                                (comp: any) => setPreviewComponent(React.createElement(comp, {}, []))
+                            )}>Preview</Button>
+                        </ListItem>
                     </List>
-
+                    {previewComponent}
                 </AccordionDetails>
             </Accordion>
             <IconButton onClick={() => updateCode(currentCode)}><Save/></IconButton>

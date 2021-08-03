@@ -223,7 +223,13 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         importObjects: async (objects) => {return Error('Not implemented')},
         runExecutable: async (uid, params) => {
             const exec = uid.startsWith("0x") ? unpad((await client.queryUID(uid))[0]) : states.caches["executables"].data[uid];
-            const ret = await buildExecutable(exec, {"params": params, "definition": exec}, states.localApi)();
+            const execFn = await buildExecutable(exec, {"params": params, "definition": exec}, states.localApi);
+            let ret;
+            if (typeof execFn === "function") {
+                ret = execFn()
+            } else if (typeof execFn === "string") {
+                ret = {return_function_component: execFn}
+            } else ret = {}
             return ret;
         },
         addNotification: async (notification) => {

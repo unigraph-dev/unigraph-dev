@@ -1,5 +1,6 @@
 // FIXME: This file is ambiguous in purpose! Move utils to utils folder and keep this a small interface with a window object.
 
+import React from 'react';
 import { typeMap } from '../types/consts'
 import { PackageDeclaration } from '../types/packages';
 import { Unigraph, AppState, UnigraphObject as IUnigraphObject } from '../types/unigraph';
@@ -346,8 +347,16 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
         runExecutable: (uid, params?) => new Promise((resolve, reject) => {
             const id = getRandomInt();
             callbacks[id] = (response: any) => {
-                if (response.success) resolve(response.returns ? response.returns : {});
-                else reject(response);
+                if (response.success) {
+                    if (response.returns?.return_function_component) {
+                        // eslint-disable-next-line no-new-func
+                        const retFn = new Function('React', 'return ' + response.returns?.return_function_component)(React);
+                        console.log(retFn);
+                        resolve(retFn);
+                    } else {
+                        resolve(response.returns ? response.returns : {});
+                    }
+                } else reject(response);
             };
             sendEvent(connection, "run_executable", {"uid": uid, params: params ? params : {}}, id);
         }),
