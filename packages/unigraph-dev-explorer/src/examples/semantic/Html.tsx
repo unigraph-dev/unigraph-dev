@@ -1,8 +1,9 @@
 import { Divider } from "@material-ui/core";
-import { FormatLineSpacing } from "@material-ui/icons";
+import { FormatLineSpacing, Menu } from "@material-ui/icons";
 import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import _ from "lodash";
 import React from "react";
+import { onUnigraphContextMenu } from "../../components/ObjectView/DefaultObjectContextMenu";
 import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView"
 import { DynamicViewRenderer } from "../../global"
 
@@ -20,7 +21,7 @@ export type Style = {
     }
 }
 
-export const HtmlStyleChooser = ({style, onStyleChange}: any) => {
+export const HtmlStyleChooser = ({style, onStyleChange, data, context}: any) => {
     return <React.Fragment>
         <ToggleButtonGroup value={style?.text?.lineHeight} onChange={(ev, newStyle) => {onStyleChange(_.merge({}, style, {text: {lineHeight: newStyle}}))}} exclusive>
             <ToggleButton value="1.2"><FormatLineSpacing style={{transform: "scaleY(0.7)"}}/></ToggleButton>
@@ -31,6 +32,11 @@ export const HtmlStyleChooser = ({style, onStyleChange}: any) => {
             <ToggleButton value="Georgia"><span style={{fontFamily: "Georgia", textTransform: "none"}}>Georgia</span></ToggleButton>
             <ToggleButton value="Times New Roman"><span style={{fontFamily: "Times New Roman", textTransform: "none"}}>Times NR</span></ToggleButton>
             <ToggleButton value="Consolas"><span style={{fontFamily: "Consolas", textTransform: "none"}}>Consolas</span></ToggleButton>
+        </ToggleButtonGroup>
+        <ToggleButtonGroup>
+            <ToggleButton onClick={(event) => onUnigraphContextMenu(event, data, context)}>
+                <Menu/>
+            </ToggleButton>
         </ToggleButtonGroup>
     </React.Fragment>
 }
@@ -62,7 +68,7 @@ export const Html: DynamicViewRenderer = ({data, context, callbacks}) => {
             (userStyle.current as HTMLElement).innerHTML = makeCSS(style)
         }} title={`object-view-${data.uid}`} frameBorder="0"/>
         <div style={{display: "flex", position: "absolute", bottom: 0, backgroundColor: "white"}}>
-            <HtmlStyleChooser style={style} onStyleChange={setStyle}/>
+            <HtmlStyleChooser style={style} onStyleChange={setStyle} data={data} context={context}/>
         </div>
     </div>
 }

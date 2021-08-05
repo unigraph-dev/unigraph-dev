@@ -9,9 +9,11 @@ export const ContextMenu = () => {
 
     const [state, setState] = React.useState(ctxMenuState.value);
 
-    const handleClose = () => ctxMenuState.setValue({show: false})
+    const handleClose = () => ctxMenuState.setValue({show: false});
+    const schemaMenuConstructors = [...(window.unigraph.getState('registry/contextMenu').value[state.contextObject?.['type']?.['unigraph.id']] || []), ...(state.schemaMenuContent || [])];
 
     React.useMemo(() => ctxMenuState.subscribe(v => setState(v)), []);
+    console.log(state)
 
     return <div><Popover
         id="context-menu"
@@ -31,9 +33,9 @@ export const ContextMenu = () => {
         <Typography variant="body1" style={{padding: "8px"}}>Object uid: {state.contextUid}; type: {state.contextObject?.type?.['unigraph.id']}</Typography>
         <Divider />
         {state.menuContent?.map(el => el(state.contextUid!, state.contextObject, handleClose, state.callbacks))}
-        {Object.keys(window.unigraph.getState('registry/contextMenu').value).includes(state.contextObject?.['type']?.['unigraph.id']) ? <React.Fragment>
+        {schemaMenuConstructors.length > 0 ? <React.Fragment>
             <Divider/>
-            {window.unigraph.getState('registry/contextMenu').value[state.contextObject?.['type']?.['unigraph.id']].map((el: any) => el(state.contextUid!, state.contextObject, handleClose, {...state.callbacks, removeFromContext: state.removeFromContext}))}
+            {schemaMenuConstructors.map((el: any) => el(state.contextUid!, state.contextObject, handleClose, {...state.callbacks, removeFromContext: state.removeFromContext}))}
         </React.Fragment> : []}
         {state.contextContextUid ? <React.Fragment>
             <Divider/>
