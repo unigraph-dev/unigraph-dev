@@ -24,11 +24,17 @@ import AddSchema from "./pages/AddSchema";
 import DataModelPlayground from "./pages/DataModelPlayground";
 import ExplorerHome from "./pages/ExplorerHome";
 import { TrashView } from './components/UnigraphCore/TrashView';
+import { Categories } from './components/UnigraphCore/Categories';
 
 const pages: Record<string, any> = {
     'datamodel-playground': {
       'constructor': (props: any) => <DataModelPlayground {...props} />,
       'name': "DataModel Playground",
+    },
+    'categories': {
+      'constructor': (props: any) => <Categories {...props} />,
+      'maximize': true,
+      'name': "Categories"
     },
     'examples/todo': {
       'constructor': (props: any) => <TodoList {...props} />,

@@ -142,7 +142,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ite
             backgroundImage: canDrop ? 'url("/assets/drop-here.png")' : '', 
             backgroundRepeat: "no-repeat", 
             backgroundPosition: "center", 
-            height: "100%"
+            height: "100%", width: "100%"
         }} ref={drop}>
             <div style={{display: "flex"}}><Accordion expanded={optionsOpen} onChange={() => setOptionsOpen(!optionsOpen)} variant={"outlined"} style={{flexGrow: 1, minWidth: 0}}> 
             <AccordionSummary  
