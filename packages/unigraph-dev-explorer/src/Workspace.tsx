@@ -14,7 +14,7 @@ import { getParameters, NavigationContext } from "./utils";
 import { Container, CssBaseline } from "@material-ui/core";
 import { isJsonString } from "unigraph-dev-common/lib/utils/utils";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
-import { Search, StarOutlined, Menu } from "@material-ui/icons";
+import { Search, StarOutlined, Menu, LocalOffer } from "@material-ui/icons";
 import { ContextMenu } from "./components/UnigraphCore/ContextMenu";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from 'react-dnd-html5-backend'
@@ -133,6 +133,22 @@ export function WorkSpace(this: any) {
 					"component": "/pages/search",
 				}
 			]
+		}, {
+		    "type":"border",
+            "location": "bottom",
+            "id": "border-bottom",
+            "selected": -1,
+			"children": [
+                {
+					"type": "tab",
+					"enableClose":false,
+                    "minSize": 700,
+                    "maxSize": 700,
+                    "name": "Categories",
+                    "id": "category-pane",
+					"component": "/pages/categories",
+				}
+			]
 		}],
         layout:{
             "type": "row",
@@ -141,10 +157,11 @@ export function WorkSpace(this: any) {
                 {
                     "type": "tabset",
                     "id": mainTabsetId,
+                    "enableDeleteWhenEmpty": false,
                     "weight": 50,
                     "selected": 0,
                     "children": [
-                        {...getComponentFromPage('/home'), enableClose: false, id: "dashboard"}
+                        {...getComponentFromPage('/home'), enableClose: false, id: "dashboard", enableDrag: false}
                     ]
                 }
             ]
@@ -205,12 +222,15 @@ export function WorkSpace(this: any) {
                     setTitleOnRenderTab(model);
                     const nodeId = node.getId();
                     if (nodeId === "app-drawer") {
-                        renderValues.content = <Menu/>;
+                        renderValues.content = <Menu style={{verticalAlign: "middle"}}/>;
                     }
                     if (nodeId === "search-pane") {
-                        renderValues.content = <Search/>;
+                        renderValues.content = <Search style={{verticalAlign: "middle"}}/>;
                     }
-                    if (node.isVisible() && nodeId !== "app-drawer" && nodeId !== "dashboard" && nodeId !== "search-pane") {
+                    if (nodeId === "category-pane") {
+                        renderValues.content = [<LocalOffer style={{verticalAlign: "middle", marginRight: "4px"}}/>, renderValues.content];
+                    }
+                    if (node.isVisible() && nodeId !== "app-drawer" && nodeId !== "dashboard" && nodeId !== "search-pane" && nodeId !== "category-pane") {
                         renderValues.buttons.push(<div style={{zIndex: 999, transform: "scale(0.7)"}} onClick={async () => {
                             const config = node.getConfig();
                             if (config) {delete config.undefine; delete config.id};

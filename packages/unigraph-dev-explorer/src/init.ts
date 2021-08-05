@@ -9,6 +9,7 @@ import { UserSettings } from "./global";
 import { init as nb_init } from './examples/notes/NoteBlock';
 import { init as sm_init } from './examples/semantic/init';
 import { init as tw_init } from './examples/twitter/Tweet';
+import { ListObjectView } from "./components/UnigraphCore/ListObjectView";
 
 /**
  * Things to do when Unigraph explorer loads
@@ -95,7 +96,8 @@ function initRegistry() {
     });
     window.unigraph.addState('registry/dynamicViewDetailed', {
         "$/schema/executable": CodeOrComponentView,
-        "$/schema/view": ViewViewDetailed
+        "$/schema/view": ViewViewDetailed,
+        '$/schema/list': ListObjectView,
     });
     window.unigraph.addState('registry/pages', {});
     window.unigraph.addState('registry/widgets', {});

@@ -15,7 +15,7 @@ function TagList ({data}: any) {
     </div>
 }
 
-const TagListSubscription = withUnigraphSubscription(
+export const TagListSubscription = withUnigraphSubscription(
     // @ts-ignore
     TagList, {schemas: [], defaultData: [], packages: []}, {afterSchemasLoaded: (subsId, data, setData) => {
         window.unigraph.subscribeToType('$/schema/tag', (result: any) => {setData(result)})
