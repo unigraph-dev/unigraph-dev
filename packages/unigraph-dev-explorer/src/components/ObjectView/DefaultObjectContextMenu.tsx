@@ -1,8 +1,9 @@
 import { Menu, MenuItem } from '@material-ui/core';
+import _ from 'lodash';
 import React from 'react';
 import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 import { AutoDynamicViewCallbacks, ContextMenuGenerator } from '../../types/ObjectView';
-import { NavigationContext } from '../../utils';
+import { isMultiSelectKeyPressed, NavigationContext, selectUid } from '../../utils';
 
 export const defaultContextMenu: Array<ContextMenuGenerator> = [
     (uid, object, handleClose, callbacks) => <MenuItem onClick={() => {handleClose(); window.wsnavigator(`/library/object?uid=${uid}&viewer=${"dynamic-view-detailed"}`)}}>
@@ -75,6 +76,8 @@ var(func: eq(<unigraph.id>, "${schema}")) {
 export const onUnigraphContextMenu = (event: React.MouseEvent, object: UnigraphObject | any, context?: UnigraphObject | any, callbacks?: AutoDynamicViewCallbacks) => {
     event.preventDefault?.();
     event.stopPropagation?.();
+
+    selectUid(object.uid, !isMultiSelectKeyPressed(event));
 
     // TODO: Currently lazy-loaded context menus. Should we eagarly load them in the future?
     if (object.type?.['unigraph.id']) window.unigraph.getQueries([getObjectContextMenuQuery(object.type['unigraph.id'])]).then((res: any) => {

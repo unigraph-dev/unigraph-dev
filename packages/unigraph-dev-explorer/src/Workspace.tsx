@@ -14,7 +14,7 @@ import { getParameters, NavigationContext } from "./utils";
 import { Container, CssBaseline } from "@material-ui/core";
 import { isJsonString } from "unigraph-dev-common/lib/utils/utils";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
-import { Search, StarOutlined, Menu, LocalOffer } from "@material-ui/icons";
+import { Search, StarOutlined, Menu, LocalOffer, Details } from "@material-ui/icons";
 import { ContextMenu } from "./components/UnigraphCore/ContextMenu";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from 'react-dnd-html5-backend'
@@ -149,6 +149,22 @@ export function WorkSpace(this: any) {
 					"component": "/pages/categories",
 				}
 			]
+		}, {
+		    "type":"border",
+            "location": "right",
+            "id": "border-right",
+            "selected": -1,
+			"children": [
+                {
+					"type": "tab",
+					"enableClose":false,
+                    "minSize": 700,
+                    "maxSize": 700,
+                    "name": "Inspector",
+                    "id": "inspector-pane",
+					"component": "/pages/inspector",
+				}
+			]
 		}],
         layout:{
             "type": "row",
@@ -222,15 +238,18 @@ export function WorkSpace(this: any) {
                     setTitleOnRenderTab(model);
                     const nodeId = node.getId();
                     if (nodeId === "app-drawer") {
-                        renderValues.content = <Menu style={{verticalAlign: "middle"}}/>;
+                        renderValues.content = <Menu style={{verticalAlign: "middle", transform: "rotate(90deg)"}}/>;
                     }
                     if (nodeId === "search-pane") {
-                        renderValues.content = <Search style={{verticalAlign: "middle"}}/>;
+                        renderValues.content = <Search style={{verticalAlign: "middle", transform: "rotate(90deg)"}}/>;
+                    }
+                    if (nodeId === "inspector-pane") {
+                        renderValues.content = <Details style={{verticalAlign: "middle", transform: "rotate(270deg)"}}/>;
                     }
                     if (nodeId === "category-pane") {
                         renderValues.content = [<LocalOffer style={{verticalAlign: "middle", marginRight: "4px"}}/>, renderValues.content];
                     }
-                    if (node.isVisible() && nodeId !== "app-drawer" && nodeId !== "dashboard" && nodeId !== "search-pane" && nodeId !== "category-pane") {
+                    if (node.isVisible() && nodeId !== "app-drawer" && nodeId !== "dashboard" && nodeId !== "search-pane" && nodeId !== "category-pane" && nodeId !== "inspector-pane") {
                         renderValues.buttons.push(<div style={{zIndex: 999, transform: "scale(0.7)"}} onClick={async () => {
                             const config = node.getConfig();
                             if (config) {delete config.undefine; delete config.id};
