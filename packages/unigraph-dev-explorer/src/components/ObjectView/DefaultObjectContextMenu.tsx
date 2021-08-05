@@ -1,6 +1,6 @@
 import { Menu, MenuItem } from '@material-ui/core';
 import React from 'react';
-import { UnigraphObject } from '../../../../unigraph-dev-common/lib/api/unigraph';
+import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 import { AutoDynamicViewCallbacks, ContextMenuGenerator } from '../../types/ObjectView';
 import { NavigationContext } from '../../utils';
 
@@ -54,22 +54,72 @@ export const DefaultObjectContextMenu = ({uid, object, anchorEl, handleClose}:
     </Menu>)
 }
 
+const getObjectContextMenuQuery = (schema: string) => `(func: uid(uids)) @recurse{
+    uid
+unigraph.id
+expand(_userpredicate_)
+}
+uids as var(func: uid(origins)) @cascade {
+uid
+type @filter(eq(<unigraph.id>, "$/schema/context_menu_item")) {
+        <unigraph.id>
+}
+
+}
+var(func: eq(<unigraph.id>, "${schema}")) {
+    <unigraph.origin> {
+        origins as uid
+}
+}`
+
 export const onUnigraphContextMenu = (event: React.MouseEvent, object: UnigraphObject | any, context?: UnigraphObject | any, callbacks?: AutoDynamicViewCallbacks) => {
     event.preventDefault?.();
     event.stopPropagation?.();
-    window.unigraph.getState('global/contextMenu').setValue({
-        anchorPosition: {top: event.clientY, left: event.clientX},
-        menuContent: defaultContextMenu,
-        menuContextContent: defaultContextContextMenu,
-        contextObject: object,
-        contextUid: object?.uid,
-        show: true,
-        ...(context ? {
-            contextContextObject: context,
-            contextContextUid: context.uid,
-            getContext: context
-        } : {}),
-        callbacks,
-        ...(callbacks?.removeFromContext ? {removeFromContext: callbacks.removeFromContext} : {})
+
+    // TODO: Currently lazy-loaded context menus. Should we eagarly load them in the future?
+    if (object.type?.['unigraph.id']) window.unigraph.getQueries([getObjectContextMenuQuery(object.type['unigraph.id'])]).then((res: any) => {
+        const items = res[0];
+        console.log(items); 
+        window.unigraph.getState('global/contextMenu').setValue({
+            anchorPosition: {top: event.clientY, left: event.clientX},
+            menuContent: defaultContextMenu,
+            menuContextContent: defaultContextContextMenu,
+            contextObject: object,
+            contextUid: object?.uid,
+            show: true,
+            ...(context ? {
+                contextContextObject: context,
+                contextContextUid: context.uid,
+                getContext: context
+            } : {}),
+            schemaMenuContent: items.map((el: any) => (uid: string, object: any, onfire: () => any, callbacks?: any) => 
+                <MenuItem onClick={() => {
+                    onfire();
+                    const view = el['_value']?.['view']?.['_value'];
+                    if (view && view['dgraph.type']?.includes?.('Executable')) {
+                        window.unigraph.runExecutable(view.uid, {uid: uid}).then((ret: any) => {
+                            if (typeof ret === "function") {
+                                // Is component, display that in a new view
+                                const tempViewId = "/temp/" + getRandomInt().toString();
+                                window.unigraph.addState(tempViewId, {
+                                    component: ret,
+                                    params: {uid, object}
+                                });
+                                window.newTab(window.layoutModel, {
+                                    type: "tab",
+                                    name: "Temp view",
+                                    component: tempViewId,
+                                    enableFloat: "true",
+                                    config: {}
+                                })
+                            }
+                        })
+                    }
+                }}>
+                    {(new UnigraphObject(el)).get('name').as('primitive') || ""}
+                </MenuItem>),
+            callbacks,
+            ...(callbacks?.removeFromContext ? {removeFromContext: callbacks.removeFromContext} : {})
+        })
     })
 }

@@ -61,6 +61,7 @@ export type ContextMenuState = {
     menuContent: ((uid: string, object: any, onfire: () => any, callbacks?: any) => React.ReactElement)[],
     contextObject: any,
     contextUid: string,
+    schemaMenuContent: ((uid: string, object: any, onfire: () => any, callbacks?: any) => React.ReactElement)[],
     menuContextContent: ((uid: string, object: any, onfire: () => any, callbacks?: any) => React.ReactElement)[],
     contextContextObject?: any,
     contextContextUid?: string,

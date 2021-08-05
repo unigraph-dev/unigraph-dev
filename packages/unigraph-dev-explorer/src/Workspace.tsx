@@ -162,6 +162,9 @@ export function WorkSpace(this: any) {
             </WorkspacePageComponent>
         } else if (component.startsWith('/components/')) {
             return components[(component.replace('/components/', '') as string)].constructor(config)
+        } else if (component.startsWith('/temp/')) {
+            const tempComponent = window.unigraph.getState(component).value;
+            return tempComponent.component({...config, ...tempComponent.params});
         }
     }
 
