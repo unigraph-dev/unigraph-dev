@@ -44,7 +44,7 @@ function App() {
   const history = createBrowserHistory();
   const componentPathName = (new URLSearchParams(window.location.search)).get('pageName');
   const config = getParameters(window.location.search.replace('?', ''));
-  console.log(config)
+  //console.log(componentPathName)
   document.body.style.backgroundColor = "unset"
 
   return (
