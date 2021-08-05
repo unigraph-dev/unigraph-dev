@@ -105,14 +105,15 @@ const TypedObjectPartEditor: any = {
     },
     "$/composer/Union": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
         //console.log(localObject, localSchema)
-        if (!localObject['_value']['type']) return "Deleted object";
-        const currentUnionType = localObject['_value']['type']['unigraph.id'];
+        if (Object.keys(localObject['_value'] || {}).length === 1 && !localObject['_value']['type']) return "Deleted object";
+        const currentUnionType = localObject['_value']?.['type']?.['unigraph.id'] || "Primitive";
         const classes = useStyles();
+        console.log("localObject")
         return <Paper variant="outlined" className={classes.editorFrame}>
-            <Typography>Union type: {localObject['type']['unigraph.id']} - object type: {currentUnionType}</Typography>
+            <Typography>Union type: {localObject['type']?.['unigraph.id'] || "anonymous union"} - object type: {currentUnionType}</Typography>
             <ObjectPartEditor
-                localSchema={schemaMap[currentUnionType]['_definition']}
-                localObject={localObject[Object.keys(localObject).filter((s: string) => s.startsWith( '_value'))[0]]}
+                localSchema={schemaMap[currentUnionType]?.['_definition'] || localSchema['_parameters']?.['_definitions']?.filter((el: any) => el?.['type']?.['unigraph.id'].startsWith('$/primitive'))[0]}
+                localObject={currentUnionType === "Primitive" ? localObject : localObject[Object.keys(localObject).filter((s: string) => s.startsWith( '_value'))[0]]}
                 schemaMap={schemaMap}
                 setLocalObject={() => {}}
             />
