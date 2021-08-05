@@ -25,6 +25,7 @@ import DataModelPlayground from "./pages/DataModelPlayground";
 import ExplorerHome from "./pages/ExplorerHome";
 import { TrashView } from './components/UnigraphCore/TrashView';
 import { Categories } from './components/UnigraphCore/Categories';
+import { InspectorView } from './components/UnigraphCore/InspectorView';
 
 const pages: Record<string, any> = {
     'datamodel-playground': {
@@ -35,6 +36,10 @@ const pages: Record<string, any> = {
       'constructor': (props: any) => <Categories {...props} />,
       'maximize': true,
       'name': "Categories"
+    },
+    'inspector': {
+      'constructor': (props: any) => <InspectorView {...props} />,
+      'name': "Inspector"
     },
     'examples/todo': {
       'constructor': (props: any) => <TodoList {...props} />,

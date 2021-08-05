@@ -2,6 +2,7 @@ import { Divider, Popover, Typography } from "@material-ui/core"
 import React from "react"
 import { AppState } from "unigraph-dev-common/lib/types/unigraph";
 import { ContextMenuState } from "../../init"
+import { deselectUid } from "../../utils";
 
 export const ContextMenu = () => {
 
@@ -9,7 +10,10 @@ export const ContextMenu = () => {
 
     const [state, setState] = React.useState(ctxMenuState.value);
 
-    const handleClose = () => ctxMenuState.setValue({show: false});
+    const handleClose = () => {
+        deselectUid();
+        ctxMenuState.setValue({show: false})
+    };
     const schemaMenuConstructors = [...(window.unigraph.getState('registry/contextMenu').value[state.contextObject?.['type']?.['unigraph.id']] || []), ...(state.schemaMenuContent || [])];
 
     React.useMemo(() => ctxMenuState.subscribe(v => setState(v)), []);
@@ -30,8 +34,6 @@ export const ContextMenu = () => {
             horizontal: 'center',
         }}
     >
-        <Typography variant="body1" style={{padding: "8px"}}>Object uid: {state.contextUid}; type: {state.contextObject?.type?.['unigraph.id']}</Typography>
-        <Divider />
         {state.menuContent?.map(el => el(state.contextUid!, state.contextObject, handleClose, state.callbacks))}
         {schemaMenuConstructors.length > 0 ? <React.Fragment>
             <Divider/>

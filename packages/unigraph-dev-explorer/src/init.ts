@@ -52,6 +52,8 @@ function init() {
         window.localStorage.setItem('userSettings', JSON.stringify({...JSON.parse(window.localStorage.getItem('userSettings')!), developerMode: val}))
     });
 
+    window.unigraph.addState('global/selected', []);
+
     initContextMenu();
     initRegistry();
     initPackages();

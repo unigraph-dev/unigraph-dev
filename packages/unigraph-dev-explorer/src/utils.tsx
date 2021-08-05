@@ -1,4 +1,5 @@
 import stringify from 'json-stable-stringify';
+import _ from 'lodash';
 import React from 'react';
 
 export const NavigationContext = React.createContext((location: string) => {});
@@ -170,4 +171,20 @@ export const openUrl = (url: string) => {
     } else {
         window.open(url, "_blank")
     }
+}
+
+export const selectUid = (uid: string, exclusive = true) => {
+    const selected = window.unigraph.getState('global/selected');
+    console.log(selected.value)
+    selected.setValue(exclusive ? [uid] : _.union(selected.value, [uid]));
+    console.log(selected.value)
+}
+
+export const deselectUid = (uid?: string) => {
+    const selected = window.unigraph.getState('global/selected');
+    selected.setValue(selected.value.filter((el: string) => uid ? el !== uid : false))
+}
+
+export const isMultiSelectKeyPressed = (event: React.MouseEvent) => {
+    return event.altKey;
 }

@@ -8,7 +8,7 @@ import { useSwipeable } from 'react-swipeable';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { DynamicViewRenderer } from '../../global';
 import { AutoDynamicViewProps } from '../../types/ObjectView';
-import { isMobile } from '../../utils';
+import { isMobile, isMultiSelectKeyPressed, selectUid } from '../../utils';
 import { ExecutableCodeEditor } from './DefaultCodeEditor';
 import { DefaultObjectContextMenu, onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import {ErrorBoundary} from 'react-error-boundary'
@@ -160,9 +160,9 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
       });
 
     const contextEntity = typeof callbacks?.context === "object" ? callbacks.context : null; 
-    const [hasContextMenu, setHasContextMenu] = React.useState(false);
-    const contextMenuState = window.unigraph.getState('global/contextMenu');
-    contextMenuState.subscribe((menu: any) => {setHasContextMenu((menu.show && menu.contextUid === object?.uid))})
+    const [isSelected, setIsSelected] = React.useState(false);
+    const selectedState = window.unigraph.getState('global/selected');
+    selectedState.subscribe((sel: any) => {if (sel?.includes?.(object.uid)) setIsSelected(true); else setIsSelected(false);})
 
     const attach = React.useCallback((domElement) => {
         if (!noDrag) drag(domElement);
@@ -186,7 +186,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
         <div 
             id={"object-view-"+object?.uid} 
             style={{
-                backgroundColor: hasContextMenu ? "whitesmoke" : "unset",
+                backgroundColor: isSelected ? "whitesmoke" : "unset",
                 opacity: isDragging ? 0.5 : 1, 
                 display: "inline-flex", alignItems: "center",
                 ...(inline ? {} : {width: "100%"}),
@@ -195,6 +195,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
             }} 
             ref={attach} 
             onContextMenu={noContextMenu ? () => {} : (event) => onUnigraphContextMenu(event, object, contextEntity, callbacks)}
+            onClickCapture={(ev) => { if (isMultiSelectKeyPressed(ev)) {ev.stopPropagation(); selectUid(object.uid, false) } }}
             {...(attributes ? attributes : {})}
             {...(isMobile() ? handlers : {})}
         >
