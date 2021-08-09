@@ -27,7 +27,8 @@ declare type EventAddUnigraphPackage = {
   "type": "event",
   "event": "add_unigraph_package",
   id: number,
-  package: PackageDeclaration
+  package: PackageDeclaration,
+  update: boolean
 }
 
 declare type EventCreateUnigraphObject = {

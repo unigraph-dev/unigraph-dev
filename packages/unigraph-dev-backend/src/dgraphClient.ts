@@ -1,5 +1,6 @@
 import AsyncLock from 'async-lock';
 import dgraph, { DgraphClient as ActualDgraphClient, DgraphClientStub, Operation, Mutation, Check } from 'dgraph-js';
+import { getRandomInt } from '../../unigraph-dev-common/lib/api/unigraph';
 import { getAsyncLock, withLock } from './asyncManager';
 import { UnigraphUpsert } from './custom';
 import { getFullTextQueryString, makeSearchQuery } from './search';
@@ -136,10 +137,19 @@ export default class DgraphClient {
       req.setMutationsList(mutations);
       req.setCommitNow(true);
 
-      response = await withLock(this.txnlock, 'txn', () => txn.doRequest(req));
+      //const fs = require('fs');
+      //fs.writeFileSync('upsert_' + (new Date()).getTime() + getRandomInt().toString() +  ".json", JSON.stringify(data, null, 4));
+
+      response = await withLock(this.txnlock, 'txn', () => txn.doRequest(req).catch(e => {
+        console.error('error: ', e);
+        console.log(JSON.stringify(data, null, 4))
+      }));
       //const fs = require('fs');
       //fs.writeFileSync('imports_uidslog.json', JSON.stringify(response.getUidsMap()));
-      !test ? true : console.log(JSON.stringify(response, null, 2))
+      !test ? true : console.log(JSON.stringify(response, null, 2));
+      if (!response) {
+        console.log(JSON.stringify(data, null, 4))
+      }
       
     } catch (e) {
       console.error('Error: ', e);
@@ -148,6 +158,7 @@ export default class DgraphClient {
     }
     /* eslint-disable */
     !test ? true : console.log("upsert details above================================================")
+    //return ["0x" + getRandomInt().toString()];
     return data.mutations.map((el, index) => response.getUidsMap().get(el.uid ? (el.uid.startsWith('_:') ? el.uid.slice(2) : el.uid) : `upsert${index}`));
   }
 

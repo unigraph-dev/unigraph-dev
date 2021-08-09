@@ -1,5 +1,7 @@
 # Apps and Registry
 
+NOTE: This is a high level documentation describing how apps work with the Unigraph ecosystem. For a lower-level summary of how app packages are handled, see [packages](./packages.md).
+
 Unigraph is data-centric. In particular, we believe that the most important aspect of creating user interfaces and apps is the data model and its interconnectivity. We designed our app and registry system around this concept, and we strongly encourage developers to do so as well.
 
 ## Apps in Unigraph

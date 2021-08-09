@@ -395,7 +395,10 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
                 else reject(response);
             };
             sendEvent(connection, "export_objects", {uids, options}, id);
-        })
+        }),
+        addPackage: (manifest, update = false) => {
+            sendEvent(connection, "add_unigraph_package", {package: manifest, update})
+        }
     }
 
     return api;
