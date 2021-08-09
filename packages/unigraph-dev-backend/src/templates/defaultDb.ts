@@ -71,8 +71,7 @@ export const packageManifestSchema = {
                     "type": {
                         "unigraph.id": "$/primitive/string"
                     }
-                },
-                "_unique": true
+                }
             },
             {
                 "_key": "version",

@@ -88,7 +88,10 @@ export function wrapUpsertFromUpdater(orig: any, queryHead: string, hasUid: stri
                         return [key, recurse(origNow[key], buildQuery(thisUid, key, hasUid))]
                     } else if (key !== '$ref' && key !== 'type') {
                         return [key, recurse(origNow[key], thisUid)]
-                    } else {return [key, value]} // Don't process `$ref` because we need it later or `type` because it's overwritten
+                    } else { // Don't process `$ref` because we need it later or `type` because it's overwritten
+                        if (key === '$ref') {queries.pop()} // Have ref, will be overwritten, so no use keeping a duplicate variable
+                        return [key, value]
+                    }
                     // TODO: These matches are of lowest priority - so we should allow the upsert even if these objects are not used
                 }),
                 ["uid",  hasUid ? hasUid : `uid(${thisUid})`] // Must have UID to do anything with it

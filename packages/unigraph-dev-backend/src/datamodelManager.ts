@@ -173,9 +173,9 @@ export async function addUnigraphPackage(client: DgraphClient, pkg: PackageDecla
     }
     // 2. Create package object and link to all schemas
     const newManifest = buildUnigraphEntity(pkg.pkgManifest, '$/schema/package_manifest', caches['schemas'].data);
-    const autorefManifest = processAutoref(newManifest, "$/schema/package_manifest", caches['schemas'].data);
+    const autorefManifest = processAutorefUnigraphId({...newManifest, "unigraph.id": `$/package/${pkg.pkgManifest.package_name}/${pkg.pkgManifest.version}/manifest`});
     const pkgObj = {
-        pkgManifest: autorefManifest,
+        pkgManifest: getRefQueryUnigraphId(`$/package/${pkg.pkgManifest.package_name}/${pkg.pkgManifest.version}/manifest`),
         "dgraph.type": "Package",
         pkgSchemas: Object.fromEntries(schemas.map((schema, i) => [
             Object.keys(pkg.pkgSchemas)[i], 
@@ -188,15 +188,14 @@ export async function addUnigraphPackage(client: DgraphClient, pkg: PackageDecla
         pkgEntities: !(pkg.pkgEntities && Object.entries(pkg.pkgEntities)) ? undefined : Object.fromEntries(entities.map((et, i) => [
             Object.keys(pkg.pkgEntities!)[i], 
             getRefQueryUnigraphId(et["unigraph.id"])
-        ]))
+        ])),
+        ...getRefQueryUnigraphId(`$/package/${pkg.pkgManifest.package_name}/${pkg.pkgManifest.version}`)
     }
     console.log(JSON.stringify(pkgObj, null, 4))
-    if (!update) {
-        const upsert = insertsToUpsert([pkgObj]);
-        await client.createUnigraphUpsert(upsert);
-    } else {
-        // TODO: handle schema update with declaration
-    }
+    const upsertM = insertsToUpsert([autorefManifest]);
+    await client.createUnigraphUpsert(upsertM);
+    const upsert = insertsToUpsert([pkgObj]);
+    await client.createUnigraphUpsert(upsert);
     // 3. Update schema reference table for these schemas
     const upsert2 = insertsToUpsert([{
         ...getRefQueryUnigraphId("$/meta/namespace_map"),

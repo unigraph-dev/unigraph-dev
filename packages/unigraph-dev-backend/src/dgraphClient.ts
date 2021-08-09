@@ -140,10 +140,16 @@ export default class DgraphClient {
       //const fs = require('fs');
       //fs.writeFileSync('upsert_' + (new Date()).getTime() + getRandomInt().toString() +  ".json", JSON.stringify(data, null, 4));
 
-      response = await withLock(this.txnlock, 'txn', () => txn.doRequest(req));
+      response = await withLock(this.txnlock, 'txn', () => txn.doRequest(req).catch(e => {
+        console.error('error: ', e);
+        console.log(JSON.stringify(data, null, 4))
+      }));
       //const fs = require('fs');
       //fs.writeFileSync('imports_uidslog.json', JSON.stringify(response.getUidsMap()));
-      !test ? true : console.log(JSON.stringify(response, null, 2))
+      !test ? true : console.log(JSON.stringify(response, null, 2));
+      if (!response) {
+        console.log(JSON.stringify(data, null, 4))
+      }
       
     } catch (e) {
       console.error('Error: ', e);
