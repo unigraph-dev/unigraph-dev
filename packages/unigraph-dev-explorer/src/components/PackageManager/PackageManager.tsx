@@ -1,6 +1,8 @@
-import { Typography } from '@material-ui/core';
+import { Button, Typography } from '@material-ui/core';
 import React from 'react';
 import { DataGrid } from '@material-ui/data-grid';
+import { upload } from '../../utils';
+import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 
 export const PackageManager: React.FC = ({}) => {
     const [packages, setPackages]: any = React.useState([])
@@ -15,6 +17,19 @@ export const PackageManager: React.FC = ({}) => {
         <Typography gutterBottom variant="h4">
             Package Manager
         </Typography>
+        <div>
+            <Button onClick={() => {upload((file: File) => {file.text().then((pkg: string) => {
+                try {
+                    // eslint-disable-next-line no-new-func
+                    const pkgModule = new Function("let exports = {pkg: undefined};" + pkg + "return exports.pkg")();
+                    console.log(pkgModule);
+                    window.unigraph.addPackage?.(pkgModule, true)
+                } catch (e) {
+                    console.error("Add package failure!");
+                    console.error(e);
+                }
+            })})}}>Add package (overwrite)</Button>
+        </div>
         <DataGrid columns={[
             {field: 'package_name', headerName: 'Package Name', width: 200},
             {field: 'name', headerName: "Name", width: 150},

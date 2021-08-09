@@ -296,5 +296,6 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param params Params object
      */
     callHook?(name: string, params: any): any;
+    addPackage?(manifest: any, update?: boolean): any;
 }
 /** End of unigraph interface */ // Don't remove this line - needed for Monaco to work
