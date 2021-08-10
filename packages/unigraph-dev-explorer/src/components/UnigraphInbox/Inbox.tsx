@@ -39,6 +39,7 @@ export const Inbox = () => {
         listUid={listUid} callbacks={{subsId}} 
         itemGetter={(el: any) => el['_value']}
         itemRemover={(uids) => {window.unigraph.deleteItemFromArray(listUid, uids, inboxEntity['uid'], subsId)}}
+        virtualized
     />
 
 }

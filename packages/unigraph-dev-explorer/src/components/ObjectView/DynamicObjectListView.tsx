@@ -7,6 +7,8 @@ import { useDrop } from "react-dnd";
 import { UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
 import { getDynamicViews } from "unigraph-dev-common/lib/api/unigraph-react";
 import { AutoDynamicView } from "./DefaultObjectView";
+import { AutoSizer, CellMeasurer, CellMeasurerCache, List as VList } from 'react-virtualized';
+import { SizeMe } from "react-sizeme";
 
 type Group = {
     name: string,
@@ -86,7 +88,44 @@ export type DynamicObjectListViewProps = {
     itemRemover?: ItemRemover, 
     filters?: Filter[], 
     defaultFilter?: string,
-    reverse?: boolean
+    reverse?: boolean,
+    virtualized?: boolean,
+}
+
+const DynamicList = ({items, virtualized, context, listUid, callbacks, itemUids, itemRemover, itemGetter}: any) => {
+    const cache = React.useMemo(() => {
+        return new CellMeasurerCache({
+            defaultHeight: 75,
+            fixedWidth: true,
+        });
+    }, []);
+
+    return virtualized ? <SizeMe monitorHeight refreshRate={200}>
+        {({size}) => {cache.clearAll(); return <VList rowRenderer={({index, isScrolling, key, parent, style}: any) => {
+        return (
+            <CellMeasurer
+              cache={cache}
+              columnIndex={0}
+              key={key}
+              parent={parent}
+              rowIndex={index}
+            >
+              {({ registerChild }: any) => (
+                // 'style' attribute required to position cell (within parent List)
+                <div ref={registerChild} style={style} key={key}>
+                  <DynamicListItem 
+                    item={itemGetter(items[index])} index={index} context={context} listUid={listUid} 
+                    callbacks={callbacks} itemUids={itemUids} itemRemover={itemRemover}
+                  />
+                </div>
+              )}
+            </CellMeasurer>)
+    }} rowHeight={cache.rowHeight}
+    deferredMeasurementCache={cache} rowCount={items.length} height={size.height || 600} width={size.width || 800} style={{outline: "none", height: "100%", width: "100%"}}/>}}
+    </SizeMe> : items.map((el: any, index: number) =>  <DynamicListItem 
+        item={itemGetter(el)} index={index} context={context} listUid={listUid} 
+        callbacks={callbacks} itemUids={itemUids} itemRemover={itemRemover}
+    />);
 }
 
 /**
@@ -98,7 +137,7 @@ export type DynamicObjectListViewProps = {
  * @param param0 
  * @returns 
  */
-export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({items, listUid, context, callbacks, itemGetter = _.identity, itemRemover = _.noop, filters = [], defaultFilter, reverse}) => {
+export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({items, listUid, context, callbacks, itemGetter = _.identity, itemRemover = _.noop, filters = [], defaultFilter, reverse, virtualized}) => {
     
     const [optionsOpen, setOptionsOpen] = React.useState(false);
     const [groupBy, setGroupBy] = React.useState('');
@@ -142,7 +181,8 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ite
             backgroundImage: canDrop ? 'url("/assets/drop-here.png")' : '', 
             backgroundRepeat: "no-repeat", 
             backgroundPosition: "center", 
-            height: "100%", width: "100%"
+            height: "100%", width: "100%",
+            display: "flex", flexDirection: "column", overflowY: "hidden"
         }} ref={drop}>
             <div style={{display: "flex"}}><Accordion expanded={optionsOpen} onChange={() => setOptionsOpen(!optionsOpen)} variant={"outlined"} style={{flexGrow: 1, minWidth: 0}}> 
             <AccordionSummary  
@@ -199,21 +239,13 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ite
             style={{display: itemRemover === _.noop ? "none" : ""}}
         ><ClearAll/></IconButton>
         </div>
-            {!groupBy.length ? 
-                procItems.map((el, index) => 
-                    <DynamicListItem 
-                        item={itemGetter(el)} index={index} context={context} listUid={listUid} 
-                        callbacks={callbacks} itemUids={procItems.map(el => el.uid)} itemRemover={itemRemover}
-                    />) : 
+            <div style={{flexGrow: 1, overflowY: "auto"}}>
+            {!groupBy.length ? React.createElement(DynamicList, {items: procItems, context, listUid, callbacks, itemRemover, itemUids: procItems.map(el => el.uid), itemGetter, virtualized: (virtualized && procItems.length > 50)}) : 
                 groupers[groupBy](procItems.map(itemGetter)).map((el: Group) => <React.Fragment>
                     <ListSubheader>{el.name}</ListSubheader>
-                    {el.items.map((it, index) => 
-                        <DynamicListItem 
-                            item={it} index={index} context={context} listUid={listUid} 
-                            callbacks={callbacks} itemUids={el.items.map(el => el.uid)} itemRemover={itemRemover}
-                        />)
-                    }
+                    {React.createElement(DynamicList, {items: el.items, context, listUid, callbacks, itemRemover, itemUids: el.items.map(ell => ell.uid), itemGetter: _.identity,})}
                 </React.Fragment>)
             }
+            </div>
     </div>
 }

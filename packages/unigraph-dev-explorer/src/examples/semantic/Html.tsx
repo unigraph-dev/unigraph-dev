@@ -66,7 +66,7 @@ export const Html: DynamicViewRenderer = ({data, context, callbacks}) => {
             userStyle.current = (frm.current as any).contentDocument.head.insertAdjacentElement("beforeend", (frm.current as any).contentDocument.createElement('style'));
             // @ts-expect-error: already checked for nullity
             (userStyle.current as HTMLElement).innerHTML = makeCSS(style)
-        }} title={`object-view-${data.uid}`} frameBorder="0"/>
+        }} title={`object-view-${data.uid}`} frameBorder="0" role="article" aria-describedby={`HTML View for object ${data.uid}`}/>
         <div style={{display: "flex", position: "absolute", bottom: 0, backgroundColor: "white"}}>
             <HtmlStyleChooser style={style} onStyleChange={setStyle} data={data} context={context}/>
         </div>

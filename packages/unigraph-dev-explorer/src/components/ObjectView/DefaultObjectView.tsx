@@ -194,6 +194,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
                 ...style
             }} 
             ref={attach} 
+            aria-label={"Object view for uid " + object?.uid + ", of type " + (object?.type?.['unigraph.id'] || "unknown")}
             onContextMenu={noContextMenu ? () => {} : (event) => onUnigraphContextMenu(event, object, contextEntity, callbacks)}
             onClickCapture={(ev) => { if (isMultiSelectKeyPressed(ev)) {ev.stopPropagation(); selectUid(object.uid, false) } }}
             {...(attributes ? attributes : {})}
