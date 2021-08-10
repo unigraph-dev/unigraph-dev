@@ -36,6 +36,7 @@
     "react-splitter-layout": "^4.0.0",
     "react-swipeable": "^6.1.2",
     "react-use": "^15.3.4",
+    "react-virtualized": "^9.22.3",
     "rehype-katex": "^5.0.0",
     "remark-breaks": "^2.0.2",
     "remark-math": "^4.0.0",
@@ -58,6 +59,7 @@
     "@types/react": "^17.0.1",
     "@types/react-dom": "^17.0.1",
     "@types/react-router-dom": "^5.1.6",
+    "@types/react-virtualized": "^9.21.13",
     "@types/uuid": "^8.3.0",
     "raw-loader": "^4.0.2"
   },
