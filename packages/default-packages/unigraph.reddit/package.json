@@ -1,0 +1,27 @@
+{
+    "displayName": "Unigraph for Reddit",
+    "version": "0.0.1",
+    "description": "View your Reddit subscriptions in Unigraph",
+    "unigraph": {
+        "package_name": "unigraph.reddit",
+        "schemas": [
+            {"id": "reddit_feed", "src": "schemas/reddit_feed.json"},
+            {"id": "subreddit", "src": "schemas/subreddit.json"},
+            {"id": "reddit_post", "src": "schemas/reddit_post.json"}
+        ],
+        "executables": [{ 
+            "id": "add-reddit-account",
+            "env": "routine/js",
+            "src": "executables/addRedditAccount.js",
+            "editable": true,
+            "name": "Adds a reddit account"
+        },{
+            "id": "update-reddit-subscriptions",
+            "env": "routine/js",
+            "src": "executables/updateRedditSubscriptions.js",
+            "periodic": "*/3 * * * *",
+            "editable": true,
+            "name": "Update Reddit subscriptions every 3 minutes"
+        }]
+    }
+}

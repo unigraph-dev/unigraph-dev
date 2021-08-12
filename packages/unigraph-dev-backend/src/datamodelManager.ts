@@ -151,7 +151,7 @@ export async function addUnigraphPackage(client: DgraphClient, pkg: PackageDecla
     // TODO: Use concurrency here
     for(let i=0; i<schemas.length; ++i) {
         const schemaShorthandRef = {
-            "unigraph.id": `$/schema/${Object.keys(pkg.pkgSchemas)[i]}`,
+            ...getRefQueryUnigraphId(`$/schema/${Object.keys(pkg.pkgSchemas)[i]}`),
             "dgraph.type": ['Type'],
             "_value[": getRefQueryUnigraphId(schemas[i]["unigraph.id"])
         }

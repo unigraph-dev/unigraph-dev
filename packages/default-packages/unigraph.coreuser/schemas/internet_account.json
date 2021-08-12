@@ -38,6 +38,18 @@
                 }
             },
             {
+                "_key": "refresh_token",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                }
+            },
+            {
+                "_key": "token_expires_in",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/datetime" }
+                }
+            },
+            {
                 "_key": "access_token_secret",
                 "_definition": {
                     "type": { "unigraph.id": "$/primitive/string" }
