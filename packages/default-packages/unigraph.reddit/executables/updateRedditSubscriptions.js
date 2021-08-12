@@ -45,7 +45,7 @@ if (account?.uid) {
         const accessTokenResult = await resp.json();
         await unigraph.updateObject(account.uid, {
             access_token: token,
-            token_expires_in: (new Date((new Date()).getTime() + accessTokenResult['expires_in'] * 1000)).toISOString()
+            token_expires_in: (new Date((new Date()).getTime() + 3600 * 1000)).toISOString()
         });
     }
     // TODO: update reddit subscriptions
