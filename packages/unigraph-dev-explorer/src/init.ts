@@ -9,6 +9,7 @@ import { UserSettings } from "./global";
 import { init as nb_init } from './examples/notes/NoteBlock';
 import { init as sm_init } from './examples/semantic/init';
 import { init as tw_init } from './examples/twitter/Tweet';
+import { init as re_init } from './examples/reddit/RedditPost';
 import { ListObjectView } from "./components/UnigraphCore/ListObjectView";
 
 /**
@@ -107,7 +108,7 @@ function initRegistry() {
 }
 
 function initPackages() {
-    nb_init(); sm_init(); tw_init();
+    nb_init(); sm_init(); tw_init(); re_init();
 }
 
 init();

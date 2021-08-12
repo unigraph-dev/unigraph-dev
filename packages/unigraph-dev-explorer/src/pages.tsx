@@ -26,6 +26,7 @@ import ExplorerHome from "./pages/ExplorerHome";
 import { TrashView } from './components/UnigraphCore/TrashView';
 import { Categories } from './components/UnigraphCore/Categories';
 import { InspectorView } from './components/UnigraphCore/InspectorView';
+import { RedditSettings } from './examples/reddit/RedditSettings';
 
 const pages: Record<string, any> = {
     'datamodel-playground': {
@@ -84,6 +85,10 @@ const pages: Record<string, any> = {
     'settings/twitter': {
       'constructor': (props: any) => <TwitterSettings {...props} />,
       'name': 'Twitter Settings',
+    },
+    'settings/reddit': {
+      'constructor': (props: any) => <RedditSettings {...props} />,
+      'name': 'Reddit Settings',
     },
     'package-manager': {
       'constructor': (props: any) => <PackageManager {...props} />,

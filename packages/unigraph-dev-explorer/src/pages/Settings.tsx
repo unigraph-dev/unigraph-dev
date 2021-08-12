@@ -82,6 +82,9 @@ export default function Settings () {
             <ListItem button onClick={e => {window.wsnavigator("/settings/twitter")}}>
                 <ListItemText id="switch-list-label-developer-mode" primary="Twitter settings" secondary="Connect your Twitter account to Unigraph" />
             </ListItem>
+            <ListItem button onClick={e => {window.wsnavigator("/settings/reddit")}}>
+                <ListItemText id="switch-list-label-developer-mode" primary="Reddit settings" secondary="Connect your Reddit account to Unigraph" />
+            </ListItem>
         </List>
         <Popover
             id={JSON.stringify(activePopover)}

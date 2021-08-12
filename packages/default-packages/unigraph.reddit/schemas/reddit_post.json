@@ -1,0 +1,62 @@
+{
+    "dgraph.type": "Type",
+    "_definition": {
+        "type": { "unigraph.id": "$/composer/Object" },
+        "_parameters": {
+            "_indexedBy": { "unigraph.id": "$/primitive/string" }
+        },
+        "_properties": [
+            {
+                "_key": "name",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/interface/textual" }
+                },
+                "_indexas": "name"
+            },
+            {
+                "_key": "subreddit",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/subreddit" }
+                }
+            },
+            {
+                "_key": "thumbnail",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/icon_url" }
+                },
+                "_indexas": "thumbnail"
+            },
+            {
+                "_key": "selftext",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/interface/textual" }
+                }
+            },
+            {
+                "_key": "permalink",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/url" }
+                }
+            },
+            {
+                "_key": "url",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/url" }
+                }
+            },
+            {
+                "_key": "id",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                }
+            },
+            {
+                "_key": "semantic_properties",
+                "_propertyType": "inheritance",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/semantic_properties" }
+                }
+            }
+        ]
+    }
+}
