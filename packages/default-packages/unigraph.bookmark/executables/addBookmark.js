@@ -2,7 +2,13 @@ const url = context.params.url;
 const tags = context.params.tags ? context.params.tags : [];
 const scrape = require('html-metadata');
 
-const res = await scrape({url, headers: {'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'}});
+let res;
+
+try {
+    res = await scrape({url, headers: {'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'}});
+} catch (e) {
+    res = await scrape(url)
+}
 
 const result = {
     name: res?.general?.title || res?.openGraph?.title || res?.twitter?.title,
