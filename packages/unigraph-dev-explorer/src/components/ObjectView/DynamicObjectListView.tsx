@@ -168,8 +168,8 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ite
     const [{ canDrop }, drop] = useDrop(() => ({
         // @ts-expect-error: already checked for namespace map
         accept: Object.keys(window.unigraph.getNamespaceMap() || {}),
-        drop: (item: {uid: string}) => {
-          window.unigraph.runExecutable('$/executable/add-item-to-list', {where: contextRef.current.uid, item: item.uid})
+        drop: (item: {uid: string}, monitor) => {
+            if (!monitor.didDrop()) window.unigraph.runExecutable('$/executable/add-item-to-list', {where: contextRef.current.uid, item: item.uid})
         },
         collect: (monitor) => ({
             isOver: !!monitor.isOver(),
