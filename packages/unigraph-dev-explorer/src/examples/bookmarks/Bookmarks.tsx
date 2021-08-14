@@ -67,6 +67,7 @@ export const Bookmarks = withUnigraphSubscription(
 
 export const BookmarkItem: DynamicViewRenderer = ({data, callbacks}) => {
     let unpadded: ABookmark = unpad(data);
+    let name = data.get('name').as('primitive');
     //console.log(unpadded)
     let totalCallbacks = callbacks || {
         'onUpdate': (data: Record<string, any>) => {
@@ -78,7 +79,7 @@ export const BookmarkItem: DynamicViewRenderer = ({data, callbacks}) => {
     return <React.Fragment>
         <ListItemIcon><Avatar alt={"favicon of "+unpadded.name} src={unpadded.favicon}><Public/></Avatar></ListItemIcon>
         <ListItemText>
-            <Typography>{data.get('name').as('primitive')}</Typography>
+            <Typography>{name && name !== "No title" ? name : data.get('url').as('primitive')}</Typography>
             <div style={{display: "inline", alignItems: "center", overflowWrap: "break-word", color: "gray"}}>
                 <Link onClick={() => {
                     openUrl(unpadded.url)
