@@ -138,7 +138,7 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param object The object to be added.
      * @param schema Schema of that object, must be valid. Such as: `$/schema/abc`
      */
-    addObject(object: any, schema: string): any;
+    addObject(object: any, schema: string, padded?: boolean): any;
     /**
      * Reach into the namespace map cache and get a UID corresponding to the name.
      * 
@@ -297,5 +297,6 @@ export interface Unigraph<TT = WebSocket | false> {
      */
     callHook?(name: string, params: any): any;
     addPackage?(manifest: any, update?: boolean): any;
+    buildUnigraphEntity?(entity: any, schema: string): any;
 }
 /** End of unigraph interface */ // Don't remove this line - needed for Monaco to work

@@ -83,10 +83,11 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
                 else {prev.push(curr); return prev}
             }, []);
         },
-        addObject: async (object, schema) => {
+        addObject: async (object, schema, padded) => {
             clearEmpties(object);
-            console.log(object)
-            const unigraphObject = buildUnigraphEntity(object, schema, states.caches['schemas'].data);
+            console.log(object);
+            let unigraphObject = object;
+            if (!padded) unigraphObject = buildUnigraphEntity(object, schema, states.caches['schemas'].data);
             const finalUnigraphObject = processAutoref(unigraphObject, schema, states.caches['schemas'].data)
             console.log(finalUnigraphObject);
             const upsert = insertsToUpsert([finalUnigraphObject]);
@@ -267,6 +268,11 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         },
         callHook: async (name, params) => {
             await callHooks(states.hooks, name, params)
+        },
+        buildUnigraphEntity: (entity, schema) => {
+            clearEmpties(entity);
+            const unigraphObject = buildUnigraphEntity(entity, schema, states.caches['schemas'].data);
+            return unigraphObject;
         }
     }
 }
