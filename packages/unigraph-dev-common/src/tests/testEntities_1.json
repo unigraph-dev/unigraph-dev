@@ -228,6 +228,10 @@
                                     {
                                         "key": "name",
                                         "value": "Haoji Xu"
+                                    },
+                                    {
+                                        "key": "type/unigraph.id",
+                                        "value": "$/schema/user"
                                     }
                                 ]
                             },
