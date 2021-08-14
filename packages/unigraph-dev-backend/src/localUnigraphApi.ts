@@ -269,9 +269,9 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         callHook: async (name, params) => {
             await callHooks(states.hooks, name, params)
         },
-        buildUnigraphEntity: (entity, schema) => {
+        buildUnigraphEntity: (entity, schema, options) => {
             clearEmpties(entity);
-            const unigraphObject = buildUnigraphEntity(entity, schema, states.caches['schemas'].data);
+            const unigraphObject = buildUnigraphEntity(entity, schema, states.caches['schemas'].data, undefined, options);
             return unigraphObject;
         }
     }

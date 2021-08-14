@@ -238,6 +238,8 @@ export function validatePaddedEntity(object: Record<string, any>) {
  */
 export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any", schemaMap: Record<string, Schema>, padding = true, options: BuildEntityOptions = {validateSchema: true, isUpdate: false, states: {}, globalStates: {}}, propDesc: any = {}): EntityDgraph<string> | TypeError {
     // initialize states
+    // @ts-expect-error: overwriting options
+    options = {validateSchema: true, isUpdate: false, states: {}, globalStates: {}, ...options}
     if (!options?.globalStates?.nextUid) options.globalStates.nextUid = 0;
     if (!options?.states?.indexes || propDesc?.['_propertyType'] !== "inheritance") {
         const globalStates = options.globalStates;

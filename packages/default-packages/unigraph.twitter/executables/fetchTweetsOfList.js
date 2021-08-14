@@ -36,12 +36,12 @@ const getSemanticEntities = (el) => {
                         _value: el.unwound?.description || "No description"
                     }
                 }
-            }, '$/schema/web_bookmark')
+            }, '$/schema/web_bookmark', {globalStates: {nextUid: (children.length+1) * 1000}})
         });
         children[children.length-1].value._hide = true;
     });
-    return children.map(el => {return {
-            '_index': {'_value.#i': children.length},
+    return children.map((el, index) => {return {
+            '_index': {'_value.#i': index},
             '_key': el.key,
             '_value': {
                 'dgraph.type': ['Interface'],
