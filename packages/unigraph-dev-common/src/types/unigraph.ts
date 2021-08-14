@@ -297,6 +297,6 @@ export interface Unigraph<TT = WebSocket | false> {
      */
     callHook?(name: string, params: any): any;
     addPackage?(manifest: any, update?: boolean): any;
-    buildUnigraphEntity?(entity: any, schema: string): any;
+    buildUnigraphEntity?(entity: any, schema: string, options: any): any;
 }
 /** End of unigraph interface */ // Don't remove this line - needed for Monaco to work

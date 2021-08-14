@@ -13,6 +13,8 @@ function buildDgraphFunctionFromRefQuery(query: {key: string, value: string}[]) 
         if (refTarget === "unigraph.id") {
             string += `AND eq(${refTarget}, "${refQuery}")`;
             string1 = `eq(${refTarget}, "${refQuery}")`;
+        } else if (refTarget === "type/unigraph.id") {
+            innerRefs.push(`type @filter(eq(<unigraph.id>, "${refQuery}"))`);
         } else {
             // Referencing a field (not unigraph.id), do manual padding!
             // TODO: Support deep nested references

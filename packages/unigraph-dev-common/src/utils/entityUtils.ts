@@ -238,6 +238,8 @@ export function validatePaddedEntity(object: Record<string, any>) {
  */
 export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any", schemaMap: Record<string, Schema>, padding = true, options: BuildEntityOptions = {validateSchema: true, isUpdate: false, states: {}, globalStates: {}}, propDesc: any = {}): EntityDgraph<string> | TypeError {
     // initialize states
+    // @ts-expect-error: overwriting options
+    options = {validateSchema: true, isUpdate: false, states: {}, globalStates: {}, ...options}
     if (!options?.globalStates?.nextUid) options.globalStates.nextUid = 0;
     if (!options?.states?.indexes || propDesc?.['_propertyType'] !== "inheritance") {
         const globalStates = options.globalStates;
@@ -390,8 +392,10 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
      */
     function recurse(currentEntity: any, schemas: Record<string, Schema>, localSchema: Definition | any) {
         //console.log("=====================")
+        let currentType: any;
         if (currentEntity.type?.['unigraph.id']?.includes('$/schema/')) {
             localSchema = schemas[currentEntity.type['unigraph.id']]._definition
+            currentType = currentEntity.type?.['unigraph.id'];
         }
         //console.log(JSON.stringify(currentEntity), JSON.stringify(localSchema))
         const paddedEntity = currentEntity;
@@ -432,6 +436,7 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
                                 // This should be a unique criterion, add an autoref upsert
                                 paddedEntity['$ref'] = {
                                     query: [{key: key, value: unpadValue(value)},
+                                        ...(currentType ? [{key: "type/unigraph.id", value: currentType}] : []) // Select current schemas only
                                     ],
                                 };
                                 //currentEntity[key] = undefined; - shouldn't remove the reference. let dgraph match mutations.
