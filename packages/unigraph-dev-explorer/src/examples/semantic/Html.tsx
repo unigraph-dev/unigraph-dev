@@ -62,7 +62,7 @@ export const Html: DynamicViewRenderer = ({data, context, callbacks}) => {
             <Divider/>
         </React.Fragment> : []}
         <iframe srcDoc={data['_value.%']} style={{flexGrow: 1, width: "100%"}} ref={frm} onLoad={() => {
-            (frm.current as any).contentDocument.head.insertAdjacentHTML("beforeend", "<style>img{ width: 100%; height: auto } video{ width: 100%; height: auto } body{margin-bottom: 64px}</style>");
+            (frm.current as any).contentDocument.head.insertAdjacentHTML("beforeend", "<style>img{ max-width: 100%; height: auto } video{ max-width: 100%; height: auto } body{margin-bottom: 64px}</style>");
             userStyle.current = (frm.current as any).contentDocument.head.insertAdjacentElement("beforeend", (frm.current as any).contentDocument.createElement('style'));
             // @ts-expect-error: already checked for nullity
             (userStyle.current as HTMLElement).innerHTML = makeCSS(style)
