@@ -116,6 +116,34 @@ export const packageExecutableSchema = {
                 "_indexAs": "name"
             },
             {
+                "_key": "imports",
+                "_definition": {
+                    "type": {
+                        "unigraph.id": "$/composer/Array"
+                    },
+                    "_parameters": {
+                        "_element": {
+                            "type": { "unigraph.id": "$/composer/Object" },
+                            "_parameters": {
+                                "_indexedBy": {
+                                    "unigraph.id": "$/primitive/string"
+                                }
+                            },
+                            "_properties": [
+                                {
+                                    "_key": "from",
+                                    "_definition": {
+                                        "type": {
+                                            "unigraph.id": "$/primitive/string"
+                                        }
+                                    }
+                                },
+                            ]
+                        }
+                    }
+                }
+            },
+            {
                 "_key": "env",
                 "_definition": {
                     "type": {

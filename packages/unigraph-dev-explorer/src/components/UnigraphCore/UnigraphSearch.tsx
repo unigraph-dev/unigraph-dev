@@ -1,4 +1,4 @@
-import { List, ListItem, TextField, Typography } from "@material-ui/core"
+import { FormControlLabel, List, ListItem, Switch, TextField, Typography } from "@material-ui/core"
 import _ from "lodash";
 import React from "react"
 import { buildGraph } from "unigraph-dev-common/lib/api/unigraph";
@@ -10,6 +10,7 @@ export const UnigraphSearch = () => {
     const [results, setResults] = React.useState<any[]>([]);
     const [entities, setEntities] = React.useState<any[]>([]);
     const [response, setResponse] = React.useState(false);
+    const [showHidden, setShowHidden] = React.useState(false);
 
     const search = React.useMemo(() => _.debounce((query: string) => {
         setResponse(false);
@@ -36,10 +37,14 @@ export const UnigraphSearch = () => {
             <TextField id="search-box" label="Search" variant="outlined" value={query} onChange={(event) => {setQuery(event?.target.value);}}
                 onKeyDown={(ev) => { if (ev.code === "Enter") { search.flush(); } }} />
         </div>
+        <FormControlLabel
+            control={<Switch checked={showHidden} onChange={() => setShowHidden(!showHidden)} name={"showHidden"} />}
+            label={"Show items without a view"}
+        />
         <Typography variant="body1" style={{marginLeft: "16px", marginTop: "8px", marginBottom: "8px"}}>{response ? entities.length + " results" : "Press Enter to search"}</Typography>
         <List style={{fontSize: "8px"}}>
             {buildGraph(entities).map((el: any) => 
-                (el.type?.['unigraph.id'] && Object.keys(dynamicViews).includes(el.type?.['unigraph.id'])) ? <ListItem><AutoDynamicView object={el} /></ListItem> : []
+                (el.type?.['unigraph.id'] && (Object.keys(dynamicViews).includes(el.type?.['unigraph.id'])) || showHidden) ? <ListItem><AutoDynamicView object={el} /></ListItem> : []
             )}
         </List>
     </div>
