@@ -131,7 +131,36 @@ export const packageExecutableSchema = {
                             },
                             "_properties": [
                                 {
-                                    "_key": "from",
+                                    "_key": "env",
+                                    "_definition": {
+                                        "type": {
+                                            "unigraph.id": "$/primitive/string"
+                                        }
+                                    }
+                                },
+                                {
+                                    "_key": "package",
+                                    "_definition": {
+                                        "type": {
+                                            "unigraph.id": "$/primitive/string"
+                                        }
+                                    }
+                                },
+                                {
+                                    "_key": "import",
+                                    "_definition": {
+                                        "type": { "unigraph.id": "$/composer/Union" },
+                                        "_parameters": {
+                                            "_definitions": [{
+                                                "type": { "unigraph.id": "$/schema/executable" }
+                                            }, {
+                                                "type": { "unigraph.id": "$/primitive/string" }
+                                            }]
+                                        }
+                                    }
+                                },
+                                {
+                                    "_key": "as",
                                     "_definition": {
                                         "type": {
                                             "unigraph.id": "$/primitive/string"
