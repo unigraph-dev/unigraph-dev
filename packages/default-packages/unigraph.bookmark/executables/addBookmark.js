@@ -7,7 +7,7 @@ let res;
 try {
     res = await scrape({url, headers: {'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'}});
 } catch (e) {
-    res = await scrape(url)
+    res = await scrape({url, headers: {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36'}})
 }
 
 const result = {

@@ -51,7 +51,7 @@ if (account?.uid) {
         });
     }
     // TODO: update reddit subscriptions
-    const subs = await fetch("https://oauth.reddit.com/?limit=50" + beforeObj, {
+    const subs = await fetch("https://oauth.reddit.com/?limit=30" + beforeObj, {
         headers: {
             'Authorization': 'bearer ' + token
         }

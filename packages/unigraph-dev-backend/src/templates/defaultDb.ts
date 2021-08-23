@@ -116,6 +116,63 @@ export const packageExecutableSchema = {
                 "_indexAs": "name"
             },
             {
+                "_key": "imports",
+                "_definition": {
+                    "type": {
+                        "unigraph.id": "$/composer/Array"
+                    },
+                    "_parameters": {
+                        "_element": {
+                            "type": { "unigraph.id": "$/composer/Object" },
+                            "_parameters": {
+                                "_indexedBy": {
+                                    "unigraph.id": "$/primitive/string"
+                                }
+                            },
+                            "_properties": [
+                                {
+                                    "_key": "env",
+                                    "_definition": {
+                                        "type": {
+                                            "unigraph.id": "$/primitive/string"
+                                        }
+                                    }
+                                },
+                                {
+                                    "_key": "package",
+                                    "_definition": {
+                                        "type": {
+                                            "unigraph.id": "$/primitive/string"
+                                        }
+                                    }
+                                },
+                                {
+                                    "_key": "import",
+                                    "_definition": {
+                                        "type": { "unigraph.id": "$/composer/Union" },
+                                        "_parameters": {
+                                            "_definitions": [{
+                                                "type": { "unigraph.id": "$/schema/executable" }
+                                            }, {
+                                                "type": { "unigraph.id": "$/primitive/string" }
+                                            }]
+                                        }
+                                    }
+                                },
+                                {
+                                    "_key": "as",
+                                    "_definition": {
+                                        "type": {
+                                            "unigraph.id": "$/primitive/string"
+                                        }
+                                    }
+                                },
+                            ]
+                        }
+                    }
+                }
+            },
+            {
                 "_key": "env",
                 "_definition": {
                     "type": {
