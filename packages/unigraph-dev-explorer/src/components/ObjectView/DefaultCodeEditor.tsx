@@ -2,7 +2,7 @@ import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { loader } from '@monaco-editor/react';
 import Editor from "@monaco-editor/react";
 import React from "react";
-import { Accordion, AccordionDetails, AccordionSummary, Button, IconButton, List, ListItem, Typography } from "@material-ui/core";
+import { Accordion, AccordionDetails, AccordionSummary, Button, FormControl, IconButton, InputLabel, List, ListItem, MenuItem, Select, TextField, Typography } from "@material-ui/core";
 import { ExpandMore, Save } from "@material-ui/icons";
 import { SizeMe } from "react-sizeme";
 import { Actions } from "flexlayout-react";
@@ -22,6 +22,40 @@ decl = decl.replace(/export declare type /g, "declare type ")
 decl = decl.replace(/export interface /g, "declare interface ")
 decl = decl + "\ndeclare var unigraph: Unigraph<WebSocket>; declare const unpad = (a:any) => any;declare const require = (a:any) => any;\ndeclare var context = {params: any}";
 console.log(decl);
+
+const AddImportComponent = ({onAddImport}: any) => {
+    const [pkgName, setPkgName] = React.useState("");
+    const [impt, setImpt] = React.useState("");
+    const [imptas, setImptas] = React.useState("");
+    const [env, setEnv] = React.useState("");
+
+    return <React.Fragment>
+        <FormControl>
+            <InputLabel>Select env</InputLabel>
+            <Select label="Env" value={env} onChange={(ev) => setEnv(ev.target.value as string)}>
+                <MenuItem value="">Env</MenuItem>
+                <MenuItem value="npm">npm</MenuItem>
+                <MenuItem value="unigraph">unigraph</MenuItem>
+            </Select>
+        </FormControl>
+        <TextField label="Package name" value={pkgName} onChange={(ev) => setPkgName(ev.target.value)}>Pkg Name</TextField>
+        <TextField label="Import" value={impt} onChange={(ev) => setImpt(ev.target.value)}>Import</TextField>
+        <TextField label="As" value={imptas} onChange={(ev) => setImptas(ev.target.value)}>As</TextField>
+
+        <Button onClick={() => {
+            onAddImport(env, pkgName, impt, imptas)
+        }}>Create</Button>
+    </React.Fragment>
+}
+
+const ImportItem = ({data}: any) => {
+    return <React.Fragment>
+        <Typography>{data?.['env']['_value.%']}</Typography>
+        <Typography>{data?.['package']['_value.%']}</Typography>
+        <Typography>{data?.['import']['_value.%']}</Typography>
+        <Typography>{data?.['as']['_value.%']}</Typography>
+    </React.Fragment>
+}
 
 export const ExecutableCodeEditor = ({data, options}: any) => {
     
@@ -55,19 +89,36 @@ export const ExecutableCodeEditor = ({data, options}: any) => {
                 <Typography color='textSecondary'>{unpadded.env}</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                    <List>
+                    <List style={{width: "100%"}}>
                         <ListItem>
-                            <Typography style={{flexBasis: '33.33%', flexShrink: 0}}>unigraph.id</Typography>
-                            <Typography color='textSecondary'>{unpadded['unigraph.id']}</Typography>
+                            <Typography style={{flexBasis: '33.33%', flexShrink: 0, maxWidth: "240px"}}>unigraph.id</Typography>
+                            <Typography color='textSecondary'>{unpadded['unigraph.id'] || "none"}</Typography>
                         </ListItem>
                         <ListItem>
-                            <Typography style={{flexBasis: '33.33%', flexShrink: 0}}>Periodic</Typography>
+                            <Typography style={{flexBasis: '33.33%', flexShrink: 0, maxWidth: "240px"}}>Periodic</Typography>
                             <Typography color='textSecondary'>{unpadded.periodic || "none"}</Typography>
                         </ListItem>
                         <ListItem style={{display: unpadded.env?.startsWith?.("component") ? "" : "none"}}>
                             <Button onClick={() => window.unigraph.runExecutable(unpadded['unigraph.id'] || data.uid, {}).then(
                                 (comp: any) => setPreviewComponent(React.createElement(comp, {}, []))
                             )}>Preview</Button>
+                        </ListItem><ListItem>
+                            <Typography style={{flexBasis: '33.33%', flexShrink: 0, maxWidth: "240px"}}>Imports</Typography>
+                            <List>
+                                {(data?.['_value']?.['imports']?.['_value['] || []).map((el: any) => <ListItem><ImportItem data={el['_value']}/></ListItem>)}
+                                <ListItem>
+                                    <AddImportComponent onAddImport={(env: string, pkg: string, impt: string, imptAs: string) => {
+                                        window.unigraph.updateObject(data.uid, {
+                                            imports: [{
+                                                env: env,
+                                                package: pkg,
+                                                import: impt,
+                                                as: imptAs
+                                            }]
+                                        })
+                                    }}/>
+                                </ListItem>
+                            </List>
                         </ListItem>
                     </List>
                     {previewComponent}

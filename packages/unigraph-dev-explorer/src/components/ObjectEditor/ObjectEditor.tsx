@@ -122,12 +122,13 @@ const TypedObjectPartEditor: any = {
     "$/composer/Array": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
         const classes = useStyles();
         const metadata = getMetadata(localObject);
+        console.log(JSON.stringify(localSchema))
         return <Paper variant="outlined" className={classes.editorFrame}>
             <Typography>Array type</Typography>
             <MetadataDisplay metadata={metadata} />
             {localObject['_value[']?.map((el: any) => <div style={{display: "flex", alignItems: "baseline", paddingTop: "8px"}}>
                 <ObjectPartEditor
-                            localSchema={schemaMap[el['_value']['type']['unigraph.id']]['_definition']}
+                            localSchema={schemaMap[el?.['_value']?.['type']?.['unigraph.id']]?.['_definition'] || localSchema['_parameters']['element']}
                             localObject={el['_value']} schemaMap={schemaMap}
                             setLocalObject={() => {}}
                 />
