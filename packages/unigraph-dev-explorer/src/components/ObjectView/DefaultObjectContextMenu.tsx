@@ -4,6 +4,7 @@ import React from 'react';
 import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 import { AutoDynamicViewCallbacks, ContextMenuGenerator } from '../../types/ObjectView';
 import { isMultiSelectKeyPressed, NavigationContext, selectUid } from '../../utils';
+import { getComponentAsView } from './DynamicComponentView';
 
 export const defaultContextMenu: Array<ContextMenuGenerator> = [
     (uid, object, handleClose, callbacks) => <MenuItem onClick={() => {handleClose(); window.wsnavigator(`/library/object?uid=${uid}&viewer=${"dynamic-view-detailed"}`)}}>
@@ -100,23 +101,15 @@ export const onUnigraphContextMenu = (event: React.MouseEvent, object: UnigraphO
                     onfire();
                     const view = el['_value']?.['view']?.['_value'];
                     if (view && view['dgraph.type']?.includes?.('Executable')) {
-                        window.unigraph.runExecutable(view.uid, {uid: uid}).then((ret: any) => {
-                            if (typeof ret === "function") {
-                                // Is component, display that in a new view
-                                const tempViewId = "/temp/" + getRandomInt().toString();
-                                window.unigraph.addState(tempViewId, {
-                                    component: ret,
-                                    params: {uid, object}
-                                });
-                                window.newTab(window.layoutModel, {
-                                    type: "tab",
-                                    name: "Temp view",
-                                    component: tempViewId,
-                                    enableFloat: "true",
-                                    config: {}
-                                })
-                            }
-                        })
+                        getComponentAsView(view, {uid, object}).then((newViewId: any) => {
+                            window.newTab(window.layoutModel, {
+                                type: "tab",
+                                name: "Temp view",
+                                component: newViewId,
+                                enableFloat: "true",
+                                config: {}
+                            })
+                        });
                     }
                 }}>
                     {(new UnigraphObject(el)).get('name').as('primitive') || ""}

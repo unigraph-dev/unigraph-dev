@@ -16,6 +16,8 @@ const oauth = new OAuth.OAuth(
     'HMAC-SHA1'
 );
 
+console.log(last_id_fetched)
+
 const getSemanticEntities = (el) => {
     const children = [];
     el.entities?.media?.forEach(el => {
@@ -105,13 +107,13 @@ const getQuery = (twid) => `(func: type(Entity)) @cascade {
 
 console.log(objects[0], objects.length)
 
-const results = await unigraph.getQueries(objects.map(el => getQuery(el['_value']['twitter_id']['_value.%'])));
+//const results = await unigraph.getQueries(objects.map(el => getQuery(el['_value']['twitter_id']['_value.%'])));
 
 let inbox_els = []
 let count = 0
 
 for (let i=0; i<objects.length; ++i) {
-    if (results[i].length === 0) {
+    if (true /*results[i].length === 0*/) {
         count ++;
         const uid = await unigraph.addObject(objects[i], '$/schema/tweet', true);
         inbox_els.push(uid[0]);
