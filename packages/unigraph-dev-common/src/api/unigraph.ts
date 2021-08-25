@@ -344,11 +344,11 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
             const id = getRandomInt();
             sendEvent(connection, "import_objects", {objects: objects}, id);
         }),
-        runExecutable: (uid, params?) => new Promise((resolve, reject) => {
+        runExecutable: (uid, params?, context?, fnString?) => new Promise((resolve, reject) => {
             const id = getRandomInt();
             callbacks[id] = (response: any) => {
                 if (response.success) {
-                    if (response.returns?.return_function_component) {
+                    if (response.returns?.return_function_component && !fnString) {
                         // eslint-disable-next-line no-new-func
                         const retFn = new Function('React', 'return ' + response.returns?.return_function_component)(React);
                         console.log(retFn);

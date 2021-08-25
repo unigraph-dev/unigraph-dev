@@ -53,3 +53,38 @@ export const registerContextMenuItems = (schema: string, items: any[]): void => 
     const state = (window as any).unigraph.getState('registry/contextMenu');
     state.setValue({...state, [schema]: [...(state[schema] || []), ...items]});
 }
+
+const refsMap = {
+    "@material-ui/core": () => require('@material-ui/core'),
+    "@material-ui/icons": () => require('@material-ui/icons'),
+}
+
+const buildRefs = (refs: {env: string, package: string, import: string, as: string}[]) => {
+    const refStrings: any[] = [];
+    const refValues: any[] = [];
+    refs.forEach(el => {
+        if (el.env === "npm" && Object.keys(refsMap).includes(el.package)) {
+            refStrings.push(el.as);
+            // @ts-expect-error: checked for inclusion
+            const module: any = refsMap[el.package]?.();
+            refValues.push(module[el.import]);
+        }
+    });
+    return [refStrings, refValues]
+}
+
+export const getComponentFromExecutable = async (data: any, params: any) => {
+    const ret = await (window as any).unigraph.runExecutable(data['unigraph.id'] || data.uid, params, {}, true);
+    const imports = (data?.['_value']?.['imports']?.['_value['] || []).map((el: any) => {return {
+        env: el?.['_value']?.['env']['_value.%'],
+        package: el?.['_value']?.['package']['_value.%'],
+        import: el?.['_value']?.['import']['_value.%'],
+        as: el?.['_value']?.['as']['_value.%'],
+    }});
+    console.log(imports)
+    const [refstr, refval] = buildRefs(imports);
+    // eslint-disable-next-line no-new-func
+    const retFn = new Function('React', ...refstr, 'return ' + ret?.return_function_component)(React, ...refval);
+    // Build the component with imports!
+    return retFn;
+}
