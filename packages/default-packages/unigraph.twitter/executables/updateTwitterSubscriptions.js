@@ -1,6 +1,6 @@
-const account = (await unigraph.getQueries([`(func: type(Entity)) @cascade {
+const account = (await unigraph.getQueries([`(func: uid(accs)) @cascade {
     uid
-    type @filter(eq(<unigraph.id>, "$/schema/internet_account")) {<unigraph.id>}
+    type {<unigraph.id>}
     _value {
         site {
             _value {
@@ -28,6 +28,10 @@ const account = (await unigraph.getQueries([`(func: type(Entity)) @cascade {
             }
         }
     }
+}
+
+var(func: eq(<unigraph.id>, "$/schema/internet_account")) {
+    <~type> { accs as uid }
 }`]))?.[0]?.[0];
 
 if (account?.uid) {

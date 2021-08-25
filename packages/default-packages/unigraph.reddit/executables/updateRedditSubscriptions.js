@@ -1,6 +1,6 @@
-const account = (await unigraph.getQueries([`(func: type(Entity)) @cascade {
+const account = (await unigraph.getQueries([`(func: uid(accs)) @cascade {
     uid
-    type @filter(eq(<unigraph.id>, "$/schema/internet_account")) {<unigraph.id>}
+    type {<unigraph.id>}
     _value {
         site {
             _value {
@@ -26,6 +26,10 @@ const account = (await unigraph.getQueries([`(func: type(Entity)) @cascade {
             }
         }
     }
+}
+
+var(func: eq(<unigraph.id>, "$/schema/internet_account")) {
+    <~type> { accs as uid }
 }`]))?.[0]?.[0];
 
 if (account?.uid) {
@@ -80,15 +84,16 @@ if (account?.uid) {
         }
     });
     // Add these items to Unigraph
-    const getQuery = (id) => `(func: type(Entity)) @cascade { 
+    const getQuery = (id) => `(func: uid(redd)) @cascade { 
         uid
-        type @filter(eq(<unigraph.id>, "$/schema/reddit_post"))
         _value {
           id @filter(eq(<_value.%>, "${id}"))
         }
     }`
 
-    const results = await unigraph.getQueries(updatedObjs.map(el => getQuery(el.id)));
+    const results = await unigraph.getQueries([...updatedObjs.map(el => getQuery(el.id)), `var(func: eq(<unigraph.id>, "$/schema/reddit_post")) {
+        <~type> { redd as uid }
+    }`]);
 
     let inbox_els = []
     let count = 0
