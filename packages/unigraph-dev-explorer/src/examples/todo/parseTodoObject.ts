@@ -30,9 +30,12 @@ export const parseTodoObject: (arg0: string) => ATodoList = (todoString: string)
         name: {type: {"unigraph.id": "$/schema/markdown"}, _value: todoString},
         done: false,
         priority: priority_num,
-        semantic_properties: {
-            children: tags.map(tagName => {return {name: tagName}})
-        },
+        children: tags.map(tagName => {return {"type": {"unigraph.id": "$/schema/subentity"},
+            "_value": {
+                "type": {"unigraph.id": "$/schema/tag"},
+                name: tagName
+            }}
+        }),
         time_frame
     }
 }

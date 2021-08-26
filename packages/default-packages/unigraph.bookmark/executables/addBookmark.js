@@ -14,9 +14,12 @@ const result = {
     name: res?.general?.title || res?.openGraph?.title || res?.twitter?.title,
     url: url,
     favicon: res?.general?.icons?.pop().href || res?.general?.icons?.[0]?.href || res?.openGraph?.image?.url || res?.twitter?.image?.src || res?.twitter?.image,
-    semantic_properties: {
-        children: tags.map(tagName => {return {name: tagName}}),
-    },
+    children: tags.map(tagName => {return {"type": {"unigraph.id": "$/schema/subentity"},
+        "_value": {
+            "type": {"unigraph.id": "$/schema/tag"},
+            name: tagName
+        }}
+    }),
     creative_work: {
         abstract: {
             type: {'unigraph.id': '$/schema/html'},

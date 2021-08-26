@@ -46,10 +46,10 @@ export const Tweet: DynamicViewRenderer = ({data, callbacks}) => {
                 <Typography variant="body2" style={{color: "gray"}}>@{data.get('from_user/username').as("primitive")}, {Sugar.Date.relative(new Date(data['_timestamp']['_updatedAt']))}</Typography>
             </div>
             
-            <AutoDynamicView object={removeContextEntities(data.get('text')['_value']['_value'], data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.['children']?.['_value['] || [])} callbacks={{namespaceLink: nslnk}} noContextMenu />
+            <AutoDynamicView object={removeContextEntities(data.get('text')['_value']['_value'], data?.['_value']?.['children']?.['_value['] || [])} callbacks={{namespaceLink: nslnk}} noContextMenu />
             <div>
-              {(data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.['children']?.['_value['] || []).map((el: any) => {
-                const elObj = el['_value']['_value']['_value'];
+              {(data?.['_value']?.['children']?.['_value['] || []).map((el: any) => {
+                const elObj = el['_value']['_value'];
                 if (elObj['type']['unigraph.id'] === "$/schema/icon_url") {
                   return <img src={elObj['_value.%']} style={{maxWidth: "240px", borderRadius: "8px"}}/>
                 } else if (elObj['type']['unigraph.id'] === "$/schema/web_bookmark") {

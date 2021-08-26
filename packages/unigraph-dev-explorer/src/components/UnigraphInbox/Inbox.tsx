@@ -37,7 +37,7 @@ export const Inbox = () => {
     return <DynamicObjectListView 
         items={inbox} context={inboxEntity} 
         listUid={listUid} callbacks={{subsId}} 
-        itemGetter={(el: any) => el['_value']}
+        itemGetter={(el: any) => el['_value']['_value']}
         itemRemover={(uids) => {window.unigraph.deleteItemFromArray(listUid, uids, inboxEntity['uid'], subsId)}}
         virtualized
     />

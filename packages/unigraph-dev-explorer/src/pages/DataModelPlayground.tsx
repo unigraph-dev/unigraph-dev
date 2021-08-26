@@ -29,6 +29,7 @@ export default function DataModelPlayground () {
                     //console.log(transformed);
                     setProcessedData(JSON.stringify(transformed, null, 4));
                 } catch (e) {
+                    console.error(e);
                     transformed = 'Processing error: \n' + e.toString()
                     setProcessedData(transformed)
                 }

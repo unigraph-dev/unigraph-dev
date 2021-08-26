@@ -19,9 +19,7 @@ type ABookmark = {
     name: string,
     url: string,
     favicon: string,
-    semantic_properties: {
-        children: any[]
-    },
+    children: any[],
     creative_work?: {
         text?: string,
         abstract?: string,
@@ -89,8 +87,8 @@ export const BookmarkItem: DynamicViewRenderer = ({data, callbacks}) => {
                     if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid, context: data.uid}));
                     if (callbacks?.removeFromContext) callbacks.removeFromContext();
                 }} style={{verticalAlign: "middle"}}/> : []}
-                {!unpadded.semantic_properties?.children?.map ? [] :
-                unpadded.semantic_properties?.children?.map(it => <Tag data={it}/>)}
+                {!unpadded.children?.map ? [] :
+                unpadded.children?.map(it => <Tag data={it}/>)}
                 <p style={{fontSize: "0.875rem", display: "contents"}}>{typeof unpadded.creative_work?.abstract === "string" ? unpadded.creative_work?.abstract : []}</p>
             </div>
         </ListItemText>

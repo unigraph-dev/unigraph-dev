@@ -14,17 +14,17 @@
             {"id": "markdown", "src": "schemas/markdown.json"},
             {"id": "interface/textual", "src": "schemas/textual.json"},
             {"id": "interface/semantic", "src": "schemas/semantic.json"},
-            {"id": "semantic_properties", "src": "schemas/semantic_properties.json"},
+            {"id": "semantic_property", "src": "schemas/semantic_property.json"},
             {"id": "creative_work", "src": "schemas/creative_work.json"},
             {"id": "message", "src": "schemas/message.json"}
         ],
         "executables": [
             { 
-                "id": "add-tag-to-object",
+                "id": "add-semantic-property",
                 "env": "routine/js",
-                "src": "executables/addTagToObject.js",
+                "src": "executables/addSemanticProperty.js",
                 "editable": true,
-                "name": "Adds a tag to an object"
+                "name": "Adds a semantic property to an object"
             }
         ]
     }
