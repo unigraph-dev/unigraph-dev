@@ -15,9 +15,7 @@ export type ATodoList = {
     name: string | any,
     done: boolean,
     priority: number,
-    semantic_properties: {
-        children: any[]
-    },
+    children: any[],
     time_frame?: {
         start: Date,
         end: Date

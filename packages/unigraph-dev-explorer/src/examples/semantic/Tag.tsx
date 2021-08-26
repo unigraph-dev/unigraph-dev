@@ -39,4 +39,4 @@ export const SemanticProperties = ({data}: any) => {
 }
 
 
-registerDynamicViews({"$/schema/tag": Tag, "$/schema/semantic_properties": SemanticProperties})
+registerDynamicViews({"$/schema/tag": Tag})

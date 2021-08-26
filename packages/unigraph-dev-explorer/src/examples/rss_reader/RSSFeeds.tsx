@@ -22,9 +22,7 @@ export type ARSSFeed = {
         name: string,
         url: string,
         favicon: string,
-        semantic_properties?: {
-            children: any[]
-        },
+        children: any[],
         creative_work?: {
             text?: any,
             abstract?: any,
@@ -51,9 +49,7 @@ export type ARSSItem = {
         date_created: string,
         creative_work?: any
     },
-    semantic_properties?: {
-        children: any[]
-    }
+    children: any[],
     _timestamp?: {
         _updatedAt: any
     }

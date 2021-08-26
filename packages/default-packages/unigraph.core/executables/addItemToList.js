@@ -17,14 +17,11 @@ const sources = !Array.isArray(sourceUid) ? [sourceUid] : sourceUid
 console.log(sources, destUid)
 
 await unigraph.updateObject(destUid, {
-    _value: {
-        children: {
-            "_value[": sources.map(el => {return {
-                "_value": {
-                    uid: el
-                }
-            }})
+    children: sources.map(el => {return {
+        "type": {"unigraph.id": "$/schema/subentity"},
+        "_value": {
+            uid: el
         }
-    }
-}, true, false);
+    }})
+}, true, true);
 

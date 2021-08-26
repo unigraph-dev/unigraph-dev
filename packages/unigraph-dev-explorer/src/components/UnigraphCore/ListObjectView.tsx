@@ -5,7 +5,7 @@ export const ListObjectView = ({data}: any) => {
 
     return <DynamicObjectListView
         items={listValue['_value['] || []} context={data} listUid={listValue.uid} callbacks={{}}
-        itemGetter={(el: any) => el['_value']}
+        itemGetter={(el: any) => el['_value']['_value']}
         itemRemover={(uids) => {window.unigraph.deleteItemFromArray(listValue.uid, uids, data['uid'])}}
     />
 }

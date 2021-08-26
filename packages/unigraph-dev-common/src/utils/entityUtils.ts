@@ -98,7 +98,7 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
     }
 
     if (rawPart?.type?.['unigraph.id'] && schemaMap[rawPart.type['unigraph.id']]?.['_definition'] && 
-        (rawPart?.type?.['unigraph.id'] === localSchema.type?.['unigraph.id'] || localSchema.type?.['unigraph.id'] === "$/schema/any") && !isUnion(localSchema.type?.['unigraph.id'], schemaMap)) {
+        (rawPart?.type?.['unigraph.id'] === localSchema.type?.['unigraph.id'] || localSchema.type?.['unigraph.id'] === "$/schema/any")) {
         const userType = rawPart.type;
         delete rawPart.type;
         unigraphPartValue = buildUnigraphEntity((rawPart['_value'] || rawPart['_value'] === '') ? rawPart['_value'] : rawPart, userType['unigraph.id'], schemaMap, true, options, propDesc);
@@ -203,7 +203,7 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
                 } catch (e) {console.log(e.message || e); return undefined};
             }).filter(x => x !== undefined);
             if (choicesResults.length !== 1 && rawPartUnigraphType !== "$/primitive/undefined") {
-                throw new TypeError("Union type does not allow ambiguous or nonexistent selections!" + JSON.stringify(rawPart) + JSON.stringify(localSchema) + rawPartUnigraphType)
+                throw new TypeError("Union type does not allow ambiguous or nonexistent selections!" + JSON.stringify(rawPart) + JSON.stringify(localSchema) + rawPartUnigraphType + "\navailable types: " + definitions.map((el: any) => el?.type?.['unigraph.id'] + " ") + "\n\n")
             } else {
                 unigraphPartValue = choicesResults[0]?.[1];
             }
@@ -290,6 +290,12 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
         }
     };
 
+    function removeDups (entries: any) {
+        if (entries['expand(_userpredicate_)']) {
+            Object.keys(entries).forEach(el => {if (el !== "uid" && el !== "expand(_userpredicate_)" && el !== "unigraph.id") delete entries[el]})
+        }
+    }
+
     function makePart(localSchema: Definition | any, depth = 0, isRoot = false, uidOnly = false) {
         if (depth > maxDepth) return {};
         let entries: any = {"uid": {}, "unigraph.id": {}, 'type': { "unigraph.id": {} }};
@@ -358,11 +364,12 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
                 break;
         }
         if (isRoot && !entries['expand(_userpredicate_)']) _.merge(entries, timestampQuery)
+        removeDups(entries); if (entries['<_value[>']) removeDups(entries['<_value[>'])
         return entries;
     }
     const localSchema = schemaMap[schemaName]._definition;
     let res = makePart(localSchema, 0, true)
-    //console.log(JSON.stringify(res))
+    //console.log(JSON.stringify(res, null, 4))
     let ret = toString ? "{" + jsonToGraphQLQuery(res) + "}" : res
     return ret;
 }

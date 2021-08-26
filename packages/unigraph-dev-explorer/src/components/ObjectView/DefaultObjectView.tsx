@@ -116,15 +116,13 @@ const SubentityDropAcceptor = ({ uid }: any) => {
         drop: (item: {uid: string, itemType: string}, monitor) => {
             if (!monitor.didDrop()) {
                 window.unigraph.updateObject(uid, {
-                    semantic_properties: {
-                        children: [{
-                            type: {"unigraph.id": "$/schema/subentity"},
-                            _value: {
-                                //"type": {"unigraph.id": item.itemType},
-                                uid: item.uid
-                            }
-                        }]
-                    }
+                    children: [{
+                        type: {"unigraph.id": "$/schema/subentity"},
+                        _value: {
+                            //"type": {"unigraph.id": item.itemType},
+                            uid: item.uid
+                        }
+                    }]
                 })
             }
         },
@@ -163,12 +161,13 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
           drop: (item: {uid: string, itemType: string}, monitor) => {
             if (!monitor.didDrop()) {
                 window.unigraph.updateObject(object?.uid, {
-                    semantic_properties: {
-                        children: [{
+                    children: [{
+                        "type": {"unigraph.id": "$/schema/interface/semantic"},
+                        "_value": {
                             "type": {"unigraph.id": item.itemType},
                             uid: item.uid
-                        }]
-                    }
+                        }
+                    }]
                 })
             }
           },

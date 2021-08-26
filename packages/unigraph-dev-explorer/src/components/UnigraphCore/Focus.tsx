@@ -36,7 +36,7 @@ export const Focus = () => {
 
     return <DynamicObjectListView 
         items={focus} context={focusEntity} 
-        listUid={listUid} itemGetter={(el: any) => el['_value']}
+        listUid={listUid} itemGetter={(el: any) => el['_value']['_value']}
         itemRemover={(uids) => {window.unigraph.deleteItemFromArray(listUid, uids, focusEntity['uid'], subsId)}}
     />
 }

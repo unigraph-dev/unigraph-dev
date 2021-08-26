@@ -23,7 +23,7 @@ export type Executable = {
     on_hook?: string,
     editable?: boolean,
     edited?: boolean,
-    semantic_properties?: any
+    children?: any
 }
 
 export function createExecutableCache(client: DgraphClient, context: Partial<ExecContext>, unigraph: Unigraph, states: any): Cache<any> {

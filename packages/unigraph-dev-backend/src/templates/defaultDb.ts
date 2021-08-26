@@ -221,9 +221,23 @@ export const packageExecutableSchema = {
                 }
             },
             {
-                "_key": "semantic_properties",
+                "_key": "children",
                 "_definition": {
-                    "type": {"unigraph.id": "$/schema/semantic_properties"},
+                    "type": {
+                        "unigraph.id": "$/composer/Array"
+                    },
+                    "_parameters": {
+                        "_element": {
+                            "type": { "unigraph.id": "$/composer/Union" },
+                            "_parameters": {
+                                "_definitions": [{
+                                    "type": { "unigraph.id": "$/schema/subentity" }
+                                }, {
+                                    "type": { "unigraph.id": "$/schema/interface/semantic" }
+                                }]
+                            }
+                        }
+                    }
                 }
             }
         ]

@@ -72,8 +72,8 @@ export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
         </ListItemIcon>
         <ListItemText 
             primary={<AutoDynamicView object={data.get('name')['_value']['_value']} noDrag noDrop noContextMenu />}
-            secondary={<div style={{display: "flex", alignItems: "baseline"}} children={[...(!unpadded.semantic_properties?.children?.map ? [] :
-                data?.['_value']?.semantic_properties?._value?._value?.children?.['_value[']?.map((it: any) => <AutoDynamicView object={it['_value']?.['_value']} inline/>
+            secondary={<div style={{display: "flex", alignItems: "baseline"}} children={[...(!unpadded.children?.map ? [] :
+                data?.['_value']?.children?.['_value[']?.map((it: any) => <AutoDynamicView object={it['_value']?.['_value']} inline/>
             )), ...(unpadded.priority > 0 ? [<Chip size="small" icon={<PriorityHigh/>} label={"Priority " + unpadded.priority}/>]: []),
             ...(unpadded.time_frame?.start && (new Date(unpadded.time_frame?.start)).getTime() !== 0 ? [<Chip size="small" icon={<CalendarToday/>} label={"Start: " + Sugar.Date.relative(new Date(unpadded.time_frame?.start))} />] : []),
             ...(unpadded.time_frame?.end && (new Date(unpadded.time_frame?.start)).getTime() !== maxDateStamp ? [<Chip size="small" icon={<CalendarToday/>} label={"End: " + Sugar.Date.relative(new Date(unpadded.time_frame?.end))} />] : [])]}></div>}

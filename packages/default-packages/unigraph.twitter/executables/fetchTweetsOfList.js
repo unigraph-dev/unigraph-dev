@@ -46,15 +46,10 @@ const getSemanticEntities = (el) => {
             '_index': {'_value.#i': index},
             '_key': el.key,
             '_value': {
-                'dgraph.type': ['Interface'],
-                'type': {'unigraph.id': '$/schema/interface/semantic'},
+                'dgraph.type': ['Entity'],
+                'type': {'unigraph.id': '$/schema/subentity'},
                 '_hide': true,
-                '_value': {
-                    'dgraph.type': ['Entity'],
-                    'type': {'unigraph.id': '$/schema/subentity'},
-                    '_hide': true,
-                    '_value': el.value
-                }
+                '_value': el.value
             }
     }});
 }
@@ -85,12 +80,10 @@ const objects = await (new Promise((resolve, reject) => oauth.get(`https://api.t
                     profile_image: el.user['profile_image_url_https']
                 },
                 twitter_id: el['id_str'],
-                semantic_properties: {
-                    children: [{uid: "0x123"}]
-                }
+                children: [{uid: "0x123"}]
             };
             const padded = unigraph.buildUnigraphEntity(entity, '$/schema/tweet');
-            padded['_value']['semantic_properties']['_value']['_value']['children']['_value['] = getSemanticEntities(el);
+            padded['_value']['children']['_value['] = getSemanticEntities(el);
             return padded;
         }) || [];
         resolve(unigraphObjects);

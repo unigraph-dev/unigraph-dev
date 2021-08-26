@@ -38,15 +38,17 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         subscribeToType: async (name, callback: any, eventId = undefined, {all, showHidden, uidsOnly}: any) => {
             eventId = eventId || getRandomInt();
             const queryAny = queries.queryAny(eventId.toString(), uidsOnly)
+            const frag = makeQueryFragmentFromType(name, states.caches["schemas"].data);
             const queryAnyAll = queries.queryAnyAll(eventId.toString(), uidsOnly)
             const query = name === "any" ? ((all || uidsOnly) ? queryAnyAll : queryAny) : `(func: uid(par${eventId})) 
                 @filter((type(Entity)) AND (NOT eq(<_propertyType>, "inheritance")) 
                 ${ showHidden ? "" : "AND (NOT eq(<_hide>, true))" } AND (NOT type(Deleted)))
-            ${uidsOnly ? "{ uid }" : makeQueryFragmentFromType(name, states.caches["schemas"].data)}
+            ${uidsOnly ? "{ uid }" : frag}
             var(func: eq(<unigraph.id>, "${name}")) {
             <~type> {
             par${eventId} as uid
             }}`;
+            //console.log(frag)
             const newSub = typeof callback === "function" ? 
                 createSubscriptionLocal(eventId, callback, query) : 
                 createSubscriptionWS(eventId, callback.ws, query, callback.connId);
@@ -100,12 +102,14 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         },
         getType: async (name) => {
             const eventId = getRandomInt();
+            const frag = makeQueryFragmentFromType(name, states.caches["schemas"].data);
             const queryAny = `query {entities(func: type(Entity)) @recurse { uid unigraph.id expand(_userpredicate_) }}`
             const query = name === "any" ? queryAny : `query {entities(func: uid(par${eventId})) 
-            ${makeQueryFragmentFromType(name, states.caches["schemas"].data)}
+            ${frag}
             par${eventId} as var(func: has(type)) @filter((NOT type(Deleted)) AND type(Entity)) @cascade {
                 type @filter(eq(<unigraph.id>, "${name}"))
             }}`
+            //console.log(frag);
             const res = await client.queryData(query);
             return res;
         },
@@ -178,7 +182,9 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
                 <_value[> {
                     uid
                     _index { uid <_value.#i> }
-                    _value { uid }
+                    _value { uid 
+                        _value { uid }
+                    }
                 }
             }}`
             const origObject = (await client.queryDgraph(query))[0][0];
@@ -189,7 +195,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             const newValues: any[] = [];
             let toDel = "";
             origObject['_value['].forEach((el: any, index: number) => {
-                if (!items.includes(index) && !items.includes(el.uid) && !items.includes(el['_value']?.uid)) {
+                if (!items.includes(index) && !items.includes(el.uid) && !items.includes(el['_value']?.uid) && !items.includes(el['_value']?.['_value']?.uid)) {
                     newValues.push(`<${el['_index'].uid}> <_value.#i> "${newValues.length.toString()}" .`)
                 } else { 
                     if (relUid) toDel += "<" + el['_value'].uid + "> <unigraph.origin> <" +  + relUid + "> .\n";
