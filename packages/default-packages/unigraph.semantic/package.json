@@ -14,7 +14,7 @@
             {"id": "markdown", "src": "schemas/markdown.json"},
             {"id": "interface/textual", "src": "schemas/textual.json"},
             {"id": "interface/semantic", "src": "schemas/semantic.json"},
-            {"id": "semantic_properties", "src": "schemas/semantic_properties.json"},
+            {"id": "semantic_property", "src": "schemas/semantic_property.json"},
             {"id": "creative_work", "src": "schemas/creative_work.json"},
             {"id": "message", "src": "schemas/message.json"}
         ],
