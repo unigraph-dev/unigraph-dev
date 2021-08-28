@@ -13,12 +13,12 @@ import { FiberManualRecord } from "@material-ui/icons";
 
 export const getSubentities = (data: any) => {
     let subentities: any, otherChildren: any;
-    if (!(data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.['children']?.['_value['])) {
+    if (!(data?.['_value']?.['children']?.['_value['])) {
         [subentities, otherChildren] = [[], []];
     } else {
-        [subentities, otherChildren] = data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.['children']?.['_value['].sort(byElementIndex).reduce((prev: any, el: any) => {
-            if ('$/schema/subentity' !== el?.['_value']?.['_value']?.type?.['unigraph.id'] && !el['_key']) return [prev[0], [...prev[1], el['_value']]];
-            else if (!el['_key']) return [[...prev[0], el['_value']?.['_value']['_value']], prev[1]];
+        [subentities, otherChildren] = data?.['_value']?.['children']?.['_value['].sort(byElementIndex).reduce((prev: any, el: any) => {
+            if ('$/schema/subentity' !== el?.['_value']?.type?.['unigraph.id'] && !el['_key']) return [prev[0], [...prev[1], el['_value']]];
+            else if (!el['_key']) return [[...prev[0], el?.['_value']['_value']], prev[1]];
             else return prev;
         }, [[], []])
     }
@@ -84,12 +84,12 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
     const [subentities, otherChildren] = getSubentities(data);
     const [command, setCommand] = React.useState<() => any | undefined>();
     const inputter = (text: string) => {
-        if (data?.['_value']?.['semantic_properties']?.['_value']?.['_value']?.['children']?.['_value[']) {
+        if (data?.['_value']?.['children']?.['_value[']) {
             let deadLinks: any = [];
-            data['_value']['semantic_properties']['_value']['_value']['children']['_value['].forEach((el: any) => {
+            data['_value']['children']['_value['].forEach((el: any) => {
                 if (el && el['_key'] && !text.includes(el['_key'])) deadLinks.push(el.uid)
             });
-            if (deadLinks.length) window.unigraph.deleteItemFromArray(data['_value']['semantic_properties']['_value']['_value']['children']['uid'], deadLinks, data['uid'])
+            if (deadLinks.length) window.unigraph.deleteItemFromArray(data['_value']['children']['uid'], deadLinks, data['uid'])
         }
 
         return window.unigraph.updateObject(data.uid, {
@@ -179,32 +179,22 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
                                     //console.log(newName, newUid, newStr, newContent);
                                     // This is an ADDITION operation
                                     //console.log(data);
-                                    const semChildren = data?.['_value']?.['semantic_properties']?.['_value']?.['_value'];
+                                    const semChildren = data?.['_value'];
                                     await window.unigraph.updateObject(data.uid, {
                                         '_value': {
                                             'text': {'_value': {'_value': {'_value.%': newStr}}},
-                                            'semantic_properties': {
-                                                '_propertyType': "inheritance",
-                                                "_value": {
-                                                    'dgraph.type': ['Entity'],
-                                                    'type': {'unigraph.id': '$/schema/semantic_properties'},
-                                                    '_propertyType': "inheritance",
-                                                    "_value": {
-                                                        children: {
-                                                            '_value[': [{
-                                                                '_index': {'_value.#i': semChildren?.['children']?.['_value[']?.length || 0},
-                                                                '_key': `[[${newName}]]`,
-                                                                '_value': {
-                                                                    'dgraph.type': ['Interface'],
-                                                                    'type': {'unigraph.id': '$/schema/interface/semantic'},
-                                                                    '_hide': true,
-                                                                    '_value': {uid: newUid},
-                                                                }
-                                                                
-                                                            }]
-                                                        }
+                                            children: {
+                                                '_value[': [{
+                                                    '_index': {'_value.#i': semChildren?.['children']?.['_value[']?.length || 0},
+                                                    '_key': `[[${newName}]]`,
+                                                    '_value': {
+                                                        'dgraph.type': ['Interface'],
+                                                        'type': {'unigraph.id': '$/schema/interface/semantic'},
+                                                        '_hide': true,
+                                                        '_value': {uid: newUid},
                                                     }
-                                                }
+                                                    
+                                                }]
                                             }
                                         }
                                     }, true, false);
@@ -226,12 +216,13 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
                                         }, '$/schema/tag');
                                         window.unigraph.addObject({
                                             'text': {type: {'unigraph.id': "$/schema/markdown"}, _value: search},
-                                            semantic_properties: {
-                                                children: [{
+                                            children: [{
+                                                type: {"unigraph.id": "$/schema/interface/semantic"},
+                                                _value: {
                                                     "type": {"unigraph.id": '$/schema/tag'},
                                                     uid: newTagUid[0]
-                                                }]
-                                            }
+                                                }
+                                            }]
                                         }, '$/schema/note_block');
                                         return newTagUid[0];
                                     }
@@ -307,7 +298,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
                 attributes={{isHeading: !isChildren}} 
                 noDrag noContextMenu 
                 callbacks={{'get-semantic-properties': () => {
-                    return data?.['_value']?.['semantic_properties']?.['_value'];
+                    return data;
                 }}}
             />}
         </div>
