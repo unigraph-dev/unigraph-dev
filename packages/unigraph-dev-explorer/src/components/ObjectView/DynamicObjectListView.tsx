@@ -9,6 +9,7 @@ import { getDynamicViews } from "unigraph-dev-common/lib/api/unigraph-react";
 import { AutoDynamicView } from "./DefaultObjectView";
 import { AutoSizer, CellMeasurer, CellMeasurerCache, List as VList } from 'react-virtualized';
 import { SizeMe } from "react-sizeme";
+import { isMobile } from "../../utils";
 
 type Group = {
     name: string,
@@ -59,7 +60,7 @@ const DynamicListItem = ({listUid, item, index, context, callbacks, itemUids, it
             <ListItem>
                 <ListItemIcon onClick={() => {
                     itemRemover(item['uid'])
-                }} style={{display: itemRemover === _.noop ? "none" : ""}}><ClearAll/></ListItemIcon>
+                }} style={{display: (itemRemover === _.noop || isMobile()) ? "none" : ""}}><ClearAll/></ListItemIcon>
                 <AutoDynamicView object={new UnigraphObject(item)} callbacks={{...callbacks, 
                     context: context,
                     removeFromContext: (where: undefined | "left" | "right") => { 
