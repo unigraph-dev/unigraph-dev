@@ -51,7 +51,7 @@ export const FavoriteBar = () => {
 
     return <React.Fragment>
         {fav.map((el, index) => <ListItem>
-            <AutoDynamicView object={el['_value']} callbacks={{context: favEntity, removeFromContext: () => window.unigraph.deleteItemFromArray(favEntity?.['_value']?.children?.uid, index)}}/>
+            <AutoDynamicView object={el['_value']['_value']} callbacks={{context: favEntity, removeFromContext: () => window.unigraph.deleteItemFromArray(favEntity?.['_value']?.children?.uid, index)}}/>
         </ListItem>)}
     </React.Fragment>
 
