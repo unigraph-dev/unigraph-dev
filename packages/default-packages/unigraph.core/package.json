@@ -13,6 +13,9 @@
         }, {
             "id": "context_menu_item",
             "src": "schemas/context_menu_item.json"
+        }, {
+            "id": "pinboard",
+            "src": "schemas/pinboard.json"
         }],
         "executables": [{
             "id": "add-item-to-list",
@@ -20,6 +23,18 @@
             "src": "executables/addItemToList.js",
             "editable": true,
             "name": "Add an item to a list object"
+        }, {
+            "id": "add-item-to-pinboard",
+            "env": "routine/js",
+            "src": "executables/addItemToPinboard.js",
+            "editable": true,
+            "name": "Add an item to a pinboard object"
+        }, {
+            "id": "update-pinboard-layout",
+            "env": "routine/js",
+            "src": "executables/updatePinboardLayout.js",
+            "editable": true,
+            "name": "Update a pinboard's layout"
         }, {
             "id": "delete-item-from-list",
             "env": "routine/js",

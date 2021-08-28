@@ -8,6 +8,7 @@ import { getParameters, NavigationContext } from './utils';
 
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { ConnectionWidget } from "./components/UnigraphCore/ConnectionWidget";
 
 
 // TODO: custom theme
@@ -30,14 +31,6 @@ const useStyles = makeStyles(theme => ({
     padding: theme.spacing(3),
   },
 }));
-
-
-
-export const components: Record<string, any> = {
-  'appdrawer': {
-    'constructor': (props: any) => <AppDrawer {...props} />,
-  },
-}
 
 function App() {
   const classes = useStyles();

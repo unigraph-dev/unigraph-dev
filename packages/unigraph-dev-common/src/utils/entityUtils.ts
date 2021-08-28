@@ -114,10 +114,18 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
                     predicate = "_value["
                     /* eslint-disable */ // Dependent recursive behavior
                     const newLocalSchema1 = localSchema['_parameters']['_element'];
-                    unigraphPartValue = rawPart.map((el: any, index: number) => {return {
-                        ...buildUnigraphEntityPart(el, options, schemaMap, newLocalSchema1), 
-                        _index: {"_value.#i": index}
-                    }});
+                    unigraphPartValue = rawPart.map((el: any, index: number) => {
+                        let context = {};
+                        if (el['$parentcontext']) {
+                            context = el['$parentcontext'];
+                            delete el['$parentcontext'];
+                        }
+                        return {
+                            ...buildUnigraphEntityPart(el, options, schemaMap, newLocalSchema1), 
+                            _index: {"_value.#i": index},
+                            ...context
+                        }
+                    });
                     unigraphPartValue = {
                         ...propDesc,
                         "type": {
@@ -145,9 +153,14 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
                     unigraphPartValue = {};
                     Object.entries(rawPart).forEach(([key, value]: [string, any]) => {
                         const localSchema = keysMap[key]['_definition'];
+                        let context = {};
+                        if (value['$parentcontext']) {
+                            context = value['$parentcontext'];
+                            delete value['$parentcontext'];
+                        }
                         const propDesc: PropertyDescription = _.pickBy({_propertyType: keysMap[key]._propertyType}, _.identity)
                         if (!localSchema) throw new TypeError("Schema check failure for object: " + JSON.stringify(rawPart));
-                        unigraphPartValue[key] = buildUnigraphEntityPart(value, options, schemaMap, localSchema, propDesc);
+                        unigraphPartValue[key] = {...buildUnigraphEntityPart(value, options, schemaMap, localSchema, propDesc), ...context};
                         if (typeof keysMap[key]?.['_indexAs'] === "string") {
                             const linkUid = unigraphPartValue[key]['uid'] || "_:link" + (options.globalStates.nextUid++)
                             unigraphPartValue[key]['uid'] = linkUid;

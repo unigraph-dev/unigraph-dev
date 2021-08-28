@@ -38,17 +38,15 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         subscribeToType: async (name, callback: any, eventId = undefined, {all, showHidden, uidsOnly}: any) => {
             eventId = eventId || getRandomInt();
             const queryAny = queries.queryAny(eventId.toString(), uidsOnly)
-            const frag = makeQueryFragmentFromType(name, states.caches["schemas"].data);
             const queryAnyAll = queries.queryAnyAll(eventId.toString(), uidsOnly)
             const query = name === "any" ? ((all || uidsOnly) ? queryAnyAll : queryAny) : `(func: uid(par${eventId})) 
                 @filter((type(Entity)) AND (NOT eq(<_propertyType>, "inheritance")) 
                 ${ showHidden ? "" : "AND (NOT eq(<_hide>, true))" } AND (NOT type(Deleted)))
-            ${uidsOnly ? "{ uid }" : frag}
+            ${uidsOnly ? "{ uid }" : makeQueryFragmentFromType(name, states.caches["schemas"].data)}
             var(func: eq(<unigraph.id>, "${name}")) {
             <~type> {
             par${eventId} as uid
             }}`;
-            //console.log(frag)
             const newSub = typeof callback === "function" ? 
                 createSubscriptionLocal(eventId, callback, query) : 
                 createSubscriptionWS(eventId, callback.ws, query, callback.connId);
@@ -102,14 +100,12 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         },
         getType: async (name) => {
             const eventId = getRandomInt();
-            const frag = makeQueryFragmentFromType(name, states.caches["schemas"].data);
             const queryAny = `query {entities(func: type(Entity)) @recurse { uid unigraph.id expand(_userpredicate_) }}`
             const query = name === "any" ? queryAny : `query {entities(func: uid(par${eventId})) 
-            ${frag}
+            ${makeQueryFragmentFromType(name, states.caches["schemas"].data)}
             par${eventId} as var(func: has(type)) @filter((NOT type(Deleted)) AND type(Entity)) @cascade {
                 type @filter(eq(<unigraph.id>, "${name}"))
             }}`
-            //console.log(frag);
             const res = await client.queryData(query);
             return res;
         },
@@ -141,7 +137,19 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
         },
         // latertodo
-        updateSimpleObject: async (object, predicate, value) => {throw Error("Not implemented")},
+        updateSimpleObject: async (object, predicate, value) => {
+            if (Array.isArray(object)) { // is triplet
+                const update_triplets = new dgraph.Mutation();
+                update_triplets.setSetNquads(object.join('\n'));
+                const result = await client.createDgraphUpsert({
+                    query: false,
+                    mutations: [
+                        update_triplets
+                    ]
+                });
+                callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
+            }
+        },
         updateObject: async (uid, newObject, isUpsert = true, pad = true, subIds) => {
             clearEmpties(newObject);
             const newUid = uid ? uid : newObject.uid

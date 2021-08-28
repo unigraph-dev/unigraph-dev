@@ -27,6 +27,9 @@ import { TrashView } from './components/UnigraphCore/TrashView';
 import { Categories } from './components/UnigraphCore/Categories';
 import { InspectorView } from './components/UnigraphCore/InspectorView';
 import { RedditSettings } from './examples/reddit/RedditSettings';
+import { AppDrawer } from './components';
+import { ConnectionWidget } from './components/UnigraphCore/ConnectionWidget';
+import { AppLibraryWidget } from './components/PackageManager/AppLibraryWidget';
 
 const pages: Record<string, any> = {
     'datamodel-playground': {
@@ -105,6 +108,7 @@ const pages: Record<string, any> = {
     'home': {
       'constructor': (props: any) => <ExplorerHome {...props} />,
       'name': 'Dashboard',
+      "paddingTop": false
     },
     'inbox': {
       'constructor': (props: any) => <Inbox {...props} />,
@@ -151,4 +155,22 @@ const pages: Record<string, any> = {
     }
   }
 
+export const components: Record<string, any> = {
+  'appdrawer': {
+    'constructor': (props: any) => <AppDrawer {...props} />,
+  },
+  
+}
+
+export const widgets: Record<string, any> = {
+  'unigraph-connection': {
+    'constructor': (props: any) => <ConnectionWidget {...props} />,
+  },
+  'recommended-apps': {
+    'constructor': (props: any) => <AppLibraryWidget {...props} />,
+  }
+}
+
 window.unigraph.getState('registry/pages').setValue(pages);
+window.unigraph.getState('registry/components').setValue(components);
+window.unigraph.getState('registry/widgets').setValue(widgets);

@@ -1,0 +1,39 @@
+{
+    "type": { "unigraph.id": "$/schema/pinboard" },
+    "name": "Dashboard",
+    "children": [{
+        "type": { "unigraph.id": "$/schema/subentity" },
+        "_value": {
+            "type": {"unigraph.id": "$/schema/view"},
+            "name": "Connection",
+            "env": "react-explorer",
+            "view": "/widgets/unigraph-connection"
+        },
+        "$parentcontext": {
+            "_pos": "0:0:6:8"
+        }
+    }, {
+        "type": { "unigraph.id": "$/schema/subentity" },
+        "_value": {
+            "type": {"unigraph.id": "$/schema/view"},
+            "name": "Apps",
+            "env": "react-explorer",
+            "view": "/widgets/recommended-apps"
+        },
+        "$parentcontext": {
+            "_pos": "6:0:6:8"
+        }
+    }, {
+        "type": { "unigraph.id": "$/schema/subentity" },
+        "_value": {
+            "type": {"unigraph.id": "$/schema/view"},
+            "name": "Inbox",
+            "env": "react-explorer",
+            "view": "/pages/inbox",
+            "props": "{\"config\": {}}"
+        },
+        "$parentcontext": {
+            "_pos": "0:8:12:8"
+        }
+    }]
+}

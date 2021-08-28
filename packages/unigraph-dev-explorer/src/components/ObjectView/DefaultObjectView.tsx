@@ -140,9 +140,16 @@ const SubentityDropAcceptor = ({ uid }: any) => {
 }
 
 export const ViewViewDetailed: DynamicViewRenderer = ({data}) => {
-    const pages = window.unigraph.getState('registry/pages').value;
-    return pages[data.get('view').as('primitive').replace('/pages/', '')]
-        .constructor(JSON.parse(data.get('props').as('primitive')).config)
+    if (data.get('view').as('primitive')?.startsWith?.('/pages')) {
+        const pages = window.unigraph.getState('registry/pages').value;
+        return pages[data.get('view').as('primitive').replace('/pages/', '')]
+            .constructor(JSON.parse(data.get('props').as('primitive')).config)
+    } else {
+        const widgets = window.unigraph.getState('registry/widgets').value;
+        return widgets[data.get('view').as('primitive').replace('/widgets/', '')]
+            .constructor()
+    }
+    
 }
 
 export const AutoDynamicView = ({ object, callbacks, component, attributes, inline, allowSubentity, style, noDrag, noDrop, noContextMenu }: AutoDynamicViewProps) => {
