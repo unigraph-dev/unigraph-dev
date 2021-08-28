@@ -108,6 +108,7 @@ const pages: Record<string, any> = {
     'home': {
       'constructor': (props: any) => <ExplorerHome {...props} />,
       'name': 'Dashboard',
+      "paddingTop": false
     },
     'inbox': {
       'constructor': (props: any) => <Inbox {...props} />,

@@ -28,6 +28,9 @@ export const Pinboard = ({data}: any) => {
                 rowHeight={30} width={size.width ? size.width : 1200}
                 compactType="horizontal"
                 isDraggable={!isTouchDevice()}
+                onLayoutChange={(layout, layouts) => {
+                    window.unigraph.runExecutable('$/executable/update-pinboard-layout', {where: data.uid, newLayout: layouts.lg});
+                }}
             >
                 {data._value._value.children['_value['].map((el: any) => <div key={el._value._value.uid}>
                     <UnigraphWidget>

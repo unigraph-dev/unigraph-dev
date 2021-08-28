@@ -137,7 +137,19 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
         },
         // latertodo
-        updateSimpleObject: async (object, predicate, value) => {throw Error("Not implemented")},
+        updateSimpleObject: async (object, predicate, value) => {
+            if (Array.isArray(object)) { // is triplet
+                const update_triplets = new dgraph.Mutation();
+                update_triplets.setSetNquads(object.join('\n'));
+                const result = await client.createDgraphUpsert({
+                    query: false,
+                    mutations: [
+                        update_triplets
+                    ]
+                });
+                callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
+            }
+        },
         updateObject: async (uid, newObject, isUpsert = true, pad = true, subIds) => {
             clearEmpties(newObject);
             const newUid = uid ? uid : newObject.uid
