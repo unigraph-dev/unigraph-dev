@@ -4,7 +4,7 @@
 
 import React, { ReactElement } from "react";
 
-import { components } from './App';
+import { components } from './pages';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 
 import FlexLayout, { Actions, DockLocation, Model, Node, TabNode } from 'flexlayout-react';

@@ -104,6 +104,7 @@ function initRegistry() {
     });
     window.unigraph.addState('registry/pages', {});
     window.unigraph.addState('registry/widgets', {});
+    window.unigraph.addState('registry/components', {});
     window.unigraph.addState('registry/contextMenu', {});
 }
 
