@@ -74,7 +74,16 @@ var(func: eq(<unigraph.id>, "${schema}")) {
 }
 }`
 
-export const onUnigraphContextMenu = (event: React.MouseEvent, object: UnigraphObject | any, context?: UnigraphObject | any, callbacks?: AutoDynamicViewCallbacks) => {
+/**
+ * Unigraph context menu wrapper.
+ * 
+ * @param event 
+ * @param object 
+ * @param context 
+ * @param callbacks 
+ * @param extra UI-specific context menu items. These are not stored in the database and instead fixed with particular UIs because they are subject to individual views.
+ */
+export const onUnigraphContextMenu = (event: React.MouseEvent, object: UnigraphObject | any, context?: UnigraphObject | any, callbacks?: AutoDynamicViewCallbacks, extra?: (handleClose: any) => React.ReactElement) => {
     event.preventDefault?.();
     event.stopPropagation?.();
 
@@ -93,6 +102,7 @@ export const onUnigraphContextMenu = (event: React.MouseEvent, object: UnigraphO
             getContext: context
         } : {}),
         schemaMenuContent: [],
+        extraContent: extra,
         callbacks,
         ...(callbacks?.removeFromContext ? {removeFromContext: callbacks.removeFromContext} : {})
     })

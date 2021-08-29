@@ -71,6 +71,7 @@ export type ContextMenuState = {
     contextContextUid?: string,
     removeFromContext?: string,
     callbacks?: any,
+    extraContent: any,
     show: boolean
 }
 
