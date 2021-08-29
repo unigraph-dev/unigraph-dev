@@ -7,7 +7,10 @@ import { SizeMe } from 'react-sizeme';
 import { Responsive as ResponsiveGridLayout } from 'react-grid-layout';
 import '../../pages/home.css';
 import { AutoDynamicViewDetailed } from "../ObjectView/DefaultObjectView";
+import { onUnigraphContextMenu } from "../ObjectView/DefaultObjectContextMenu";
 import { UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
+import React from "react";
+import { MenuItem } from "@material-ui/core";
 
 const parseLayout = (it: any) => {
     const [x, y, w, h] = (it._pos || "0:0:6:8").split(':');
@@ -18,8 +21,12 @@ export const Pinboard = ({data}: any) => {
     const layout = data._value._value.children['_value['].map(parseLayout)
     console.log(layout)
 
+    const [layoutLocked, setLayoutLocked] = React.useState(true);
+
     return <SizeMe>
-        {({size}) => <div>
+        {({size}) => <div onContextMenu={(event) => onUnigraphContextMenu(event, data, undefined, undefined, (handleClose: any) => <React.Fragment>
+            <MenuItem onClick={() => {handleClose(); setLayoutLocked(!layoutLocked);}}>{layoutLocked ? "Unlock" : "Lock"} pinboard layout</MenuItem>
+        </React.Fragment>)}>
             <ResponsiveGridLayout 
                 className="layout" 
                 layouts={{lg: layout}}  
@@ -27,7 +34,8 @@ export const Pinboard = ({data}: any) => {
                 cols={{lg: 12, md: 10, sm: 6, xs: 4, xxs: 2}} 
                 rowHeight={30} width={size.width ? size.width : 1200}
                 compactType="horizontal"
-                isDraggable={!isTouchDevice()}
+                isDraggable={!isTouchDevice() && !layoutLocked}
+                isResizable={!layoutLocked}
                 onLayoutChange={(layout, layouts) => {
                     window.unigraph.runExecutable('$/executable/update-pinboard-layout', {where: data.uid, newLayout: layouts.lg});
                 }}

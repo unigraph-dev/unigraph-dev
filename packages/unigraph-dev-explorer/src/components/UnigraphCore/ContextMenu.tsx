@@ -45,5 +45,6 @@ export const ContextMenu = () => {
             <Divider/>
             {state.menuContextContent?.map(el => el(state.contextUid!, state.contextObject, handleClose, {...state.callbacks, removeFromContext: state.removeFromContext}))}
         </React.Fragment>: []}
+        {state.extraContent ? state.extraContent(handleClose) : []}
     </Popover></div>
 }

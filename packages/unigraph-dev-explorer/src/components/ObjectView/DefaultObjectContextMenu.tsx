@@ -74,28 +74,45 @@ var(func: eq(<unigraph.id>, "${schema}")) {
 }
 }`
 
-export const onUnigraphContextMenu = (event: React.MouseEvent, object: UnigraphObject | any, context?: UnigraphObject | any, callbacks?: AutoDynamicViewCallbacks) => {
+/**
+ * Unigraph context menu wrapper.
+ * 
+ * @param event 
+ * @param object 
+ * @param context 
+ * @param callbacks 
+ * @param extra UI-specific context menu items. These are not stored in the database and instead fixed with particular UIs because they are subject to individual views.
+ */
+export const onUnigraphContextMenu = (event: React.MouseEvent, object: UnigraphObject | any, context?: UnigraphObject | any, callbacks?: AutoDynamicViewCallbacks, extra?: (handleClose: any) => React.ReactElement) => {
     event.preventDefault?.();
     event.stopPropagation?.();
 
     selectUid(object.uid, !isMultiSelectKeyPressed(event));
+
+    window.unigraph.getState('global/contextMenu').setValue({
+        anchorPosition: {top: event.clientY, left: event.clientX},
+        menuContent: defaultContextMenu,
+        menuContextContent: defaultContextContextMenu,
+        contextObject: object,
+        contextUid: object?.uid,
+        show: true,
+        ...(context ? {
+            contextContextObject: context,
+            contextContextUid: context.uid,
+            getContext: context
+        } : {}),
+        schemaMenuContent: [],
+        extraContent: extra,
+        callbacks,
+        ...(callbacks?.removeFromContext ? {removeFromContext: callbacks.removeFromContext} : {})
+    })
 
     // TODO: Currently lazy-loaded context menus. Should we eagarly load them in the future?
     if (object.type?.['unigraph.id']) window.unigraph.getQueries([getObjectContextMenuQuery(object.type['unigraph.id'])]).then((res: any) => {
         const items = res[0];
         console.log(items); 
         window.unigraph.getState('global/contextMenu').setValue({
-            anchorPosition: {top: event.clientY, left: event.clientX},
-            menuContent: defaultContextMenu,
-            menuContextContent: defaultContextContextMenu,
-            contextObject: object,
-            contextUid: object?.uid,
-            show: true,
-            ...(context ? {
-                contextContextObject: context,
-                contextContextUid: context.uid,
-                getContext: context
-            } : {}),
+            ...window.unigraph.getState('global/contextMenu').value,
             schemaMenuContent: items.map((el: any) => (uid: string, object: any, onfire: () => any, callbacks?: any) => 
                 <MenuItem onClick={() => {
                     onfire();
@@ -114,8 +131,6 @@ export const onUnigraphContextMenu = (event: React.MouseEvent, object: UnigraphO
                 }}>
                     {(new UnigraphObject(el)).get('name').as('primitive') || ""}
                 </MenuItem>),
-            callbacks,
-            ...(callbacks?.removeFromContext ? {removeFromContext: callbacks.removeFromContext} : {})
         })
     })
 }
