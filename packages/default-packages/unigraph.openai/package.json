@@ -1,0 +1,17 @@
+{
+    "displayName": "OpenAI API for Unigraph",
+    "version": "0.0.1",
+    "description": "GPT-3 and Codex integration for Unigraph",
+    "unigraph": {
+        "executables": [
+            {
+                "name": "Language modelling with GPT-3",
+                "env": "routine/js",
+                "id": "lm-gpt3",
+                "src": "executables/lmgpt3.js",
+                "editable": true
+            }
+        ],
+        "package_name": "unigraph.openai"
+    }
+}
