@@ -49,7 +49,14 @@ export class UnigraphObject extends Object {
         Object.setPrototypeOf(this, UnigraphObject.prototype)
     }
 
-    get = (path: string | string[]) => getPath(this, path);
+    get = (path: string | string[]) => {
+        try { 
+            return getPath(this, path)
+        } catch (e) {
+            console.error(e);
+            console.log(this)
+            return e;
+        }};
     getMetadata = () => {
         return undefined;
     }

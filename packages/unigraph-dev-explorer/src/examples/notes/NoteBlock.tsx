@@ -114,6 +114,8 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
     const editorContext = {
         setEdited, setCommand, childrenref, callbacks, nodesState
     }
+
+    //console.log(data);
     
     const [isChildrenCollapsed, setIsChildrenCollapsed] = React.useState<any>({});
 
