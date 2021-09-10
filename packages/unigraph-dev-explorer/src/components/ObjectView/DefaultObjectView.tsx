@@ -204,9 +204,11 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     } else if (object) {
         el = <StringObjectViewer object={object}/>
     }
-    return el ? <ErrorBoundary  FallbackComponent={({error}) => <div style={{backgroundColor: "floralwhite", borderRadius: "8px"}}>
+    return el ? <ErrorBoundary onError={(error: Error, info: {componentStack: string}) => {
+        console.error(error);
+      }} FallbackComponent={({error}) => <div style={{backgroundColor: "floralwhite", borderRadius: "8px"}}>
         <Typography>Error in AutoDynamicView: </Typography>
-        <p>{JSON.stringify(error, null, 4)}</p>
+        <p>{error.message}</p>
     </div>}>
         <div 
             id={"object-view-"+object?.uid} 

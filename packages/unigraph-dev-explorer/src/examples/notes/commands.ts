@@ -204,11 +204,9 @@ export const unindentChild = async (data: any, context: NoteEditorContext, paren
                 uid: curr.uid,
                 _value: {uid: curr['_value'].uid, _value: {
                     uid: curr['_value']['_value'].uid, _value: {
-                        uid: curr['_value']['_value']['_value'].uid, _value: {
-                            children: {
-                                //uid: curr['_value']['_value']['_value']['children'].uid, 
-                                '_value[': newChildChildren
-                            }
+                        uid: curr['_value']['_value']['_value'].uid,
+                        children: {
+                            '_value[': newChildChildren
                         }
                     }
                 }}

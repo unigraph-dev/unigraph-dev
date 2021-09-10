@@ -19,7 +19,7 @@ const parseLayout = (it: any) => {
 
 export const Pinboard = ({data}: any) => {
     const layout = data._value._value.children['_value['].map(parseLayout)
-    console.log(layout)
+    //console.log(layout)
 
     const [layoutLocked, setLayoutLocked] = React.useState(true);
 
