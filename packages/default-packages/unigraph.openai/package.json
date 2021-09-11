@@ -26,7 +26,8 @@
                     {"env": "npm", "package": "@material-ui/core", "import": "Card", "as": "Card"},
                     {"env": "npm", "package": "@material-ui/core", "import": "Select", "as": "Select"},
                     {"env": "npm", "package": "@material-ui/core", "import": "MenuItem", "as": "MenuItem"},
-                    {"env": "npm", "package": "@material-ui/icons", "as": "Icons"}
+                    {"env": "npm", "package": "@material-ui/icons", "as": "Icons"},
+                    {"env": "npm", "package": "@material-ui/core", "import": "Divider", "as": "Divider"}
                 ]
             }
         ],
