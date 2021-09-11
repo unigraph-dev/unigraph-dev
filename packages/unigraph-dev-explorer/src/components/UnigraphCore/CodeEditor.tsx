@@ -21,6 +21,7 @@ export const NewUserCode = ({}) => {
                 <MenuItem value="">Select environment</MenuItem>
                 <MenuItem value="routine/js">routine/js</MenuItem>
                 <MenuItem value="component/react-jsx">component/react-jsx</MenuItem>
+                <MenuItem value="lambda/js">lambda/js</MenuItem>
             </Select>
         </FormControl>
         

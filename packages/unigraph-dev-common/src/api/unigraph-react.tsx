@@ -59,7 +59,7 @@ const refsMap = {
     "@material-ui/icons": () => require('@material-ui/icons'),
 }
 
-const buildRefs = (refs: {env: string, package: string, import: string, as: string}[]) => {
+const buildRefs = (refs: {env: string, package: string, import: string | undefined, as: string}[]) => {
     const refStrings: any[] = [];
     const refValues: any[] = [];
     refs.forEach(el => {
@@ -67,7 +67,7 @@ const buildRefs = (refs: {env: string, package: string, import: string, as: stri
             refStrings.push(el.as);
             // @ts-expect-error: checked for inclusion
             const module: any = refsMap[el.package]?.();
-            refValues.push(module[el.import]);
+            refValues.push(el.import ? module[el.import] : module);
         }
     });
     return [refStrings, refValues]
@@ -78,7 +78,7 @@ export const getComponentFromExecutable = async (data: any, params: any) => {
     const imports = (data?.['_value']?.['imports']?.['_value['] || []).map((el: any) => {return {
         env: el?.['_value']?.['env']['_value.%'],
         package: el?.['_value']?.['package']['_value.%'],
-        import: el?.['_value']?.['import']['_value.%'],
+        import: el?.['_value']?.['import']?.['_value.%'],
         as: el?.['_value']?.['as']['_value.%'],
     }});
     console.log(imports)

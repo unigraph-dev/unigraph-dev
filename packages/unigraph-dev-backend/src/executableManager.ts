@@ -125,6 +125,25 @@ export const runEnvRoutineJs: ExecRunner = (src, context, unigraph) => {
     return fn;
 }
 
+export const runEnvLambdaJs: ExecRunner = (src, context, unigraph) => {
+    //const fn = () => eval(src);
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor
+    const fn = new AsyncFunction("require", "unpad", "context", "unigraph", `try {
+        return ${src}
+} catch (e) {
+        unigraph.addNotification({
+            from: "Executable manager", 
+            name: "Failed to run executable " + context.definition["unigraph.id"], 
+            content: "Error was: " + e.toString() + e.stack }
+        )
+    }`).bind(this, require, unpad, context, unigraph);
+
+    
+
+    return fn;
+}
+
 export const runEnvReactJSX: ExecRunner = (src, context, unigraph) => {
     let transpiled: any;
     try {
@@ -147,6 +166,7 @@ ${src}
 
 export const environmentRunners = {
     "routine/js": runEnvRoutineJs,
-    "component/react-jsx": runEnvReactJSX
+    "lambda/js": runEnvLambdaJs,
+    "component/react-jsx": runEnvReactJSX,
 } /** List of all environments supported in Unigraph */
 

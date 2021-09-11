@@ -52,7 +52,7 @@ const ImportItem = ({data}: any) => {
     return <React.Fragment>
         <Typography>{data?.['env']['_value.%']}</Typography>
         <Typography>{data?.['package']['_value.%']}</Typography>
-        <Typography>{data?.['import']['_value.%']}</Typography>
+        <Typography>{data?.['import']?.['_value.%'] || "*"}</Typography>
         <Typography>{data?.['as']['_value.%']}</Typography>
     </React.Fragment>
 }
