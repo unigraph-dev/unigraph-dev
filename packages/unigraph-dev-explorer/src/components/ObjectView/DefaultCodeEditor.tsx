@@ -57,6 +57,18 @@ const ImportItem = ({data}: any) => {
     </React.Fragment>
 }
 
+const lang: any = {
+    'component/react-jsx': 'jsx',
+    'routine/js': "javascript",
+    "lambda/js": "javascript"
+}
+
+const ext: any = {
+    'component/react-jsx': '.jsx',
+    'routine/js': ".js",
+    "lambda/js": ".js"
+}
+
 export const ExecutableCodeEditor = ({data, options}: any) => {
     
     const unpadded = unpad(data);
@@ -143,8 +155,14 @@ export const ExecutableCodeEditor = ({data, options}: any) => {
                     allowNonTsExtensions: true
                 });
 
-                monaco.languages.typescript.javascriptDefaults.addExtraLib(decl)
+                monaco.languages.typescript.javascriptDefaults.addExtraLib(decl);
+                (data['_value']['imports']?.['_value['] || []).forEach((el: any) => {
+                    if (el['_value']['env']['_value.%'] === "npm") {
+                        // TODO: import references   
+                    }
+                })
             }}
+            path={"main" + ext[unpadded['env']]}
             defaultValue={currentCode}
             onChange={handleEditorChange}
         />}</SizeMe></div>
