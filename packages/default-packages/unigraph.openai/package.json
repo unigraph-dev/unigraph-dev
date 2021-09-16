@@ -3,6 +3,9 @@
     "version": "0.0.1",
     "description": "GPT-3 and Codex integration for Unigraph",
     "unigraph": {
+        "schemas": [
+            {"id": "prompt_generator", "src": "schemas/promptGenerator.json"}
+        ],
         "executables": [
             {
                 "name": "Language modelling with GPT-3",
@@ -10,6 +13,22 @@
                 "id": "lm-gpt3",
                 "src": "executables/lmgpt3.js",
                 "editable": true
+            }, {
+                "name": "GPT-3 Playground",
+                "env": "component/react-jsx",
+                "id": "gpt3-playground",
+                "src": "executables/gpt3Playground.jsx",
+                "editable": true,
+                "imports": [
+                    {"env": "npm", "package": "@material-ui/core", "import": "TextField", "as": "TextField"},
+                    {"env": "npm", "package": "@material-ui/core", "import": "Button", "as": "Button"},
+                    {"env": "npm", "package": "@material-ui/core", "import": "Typography", "as": "Typography"},
+                    {"env": "npm", "package": "@material-ui/core", "import": "Card", "as": "Card"},
+                    {"env": "npm", "package": "@material-ui/core", "import": "Select", "as": "Select"},
+                    {"env": "npm", "package": "@material-ui/core", "import": "MenuItem", "as": "MenuItem"},
+                    {"env": "npm", "package": "@material-ui/icons", "as": "Icons"},
+                    {"env": "npm", "package": "@material-ui/core", "import": "Divider", "as": "Divider"}
+                ]
             }
         ],
         "package_name": "unigraph.openai"

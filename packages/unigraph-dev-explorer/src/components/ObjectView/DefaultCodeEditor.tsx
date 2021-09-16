@@ -52,9 +52,21 @@ const ImportItem = ({data}: any) => {
     return <React.Fragment>
         <Typography>{data?.['env']['_value.%']}</Typography>
         <Typography>{data?.['package']['_value.%']}</Typography>
-        <Typography>{data?.['import']['_value.%']}</Typography>
+        <Typography>{data?.['import']?.['_value.%'] || "*"}</Typography>
         <Typography>{data?.['as']['_value.%']}</Typography>
     </React.Fragment>
+}
+
+const lang: any = {
+    'component/react-jsx': 'jsx',
+    'routine/js': "javascript",
+    "lambda/js": "javascript"
+}
+
+const ext: any = {
+    'component/react-jsx': '.jsx',
+    'routine/js': ".js",
+    "lambda/js": ".js"
 }
 
 export const ExecutableCodeEditor = ({data, options}: any) => {
@@ -143,8 +155,14 @@ export const ExecutableCodeEditor = ({data, options}: any) => {
                     allowNonTsExtensions: true
                 });
 
-                monaco.languages.typescript.javascriptDefaults.addExtraLib(decl)
+                monaco.languages.typescript.javascriptDefaults.addExtraLib(decl);
+                (data['_value']['imports']?.['_value['] || []).forEach((el: any) => {
+                    if (el['_value']['env']['_value.%'] === "npm") {
+                        // TODO: import references   
+                    }
+                })
             }}
+            path={"main" + ext[unpadded['env']]}
             defaultValue={currentCode}
             onChange={handleEditorChange}
         />}</SizeMe></div>

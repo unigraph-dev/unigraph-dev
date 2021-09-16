@@ -1,5 +1,5 @@
 import { Checkbox, FormControlLabel, IconButton, ListItemIcon, ListItemText, Typography } from '@material-ui/core';
-import { MoreVert, OpenInNew, PlayArrow } from '@material-ui/icons';
+import { MoreVert, OpenInNew, PlayArrow, TrendingFlat } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import React, { FC } from 'react';
 import { useDrag, useDrop} from 'react-dnd';
@@ -77,7 +77,8 @@ export const Executable: DynamicViewRenderer = ({data, callbacks}) => {
     const unpadded = unpad(data);
     const icons: any = {
         "routine/js": <PlayArrow/>,
-        "component/react-jsx": <OpenInNew/>
+        "component/react-jsx": <OpenInNew/>,
+        "lambda/js": <TrendingFlat/>
     }
     const actions: any = {
         "routine/js": () => {window.unigraph.runExecutable(unpadded['unigraph.id'] || data.uid, {})},
@@ -92,6 +93,10 @@ export const Executable: DynamicViewRenderer = ({data, callbacks}) => {
                     config: {}
                 })
             })
+        },
+        "lambda/js": async () => {
+            const res = await window.unigraph.runExecutable(unpadded['unigraph.id'] || data.uid, {});
+            console.log(res);
         }
     }
 

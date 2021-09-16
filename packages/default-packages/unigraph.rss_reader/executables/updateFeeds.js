@@ -50,6 +50,10 @@ const objects = results.map((els, index) => els.length >= 1 ? undefined : {
       name: queries[index].item.title,
       url: queries[index].item.link,
       favicon: feeds[queries[index].feedId].site_info.favicon,
+      creative_work: {
+        text: {type: {'unigraph.id': '$/schema/html'}, _value: queries[index].item.content || "<br/>"},
+        abstract: {type: {'unigraph.id': '$/schema/note'}, _value: queries[index].item.contentSnippet?.slice(0, 100) || queries[index].item.content?.slice(0, 100) || "No preview available"},
+      },
       date_created: queries[index].item.isoDate
   }
 }).filter(el => el !== undefined);
