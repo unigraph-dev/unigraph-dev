@@ -246,7 +246,7 @@ export default async function startServer(client: DgraphClient) {
           done(false, null)
           //console.log("Hooks called")
           ws.send(makeResponse(event, true));
-        }).catch(e => {ws.send(makeResponse(event, false, {"error": e})); done(true, null)});
+        }).catch(e => {ws.send(makeResponse(event, false, {"error": e})); console.error(e); done(true, null)});
       })
     },
 

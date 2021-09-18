@@ -40,9 +40,21 @@
                 }
             },
             {
-                "_key": "item_type",
+                "_key": "processor",
                 "_definition": {
-                    "type": { "unigraph.id": "$/schema/any" }
+                    "type": { "unigraph.id": "$/schema/executable" }
+                }
+            },
+            {
+                "_key": "stop_sequence",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                }
+            },
+            {
+                "_key": "max_tokens",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/number" }
                 }
             }
         ]

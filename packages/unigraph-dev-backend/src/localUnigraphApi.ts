@@ -53,14 +53,14 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             states.subscriptions.push(newSub);
             callHooks(states.hooks, "after_subscription_added", {subscriptions: states.subscriptions, ids: [eventId]});
         },
-        subscribeToObject: async (uid, callback: any, eventId = undefined, {queryAsType}: any) => {
+        subscribeToObject: async (uid, callback: any, eventId = undefined, options: any) => {
             eventId = eventId || getRandomInt();
             if (typeof uid === "string" && uid.startsWith('$/')) {
                 // Is named entity
                 uid = states.namespaceMap[uid].uid;
             }
             const frag = `(func: uid(${Array.isArray(uid) ? uid.reduce((prev: string, el: string) => prev + el + ",", "").slice(0, -1): uid })) 
-                ${queryAsType ? makeQueryFragmentFromType(queryAsType, states.caches["schemas"].data) : "@recurse { uid unigraph.id expand(_userpredicate_) }"}`
+                ${options?.queryAsType ? makeQueryFragmentFromType(options.queryAsType, states.caches["schemas"].data) : "@recurse { uid unigraph.id expand(_userpredicate_) }"}`
             const newSub = typeof callback === "function" ? 
                 createSubscriptionLocal(eventId, callback, frag) :
                 createSubscriptionWS(eventId, callback.ws, frag, callback.connId);
@@ -108,6 +108,16 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             }}`
             const res = await client.queryData(query);
             return res;
+        },
+        getObject: async (uid: any, options: any) => {
+            if (typeof uid === "string" && uid.startsWith('$/')) {
+                // Is named entity
+                uid = states.namespaceMap[uid].uid;
+            }
+            const frag = `query(func: uid(${Array.isArray(uid) ? uid.reduce((prev: string, el: string) => prev + el + ",", "").slice(0, -1): uid })) 
+                ${options?.queryAsType ? makeQueryFragmentFromType(options.queryAsType, states.caches["schemas"].data) : "@recurse { uid unigraph.id expand(_userpredicate_) }"}`
+            const ret = (await client.queryDgraph('query { ' + frag + ' }'))[0]?.[0];
+            return ret;
         },
         getQueries: async (fragments, getAll = false, batch = 50) => {
             let allQueries;

@@ -211,6 +211,9 @@ export interface Unigraph<TT = WebSocket | false> {
     getReferenceables(key?: string | undefined, asMapWithContent?: boolean | undefined): Promise<any>;
     /** Gets a list of schemas. */
     getSchemas(schemas?: string[] | undefined, resolve?: boolean): Promise<Record<string, SchemaDgraph>>;
+    getObject?(uidOrName: string, options?: {
+        queryAsType?: string | undefined
+    }): Promise<any>;
     /** Gets a list of packages. */
     getPackages(packages?: string[] | undefined): Promise<Record<string, PackageDeclaration>>;
     /**

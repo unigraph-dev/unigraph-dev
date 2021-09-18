@@ -4,7 +4,7 @@
     "description": "GPT-3 and Codex integration for Unigraph",
     "unigraph": {
         "schemas": [
-            {"id": "prompt_generator", "src": "schemas/promptGenerator.json"}
+            {"id": "prompt_preset", "src": "schemas/promptPreset.json"}
         ],
         "executables": [
             {
@@ -29,6 +29,13 @@
                     {"env": "npm", "package": "@material-ui/icons", "as": "Icons"},
                     {"env": "npm", "package": "@material-ui/core", "import": "Divider", "as": "Divider"}
                 ]
+            },
+            {
+                "name": "Apply a prompt preset with language model",
+                "env": "routine/js",
+                "id": "apply-prompt-preset",
+                "src": "executables/applyPromptPreset.js",
+                "editable": true
             }
         ],
         "package_name": "unigraph.openai"
