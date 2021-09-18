@@ -1,0 +1,23 @@
+{
+    "displayName": "NLP for Unigraph",
+    "version": "0.0.1",
+    "description": "Basic NLP tasks for Unigraph",
+    "unigraph": {
+        "executables": [
+            { "name": "Prompt generator: tl;dr", "env": "lambda/js", "id": "prompt-preset-tldr-generator", "src": "executables/tldrGenerator.js", "editable": true },
+            { "name": "Prompt processor: tl;dr", "env": "lambda/js", "id": "prompt-preset-tldr-processor", "src": "executables/tldrProcessor.js", "editable": true },
+            {
+                "name": "Summarize creative work with language model",
+                "env": "routine/js",
+                "id": "summarize-creative-work",
+                "src": "executables/summarizeCreativeWork.js",
+                "editable": true,
+                "on_hook": "after_creative_work_updated"
+            }
+        ],
+        "entities": [
+            {"id": "prompt_preset_tldr", "src": "entities/promptPresetTldr.json"}
+        ],
+        "package_name": "unigraph.nlp"
+    }
+}

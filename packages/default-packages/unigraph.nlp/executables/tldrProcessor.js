@@ -1,0 +1,3 @@
+{
+    summary: context.params.result
+}
