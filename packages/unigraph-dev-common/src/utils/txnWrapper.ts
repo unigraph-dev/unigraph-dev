@@ -2,10 +2,12 @@ import { UnigraphUpsert } from "../types/unigraph"
 import _, { has, uniqueId } from "lodash";
 
 import { typeMap } from '../types/consts'
+import { getRandomInt } from "../api/unigraph";
 
 function buildDgraphFunctionFromRefQuery(query: {key: string, value: string}[]) {
     let string = "";
     let string1 = "";
+    let typeSelector = ""; let typeSelectorName = "";
     const innerRefs: string[] = [];
     query.forEach(({key, value}: any) => {
         const refTarget = key.replace(/["%@\\]/g, "");
@@ -14,7 +16,9 @@ function buildDgraphFunctionFromRefQuery(query: {key: string, value: string}[]) 
             string += `AND eq(${refTarget}, "${refQuery}")`;
             string1 = `eq(${refTarget}, "${refQuery}")`;
         } else if (refTarget === "type/unigraph.id") {
-            innerRefs.push(`type @filter(eq(<unigraph.id>, "${refQuery}"))`);
+            //innerRefs.push(`type @filter(eq(<unigraph.id>, "${refQuery}"))`);
+            typeSelectorName = "typeSelector" + getRandomInt().toString();
+            typeSelector = `var(func: eq(<unigraph.id>, "${refQuery}")) { <~type> { `+ typeSelectorName +" as uid } }"
         } else {
             // Referencing a field (not unigraph.id), do manual padding!
             // TODO: Support deep nested references
@@ -22,8 +26,13 @@ function buildDgraphFunctionFromRefQuery(query: {key: string, value: string}[]) 
         }
     })
     if (innerRefs.length) {
-        string1 = `type(Entity)`
-        string = `AND type(Entity)`
+        if (typeSelectorName.length) {
+            string1 = `uid(${typeSelectorName})`
+            string = `AND type(Entity)`
+        } else {
+            string1 = `type(Entity)`
+            string = `AND type(Entity)`
+        }
     }
     let fn = `var(func: ${string1}) @filter(${string.slice(4)})`;
     if (innerRefs.length) {
@@ -31,6 +40,7 @@ function buildDgraphFunctionFromRefQuery(query: {key: string, value: string}[]) 
         innerRefs.forEach(str => fn += str + "\n");
         fn += "}";
     }
+    if (typeSelector) fn = [fn, typeSelector] as any;
     return fn;
 }
 
@@ -156,7 +166,11 @@ export function insertsToUpsert(inserts: any[]): UnigraphUpsert {
 
                 if (!refUids.includes(refUid)) {
                     refUids.push(refUid)
-                    const dgraphFunction = buildDgraphFunctionFromRefQuery(query);
+                    let dgraphFunction = buildDgraphFunctionFromRefQuery(query);
+                    if (Array.isArray(dgraphFunction)) {
+                        queries.push(dgraphFunction[1]);
+                        dgraphFunction = dgraphFunction[0];
+                    }
                     queries.push(refUid + " as " + dgraphFunction + "\n");
                     //currentObject["uid"] = refUid;
                     //currentObject = {"uid": `uid(${refUid})`}

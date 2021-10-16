@@ -215,7 +215,14 @@
             },
             "users": {
                 "type": {
-                    "unigraph.id": "$/composer/Array"
+                    "$ref": {
+                        "query": [
+                            {
+                                "key": "unigraph.id",
+                                "value": "$/composer/Array"
+                            }
+                        ]
+                    }
                 },
                 "_value[": [
                     {

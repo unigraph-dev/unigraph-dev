@@ -268,6 +268,9 @@ export const defaultUserlandSchemas = [
         "unigraph.id": "$/composer/Array" // Ordered array
     },
     {
+        "unigraph.id": "$/composer/Union"
+    },
+    {
         "unigraph.id": "$/composer/Object"
     },
     {

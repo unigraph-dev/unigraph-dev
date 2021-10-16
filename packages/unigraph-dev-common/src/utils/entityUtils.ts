@@ -461,7 +461,9 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
                                 };
                                 //currentEntity[key] = undefined; - shouldn't remove the reference. let dgraph match mutations.
                             }
+                            const hasType = value && (value as any)?.type !== undefined
                             recurse(unpadValue(value), schemas, localSchema["_definition"]);
+                            if (hasType) recurse((value as any).type, schemas, localSchema)
                         } else if (typeof value === "object" && (value as any)?.type?.['unigraph.id']) {
                             try {
                                 recurse(unpadValue(value), schemas, schemas[(value as any)?.type?.['unigraph.id']]['_definition'])

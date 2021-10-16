@@ -140,13 +140,18 @@ export default class DgraphClient {
       //const fs = require('fs');
       //fs.writeFileSync('upsert_' + (new Date()).getTime() + getRandomInt().toString() +  ".json", JSON.stringify(data, null, 4));
 
-      response = await withLock(this.txnlock, 'txn', () => txn.doRequest(req).catch(e => {
+      response = await withLock(this.txnlock, 'txn', () => {
+        console.log("Actually doing the upsert...")
+        return txn.doRequest(req).catch(e => {
         console.error('error: ', e);
         console.log(JSON.stringify(data, null, 4))
-      }));
+        })
+      });
       //const fs = require('fs');
       //fs.writeFileSync('imports_uidslog.json', JSON.stringify(response.getUidsMap()));
-      !test ? true : console.log(JSON.stringify(response, null, 2));
+      const tns = response?.getLatency()?.getTotalNs();
+      if (tns && tns > 200000000) console.log(`[PERF] Slow - Upsertion complete - but took ${tns / 1000000.0} ms. `)
+      //!test ? true : console.log(JSON.stringify(response, null, 2));
       if (!response) {
         console.log(JSON.stringify(data, null, 4))
       }
