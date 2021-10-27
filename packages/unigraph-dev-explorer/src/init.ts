@@ -10,7 +10,7 @@ import { init as nb_init } from './examples/notes/NoteBlock';
 import { init as sm_init } from './examples/semantic/init';
 import { init as tw_init } from './examples/twitter/Tweet';
 import { init as re_init } from './examples/reddit/RedditPost';
-import { ListObjectView } from "./components/UnigraphCore/ListObjectView";
+import { ListObjectQuery, ListObjectView } from "./components/UnigraphCore/ListObjectView";
 
 /**
  * Things to do when Unigraph explorer loads
@@ -99,9 +99,9 @@ function initRegistry() {
         "$/schema/notification": CNotification
     });
     window.unigraph.addState('registry/dynamicViewDetailed', {
-        "$/schema/executable": CodeOrComponentView,
-        "$/schema/view": ViewViewDetailed,
-        '$/schema/list': ListObjectView,
+        "$/schema/executable": {view: CodeOrComponentView},
+        "$/schema/view": {view: ViewViewDetailed},
+        '$/schema/list': {view: ListObjectView, query: ListObjectQuery},
     });
     window.unigraph.addState('registry/pages', {});
     window.unigraph.addState('registry/widgets', {});

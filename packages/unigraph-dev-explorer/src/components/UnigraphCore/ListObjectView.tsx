@@ -1,5 +1,7 @@
 import { DynamicObjectListView } from "../ObjectView/DynamicObjectListView"
 
+export const ListObjectQuery = (uid: string) => `(func: uid(${uid})) @recurse { uid <unigraph.id> expand(_userpredicate_) }`
+
 export const ListObjectView = ({data, callbacks}: any) => {
     const listValue = data?.['_value']?.children
 

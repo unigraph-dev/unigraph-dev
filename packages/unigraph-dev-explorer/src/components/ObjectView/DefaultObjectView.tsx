@@ -13,6 +13,7 @@ import { ExecutableCodeEditor } from './DefaultCodeEditor';
 import { DefaultObjectContextMenu, onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import {ErrorBoundary} from 'react-error-boundary'
 import { DynamicComponentView, getComponentAsView } from './DynamicComponentView';
+import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 
 type ObjectViewOptions = {
     viewer?: "string" | "json-tree" | "dynamic-view" | "code-editor" | "dynamic-view-detailed",
@@ -238,19 +239,46 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     </ErrorBoundary> : <React.Fragment/>;
 }
 
+const isStub = (object: any) =>
+    (typeof object === "object" && Object.keys(object).length === 3 && object['_stub'] && object.uid && object.type &&
+     typeof object.type['unigraph.id'] === "string" && typeof object.type['unigraph.id'].startsWith('$/'))
+
+
 export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, callbacks, context, component, attributes, useFallback }) => {
+
+    const isObjectStub = isStub(object)
+    const [loadedObj, setLoadedObj] = React.useState<any>(false)
+    const [subsId, setSubsId] = React.useState(getRandomInt());
+
     const DynamicViewsDetailed = {...window.unigraph.getState('registry/dynamicViewDetailed').value, ...(component || {})}
-    if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViewsDetailed).includes(object.type['unigraph.id'])) {
+
+    React.useEffect(() => {
+        if (isObjectStub) {
+            window.unigraph.unsubscribe(subsId);
+            const newSubs = getRandomInt();
+            const query = DynamicViewsDetailed[object.type['unigraph.id']].query(object.uid)
+            window.unigraph.subscribeToQuery(query, (objects: any[]) => {
+                setLoadedObj(objects[0]);
+            }, newSubs, true);
+            setSubsId(newSubs);
+            callbacks = {...callbacks, subsId: newSubs}
+        }
+
+        return function cleanup () { window.unigraph.unsubscribe(subsId); }
+    }, [object])
+
+    
+    if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViewsDetailed).includes(object.type['unigraph.id']) && ((isObjectStub && loadedObj) || !isObjectStub)) {
         return <ErrorBoundary FallbackComponent={(error) => <div>
             <Typography>Error in detailed AutoDynamicView: </Typography>
             <p>{JSON.stringify(error, null, 4)}</p>
         </div>}>
-            {React.createElement(DynamicViewsDetailed[object.type['unigraph.id']], {
-            data: object, callbacks, options: options || {}, context, ...(attributes ? attributes : {})
+            {React.createElement(DynamicViewsDetailed[object.type['unigraph.id']].view, {
+            data: isObjectStub ? loadedObj : object, callbacks, options: options || {}, context, ...(attributes ? attributes : {})
         })}
         </ErrorBoundary>;
     } else if (useFallback) {
-        return <JsontreeObjectViewer object={object} options={options}/>
+        return <JsontreeObjectViewer object={isObjectStub ? loadedObj : object} options={options}/>
     } else return <React.Fragment/>
 }
 

@@ -98,7 +98,7 @@ const dynamicComponents = {
 }
 
 registerDynamicViews(dynamicComponents);
-registerDetailedDynamicViews({"$/schema/rss_item": RSSItemDetailed})
+registerDetailedDynamicViews({"$/schema/rss_item": {view: RSSItemDetailed}})
 
 const RSSFeedsBody: React.FC<{data: ARSSFeed[]}> = ({data}) => {
     const [newUrl, setNewUrl] = React.useState("");

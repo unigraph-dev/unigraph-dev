@@ -51,5 +51,5 @@ export const Pinboard = ({data}: any) => {
 }
 
 export const pb_init = () => {
-    registerDetailedDynamicViews({"$/schema/pinboard": Pinboard})
+    registerDetailedDynamicViews({"$/schema/pinboard": {view: Pinboard}})
 }
