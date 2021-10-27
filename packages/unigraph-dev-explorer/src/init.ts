@@ -39,7 +39,7 @@ function init() {
 
     const nfState = window.unigraph.addState('notification-center/notifications', []);
     nfState.subscribe((el: any[]) => {
-        el = JSON.parse(JSON.stringify(el)).pop();
+        el = [...el].pop();
         const unpadded: ANotification = unpad(el); 
         let updated = new Date(unpadded?._timestamp?._updatedAt);
         let current = new Date();

@@ -10,7 +10,7 @@ import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import FlexLayout, { Actions, DockLocation, Model, Node, TabNode } from 'flexlayout-react';
 import 'flexlayout-react/style/light.css'
 import './workspace.css'
-import { getParameters, NavigationContext } from "./utils";
+import { getParameters, isMobile, isSmallScreen, NavigationContext } from "./utils";
 import { Container, CssBaseline } from "@material-ui/core";
 import { isJsonString } from "unigraph-dev-common/lib/utils/utils";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
@@ -112,7 +112,7 @@ export function WorkSpace(this: any) {
 		    "type":"border",
             "location": "left",
             "id": "border-left",
-            "selected": 0,
+            "selected": isSmallScreen() ? -1 : 0,
 			"children": [
 				{
 					"type": "tab",

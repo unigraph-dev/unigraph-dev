@@ -26,9 +26,9 @@ export const setupInfiniteScrolling = (uids: string[], chunk = 50, stateCallback
             const toSub = states.chunks[subsHead];
             const subsId = getRandomInt();
             states.subs.push({id: subsId, result: []});
-            window.unigraph.subscribeToObject(toSub, (results: any[]) => {
+            window.unigraph.subscribeToObject(toSub, (results: any[] | any) => {
                 let uidsMap: any = {};
-                results.forEach((el: any) => {uidsMap[el.uid] = el});
+                results.forEach ? results.forEach((el: any) => {uidsMap[el.uid] = el}) : uidsMap[results.uid] = results;
                 states.subs[subsHead].result = toSub.map(el => uidsMap[el]);
                 onStateUpdated();
             }, subsId);

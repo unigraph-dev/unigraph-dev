@@ -44,7 +44,7 @@ export const CodeEditor = ({id}: any) => {
 
     const [currentTab, setCurrentTab]: any = React.useState(0);
 
-    const currentView = <DetailedObjectView uid={currentUid} id={id} component={{"$/schema/executable": ExecutableCodeEditor}} />
+    const currentView = <DetailedObjectView uid={currentUid} id={id} component={{"$/schema/executable": {view: ExecutableCodeEditor}}} />
 
 
     useEffectOnce(() => {

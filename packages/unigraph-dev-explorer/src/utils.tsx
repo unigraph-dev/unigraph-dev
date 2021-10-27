@@ -159,10 +159,22 @@ export const isElectron = () => {
     return (userAgent.indexOf(' electron/') > -1 && window.electronShell);
 }
 
+/**
+ * Whether this is a mobile device with touch capacity.
+ * Not to be confused with isSmallScreen which checks width. 
+ */
 export const isMobile = () => {
     return (('ontouchstart' in window) ||
      (navigator.maxTouchPoints > 0) ||
      (navigator.msMaxTouchPoints > 0));
+}
+
+/**
+ * Whether the window is a small screen for layouting. 
+ * Not to be confused with isMobile which checks touch.
+ */
+export const isSmallScreen = () => {
+    return window.innerWidth <= 480;
 }
 
 export const openUrl = (url: string) => {

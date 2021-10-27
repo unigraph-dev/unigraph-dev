@@ -16,14 +16,18 @@ export const ConnectionWidget: React.FC = ({}) => {
     const [counts, setCounts] = React.useState<any[]>([])
 
     useEffectOnce(() => {
-        window.unigraph.getStatus().then((st: any) => setContent(st))
-        window.unigraph.getQueries(nsmap.map(el => getQuery(el))).then((res: any[]) => {
-            setCounts(res.map((el, index) => [nsmap[index], el[0]?.['objects']]))
-        })
+        const poll = () => {
+            window.unigraph.getStatus().then((st: any) => setContent(st))
+            window.unigraph.getQueries(nsmap.map(el => getQuery(el))).then((res: any[]) => {
+                setCounts(res.map((el, index) => [nsmap[index], el[0]?.['objects']]))
+            })
+        };
+        setInterval(poll, 10000)
+        poll();
     })
 
 
-    return <div>
+    return <div style={{overflowY: "auto", height: "100%"}}>
         <Typography variant="h5" gutterBottom >Unigraph Connection</Typography>
         <b>Graph DB Version </b> {content?.dgraph?.version} <br/>
         <b>Caches in memory </b> {JSON.stringify(content?.unigraph?.cache?.names)} <br/>
