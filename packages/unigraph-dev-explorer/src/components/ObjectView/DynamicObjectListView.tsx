@@ -109,7 +109,7 @@ const DynamicList = ({ items, context, listUid, callbacks, itemUids, itemRemover
             });
             setSetupProps(newProps);
             newProps.next();
-        }
+        } else {setLoadedItems([])};
 
         return function cleanup () { setupProps?.cleanup() }
     }, [items])
