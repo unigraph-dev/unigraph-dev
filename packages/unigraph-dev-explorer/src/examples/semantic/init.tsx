@@ -5,9 +5,9 @@ import { InterfaceSemantic } from "./InterfaceSemantic";
 import { Markdown } from "./Markdown";
 
 export const init = () => {
-    registerDetailedDynamicViews({"$/schema/html": Html});
-    registerDetailedDynamicViews({"$/schema/tag": BacklinkView});
-    registerDetailedDynamicViews({"$/schema/markdown": Markdown});
+    registerDetailedDynamicViews({"$/schema/html": {view: Html}});
+    registerDetailedDynamicViews({"$/schema/tag": {view: BacklinkView}});
+    registerDetailedDynamicViews({"$/schema/markdown": {view: Markdown}});
     registerDynamicViews({"$/schema/markdown": Markdown});
     registerDynamicViews({"$/schema/interface/semantic": InterfaceSemantic})
 }

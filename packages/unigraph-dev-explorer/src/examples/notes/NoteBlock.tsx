@@ -336,7 +336,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
 
 export const init = () => {
     registerDynamicViews({"$/schema/note_block": NoteBlock})
-    registerDetailedDynamicViews({"$/schema/note_block": DetailedNoteBlock})
+    registerDetailedDynamicViews({"$/schema/note_block": {view: DetailedNoteBlock}})
 
     registerContextMenuItems("$/schema/note_block", [(uid: any, object: any, handleClose: any, callbacks: any) => <MenuItem onClick={() => {
         handleClose(); callbacks['convert-child-to-todo']();

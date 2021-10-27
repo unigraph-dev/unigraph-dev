@@ -13,6 +13,7 @@ import Sugar from "sugar";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import _ from "lodash";
 import { Html } from "../semantic/Html";
+import { setupInfiniteScrolling } from "../../components/ObjectView/infiniteScrolling";
 
 export type ARSSFeed = {
     uid?: string,
@@ -98,7 +99,7 @@ const dynamicComponents = {
 }
 
 registerDynamicViews(dynamicComponents);
-registerDetailedDynamicViews({"$/schema/rss_item": RSSItemDetailed})
+registerDetailedDynamicViews({"$/schema/rss_item": {view: RSSItemDetailed}})
 
 const RSSFeedsBody: React.FC<{data: ARSSFeed[]}> = ({data}) => {
     const [newUrl, setNewUrl] = React.useState("");
@@ -134,72 +135,30 @@ export const RSSFeedsList = withUnigraphSubscription(
 const RSSItemsListBody: React.FC<any> = ({data, viewId}) => {
 
     const [loadedItems, setLoadedItems] = React.useState<UnigraphObject[]>([]);
-    const [subs, setSubs] = React.useState<any[]>([]);
-    const subsRef = React.useRef<any>([]);
-    const [reload, setReload] = React.useState(0);
-    const [chunks, setChunks] = React.useState<any[][]>(_.chunk(data, 50));
-
-    React.useEffect(() => { setChunks(_.chunk(data, 50)) }, [data]);
-
-    React.useEffect(() => { 
-        subsRef.current = subs;
-        if (!(loadedItems.length && !subs.length)) setLoadedItems(subs.reduce((prev: any[], current: any) => {prev.push(...current.results); return prev;}, []));
-    }, [subs]);
+    const [setupProps, setSetupProps] = React.useState<{next: any, cleanup: any} | null>(null);
 
     React.useEffect(() => {
-        if (reload !== 0 && subs.length === 0) {
-            for(let i=0; i<reload; ++i) {
-                nextGroup();
-            };
-            setReload(0);
+        if (setupProps?.cleanup) setupProps.cleanup();
+        if (data.length) {
+            const newProps = setupInfiniteScrolling(data.map((el: any) => el.uid), 100, (items: any[]) => {
+                setLoadedItems(items);
+            });
+            setSetupProps(newProps);
+            newProps.next();
         }
-    }, [subs, reload])
 
-    const setSubResult = React.useCallback((data: any[], index: number) => {
-        let newSubs = [...subsRef.current];
-        if (newSubs[index]) {
-            newSubs[index].results = data;
-            setSubs(newSubs)
-        };
-    }, [subs]);
-    const nextGroup = () => {
-        console.log("Showing next group...", subs.length)
-        if (chunks[subs.length]?.length) {
-            const subId = getRandomInt();
-            const thisSub = {id: subId, results: [] };
-            console.log(chunks[subs.length].map((el: any) => el.uid));
-            window.unigraph.subscribeToObject(chunks[subs.length].map((el: any) => el.uid), (results: any[]) => {
-                let resultsMap: any = {};
-                results.forEach((el: any) => resultsMap[el.uid] = el);
-                setSubResult(chunks[subs.length].map((el: any) => resultsMap[el.uid]), subs.length);
-            }, subId, {queryAsType: "$/schema/rss_item"});
-            setSubs([...subs, thisSub]);
-        }
-    };
-
-    React.useEffect(() => {
-        const nextGroups = subs.length || 1;
-        const cleanup = () => {
-            subsRef.current.forEach((el: any) => {
-                window.unigraph.unsubscribe(el.id);
-        })};
-        cleanup();
-        setSubs([]);
-        setReload(nextGroups);
-        return cleanup;
-    }, [chunks])
+        return function cleanup () { setupProps?.cleanup() }
+    }, [data])
 
     return <div>
         <InfiniteScroll
             dataLength={loadedItems.length} //This is important field to render the next data
-            next={nextGroup}
+            next={setupProps?.next || (() => {})}
             scrollableTarget={"workspaceContainer"+viewId}
-            hasMore={true}
+            hasMore={loadedItems.length < data.length}
             loader={<h4>Loading...</h4>}
             endMessage={
-                <p style={{ textAlign: 'center' }}>
-                <b>Yay! You have seen it all</b>
-                </p>
+                <React.Fragment/>
             }
         >
             {(loadedItems || []).map((it: any) => <ListItem button key={it.uid}>
