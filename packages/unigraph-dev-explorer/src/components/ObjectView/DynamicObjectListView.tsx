@@ -122,6 +122,7 @@ const DynamicList = ({ items, context, listUid, callbacks, itemUids, itemRemover
         endMessage={
             <React.Fragment/>
         }
+        scrollableTarget="scrollableDiv"
     >
         {loadedItems.map((el: any, index: number) => <DynamicListItem
             item={el} index={index} context={context} listUid={listUid}
@@ -241,7 +242,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
                 style={{ display: itemRemover === _.noop ? "none" : "" }}
             ><ClearAll /></IconButton>
         </div>
-        <div style={{ flexGrow: 1, overflowY: "auto" }}>
+        <div style={{ flexGrow: 1, overflowY: "auto" }} id="scrollableDiv" >
             {!groupBy.length ? 
                 React.createElement(DynamicList, { items: procItems, context, listUid, callbacks, itemRemover, itemUids: procItems.map(el => el.uid), itemGetter }) :
                 groupers[groupBy](procItems.map(itemGetter)).map((el: Group) => <React.Fragment>
