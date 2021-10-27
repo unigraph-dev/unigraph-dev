@@ -4,7 +4,7 @@ import { DynamicObjectListView } from "../ObjectView/DynamicObjectListView"
 export const ListObjectQuery = (uid: string) => `(func: uid(${uid})) {
     _value {
         name { <_value.%> }
-        children { <_value[> {
+        children { uid <_value[> {
             _value { 
                 uid
                 type { <unigraph.id> }

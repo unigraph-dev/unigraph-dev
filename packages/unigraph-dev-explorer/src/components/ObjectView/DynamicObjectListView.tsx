@@ -126,7 +126,7 @@ const DynamicList = ({ items, context, listUid, callbacks, itemUids, itemRemover
     >
         {loadedItems.map((el: any, index: number) => <DynamicListItem
             item={el} index={index} context={context} listUid={listUid}
-            callbacks={callbacks} itemUids={itemUids} itemRemover={itemRemover}
+            callbacks={callbacks} itemUids={items.map((el: any) => itemGetter(el).uid)} itemRemover={itemRemover}
         />)}
     </InfiniteScroll>  
 }
