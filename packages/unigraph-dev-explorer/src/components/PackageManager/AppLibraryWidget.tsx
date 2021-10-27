@@ -13,7 +13,7 @@ export const AppShortcut = ({avatar, address, text}: AppShortcutProps) => {
 }
 
 export const AppLibraryWidget = ({}) => {
-    return <div>
+    return <div style={{overflowY: "auto", height: "100%"}}>
         <Typography variant="h5">Recommended Apps</Typography>
         <NavigationContext.Consumer>
         { (navigator: any) => <Grid container>

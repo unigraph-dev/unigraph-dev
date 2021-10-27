@@ -9,7 +9,7 @@ frames as var(func: type(Entity)) @cascade {
     }
     _value {
         start {
-            _value {
+            _value @filter(le(<_value.%dt>, "${(new Date()).toJSON()}")) {
                 <_value.%dt>
             }
         }
