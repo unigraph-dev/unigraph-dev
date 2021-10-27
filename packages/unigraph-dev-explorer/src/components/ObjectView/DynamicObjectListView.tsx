@@ -10,6 +10,8 @@ import { AutoDynamicView } from "./DefaultObjectView";
 import { AutoSizer, CellMeasurer, CellMeasurerCache, List as VList } from 'react-virtualized';
 import { SizeMe } from "react-sizeme";
 import { isMobile } from "../../utils";
+import InfiniteScroll from "react-infinite-scroll-component";
+import { setupInfiniteScrolling } from "./infiniteScrolling";
 
 type Group = {
     name: string,
@@ -20,16 +22,16 @@ type Grouper = (el: any[]) => Group[];
 
 const groupers: Record<string, Grouper> = {
     'date': (el: any[]) => {
-        let groupsMap: any = {"Today": [], "Last week": [], "Last month": [], "Earlier": []};
+        let groupsMap: any = { "Today": [], "Last week": [], "Last month": [], "Earlier": [] };
         el.forEach(it => {
             if (it && it._timestamp && it._timestamp._updatedAt) {
                 let day = new Date(it._timestamp._updatedAt);
                 let now = new Date();
-                if (now.getTime() - day.getTime() <= 1000*60*60*24 ) {
+                if (now.getTime() - day.getTime() <= 1000 * 60 * 60 * 24) {
                     groupsMap['Today'].push(it);
-                } else if (now.getTime() - day.getTime() <= 1000*60*60*24*7) {
+                } else if (now.getTime() - day.getTime() <= 1000 * 60 * 60 * 24 * 7) {
                     groupsMap['Last week'].push(it);
-                } else if (now.getTime() - day.getTime() <= 1000*60*60*24*31) {
+                } else if (now.getTime() - day.getTime() <= 1000 * 60 * 60 * 24 * 31) {
                     groupsMap['Last month'].push(it);
                 } else {
                     groupsMap['Earlier'].push(it);
@@ -38,7 +40,7 @@ const groupers: Record<string, Grouper> = {
                 groupsMap['Earlier'].push(it)
             }
         });
-        return Object.entries(groupsMap).map(([k, v]) => {return {name: k, items: v as any[]}})
+        return Object.entries(groupsMap).map(([k, v]) => { return { name: k, items: v as any[] } })
     },
     'type': (el: any[]) => {
         let groupsMap: any = {};
@@ -50,23 +52,24 @@ const groupers: Record<string, Grouper> = {
                 groupsMap[type] = [it]
             }
         })
-        return Object.entries(groupsMap).map(([k, v]) => {return {name: k, items: v as any[]}})
+        return Object.entries(groupsMap).map(([k, v]) => { return { name: k, items: v as any[] } })
     },
 }
 
-const DynamicListItem = ({listUid, item, index, context, callbacks, itemUids, itemRemover}: any) => {
+const DynamicListItem = ({ listUid, item, index, context, callbacks, itemUids, itemRemover }: any) => {
     return <React.Fragment>
         <Grow in key={item.uid}>
             <ListItem>
                 <ListItemIcon onClick={() => {
                     itemRemover(item['uid'])
-                }} style={{display: (itemRemover === _.noop || isMobile()) ? "none" : ""}}><ClearAll/></ListItemIcon>
-                <AutoDynamicView object={new UnigraphObject(item)} callbacks={{...callbacks, 
+                }} style={{ display: (itemRemover === _.noop || isMobile()) ? "none" : "" }}><ClearAll /></ListItemIcon>
+                <AutoDynamicView object={new UnigraphObject(item)} callbacks={{
+                    ...callbacks,
                     context: context,
-                    removeFromContext: (where: undefined | "left" | "right") => { 
+                    removeFromContext: (where: undefined | "left" | "right") => {
                         let uids = {
-                            "left": itemUids.slice(0, index), 
-                            "right": undefined, 
+                            "left": itemUids.slice(0, index),
+                            "right": undefined,
                             "": undefined
                         }[where || ""] || [item['uid']]
                         itemRemover(uids)
@@ -78,58 +81,54 @@ const DynamicListItem = ({listUid, item, index, context, callbacks, itemUids, it
 }
 
 export type ItemRemover = (uids: string | string[] | number | number[]) => void;
-export type Filter = {id: string, fn: (_: any) => boolean}
+export type Filter = { id: string, fn: (_: any) => boolean }
 
 export type DynamicObjectListViewProps = {
-    items: any[], 
-    listUid?: string, 
-    context: any, 
-    callbacks?: any, 
-    itemGetter?: any, 
-    itemRemover?: ItemRemover, 
-    filters?: Filter[], 
+    items: any[],
+    listUid?: string,
+    context: any,
+    callbacks?: any,
+    itemGetter?: any,
+    itemRemover?: ItemRemover,
+    filters?: Filter[],
     defaultFilter?: string,
     reverse?: boolean,
     virtualized?: boolean,
 }
 
-const DynamicList = ({items, virtualized, context, listUid, callbacks, itemUids, itemRemover, itemGetter}: any) => {
-    const cache = React.useMemo(() => {
-        return new CellMeasurerCache({
-            defaultHeight: 75,
-            fixedWidth: true,
-        });
-    }, []);
+const DynamicList = ({ items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true }: any) => {
 
-    return virtualized ? <SizeMe monitorHeight refreshRate={200}>
-        {({size}) => {cache.clearAll(); return <VList rowRenderer={({index, isScrolling, key, parent, style}: any) => {
-        return (
-            <CellMeasurer
-              cache={cache}
-              columnIndex={0}
-              key={key}
-              parent={parent}
-              rowIndex={index}
-            >
-              {({ registerChild }: any) => (
-                // 'style' attribute required to position cell (within parent List)
-                <div ref={registerChild} style={style} key={key}>
-                  <DynamicListItem 
-                    item={itemGetter(items[index])} index={index} context={context} listUid={listUid} 
-                    callbacks={callbacks} itemUids={itemUids} itemRemover={itemRemover}
-                  />
-                </div>
-              )}
-            </CellMeasurer>)
-    }} rowHeight={cache.rowHeight}
-    deferredMeasurementCache={cache} rowCount={items.length} height={size.height || 600} width={size.width || 800} style={{outline: "none", height: "100%", width: "100%"}}/>}}
-    </SizeMe> : items.map((el: any, index: number) =>  <DynamicListItem 
-        item={itemGetter(el)} index={index} context={context} listUid={listUid} 
-        callbacks={callbacks} itemUids={itemUids} itemRemover={itemRemover}
-    />);
+    const [loadedItems, setLoadedItems] = React.useState<any[]>([]);
+    const [setupProps, setSetupProps] = React.useState<{next: any, cleanup: any} | null>(null);
+
+    React.useEffect(() => {
+        if (setupProps?.cleanup) setupProps.cleanup();
+        if (items.length) {
+            const newProps = setupInfiniteScrolling(items.map((el: any) => itemGetter(el).uid), infinite ? 25 : items.length, (items: any[]) => {
+                setLoadedItems(items);
+            });
+            setSetupProps(newProps);
+            newProps.next();
+        }
+
+        return function cleanup () { setupProps?.cleanup() }
+    }, [items])
+
+    return <InfiniteScroll
+        dataLength={loadedItems.length}
+        next={setupProps?.next || (() => {})}
+        hasMore={loadedItems.length < items.length}
+        loader={<React.Fragment/>}
+        endMessage={
+            <React.Fragment/>
+        }
+    >
+        {loadedItems.map((el: any, index: number) => <DynamicListItem
+            item={el} index={index} context={context} listUid={listUid}
+            callbacks={callbacks} itemUids={itemUids} itemRemover={itemRemover}
+        />)}
+    </InfiniteScroll>  
 }
-
-const virtThreshold = 400;
 
 /**
  * Component for a list of objects with various functionalities.
@@ -140,16 +139,16 @@ const virtThreshold = 400;
  * @param param0 
  * @returns 
  */
-export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({items, listUid, context, callbacks, itemGetter = _.identity, itemRemover = _.noop, filters = [], defaultFilter, reverse, virtualized}) => {
-    
+export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ items, listUid, context, callbacks, itemGetter = _.identity, itemRemover = _.noop, filters = [], defaultFilter, reverse, virtualized }) => {
+
     const [optionsOpen, setOptionsOpen] = React.useState(false);
     const [groupBy, setGroupBy] = React.useState('');
     const [reverseOrder, setReverseOrder] = React.useState(reverse);
 
     const totalFilters: Filter[] = [
-        {id: "no-filter", fn: () => true},
-        {id: "no-deleted", fn: (obj) => (obj?.['dgraph.type']?.includes?.('Deleted')) ? null : obj},
-        {id: "no-noview", fn: (obj) => getDynamicViews().includes(obj?.['type']?.['unigraph.id']) ? obj : null},
+        { id: "no-filter", fn: () => true },
+        { id: "no-deleted", fn: (obj) => (obj?.['dgraph.type']?.includes?.('Deleted')) ? null : obj },
+        { id: "no-noview", fn: (obj) => getDynamicViews().includes(obj?.['type']?.['unigraph.id']) ? obj : null },
         ...filters];
     const [filtersUsed, setFiltersUsed] = React.useState([...(defaultFilter ? [defaultFilter] : []), 'no-deleted', 'no-noview']);
 
@@ -160,7 +159,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ite
         else allItems = [...items];
         filtersUsed.forEach(el => {
             const filter = totalFilters.find((flt) => flt.id === el);
-            allItems = allItems.filter((it: any) => (filter?.fn || (() => true))(itemGetter(it)) );
+            allItems = allItems.filter((it: any) => (filter?.fn || (() => true))(itemGetter(it)));
         })
         setProcItems(allItems)
     }, [reverseOrder, items, filtersUsed])
@@ -171,8 +170,8 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ite
     const [{ canDrop }, drop] = useDrop(() => ({
         // @ts-expect-error: already checked for namespace map
         accept: Object.keys(window.unigraph.getNamespaceMap() || {}),
-        drop: (item: {uid: string}, monitor) => {
-            if (!monitor.didDrop()) window.unigraph.runExecutable('$/executable/add-item-to-list', {where: contextRef.current.uid, item: item.uid})
+        drop: (item: { uid: string }, monitor) => {
+            if (!monitor.didDrop()) window.unigraph.runExecutable('$/executable/add-item-to-list', { where: contextRef.current.uid, item: item.uid })
         },
         collect: (monitor) => ({
             isOver: !!monitor.isOver(),
@@ -181,20 +180,20 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ite
     }))
 
     return <div style={{
-            backgroundImage: canDrop ? 'url("/assets/drop-here.png")' : '', 
-            backgroundRepeat: "no-repeat", 
-            backgroundPosition: "center", 
-            height: "100%", width: "100%",
-            display: "flex", flexDirection: "column", overflowY: "hidden"
-        }} ref={drop}>
-            <div style={{display: "flex"}}><Accordion expanded={optionsOpen} onChange={() => setOptionsOpen(!optionsOpen)} variant={"outlined"} style={{flexGrow: 1, minWidth: 0}}> 
-            <AccordionSummary  
-            expandIcon={<ExpandMore />}
-            aria-controls="panel1bh-content"
-            id="panel1bh-header"
+        backgroundImage: canDrop ? 'url("/assets/drop-here.png")' : '',
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "center",
+        height: "100%", width: "100%",
+        display: "flex", flexDirection: "column", overflowY: "hidden"
+    }} ref={drop}>
+        <div style={{ display: "flex" }}><Accordion expanded={optionsOpen} onChange={() => setOptionsOpen(!optionsOpen)} variant={"outlined"} style={{ flexGrow: 1, minWidth: 0 }}>
+            <AccordionSummary
+                expandIcon={<ExpandMore />}
+                aria-controls="panel1bh-content"
+                id="panel1bh-header"
             >
-            <Typography style={{flexBasis: '50%', flexShrink: 0}}>View options</Typography>
-            <Typography>{procItems.length} items</Typography>
+                <Typography style={{ flexBasis: '50%', flexShrink: 0 }}>View options</Typography>
+                <Typography>{procItems.length} items</Typography>
             </AccordionSummary>
             <AccordionDetails>
                 <List>
@@ -202,8 +201,8 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ite
                         <Typography>Group items by</Typography>
                         <Select
                             value={groupBy}
-                            onChange={(ev) => {setGroupBy(ev.target.value as string)}}
-                            style={{marginLeft: "24px"}}
+                            onChange={(ev) => { setGroupBy(ev.target.value as string) }}
+                            style={{ marginLeft: "24px" }}
                             displayEmpty
                         >
                             <MenuItem value={''}>None</MenuItem>
@@ -212,43 +211,44 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ite
                         </Select>
                     </ListItem>
                     <ListItem>
-                    <FormControlLabel
-                        control={<Switch checked={reverseOrder} onChange={() => setReverseOrder(!reverseOrder)} name={"moveToInbox"} />}
-                        label={"Latest items on top"}
-                    />
+                        <FormControlLabel
+                            control={<Switch checked={reverseOrder} onChange={() => setReverseOrder(!reverseOrder)} name={"moveToInbox"} />}
+                            label={"Latest items on top"}
+                        />
                     </ListItem>
                     <ListItem>
-                    <Autocomplete
-                        multiple
-                        value={filtersUsed}
-                        onChange={(event, newValue) => {
-                            setFiltersUsed(newValue)
-                        }}
-                        id="filter-selector"
-                        options={totalFilters.map(el => el.id)}
-                        style={{ width: 300 }}
-                        renderInput={(params) => <TextField {...params} label="Filter presets" variant="outlined" />}
-                    />
+                        <Autocomplete
+                            multiple
+                            value={filtersUsed}
+                            onChange={(event, newValue) => {
+                                setFiltersUsed(newValue)
+                            }}
+                            id="filter-selector"
+                            options={totalFilters.map(el => el.id)}
+                            style={{ width: 300 }}
+                            renderInput={(params) => <TextField {...params} label="Filter presets" variant="outlined" />}
+                        />
                     </ListItem>
-                    <ListItem style={{display: context?.uid ? "" : "none"}}>
-                        <Button onClick={() => {window.wsnavigator(`/graph?uid=${context.uid}`)}}>Show Graph view</Button>
+                    <ListItem style={{ display: context?.uid ? "" : "none" }}>
+                        <Button onClick={() => { window.wsnavigator(`/graph?uid=${context.uid}`) }}>Show Graph view</Button>
                     </ListItem>
                 </List>
 
             </AccordionDetails>
         </Accordion>
-        <IconButton 
-            onClick={() => itemRemover(procItems.map((el, idx) => idx))}
-            style={{display: itemRemover === _.noop ? "none" : ""}}
-        ><ClearAll/></IconButton>
+            <IconButton
+                onClick={() => itemRemover(procItems.map((el, idx) => idx))}
+                style={{ display: itemRemover === _.noop ? "none" : "" }}
+            ><ClearAll /></IconButton>
         </div>
-            <div style={{flexGrow: 1, overflowY: "auto"}}>
-            {!groupBy.length ? React.createElement(DynamicList, {items: procItems, context, listUid, callbacks, itemRemover, itemUids: procItems.map(el => el.uid), itemGetter, virtualized: (virtualized && procItems.length > virtThreshold)}) : 
+        <div style={{ flexGrow: 1, overflowY: "auto" }}>
+            {!groupBy.length ? 
+                React.createElement(DynamicList, { items: procItems, context, listUid, callbacks, itemRemover, itemUids: procItems.map(el => el.uid), itemGetter }) :
                 groupers[groupBy](procItems.map(itemGetter)).map((el: Group) => <React.Fragment>
                     <ListSubheader>{el.name}</ListSubheader>
-                    {React.createElement(DynamicList, {items: el.items, context, listUid, callbacks, itemRemover, itemUids: el.items.map(ell => ell.uid), itemGetter: _.identity,})}
+                    {React.createElement(DynamicList, { items: el.items, context, listUid, callbacks, itemRemover, itemUids: el.items.map(ell => ell.uid), itemGetter: _.identity, infinite: false})}
                 </React.Fragment>)
             }
-            </div>
+        </div>
     </div>
 }
