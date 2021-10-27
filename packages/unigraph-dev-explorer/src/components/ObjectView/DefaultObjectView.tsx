@@ -238,7 +238,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     </ErrorBoundary> : <React.Fragment/>;
 }
 
-export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, callbacks, context, component }) => {
+export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, callbacks, context, component, attributes, useFallback }) => {
     const DynamicViewsDetailed = {...window.unigraph.getState('registry/dynamicViewDetailed').value, ...(component || {})}
     if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViewsDetailed).includes(object.type['unigraph.id'])) {
         return <ErrorBoundary FallbackComponent={(error) => <div>
@@ -246,12 +246,12 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, 
             <p>{JSON.stringify(error, null, 4)}</p>
         </div>}>
             {React.createElement(DynamicViewsDetailed[object.type['unigraph.id']], {
-            data: object, callbacks, options: options || {}, context
+            data: object, callbacks, options: options || {}, context, ...(attributes ? attributes : {})
         })}
         </ErrorBoundary>;
-    } else {
+    } else if (useFallback) {
         return <JsontreeObjectViewer object={object} options={options}/>
-    }
+    } else return <React.Fragment/>
 }
 
 const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options, callbacks }) => {

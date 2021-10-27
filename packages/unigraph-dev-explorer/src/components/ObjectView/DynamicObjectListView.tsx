@@ -129,6 +129,8 @@ const DynamicList = ({items, virtualized, context, listUid, callbacks, itemUids,
     />);
 }
 
+const virtThreshold = 400;
+
 /**
  * Component for a list of objects with various functionalities.
  * 
@@ -241,7 +243,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ite
         ><ClearAll/></IconButton>
         </div>
             <div style={{flexGrow: 1, overflowY: "auto"}}>
-            {!groupBy.length ? React.createElement(DynamicList, {items: procItems, context, listUid, callbacks, itemRemover, itemUids: procItems.map(el => el.uid), itemGetter, virtualized: (virtualized && procItems.length > 100)}) : 
+            {!groupBy.length ? React.createElement(DynamicList, {items: procItems, context, listUid, callbacks, itemRemover, itemUids: procItems.map(el => el.uid), itemGetter, virtualized: (virtualized && procItems.length > virtThreshold)}) : 
                 groupers[groupBy](procItems.map(itemGetter)).map((el: Group) => <React.Fragment>
                     <ListSubheader>{el.name}</ListSubheader>
                     {React.createElement(DynamicList, {items: el.items, context, listUid, callbacks, itemRemover, itemUids: el.items.map(ell => ell.uid), itemGetter: _.identity,})}
