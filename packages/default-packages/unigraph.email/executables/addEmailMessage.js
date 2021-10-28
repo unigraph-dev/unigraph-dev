@@ -1,11 +1,11 @@
 const msgs = context.params.messages;
+const dontCheckUnique = context.params.dont_check_unique;
 const simpleParser = require('mailparser').simpleParser;
 
 const parsed = await Promise.all(msgs.map(it => simpleParser(it.message)));
 
-const getQuery = (msgid) => `(func: type(Entity)) @cascade { 
+const getQuery = (msgid) => `(func: uid(parIds)) @cascade { 
     uid
-	type @filter(eq(<unigraph.id>, "$/schema/email_message"))
     _value {
       message_id @filter(eq(<_value.%>, "${msgid}"))
     }
@@ -39,7 +39,9 @@ const dest = parsed.map((el) => {
     }
 })
 
-const results = await unigraph.getQueries(dest.map(el => getQuery(el.message_id)));
+const results = dontCheckUnique ? dest.map(el => []) : await unigraph.getQueries([...(dest.map(el => getQuery(el.message_id))), `var(func: eq(<unigraph.id>, "$/schema/email_message")) {
+    <~type> { parIds as uid }
+}`]);
 
 let inbox_els = []
 let count = 0

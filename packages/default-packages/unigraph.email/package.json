@@ -10,6 +10,19 @@
             "id": "add-email",
             "src": "executables/addEmailMessage.js",
             "editable": true
+        }, {
+            "name": "Add a Gmail account",
+            "env": "routine/js",
+            "id": "add-gmail-account",
+            "src": "executables/addGmailAccount.js",
+            "editable": true
+        }, {
+            "id": "update-gmail-inbox",
+            "env": "routine/js",
+            "src": "executables/updateGmailInbox.js",
+            "periodic": "*/2 * * * *",
+            "editable": true,
+            "name": "Sync Gmail inbox every 2 minutes"
         }],
         "package_name": "unigraph.email"
     }

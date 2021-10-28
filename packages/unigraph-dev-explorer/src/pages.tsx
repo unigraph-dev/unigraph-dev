@@ -30,6 +30,7 @@ import { RedditSettings } from './examples/reddit/RedditSettings';
 import { AppDrawer } from './components';
 import { ConnectionWidget } from './components/UnigraphCore/ConnectionWidget';
 import { AppLibraryWidget } from './components/PackageManager/AppLibraryWidget';
+import { EmailSettings } from './examples/email/EmailSettings';
 
 const pages: Record<string, any> = {
     'datamodel-playground': {
@@ -92,6 +93,10 @@ const pages: Record<string, any> = {
     'settings/reddit': {
       'constructor': (props: any) => <RedditSettings {...props} />,
       'name': 'Reddit Settings',
+    },
+    'settings/email': {
+      'constructor': (props: any) => <EmailSettings {...props} />,
+      'name': 'Email Settings',
     },
     'package-manager': {
       'constructor': (props: any) => <PackageManager {...props} />,
