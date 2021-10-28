@@ -36,6 +36,7 @@
     "express": "^4.17.1",
     "express-ws": "^4.0.0",
     "google-protobuf": "^3.13.0",
+    "googleapis": "^89.0.0",
     "html-metadata": "^1.7.1",
     "jsdom": "^16.5.3",
     "lodash": "^4.17.20",
