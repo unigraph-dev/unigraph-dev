@@ -40,7 +40,7 @@ const EmailMessage: DynamicViewRenderer = ({data, callbacks}) => {
     return <ListItem>
         <ListItemAvatar><Avatar>{unpadded.message?.sender?.[0]?.[0]}</Avatar></ListItemAvatar>
         <ListItemText
-            primary={data?.get('name')?.['_value']?.['_value']?.['_value.%']}
+            primary={[<strong>{unpadded.message?.sender?.[0]}</strong>, <br/>, data?.get('name')?.['_value']?.['_value']?.['_value.%']]}
             secondary={<div style={{display: "flex", alignItems: "center"}}>
                 <Link onClick={() => {
                     const htmlUid = data?.get('content/text')?.['_value']?.['_value']?.['uid'];
