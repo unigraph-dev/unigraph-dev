@@ -149,7 +149,7 @@ export function insertsToUpsert(inserts: any[]): UnigraphUpsert {
                 // uid takes precedence over $ref: when specifying explicit; otherwise doesnt care
                 delete currentObject['$ref'];
                 const refUid = "unigraphquery" + (queries.length + 1);
-                const [upsertObject, upsertQueries] = wrapUpsertFromUpdater({"_value": currentObject['_value']}, refUid, currentObject.uid, blankUidsToRef);
+                const [upsertObject, upsertQueries] = wrapUpsertFromUpdater({"_value": currentObject['_value'], ...(currentObject['unigraph.indexes'] ? {"unigraph.indexes": currentObject['unigraph.indexes']} : {})}, refUid, currentObject.uid, blankUidsToRef);
                 queries.push(...upsertQueries);
                 currentObject = Object.assign(currentObject, upsertObject);
             } else if (currentObject["$ref"] && currentObject["$ref"].query) {
