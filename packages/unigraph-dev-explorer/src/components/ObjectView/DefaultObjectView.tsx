@@ -253,9 +253,9 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, 
     const DynamicViewsDetailed = {...window.unigraph.getState('registry/dynamicViewDetailed').value, ...(component || {})}
 
     React.useEffect(() => {
+        const newSubs = getRandomInt();
         if (isObjectStub) {
             window.unigraph.unsubscribe(subsId);
-            const newSubs = getRandomInt();
             const query = DynamicViewsDetailed[object.type['unigraph.id']].query(object.uid)
             window.unigraph.subscribeToQuery(query, (objects: any[]) => {
                 setLoadedObj(objects[0]);
@@ -264,7 +264,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, 
             callbacks = {...callbacks, subsId: newSubs}
         }
 
-        return function cleanup () { window.unigraph.unsubscribe(subsId); }
+        return function cleanup () { window.unigraph.unsubscribe(newSubs); }
     }, [object])
 
     

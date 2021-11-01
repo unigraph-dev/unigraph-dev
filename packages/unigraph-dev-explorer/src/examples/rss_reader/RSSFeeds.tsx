@@ -139,15 +139,16 @@ const RSSItemsListBody: React.FC<any> = ({data, viewId}) => {
 
     React.useEffect(() => {
         if (setupProps?.cleanup) setupProps.cleanup();
+        let newProps: any = undefined;
         if (data.length) {
-            const newProps = setupInfiniteScrolling(data.map((el: any) => el.uid), 100, (items: any[]) => {
+            newProps = setupInfiniteScrolling(data.map((el: any) => el.uid), 100, (items: any[]) => {
                 setLoadedItems(items);
             });
             setSetupProps(newProps);
             newProps.next();
         }
 
-        return function cleanup () { setupProps?.cleanup() }
+        return function cleanup () { newProps?.cleanup() }
     }, [data])
 
     return <div>
