@@ -11,7 +11,7 @@ function buildDgraphFunctionFromRefQuery(query: {key: string, value: string}[]) 
     const innerRefs: string[] = [];
     query.forEach(({key, value}: any) => {
         const refTarget = key.replace(/["%@\\]/g, "");
-        const refQuery = value.replace(/["%@\\]/g, "");
+        const refQuery = value.replace(/["]/g, "");
         if (refTarget === "unigraph.id") {
             string += `AND eq(${refTarget}, "${refQuery}")`;
             string1 = `eq(${refTarget}, "${refQuery}")`;
