@@ -10,7 +10,7 @@ const account = (await unigraph.getQueries([`(func: uid(accs)) @cascade {
         site {
             _value {
                 _value {
-                    name @filter(eq(<_value.%>, "Gmail")) {
+                    name @filter(eq(<_value.%>, "Google")) {
                         <_value.%>
                     }
                 }
