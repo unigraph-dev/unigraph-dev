@@ -16,14 +16,10 @@ export const ConnectionWidget: React.FC = ({}) => {
     const [counts, setCounts] = React.useState<any[]>([])
 
     useEffectOnce(() => {
-        const poll = () => {
-            window.unigraph.getStatus().then((st: any) => setContent(st))
-            window.unigraph.getQueries(nsmap.map(el => getQuery(el))).then((res: any[]) => {
-                setCounts(res.map((el, index) => [nsmap[index], el[0]?.['objects']]))
-            })
-        };
-        setInterval(poll, 10000)
-        poll();
+        window.unigraph.getStatus().then((st: any) => setContent(st));
+        window.unigraph.getQueries(nsmap.map(el => getQuery(el))).then((res: any[]) => {
+            setCounts(res.map((el, index) => [nsmap[index], el[0]?.['objects']]))
+        })
     })
 
 
@@ -35,6 +31,12 @@ export const ConnectionWidget: React.FC = ({}) => {
         <b>Total schemas </b> {content?.dgraph?.schemas} <br/>
         <b>Total subscriptions </b> {content?.unigraph?.subscription?.length} <br/>
         <div>
+            <Button onClick={() => {
+                window.unigraph.getStatus().then((st: any) => setContent(st))
+                window.unigraph.getQueries(nsmap.map(el => getQuery(el))).then((res: any[]) => {
+                    setCounts(res.map((el, index) => [nsmap[index], el[0]?.['objects']]))
+                })
+            }}>Refresh</Button>
             <Button onClick={() => upload((f: File) => {f.text().then((txt) => window.unigraph.importObjects(txt))})}>Import objects</Button> 
             <Button onClick={() => window.unigraph.subscribeToType('any', (data: any) => {download("unigraph_export_all.json", JSON.stringify(data))}, getRandomInt(), {all: true})}>Export all objects</Button>
         </div>
