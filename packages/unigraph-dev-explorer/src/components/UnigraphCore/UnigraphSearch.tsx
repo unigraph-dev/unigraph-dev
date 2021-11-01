@@ -37,15 +37,16 @@ export const UnigraphSearch = ({id}: any) => {
 
     React.useEffect(() => {
         if (setupProps?.cleanup) setupProps.cleanup();
+        let newProps: any = undefined;
         if (entities.length) {
-            const newProps = setupInfiniteScrolling(entities, 25, (items: any[]) => {
+            newProps = setupInfiniteScrolling(entities, 25, (items: any[]) => {
                 setLoadedItems(items);
             });
             setSetupProps(newProps);
             newProps.next();
         } else {setLoadedItems([])};
 
-        return function cleanup () { setupProps?.cleanup() }
+        return function cleanup () { newProps?.cleanup() }
     }, [entities])
 
     const dynamicViews = window.unigraph.getState('registry/dynamicView').value

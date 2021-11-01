@@ -103,15 +103,16 @@ const DynamicList = ({ items, context, listUid, callbacks, itemUids, itemRemover
 
     React.useEffect(() => {
         if (setupProps?.cleanup) setupProps.cleanup();
+        let newProps: any = undefined;
         if (items.length) {
-            const newProps = setupInfiniteScrolling(items.map((el: any) => itemGetter(el).uid), infinite ? 25 : items.length, (items: any[]) => {
+            newProps = setupInfiniteScrolling(items.map((el: any) => itemGetter(el).uid), infinite ? 25 : items.length, (items: any[]) => {
                 setLoadedItems(items);
             });
             setSetupProps(newProps);
             newProps.next();
         } else {setLoadedItems([])};
 
-        return function cleanup () { setupProps?.cleanup() }
+        return function cleanup () { newProps?.cleanup() }
     }, [items])
 
     return <InfiniteScroll
