@@ -17,7 +17,8 @@ function getPath (obj: any, path: string | string[]): any {
     } else if (Object.keys(obj).includes(path[0])){
         return getPath(obj[path[0]], path.slice(1));
     } else {
-        throw new RangeError('Requested path doesn\'t exist')
+        return undefined;
+        //throw new RangeError('Requested path doesn\'t exist')
     }
 }
 
