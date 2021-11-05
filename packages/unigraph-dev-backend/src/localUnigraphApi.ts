@@ -85,11 +85,11 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         },
         addObject: async (object, schema, padded) => {
             clearEmpties(object);
-            console.log(object);
+            //console.log(JSON.stringify(object, null, 4));
             let unigraphObject = object;
             if (!padded) unigraphObject = buildUnigraphEntity(object, schema, states.caches['schemas'].data);
             const finalUnigraphObject = processAutoref(unigraphObject, schema, states.caches['schemas'].data)
-            console.log(finalUnigraphObject);
+            //console.log(JSON.stringify(finalUnigraphObject, null, 4));
             const upsert = insertsToUpsert([finalUnigraphObject]);
             const uids = await client.createUnigraphUpsert(upsert);
             callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches});
@@ -164,13 +164,13 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             clearEmpties(newObject);
             const newUid = uid ? uid : newObject.uid
             // Get new object's unigraph.origin first
-            console.log("update: 1")
+            //console.log("update: 1")
             let origin = newObject['unigraph.origin'] ? newObject['unigraph.origin'] : (await client.queryData<any>(`query { entity(func: uid(${newUid})) { <unigraph.origin> { uid } }}`, []))[0]?.['unigraph.origin']
             if (!Array.isArray(origin)) origin = [origin];
-            console.log("update: 2", uid)
+            //console.log("update: 2", uid)
             const origObject = (await client.queryUID(uid))[0];
             let finalUpdater = newObject;
-            console.log("update: 3", uid)
+            //console.log("update: 3", uid)
             try {
                 if (pad) {
                     const schema = origObject['type']['unigraph.id'];

@@ -11,7 +11,7 @@ function buildDgraphFunctionFromRefQuery(query: {key: string, value: string}[]) 
     const innerRefs: string[] = [];
     query.forEach(({key, value}: any) => {
         const refTarget = key.replace(/["%@\\]/g, "");
-        const refQuery = value.replace(/["%@\\]/g, "");
+        const refQuery = value.replace(/["]/g, "");
         if (refTarget === "unigraph.id") {
             string += `AND eq(${refTarget}, "${refQuery}")`;
             string1 = `eq(${refTarget}, "${refQuery}")`;
@@ -97,7 +97,7 @@ export function wrapUpsertFromUpdater(orig: any, queryHead: string, hasUid: stri
             const res = Object.fromEntries([
                 ...Object.entries(origNow).map(([key, value]) => {
                     if (key !== '_value[' && key !== '$ref' && key !== 'type') { // FIXME: This currently ignores subsequent UIDs if one is specified. Fix ASAP!
-                        return [key, recurse(origNow[key], buildQuery(thisUid, key, hasUid))]
+                        return [key, recurse(origNow[key], buildQuery(thisUid, key, origNow[key]?.uid?.startsWith?.('0x') ? origNow[key].uid : hasUid))]
                     } else if (key !== '$ref' && key !== 'type') {
                         return [key, recurse(origNow[key], thisUid)]
                     } else { // Don't process `$ref` because we need it later or `type` because it's overwritten

@@ -119,17 +119,22 @@ export default class DgraphClient {
     const txn = this.dgraphClient.newTxn();
     let response: dgraph.Response;
     try {
-      const querybody = data.queries.join('\n');
-      const querystr = `query {
-        ${querybody}
-      }`;
       const mutations: Mutation[] = [...data.mutations, ...data.appends].map((obj: any, index) => {
         const mu = new dgraph.Mutation();
-        mu.setSetJson((data.mutations.includes(obj) && obj && !obj.uid) ? {...obj, uid: `_:upsert${index}`} : obj);
+        const newJson = (data.mutations.includes(obj) && obj && !obj.uid) ? {...obj, uid: `_:upsert${index}`} : obj;
+        if (data.mutations.includes(obj) && obj?.uid?.startsWith('uid(')) {
+          // log the mutation uid as a request
+          data.queries.push('uidreq' + obj.uid.slice(4, -1) + "(func: " + obj.uid + ") { uid }");
+        }
+        mu.setSetJson(newJson);
         !test ? true : console.log(JSON.stringify(obj, null, 2))
         return mu;
       });
       /* eslint-disable */
+      const querybody = data.queries.join('\n');
+      const querystr = `query {
+        ${querybody}
+      }`;
       !test ? true : console.log(querystr)
       const req = new dgraph.Request();
       /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
@@ -139,7 +144,6 @@ export default class DgraphClient {
 
       //const fs = require('fs');
       //fs.writeFileSync('upsert_' + (new Date()).getTime() + getRandomInt().toString() +  ".json", JSON.stringify(data, null, 4));
-
       response = await withLock(this.txnlock, 'txn', () => {
         console.log("Actually doing the upsert...")
         return txn.doRequest(req).catch(e => {
@@ -164,7 +168,15 @@ export default class DgraphClient {
     /* eslint-disable */
     !test ? true : console.log("upsert details above================================================")
     //return ["0x" + getRandomInt().toString()];
-    return data.mutations.map((el, index) => response.getUidsMap().get(el.uid ? (el.uid.startsWith('_:') ? el.uid.slice(2) : el.uid) : `upsert${index}`));
+    return data.mutations.map((el, index) => {
+      let targetUid = `upsert${index}`;
+      if (el.uid) {
+        if (el.uid.startsWith('_:')) targetUid = el.uid.slice(2);
+        else if (el.uid.startsWith('uid(')) return response.getJson()?.["uidreq" +el.uid.slice(4, -1)]?.[0]?.uid;
+        else targetUid = el.uid
+      }
+      return response.getUidsMap().get(targetUid)
+    });
   }
 
   async createDgraphUpsert(data: {query: string | false, mutations: Mutation[]}) {

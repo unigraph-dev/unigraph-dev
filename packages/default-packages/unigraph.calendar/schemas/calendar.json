@@ -1,0 +1,55 @@
+{
+    "dgraph.type": "Type",
+    "_definition": {
+        "type": { "unigraph.id": "$/composer/Object" },
+        "_parameters": {
+            "_indexedBy": { "unigraph.id": "$/primitive/string" }
+        },
+        "_properties": [
+            {
+                "_key": "name",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/interface/textual" }
+                },
+                "_indexAs": "name"
+            },
+            {
+                "_key": "about",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/interface/textual" }
+                }
+            },
+            {
+                "_key": "location",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/interface/textual" }
+                }
+            },
+            {
+                "_key": "color",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/color" }
+                }
+            },
+            {
+                "_key": "foreground_color",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/color" }
+                }
+            },
+            {
+                "_key": "id",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                },
+                "_unique": true
+            },
+            {
+                "_key": "sync_token",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                }
+            }
+        ]
+    }
+}

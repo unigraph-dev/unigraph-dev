@@ -12,7 +12,7 @@ const oauth2Client = new google.auth.OAuth2(
     'http://127.0.0.1:4001/callback?key=gmail'
 );
 
-const scopes = ['https://mail.google.com/']
+const scopes = ['https://mail.google.com/', 'https://www.googleapis.com/auth/calendar']
 
 google.options({ auth: oauth2Client });
 
@@ -40,9 +40,9 @@ unigraph.addObject({
     name: json.emailAddress,
     username: json.emailAddress,
     site: {
-        name: "Gmail",
-        url: "https://mail.google.com",
-        favicon: "https://mail.google.com/favicon.ico"
+        name: "Google",
+        url: "https://www.google.com",
+        favicon: "https://www.google.com/favicon.ico"
     },
     access_token: tokens.bearer,
     token_expires_in: new Date(tokens.expiry).toISOString(),

@@ -23,7 +23,7 @@ export const EmailSettings = ({}) => {
                     site {
                         _value {
                             _value {
-                                name @filter(eq(<_value.%>, "Gmail")) {
+                                name @filter(eq(<_value.%>, "Google")) {
                                     <_value.%>
                                 }
                             }

@@ -1,6 +1,36 @@
 {
     "dgraph.type": "Type",
     "_definition": {
-        "type": { "unigraph.id": "$/primitive/datetime" }
+        "type": { "unigraph.id": "$/composer/Object" },
+        "_parameters": {
+            "_indexedBy": { "unigraph.id": "$/primitive/string" }
+        },
+        "_properties": [
+            {
+                "_key": "name",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/interface/textual" }
+                },
+                "_indexAs": "name"
+            },
+            {
+                "_key": "datetime",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/datetime" }
+                }
+            },
+            {
+                "_key": "all_day",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/boolean" }
+                }
+            },
+            {
+                "_key": "timezone",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                }
+            }
+        ]
     }
 }
