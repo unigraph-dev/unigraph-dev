@@ -86,7 +86,7 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
     let predicate = "_value";
     let noPredicate = false;
     const rawPartUnigraphType = getUnigraphType(rawPart, localSchema?.type?.['unigraph.id']);
-    console.log(localSchema, rawPart)
+    //console.log(localSchema, rawPart)
 
     if (localSchema.type?.['unigraph.id'] === "$/schema/any" && typeof rawPart?.type?.['unigraph.id'] === "string") {
         // If schema is any object and the object has a type (that we can check), 

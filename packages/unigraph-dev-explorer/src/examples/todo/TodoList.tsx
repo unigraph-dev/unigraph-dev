@@ -75,8 +75,8 @@ export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
             secondary={<div style={{display: "flex", alignItems: "baseline"}} children={[...(!unpadded.children?.map ? [] :
                 data?.['_value']?.children?.['_value[']?.map((it: any) => <AutoDynamicView object={it['_value']?.['_value']} inline/>
             )), ...(unpadded.priority > 0 ? [<Chip size="small" icon={<PriorityHigh/>} label={"Priority " + unpadded.priority}/>]: []),
-            ...(unpadded.time_frame?.start && (new Date(unpadded.time_frame?.start)).getTime() !== 0 ? [<Chip size="small" icon={<CalendarToday/>} label={"Start: " + Sugar.Date.relative(new Date(unpadded.time_frame?.start))} />] : []),
-            ...(unpadded.time_frame?.end && (new Date(unpadded.time_frame?.start)).getTime() !== maxDateStamp ? [<Chip size="small" icon={<CalendarToday/>} label={"End: " + Sugar.Date.relative(new Date(unpadded.time_frame?.end))} />] : [])]}></div>}
+            ...(unpadded.time_frame?.start?.datetime && (new Date(unpadded.time_frame?.start?.datetime)).getTime() !== 0 ? [<Chip size="small" icon={<CalendarToday/>} label={"Start: " + Sugar.Date.relative(new Date(unpadded.time_frame?.start?.datetime))} />] : []),
+            ...(unpadded.time_frame?.end?.datetime && (new Date(unpadded.time_frame?.start?.datetime)).getTime() !== maxDateStamp ? [<Chip size="small" icon={<CalendarToday/>} label={"End: " + Sugar.Date.relative(new Date(unpadded.time_frame?.end?.datetime))} />] : [])]}></div>}
         />
     </React.Fragment>
 }

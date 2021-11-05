@@ -14,15 +14,27 @@
                 "_indexAs": "name"
             },
             {
+                "_key": "calendar",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/calendar" }
+                }
+            },
+            {
+                "_key": "recurring_event",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/calendar_event" }
+                }
+            },
+            {
                 "_key": "about",
                 "_definition": {
-                    "type": { "unigraph.id": "$/schema/interface/semantic" }
+                    "type": { "unigraph.id": "$/schema/interface/textual" }
                 }
             },
             {
                 "_key": "location",
                 "_definition": {
-                    "type": { "unigraph.id": "$/schema/interface/semantic" }
+                    "type": { "unigraph.id": "$/schema/interface/textual" }
                 }
             },
             {
@@ -30,6 +42,45 @@
                 "_propertyType": "inheritance",
                 "_definition": {
                     "type": { "unigraph.id": "$/schema/time_frame" }
+                }
+            },
+            {
+                "_key": "icaluid",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                }
+            },
+            {
+                "_key": "eventuid",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                },
+                "_unique": true
+            },
+            {
+                "_key": "recurrence",
+                "_definition": {
+                    "type": {
+                        "unigraph.id": "$/composer/Array"
+                    },
+                    "_parameters": {
+                        "_element": {
+                            "type": { "unigraph.id": "$/schema/time_frame" }
+                        }
+                    }
+                }
+            },
+            {
+                "_key": "recurrence_rules",
+                "_definition": {
+                    "type": {
+                        "unigraph.id": "$/composer/Array"
+                    },
+                    "_parameters": {
+                        "_element": {
+                            "type": { "unigraph.id": "$/primitive/string" }
+                        }
+                    }
                 }
             },
             {

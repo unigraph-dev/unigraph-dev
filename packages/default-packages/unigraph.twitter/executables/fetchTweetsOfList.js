@@ -22,7 +22,7 @@ const getSemanticEntities = (el) => {
     const children = [];
     el.entities?.media?.forEach(el => {
         children.push({
-            key: el.url,
+            key: el.url || "about:blank",
             value: unigraph.buildUnigraphEntity(el.media_url, '$/schema/icon_url')
         })
     });

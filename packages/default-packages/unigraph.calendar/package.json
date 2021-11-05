@@ -7,7 +7,8 @@
         "schemas": [
             {"id": "time_point", "src": "schemas/time_point.json"},
             {"id": "time_frame", "src": "schemas/time_frame.json"},
-            {"id": "calendar_event", "src": "schemas/calendar_event.json"}
+            {"id": "calendar_event", "src": "schemas/calendar_event.json"},
+            {"id": "calendar", "src": "schemas/calendar.json"}
         ],
         "executables": [
             {
@@ -15,6 +16,21 @@
                 "env": "lambda/js",
                 "id": "get-current-events",
                 "src": "executables/get-current-events.js",
+                "editable": true
+            },
+            {
+                "name": "Sync Google calendar every 2 minutes",
+                "env": "routine/js",
+                "id": "sync-google-calendar",
+                "periodic": "*/2 * * * *",
+                "src": "executables/syncGoogleCalendar.js",
+                "editable": true
+            },
+            {
+                "name": "Sync a specific Google calendar",
+                "env": "routine/js",
+                "id": "sync-google-calendar-specific",
+                "src": "executables/syncGoogleCalendarSpecific.js",
                 "editable": true
             }
         ]

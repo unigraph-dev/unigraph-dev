@@ -20,8 +20,14 @@ export const parseTodoObject: (arg0: string) => ATodoList = (todoString: string)
         let calendar = calendar_matches[2] ? calendar_matches : ["", "", calendar_matches[1]];
         console.log(calendar, Sugar.Date.create("tomorrow"))
         time_frame = {
-            start: (!calendar[1]?.length ? undefined : setHours(Sugar.Date.create(calendar[1]), 0, 0, 0, 0)) || getMinDate(),
-            end: (!calendar[2]?.length ? undefined : setHours(Sugar.Date.create(calendar[2]), 23, 59, 59, 999)) || getMaxDate()
+            start: {
+                datetime: (!calendar[1]?.length ? undefined : setHours(Sugar.Date.create(calendar[1]), 0, 0, 0, 0)) || getMinDate(),
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            },
+            end: {
+                datetime: (!calendar[2]?.length ? undefined : setHours(Sugar.Date.create(calendar[2]), 23, 59, 59, 999)) || getMaxDate(),
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            }
         }
         todoString = todoString.replace(calendar_regex, '');
     }

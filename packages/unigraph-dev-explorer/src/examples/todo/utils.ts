@@ -17,8 +17,8 @@ export type ATodoList = {
     priority: number,
     children: any[],
     time_frame?: {
-        start: Date,
-        end: Date
+        start: {datetime: Date},
+        end: {datetime: Date}
     }
 }
 
