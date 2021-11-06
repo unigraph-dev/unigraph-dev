@@ -96,6 +96,13 @@ export type DynamicObjectListViewProps = {
     virtualized?: boolean,
 }
 
+const DynamicListBasic = ({ items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true }: any) => {
+    return items.map((el: any, index: number) => <DynamicListItem 
+        item={itemGetter(el)} index={index} context={context} listUid={listUid} 
+        callbacks={callbacks} itemUids={itemUids} itemRemover={itemRemover}
+    />);
+}
+
 const DynamicList = ({ items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true }: any) => {
 
     const [loadedItems, setLoadedItems] = React.useState<any[]>([]);
@@ -147,12 +154,15 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
     const [groupBy, setGroupBy] = React.useState('');
     const [reverseOrder, setReverseOrder] = React.useState(reverse);
 
+    const isStub = !items[0] || Object.keys(itemGetter(items[0])).filter(el => el.startsWith('_value')).length < 1;
+    console.log(isStub)
+
     const totalFilters: Filter[] = [
         { id: "no-filter", fn: () => true },
         { id: "no-deleted", fn: (obj) => (obj?.['dgraph.type']?.includes?.('Deleted')) ? null : obj },
         { id: "no-noview", fn: (obj) => getDynamicViews().includes(obj?.['type']?.['unigraph.id']) ? obj : null },
         ...filters];
-    const [filtersUsed, setFiltersUsed] = React.useState([...(defaultFilter ? [defaultFilter] : []), 'no-deleted', 'no-noview']);
+    const [filtersUsed, setFiltersUsed] = React.useState([...(defaultFilter ? [defaultFilter] : [])]);
 
     const [procItems, setProcItems] = React.useState<any[]>([]);
     React.useEffect(() => {
@@ -245,10 +255,10 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
         </div>
         <div style={{ flexGrow: 1, overflowY: "auto" }} id="scrollableDiv" >
             {!groupBy.length ? 
-                React.createElement(DynamicList, { items: procItems, context, listUid, callbacks, itemRemover, itemUids: procItems.map(el => el.uid), itemGetter }) :
+                React.createElement(isStub ? DynamicList : DynamicListBasic, { items: procItems, context, listUid, callbacks, itemRemover, itemUids: procItems.map(el => el.uid), itemGetter }) :
                 groupers[groupBy](procItems.map(itemGetter)).map((el: Group) => <React.Fragment>
                     <ListSubheader>{el.name}</ListSubheader>
-                    {React.createElement(DynamicList, { items: el.items, context, listUid, callbacks, itemRemover, itemUids: el.items.map(ell => ell.uid), itemGetter: _.identity, infinite: false})}
+                    {React.createElement(isStub ? DynamicList : DynamicListBasic, { items: el.items, context, listUid, callbacks, itemRemover, itemUids: el.items.map(ell => ell.uid), itemGetter: _.identity, infinite: false})}
                 </React.Fragment>)
             }
         </div>

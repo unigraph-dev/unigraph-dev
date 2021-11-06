@@ -12,10 +12,10 @@
         ],
         "executables": [
             {
-                "name": "Query - get current events",
-                "env": "lambda/js",
-                "id": "get-current-events",
-                "src": "executables/get-current-events.js",
+                "name": "Get next events",
+                "env": "routine/js",
+                "id": "get-next-events",
+                "src": "executables/get-next-events.js",
                 "editable": true
             },
             {

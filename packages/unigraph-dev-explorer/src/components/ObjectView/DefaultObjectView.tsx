@@ -213,7 +213,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     return el ? <ErrorBoundary onError={(error: Error, info: {componentStack: string}) => {
         console.error(error);
       }} FallbackComponent={({error}) => <div style={{backgroundColor: "floralwhite", borderRadius: "8px"}}>
-        <Typography>Error in AutoDynamicView: </Typography>
+        <Typography>Error in AutoDynamicView: (for object {object?.uid})</Typography>
         <p>{error.message}</p>
     </div>}>
         <div 
