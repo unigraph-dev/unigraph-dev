@@ -8,6 +8,7 @@ import { DynamicViewRenderer } from "../../global";
 import Sugar from 'sugar';
 import { Link } from "@material-ui/icons";
 import { getComponentFromPage } from "../../Workspace";
+import { DynamicObjectListView } from "../../components/ObjectView/DynamicObjectListView";
 
 type AEmail = {
     name: string,
@@ -25,13 +26,10 @@ type AEmail = {
 
 const EmailListBody: React.FC<{data: any[]}> = ({data}) => {
 
-    return <div>
-        <List>
-            {data.sort(byUpdatedAt).reverse().map(it => <ListItem button key={it.uid}>
-                <AutoDynamicView object={it} />
-            </ListItem>)}
-        </List>
-    </div>
+    return <DynamicObjectListView 
+        items={data}
+        context={null}
+    />
 }
 
 const EmailMessage: DynamicViewRenderer = ({data, callbacks}) => {
@@ -58,8 +56,8 @@ registerDynamicViews({'$/schema/email_message': EmailMessage})
 
 export const EmailList = withUnigraphSubscription(
     EmailListBody,
-    { schemas: [], defaultData: Array(10).fill({'type': {'unigraph.id': '$/skeleton/default'}}), packages: [emailPackage]},
+    { schemas: [], defaultData: [], packages: [emailPackage]},
     { afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
-        window.unigraph.subscribeToType("$/schema/email_message", (result: any[]) => {setData(result.reverse())}, subsId);
+        window.unigraph.subscribeToType("$/schema/email_message", (result: any[]) => {setData(result.reverse())}, subsId, {uidsOnly: true});
     }}
 )

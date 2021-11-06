@@ -1,7 +1,7 @@
 import { Avatar, Badge, Typography } from "@material-ui/core";
 import { CalendarToday } from "@material-ui/icons";
 import React from "react";
-import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
+import { buildGraph, getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
 import { DynamicObjectListView } from "../../components/ObjectView/DynamicObjectListView";
 import Sugar from 'sugar';
 
@@ -18,8 +18,9 @@ export const CalendarEvent = ({data}: any) => {
                 <Typography variant="body1" style={{marginRight: "8px"}}><strong>{data.get('name').as("primitive")}</strong></Typography>
                 <Typography variant="body2" style={{color: "gray"}}>{data.get('location').as("primitive")}</Typography>
             </div>
-            {"Start: " + Sugar.Date.relative(new Date(data.get('time_frame/start/datetime').as('primitive'))) + ", "}
-            {"End: " + Sugar.Date.relative(new Date(data.get('time_frame/end/datetime').as('primitive')))}
+            {Sugar.Date.medium(new Date(data.get('time_frame/start/datetime').as('primitive'))) + ", "}
+            {Sugar.Date.format(new Date(data.get('time_frame/start/datetime').as('primitive')), "{h}:{mm}%P") + " - "}
+            {Sugar.Date.format(new Date(data.get('time_frame/end/datetime').as('primitive')), "{h}:{mm}%P")}
         </div>
     </div>
 }
@@ -31,18 +32,15 @@ export const Calendar = () => {
         const id = getRandomInt();
 
         window.unigraph.subscribeToType("$/schema/calendar_event", (res: any) => {
-            setCurrentEvents(res);
-        }, id);
+            setCurrentEvents(res.reverse());
+        }, id, {uidsOnly: true});
 
         return function cleanup() { window.unigraph.unsubscribe(id); }
 
     }, [])
 
-    return <div>
-        <Typography gutterBottom>Current Items</Typography>
-        <DynamicObjectListView 
-            items={currentEvents}
-            context={null}
-        />
-    </div>
+    return <DynamicObjectListView 
+        items={currentEvents}
+        context={null}
+    />
 }

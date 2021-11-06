@@ -9,7 +9,7 @@ export const CurrentEvents = () => {
     React.useEffect(() => {
         const id = getRandomInt();
 
-        window.unigraph.subscribeToQuery("$/executable/get-current-events", (res: any) => {
+        window.unigraph.subscribeToQuery("$/executable/get-next-events", (res: any) => {
             setCurrentEvents(buildGraph(res as any[]));
         }, id, true);
 
@@ -17,11 +17,8 @@ export const CurrentEvents = () => {
 
     }, [])
 
-    return <div>
-        <Typography gutterBottom>Current Items</Typography>
-        <DynamicObjectListView 
-            items={currentEvents}
-            context={null}
-        />
-    </div>
+    return <DynamicObjectListView 
+        items={currentEvents}
+        context={null}
+    />
 }
