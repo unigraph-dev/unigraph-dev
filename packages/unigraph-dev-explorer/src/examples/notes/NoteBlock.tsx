@@ -47,7 +47,7 @@ export const NoteBlock = ({data} : any) => {
 const onNoteInput = (inputDebounced: any, event: FormEvent<HTMLSpanElement>) => {
     const newInput = event.currentTarget.textContent;
 
-    inputDebounced(newInput);
+    inputDebounced.current(newInput);
 }
 
 const noteBlockCommands = {
@@ -105,7 +105,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
     const childrenref = React.useRef<any>();
     /** Reference for the box of this element. Used for positioning only */
     const boxRef = React.useRef<any>();
-    const inputDebounced = React.useRef(_.throttle(inputter, 5000)).current
+    const inputDebounced = React.useRef(_.debounce(inputter, 200))
     const setCurrentText = (text: string) => {textInput.current.textContent = text};
     const edited = React.useRef(false);
     const [isEditing, setIsEditing] = React.useState(false);
@@ -123,7 +123,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
         const newNodes = _.unionBy([{uid: data.uid, children: subentities.map((el: any) => el.uid), root: !isChildren}], nodesState.value, 'uid');
         nodesState.setValue(newNodes)
 
-        return function cleanup() {inputDebounced.flush();}
+        return function cleanup() {inputDebounced.current.flush();}
     }, [data])
 
     React.useEffect(() => {
@@ -177,7 +177,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
                     for (let match: any; (match = placeholder.exec(textInput.current.textContent)) !== null;) {
                         if (match.index <= caret && placeholder.lastIndex >= caret) {
                             hasMatch = true;
-                            inputDebounced.cancel();
+                            //inputDebounced.cancel();
                             window.unigraph.getState('global/searchPopup').setValue({show: true, search: match[1], anchorEl: boxRef.current,
                                 onSelected: async (newName: string, newUid: string) => {
                                     const newStr = newContent?.slice?.(0, match.index) + '[[' + newName + ']]' + newContent?.slice?.(match.index+match[0].length);
@@ -185,7 +185,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
                                     // This is an ADDITION operation
                                     //console.log(data);
                                     const semChildren = data?.['_value'];
-                                    inputDebounced.cancel();
+                                    //inputDebounced.cancel();
                                     await window.unigraph.updateObject(data.uid, {
                                         '_value': {
                                             'text': {'_value': {'_value': {'_value.%': newStr}}},
@@ -248,13 +248,13 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
                         case 'Enter':
                             ev.preventDefault();
                             edited.current = false;
-                            inputDebounced.cancel();
+                            inputDebounced.current.cancel();
                             setCommand(() => callbacks['split-child']?.bind(this, textref.current || data.get('text').as('primitive'), caret))
                             break;
                         
                         case 'Tab':
                             ev.preventDefault();
-                            inputDebounced.flush();
+                            inputDebounced.current.flush();
                             if (ev.shiftKey) {
                                 setCommand(() => callbacks['unindent-child-in-parent']?.bind(this))
                             } else {
@@ -274,13 +274,13 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
                         
                         case 'ArrowUp':
                             ev.preventDefault();
-                            inputDebounced.flush();
+                            inputDebounced.current.flush();
                             setCommand(() => callbacks['focus-last-dfs-node'].bind(this, data, editorContext, 0))
                             break;
                         
                         case 'ArrowDown':
                             ev.preventDefault();
-                            inputDebounced.flush();
+                            inputDebounced.current.flush();
                             setCommand(() => callbacks['focus-next-dfs-node'].bind(this, data, editorContext, 0))
                             break;
 
