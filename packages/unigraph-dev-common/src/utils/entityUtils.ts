@@ -650,7 +650,7 @@ export function unpadRecurse(object: any, visitedUids: any[] = []) {
     return result;
 }
 
-export function unpad(object: any, withType = false) {
+export function unpad(object: any, withType = true) {
     
     return {...unpadRecurse(object, []), uid: object?.uid, ...(withType ? {type: object?.type} : {})}
 }
