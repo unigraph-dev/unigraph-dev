@@ -138,7 +138,7 @@ function* nextUid() {
  * This function will ensure that the field `unigraph.id` is unique and all references to be resolved.
  * @param inserts An array of objects or schemas to insert, containing the `$ref` field
  */
-export function insertsToUpsert(inserts: any[], upsert: boolean = true): UnigraphUpsert {
+export function insertsToUpsert(inserts: any[], upsert = true): UnigraphUpsert {
 
     const refUids: string[] = [];
     const genUid = nextUid();
