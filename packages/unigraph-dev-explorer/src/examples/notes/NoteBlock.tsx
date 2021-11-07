@@ -105,7 +105,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
     const childrenref = React.useRef<any>();
     /** Reference for the box of this element. Used for positioning only */
     const boxRef = React.useRef<any>();
-    const inputDebounced = React.useRef(_.throttle(inputter, 1000)).current
+    const inputDebounced = React.useRef(_.throttle(inputter, 5000)).current
     const setCurrentText = (text: string) => {textInput.current.textContent = text};
     const edited = React.useRef(false);
     const [isEditing, setIsEditing] = React.useState(false);
@@ -122,6 +122,8 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
     React.useEffect(() => {
         const newNodes = _.unionBy([{uid: data.uid, children: subentities.map((el: any) => el.uid), root: !isChildren}], nodesState.value, 'uid');
         nodesState.setValue(newNodes)
+
+        return function cleanup() {inputDebounced.flush();}
     }, [data])
 
     React.useEffect(() => {
@@ -129,6 +131,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
         const dataText = data.get('text').as('primitive')
         if (dataText && options?.viewId) window.layoutModel.doAction(Actions.renameTab(options.viewId, `Note: ${dataText}`))
         if (isEditing && textref.current !== dataText && !edited.current) {setCurrentText(dataText); textInput.current.textContent = dataText;}
+        if (textref.current !== dataText && !edited.current) {textref.current = dataText;}
         else if ((textref.current === dataText && edited.current) || textref.current === undefined) edited.current = false;
     }, [data, isEditing])
 
@@ -174,7 +177,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
                     for (let match: any; (match = placeholder.exec(textInput.current.textContent)) !== null;) {
                         if (match.index <= caret && placeholder.lastIndex >= caret) {
                             hasMatch = true;
-                            inputDebounced.flush();
+                            inputDebounced.cancel();
                             window.unigraph.getState('global/searchPopup').setValue({show: true, search: match[1], anchorEl: boxRef.current,
                                 onSelected: async (newName: string, newUid: string) => {
                                     const newStr = newContent?.slice?.(0, match.index) + '[[' + newName + ']]' + newContent?.slice?.(match.index+match[0].length);
@@ -182,6 +185,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
                                     // This is an ADDITION operation
                                     //console.log(data);
                                     const semChildren = data?.['_value'];
+                                    inputDebounced.cancel();
                                     await window.unigraph.updateObject(data.uid, {
                                         '_value': {
                                             'text': {'_value': {'_value': {'_value.%': newStr}}},
@@ -260,9 +264,10 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
 
                         case 'Backspace':
                             //console.log(caret, document.getSelection()?.type)
-                            if (caret === 0 && document.getSelection()?.type === "Caret") {
+                            if (caret === 0 && document.getSelection()?.type === "Caret" && !(textref.current || data.get('text').as('primitive')).length) {
                                 ev.preventDefault();
-                                inputDebounced.flush();
+                                //inputDebounced.cancel();
+                                edited.current = false;
                                 setCommand(() => callbacks['unsplit-child'].bind(this));
                             }
                             break;

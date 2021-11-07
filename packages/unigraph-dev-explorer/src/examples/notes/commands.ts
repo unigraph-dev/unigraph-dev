@@ -80,7 +80,7 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
                     } else return true;
                 }).map((ell: any, idx: number) => {return {...ell, "_index": {"_value.#i": idx}}})
                 //console.log(oldChildren);
-                _.merge(newel, {'_value': {'_value': {'_value': {'_value': {'children': {'_value[': upchildren}}}}}})
+                _.merge(newel, {'_value': {'_value': {'_value': {'children': {'_value[': upchildren}}}}})
             }
             return [...prev, newel, el];
         } else {
@@ -89,7 +89,7 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
         };
     }, [])
     console.log(newChildren)
-    window.unigraph.updateObject(data?.['_value']?.uid, {...data['_value'], children: {'_value[': newChildren}}, false, false, context.callbacks.subsId);
+    window.unigraph.updateObject(data?.['_value']?.uid, {children: {'_value[': newChildren}}, false, false, context.callbacks.subsId);
     context.edited.current = true;
     context.setCommand(() => setFocus.bind(this, data, context, index + 1))
 }
@@ -104,7 +104,7 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
             else return prev;
         } else return prev;
     }, 0)
-    if (children[delAt]?.['_value']?.['_value']?.['_value']?.['text']?.['_value']?.['_value']?.['_value.%'] === "") {
+    if (/*children[delAt]?.['_value']?.['_value']?.['_value']?.['text']?.['_value']?.['_value']?.['_value.%'] === ""*/ true ) {
         window.unigraph.deleteItemFromArray(getSemanticChildren(data).uid, children[delAt].uid, data.uid, context.callbacks.subsId);
         if (index !== 0) {
             context.edited.current = true;
