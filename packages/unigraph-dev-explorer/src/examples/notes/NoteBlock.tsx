@@ -47,7 +47,7 @@ export const NoteBlock = ({data} : any) => {
 const onNoteInput = (inputDebounced: any, event: FormEvent<HTMLSpanElement>) => {
     const newInput = event.currentTarget.textContent;
 
-    inputDebounced(newInput);
+    inputDebounced.current(newInput);
 }
 
 const noteBlockCommands = {
@@ -105,14 +105,14 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
     const childrenref = React.useRef<any>();
     /** Reference for the box of this element. Used for positioning only */
     const boxRef = React.useRef<any>();
-    const inputDebounced = React.useRef(_.throttle(inputter, 1000)).current
+    const inputDebounced = React.useRef(_.debounce(inputter, 200))
     const setCurrentText = (text: string) => {textInput.current.textContent = text};
-    const [edited, setEdited] = React.useState(false);
+    const edited = React.useRef(false);
     const [isEditing, setIsEditing] = React.useState(false);
     const textInput: any = React.useRef();
     const nodesState = window.unigraph.addState(`${options?.viewId || callbacks['get-view-id']()}/nodes`, [])
     const editorContext = {
-        setEdited, setCommand, childrenref, callbacks, nodesState
+        edited, setCommand, childrenref, callbacks, nodesState
     }
 
     //console.log(data);
@@ -122,14 +122,17 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
     React.useEffect(() => {
         const newNodes = _.unionBy([{uid: data.uid, children: subentities.map((el: any) => el.uid), root: !isChildren}], nodesState.value, 'uid');
         nodesState.setValue(newNodes)
+
+        return function cleanup() {inputDebounced.current.flush();}
     }, [data])
 
     React.useEffect(() => {
         dataref.current = data;
         const dataText = data.get('text').as('primitive')
         if (dataText && options?.viewId) window.layoutModel.doAction(Actions.renameTab(options.viewId, `Note: ${dataText}`))
-        if (isEditing && textref.current !== dataText && !edited) {setCurrentText(dataText); textInput.current.textContent = dataText;}
-        else if ((textref.current === dataText && edited) || textref.current === undefined) setEdited(false);
+        if (isEditing && textref.current !== dataText && !edited.current) {setCurrentText(dataText); textInput.current.textContent = dataText;}
+        if (textref.current !== dataText && !edited.current) {textref.current = dataText;}
+        else if ((textref.current === dataText && edited.current) || textref.current === undefined) edited.current = false;
     }, [data, isEditing])
 
     React.useEffect(() => {
@@ -137,11 +140,11 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
     }, [isEditing])
 
     React.useEffect(() => {
-        if (!edited && command) {
+        if (!edited.current && command) {
             command();
             setCommand(undefined);
         }
-    }, [command, edited])
+    }, [command])
 
     return <div style={{width: "100%"}} ref={boxRef} >
         <div onClick={(ev) => { if (!isEditing) {
@@ -164,7 +167,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
                 ref={textInput}
                 onInput={(ev) => {
                     
-                    if (ev.currentTarget.textContent !== data.get('text').as('primitive') && !edited) setEdited(true)
+                    if (ev.currentTarget.textContent !== data.get('text').as('primitive') && !edited.current) edited.current = true
                     const newContent = ev.currentTarget.textContent;
                     const caret = (document.getSelection()?.anchorOffset) as number;
                     // Check if inside a reference block
@@ -174,7 +177,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
                     for (let match: any; (match = placeholder.exec(textInput.current.textContent)) !== null;) {
                         if (match.index <= caret && placeholder.lastIndex >= caret) {
                             hasMatch = true;
-                            inputDebounced.flush();
+                            //inputDebounced.cancel();
                             window.unigraph.getState('global/searchPopup').setValue({show: true, search: match[1], anchorEl: boxRef.current,
                                 onSelected: async (newName: string, newUid: string) => {
                                     const newStr = newContent?.slice?.(0, match.index) + '[[' + newName + ']]' + newContent?.slice?.(match.index+match[0].length);
@@ -182,6 +185,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
                                     // This is an ADDITION operation
                                     //console.log(data);
                                     const semChildren = data?.['_value'];
+                                    //inputDebounced.cancel();
                                     await window.unigraph.updateObject(data.uid, {
                                         '_value': {
                                             'text': {'_value': {'_value': {'_value.%': newStr}}},
@@ -243,13 +247,14 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
                     switch (ev.code) {
                         case 'Enter':
                             ev.preventDefault();
-                            inputDebounced.flush();
-                            setCommand(() => callbacks['split-child']?.bind(this, caret))
+                            edited.current = false;
+                            inputDebounced.current.cancel();
+                            setCommand(() => callbacks['split-child']?.bind(this, textref.current || data.get('text').as('primitive'), caret))
                             break;
                         
                         case 'Tab':
                             ev.preventDefault();
-                            inputDebounced.flush();
+                            inputDebounced.current.flush();
                             if (ev.shiftKey) {
                                 setCommand(() => callbacks['unindent-child-in-parent']?.bind(this))
                             } else {
@@ -259,22 +264,23 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
 
                         case 'Backspace':
                             //console.log(caret, document.getSelection()?.type)
-                            if (caret === 0 && document.getSelection()?.type === "Caret") {
+                            if (caret === 0 && document.getSelection()?.type === "Caret" && !(textref.current || data.get('text').as('primitive')).length) {
                                 ev.preventDefault();
-                                inputDebounced.flush();
+                                //inputDebounced.cancel();
+                                edited.current = false;
                                 setCommand(() => callbacks['unsplit-child'].bind(this));
                             }
                             break;
                         
                         case 'ArrowUp':
                             ev.preventDefault();
-                            inputDebounced.flush();
+                            inputDebounced.current.flush();
                             setCommand(() => callbacks['focus-last-dfs-node'].bind(this, data, editorContext, 0))
                             break;
                         
                         case 'ArrowDown':
                             ev.preventDefault();
-                            inputDebounced.flush();
+                            inputDebounced.current.flush();
                             setCommand(() => callbacks['focus-next-dfs-node'].bind(this, data, editorContext, 0))
                             break;
 
@@ -321,6 +327,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
                             "unindent-child-in-parent": () => {callbacks['unindent-child'](elindex)},
                             "focus-last-dfs-node": focusLastDFSNode,
                             "focus-next-dfs-node": focusNextDFSNode,
+                            "dataref": dataref,
                         }} 
                         component={{"$/schema/note_block": DetailedNoteBlock, "$/schema/view": ViewViewDetailed}} attributes={{isChildren: true, isCollapsed: isCol}} allowSubentity
                         style={el.type?.['unigraph.id'] === "$/schema/note_block" ? {} : 

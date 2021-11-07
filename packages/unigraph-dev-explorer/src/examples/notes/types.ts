@@ -1,5 +1,5 @@
 export type NoteEditorContext = {
-    setEdited: (a: boolean) => any;
+    edited: any
     setCommand: (a: any) => any;
     childrenref: any;
     callbacks: any;

@@ -34,11 +34,11 @@ export const addChild = (data: any, context: NoteEditorContext) => {
             }
         }]
     }, undefined, undefined, context.callbacks.subsId);
-    context.setEdited(true);
+    context.edited.current = true;
     context.setCommand(() => setFocus.bind(this, data, context, 0));
 }
 
-export const splitChild = (data: any, context: NoteEditorContext, index: number, at: number) => {
+export const splitChild = (data: any, context: NoteEditorContext, index: number, oldtext: string, at: number) => {
     //console.log(JSON.stringify([data, index, at], null, 4))
     let currSubentity = -1;
     let isInserted = false;
@@ -47,11 +47,11 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
         if (el?.['_value']?.['type']?.['unigraph.id'] === "$/schema/subentity" && ++currSubentity === index) {
             isInserted = true;
             /* */
-            const oldText = el['_value']['_value']['_value']['text']?.['_value']?.['_value']['_value.%'].slice(0, at);
+            const prevText = oldtext.slice(0, at);
             const splittedEntity = buildUnigraphEntity({
                 text: {
                     type: {"unigraph.id": "$/schema/markdown"}, 
-                    _value: oldText
+                    _value: prevText
                 }
             }, "$/schema/note_block", (window.unigraph as any).getSchemaMap());
             (splittedEntity as any)['_hide'] = true;
@@ -68,19 +68,19 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
             //console.log(el)
             el['_index']['_value.#i'] = elindex + 1;
             el['_value']['_hide'] = true; el['_value']['_value']['_hide'] = true;
-            el['_value']['_value']['_value']['text']['_value']['_value']['_value.%'] = el['_value']['_value']['_value']['text']?.['_value']?.['_value']['_value.%'].slice(at);
+            el['_value']['_value']['_value']['text']['_value']['_value']['_value.%'] = oldtext.slice(at);
             // distribute references accordingly
             if (el?.['_value']?.['_value']?.['_value']?.['children']?.['_value[']) {
                 const oldChildren = el['_value']['_value']['_value']['children'];
                 let upchildren: any[] = [];
                 oldChildren['_value['] = oldChildren['_value['].filter((elc: any) => {
-                    if (elc['_key'] && oldText.includes(elc['_key'])) {
+                    if (elc['_key'] && prevText.includes(elc['_key'])) {
                         upchildren.push({...elc, "_index": {"_value.#i": upchildren.length}});
                         return false;
                     } else return true;
                 }).map((ell: any, idx: number) => {return {...ell, "_index": {"_value.#i": idx}}})
                 //console.log(oldChildren);
-                _.merge(newel, {'_value': {'_value': {'_value': {'_value': {'children': {'_value[': upchildren}}}}}})
+                _.merge(newel, {'_value': {'_value': {'_value': {'children': {'_value[': upchildren}}}}})
             }
             return [...prev, newel, el];
         } else {
@@ -88,9 +88,9 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
             else return [...prev, {uid: el.uid}]
         };
     }, [])
-    //console.log(newChildren)
-    window.unigraph.updateObject(data?.['_value']?.uid, {...data['_value'], children: {'_value[': newChildren}}, false, false, context.callbacks.subsId);
-    context.setEdited(true);
+    console.log(newChildren)
+    window.unigraph.updateObject(data?.['_value']?.uid, {children: {'_value[': newChildren}}, false, false, context.callbacks.subsId);
+    context.edited.current = true;
     context.setCommand(() => setFocus.bind(this, data, context, index + 1))
 }
 
@@ -104,10 +104,10 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
             else return prev;
         } else return prev;
     }, 0)
-    if (children[delAt]?.['_value']?.['_value']?.['_value']?.['text']?.['_value']?.['_value']?.['_value.%'] === "") {
+    if (/*children[delAt]?.['_value']?.['_value']?.['_value']?.['text']?.['_value']?.['_value']?.['_value.%'] === ""*/ true ) {
         window.unigraph.deleteItemFromArray(getSemanticChildren(data).uid, children[delAt].uid, data.uid, context.callbacks.subsId);
         if (index !== 0) {
-            context.setEdited(true);
+            context.edited.current = true;
             context.setCommand(() => () => {focusUid(children[index - 1]['_value']['_value'].uid)})
         }
     }
@@ -142,7 +142,7 @@ export const indentChild = (data: any, context: NoteEditorContext, index: number
             if (currSubentity === index) {
                 isDeleted = true;
                 newUid.uid = el['_value'].uid;
-                newUid['_value'] = {uid: el['_value'].uid, '_value': {uid: el['_value']['_value'].uid}}
+                newUid['_value'] = {uid: el['_value']['_value'].uid}
                 return undefined;
             } else if (currSubentity === parent) {
                 parIndex = elindex;
@@ -156,22 +156,27 @@ export const indentChild = (data: any, context: NoteEditorContext, index: number
             else return {uid: el.uid}
         };
     })
-    if (parIndex !== undefined) newChildren[parIndex] = _.mergeWith({}, newChildren[parIndex], {'_value': { '_value': { '_value': {
-                children: {'_value[': [{
-                    '_index': {'_value.#i': getSemanticChildren(newChildren[parIndex]['_value'])?.['_value[']?.length || 0}, // always append at bottom
-                    '_value': newUid
-                }]}
+    if (parIndex !== undefined) newChildren[parIndex] = {
+            uid: newChildren[parIndex].uid,
+            '_value': { 
+                uid: newChildren[parIndex]._value.uid,
+                '_value': { 
+                    uid: newChildren[parIndex]._value._value.uid,
+                    '_value': {
+                        uid: newChildren[parIndex]._value._value._value.uid,
+                        children: {
+                            uid: newChildren[parIndex]._value._value._value.children?.uid || undefined,
+                            '_value[': [{
+                            '_index': {'_value.#i': getSemanticChildren(newChildren[parIndex]['_value'])?.['_value[']?.length || 0}, // always append at bottom
+                            '_value': newUid
+                        }]}
             }
-        }
-    }}, function (objValue: any, srcValue: any) {
-        if (_.isArray(objValue)) {
-          return objValue.concat(srcValue);
-        }
-      })
+        }}
+    };
     const finalChildren = newChildren.filter((el: any) => el !== undefined);
-    //console.log(finalChildren)
-    window.unigraph.updateObject(data?.['_value']?.uid, {...data['_value'], children: {'_value[': finalChildren}}, false, false, context.callbacks.subsId);
-    context.setEdited(true);
+    console.log(finalChildren)
+    window.unigraph.updateObject(data?.['_value']?.uid, {children: {'_value[': finalChildren}}, false, false, context.callbacks.subsId);
+    context.edited.current = true;
     
     context.setCommand(() => () => {focusUid(newUid['_value'].uid)});
     //context.setCommand(() => noteBlockCommands['set-focus'].bind(this, data, {...context, childrenref: {current: context.childrenref.current.children[parent as number].children[0].children[0].children[1]}}, -1))
@@ -221,7 +226,7 @@ export const unindentChild = async (data: any, context: NoteEditorContext, paren
     console.log(newChildren, newChildren[parent+1]['_value']['_value'].uid);
     await window.unigraph.updateObject(data?.['_value']?.uid, {...data['_value'], children: {'_value[': newChildren}}, false, false, []);
     await window.unigraph.deleteItemFromArray(delUidPar, delUidChild)
-    context.setEdited(true);
+    context.edited.current = true;
     context.setCommand(() => () => focusUid(newChildren[parent+1]['_value']['_value'].uid))
 }
 
