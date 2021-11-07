@@ -28,7 +28,7 @@ const getEod = (date) => {
 start = start ? new Date(start) : new Date();
 const end = new Date((start).getTime() + 1000 * 60 * 60 * 24 * days);
 
-return `(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted)) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) @recurse {
+return `(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted)) AND (NOT eq(<_hide>, true))) @recurse {
     uid
     <unigraph.id>
     expand(_userpredicate_)
@@ -62,11 +62,6 @@ var(func: eq(<unigraph.id>, "$/schema/time_frame")) {
 }
 var(func: uid(frames)) {
     <unigraph.origin> {
-        res0 as uid
-    }
-}
-res as var(func: uid(res0)) @cascade {
-    <type> @filter(NOT eq(<unigraph.id>, "$/schema/time_frame")) {
-        uid
+        res as uid
     }
 }`;

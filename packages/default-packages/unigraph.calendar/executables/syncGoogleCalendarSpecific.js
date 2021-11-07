@@ -37,12 +37,12 @@ const parseRecurrence = (start, end, rrule, timezone) => {
   const startDate = new Date(start), endDate = new Date(end);
   const options = RRule.parseString(rrule);
   options.dtstart = new Date(Date.UTC(
-    startDate.getUTCFullYear(),
-    startDate.getUTCMonth(),
-    startDate.getUTCDate(),
-    startDate.getUTCHours(),
-    startDate.getUTCMinutes(),
-    startDate.getUTCSeconds()
+    startDate.getFullYear(),
+    startDate.getMonth(),
+    startDate.getDate(),
+    startDate.getHours(),
+    startDate.getMinutes(),
+    startDate.getSeconds()
   ))
   var rule = new RRule(options);
   const diff = endDate.getTime() - startDate.getTime();

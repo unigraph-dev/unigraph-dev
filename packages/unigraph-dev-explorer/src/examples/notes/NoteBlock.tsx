@@ -105,7 +105,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
     const childrenref = React.useRef<any>();
     /** Reference for the box of this element. Used for positioning only */
     const boxRef = React.useRef<any>();
-    const inputDebounced = React.useRef(_.debounce(inputter, 200))
+    const inputDebounced = React.useRef(_.debounce(inputter, 1000))
     const setCurrentText = (text: string) => {textInput.current.textContent = text};
     const edited = React.useRef(false);
     const [isEditing, setIsEditing] = React.useState(false);

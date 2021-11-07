@@ -20,7 +20,7 @@ type Group = {
 
 type Grouper = (el: any[]) => Group[];
 
-const groupers: Record<string, Grouper> = {
+const groupersDefault: Record<string, Grouper> = {
     'date': (el: any[]) => {
         let groupsMap: any = { "Today": [], "Last week": [], "Last month": [], "Earlier": [] };
         el.forEach(it => {
@@ -94,6 +94,8 @@ export type DynamicObjectListViewProps = {
     defaultFilter?: string,
     reverse?: boolean,
     virtualized?: boolean,
+    groupBy?: string,
+    groupers?: any
 }
 
 const DynamicListBasic = ({ items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true }: any) => {
@@ -148,10 +150,12 @@ const DynamicList = ({ items, context, listUid, callbacks, itemUids, itemRemover
  * @param param0 
  * @returns 
  */
-export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ items, listUid, context, callbacks, itemGetter = _.identity, itemRemover = _.noop, filters = [], defaultFilter, reverse, virtualized }) => {
+export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ items, groupers, groupBy, listUid, context, callbacks, itemGetter = _.identity, itemRemover = _.noop, filters = [], defaultFilter, reverse, virtualized }) => {
 
     const [optionsOpen, setOptionsOpen] = React.useState(false);
-    const [groupBy, setGroupBy] = React.useState('');
+    let setGroupBy: any;
+    [groupBy, setGroupBy] = React.useState(groupBy || '');
+    groupers = {...groupers, ...groupersDefault}
     const [reverseOrder, setReverseOrder] = React.useState(reverse);
 
     const isStub = !items[0] || Object.keys(itemGetter(items[0])).filter(el => el.startsWith('_value')).length < 1;
@@ -218,8 +222,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
                             displayEmpty
                         >
                             <MenuItem value={''}>None</MenuItem>
-                            <MenuItem value={'date'}>Date added</MenuItem>
-                            <MenuItem value={'type'}>Item type</MenuItem>
+                            {Object.keys(groupers).map(el => <MenuItem value={el}>{el}</MenuItem>)}
                         </Select>
                     </ListItem>
                     <ListItem>
