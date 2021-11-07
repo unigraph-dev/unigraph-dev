@@ -107,12 +107,12 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
     const boxRef = React.useRef<any>();
     const inputDebounced = React.useRef(_.throttle(inputter, 1000)).current
     const setCurrentText = (text: string) => {textInput.current.textContent = text};
-    const [edited, setEdited] = React.useState(false);
+    const edited = React.useRef(false);
     const [isEditing, setIsEditing] = React.useState(false);
     const textInput: any = React.useRef();
     const nodesState = window.unigraph.addState(`${options?.viewId || callbacks['get-view-id']()}/nodes`, [])
     const editorContext = {
-        setEdited, setCommand, childrenref, callbacks, nodesState
+        edited, setCommand, childrenref, callbacks, nodesState
     }
 
     //console.log(data);
@@ -128,8 +128,8 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
         dataref.current = data;
         const dataText = data.get('text').as('primitive')
         if (dataText && options?.viewId) window.layoutModel.doAction(Actions.renameTab(options.viewId, `Note: ${dataText}`))
-        if (isEditing && textref.current !== dataText && !edited) {setCurrentText(dataText); textInput.current.textContent = dataText;}
-        else if ((textref.current === dataText && edited) || textref.current === undefined) setEdited(false);
+        if (isEditing && textref.current !== dataText && !edited.current) {setCurrentText(dataText); textInput.current.textContent = dataText;}
+        else if ((textref.current === dataText && edited.current) || textref.current === undefined) edited.current = false;
     }, [data, isEditing])
 
     React.useEffect(() => {
@@ -137,11 +137,11 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
     }, [isEditing])
 
     React.useEffect(() => {
-        if (!edited && command) {
+        if (!edited.current && command) {
             command();
             setCommand(undefined);
         }
-    }, [command, edited])
+    }, [command])
 
     return <div style={{width: "100%"}} ref={boxRef} >
         <div onClick={(ev) => { if (!isEditing) {
@@ -164,7 +164,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
                 ref={textInput}
                 onInput={(ev) => {
                     
-                    if (ev.currentTarget.textContent !== data.get('text').as('primitive') && !edited) setEdited(true)
+                    if (ev.currentTarget.textContent !== data.get('text').as('primitive') && !edited.current) edited.current = true
                     const newContent = ev.currentTarget.textContent;
                     const caret = (document.getSelection()?.anchorOffset) as number;
                     // Check if inside a reference block
@@ -243,8 +243,9 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
                     switch (ev.code) {
                         case 'Enter':
                             ev.preventDefault();
-                            inputDebounced.flush();
-                            setCommand(() => callbacks['split-child']?.bind(this, caret))
+                            edited.current = false;
+                            inputDebounced.cancel();
+                            setCommand(() => callbacks['split-child']?.bind(this, textref.current || data.get('text').as('primitive'), caret))
                             break;
                         
                         case 'Tab':
@@ -321,6 +322,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
                             "unindent-child-in-parent": () => {callbacks['unindent-child'](elindex)},
                             "focus-last-dfs-node": focusLastDFSNode,
                             "focus-next-dfs-node": focusNextDFSNode,
+                            "dataref": dataref,
                         }} 
                         component={{"$/schema/note_block": DetailedNoteBlock, "$/schema/view": ViewViewDetailed}} attributes={{isChildren: true, isCollapsed: isCol}} allowSubentity
                         style={el.type?.['unigraph.id'] === "$/schema/note_block" ? {} : 

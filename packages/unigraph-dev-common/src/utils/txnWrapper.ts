@@ -79,7 +79,11 @@ export function wrapUpsertFromUpdater(orig: any, queryHead: string, hasUid: stri
             // This means the updater is creating new things inside or changing primitive values: we don't need uid
             queries.pop();
             return origNow;
-        } else if (typeof origNow === 'object' && Array.isArray(origNow)) {
+        }
+        if (hasUid && hasUid.startsWith('0x')) {
+            queries.pop();
+        }
+        if (typeof origNow === 'object' && Array.isArray(origNow)) {
             // TODO: document expected behavior: when upserting an array, elements are always appended.
             if (typeof origNow[0] === 'object') {
                 const currPos = buildQueryCount(thisUid, origNow.length, hasUid);
@@ -97,7 +101,8 @@ export function wrapUpsertFromUpdater(orig: any, queryHead: string, hasUid: stri
             const res = Object.fromEntries([
                 ...Object.entries(origNow).map(([key, value]) => {
                     if (key !== '_value[' && key !== '$ref' && key !== 'type') { // FIXME: This currently ignores subsequent UIDs if one is specified. Fix ASAP!
-                        return [key, recurse(origNow[key], buildQuery(thisUid, key, origNow[key]?.uid?.startsWith?.('0x') ? origNow[key].uid : hasUid))]
+                        const ret = [key, recurse(origNow[key], buildQuery(thisUid, key, hasUid), origNow[key]?.uid?.startsWith?.('0x') ? origNow[key].uid : false)];
+                        return ret;
                     } else if (key !== '$ref' && key !== 'type') {
                         return [key, recurse(origNow[key], thisUid)]
                     } else { // Don't process `$ref` because we need it later or `type` because it's overwritten
@@ -133,7 +138,7 @@ function* nextUid() {
  * This function will ensure that the field `unigraph.id` is unique and all references to be resolved.
  * @param inserts An array of objects or schemas to insert, containing the `$ref` field
  */
-export function insertsToUpsert(inserts: any[]): UnigraphUpsert {
+export function insertsToUpsert(inserts: any[], upsert: boolean = true): UnigraphUpsert {
 
     const refUids: string[] = [];
     const genUid = nextUid();
@@ -148,10 +153,12 @@ export function insertsToUpsert(inserts: any[]): UnigraphUpsert {
             if (currentObject.uid && currentObject.uid.startsWith('0x')) { 
                 // uid takes precedence over $ref: when specifying explicit; otherwise doesnt care
                 delete currentObject['$ref'];
-                const refUid = "unigraphquery" + (queries.length + 1);
-                const [upsertObject, upsertQueries] = wrapUpsertFromUpdater({"_value": currentObject['_value'], ...(currentObject['unigraph.indexes'] ? {"unigraph.indexes": currentObject['unigraph.indexes']} : {})}, refUid, currentObject.uid, blankUidsToRef);
-                queries.push(...upsertQueries);
-                currentObject = Object.assign(currentObject, upsertObject);
+                if (upsert) {
+                    const refUid = "unigraphquery" + (queries.length + 1);
+                    const [upsertObject, upsertQueries] = wrapUpsertFromUpdater({"_value": currentObject['_value'], ...(currentObject['unigraph.indexes'] ? {"unigraph.indexes": currentObject['unigraph.indexes']} : {})}, refUid, currentObject.uid, blankUidsToRef);
+                    queries.push(...upsertQueries);
+                    currentObject = Object.assign(currentObject, upsertObject);
+                }
             } else if (currentObject["$ref"] && currentObject["$ref"].query) {
                 let refUid = "unigraphquery" + (queries.length + 1)
                 if (currentObject.uid && currentObject.uid.startsWith('_:')) {

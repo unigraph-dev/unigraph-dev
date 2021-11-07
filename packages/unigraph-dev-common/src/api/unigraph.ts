@@ -79,7 +79,7 @@ export class UnigraphObject extends Object {
  */
 export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
 
-    const objs: any[] = objects.map((el: any) => new UnigraphObject(el))
+    const objs: any[] = JSON.parse(JSON.stringify(objects)).map((el: any) => new UnigraphObject(el))
     const dict: any = {}
     objs.forEach(object => {if (object?.uid) dict[object.uid] = object})
 
