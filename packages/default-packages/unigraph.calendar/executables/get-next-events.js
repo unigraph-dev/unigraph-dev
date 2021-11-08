@@ -6,7 +6,7 @@
  * @param {number} days How many days to look ahead (only matters if current is not true, default to 7 = next week)
  * @param {boolean} getFrames whether to pair the events with their corresponding timeframes. 
  */
-let { current, days, start, getFrames } = context.params
+let { current, days, start, getFrames, getAll } = context.params
 if (!days) days = 7;
 
 const getSod = (date) => {

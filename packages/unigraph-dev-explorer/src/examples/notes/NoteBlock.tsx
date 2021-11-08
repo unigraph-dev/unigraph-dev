@@ -158,7 +158,7 @@ export const DetailedNoteBlock = ({data, isChildren, callbacks, options, isColla
                         setCaret(document, textInput.current.firstChild, caretPos || textInput.current?.textContent?.length)
                     }
                 }, 0)
-            }}} onBlur={(ev) => {setIsEditing(false)}}>
+            }}} onBlur={(ev) => {setIsEditing(false); inputDebounced.current.flush();}}>
             {(isEditing) ? <Typography 
                 variant={isChildren ? "body1" : "h4"} 
                 onContextMenu={isChildren ? undefined : (event) => onUnigraphContextMenu(event, data, undefined, callbacks)}
