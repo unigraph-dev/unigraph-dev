@@ -7,9 +7,8 @@ import { useDrop } from "react-dnd";
 import { UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
 import { getDynamicViews } from "unigraph-dev-common/lib/api/unigraph-react";
 import { AutoDynamicView } from "./DefaultObjectView";
-import { AutoSizer, CellMeasurer, CellMeasurerCache, List as VList } from 'react-virtualized';
-import { SizeMe } from "react-sizeme";
 import { isMobile } from "../../utils";
+import { buildGraph as buildGraphFn } from "unigraph-dev-common/lib/api/unigraph";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { setupInfiniteScrolling } from "./infiniteScrolling";
 
@@ -95,6 +94,7 @@ export type DynamicObjectListViewProps = {
     reverse?: boolean,
     virtualized?: boolean,
     groupBy?: string,
+    buildGraph?: boolean
     groupers?: any
 }
 
@@ -105,7 +105,7 @@ const DynamicListBasic = ({ items, context, listUid, callbacks, itemUids, itemRe
     />);
 }
 
-const DynamicList = ({ items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true }: any) => {
+const DynamicList = ({ items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true, buildGraph }: any) => {
 
     const [loadedItems, setLoadedItems] = React.useState<any[]>([]);
     const [setupProps, setSetupProps] = React.useState<{next: any, cleanup: any} | null>(null);
@@ -115,7 +115,7 @@ const DynamicList = ({ items, context, listUid, callbacks, itemUids, itemRemover
         let newProps: any = undefined;
         if (items.length) {
             newProps = setupInfiniteScrolling(items.map((el: any) => itemGetter(el).uid), infinite ? 25 : items.length, (items: any[]) => {
-                setLoadedItems(items);
+                setLoadedItems(buildGraph ? buildGraphFn(items) : items);
             });
             setSetupProps(newProps);
             newProps.next();
@@ -150,7 +150,7 @@ const DynamicList = ({ items, context, listUid, callbacks, itemUids, itemRemover
  * @param param0 
  * @returns 
  */
-export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ items, groupers, groupBy, listUid, context, callbacks, itemGetter = _.identity, itemRemover = _.noop, filters = [], defaultFilter, reverse, virtualized }) => {
+export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ items, groupers, groupBy, listUid, context, callbacks, itemGetter = _.identity, itemRemover = _.noop, filters = [], defaultFilter, reverse, virtualized, buildGraph }) => {
 
     const [optionsOpen, setOptionsOpen] = React.useState(false);
     let setGroupBy: any;
@@ -158,15 +158,16 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
     groupers = {...groupers, ...groupersDefault}
     const [reverseOrder, setReverseOrder] = React.useState(reverse);
 
-    const isStub = !items[0] || Object.keys(itemGetter(items[0])).filter(el => el.startsWith('_value')).length < 1;
+    const isStub = !items[0] || Object.keys(itemGetter(items[0])).filter(el => el.startsWith('_value')).length < 1 || items[0]._stub;
     console.log(isStub)
 
     const totalFilters: Filter[] = [
         { id: "no-filter", fn: () => true },
         { id: "no-deleted", fn: (obj) => (obj?.['dgraph.type']?.includes?.('Deleted')) ? null : obj },
         { id: "no-noview", fn: (obj) => getDynamicViews().includes(obj?.['type']?.['unigraph.id']) ? obj : null },
+        { id: "no-textual", fn: (obj) => ["$/schema/markdown"].includes(obj?.['type']?.['unigraph.id']) ? null : obj },
         ...filters];
-    const [filtersUsed, setFiltersUsed] = React.useState([...(defaultFilter ? [defaultFilter] : [])]);
+    const [filtersUsed, setFiltersUsed] = React.useState([...(defaultFilter ? [defaultFilter] : ["no-noview", "no-deleted", "no-textual"])]);
 
     const [procItems, setProcItems] = React.useState<any[]>([]);
     React.useEffect(() => {
@@ -258,10 +259,10 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
         </div>
         <div style={{ flexGrow: 1, overflowY: "auto" }} id="scrollableDiv" >
             {!groupBy.length ? 
-                React.createElement(isStub ? DynamicList : DynamicListBasic, { items: procItems, context, listUid, callbacks, itemRemover, itemUids: procItems.map(el => el.uid), itemGetter }) :
+                React.createElement(isStub ? DynamicList : DynamicListBasic, { items: procItems, context, listUid, callbacks, itemRemover, itemUids: procItems.map(el => el.uid), itemGetter, buildGraph }) :
                 groupers[groupBy](procItems.map(itemGetter)).map((el: Group) => <React.Fragment>
                     <ListSubheader>{el.name}</ListSubheader>
-                    {React.createElement(isStub ? DynamicList : DynamicListBasic, { items: el.items, context, listUid, callbacks, itemRemover, itemUids: el.items.map(ell => ell.uid), itemGetter: _.identity, infinite: false})}
+                    {React.createElement(isStub ? DynamicList : DynamicListBasic, { items: el.items, context, listUid, callbacks, itemRemover, itemUids: el.items.map(ell => ell.uid), itemGetter: _.identity, infinite: false, buildGraph})}
                 </React.Fragment>)
             }
         </div>

@@ -273,6 +273,8 @@ export default class DgraphClient {
     query findByName($a: string) {
       entities(func: eq(unigraph.id, $a)) @recurse {
         unigraph.id
+        _definition
+        uid
         expand(_userpredicate_)
       }
     }
@@ -285,6 +287,7 @@ export default class DgraphClient {
       entities(func: eq(dgraph.type, "Type")) @recurse {
         uid
         unigraph.id
+        _definition
         expand(_userpredicate_)
       }
     }
@@ -298,6 +301,7 @@ export default class DgraphClient {
       entities(func: eq(unigraph.id, "$/meta/namespace_map")) @recurse {
         uid
         unigraph.id
+        _definition
         expand(_userpredicate_)
       }
     }
@@ -316,6 +320,7 @@ export default class DgraphClient {
       entities(func: eq(dgraph.type, "Package")) @recurse {
         uid
         unigraph.id
+        _definition
         expand(_userpredicate_)
       }
     }
@@ -328,6 +333,7 @@ export default class DgraphClient {
       entities(func: eq(dgraph.type, "Executable")) @recurse {
         uid
         unigraph.id
+        _definition
         expand(_userpredicate_)
       }
     }

@@ -107,6 +107,7 @@ export interface Unigraph<TT = WebSocket | false> {
         all?: boolean | undefined, 
         showHidden?: boolean | undefined,
         uidsOnly?: boolean | undefined,
+        metadataOnly?: boolean | undefined,
         first?: number | undefined
     }): Promise<any>;
     /**

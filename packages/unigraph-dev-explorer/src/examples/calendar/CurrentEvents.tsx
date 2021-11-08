@@ -35,7 +35,7 @@ export const CurrentEvents = () => {
             let finalGroups: any = [];
             Object.entries(groups).sort((a, b) => Sugar.Date.create(a[0]).getTime() - Sugar.Date.create(b[0]).getTime()).map(([key, value]: any) => {
                 const insert: any = {name: key, items: []}
-                value.map((val: any) => {
+                value.sort((a: any, b: any) => Sugar.Date.create(new Date((new UnigraphObject(a)).get('start/datetime').as('primitive'))).getTime() - Sugar.Date.create(new Date((new UnigraphObject(b)).get('start/datetime').as('primitive'))).getTime()).map((val: any) => {
                     els.filter(el => el.type['unigraph.id'] !== "$/schema/time_frame").forEach(el => {
                         if (JSON.stringify(unpad(el, false)).includes(val._value.uid)) insert.items.push(el);
                     })

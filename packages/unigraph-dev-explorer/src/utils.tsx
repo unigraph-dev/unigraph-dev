@@ -174,7 +174,7 @@ export const isMobile = () => {
  * Not to be confused with isMobile which checks touch.
  */
 export const isSmallScreen = () => {
-    return window.innerWidth <= 480;
+    return window.innerWidth <= 720;
 }
 
 export const openUrl = (url: string) => {

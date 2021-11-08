@@ -14,6 +14,12 @@ const resQueries = {
     "uids": (qual: string) => `result(${qual}) @filter(type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) {
         uid
     }`,
+    "metadata": (qual: string) => `result(${qual}) @filter(type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) {
+        uid
+        type {
+            unigraph.id
+        }
+    }`,
     "default": (qual: string) => `result(${qual}) @filter(type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) @recurse(depth: 15) {
         uid
         expand(_userpredicate_)
@@ -43,7 +49,7 @@ const getQualFromOptions = (options: any) => {
  */
 export const makeSearchQuery = (
     queryString: string, 
-    display: "indexes" | "uids" | undefined,
+    display: "indexes" | "uids" | "metadata" | undefined,
     hops = 2, // 1 to 4,
     searchOptions: any = {},
 ): string => {

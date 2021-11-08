@@ -58,6 +58,6 @@ export const EmailList = withUnigraphSubscription(
     EmailListBody,
     { schemas: [], defaultData: [], packages: [emailPackage]},
     { afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
-        window.unigraph.subscribeToType("$/schema/email_message", (result: any[]) => {setData(result.reverse())}, subsId, {uidsOnly: true});
+        window.unigraph.subscribeToType("$/schema/email_message", (result: any[]) => {setData(result.reverse())}, subsId, {metadataOnly: true});
     }}
 )
