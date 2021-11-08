@@ -31,6 +31,7 @@ import { AppDrawer } from './components';
 import { ConnectionWidget } from './components/UnigraphCore/ConnectionWidget';
 import { AppLibraryWidget } from './components/PackageManager/AppLibraryWidget';
 import { EmailSettings } from './examples/email/EmailSettings';
+import { BacklinkView } from './components/ObjectView/BacklinkView';
 
 const pages: Record<string, any> = {
     'datamodel-playground': {
@@ -105,6 +106,10 @@ const pages: Record<string, any> = {
     'library/object': {
       'constructor': (props: any) => <DetailedObjectView {...props} />,
       'name': 'Object View',
+    },
+    'library/backlink': {
+      'constructor': (props: any) => <BacklinkView {...props} />,
+      'name': 'Backlink View',
     },
     'schema/new': {
       'constructor': (props: any) => <AddSchema {...props} />,

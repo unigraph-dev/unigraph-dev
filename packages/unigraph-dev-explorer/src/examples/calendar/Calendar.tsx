@@ -26,7 +26,7 @@ export const CalendarEvent = ({data, callbacks}: any) => {
 
 export const TimeFrame = ({data, callbacks}: any) => {
     return <span>
-        {callbacks.noDate ? "" : (Sugar.Date.medium(new Date(data.get('start/datetime').as('primitive'))) + ", ")}
+        {callbacks?.noDate ? "" : (Sugar.Date.medium(new Date(data.get('start/datetime').as('primitive'))) + ", ")}
         {Sugar.Date.format(new Date(data.get('start/datetime').as('primitive')), "{h}:{mm}%P") + " - "}
         {Sugar.Date.format(new Date(data.get('end/datetime').as('primitive')), "{h}:{mm}%P")}
     </span>

@@ -19,6 +19,9 @@ export const defaultContextMenu: Array<ContextMenuGenerator> = [
     (uid, object, handleClose, callbacks) => <MenuItem onClick={() => {handleClose(); window.unigraph.runExecutable('$/executable/add-item-to-list', {where: "$/entity/inbox", item: uid})}}>
         Add item to inbox
     </MenuItem>,
+    (uid, object, handleClose, callbacks) => <MenuItem onClick={() => {handleClose(); window.wsnavigator(`/library/backlink?uid=${uid}`);}}>
+        View backlinks
+    </MenuItem>,
     (uid, object, handleClose, callbacks) => <MenuItem onClick={() => {handleClose(); window.unigraph.deleteObject(uid)}}>
         Delete item (set as deleted)
     </MenuItem>,

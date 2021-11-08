@@ -24,6 +24,7 @@ export const CurrentEvents = () => {
         groupers={{"time_frame": (els: any[]) => {
             // Group all current events into an agenda view
             // 1. Find all timeframes and group them
+            els = buildGraph(els);
             let groups: any = {};
             groups[Sugar.Date.medium(new Date())] = []
             els.filter(el => el.type['unigraph.id'] === "$/schema/time_frame").forEach(el => {

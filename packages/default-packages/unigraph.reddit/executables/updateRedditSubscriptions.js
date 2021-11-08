@@ -55,7 +55,7 @@ if (account?.uid) {
         });
     }
     // TODO: update reddit subscriptions
-    const subs = await fetch("https://oauth.reddit.com/?limit=30" + beforeObj, {
+    const subs = await fetch("https://oauth.reddit.com/?limit=60" + beforeObj, {
         headers: {
             'Authorization': 'bearer ' + token
         }
@@ -92,8 +92,8 @@ if (account?.uid) {
     }`
 
     const results = await unigraph.getQueries([...updatedObjs.map(el => getQuery(el.id)), `var(func: eq(<unigraph.id>, "$/schema/reddit_post")) {
-        <~type> { redd as uid }
-    }`]);
+        <~type> (first: -250) { redd as uid }
+    }`], false, 100);
 
     let inbox_els = []
     let count = 0

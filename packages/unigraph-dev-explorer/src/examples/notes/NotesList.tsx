@@ -1,4 +1,4 @@
-import { TextField, Button, List, ListItem } from "@material-ui/core";
+import { TextField, Button, List, ListItem, Divider } from "@material-ui/core";
 import React from "react";
 import { withUnigraphSubscription } from "unigraph-dev-common/lib/api/unigraph-react"
 import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
@@ -6,7 +6,10 @@ import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
 export const NotesListBody = ({data}: any) => {
     return <div>
         <List>
-            {data.map((el: any) => <ListItem key={el.uid}><AutoDynamicView object={el}/></ListItem>)}
+            {data.map((el: any) => <React.Fragment>
+                <Divider/>
+                <ListItem key={el.uid}><AutoDynamicView object={el}/></ListItem>
+            </React.Fragment>)}
         </List>
     </div>
 }

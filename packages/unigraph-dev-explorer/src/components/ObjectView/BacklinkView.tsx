@@ -15,13 +15,14 @@ var(func: uid(${uid})) {
   }
 }`
 
-export const BacklinkView = ({data, hideHeader, forward}: any) => {
+export const BacklinkView = ({data, hideHeader, forward, callbacks, uid}: any) => {
 
     const [objects, setObjects]: [any[], Function] = React.useState([]);
     const [id, setId] = React.useState(Date.now());
+    if (callbacks?.isEmbed) hideHeader = true;
 
     useEffectOnce(() => {
-        window.unigraph.subscribeToQuery(getQuery(data.uid, forward), (objects: any[]) => { setObjects(buildGraph(objects).filter((el: any) => (el.uid !== data.uid))) }, id);
+        window.unigraph.subscribeToQuery(getQuery(data?.uid || uid, forward), (objects: any[]) => { setObjects(buildGraph(objects).filter((el: any) => (el.uid !== (data?.uid || uid)))) }, id);
 
         return function cleanup () {
             window.unigraph.unsubscribe(id);
@@ -30,17 +31,17 @@ export const BacklinkView = ({data, hideHeader, forward}: any) => {
 
     return <div>
         <Typography gutterBottom variant="h4" style={{display: hideHeader ? "none" : "unset"}}>
-            Backlinks of: {hideHeader || data.get('name').as('primitive') || data.uid}
+            Backlinks of: {hideHeader || data?.get?.('name').as('primitive') || data?.uid || uid}
         </Typography>
         <DynamicObjectListView 
-            items={objects} context={data} 
+            items={objects} context={data || null} 
             itemRemover={(uids: any) => {
                 if (!forward) {
-                    window.unigraph.deleteRelation(data.uid, {"unigraph.origin": {uid: uids}})
+                    window.unigraph.deleteRelation(data?.uid || uid, {"unigraph.origin": {uid: uids}})
                 } else {
                     if (!Array.isArray(uids)) uids = [uids]
                     uids.filter((el: any) => typeof el === "string")
-                        .forEach((el: any) => window.unigraph.deleteRelation(el, {"unigraph.origin": {uid: data.uid}}))
+                        .forEach((el: any) => window.unigraph.deleteRelation(el, {"unigraph.origin": {uid: data?.uid || uid}}))
                 }
             }}
         />
