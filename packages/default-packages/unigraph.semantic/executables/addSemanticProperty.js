@@ -23,7 +23,6 @@ const querySource = `(func: uid(${sourceUid})) {
 }`
 
 const results = await unigraph.getQueries([querySource, queryDest]);
-console.log(results[0][0])
 
 // Check for schema accordance
 if (results[0].length !== 1 || results[1].length !== 1 || 

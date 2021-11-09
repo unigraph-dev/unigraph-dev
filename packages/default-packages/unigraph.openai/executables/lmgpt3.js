@@ -22,5 +22,4 @@ const response = await fetch(apiurl, {
 })
 
 const data = await response.json();
-console.log(data);
 return data.choices;

@@ -57,18 +57,6 @@ declare type EventDeleteUnigraphObject = {
   permanent?: boolean
 }
 
-declare type EventDropAll = {
-  type: "event",
-  event: "drop_all",
-  id: number
-}
-
-declare type EventDropData = {
-  type: "event",
-  event: "drop_data",
-  id: number
-}
-
 declare type EventCreateDataByJson = {
   type: "event",
   event: "create_data_by_json",

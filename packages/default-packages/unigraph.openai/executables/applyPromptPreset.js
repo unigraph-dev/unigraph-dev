@@ -12,5 +12,4 @@ const promptResults = await unigraph.runExecutable('$/executable/lm-gpt3', {
 });
 const text = promptResults[0]?.text;
 const processed = await unigraph.runExecutable(presetObject['_value']['processor']['_value']['uid'], {result: text});
-console.log(processed);
 return processed;

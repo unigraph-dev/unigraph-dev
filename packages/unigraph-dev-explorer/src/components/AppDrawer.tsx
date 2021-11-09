@@ -78,10 +78,6 @@ export default function DrawerRouter() {
             <Divider/>
             <div style={{display: devMode ? "inherit" : "none"}}>
               <ListSubheader component="div" id="subheader-developer-tools"> Developer Tools </ListSubheader>
-              <ListItem button onClick={()=>navigator('/about')}>
-                <ListItemIcon><Info /></ListItemIcon>
-                <ListItemText primary="About" />
-              </ListItem>
               <ListItem button onClick={()=>navigator('/request')}>
                 <ListItemIcon><Comment /></ListItemIcon>
                 <ListItemText primary="Request" />

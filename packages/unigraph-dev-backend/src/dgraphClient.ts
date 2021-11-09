@@ -41,18 +41,6 @@ export default class DgraphClient {
     }
   }
 
-  async dropAll() {
-    const op = new Operation();
-    op.setDropAll(true);
-    await this.dgraphClient.alter(op);
-  }
-
-  async dropData() {
-    const op = new Operation();
-    op.setDropOp(Operation.DropOp.DATA);
-    await this.dgraphClient.alter(op);
-  }
-
   async setSchema(schema: string) {
     const op = new Operation();
     op.setSchema(schema);

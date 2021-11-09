@@ -1,5 +1,3 @@
-// TODO: Use dynamic pagination based on last id fetched
-// TODO: Process entities properly
 // TODO: Use twitter-like UX in views (RT, reply, etc) + include RTs
 const {uid, access_token, access_token_secret, id, last_id_fetched} = context.params;
 const OAuth = require('oauth');
@@ -15,8 +13,6 @@ const oauth = new OAuth.OAuth(
     'http://127.0.0.1:4001/callback?key=twitter',
     'HMAC-SHA1'
 );
-
-console.log(last_id_fetched)
 
 const getSemanticEntities = (el) => {
     const children = [];
@@ -90,18 +86,6 @@ const objects = await (new Promise((resolve, reject) => oauth.get(`https://api.t
     }
 })))
 
-const getQuery = (twid) => `(func: type(Entity)) @cascade { 
-    uid
-	type @filter(eq(<unigraph.id>, "$/schema/tweet"))
-    _value {
-      twitter_id @filter(eq(<_value.%>, "${twid}"))
-    }
-}`
-
-console.log(objects[0], objects.length)
-
-//const results = await unigraph.getQueries(objects.map(el => getQuery(el['_value']['twitter_id']['_value.%'])));
-
 let inbox_els = []
 let count = 0
 
@@ -114,7 +98,6 @@ for (let i=0; i<objects.length; ++i) {
 }
 
 if (objects?.[0]?.['_value']?.['twitter_id']?.['_value.%']) {
-    console.log("p", context.params)
     await unigraph.updateObject(uid, {
         _value: {
             last_id_fetched: {

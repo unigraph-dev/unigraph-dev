@@ -2,21 +2,21 @@ import { Application } from 'express-ws';
 import express from 'express';
 import WebSocket from 'ws';
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
-import DgraphClient, { queries } from './dgraphClient';
+import DgraphClient from './dgraphClient';
 import { insertsToUpsert } from 'unigraph-dev-common/lib/utils/txnWrapper';
-import { EventAddNotification, EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteItemFromArray, EventDeleteRelation, EventDeleteUnigraphObject, EventDropAll, EventDropData, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventExportObjects, EventGetPackages, EventGetQueries, EventGetSchemas, EventGetSearchResults, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventResponser, EventRunExecutable, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeQuery, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
-import { buildUnigraphEntity, getUpsertFromUpdater, makeQueryFragmentFromType, processAutoref, dectxObjects, unpad, processAutorefUnigraphId, isPaddedObject } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { EventAddNotification, EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteItemFromArray, EventDeleteRelation, EventDeleteUnigraphObject, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventExportObjects, EventGetPackages, EventGetQueries, EventGetSchemas, EventGetSearchResults, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventResponser, EventRunExecutable, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeQuery, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
+import { buildUnigraphEntity, processAutoref, dectxObjects, processAutorefUnigraphId } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { addUnigraphPackage, checkOrCreateDefaultDataModel, createPackageCache, createSchemaCache } from './datamodelManager';
 import { Cache } from './caches';
 import repl from 'repl';
-import { createSubscriptionLocal, createSubscriptionWS, MsgCallbackFn, pollSubscriptions, removeSubscriptionsById, Subscription } from './subscriptions';
+import { createSubscriptionLocal, MsgCallbackFn, pollSubscriptions, removeSubscriptionsById, Subscription } from './subscriptions';
 import { callHooks, HookAfterObjectChangedParams, HookAfterSchemaUpdatedParams, HookAfterSubscriptionAddedParams, Hooks } from './hooks';
 import { getAsyncLock } from './asyncManager';
 import fetch from 'node-fetch';
 import { uniqueId } from 'lodash';
-import { buildExecutable, createExecutableCache } from './executableManager';
+import { createExecutableCache } from './executableManager';
 import { getLocalUnigraphAPI } from './localUnigraphApi';
-import unigraph, { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
+import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { addNotification } from './notifications';
 import { Unigraph } from 'unigraph-dev-common/lib/types/unigraph';
 import stringify from 'json-stable-stringify';
@@ -38,7 +38,6 @@ export default async function startServer(client: DgraphClient) {
   const lock = getAsyncLock();
 
   const connections: Record<string, WebSocket> = {};
-
 
   // Basic checks
   await checkOrCreateDefaultDataModel(client);
@@ -146,18 +145,6 @@ export default async function startServer(client: DgraphClient) {
       dgraphClient.createData(event.data).then(_ => {
         callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
         ws.send(makeResponse(event, true));
-      }).catch(e => ws.send(makeResponse(event, false, {"error": e})))
-    },
-
-    "drop_data": function (event: EventDropData, ws: IWebsocket) {
-      dgraphClient.dropData().then(_ => {
-        ws.send(makeResponse(event, true))
-      }).catch(e => ws.send(makeResponse(event, false, {"error": e})))
-    },
-  
-    "drop_all": function (event: EventDropAll, ws: IWebsocket) {
-      dgraphClient.dropAll().then(_ => {
-        ws.send(makeResponse(event, true))
       }).catch(e => ws.send(makeResponse(event, false, {"error": e})))
     },
 
