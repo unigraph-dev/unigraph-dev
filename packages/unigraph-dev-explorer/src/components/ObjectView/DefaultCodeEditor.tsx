@@ -4,9 +4,10 @@ import Editor from "@monaco-editor/react";
 import React from "react";
 import { Accordion, AccordionDetails, AccordionSummary, Button, FormControl, IconButton, InputLabel, List, ListItem, MenuItem, Select, TextField, Typography } from "@material-ui/core";
 import { ExpandMore, Save } from "@material-ui/icons";
-import { SizeMe } from "react-sizeme";
 import { Actions } from "flexlayout-react";
 import { useEffectOnce } from "react-use";
+
+import ReactResizeDetector from 'react-resize-detector';
 
 loader.config({ paths: { vs: './vendor/monaco-editor_at_0.23.0/min/vs' } });
 
@@ -21,7 +22,6 @@ let decl = unigraphDecl.substring(
 decl = decl.replace(/export declare type /g, "declare type ")
 decl = decl.replace(/export interface /g, "declare interface ")
 decl = decl + "\ndeclare var unigraph: Unigraph<WebSocket>; declare const unpad = (a:any) => any;declare const require = (a:any) => any;\ndeclare var context = {params: any}";
-console.log(decl);
 
 const AddImportComponent = ({onAddImport}: any) => {
     const [pkgName, setPkgName] = React.useState("");
@@ -138,9 +138,9 @@ export const ExecutableCodeEditor = ({data, options}: any) => {
             </Accordion>
             <IconButton onClick={() => updateCode(currentCode)}><Save/></IconButton>
         </div>
-        <div style={{flexGrow: 1}}><SizeMe>{({size}: any) => <Editor
-            height={size.height ? `${size.height}px` : undefined}
-            width={`${size.width}px`}
+        <div style={{flexGrow: 1}}><ReactResizeDetector handleWidth handleHeight>{({width, height}: any) => <Editor
+            height={height ? `${height}px` : undefined}
+            width={`${width}px`}
             defaultLanguage="javascript"
             beforeMount={(monaco) => {
                 monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
@@ -165,7 +165,7 @@ export const ExecutableCodeEditor = ({data, options}: any) => {
             path={"main" + ext[unpadded['env']]}
             defaultValue={currentCode}
             onChange={handleEditorChange}
-        />}</SizeMe></div>
+        />}</ReactResizeDetector></div>
         </div>
 
 }

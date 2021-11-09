@@ -2,7 +2,7 @@
  * Unigraph-workspace: an experimental multiwindow workspace for Unigraph
  */
 
-import React, { ReactElement } from "react";
+import React from "react";
 
 import { components } from './pages';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
@@ -10,7 +10,7 @@ import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import FlexLayout, { Actions, DockLocation, Model, Node, TabNode } from 'flexlayout-react';
 import 'flexlayout-react/style/light.css'
 import './workspace.css'
-import { getParameters, isMobile, isSmallScreen, NavigationContext } from "./utils";
+import { getParameters, isSmallScreen, NavigationContext } from "./utils";
 import { Container, CssBaseline } from "@material-ui/core";
 import { isJsonString } from "unigraph-dev-common/lib/utils/utils";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
@@ -25,7 +25,6 @@ import MomentUtils from '@date-io/moment';
 const pages = window.unigraph.getState('registry/pages')
 
 export function WorkspacePageComponent({ children, maximize, paddingTop, id }: any) {
-    //console.log(id)
     return <div id={"workspaceContainer"+id} style={{width: "100%", height: "100%", overflow: "auto"}}>
         <Container maxWidth={maximize ? false : "lg"} disableGutters style={{paddingTop: (maximize || !paddingTop) ? "0px" : "12px", height: "100%"}}>
             <CssBaseline/>
@@ -59,7 +58,7 @@ const newWindowActions = {
         let node = getComponentFromPage(initJson) as any;
         node.id = someId;
         let action = Actions.addNode(node, "workspace-main-tabset", DockLocation.CENTER, -1, false)
-        let newNode = model.doAction(action);
+        model.doAction(action);
         model.doAction(Actions.floatTab(someId))
     }
 }
@@ -189,8 +188,11 @@ export function WorkSpace(this: any) {
         var config = node.getConfig() || {};
         if (component.startsWith('/pages/')) {
             const page = pages.value[(component.replace('/pages/', '') as string)]
-            //console.log(page)
             return <WorkspacePageComponent maximize={page.maximize} paddingTop={page.paddingTop} id={config.id}>
+                {node._attributes.floating ? <div id="global-elements">
+                    <ContextMenu />
+                    <InlineSearch />
+                </div> : []}
                 {page.constructor(config)}
             </WorkspacePageComponent>
         } else if (component.startsWith('/components/')) {
@@ -201,7 +203,7 @@ export function WorkSpace(this: any) {
         }
     }
 
-    const [model, setModel] = React.useState(FlexLayout.Model.fromJson(json));
+    const [model] = React.useState(FlexLayout.Model.fromJson(json));
 
     let memoMDFn: any = {}
     const getMouseDownFn = (id: string) => {
@@ -238,19 +240,19 @@ export function WorkSpace(this: any) {
                     setTitleOnRenderTab(model);
                     const nodeId = node.getId();
                     if (nodeId === "app-drawer") {
-                        renderValues.content = <Menu style={{verticalAlign: "middle", transform: "rotate(90deg)"}}/>;
+                        renderValues.content = <Menu style={{verticalAlign: "middle", transform: "rotate(90deg)"}} key="icon"/>;
                     }
                     if (nodeId === "search-pane") {
-                        renderValues.content = <Search style={{verticalAlign: "middle", transform: "rotate(90deg)"}}/>;
+                        renderValues.content = <Search style={{verticalAlign: "middle", transform: "rotate(90deg)"}} key="icon"/>;
                     }
                     if (nodeId === "inspector-pane") {
-                        renderValues.content = <Details style={{verticalAlign: "middle", transform: "rotate(270deg)"}}/>;
+                        renderValues.content = <Details style={{verticalAlign: "middle", transform: "rotate(270deg)"}} key="icon"/>;
                     }
                     if (nodeId === "category-pane") {
-                        renderValues.content = [<LocalOffer style={{verticalAlign: "middle", marginRight: "4px"}}/>, renderValues.content];
+                        renderValues.content = [<LocalOffer style={{verticalAlign: "middle", marginRight: "4px"}} key="icon"/>, renderValues.content];
                     }
                     if (node.isVisible() && nodeId !== "app-drawer" && nodeId !== "dashboard" && nodeId !== "search-pane" && nodeId !== "category-pane" && nodeId !== "inspector-pane") {
-                        renderValues.buttons.push(<div style={{zIndex: 999, transform: "scale(0.7)"}} onClick={async () => {
+                        renderValues.buttons.push(<div style={{zIndex: 999, transform: "scale(0.7)"}} key="favoriteButton" onClick={async () => {
                             const config = node.getConfig();
                             if (config) {delete config.undefine; delete config.id};
                             const uid = await window.unigraph.addObject({
@@ -266,7 +268,7 @@ export function WorkSpace(this: any) {
                         }}><StarOutlined></StarOutlined></div>) 
                     }
                     
-                    renderValues.buttons.push(<div id={"tabId"+nodeId}></div>);
+                    renderValues.buttons.push(<div id={"tabId"+nodeId} key={"tabId"+nodeId}></div>);
                     setTimeout(() => {
                         const el = document.getElementById('tabId'+nodeId);
                         

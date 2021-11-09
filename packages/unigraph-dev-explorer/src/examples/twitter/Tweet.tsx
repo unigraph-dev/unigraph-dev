@@ -1,4 +1,4 @@
-import { Avatar, Badge, Icon, Typography } from "@material-ui/core";
+import { Avatar, Badge, Typography } from "@material-ui/core";
 import { registerDynamicViews } from "unigraph-dev-common/lib/api/unigraph-react";
 import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
 import { DynamicViewRenderer } from "../../global"
@@ -51,7 +51,7 @@ export const Tweet: DynamicViewRenderer = ({data, callbacks}) => {
               {(data?.['_value']?.['children']?.['_value['] || []).map((el: any) => {
                 const elObj = el['_value']['_value'];
                 if (elObj['type']['unigraph.id'] === "$/schema/icon_url") {
-                  return <img src={elObj['_value.%']} style={{maxWidth: "240px", borderRadius: "8px"}}/>
+                  return <img src={elObj['_value.%']} style={{maxWidth: "240px", borderRadius: "8px"}} alt=""/>
                 } else if (elObj['type']['unigraph.id'] === "$/schema/web_bookmark") {
                   return <AutoDynamicView object={new UnigraphObject(elObj)} />
                 } else return <React.Fragment/>

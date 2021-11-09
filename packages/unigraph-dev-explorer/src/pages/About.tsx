@@ -37,7 +37,7 @@ export default function About(){
         return function cleanup() {
         window.unigraph.eventTarget.removeEventListener("onmessage", listener);
         }
-    }, [])
+    })
 
     return <div>
         <Typography variant="h4" gutterBottom>Hello World</Typography>

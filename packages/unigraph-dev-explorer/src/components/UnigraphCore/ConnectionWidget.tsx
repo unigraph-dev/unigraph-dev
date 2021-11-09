@@ -41,6 +41,6 @@ export const ConnectionWidget: React.FC = ({}) => {
             <Button onClick={() => window.unigraph.subscribeToType('any', (data: any) => {download("unigraph_export_all.json", JSON.stringify(data))}, getRandomInt(), {all: true})}>Export all objects</Button>
         </div>
         <b>Objects count</b> <br/>
-        {counts.sort((a, b) => b[1] - a[1]).map(el => <div><b>{el[0]}</b> {el[1]}</div>)}
+        {counts.sort((a, b) => b[1] - a[1]).map((el, index) => <div key={index.toString()}><b>{el[0]}</b> {el[1]}</div>)}
     </div>
 }

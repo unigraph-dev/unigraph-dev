@@ -107,6 +107,7 @@ export const onUnigraphContextMenu = (event: React.MouseEvent, object: UnigraphO
         schemaMenuContent: [],
         extraContent: extra,
         callbacks,
+        windowName: window.name,
         ...(callbacks?.removeFromContext ? {removeFromContext: callbacks.removeFromContext} : {})
     })
 

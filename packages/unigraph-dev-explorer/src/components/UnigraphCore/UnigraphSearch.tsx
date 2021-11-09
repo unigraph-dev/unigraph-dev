@@ -1,11 +1,7 @@
-import { FormControlLabel, List, ListItem, Switch, TextField, Typography } from "@material-ui/core"
+import { FormControlLabel, Switch, TextField } from "@material-ui/core"
 import _ from "lodash";
 import React from "react"
-import InfiniteScroll from "react-infinite-scroll-component";
-import { buildGraph } from "unigraph-dev-common/lib/api/unigraph";
-import { AutoDynamicView } from "../ObjectView/DefaultObjectView";
 import { DynamicObjectListView } from "../ObjectView/DynamicObjectListView";
-import { setupInfiniteScrolling } from "../ObjectView/infiniteScrolling";
 
 export const SearchBar = ({onQueryUpdate, searchNow}: any) => {
 

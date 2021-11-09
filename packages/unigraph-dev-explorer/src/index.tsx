@@ -18,12 +18,9 @@ function render(component: any) {
 }
 
 const notConnectedScreen = React.createElement(React.Fragment, {}, [
-  React.createElement(SplashScreen),
-  React.createElement(Settings)
+  React.createElement(SplashScreen, {key: "splashscreen"}),
+  React.createElement(Settings, {key: "settings"})
 ])
-
-
-render(notConnectedScreen);
 
 window.unigraph.backendConnection.onopen = () => {
   // Register notification center

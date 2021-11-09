@@ -1,9 +1,9 @@
 /* eslint-disable react-hooks/rules-of-hooks */ // Using maps as React functional components
-import { Button, Checkbox, Divider, FormControl, FormHelperText, InputLabel, makeStyles, MenuItem, Paper, Select, Switch, TextField, Typography } from '@material-ui/core';
+import { Button, Checkbox, Divider, FormControl, InputLabel, makeStyles, MenuItem, Paper, Select, Switch, TextField, Typography } from '@material-ui/core';
 import _ from 'lodash';
 import React from 'react';
 import { useEffectOnce } from 'react-use';
-import { Definition, SchemaDgraph } from 'unigraph-dev-common/lib/types/json-ts';
+import { SchemaDgraph } from 'unigraph-dev-common/lib/types/json-ts';
 import { KeyboardDateTimePicker } from "@material-ui/pickers";
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { ReferenceableSelectorControlled } from '../ObjectView/ReferenceableSelector';
@@ -52,7 +52,7 @@ const TypedObjectPartEditor: any = {
         const [currentInputValue, setCurrentInputValue] = React.useState<any>();
         const [currentInputObjValue, setCurrentInputObjValue] = React.useState<any>();
         const [viewOrEdit, setViewOrEdit] = React.useState<any>(getDynamicViews().includes(localObject['type']?.['unigraph.id']) ? "view" : "edit")
-        React.useEffect(() => {if (JSON.stringify(currentInputObjValue) !== currentInputValue) setCurrentInputValue(JSON.stringify(currentInputObjValue))}, [currentInputObjValue]);
+        React.useEffect(() => {if (JSON.stringify(currentInputObjValue) !== currentInputValue) setCurrentInputValue(JSON.stringify(currentInputObjValue))}, [currentInputObjValue, currentInputValue]);
         React.useEffect(() => {if (isJsonString(currentInputValue)) setCurrentInputObjValue(JSON.parse(currentInputValue))}, [currentInputValue])
         return <React.Fragment>
             <Paper variant="outlined" className={classes.editorFrame}>

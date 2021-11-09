@@ -8,7 +8,7 @@ export const Focus = () => {
     const [focus, setFocus] = React.useState<any[]>([]);
     const [focusEntity, setFocusEntity] = React.useState<any>({});
     const [listUid, setListUid] = React.useState("");
-    const [subsId, setSubsId] = React.useState(getRandomInt);
+    const [subsId] = React.useState(getRandomInt);
 
     React.useEffect(() => {
         if (window.unigraph.getState('calendar/focusItems')) {

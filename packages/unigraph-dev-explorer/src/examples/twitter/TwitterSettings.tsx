@@ -4,7 +4,7 @@ import { useEffectOnce } from "react-use"
 import { pkg as twitterPackage } from 'unigraph-dev-common/lib/data/unigraph.twitter.pkg';
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
 
-export const TwitterSettings = ({}) => {
+export const TwitterSettings = () => {
 
     const [loaded, setLoaded] = React.useState(false);
     const [account, setAccount] = React.useState<any>({});
