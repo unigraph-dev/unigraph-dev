@@ -1,7 +1,7 @@
 import React from "react"
 import { getRandomInt, UnigraphObject } from "unigraph-dev-common/lib/api/unigraph"
 import ForceGraph2D from 'react-force-graph-2d';
-import { SizeMe } from "react-sizeme";
+import ReactResizeDetector from 'react-resize-detector';
 import _ from "lodash";
 import { Checkbox, List, ListItem, Typography } from "@material-ui/core";
 
@@ -39,7 +39,7 @@ export const GraphView = ({uid}: any) => {
         }, id, true);
 
         return function cleanup () { window.unigraph.unsubscribe(id); }
-    }, [])
+    })
 
     React.useEffect(() => {
         if (refs?.[0]) {
@@ -61,7 +61,7 @@ export const GraphView = ({uid}: any) => {
             setEntities(_.uniqBy([...(entitiesInto || []), ...(entitiesOutof || [])], el => el.id));
             setLinks(llinks);
         }
-    }, [refs, typesExcluded])
+    }, [refs, typesExcluded, uid])
 
     return <div>
         <Typography>Graph view of object {uid}</Typography>
@@ -71,7 +71,7 @@ export const GraphView = ({uid}: any) => {
                 <Typography>{el}</Typography>
             </ListItem>)}
         </List>
-        <SizeMe>{({size}) => <ForceGraph2D 
+        <ReactResizeDetector handleWidth handleHeight>{(size) => <ForceGraph2D 
             width={size.width || undefined} height={size.height || undefined}
             nodeAutoColorBy={(node) => (node as any).type}
             nodeLabel={(node: any) => `Name: ${node.name}\n Type: ${node.type}`}
@@ -99,6 +99,6 @@ export const GraphView = ({uid}: any) => {
             onNodeClick={(node) => {
                 window.wsnavigator(`/object-editor?uid=${node.id}`)
             }}
-        />}</SizeMe>
+        />}</ReactResizeDetector>
     </div>
 }

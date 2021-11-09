@@ -57,7 +57,7 @@ export const RedditPost: DynamicViewRenderer = ({data, callbacks}) => {
                     </div>
                 </div>
                 {innerExpanded ? <div>
-                {data.get('selftext').as('primitive').length ? <AutoDynamicView object={new UnigraphObject(data.get('selftext')['_value']['_value'])}/> : <img src={data.get('url').as('primitive')} style={{maxWidth: "100%"}}/>}
+                {data.get('selftext').as('primitive').length ? <AutoDynamicView object={new UnigraphObject(data.get('selftext')['_value']['_value'])}/> : <img src={data.get('url').as('primitive')} style={{maxWidth: "100%"}} alt=""/>}
             </div> : []}
             </div>
             

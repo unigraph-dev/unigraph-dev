@@ -1,4 +1,4 @@
-import { Accordion, AccordionSummary, Typography, AccordionDetails, List, ListItem, Select, MenuItem, IconButton, ListItemIcon, ListSubheader, Fade, Grow, Collapse, FormControlLabel, Switch, Button, TextField, Slide } from "@material-ui/core";
+import { Accordion, AccordionSummary, Typography, AccordionDetails, List, ListItem, Select, MenuItem, IconButton, ListItemIcon, ListSubheader, FormControlLabel, Switch, Button, TextField, Slide } from "@material-ui/core";
 import { ExpandMore, ClearAll } from "@material-ui/icons";
 import { Autocomplete } from "@material-ui/lab";
 import _ from "lodash";
@@ -159,7 +159,6 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
     const [reverseOrder, setReverseOrder] = React.useState(reverse);
 
     const isStub = !items[0] || Object.keys(itemGetter(items[0])).filter(el => el.startsWith('_value')).length < 1 || items[0]._stub;
-    console.log(isStub)
 
     const totalFilters: Filter[] = [
         { id: "no-filter", fn: () => true },

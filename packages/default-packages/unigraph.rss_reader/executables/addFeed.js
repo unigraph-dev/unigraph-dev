@@ -18,5 +18,3 @@ const feedObj = {
 }
 
 const result = await unigraph.addObject(feedObj, '$/schema/rss_feed')
-                            
-console.log(result);

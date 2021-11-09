@@ -38,7 +38,7 @@ export default function DataModelPlayground () {
             transformed = 'Invalid data entered: \n' + e.toString()
         }
         setProcessedData(transformed)
-    }, [origData])
+    }, [origData, name])
 
     return <div>
 

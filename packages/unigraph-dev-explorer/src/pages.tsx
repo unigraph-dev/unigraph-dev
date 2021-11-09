@@ -19,8 +19,6 @@ import { TodoList } from "./examples/todo/TodoList";
 import { TwitterSettings } from "./examples/twitter/TwitterSettings";
 import Request from './pages/Request';
 import RSSReader from './examples/rss_reader';
-import About from "./pages/About";
-import AddSchema from "./pages/AddSchema";
 import DataModelPlayground from "./pages/DataModelPlayground";
 import ExplorerHome from "./pages/ExplorerHome";
 import { TrashView } from './components/UnigraphCore/TrashView';
@@ -62,10 +60,6 @@ const pages: Record<string, any> = {
     'request': {
       'constructor': (props: any) => <Request {...props} />,
       'name': 'Request',
-    },
-    'about': {
-      'constructor': (props: any) => <About {...props} />,
-      'name': 'About',
     },
     'email': {
       'constructor': (props: any) => <EmailList {...props} />,
@@ -110,10 +104,6 @@ const pages: Record<string, any> = {
     'library/backlink': {
       'constructor': (props: any) => <BacklinkView {...props} />,
       'name': 'Backlink View',
-    },
-    'schema/new': {
-      'constructor': (props: any) => <AddSchema {...props} />,
-      'name': 'New Schema',
     },
     'home': {
       'constructor': (props: any) => <ExplorerHome {...props} />,

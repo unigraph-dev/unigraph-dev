@@ -7,7 +7,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import { makeStyles } from '@material-ui/core/styles';
-import { Bookmarks, Category, CodeRounded, Comment, CompareArrows, Delete, FileCopy, Home, Info, LibraryBooks, Notifications, PlaylistAddCheck, Settings, Storage } from '@material-ui/icons';
+import { Category, CodeRounded, Comment, CompareArrows, Delete, FileCopy, Info, LibraryBooks, Notifications, Settings, Storage } from '@material-ui/icons';
 import { ListSubheader } from '@material-ui/core';
 import { NavigationContext } from '../utils';
 import { FavoriteBar } from './UnigraphCore/FavoriteBar';
@@ -78,10 +78,6 @@ export default function DrawerRouter() {
             <Divider/>
             <div style={{display: devMode ? "inherit" : "none"}}>
               <ListSubheader component="div" id="subheader-developer-tools"> Developer Tools </ListSubheader>
-              <ListItem button onClick={()=>navigator('/about')}>
-                <ListItemIcon><Info /></ListItemIcon>
-                <ListItemText primary="About" />
-              </ListItem>
               <ListItem button onClick={()=>navigator('/request')}>
                 <ListItemIcon><Comment /></ListItemIcon>
                 <ListItemText primary="Request" />
@@ -89,10 +85,6 @@ export default function DrawerRouter() {
               <ListItem button onClick={()=>navigator('/datamodel-playground')}>
                 <ListItemIcon><CompareArrows /></ListItemIcon>
                 <ListItemText primary="DataModel Playground" />
-              </ListItem>
-              <ListItem button onClick={()=>navigator('/schema/new')}>
-                <ListItemIcon><Storage /></ListItemIcon>
-                <ListItemText primary="Add Schema" />
               </ListItem>
               <Divider/>
             </div>

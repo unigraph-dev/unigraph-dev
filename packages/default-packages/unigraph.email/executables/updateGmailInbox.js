@@ -37,8 +37,6 @@ if (account?.uid) {
     let token = account['_value']['access_token']['_value.%'];
     let refresh = account['_value']['refresh_token']['_value.%'];
 
-    console.log(token, refresh)
-
     const resp = await fetch('https://www.googleapis.com/oauth2/v4/token', {
         method: "POST",
         body: JSON.stringify({
@@ -71,9 +69,6 @@ if (account?.uid) {
         gmail.users.messages.get({userId: "me", id, format: "metadata", metadataHeaders: ['Message-Id']})));
 
     const msgIds = msgIdResps.map(el => el.data.payload.headers[0].value)
-    console.log(msgIds)
-    
-    //console.log(msgIds)
 
     const results = (await unigraph.getQueries([...(msgIds.map(el => getQuery(el))), `var(func: eq(<unigraph.id>, "$/schema/email_message")) {
         <~type> { parIds as uid }

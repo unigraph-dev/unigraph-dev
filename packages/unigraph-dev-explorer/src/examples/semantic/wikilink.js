@@ -4,14 +4,14 @@ import { toMarkdown } from 'mdast-util-wiki-link'
 let warningIssued
 
 function fromMarkdown (opts = {}) {
-    const permalinks = opts.permalinks || []
-    const defaultPageResolver = (name) => [name.replace(/ /g, '_').toLowerCase()]
-    const pageResolver = opts.pageResolver || defaultPageResolver
-    const newClassName = opts.newClassName || 'new'
-    const wikiLinkClassName = opts.wikiLinkClassName || 'internal'
+    //const permalinks = opts.permalinks || []
+    //const defaultPageResolver = (name) => [name.replace(/ /g, '_').toLowerCase()]
+    //const pageResolver = opts.pageResolver || defaultPageResolver
+    //const newClassName = opts.newClassName || 'new'
+    //const wikiLinkClassName = opts.wikiLinkClassName || 'internal'
     // eslint-disable-next-line no-script-url
-    const defaultHrefTemplate = (permalink) => `https://google.com`
-    const hrefTemplate = opts.hrefTemplate || defaultHrefTemplate
+    //const defaultHrefTemplate = (permalink) => `https://google.com`
+    //const hrefTemplate = opts.hrefTemplate || defaultHrefTemplate
   
     function enterWikiLink (token) {
       this.enter(

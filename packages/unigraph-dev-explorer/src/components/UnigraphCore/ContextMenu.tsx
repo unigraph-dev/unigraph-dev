@@ -9,6 +9,7 @@ export const ContextMenu = () => {
     const ctxMenuState: AppState<Partial<ContextMenuState>> = window.unigraph.getState('global/contextMenu');
 
     const [state, setState] = React.useState(ctxMenuState.value);
+    const thisRef = React.useRef(null);
 
     const handleClose = () => {
         deselectUid();
@@ -17,14 +18,14 @@ export const ContextMenu = () => {
     const schemaMenuConstructors = [...(window.unigraph.getState('registry/contextMenu').value[state.contextObject?.['type']?.['unigraph.id']] || []), ...(state.schemaMenuContent || [])];
 
     React.useMemo(() => ctxMenuState.subscribe(v => setState(v)), []);
-    console.log(state)
 
-    return <div><Popover
+    return <div ref={thisRef}><Popover
         id="context-menu"
         anchorReference="anchorPosition"
-        open={state.show!}
+        open={state.show! && window.name === state.windowName}
         anchorPosition={state.anchorPosition}
         onClose={handleClose}
+        container={thisRef.current}
         anchorOrigin={{ 
             vertical: 'bottom',
             horizontal: 'center',

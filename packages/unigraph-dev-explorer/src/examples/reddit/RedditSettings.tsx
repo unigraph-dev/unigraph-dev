@@ -4,7 +4,7 @@ import { useEffectOnce } from "react-use"
 import { pkg as redditPacakge } from 'unigraph-dev-common/lib/data/unigraph.reddit.pkg';
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
 
-export const RedditSettings = ({}) => {
+export const RedditSettings = () => {
 
     const [loaded, setLoaded] = React.useState(false);
     const [account, setAccount] = React.useState<any>({});

@@ -1,7 +1,6 @@
 import { unigraph } from "unigraph-dev-common";
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { isJsonString } from "unigraph-dev-common/lib/utils/utils";
-import { ExecutableCodeEditor } from "./components/ObjectView/DefaultCodeEditor";
 import { CodeOrComponentView, DefaultSkeleton, Executable, ViewViewDetailed } from "./components/ObjectView/DefaultObjectView";
 import { ANotification, Notification as CNotification } from "./components/UnigraphCore/Notification";
 import { UserSettings } from "./global";
@@ -73,6 +72,7 @@ export type ContextMenuState = {
     removeFromContext?: string,
     callbacks?: any,
     extraContent: any,
+    windowName?: string,
     show: boolean
 }
 

@@ -36,7 +36,6 @@ export const setupInfiniteScrolling = (uids: string[], chunk = 50, stateCallback
     }
 
     const onCleanup = () => {
-        console.log(states.subs)
         states.subs.forEach(el => window.unigraph.unsubscribe(el.id));
         stateCallback = () => {};
     }

@@ -31,22 +31,22 @@ export default function Settings () {
         setActivePopover(-1);
     };
 
-    const id0 = Boolean(anchorEl[0]) ? 'address-popover' : undefined;
+    //const id0 = Boolean(anchorEl[0]) ? 'address-popover' : undefined;
     //console.log(Boolean(anchorEl[0]))
     return <div>
         <Typography variant="h4">Settings</Typography>
         <p>These setting will be stored in your browser. </p>
         <List>
-            <ListSubheader component="div" id="nested-list-subheader">
+            <ListSubheader component="div" id="nested-list-subheader" key="connectionsettings">
             Connection
             </ListSubheader>
-            <ListItem button onClick={(e) => handleClick(e, 0)}>
+            <ListItem button onClick={(e) => handleClick(e, 0)} key="connection">
                 <ListItemText primary="Server address" secondary={`Current address: ${settings.serverLocation}`}/>
             </ListItem>
-            <ListSubheader component="div" id="nested-list-subheader">
+            <ListSubheader component="div" id="nested-list-subheader" key="window">
             Window Management
             </ListSubheader>
-            <ListItem button onClick={e => {}}>
+            <ListItem button onClick={e => {}} key="newwindow">
                 <ListItemText id="switch-list-label-new-window" primary="New window options" secondary="Choose the behavior when a new window is opened." />
                 <ListItemSecondaryAction>
                     <Select
@@ -62,10 +62,10 @@ export default function Settings () {
                     </Select>
                 </ListItemSecondaryAction>
             </ListItem>
-            <ListSubheader component="div" id="nested-list-subheader">
+            <ListSubheader component="div" id="nested-list-subheader" key="developers">
             Developers
             </ListSubheader>
-            <ListItem button onClick={e => {}}>
+            <ListItem button onClick={e => {}} key="developermode">
                 <ListItemText id="switch-list-label-developer-mode" primary="Developer mode" secondary="Enable utilities about Unigraph for developers." />
                 <ListItemSecondaryAction>
                     <Switch
@@ -76,16 +76,16 @@ export default function Settings () {
                     />
                 </ListItemSecondaryAction>
             </ListItem>
-            <ListSubheader component="div" id="nested-list-subheader">
+            <ListSubheader component="div" id="nested-list-subheader" key="settingsapp">
             App Settings
             </ListSubheader>
-            <ListItem button onClick={e => {window.wsnavigator("/settings/twitter")}}>
+            <ListItem button onClick={e => {window.wsnavigator("/settings/twitter")}} key="twitter">
                 <ListItemText id="switch-list-label-developer-mode" primary="Twitter settings" secondary="Connect your Twitter account to Unigraph" />
             </ListItem>
-            <ListItem button onClick={e => {window.wsnavigator("/settings/reddit")}}>
+            <ListItem button onClick={e => {window.wsnavigator("/settings/reddit")}} key="reddit">
                 <ListItemText id="switch-list-label-developer-mode" primary="Reddit settings" secondary="Connect your Reddit account to Unigraph" />
             </ListItem>
-            <ListItem button onClick={e => {window.wsnavigator("/settings/email")}}>
+            <ListItem button onClick={e => {window.wsnavigator("/settings/email")}} key="email">
                 <ListItemText id="switch-list-label-developer-mode" primary="Email settings" secondary="Connect your email inboxes to Unigraph" />
             </ListItem>
         </List>

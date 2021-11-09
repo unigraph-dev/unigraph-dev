@@ -17,7 +17,6 @@ const resp = await fetch("https://www.reddit.com/api/v1/access_token", {
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
     }});
 const accessTokenResult = await resp.json();
-console.log(accessTokenResult)
 const identityRes = (await fetch('https://oauth.reddit.com/api/v1/me', {
     method: 'GET',
     headers: {
@@ -27,7 +26,6 @@ const identityRes = (await fetch('https://oauth.reddit.com/api/v1/me', {
 
 const identity = await identityRes.json();
 
-console.log(identity);
 unigraph.addObject({
     name: "u/" + identity.name,
     username: identity.name,

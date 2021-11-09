@@ -7,7 +7,7 @@ import { AutoDynamicView, ViewViewDetailed } from "../../components/ObjectView/D
 import _ from "lodash";
 import { buildGraph } from "unigraph-dev-common/lib/api/unigraph";
 import { Actions } from "flexlayout-react";
-import { addChild, convertChildToTodo, focusLastDFSNode, focusNextDFSNode, focusUid, getSemanticChildren, indentChild, setCaret, setFocus, splitChild, unindentChild, unsplitChild } from "./commands";
+import { addChild, convertChildToTodo, focusLastDFSNode, focusNextDFSNode, indentChild, setCaret, setFocus, splitChild, unindentChild, unsplitChild } from "./commands";
 import { onUnigraphContextMenu } from "../../components/ObjectView/DefaultObjectContextMenu";
 import { FiberManualRecord, MoreVert } from "@material-ui/icons";
 import { setSearchPopup } from "./searchPopup";
