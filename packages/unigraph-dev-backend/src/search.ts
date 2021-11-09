@@ -1,5 +1,5 @@
 const resQueries = {
-    "indexes": (qual: string) => `result(${qual}) @filter(type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) {
+    "indexes": (qual: string, filter: string) => `result(${qual}) @filter(${filter} type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) {
         uid
         type {
           unigraph.id
@@ -11,16 +11,16 @@ const resQueries = {
             uid expand(_userpredicate_) { uid expand(_userpredicate_) { uid expand(_userpredicate_) } } } } }
         }
     }`,
-    "uids": (qual: string) => `result(${qual}) @filter(type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) {
+    "uids": (qual: string, filter: string) => `result(${qual}) @filter(${filter} type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) {
         uid
     }`,
-    "metadata": (qual: string) => `result(${qual}) @filter(type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) {
+    "metadata": (qual: string, filter: string) => `result(${qual}) @filter(${filter} type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) {
         uid
         type {
             unigraph.id
         }
     }`,
-    "default": (qual: string) => `result(${qual}) @filter(type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) @recurse(depth: 15) {
+    "default": (qual: string, filter: string) => `result(${qual}) @filter(${filter} type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) @recurse(depth: 15) {
         uid
         expand(_userpredicate_)
         unigraph.id
@@ -61,7 +61,7 @@ export const makeSearchQuery = (
             }
         }`)
     }
-    const resultQuery = resQueries[display || "default"](`func: uid(${getQualUids(hops)})${getQualFromOptions(searchOptions)}`)
+    const resultQuery = resQueries[display || "default"](`func: uid(${getQualUids(hops)})${getQualFromOptions(searchOptions)}`, queryString[2])
     const fq = `query {
         ${queryString[0]}
         uhops0 as var${queryString[1]}
@@ -72,14 +72,17 @@ export const makeSearchQuery = (
         ${qhops.join('\n')}
         ${resultQuery}
     }`
+    console.log(fq)
     return fq;
 }
 
 export const getQueryString = (query: {method: "fulltext" | "type" | "uid", value: any}[]) => {
+    const entityQueries: string[] = [];
+    const resultQueries: string[] = [];
     const queries = query.map((el, index) => {
-        if (el.method === "fulltext") return `queryresult${index.toString()} as var(func: alloftext(<_value.%>, "${el.value}"))`;
-        else if (el.method === "type") return `var(func: eq(<unigraph.id>, ${el.value})) { <~type> { queryresult${index.toString()} as uid } }`
-        else if (el.method === "uid") return `queryresult${index.toString()} as var(func: uid(${el.value}))`
+        if (el.method === "fulltext") {resultQueries.push(`queryresult${index.toString()}`); return `queryresult${index.toString()} as var(func: alloftext(<_value.%>, "${el.value}"))`;}
+        else if (el.method === "type") {entityQueries.push(`queryresult${index.toString()}`); return `var(func: eq(<unigraph.id>, "${el.value}")) { <~type> { queryresult${index.toString()} as uid } }`}
+        else if (el.method === "uid") {resultQueries.push(`queryresult${index.toString()}`); return `queryresult${index.toString()} as var(func: uid(${el.value}))`}
     })
-    return [queries.join('\n'), `(func: uid(${query.map((el, index) => `queryresult${index.toString()}`).join(', ')}))`]
+    return [queries.join('\n'), `(func: uid(${resultQueries.join(', ')}))`, entityQueries.length ? `uid(${entityQueries.join(', ')}) AND ` : ""]
 }
