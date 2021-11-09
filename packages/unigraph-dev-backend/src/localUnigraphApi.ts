@@ -217,7 +217,11 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
                 if (!items.includes(index) && !items.includes(el.uid) && !items.includes(el['_value']?.uid) && !items.includes(el['_value']?.['_value']?.uid)) {
                     newValues.push(`<${el['_index'].uid}> <_value.#i> "${newValues.length.toString()}" .`)
                 } else { 
-                    if (relUid) toDel += "<" + el['_value'].uid + "> <unigraph.origin> <" +  + relUid + "> .\n";
+                    if (relUid) {
+                        toDel += "<" + el['_value'].uid + "> <unigraph.origin> <" +  + relUid + "> .\n";
+                        if (el?.['_value']?.['_value']?.uid) toDel += "<" + el['_value']['_value'].uid + "> <unigraph.origin> <" +  + relUid + "> .\n"
+                        if (el?.['_value']?.['_value']?.['_value']?.uid) toDel += "<" + el['_value']['_value']['_value'].uid + "> <unigraph.origin> <" +  + relUid + "> .\n"
+                    }
                     toDel += `<${uid}> <_value[> <${el.uid}> .\n`;
                 }
             });
