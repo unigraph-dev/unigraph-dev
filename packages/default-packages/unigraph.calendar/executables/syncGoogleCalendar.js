@@ -30,8 +30,6 @@ if (account?.uid) {
     let token = account['_value']['access_token']['_value.%'];
     let refresh = account['_value']['refresh_token']['_value.%'];
 
-    console.log(token, refresh)
-
     const resp = await fetch('https://www.googleapis.com/oauth2/v4/token', {
         method: "POST",
         body: JSON.stringify({
