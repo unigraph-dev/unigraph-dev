@@ -429,7 +429,7 @@ export default async function startServer(client: DgraphClient) {
     },
 
     "get_search_results": async function (event: EventGetSearchResults, ws: IWebsocket) {
-      const res = await serverStates.localApi.getSearchResults(event.query, event.method, event.display, event.hops, event.searchOptions)
+      const res = await serverStates.localApi.getSearchResults(event.query, event.display, event.hops, event.searchOptions)
         .catch((e: any) => ws.send(makeResponse(event, false, {"error": e})));
       ws.send(makeResponse(event, true, {results: res}));
     },

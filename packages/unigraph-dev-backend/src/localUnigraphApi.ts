@@ -11,6 +11,7 @@ import { insertsToUpsert } from "unigraph-dev-common/lib/utils/txnWrapper";
 import { Cache } from './caches';
 import dgraph from "dgraph-js";
 import path from "path";
+import { getQueryString } from "./search";
 
 export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Record<string, Cache<any>>, subscriptions: Subscription[], hooks: any, namespaceMap: any, localApi: Unigraph, httpCallbacks: any}): Unigraph {
     const messages: any[] = [];
@@ -265,9 +266,10 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         addState: (...params) => {throw Error('Not available in server side')},
         getState: (...params) => {throw Error('Not available in server side')},
         deleteState: (...params) => {throw Error('Not available in server side')},
-        getSearchResults: async (query: string, method = "fulltext", display: any, hops, searchOptions) => {
+        getSearchResults: async (query, display: any, hops, searchOptions) => {
             let res: {results: any[], entities: any[]} = {results: [], entities: []};
-            if (method === 'fulltext') res = await client.getTextSearchResults(query, display, hops, searchOptions);
+            const finalQuery = getQueryString(query);
+            res = await client.getSearchResults(finalQuery, display, hops, searchOptions);
             return res;
         },
         getSecret: (scope, key) => {

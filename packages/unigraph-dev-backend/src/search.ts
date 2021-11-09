@@ -48,7 +48,7 @@ const getQualFromOptions = (options: any) => {
  * @param hops 
  */
 export const makeSearchQuery = (
-    queryString: string, 
+    queryString: string[], 
     display: "indexes" | "uids" | "metadata" | undefined,
     hops = 2, // 1 to 4,
     searchOptions: any = {},
@@ -62,8 +62,9 @@ export const makeSearchQuery = (
         }`)
     }
     const resultQuery = resQueries[display || "default"](`func: uid(${getQualUids(hops)})${getQualFromOptions(searchOptions)}`)
-    return `query {
-        uhops0 as var${queryString}
+    const fq = `query {
+        ${queryString[0]}
+        uhops0 as var${queryString[1]}
         ${searchOptions.noPrimitives ? "" : `qhops0(func: uid(uhops0)) {
             uid
             <_value.%>
@@ -71,6 +72,14 @@ export const makeSearchQuery = (
         ${qhops.join('\n')}
         ${resultQuery}
     }`
+    return fq;
 }
 
-export const getFullTextQueryString = (search: string) => `(func: alloftext(<_value.%>, "${search}"))`
+export const getQueryString = (query: {method: "fulltext" | "type" | "uid", value: any}[]) => {
+    const queries = query.map((el, index) => {
+        if (el.method === "fulltext") return `queryresult${index.toString()} as var(func: alloftext(<_value.%>, "${el.value}"))`;
+        else if (el.method === "type") return `var(func: eq(<unigraph.id>, ${el.value})) { <~type> { queryresult${index.toString()} as uid } }`
+        else if (el.method === "uid") return `queryresult${index.toString()} as var(func: uid(${el.value}))`
+    })
+    return [queries.join('\n'), `(func: uid(${query.map((el, index) => `queryresult${index.toString()}`).join(', ')}))`]
+}

@@ -21,7 +21,7 @@ export const UnigraphSearch = ({id}: any) => {
     const search = React.useMemo(() => _.debounce((query: string) => {
         setResponse(false);
         if (query.length) {
-            window.unigraph.getSearchResults(query, "fulltext", "metadata", 3).then(res => {
+            window.unigraph.getSearchResults([{method: 'fulltext', value: query}], "metadata", 3).then(res => {
                 //setResults(res.results.reverse());
                 setEntities(res.entities.reverse());
                 setResponse(true);

@@ -3,7 +3,7 @@ import dgraph, { DgraphClient as ActualDgraphClient, DgraphClientStub, Operation
 import { getRandomInt } from '../../unigraph-dev-common/lib/api/unigraph';
 import { getAsyncLock, withLock } from './asyncManager';
 import { UnigraphUpsert } from './custom';
-import { getFullTextQueryString, makeSearchQuery } from './search';
+import { makeSearchQuery } from './search';
 
 /**
  * Example client, adapted from:
@@ -308,9 +308,9 @@ export default class DgraphClient {
   `, {}))[0]
   }
 
-  async getTextSearchResults(search: string, display: any, hops = 2, searchOptions: any) {
-    const query = makeSearchQuery(getFullTextQueryString(search), display, hops, searchOptions)
-    const res = (await this.queryDgraph(query));
+  async getSearchResults(query: string[], display: any, hops = 2, searchOptions: any) {
+    const finalQuery = makeSearchQuery(query, display, hops, searchOptions)
+    const res = (await this.queryDgraph(finalQuery));
     return {results: (searchOptions?.noPrimitives ? [] : res[0]) as any[], entities: res[hops+1-Number(!!searchOptions?.noPrimitives)] as any[]};
   }
 
