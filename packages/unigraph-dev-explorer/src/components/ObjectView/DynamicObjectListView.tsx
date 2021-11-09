@@ -1,4 +1,4 @@
-import { Accordion, AccordionSummary, Typography, AccordionDetails, List, ListItem, Select, MenuItem, IconButton, ListItemIcon, ListSubheader, Fade, Grow, Collapse, FormControlLabel, Switch, Button, TextField } from "@material-ui/core";
+import { Accordion, AccordionSummary, Typography, AccordionDetails, List, ListItem, Select, MenuItem, IconButton, ListItemIcon, ListSubheader, Fade, Grow, Collapse, FormControlLabel, Switch, Button, TextField, Slide } from "@material-ui/core";
 import { ExpandMore, ClearAll } from "@material-ui/icons";
 import { Autocomplete } from "@material-ui/lab";
 import _ from "lodash";
@@ -57,7 +57,7 @@ const groupersDefault: Record<string, Grouper> = {
 
 const DynamicListItem = ({ listUid, item, index, context, callbacks, itemUids, itemRemover }: any) => {
     return <React.Fragment>
-        <Grow in key={item.uid}>
+        <Slide direction="up" in key={item.uid}>
             <ListItem>
                 <ListItemIcon onClick={() => {
                     itemRemover(item['uid'])
@@ -75,7 +75,7 @@ const DynamicListItem = ({ listUid, item, index, context, callbacks, itemUids, i
                     }
                 }} />
             </ListItem>
-        </Grow>
+        </Slide>
     </React.Fragment>
 }
 

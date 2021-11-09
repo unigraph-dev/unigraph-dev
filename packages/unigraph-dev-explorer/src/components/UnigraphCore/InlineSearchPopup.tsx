@@ -12,7 +12,7 @@ export const InlineSearch = () => {
     const [state, setState] = React.useState(ctxMenuState.value);
     const search = React.useRef(_.throttle((key: string) => {
         if (key !== undefined && key.length > 1) 
-            window.unigraph.getSearchResults((key as string), "fulltext", "indexes", 2, {limit: -50, noPrimitives: true}).then((res: any) => {
+            window.unigraph.getSearchResults([{value: (key as string), method: "fulltext"}], "indexes", 2, {limit: -50, noPrimitives: true}).then((res: any) => {
                 const results = res.entities.map((el: any) => { return {
                     name: (new UnigraphObject(el['unigraph.indexes']?.['name'] || {})).as('primitive'),
                     uid: el.uid,

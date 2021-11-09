@@ -3,7 +3,8 @@ import dgraph, { DgraphClient as ActualDgraphClient, DgraphClientStub, Operation
 import { getRandomInt } from '../../unigraph-dev-common/lib/api/unigraph';
 import { getAsyncLock, withLock } from './asyncManager';
 import { UnigraphUpsert } from './custom';
-import { getFullTextQueryString, makeSearchQuery } from './search';
+import { perfLogStartDbTransaction, perfLogAfterDbTransaction } from './logging';
+import { makeSearchQuery } from './search';
 
 /**
  * Example client, adapted from:
@@ -308,10 +309,12 @@ export default class DgraphClient {
   `, {}))[0]
   }
 
-  async getTextSearchResults(search: string, display: any, hops = 2, searchOptions: any) {
-    const query = makeSearchQuery(getFullTextQueryString(search), display, hops, searchOptions)
-    const res = (await this.queryDgraph(query));
-    return {results: (searchOptions?.noPrimitives ? [] : res[0]) as any[], entities: res[hops+1-Number(!!searchOptions?.noPrimitives)] as any[]};
+  async getSearchResults(query: string[], display: any, hops = 2, searchOptions: any) {
+    const finalQuery = makeSearchQuery(query, display, hops, searchOptions)
+    perfLogStartDbTransaction ()
+    const res = (await this.queryDgraph(finalQuery));
+    perfLogAfterDbTransaction ()
+    return {results: ((searchOptions?.noPrimitives || searchOptions?.resultsOnly) ? [] : res[0]) as any[], entities: res[res.length - 1] as any[]};
   }
 
   async getPackages() {

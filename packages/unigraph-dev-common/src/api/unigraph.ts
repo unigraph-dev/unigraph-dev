@@ -387,13 +387,13 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
             };
             sendEvent(connection, "add_notification", {item: item}, id);
         }),
-        getSearchResults: (query, method = "fulltext", display, hops, searchOptions) => new Promise((resolve, reject) => {
+        getSearchResults: (query, display, hops, searchOptions) => new Promise((resolve, reject) => {
             const id = getRandomInt();
             callbacks[id] = (response: any) => {
                 if (response.success && response.results) resolve(response.results);
                 else reject(response);
             };
-            sendEvent(connection, "get_search_results", {query, method, display, hops, searchOptions}, id);
+            sendEvent(connection, "get_search_results", {query, display, hops, searchOptions}, id);
         }),
         getSchemaMap: () => caches.schemaMap,
         exportObjects: (uids, options) => new Promise((resolve, reject) => {

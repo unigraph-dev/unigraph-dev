@@ -169,7 +169,7 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param display How to return the results to display. 'indexes' will only fetch the indexes.
      * @param hops How many hops to fetch.
      */
-    getSearchResults(query: string, method?: string, display?: string, hops?: number, searchOptions?: {limit?: number, noPrimitives?: boolean}): Promise<{results: any[], entities: any[]}>;
+    getSearchResults(query: {method: "fulltext" | "type" | "uid", value: any}[], display?: string, hops?: number, searchOptions?: {limit?: number, noPrimitives?: boolean, resultsOnly?: boolean}): Promise<{results: any[], entities: any[]}>;
     /** Deletes an object by its UID. */
     deleteObject(uid: string, permanent?: boolean): any;
     /**

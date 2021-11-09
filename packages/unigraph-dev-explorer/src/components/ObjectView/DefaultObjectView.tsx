@@ -145,11 +145,11 @@ const SubentityDropAcceptor = ({ uid }: any) => {
     </div>
 }
 
-export const ViewViewDetailed: DynamicViewRenderer = ({data}) => {
+export const ViewViewDetailed: DynamicViewRenderer = ({data, callbacks}) => {
     if (data.get('view').as('primitive')?.startsWith?.('/pages')) {
         const pages = window.unigraph.getState('registry/pages').value;
         return pages[data.get('view').as('primitive').replace('/pages/', '')]
-            .constructor(JSON.parse(data.get('props').as('primitive')).config)
+            .constructor({...JSON.parse(data.get('props').as('primitive')).config, callbacks: callbacks})
     } else {
         const widgets = window.unigraph.getState('registry/widgets').value;
         return widgets[data.get('view').as('primitive').replace('/widgets/', '')]
