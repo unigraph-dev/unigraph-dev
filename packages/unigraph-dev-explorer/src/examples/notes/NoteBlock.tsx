@@ -89,10 +89,11 @@ const NoteViewPageWrapper = ({ children, isRoot }: any) => {
     </div>
 }
 
-const NoteViewTextWrapper = ({ children, isRoot, onContextMenu }: any) => {
-    return !isRoot ? children : <div style={{ display: "flex", alignItems: "baseline" }}>
+const NoteViewTextWrapper = ({ children, semanticChildren, isRoot, onContextMenu }: any) => {
+    return <div style={{ display: "flex", alignItems: "center" }}>
         {children}
-        <MoreVert onClick={onContextMenu}/>
+        {semanticChildren}
+        {isRoot ? <MoreVert onClick={onContextMenu} style={{marginLeft: "8px"}}/> : []}
     </div>
 }
 
@@ -164,7 +165,10 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
 
     return <NoteViewPageWrapper isRoot={!isChildren}>
         <div style={{ width: "100%", }} ref={boxRef} >
-            <NoteViewTextWrapper isRoot={!isChildren} onContextMenu={(event: any) => onUnigraphContextMenu(event, data, undefined, callbacks)}>
+            <NoteViewTextWrapper 
+                isRoot={!isChildren} onContextMenu={(event: any) => onUnigraphContextMenu(event, data, undefined, callbacks)} 
+                semanticChildren={buildGraph(otherChildren).filter((el: any) => el.type).map((el: any) => <AutoDynamicView object={el} style={{width: "unset"}}/>)}
+            >
                 <div onClick={(ev) => {
                     if (!isEditing) {
                         setIsEditing(true);
@@ -306,7 +310,6 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                 </div>
             </NoteViewTextWrapper>
             {!isChildren ? <div style={{ height: "12px" }} /> : []}
-            {buildGraph(otherChildren).filter((el: any) => el.type).map((el: any) => <AutoDynamicView object={el}/>)}
             {!(isCollapsed === true) ? <div ref={childrenref} style={{ width: "100%" }} >
                 {(subentities.length || isChildren) ? buildGraph(subentities).map((el: any, elindex) => {
                     const isCol = isChildrenCollapsed[el.uid];
