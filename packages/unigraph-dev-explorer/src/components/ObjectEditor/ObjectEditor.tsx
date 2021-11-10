@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */ // Using maps as React functional components
-import { Button, Checkbox, Divider, FormControl, InputLabel, makeStyles, MenuItem, Paper, Select, Switch, TextField, Typography } from '@material-ui/core';
+import { Button, Checkbox, Divider, FormControl, Grid, InputLabel, makeStyles, MenuItem, Paper, Select, Switch, TextField, Typography } from '@material-ui/core';
 import _ from 'lodash';
 import React from 'react';
 import { useEffectOnce } from 'react-use';
@@ -254,16 +254,17 @@ const ObjectEditorBody = ({currentObject, setCurrentObject, schemaMap}: any) => 
     const currentSchema = currentObject['type']['_value[']?.[0]?.['_definition'] || schemaMap[currentObject['type']['unigraph.id']]['_definition']
 
     return <div style={{display: "flex"}}>
-        <div style={{width: "66%", overflow: "auto"}}>
-            <ObjectPartEditor localSchema={currentSchema} localObject={currentObject} setLocalObject={setCurrentObject} schemaMap={schemaMap} />
-        </div>
-        <Divider orientation={"vertical"}/>
-        <div style={{width: "34%"}}>
-            <Typography>Backlinks</Typography>
-            <BacklinkView data={currentObject} hideHeader/>
-            <Typography>Forward links</Typography>
-            <BacklinkView data={currentObject} hideHeader forward/>
-        </div>
+        <Grid container spacing={2}>
+            <Grid item xs={12} lg={8} style={{overflow: "auto"}}>
+                <ObjectPartEditor localSchema={currentSchema} localObject={currentObject} setLocalObject={setCurrentObject} schemaMap={schemaMap} />
+            </Grid>
+            <Grid item xs={12} lg={4}>
+                <Typography>Backlinks</Typography>
+                <BacklinkView data={currentObject} hideHeader/>
+                <Typography>Forward links</Typography>
+                <BacklinkView data={currentObject} hideHeader forward/>
+            </Grid>
+        </Grid>
     </div>
 }
 

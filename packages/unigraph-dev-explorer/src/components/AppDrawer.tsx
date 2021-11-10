@@ -12,6 +12,9 @@ import { ListSubheader } from '@material-ui/core';
 import { NavigationContext } from '../utils';
 import { FavoriteBar } from './UnigraphCore/FavoriteBar';
 
+import Icon from '@mdi/react'
+import { mdiBookOpenOutline, mdiPencilBoxMultipleOutline, mdiXml, mdiPackageVariantClosed, mdiDeleteOutline, mdiCogOutline, mdiBellOutline } from '@mdi/js';
+
 const drawerWidth = 240;
 
 const useStyles = makeStyles(theme => ({
@@ -45,33 +48,33 @@ export default function DrawerRouter() {
             <ListSubheader component="div" id="subheader-home"> Home </ListSubheader>
             
             <ListItem button onClick={()=>navigator('/library')}>
-              <ListItemIcon><LibraryBooks /></ListItemIcon>
+              <ListItemIcon><Icon path={mdiBookOpenOutline} size={1}/></ListItemIcon>
               <ListItemText primary="Library" />
             </ListItem>
             
             <ListItem button onClick={()=>navigator('/object-editor')}>
-              <ListItemIcon><FileCopy /></ListItemIcon>
+              <ListItemIcon><Icon path={mdiPencilBoxMultipleOutline} size={1}/></ListItemIcon>
               <ListItemText primary="Object Editor" />
             </ListItem>
             <ListItem button onClick={()=>navigator('/code-editor')}>
-              <ListItemIcon><CodeRounded /></ListItemIcon>
+              <ListItemIcon><Icon path={mdiXml} size={1}/></ListItemIcon>
               <ListItemText primary="Code Editor" />
             </ListItem>
             <ListItem button onClick={()=>navigator('/trash')}>
-              <ListItemIcon><Delete /></ListItemIcon>
+              <ListItemIcon><Icon path={mdiDeleteOutline} size={1}/></ListItemIcon>
               <ListItemText primary="Trash bin" />
             </ListItem>
             <ListSubheader component="div" id="subheader-unigraph"> Unigraph </ListSubheader>
             <ListItem button onClick={()=>navigator('/settings')}>
-              <ListItemIcon><Settings /></ListItemIcon>
+              <ListItemIcon><Icon path={mdiCogOutline} size={1}/></ListItemIcon>
               <ListItemText primary="Settings" />
             </ListItem>
             <ListItem button onClick={()=>navigator('/notification-center')}>
-              <ListItemIcon><Notifications /></ListItemIcon>
+              <ListItemIcon><Icon path={mdiBellOutline} size={1}/></ListItemIcon>
               <ListItemText primary="Notifications" />
             </ListItem>
             <ListItem button onClick={()=>navigator('/package-manager')}>
-              <ListItemIcon><Category /></ListItemIcon>
+              <ListItemIcon><Icon path={mdiPackageVariantClosed} size={1}/></ListItemIcon>
               <ListItemText primary="Packages" />
             </ListItem>
             <div style={{display: devMode ? "inherit" : "none"}}>

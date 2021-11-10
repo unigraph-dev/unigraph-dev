@@ -12,8 +12,6 @@ import { parseTodoObject } from './parseTodoObject';
 import { ATodoList, filters, maxDateStamp } from './utils';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
 
-
-
 function TodoListBody ({data}: { data: ATodoList[] }) {
     const todoList = data;
     const [newName, setNewName] = useState("");

@@ -11,7 +11,7 @@ import FlexLayout, { Actions, DockLocation, Model, Node, TabNode } from 'flexlay
 import 'flexlayout-react/style/light.css'
 import './workspace.css'
 import { getParameters, isSmallScreen, NavigationContext } from "./utils";
-import { Container, CssBaseline } from "@material-ui/core";
+import { Button, Container, CssBaseline } from "@material-ui/core";
 import { isJsonString } from "unigraph-dev-common/lib/utils/utils";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
 import { Search, StarOutlined, Menu, LocalOffer, Details } from "@material-ui/icons";
@@ -21,6 +21,9 @@ import { HTML5Backend } from 'react-dnd-html5-backend'
 import { InlineSearch } from "./components/UnigraphCore/InlineSearchPopup";
 
 import MomentUtils from '@date-io/moment';
+
+import Icon from '@mdi/react'
+import { mdiStarPlusOutline, mdiTagMultipleOutline } from '@mdi/js';
 
 const pages = window.unigraph.getState('registry/pages')
 
@@ -249,25 +252,8 @@ export function WorkSpace(this: any) {
                         renderValues.content = <Details style={{verticalAlign: "middle", transform: "rotate(270deg)"}} key="icon"/>;
                     }
                     if (nodeId === "category-pane") {
-                        renderValues.content = [<LocalOffer style={{verticalAlign: "middle", marginRight: "4px"}} key="icon"/>, renderValues.content];
+                        renderValues.content = [<Icon path={mdiTagMultipleOutline} size={1} style={{verticalAlign: "middle"}} key="icon"/>, renderValues.content];
                     }
-                    if (node.isVisible() && nodeId !== "app-drawer" && nodeId !== "dashboard" && nodeId !== "search-pane" && nodeId !== "category-pane" && nodeId !== "inspector-pane") {
-                        renderValues.buttons.push(<div style={{zIndex: 999, transform: "scale(0.7)"}} key="favoriteButton" onClick={async () => {
-                            const config = node.getConfig();
-                            if (config) {delete config.undefine; delete config.id};
-                            const uid = await window.unigraph.addObject({
-                                name: node.getName(),
-                                env: "react-explorer",
-                                view: node.getComponent(),
-                                props: JSON.stringify({config: config}) 
-                            }, "$/schema/view");
-                            await window.unigraph.runExecutable("$/package/unigraph.core/0.0.1/executable/add-item-to-list", {
-                                item: uid[0],
-                                where: "$/entity/favorite_bar"
-                            })
-                        }}><StarOutlined></StarOutlined></div>) 
-                    }
-                    
                     renderValues.buttons.push(<div id={"tabId"+nodeId} key={"tabId"+nodeId}></div>);
                     setTimeout(() => {
                         const el = document.getElementById('tabId'+nodeId);
@@ -278,6 +264,30 @@ export function WorkSpace(this: any) {
                             el.parentElement.addEventListener("mousedown", fn)
                         }
                     }, 0)
+                }} onRenderTabSet={(tabSetNode, renderValues) => {
+                    if (tabSetNode.getType() === "tabset") {
+                        renderValues.buttons.push(<span onClick={async () => {
+                            const node: TabNode = tabSetNode.getSelectedNode() as any;
+                            if (node && node.getId() !== "dashboard") {
+                                const config = node.getConfig();
+                                if (config) {delete config.undefine; delete config.id};
+                                const uid = await window.unigraph.addObject({
+                                    name: node.getName(),
+                                    env: "react-explorer",
+                                    view: node.getComponent(),
+                                    props: JSON.stringify({config: config}) 
+                                }, "$/schema/view");
+                                await window.unigraph.runExecutable("$/package/unigraph.core/0.0.1/executable/add-item-to-list", {
+                                    item: uid[0],
+                                    where: "$/entity/favorite_bar"
+                                })
+                            }
+                        }}>
+                            <Icon path={mdiStarPlusOutline} size={0.7} style={{marginTop: "5px"}}/>
+                        </span>);
+                    }
+                    
+                    //renderValues.headerContent = <Button>Hi</Button>;
                 }}/>
             </DndProvider>
         </MuiPickersUtilsProvider>

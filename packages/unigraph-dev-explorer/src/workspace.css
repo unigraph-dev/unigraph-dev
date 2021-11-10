@@ -9,7 +9,7 @@
 }
 
 .flexlayout__tab_button--selected {
-    background-color: #ffffff;
+    background-color: #e9e9e9;
     border-radius: 8px;
     margin: 4px;
 }
@@ -20,4 +20,38 @@
 
 .flexlayout__tab_button_trailing {
     background: transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAADZXpUWHRSYXcgcHJvZmlsZSB0eXBlIGV4aWYAAHja7ZdtduMqDIb/s4q7BCQhJJaDsTlndjDLvy82dtJOM5M2/XM/TGyILEsvPMhtwvbzRw9/4eCYc0hqnkvOEUcqqXDFwONx1P1KMe3X4zjv0Vt7uG4wTIJepn+e9g12hj9Pe5txKux6F6hs88by9kadgdhnglPRTCR0JIgzcKgzkPDMnI7vyzGtmIvb/RTa9O/1bqo+p5bEOGsmS7gmjma5YOwck2Hd1iE0t7hrpHUmePc9nK4MTbwJScQ1DYVynBVnxlVk+JAkjBP6irMcSkGLQzSMy7muvz9+pzyc0ie9t6jPET2w35EO+3zPG/KOUL76D+2kN3u4R7pzu8uc85X5jb3qleIiF058va/e+3bMrqaMKec5qXMq+wh+y1it/amMZjg1+ljs0QqaoyQa9tGKTbagNSrEwNgp0UqVOm1736hBYuKNDT1zY6EWYHTAKNzkgItGnU2KrOLYAA3bQWDlSwvtacuerpEj8UoesHsIwQiPvNTCM069j4Iiin6tFXTxqDSoGOSIQiS4gQj1uai6L/DZ3h+Dq4Cg7svsmGCNy4gA/IvSbXPJDlrgqOiPAiZbZwAsERQoxJCAQMwkSpmiMQcjwkI6AFVIZ0m8AAup8gqRnEQy4KAKkBvPGO2urHyY8SIECJUcxMCmSAWslBT7x5JjD1UVTaqa1dS1aM2SR4XlbHm8UauJJVPLZuZWrAYXT66e3dy9eC1cBG9cLajH4qWUWpG0InLF0xUOtS68yJIWXfJiiy9lqY1Dk5aattyseSutrrzKijpe82qrr2WtG23YSlvadMubbb6VrXZstS49de25W/deQq8XtYn1l/YJajSp8U5qONpFDVazMwSN14kOZiDGiQDcBgGSwDyYRaeUeJAbzGJhVIUyROqAs9IgBoJpI9ZOF7sbOQ14jX4LtwAQ/B3kwkD3BLlfuX1Eba37HzrZCY0yHIsaBdWnlR0fvBQ/7gVxj2F46BP/GMPpzhS+FuPUcbsVXtNx64O/MLd7XeFzeR/34TvWZ/ThNR0f4f9CmPhZ/I+mc+8SXtPxFP4ndMT3+OV1XeFzeR/vuvBqjP+r//nt8K+r/lsfvqzjK/j/QdV/N70Qv0XPf6/6peM/FPw8DX8DQCrUTb/DsaEAAAAGYktHRAD/AP8A/6C9p5MAAAAJcEhZcwAAFiUAABYlAUlSJPAAAAAHdElNRQfkBh4NKRbGzZ/RAAAAGXRFWHRDb21tZW50AENyZWF0ZWQgd2l0aCBHSU1QV4EOFwAAADhJREFUGNOFjUEKAEAIArWPSy/fPQUiQXOSkZLd/QBAEmGMrxSZmcKRRG5XPlk4uCe8nLfuKsvMH50+IRBMM7okAAAAAElFTkSuQmCC) no-repeat center;
+}
+
+.flexlayout__border_button--unselected {
+    background-color: unset;
+}
+
+.flexlayout__border_button--selected {
+    border-radius: 8px;
+}
+
+
+.flexlayout__border_left {
+    border-right: 0px;
+}
+
+.flexlayout__border_right {
+    border-left: 0px;
+    flex-direction: column-reverse;
+}
+
+.flexlayout__tabset-selected {
+    background-color: unset;
+}
+
+.flexlayout__splitter {
+    background-color: #ffffff;
+}
+
+.flexlayout__splitter_vert {
+    border-left: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.flexlayout__splitter_horz {
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
 }
