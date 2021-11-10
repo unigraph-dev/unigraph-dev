@@ -36,14 +36,14 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         ensureSchema: async (name, fallback) => {return Error('Not implemented')},
         // latertodo
         ensurePackage: async (packageName, fallback) => {return Error('Not implemented')},
-        subscribeToType: async (name, callback: any, eventId = undefined, {all, showHidden, uidsOnly, first, metadataOnly}: any) => {
+        subscribeToType: async (name, callback: any, eventId = undefined, {all, showHidden, uidsOnly, first, metadataOnly, depth}: any) => {
             eventId = eventId || getRandomInt();
             const queryAny = queries.queryAny(eventId.toString(), uidsOnly)
             const queryAnyAll = queries.queryAnyAll(eventId.toString(), uidsOnly)
             const query = name === "any" ? ((all || uidsOnly) ? queryAnyAll : queryAny) : `(func: uid(par${eventId})${first ? ", first: "+first : ""}) 
                 @filter((type(Entity)) AND (NOT eq(<_propertyType>, "inheritance")) 
                 ${ showHidden ? "" : "AND (NOT eq(<_hide>, true))" } AND (NOT type(Deleted)))
-            ${uidsOnly ? "{ uid }" : (metadataOnly ? " { uid <dgraph.type> type { <unigraph.id> } } " : makeQueryFragmentFromType(name, states.caches["schemas"].data))}
+            ${uidsOnly ? "{ uid }" : (metadataOnly ? " { uid <dgraph.type> type { <unigraph.id> } } " : makeQueryFragmentFromType(name, states.caches["schemas"].data, depth))}
             var(func: eq(<unigraph.id>, "${name}")) {
             <~type> {
             par${eventId} as uid
