@@ -55,4 +55,4 @@ for (let i=0; i<dest.length; ++i) {
 }
 
 await unigraph.runExecutable("$/executable/add-item-to-list", {where: "$/entity/inbox", item: inbox_els.reverse()});
-setTimeout(() => unigraph.addNotification({name: "Inboxes synced", from: "unigraph.email", content: "Added " + count + " items.", actions: []}), 1000); 
+setTimeout(() => unigraph.addNotification({name: "Inboxes synced", from: "unigraph.email", content: "Added " + count + " emails (" + inbox_els.length + " unread).", actions: []}), 1000); 

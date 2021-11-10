@@ -5,7 +5,7 @@ import ReactResizeDetector from 'react-resize-detector';
 import _ from "lodash";
 import { Checkbox, List, ListItem, Typography } from "@material-ui/core";
 
-const queryNameIndex = `@filter((NOT eq(<_propertyType>, "inheritance"))) {
+const queryNameIndex = `@filter(type(Entity) AND (NOT eq(<_propertyType>, "inheritance"))) {
     uid 
     unigraph.indexes {
         uid

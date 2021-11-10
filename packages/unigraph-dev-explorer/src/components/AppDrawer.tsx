@@ -61,7 +61,6 @@ export default function DrawerRouter() {
               <ListItemIcon><Delete /></ListItemIcon>
               <ListItemText primary="Trash bin" />
             </ListItem>
-            <Divider/>
             <ListSubheader component="div" id="subheader-unigraph"> Unigraph </ListSubheader>
             <ListItem button onClick={()=>navigator('/settings')}>
               <ListItemIcon><Settings /></ListItemIcon>
@@ -75,7 +74,6 @@ export default function DrawerRouter() {
               <ListItemIcon><Category /></ListItemIcon>
               <ListItemText primary="Packages" />
             </ListItem>
-            <Divider/>
             <div style={{display: devMode ? "inherit" : "none"}}>
               <ListSubheader component="div" id="subheader-developer-tools"> Developer Tools </ListSubheader>
               <ListItem button onClick={()=>navigator('/request')}>
@@ -86,7 +84,6 @@ export default function DrawerRouter() {
                 <ListItemIcon><CompareArrows /></ListItemIcon>
                 <ListItemText primary="DataModel Playground" />
               </ListItem>
-              <Divider/>
             </div>
             <ListSubheader component="div" id="subheader-developer-tools"> Favorites </ListSubheader>
             <FavoriteBar/>
