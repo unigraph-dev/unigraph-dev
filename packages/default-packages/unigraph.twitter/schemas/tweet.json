@@ -11,7 +11,7 @@
                 "_definition": {
                     "type": { "unigraph.id": "$/schema/interface/textual" }
                 },
-                "_indexas": "name"
+                "_indexAs": "name"
             },
             {
                 "_key": "twitter_id",

@@ -11,7 +11,7 @@
                 "_definition": {
                     "type": { "unigraph.id": "$/schema/interface/textual" }
                 },
-                "_indexas": "name"
+                "_indexAs": "name"
             },
             {
                 "_key": "subreddit",
@@ -24,7 +24,7 @@
                 "_definition": {
                     "type": { "unigraph.id": "$/schema/icon_url" }
                 },
-                "_indexas": "thumbnail"
+                "_indexAs": "thumbnail"
             },
             {
                 "_key": "selftext",

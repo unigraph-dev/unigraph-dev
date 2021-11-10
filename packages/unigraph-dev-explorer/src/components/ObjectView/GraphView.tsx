@@ -39,7 +39,7 @@ export const GraphView = ({uid}: any) => {
         }, id, true);
 
         return function cleanup () { window.unigraph.unsubscribe(id); }
-    })
+    }, [])
 
     React.useEffect(() => {
         if (refs?.[0]) {
@@ -61,7 +61,7 @@ export const GraphView = ({uid}: any) => {
             setEntities(_.uniqBy([...(entitiesInto || []), ...(entitiesOutof || [])], el => el.id));
             setLinks(llinks);
         }
-    }, [refs, typesExcluded, uid])
+    }, [refs, typesExcluded])
 
     return <div>
         <Typography>Graph view of object {uid}</Typography>
