@@ -108,7 +108,8 @@ export interface Unigraph<TT = WebSocket | false> {
         showHidden?: boolean | undefined,
         uidsOnly?: boolean | undefined,
         metadataOnly?: boolean | undefined,
-        first?: number | undefined
+        first?: number | undefined,
+        depth?: number | undefined
     }): Promise<any>;
     /**
      * Subscribe to a Unigraph object with a given UID or name, and call the callback function evry time the subscription is updated.

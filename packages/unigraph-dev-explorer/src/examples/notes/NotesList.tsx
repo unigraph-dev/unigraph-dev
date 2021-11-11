@@ -16,7 +16,7 @@ export const NotesListBody = ({data}: any) => {
 
 export const NotesListAll = withUnigraphSubscription(NotesListBody, { schemas: [], defaultData: [], packages: []},
 { afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
-    window.unigraph.subscribeToType("$/schema/note_block", (result: any[]) => {setData(result.reverse())}, subsId);
+    window.unigraph.subscribeToType("$/schema/note_block", (result: any[]) => {setData(result.reverse())}, subsId, {depth: 9});
 }})
 
 export const NotesList = () => {
