@@ -127,28 +127,6 @@ export async function addUnigraphPackage(client: DgraphClient, pkg: PackageDecla
             ...schema
         }
     });
-    // 1.5 Create all executables if there are any
-    const executables = !(pkg.pkgExecutables && Object.entries(pkg.pkgExecutables)) ? [] : Object.entries(pkg.pkgExecutables).map(([key, exec]: any) => {
-        const builtExecutable: any = buildUnigraphEntity(exec, "$/schema/executable", caches['schemas'].data);
-        builtExecutable['unigraph.id'] = `$/package/${pkg.pkgManifest.package_name}/${pkg.pkgManifest.version}/executable/${key}`;
-        builtExecutable['dgraph.type'] = ['Entity', 'Executable']
-        return builtExecutable
-    })
-    // 1.7 Create all predefined entities
-    const entities = !(pkg.pkgEntities && Object.entries(pkg.pkgEntities)) ? [] : Object.entries(pkg.pkgEntities).map(([key, obj]: any) => {
-        const schema = obj?.type?.['unigraph.id'];
-        if (typeof schema === "string") {
-            delete obj.type;
-            const builtEntity: any = buildUnigraphEntity(obj, schema, caches['schemas'].data);
-            builtEntity['unigraph.id'] = `$/package/${pkg.pkgManifest.package_name}/${pkg.pkgManifest.version}/entity/${key}`;
-            builtEntity['dgraph.type'] = ['Entity', 'Named']
-            return builtEntity
-        } else return undefined;
-    }).filter(x => x !== undefined);
-    if (entities.length !== 0 && (typeof pkg.pkgEntities !== "object" || entities.length !== Object.values(pkg.pkgEntities).length)) {
-        throw new SyntaxError("Malformed package declaration, aborting!")
-    }
-    // TODO: Use concurrency here
     for(let i=0; i<schemas.length; ++i) {
         const schemaShorthandRef = {
             ...getRefQueryUnigraphId(`$/schema/${Object.keys(pkg.pkgSchemas)[i]}`),
@@ -161,6 +139,36 @@ export async function addUnigraphPackage(client: DgraphClient, pkg: PackageDecla
         const upsert2 = insertsToUpsert([schemaShorthandRef]);
         await client.createUnigraphUpsert(upsert2)
     }
+    await caches['schemas'].updateNow();
+    // 1.5 Create all executables if there are any
+    const executables = !(pkg.pkgExecutables && Object.entries(pkg.pkgExecutables)) ? [] : Object.entries(pkg.pkgExecutables).map(([key, exec]: any) => {
+        const builtExecutable: any = buildUnigraphEntity(exec, "$/schema/executable", caches['schemas'].data);
+        builtExecutable['unigraph.id'] = `$/package/${pkg.pkgManifest.package_name}/${pkg.pkgManifest.version}/executable/${key}`;
+        builtExecutable['dgraph.type'] = ['Entity', 'Executable']
+        return builtExecutable
+    })
+    // 1.7 Create all predefined entities
+    const entities = !(pkg.pkgEntities && Object.entries(pkg.pkgEntities)) ? [] : Object.entries(pkg.pkgEntities).map(([key, obj]: any) => {
+        const schema = obj?.type?.['unigraph.id'];
+        if (typeof schema === "string") {
+            delete obj.type;
+            //console.log(JSON.stringify(obj))
+            //console.log(JSON.stringify(caches['schemas'].data[schema]))
+            if (!caches['schemas'].data?.[schema]?._definition && caches['schemas'].data[schema]?.['_value[']) {
+                // Deal with schema cited only just created now
+                const id = caches['schemas'].data[schema]['_value['][0]['unigraph.id'];
+                caches['schemas'].data[schema] = caches['schemas'].data[id];
+            }
+            const builtEntity: any = buildUnigraphEntity(obj, schema, caches['schemas'].data);
+            builtEntity['unigraph.id'] = `$/package/${pkg.pkgManifest.package_name}/${pkg.pkgManifest.version}/entity/${key}`;
+            builtEntity['dgraph.type'] = ['Entity', 'Named']
+            return builtEntity
+        } else return undefined;
+    }).filter(x => x !== undefined);
+    if (entities.length !== 0 && (typeof pkg.pkgEntities !== "object" || entities.length !== Object.values(pkg.pkgEntities).length)) {
+        throw new SyntaxError("Malformed package declaration, aborting!")
+    }
+    // TODO: Use concurrency here
     for(let i=0; i<executables.length; ++i) {
         const autoRefExecutable = processAutorefUnigraphId(executables[i]);
         const upsert = insertsToUpsert([autoRefExecutable]);

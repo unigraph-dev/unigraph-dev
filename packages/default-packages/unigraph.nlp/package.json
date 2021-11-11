@@ -3,6 +3,9 @@
     "version": "0.0.1",
     "description": "Basic NLP tasks for Unigraph",
     "unigraph": {
+        "schemas": [
+            {"id": "prompt_preset", "src": "schemas/promptPreset.json"}
+        ],
         "executables": [
             { "name": "Prompt generator: tl;dr", "env": "lambda/js", "id": "prompt-preset-tldr-generator", "src": "executables/tldrGenerator.js", "editable": true },
             { "name": "Prompt processor: tl;dr", "env": "lambda/js", "id": "prompt-preset-tldr-processor", "src": "executables/tldrProcessor.js", "editable": true },

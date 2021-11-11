@@ -18,14 +18,14 @@ const queryNameIndex = `@filter(type(Entity) AND (NOT eq(<_propertyType>, "inher
     <type> { <unigraph.id> }
 }`
 
-const excludableTypes = ['$/schema/subentity', '$/schema/interface/textual']
+const excludableTypes = ['$/schema/subentity', '$/schema/interface/textual', '$/schema/markdown']
 const getExcluded = (id: number) => excludableTypes.reduce((prev, curr, idx) => (!!((id >> idx) % 2)) ? [...prev, curr] : prev, [] as string[])
 
 export const GraphView = ({uid}: any) => {
     const [entities, setEntities] = React.useState<any>([]);
     const [links, setLinks] = React.useState<any>([]);
     const [refs, setRefs] = React.useState<any>();
-    const [typesExcluded, setTypesExcluded] = React.useState(3); // Bitmapped, types[0] => +-1, etc
+    const [typesExcluded, setTypesExcluded] = React.useState(7); // Bitmapped, types[0] => +-1, etc
 
     React.useEffect(() => {
         const id = getRandomInt();
