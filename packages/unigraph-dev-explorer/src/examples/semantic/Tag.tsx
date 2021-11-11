@@ -7,6 +7,9 @@ import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { registerDynamicViews } from 'unigraph-dev-common/lib/api/unigraph-react';
 import { AutoDynamicView } from '../../components/ObjectView/DefaultObjectView';
 
+import Icon from '@mdi/react'
+import { mdiTagOutline } from '@mdi/js';
+
 export const Tag: DynamicViewRenderer = ({data, callbacks}) => {
     let tag = data;
     let uid = data.uid
@@ -15,7 +18,7 @@ export const Tag: DynamicViewRenderer = ({data, callbacks}) => {
     return <NavigationContext.Consumer>
         {(navigator) => <Chip
             size="small"
-            icon={<LocalOffer style={{filter: (bgc === "unset" || getContrast(bgc) === "black") ? "unset" : "invert(1)"}}/>}
+            icon={<Icon path={mdiTagOutline} size={0.75} style={{filter: (bgc === "unset" || getContrast(bgc) === "black") ? "unset" : "invert(1)"}}/>}
             style={{
                 backgroundColor: bgc,
                 color: bgc.startsWith("#") ? getContrast(bgc) : "unset"

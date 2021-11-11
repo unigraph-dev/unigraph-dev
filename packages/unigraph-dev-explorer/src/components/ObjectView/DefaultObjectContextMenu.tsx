@@ -1,4 +1,4 @@
-import { Menu, MenuItem } from '@material-ui/core';
+import { ListItemIcon, ListItemText, Menu, MenuItem } from '@material-ui/core';
 import _ from 'lodash';
 import React from 'react';
 import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
@@ -6,36 +6,57 @@ import { AutoDynamicViewCallbacks, ContextMenuGenerator } from '../../types/Obje
 import { isMultiSelectKeyPressed, NavigationContext, selectUid } from '../../utils';
 import { getComponentAsView } from './DynamicComponentView';
 
+import Icon from '@mdi/react'
+import { mdiCubeOutline, mdiDatabaseOutline, mdiCloseBoxOutline, mdiCloseBoxMultipleOutline, mdiViewDayOutline, mdiFileTreeOutline, mdiVectorPolylineEdit, mdiInboxArrowDownOutline, mdiLinkBoxVariantOutline, mdiDeleteOutline, mdiGraphOutline } from '@mdi/js';
+
 export const defaultContextMenu: Array<ContextMenuGenerator> = [
-    (uid, object, handleClose, callbacks) => <MenuItem onClick={() => {handleClose(); window.wsnavigator(`/library/object?uid=${uid}&viewer=${"dynamic-view-detailed"}`)}}>
-        View object with its default
+    (uid, object, handleClose, callbacks) => <MenuItem style={{paddingTop: "2px", paddingBottom: "2px"}} onClick={() => {handleClose(); window.wsnavigator(`/library/object?uid=${uid}&viewer=${"dynamic-view-detailed"}`)}}>
+        <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiViewDayOutline} size={1}/></ListItemIcon>
+        <ListItemText>View object with its default</ListItemText>
+        
     </MenuItem>,
-    (uid, object, handleClose, callbacks) => <MenuItem onClick={() => {handleClose(); window.wsnavigator(`/library/object?uid=${uid}&viewer=${"json-tree"}`)}}>
-        View object with JSON tree viewer
+    (uid, object, handleClose, callbacks) => <MenuItem style={{paddingTop: "2px", paddingBottom: "2px"}} onClick={() => {handleClose(); window.wsnavigator(`/library/object?uid=${uid}&viewer=${"json-tree"}`)}}>
+        <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiFileTreeOutline} size={1}/></ListItemIcon>
+        <ListItemText>View object with JSON tree viewer</ListItemText>
+        
     </MenuItem>,
-    (uid, object, handleClose, callbacks) => <MenuItem onClick={() => {handleClose(); window.wsnavigator(`/object-editor?uid=${uid}`)}}>
-        View object with rich object editor
+    (uid, object, handleClose, callbacks) => <MenuItem style={{paddingTop: "2px", paddingBottom: "2px"}} onClick={() => {handleClose(); window.wsnavigator(`/object-editor?uid=${uid}`)}}>
+        <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiVectorPolylineEdit} size={1}/></ListItemIcon>
+        <ListItemText>View object with rich object editor</ListItemText>
+        
     </MenuItem>,
-    (uid, object, handleClose, callbacks) => <MenuItem onClick={() => {handleClose(); window.unigraph.runExecutable('$/executable/add-item-to-list', {where: "$/entity/inbox", item: uid})}}>
-        Add item to inbox
+    (uid, object, handleClose, callbacks) => <MenuItem style={{paddingTop: "2px", paddingBottom: "2px"}} onClick={() => {handleClose(); window.unigraph.runExecutable('$/executable/add-item-to-list', {where: "$/entity/inbox", item: uid})}}>
+        <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiInboxArrowDownOutline} size={1}/></ListItemIcon>
+        <ListItemText>Add item to inbox</ListItemText>
+        
     </MenuItem>,
-    (uid, object, handleClose, callbacks) => <MenuItem onClick={() => {handleClose(); window.wsnavigator(`/library/backlink?uid=${uid}`);}}>
-        View backlinks
+    (uid, object, handleClose, callbacks) => <MenuItem style={{paddingTop: "2px", paddingBottom: "2px"}} onClick={() => {handleClose(); window.wsnavigator(`/library/backlink?uid=${uid}`);}}>
+        <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiLinkBoxVariantOutline} size={1}/></ListItemIcon>
+        <ListItemText>View backlinks</ListItemText>
+        
     </MenuItem>,
-    (uid, object, handleClose, callbacks) => <MenuItem onClick={() => {handleClose(); window.unigraph.deleteObject(uid)}}>
-        Delete item (set as deleted)
+    (uid, object, handleClose, callbacks) => <MenuItem style={{paddingTop: "2px", paddingBottom: "2px"}} onClick={() => {handleClose(); window.unigraph.deleteObject(uid)}}>
+        <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiDeleteOutline} size={1}/></ListItemIcon>
+        <ListItemText>Delete item</ListItemText>
+        
     </MenuItem>,
-    (uid, object, handleClose, callbacks) => <MenuItem onClick={() => {handleClose(); window.wsnavigator(`/graph?uid=${uid}`)}}>
-        Show Graph view
+    (uid, object, handleClose, callbacks) => <MenuItem style={{paddingTop: "2px", paddingBottom: "0px"}} onClick={() => {handleClose(); window.wsnavigator(`/graph?uid=${uid}`)}}>
+        <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiGraphOutline} size={1}/></ListItemIcon>
+        <ListItemText>Show Graph view</ListItemText>
+        
     </MenuItem>,
 ]
 
 export const defaultContextContextMenu: Array<ContextMenuGenerator> = [
-    (uid, object, handleClose, callbacks) => <MenuItem onClick={() => {handleClose(); callbacks?.removeFromContext?.()}}>
-        Remove item from context
+    (uid, object, handleClose, callbacks) => <MenuItem style={{paddingTop: "2px", paddingBottom: "2px"}} onClick={() => {handleClose(); callbacks?.removeFromContext?.()}}>
+        <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiCloseBoxOutline} size={1}/></ListItemIcon>
+        <ListItemText>Remove item from context</ListItemText>
+        
     </MenuItem>,
-    (uid, object, handleClose, callbacks) => <MenuItem onClick={() => {handleClose(); callbacks?.removeFromContext?.("left")}}>
-        Remove all items above (on the left) from context
+    (uid, object, handleClose, callbacks) => <MenuItem style={{paddingTop: "2px", paddingBottom: "2px"}} onClick={() => {handleClose(); callbacks?.removeFromContext?.("left")}}>
+        <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiCloseBoxMultipleOutline} size={1}/></ListItemIcon>
+        <ListItemText>Remove all items above (on the left) from context</ListItemText>
+        
     </MenuItem>
 ]
 
@@ -48,14 +69,10 @@ export const DefaultObjectContextMenu = ({uid, object, anchorEl, handleClose}:
         open={Boolean(anchorEl)}
         onClose={handleClose}
     >
-        <NavigationContext.Consumer>
-        { (navigator: any) => 
-            <React.Fragment>
-                {defaultContextMenu.map(el => el(uid, object, handleClose))}
-            </React.Fragment>
-        }
-        </NavigationContext.Consumer>
-        
+        <React.Fragment>
+            
+            {defaultContextMenu.map(el => el(uid, object, handleClose))}
+        </React.Fragment>
     </Menu>)
 }
 

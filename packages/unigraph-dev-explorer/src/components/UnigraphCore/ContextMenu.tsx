@@ -1,8 +1,11 @@
-import { Divider, Popover, Typography } from "@material-ui/core"
+import { Divider, ListItemText, ListItemIcon, MenuItem, Popover, Typography, MenuList } from "@material-ui/core"
 import React from "react"
 import { AppState } from "unigraph-dev-common/lib/types/unigraph";
 import { ContextMenuState } from "../../init"
 import { deselectUid } from "../../utils";
+
+import Icon from '@mdi/react'
+import { mdiCubeOutline, mdiDatabaseOutline, mdiRelationManyToMany } from '@mdi/js';
 
 export const ContextMenu = () => {
 
@@ -35,6 +38,14 @@ export const ContextMenu = () => {
             horizontal: 'center',
         }}
     >
+        <MenuList>
+        <MenuItem style={{paddingTop: "2px", paddingBottom: "2px"}} >
+            <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiCubeOutline} size={1}/></ListItemIcon>
+            <ListItemText>{state.contextUid}</ListItemText>
+            <ListItemIcon style={{minWidth: "36px", marginLeft: "12px"}}><Icon path={mdiDatabaseOutline} size={1}/></ListItemIcon>
+            <ListItemText>{state.contextObject?.type?.['unigraph.id']}</ListItemText>
+        </MenuItem>
+        <Divider/>
         {state.menuContent?.map(el => el(state.contextUid!, state.contextObject, handleClose, state.callbacks))}
         {schemaMenuConstructors.length > 0 ? <React.Fragment>
             <Divider/>
@@ -42,10 +53,16 @@ export const ContextMenu = () => {
         </React.Fragment> : []}
         {state.contextContextUid ? <React.Fragment>
             <Divider/>
-            <Typography variant="body1" style={{padding: "8px"}}>Context uid: {state.contextContextUid}; type: {state.contextContextObject?.type?.['unigraph.id']}</Typography>
+            <MenuItem style={{paddingTop: "2px", paddingBottom: "2px"}} >
+                <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiRelationManyToMany} size={1}/></ListItemIcon>
+                <ListItemText>{state.contextContextUid}</ListItemText>
+                <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiDatabaseOutline} size={1}/></ListItemIcon>
+                <ListItemText>{state.contextContextObject?.type?.['unigraph.id']}</ListItemText>
+            </MenuItem>
             <Divider/>
             {state.menuContextContent?.map(el => el(state.contextUid!, state.contextObject, handleClose, {...state.callbacks, removeFromContext: state.removeFromContext}))}
         </React.Fragment>: []}
         {state.extraContent ? state.extraContent(handleClose) : []}
+        </MenuList>
     </Popover></div>
 }

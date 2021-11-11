@@ -1908,6 +1908,16 @@
     prop-types "^15.7.2"
     react-is "^17.0.0"
 
+"@mdi/js@^6.4.95":
+  version "6.4.95"
+  resolved "https://registry.yarnpkg.com/@mdi/js/-/js-6.4.95.tgz#3ba2c04b702f1f7b71c41d5c86d2849868c866c8"
+  integrity sha512-b1/P//1D2KOzta8YRGyoSLGsAlWyUHfxzVBhV4e/ppnjM4DfBgay/vWz7Eg5Ee80JZ4zsQz8h54X+KOahtBk5Q==
+
+"@mdi/react@^1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@mdi/react/-/react-1.5.0.tgz#461d2064ba12d509723bffc95e2f7169a6ac884a"
+  integrity sha512-NztRgUxSYD+ImaKN94Tg66VVVqXj4SmlDGzZoz48H9riJ+Awha56sfXH2fegw819NWo7KI3oeS1Es0lNQqwr0w==
+
 "@monaco-editor/loader@^1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@monaco-editor/loader/-/loader-1.0.1.tgz#7068c9b07bbc65387c0e7a4df6dac0a326155905"

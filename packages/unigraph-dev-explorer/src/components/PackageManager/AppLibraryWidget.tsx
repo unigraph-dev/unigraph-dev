@@ -2,12 +2,15 @@ import { Avatar, Grid, Typography } from "@material-ui/core"
 import { Apps, Bookmarks, CalendarToday, CodeRounded, Email, Inbox, Note, PlaylistAddCheck, RssFeed, Search, Timer } from "@material-ui/icons"
 import { NavigationContext } from "../../utils"
 
+import Icon from '@mdi/react'
+import { mdiViewDashboardOutline, mdiFeatureSearchOutline, mdiRss, mdiAppsBox, mdiEmailOpenMultipleOutline, mdiCalendarOutline, mdiCalendarClockOutline, mdiInboxOutline, mdiBookmarkMultipleOutline, mdiCheckboxMarkedCirclePlusOutline, mdiNoteMultipleOutline } from '@mdi/js';
+
 type AppShortcutProps = {avatar: React.ReactElement<any>, address: string, text: string}
 
 export const AppShortcut = ({avatar, address, text}: AppShortcutProps) => {
     return <div style={{display: "flex", flexDirection: "column", alignItems: "center", padding: "16px"}}
         onClick={() => window.wsnavigator(address)}>
-        <Avatar>{avatar}</Avatar>
+        {avatar}
         {text}
     </div>
 }
@@ -15,21 +18,41 @@ export const AppShortcut = ({avatar, address, text}: AppShortcutProps) => {
 export const AppLibraryWidget = ({}) => {
     return <div style={{overflowY: "auto", height: "100%"}}>
         <Typography variant="h5">Recommended Apps</Typography>
-        <NavigationContext.Consumer>
-        { (navigator: any) => <Grid container>
-            <AppShortcut avatar={<Timer/>} address="/today" text="Today" />
-            <AppShortcut avatar={<Search/>} address="/search" text="Search" />
-            <AppShortcut avatar={<PlaylistAddCheck/>} address="/examples/todo" text="Todo List" />
-            <AppShortcut avatar={<Note/>} address="/notes-list" text="Notes" />
-            <AppShortcut avatar={<Bookmarks/>} address="/examples/bookmarks" text="Bookmarks" />
-            <AppShortcut avatar={<RssFeed/>} address="/examples/rss_reader" text="RSS Reader" />
-            <AppShortcut avatar={<Inbox/>} address="/inbox" text="Inbox" />
-            <AppShortcut avatar={<Email/>} address="/email" text="Email" />
-            <AppShortcut avatar={<CalendarToday/>} address="/current-events" text="Current Events" />
-            <AppShortcut avatar={<CalendarToday/>} address="/calendar" text="Calendar" />
-            <AppShortcut avatar={<Apps/>} address="/app-library" text="All Apps" />
+        <Grid container spacing={2}>
+            <Grid item xs={3}>
+            <AppShortcut avatar={<Icon path={mdiViewDashboardOutline} size={1}/>} address="/today" text="Today" />
+            </Grid>
+            <Grid item xs={3}>
+            <AppShortcut avatar={<Icon path={mdiFeatureSearchOutline} size={1}/>} address="/search" text="Search" />
+            </Grid>
+            <Grid item xs={3}>
+            <AppShortcut avatar={<Icon path={mdiCheckboxMarkedCirclePlusOutline} size={1}/>} address="/examples/todo" text="Todo List" />
+            </Grid>
+            <Grid item xs={3}>
+            <AppShortcut avatar={<Icon path={mdiNoteMultipleOutline} size={1}/>} address="/notes-list" text="Notes" />
+            </Grid>
+            <Grid item xs={3}>
+            <AppShortcut avatar={<Icon path={mdiBookmarkMultipleOutline} size={1}/>} address="/examples/bookmarks" text="Bookmarks" />
+            </Grid>
+            <Grid item xs={3}>
+            <AppShortcut avatar={<Icon path={mdiRss} size={1}/>} address="/examples/rss_reader" text="RSS Reader" />
+            </Grid>
+            <Grid item xs={3}>
+            <AppShortcut avatar={<Icon path={mdiInboxOutline} size={1}/>} address="/inbox" text="Inbox" />
+            </Grid>
+            <Grid item xs={3}>
+            <AppShortcut avatar={<Icon path={mdiEmailOpenMultipleOutline} size={1}/>} address="/email" text="Email" />
+            </Grid>
+            <Grid item xs={3}>
+            <AppShortcut avatar={<Icon path={mdiCalendarClockOutline} size={1}/>} address="/current-events" text="Current Events" />
+            </Grid>
+            <Grid item xs={3}>
+            <AppShortcut avatar={<Icon path={mdiCalendarOutline} size={1}/>} address="/calendar" text="Calendar" />
+            </Grid>
+            <Grid item xs={3}>
+            <AppShortcut avatar={<Icon path={mdiAppsBox} size={1}/>} address="/app-library" text="All Apps" />
+            </Grid>
         </Grid>
-        }</NavigationContext.Consumer>
     </div>
 
 }
