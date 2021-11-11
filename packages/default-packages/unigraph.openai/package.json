@@ -3,9 +3,6 @@
     "version": "0.0.1",
     "description": "GPT-3 and Codex integration for Unigraph",
     "unigraph": {
-        "schemas": [
-            {"id": "prompt_preset", "src": "schemas/promptPreset.json"}
-        ],
         "executables": [
             {
                 "name": "Language modelling with GPT-3",
