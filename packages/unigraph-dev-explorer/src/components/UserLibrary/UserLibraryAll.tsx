@@ -3,8 +3,8 @@ import _ from 'lodash';
 import React from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useEffectOnce } from 'react-use';
-import { buildGraph, getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
-import { AutoDynamicView } from '../ObjectView/DefaultObjectView';
+import { buildGraph, getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
+import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
 import { setupInfiniteScrolling } from '../ObjectView/infiniteScrolling';
 
 const UserLibraryAll = ({id}: any) => {

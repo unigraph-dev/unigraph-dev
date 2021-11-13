@@ -1,11 +1,11 @@
-import { Box, Button, FormControl, InputLabel, List, ListItem, MenuItem, Select, Tab, Tabs, TextField, Typography } from '@material-ui/core';
+import { Button, FormControl, InputLabel, List, ListItem, MenuItem, Select, Tab, Tabs, TextField } from '@material-ui/core';
 import { TabPanel } from './TabPanel';
 import React from 'react';
 import SplitterLayout from 'react-splitter-layout';
 import 'react-splitter-layout/lib/index.css';
 import { useEffectOnce } from 'react-use';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
-import { AutoDynamicView } from '../ObjectView/DefaultObjectView';
+import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
 import DetailedObjectView from '../UserLibrary/UserLibraryObject';
 import { ExecutableCodeEditor } from '../ObjectView/DefaultCodeEditor';
 

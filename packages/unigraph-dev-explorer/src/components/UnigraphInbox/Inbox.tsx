@@ -1,4 +1,4 @@
-import { AutoDynamicViewDetailed } from "../ObjectView/DefaultObjectView";
+import { AutoDynamicViewDetailed } from "../ObjectView/AutoDynamicViewDetailed";
 
 export const Inbox = () => {
 

@@ -1,7 +1,7 @@
 import { Typography } from "@material-ui/core"
 import React from "react"
 import { withUnigraphSubscription } from "unigraph-dev-common/lib/api/unigraph-react"
-import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
+import { AutoDynamicView } from "../../components/ObjectView/AutoDynamicView";
 import { NavigationContext } from "../../utils";
 
 function TagList ({data}: any) {

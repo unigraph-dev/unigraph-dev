@@ -36,7 +36,7 @@ export default function Request () {
             options={{lineNumbers: true, mode: "javascript"}} 
         />
         <Button onClick={() => {
-            window.unigraph.backendConnection.send(code)
+            window.unigraph.backendConnection.current?.send(code)
         }}>Send to server</Button>
         <p>Templates: </p>
         <Button onClick={() => setCode(templateRequests['get-all-objects-with-id'])}>Get all objects with ID</Button>

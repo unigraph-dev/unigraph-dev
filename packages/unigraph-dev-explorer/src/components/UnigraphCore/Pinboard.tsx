@@ -6,7 +6,7 @@ import ReactResizeDetector from 'react-resize-detector';
 
 import { Responsive as ResponsiveGridLayout } from 'react-grid-layout';
 import '../../pages/home.css';
-import { AutoDynamicViewDetailed } from "../ObjectView/DefaultObjectView";
+import { AutoDynamicViewDetailed } from "../ObjectView/AutoDynamicViewDetailed";
 import { onUnigraphContextMenu } from "../ObjectView/DefaultObjectContextMenu";
 import { UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
 import React from "react";

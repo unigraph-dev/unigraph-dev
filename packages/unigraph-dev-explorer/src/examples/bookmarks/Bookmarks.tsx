@@ -9,7 +9,7 @@ import { registerDynamicViews, withUnigraphSubscription } from 'unigraph-dev-com
 import { Tag } from "../semantic/Tag";
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { getExecutableId } from "unigraph-dev-common/lib/api/unigraph";
-import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
+import { AutoDynamicView } from "../../components/ObjectView/AutoDynamicView";
 import { getComponentFromPage } from "../../Workspace";
 import { openUrl } from "../../utils";
 import { DynamicObjectListView } from "../../components/ObjectView/DynamicObjectListView";

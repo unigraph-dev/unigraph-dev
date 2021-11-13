@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { AutoDynamicViewDetailed, DefaultObjectView } from '../ObjectView/DefaultObjectView';
+import { AutoDynamicViewDetailed } from '../ObjectView/AutoDynamicViewDetailed';
+import { DefaultObjectView } from '../ObjectView/DefaultObjectView';
 
 export default function DetailedObjectView ({ uid, viewer, id, context, component, callbacks }: any) {
     let objectId: any = uid;

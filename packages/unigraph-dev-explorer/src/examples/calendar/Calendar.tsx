@@ -4,7 +4,7 @@ import React from "react";
 import { buildGraph, getRandomInt, UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
 import { DynamicObjectListView } from "../../components/ObjectView/DynamicObjectListView";
 import Sugar from 'sugar';
-import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
+import { AutoDynamicView } from "../../components/ObjectView/AutoDynamicView";
 
 export const CalendarEvent = ({data, callbacks}: any) => {
     return <div style={{display: "flex"}}>

@@ -2,7 +2,8 @@ import { MenuItem, Typography } from "@material-ui/core";
 import React, { FormEvent } from "react";
 import { registerDetailedDynamicViews, registerDynamicViews, registerContextMenuItems } from "unigraph-dev-common/lib/api/unigraph-react";
 import { byElementIndex, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
-import { AutoDynamicView, ViewViewDetailed } from "../../components/ObjectView/DefaultObjectView";
+import { AutoDynamicView } from "../../components/ObjectView/AutoDynamicView";
+import { ViewViewDetailed } from "../../components/ObjectView/DefaultObjectView";
 
 import _ from "lodash";
 import { buildGraph } from "unigraph-dev-common/lib/api/unigraph";
@@ -281,14 +282,16 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                                     break;
 
                                 case 'BracketLeft':
-                                    ev.preventDefault();
-                                    //console.log(document.getSelection())
-                                    let middle = document.getSelection()?.toString() || "";
-                                    let end = "";
-                                    if (middle.endsWith(' ')) { middle = middle.slice(0, middle.length - 1); end = " "; }
-                                    document.execCommand('insertText', false, '[' + middle + ']' + end);
-                                    //console.log(caret, document.getSelection(), middle)
-                                    setCaret(document, textInput.current.firstChild, caret + 1, middle.length)
+                                    if (!ev.shiftKey) {
+                                        ev.preventDefault();
+                                        //console.log(document.getSelection())
+                                        let middle = document.getSelection()?.toString() || "";
+                                        let end = "";
+                                        if (middle.endsWith(' ')) { middle = middle.slice(0, middle.length - 1); end = " "; }
+                                        document.execCommand('insertText', false, '[' + middle + ']' + end);
+                                        //console.log(caret, document.getSelection(), middle)
+                                        setCaret(document, textInput.current.firstChild, caret + 1, middle.length)
+                                    }
                                     break;
 
                                 default:

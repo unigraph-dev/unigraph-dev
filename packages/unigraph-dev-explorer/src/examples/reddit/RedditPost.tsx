@@ -4,7 +4,7 @@ import { DynamicViewRenderer } from "../../global";
 import Sugar from "sugar";
 import { AddCircle, ArrowDownward, ArrowUpward, Chat, Image, Link, RemoveCircle } from "@material-ui/icons";
 import React from "react";
-import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
+import { AutoDynamicView } from "../../components/ObjectView/AutoDynamicView";
 import { UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
 
 const getThumbnail = (url: string) => {
