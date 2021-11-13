@@ -73,3 +73,7 @@
 .flexlayout__tab_toolbar {
     -webkit-app-region: no-drag;
 }
+
+.topleft_bar_with_electron {
+    padding-left: 50px;
+}
