@@ -3,14 +3,40 @@ import React from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useSwipeable } from 'react-swipeable';
+import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { AutoDynamicViewProps } from '../../types/ObjectView';
 import { isMobile, isMultiSelectKeyPressed, selectUid } from '../../utils';
 import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import { StringObjectViewer } from './DefaultObjectView';
-import { SubentityDropAcceptor } from './utils';
+import { isStub, SubentityDropAcceptor } from './utils';
 
 export const AutoDynamicView = ({ object, callbacks, component, attributes, inline, allowSubentity, style, noDrag, noDrop, noContextMenu }: AutoDynamicViewProps) => {
     allowSubentity = allowSubentity === true;
+
+    const isObjectStub = isStub(object);
+    const [loadedObj, setLoadedObj] = React.useState<any>(false);
+    const [subsId, setSubsId] = React.useState(0);
+    const getObject = () => isObjectStub ? loadedObj : object;
+    const DynamicViews = {...window.unigraph.getState('registry/dynamicView').value, ...(component ? component : {})}
+
+    React.useEffect(() => {
+        const newSubs = getRandomInt();
+        if (isObjectStub) {
+            if (subsId) window.unigraph.unsubscribe(subsId);
+            let query = DynamicViews[object.type['unigraph.id']].query?.(object.uid)
+            if (!query) query = `(func: uid(${object.uid})) @recurse {
+                uid
+                unigraph.id
+                expand(_userpredicate_)
+              }`
+            window.unigraph.subscribeToQuery(query, (objects: any[]) => {
+                setLoadedObj(objects[0]); 
+            }, newSubs, true);
+            setSubsId(newSubs);
+            callbacks = {...callbacks, subsId: newSubs}
+            return function cleanup () { window.unigraph.unsubscribe(newSubs); }
+        }
+    }, [object])
 
     const [{ isDragging }, drag] = useDrag(() => ({
         type: object?.['type']?.['unigraph.id'] || "$/schema/any",
@@ -38,7 +64,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     }))
 
     const handlers = useSwipeable({
-        onSwipedRight: (eventData) => onUnigraphContextMenu(({clientX: eventData.absX, clientY: eventData.absY} as any), object, contextEntity, callbacks),
+        onSwipedRight: (eventData) => onUnigraphContextMenu(({clientX: eventData.absX, clientY: eventData.absY} as any), getObject(), contextEntity, callbacks),
       });
 
     const contextEntity = typeof callbacks?.context === "object" ? callbacks.context : null; 
@@ -54,13 +80,14 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
 
     //console.log(object) 
     let el;
-    const DynamicViews = window.unigraph.getState('registry/dynamicView').value
-    if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViews).includes(object.type['unigraph.id'])) {
-        el = React.createElement(component?.[object.type['unigraph.id']] ? component[object.type['unigraph.id']] : DynamicViews[object.type['unigraph.id']], {
-            data: object, callbacks: callbacks ? callbacks : undefined, ...(attributes ? attributes : {})
+    if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViews).includes(object.type['unigraph.id']) && getObject()) {
+        el = React.createElement(DynamicViews[object.type['unigraph.id']].view, {
+            data: getObject(), callbacks: callbacks ? callbacks : undefined, ...(attributes ? attributes : {})
         });
-    } else if (object) {
-        el = <StringObjectViewer object={object}/>
+    } else if (object && getObject()) {
+        el = <StringObjectViewer object={getObject()}/>
+    } else {
+        el = <React.Fragment />
     }
     return el ? <ErrorBoundary onError={(error: Error, info: {componentStack: string}) => {
         console.error(error);
@@ -79,7 +106,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
                 ...style
             }} 
             aria-label={"Object view for uid " + object?.uid + ", of type " + (object?.type?.['unigraph.id'] || "unknown")}
-            onContextMenu={noContextMenu ? () => {} : (event) => onUnigraphContextMenu(event, object, contextEntity, callbacks)}
+            onContextMenu={noContextMenu ? () => {} : (event) => onUnigraphContextMenu(event, getObject(), contextEntity, callbacks)}
             onClickCapture={(ev) => { if (isMultiSelectKeyPressed(ev)) {ev.stopPropagation(); selectUid(object.uid, false) } }}
             {...(attributes ? attributes : {})}
             ref={attach} 

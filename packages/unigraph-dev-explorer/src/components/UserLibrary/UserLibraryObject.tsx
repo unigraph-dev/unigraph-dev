@@ -3,7 +3,8 @@ import React from 'react';
 import { AutoDynamicViewDetailed } from '../ObjectView/AutoDynamicViewDetailed';
 import { DefaultObjectView } from '../ObjectView/DefaultObjectView';
 
-export default function DetailedObjectView ({ uid, viewer, id, context, component, callbacks }: any) {
+export default function DetailedObjectView ({ uid, viewer, id, context, component, callbacks, isStub, type }: any) {
+    console.log(uid, isStub, type)
     let objectId: any = uid;
 
     const viewerId = viewer ? viewer : "dynamic-view-detailed"
@@ -15,20 +16,25 @@ export default function DetailedObjectView ({ uid, viewer, id, context, componen
     const [showPadded, setShowPadded] = React.useState(false);
 
     React.useEffect(() => {
-        
-        window.unigraph.subscribeToObject(objectId, (object: any) => {
-            setObject(object)
-        }, myid);
-
-        if (context?.startsWith?.('0x')) {
-            setContextObj({type: {"unigraph.id": "$/skeleton/default"}, uid: "0x0"})
-            window.unigraph.subscribeToObject(context, (obj: any) => setContextObj(obj), myid+1)
-        }
-
-        return function cleanup () {
-            window.unigraph.unsubscribe(myid);
-            window.unigraph.unsubscribe(myid+1);
-        }
+        if (!isStub) {
+            window.unigraph.subscribeToObject(objectId, (object: any) => {
+                setObject(object)
+            }, myid);
+    
+            if (context?.startsWith?.('0x')) {
+                setContextObj({type: {"unigraph.id": "$/skeleton/default"}, uid: "0x0"})
+                window.unigraph.subscribeToObject(context, (obj: any) => setContextObj(obj), myid+1)
+            }
+    
+            return function cleanup () {
+                window.unigraph.unsubscribe(myid);
+                window.unigraph.unsubscribe(myid+1);
+            }
+        } else setObject({
+            uid,
+            type: { "unigraph.id": type },
+            _stub: true
+        })
     }, [myid])
 
     React.useEffect(() => {setId(Date.now())}, [uid])

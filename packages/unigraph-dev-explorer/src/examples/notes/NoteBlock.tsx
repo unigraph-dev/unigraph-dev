@@ -1,6 +1,5 @@
-import { MenuItem, Typography } from "@material-ui/core";
+import { Typography } from "@material-ui/core";
 import React, { FormEvent } from "react";
-import { registerDetailedDynamicViews, registerDynamicViews, registerContextMenuItems } from "unigraph-dev-common/lib/api/unigraph-react";
 import { byElementIndex, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { AutoDynamicView } from "../../components/ObjectView/AutoDynamicView";
 import { ViewViewDetailed } from "../../components/ObjectView/DefaultObjectView";
@@ -12,6 +11,7 @@ import { addChild, convertChildToTodo, focusLastDFSNode, focusNextDFSNode, inden
 import { onUnigraphContextMenu } from "../../components/ObjectView/DefaultObjectContextMenu";
 import { FiberManualRecord, MoreVert } from "@material-ui/icons";
 import { setSearchPopup } from "./searchPopup";
+import { noteQuery } from "./init";
 
 export const getSubentities = (data: any) => {
     let subentities: any, otherChildren: any;
@@ -25,12 +25,6 @@ export const getSubentities = (data: any) => {
         }, [[], []])
     }
     return [subentities, otherChildren];
-}
-
-
-
-export const NoteBody = ({ text, children }: any) => {
-    return 
 }
 
 export const NoteBlock = ({ data }: any) => {
@@ -331,7 +325,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                                 "dataref": dataref,
                                 isEmbed: true
                             }}
-                            component={{ "$/schema/note_block": DetailedNoteBlock, "$/schema/view": ViewViewDetailed }} attributes={{ isChildren: true, isCollapsed: isCol }} allowSubentity
+                            component={{ "$/schema/note_block": {view: DetailedNoteBlock, query: noteQuery}, "$/schema/view": {view: ViewViewDetailed} }} attributes={{ isChildren: true, isCollapsed: isCol }} allowSubentity
                             style={el.type?.['unigraph.id'] === "$/schema/note_block" ? {} :
                                 { border: "lightgray", borderStyle: "solid", borderWidth: 'thin', margin: "4px", borderRadius: "8px", minWidth: "calc(100% - 8px)" }}
                         />
@@ -342,15 +336,4 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
             </div> : []}
         </div>
     </NoteViewPageWrapper>
-}
-
-export const init = () => {
-    registerDynamicViews({ "$/schema/note_block": NoteBlock })
-    registerDetailedDynamicViews({ "$/schema/note_block": { view: DetailedNoteBlock } })
-
-    registerContextMenuItems("$/schema/note_block", [(uid: any, object: any, handleClose: any, callbacks: any) => <MenuItem onClick={() => {
-        handleClose(); callbacks['convert-child-to-todo']();
-    }}>
-        Convert note as TODO
-    </MenuItem>])
 }
