@@ -9,7 +9,7 @@ import { buildUnigraphEntity, processAutoref, dectxObjects, processAutorefUnigra
 import { addUnigraphPackage, checkOrCreateDefaultDataModel, createPackageCache, createSchemaCache } from './datamodelManager';
 import { Cache } from './caches';
 import repl from 'repl';
-import { createSubscriptionLocal, MsgCallbackFn, pollSubscriptions, removeSubscriptionsById, Subscription } from './subscriptions';
+import { createSubscriptionLocal, MsgCallbackFn, pollSubscriptions, removeOrHibernateSubscriptionsById, Subscription } from './subscriptions';
 import { callHooks, HookAfterObjectChangedParams, HookAfterSchemaUpdatedParams, HookAfterSubscriptionAddedParams, Hooks } from './hooks';
 import { getAsyncLock } from './asyncManager';
 import fetch from 'node-fetch';
@@ -437,41 +437,59 @@ export default async function startServer(client: DgraphClient) {
     console.log('\nUnigraph server listening on port', PORT);
   })
 
+  /** Maps from clientIds to connIds, from this server start  */
+  const historialClients: Record<string, string> = {}
+  serverStates.getClientId = (connId: string) => Object.entries(historialClients).filter(el => el[1] === connId)[0][0];
+
   server.on('connection', (ws, req) => {
+    // Set up connId and clientId
     let connId = uniqueId();
+    let revival = false;
     connections[connId] = ws;
-      ws.on('message', (msg: string) => {
-        const msgObject: {type: string | null, event: string | null} = isJsonString(msg)
-        if (msgObject) {
-          // match events
-          if (msgObject.type === "event" && msgObject.event && eventRouter[msgObject.event]) {
-            if (verbose >= 1) console.log("matched event: " + msgObject.event);
-            eventRouter[msgObject.event]({...msgObject, connId: connId}, ws);
-          }
-          if (verbose >= 2) console.log(msgObject);
-        } else {
-          console.log("Message received is not JSON!");
-          console.log(msg)
+    const clientBrowserId = (new URL(req.url || "/", 'https://localhost')).searchParams.get('browserId') || connId;
+    if (!Object.keys(historialClients).includes(clientBrowserId) || !(new URL(req.url || "/", 'https://localhost')).searchParams.get('revival')) {
+      if (Object.keys(historialClients).includes(clientBrowserId)) 
+        serverStates.subscriptions = removeOrHibernateSubscriptionsById(serverStates.subscriptions, historialClients[clientBrowserId], undefined);
+      historialClients[clientBrowserId] = connId;
+    } else {
+      connId = historialClients[clientBrowserId];
+      revival = true
+    }
+    
+    ws.on('message', (msg: string) => {
+      const msgObject: {type: string | null, event: string | null} = isJsonString(msg)
+      if (msgObject) {
+        // match events
+        if (msgObject.type === "event" && msgObject.event && eventRouter[msgObject.event]) {
+          if (verbose >= 1) console.log("Event: " + msgObject.event + ", from: " + clientBrowserId + " | " + connId);
+          eventRouter[msgObject.event]({...msgObject, connId: connId}, ws);
         }
-      });
-      ws.on('close', () => {
-        serverStates.subscriptions = removeSubscriptionsById(serverStates.subscriptions, connId);
-        delete connections[connId];
-      })
-      ws.send(JSON.stringify({
-        "type": "hello"
-      }))
-      ws.send(stringify({
-        "type": "cache_updated",
-        "name": "namespaceMap",
-        result: serverStates.namespaceMap
-      }))
-      ws.send(stringify({
-        "type": "cache_updated",
-        "name": "schemaMap",
-        result: serverStates.caches['schemas'].data
-      }))
-      console.log('opened socket connection');
+        if (verbose >= 6) console.log(msgObject);
+      } else {
+        console.log("Message received is not JSON!");
+        console.log(msg)
+      }
+    });
+    ws.on('close', () => {
+      serverStates.subscriptions = removeOrHibernateSubscriptionsById(serverStates.subscriptions, connId, clientBrowserId);
+      delete connections[connId];
+    })
+    ws.send(stringify({
+      "type": "cache_updated",
+      "name": "namespaceMap",
+      result: serverStates.namespaceMap
+    }))
+    ws.send(stringify({
+      "type": "cache_updated",
+      "name": "schemaMap",
+      result: serverStates.caches['schemas'].data
+    }))
+    console.log('opened socket connection');
+
+    if (revival) {
+      pollSubscriptions(serverStates.subscriptions.filter((el: any) => el.clientId === clientBrowserId),
+        dgraphClient, pollCallback, undefined, serverStates);
+    }
   })
 
   const httpserver = express()

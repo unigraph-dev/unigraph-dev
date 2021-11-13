@@ -1,6 +1,7 @@
-import { Typography } from "@material-ui/core";
+import { Divider, Typography } from "@material-ui/core";
 import React from "react";
 import { getRandomInt, UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
+import { ObjectOverview } from "../ObjectView/ObjectOverview";
 
 export const InspectorView = () => {
     const [selected, setSelected] = React.useState<string[]>([]);
@@ -9,6 +10,7 @@ export const InspectorView = () => {
     const subIdMapRef = React.useRef<Record<string, any>>({});
 
     React.useEffect(() => {
+        setSelected(window.unigraph.getState('global/selected').value)
         window.unigraph.getState('global/selected').subscribe((newVal: string[]) => {setSelected(newVal)})
     }, []);
 
@@ -39,8 +41,12 @@ export const InspectorView = () => {
     return <div>
         {selected.length === 0? <Typography>Select items to inspect</Typography> : <div>
             <Typography>Selected {selected.length.toString()} items.</Typography>
+            <Divider/>
             {selected.map((uid: string) => {
-                return objectsMapRef.current[uid] ? <div>Uid: {uid}, type: {objectsMapRef.current[uid].type['unigraph.id']}, last updated: {objectsMapRef.current[uid]?._timestamp?._updatedAt || "unknown"}</div> : <div>{uid}</div>
+                return objectsMapRef.current[uid] ? <React.Fragment>
+                    <ObjectOverview data={objectsMapRef.current[uid]} />
+                    <Divider />
+                </React.Fragment> : <div>{uid}</div>
             })}    
         </div>}
     </div>

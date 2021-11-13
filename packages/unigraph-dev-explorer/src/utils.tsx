@@ -187,9 +187,7 @@ export const openUrl = (url: string) => {
 
 export const selectUid = (uid: string, exclusive = true) => {
     const selected = window.unigraph.getState('global/selected');
-    console.log(selected.value)
-    selected.setValue(exclusive ? [uid] : _.union(selected.value, [uid]));
-    console.log(selected.value)
+    selected.setValue(exclusive ? [uid] : selected.value?.includes?.(uid) ? selected.value.filter((el: string) => el !== uid): _.union(selected.value, [uid]));
 }
 
 export const deselectUid = (uid?: string) => {

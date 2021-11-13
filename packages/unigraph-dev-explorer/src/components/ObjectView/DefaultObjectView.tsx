@@ -120,7 +120,7 @@ const SubentityDropAcceptor = ({ uid }: any) => {
         // @ts-expect-error: already checked for namespace map
         accept: Object.keys(window.unigraph.getNamespaceMap() || {}),
         drop: (item: {uid: string, itemType: string}, monitor) => {
-            if (!monitor.didDrop()) {
+            if (!monitor.didDrop() && item.uid !== uid) {
                 window.unigraph.updateObject(uid, {
                     children: [{
                         type: {"unigraph.id": "$/schema/subentity"},
@@ -147,7 +147,6 @@ const SubentityDropAcceptor = ({ uid }: any) => {
 
 export const ViewViewDetailed: DynamicViewRenderer = ({data, callbacks}) => {
     if (data.get('view')?.['_value']?.['dgraph.type'].includes('Executable')) {
-        console.log(data.get('view')['_value']);
         return <AutoDynamicViewDetailed object={new UnigraphObject(data.get('view')['_value'])} callbacks={callbacks} />
     } else {
         if (data.get('view').as('primitive')?.startsWith?.('/pages')) {
@@ -176,7 +175,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     const [, drop] = useDrop(() => ({
           accept: window.unigraph.getState('referenceables/semantic_children').value,
           drop: (item: {uid: string, itemType: string}, monitor) => {
-            if (!monitor.didDrop()) {
+            if (!monitor.didDrop() && item.uid !== object?.uid) {
                 window.unigraph.updateObject(object?.uid, {
                     children: [{
                         "type": {"unigraph.id": "$/schema/interface/semantic"},

@@ -45,6 +45,16 @@ export const getComponentFromPage = (location: string, params: any = {}) => {ret
     enableFloat: 'true'
 }}
 
+const ConnectionIndicator = () => {
+    const [connected, setConnected] = React.useState(false);
+    React.useMemo(() => {
+        window.unigraph.getState('unigraph/connected').subscribe((conn) => {
+            setConnected(conn)
+        })
+    }, [])
+    return <span style={{height: "16px", width: "16px", borderRadius: "8px", backgroundColor: connected ? "lightgreen" : "white", border: "1px solid grey", marginRight: "8px"}}></span>
+}
+
 const newWindowActions = {
     "new-tab": (model: Model, initJson: any) => {
         let newJson = {...initJson, id: getRandomInt().toString()};
@@ -286,6 +296,8 @@ export function WorkSpace(this: any) {
                         }}>
                             <Icon path={mdiStarPlusOutline} size={0.7} style={{marginTop: "5px"}}/>
                         </span>);
+                    } else if (tabSetNode.getId() === "border_bottom") {
+                        renderValues.buttons.push(<ConnectionIndicator />)
                     }
                     
                     //renderValues.headerContent = <Button>Hi</Button>;

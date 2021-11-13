@@ -3,26 +3,30 @@ import _ from "lodash";
 import React from "react"
 import { DynamicObjectListView } from "../ObjectView/DynamicObjectListView";
 
+export const parseQuery = (queryText: string) => {
+    let currText = queryText;
+    let finalQuery = [];
+
+    let type_regex = /type:\$\/schema\/[a-zA-Z0-9_]*\b ?/gm;
+    let types = currText.match(type_regex) || [];
+    finalQuery.push(...types.map(tag => {return {method: "type", value: tag.slice(5).trim()}}));
+    currText = currText.replace(type_regex, '');
+
+    let uid_regex = /uid:[a-zA-Z0-9]*\b ?/gm;
+    let uids = currText.match(uid_regex) || [];
+    finalQuery.push(...uids.map(tag => {return {method: "uid", value: tag.slice(4).trim()}}));
+    currText = currText.replace(uid_regex, '');
+
+
+    return [{method: "fulltext", value: currText}, ...finalQuery];
+}
+
 export const SearchBar = ({onQueryUpdate, searchNow}: any) => {
 
     const [queryText, setQueryText] = React.useState('')
 
     React.useEffect(() => {
-        let currText = queryText;
-        let finalQuery = [];
-
-        let type_regex = /type:\$\/schema\/[a-zA-Z0-9_]*\b ?/gm;
-        let types = currText.match(type_regex) || [];
-        finalQuery.push(...types.map(tag => {return {method: "type", value: tag.slice(5).trim()}}));
-        currText = currText.replace(type_regex, '');
-
-        let uid_regex = /uid:[a-zA-Z0-9]*\b ?/gm;
-        let uids = currText.match(uid_regex) || [];
-        finalQuery.push(...uids.map(tag => {return {method: "uid", value: tag.slice(4).trim()}}));
-        currText = currText.replace(uid_regex, '');
-
-
-        onQueryUpdate([{method: "fulltext", value: currText}, ...finalQuery]);
+       onQueryUpdate(parseQuery(queryText));
     }, [queryText])
 
     return <div style={{display: "flex", flexDirection: "column", marginLeft: "16px", marginRight: "16px"}}>

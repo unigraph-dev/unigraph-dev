@@ -13,12 +13,12 @@ import dgraph from "dgraph-js";
 import path from "path";
 import { getQueryString } from "./search";
 
-export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Record<string, Cache<any>>, subscriptions: Subscription[], hooks: any, namespaceMap: any, localApi: Unigraph, httpCallbacks: any}): Unigraph {
+export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Record<string, Cache<any>>, subscriptions: Subscription[], hooks: any, namespaceMap: any, localApi: Unigraph, httpCallbacks: any, getClientId: any}): Unigraph {
     const messages: any[] = [];
     const eventTarget: any = {};
 
     return {
-        backendConnection: false,
+        backendConnection: {current: false},
         backendMessages: messages,
         eventTarget: eventTarget,
         buildGraph: buildGraph,
@@ -50,7 +50,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             }}`;
             const newSub = typeof callback === "function" ? 
                 createSubscriptionLocal(eventId, callback, query) : 
-                createSubscriptionWS(eventId, callback.ws, query, callback.connId);
+                createSubscriptionWS(eventId, callback.ws, query, callback.connId, states.getClientId(callback.connId));
             states.subscriptions.push(newSub);
             callHooks(states.hooks, "after_subscription_added", {subscriptions: states.subscriptions, ids: [eventId]});
         },
@@ -64,7 +64,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
                 ${options?.queryAsType ? makeQueryFragmentFromType(options.queryAsType, states.caches["schemas"].data) : "@recurse { uid unigraph.id expand(_userpredicate_) }"}`
             const newSub = typeof callback === "function" ? 
                 createSubscriptionLocal(eventId, callback, frag) :
-                createSubscriptionWS(eventId, callback.ws, frag, callback.connId);
+                createSubscriptionWS(eventId, callback.ws, frag, callback.connId, states.getClientId(callback.connId));
             states.subscriptions.push(newSub);
             callHooks(states.hooks, "after_subscription_added", {subscriptions: states.subscriptions, ids: [eventId]});
         },
@@ -74,7 +74,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             par${eventId} as var${fragment}`
             const newSub = typeof callback === "function" ? 
                 createSubscriptionLocal(eventId, callback, query) :
-                createSubscriptionWS(eventId, callback.ws, query, callback.connId);
+                createSubscriptionWS(eventId, callback.ws, query, callback.connId, states.getClientId(callback.connId));
             states.subscriptions.push(newSub);
             callHooks(states.hooks, "after_subscription_added", {subscriptions: states.subscriptions, ids: [eventId]});
         },
