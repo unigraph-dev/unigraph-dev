@@ -55,7 +55,7 @@ export const makeSearchQuery = (
 ): string => {
     const qhops: string[] = [];
     for (let i=0; i<hops; ++i) {
-        qhops.push(`qhops${(i+1).toString()}(func: uid(uhops${i.toString()})${getQualFromOptions(searchOptions)}) {
+        qhops.push(`qhops${(i+1).toString()}(func: uid(uhops${i.toString()})) {
             <unigraph.origin> {
                 ${i === hops-1 ? "" : `uhops${(i+1).toString()} as `}uid
             }

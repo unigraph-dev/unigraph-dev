@@ -9,8 +9,8 @@ React.useEffect(() => {
     window.unigraph.getQueries([`(func: uid(${inboxUid})) @normalize { _value { children { <_value[> {items: count(uid)} } } }`, 
         `(func: uid(${readLaterUid})) @normalize { _value { children { <_value[> {items: count(uid)} } } }`]).then((results) => {
             setCount({
-                "$/entity/inbox": results[0][0].items,
-                "$/entity/read_later": results[1][0].items
+                "$/entity/inbox": results[0]?.[0]?.items || 0,
+                "$/entity/read_later": results[1]?.[0]?.items || 0
             })
         })
 }, []);
