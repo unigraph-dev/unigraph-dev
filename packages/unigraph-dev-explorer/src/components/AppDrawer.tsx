@@ -1,19 +1,18 @@
 import React from 'react';
 
-import Divider from '@material-ui/core/Divider';
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import { makeStyles } from '@material-ui/core/styles';
-import { Category, CodeRounded, Comment, CompareArrows, Delete, FileCopy, Info, LibraryBooks, Notifications, Settings, Storage } from '@material-ui/icons';
+import { Comment, CompareArrows } from '@material-ui/icons';
 import { ListSubheader } from '@material-ui/core';
 import { NavigationContext } from '../utils';
 import { FavoriteBar } from './UnigraphCore/FavoriteBar';
 
 import Icon from '@mdi/react'
-import { mdiBookOpenOutline, mdiPencilBoxMultipleOutline, mdiXml, mdiPackageVariantClosed, mdiDeleteOutline, mdiCogOutline, mdiBellOutline } from '@mdi/js';
+import { mdiViewDashboardOutline, mdiBookOpenOutline, mdiPencilBoxMultipleOutline, mdiXml, mdiPackageVariantClosed, mdiDeleteOutline, mdiCogOutline, mdiBellOutline } from '@mdi/js';
 
 const drawerWidth = 240;
 
@@ -46,6 +45,11 @@ export default function DrawerRouter() {
         >
           <List>
             <ListSubheader component="div" id="subheader-home"> Home </ListSubheader>
+
+            <ListItem button onClick={()=>navigator('/dashboard')}>
+              <ListItemIcon><Icon path={mdiViewDashboardOutline} size={1}/></ListItemIcon>
+              <ListItemText primary="Dashboard" />
+            </ListItem>
             
             <ListItem button onClick={()=>navigator('/library')}>
               <ListItemIcon><Icon path={mdiBookOpenOutline} size={1}/></ListItemIcon>

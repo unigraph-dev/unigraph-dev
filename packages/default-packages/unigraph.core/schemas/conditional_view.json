@@ -1,0 +1,23 @@
+{
+    "dgraph.type": "Type",
+    "_definition": {
+        "type": { "unigraph.id": "$/composer/Object" },
+        "_parameters": {
+            "_indexedBy": { "unigraph.id": "$/primitive/string" }
+        },
+        "_properties": [
+            {
+                "_key": "condition",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/executable" }
+                }
+            },
+            {
+                "_key": "view",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/view" }
+                }
+            }
+        ]
+    }
+}

@@ -10,6 +10,8 @@ import { init as sm_init } from './examples/semantic/init';
 import { init as cl_init } from './examples/calendar/init';
 import { init as tw_init } from './examples/twitter/Tweet';
 import { init as re_init } from './examples/reddit/RedditPost';
+import { pb_init } from './components/UnigraphCore/Pinboard';
+
 import { ListObjectQuery, ListObjectView } from "./components/UnigraphCore/ListObjectView";
 
 /**
@@ -111,7 +113,7 @@ function initRegistry() {
 }
 
 function initPackages() {
-    nb_init(); sm_init(); tw_init(); re_init(); cl_init();
+    nb_init(); sm_init(); tw_init(); re_init(); cl_init(); pb_init();
 }
 
 init();
