@@ -123,7 +123,7 @@ export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
 export function getRandomInt() {return Math.floor(Math.random() * Math.floor(1000000))}
 
 export default function unigraph(url: string, browserId: string): Unigraph<WebSocket | undefined> {
-    let connection: {current: WebSocket | undefined} = {current: undefined}; 
+    const connection: {current: WebSocket | undefined} = {current: undefined}; 
     const messages: any[] = [];
     const eventTarget: EventTarget = new EventTarget();
     // eslint-disable-next-line @typescript-eslint/ban-types
@@ -136,7 +136,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
         namespaceMap: isJsonString(window.localStorage.getItem("caches/namespaceMap")) ? JSON.parse(window.localStorage.getItem("caches/namespaceMap")) : false 
     };
     let retries: any = false;
-    let readyCallback = () => {};
+    let readyCallback = () => undefined;
     const msgQueue: string[] = [];
 
     const getState = (name: string) => {
