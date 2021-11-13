@@ -11,6 +11,12 @@
             "id": "view",
             "src": "schemas/view.json"
         }, {
+            "id": "conditional_view",
+            "src": "schemas/conditional_view.json"
+        }, {
+            "id": "home_section",
+            "src": "schemas/home_section.json"
+        }, {
             "id": "context_menu_item",
             "src": "schemas/context_menu_item.json"
         }, {

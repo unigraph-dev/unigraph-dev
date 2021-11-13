@@ -1,0 +1,31 @@
+{
+    "displayName": "Unigraph Home",
+    "version": "0.0.1",
+    "description": "Provides the default Home integrations for Unigraph.",
+    "unigraph": {
+        "package_name": "unigraph.home",
+        "entities": [
+            {"id": "section_all_apps", "src": "entities/apps.json"},
+            {"id": "section_read_something_new", "src": "entities/read_something_new.json"}
+        ],
+        "executables": [
+            {
+                "name": "Read something new: condition",
+                "env": "routine/js",
+                "id": "read-something-new-condition",
+                "src": "executables/readSomethingNewCondition.jsx",
+                "editable": true
+            },
+            {
+                "name": "Read something new",
+                "env": "component/react-jsx",
+                "id": "read-something-new",
+                "src": "executables/readSomethingNew.jsx",
+                "imports": [
+                    {"env": "npm", "package": "@material-ui/core", "import": "Typography", "as": "Typography"}
+                ],
+                "editable": true
+            }
+        ]
+    }
+}

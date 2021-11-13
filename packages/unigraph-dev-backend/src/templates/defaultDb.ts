@@ -10,6 +10,7 @@ import {pkg as coreuser} from 'unigraph-dev-common/lib/data/unigraph.coreuser.pk
 import {pkg as execexample} from 'unigraph-dev-common/lib/data/unigraph.execexample.pkg';
 import {pkg as calendar} from 'unigraph-dev-common/lib/data/unigraph.calendar.pkg';
 import {pkg as notes} from 'unigraph-dev-common/lib/data/unigraph.notes.pkg';
+import {pkg as home} from 'unigraph-dev-common/lib/data/unigraph.home.pkg';
 
 export const defaultTypes = `<_value>: uid .
 <_value.#i>: int .
@@ -292,5 +293,5 @@ export const defaultUserlandSchemas = [
 ]
 
 export const defaultPackages = [
-    semantic, core, execexample, coreuser, calendar, notes
+    semantic, core, execexample, coreuser, home, calendar, notes
 ]

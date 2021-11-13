@@ -13,7 +13,7 @@ import { ExecutableCodeEditor } from './DefaultCodeEditor';
 import { DefaultObjectContextMenu, onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import {ErrorBoundary} from 'react-error-boundary'
 import { DynamicComponentView, getComponentAsView } from './DynamicComponentView';
-import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
+import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 
 type ObjectViewOptions = {
     viewer?: "string" | "json-tree" | "dynamic-view" | "code-editor" | "dynamic-view-detailed",
@@ -146,16 +146,20 @@ const SubentityDropAcceptor = ({ uid }: any) => {
 }
 
 export const ViewViewDetailed: DynamicViewRenderer = ({data, callbacks}) => {
-    if (data.get('view').as('primitive')?.startsWith?.('/pages')) {
-        const pages = window.unigraph.getState('registry/pages').value;
-        return pages[data.get('view').as('primitive').replace('/pages/', '')]
-            .constructor({...JSON.parse(data.get('props').as('primitive')).config, callbacks: callbacks})
+    if (data.get('view')?.['_value']?.['dgraph.type'].includes('Executable')) {
+        console.log(data.get('view')['_value']);
+        return <AutoDynamicViewDetailed object={new UnigraphObject(data.get('view')['_value'])} callbacks={callbacks} />
     } else {
-        const widgets = window.unigraph.getState('registry/widgets').value;
-        return widgets[data.get('view').as('primitive').replace('/widgets/', '')]
-            .constructor()
+        if (data.get('view').as('primitive')?.startsWith?.('/pages')) {
+            const pages = window.unigraph.getState('registry/pages').value;
+            return pages[data.get('view').as('primitive').replace('/pages/', '')]
+                .constructor({...JSON.parse(data.get('props').as('primitive')).config, callbacks: callbacks})
+        } else {
+            const widgets = window.unigraph.getState('registry/widgets').value;
+            return widgets[data.get('view').as('primitive').replace('/widgets/', '')]
+                .constructor()
+        }
     }
-    
 }
 
 export const AutoDynamicView = ({ object, callbacks, component, attributes, inline, allowSubentity, style, noDrag, noDrop, noContextMenu }: AutoDynamicViewProps) => {

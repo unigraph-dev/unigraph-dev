@@ -27,9 +27,10 @@ import { InspectorView } from './components/UnigraphCore/InspectorView';
 import { RedditSettings } from './examples/reddit/RedditSettings';
 import { AppDrawer } from './components';
 import { ConnectionWidget } from './components/UnigraphCore/ConnectionWidget';
-import { AppLibraryWidget } from './components/PackageManager/AppLibraryWidget';
+import { AllApps, AppLibraryWidget } from './components/PackageManager/AppLibraryWidget';
 import { EmailSettings } from './examples/email/EmailSettings';
 import { BacklinkView } from './components/ObjectView/BacklinkView';
+import ExplorerDashboard from './pages/ExplorerDashboard';
 
 const pages: Record<string, any> = {
     'datamodel-playground': {
@@ -107,6 +108,11 @@ const pages: Record<string, any> = {
     },
     'home': {
       'constructor': (props: any) => <ExplorerHome {...props} />,
+      'name': 'Home',
+      "paddingTop": false
+    },
+    'dashboard': {
+      'constructor': (props: any) => <ExplorerDashboard {...props} />,
       'name': 'Dashboard',
       "paddingTop": false
     },
@@ -168,6 +174,9 @@ export const widgets: Record<string, any> = {
   },
   'recommended-apps': {
     'constructor': (props: any) => <AppLibraryWidget {...props} />,
+  },
+  'apps': {
+    'constructor': (props: any) => <AllApps {...props} />,
   }
 }
 
