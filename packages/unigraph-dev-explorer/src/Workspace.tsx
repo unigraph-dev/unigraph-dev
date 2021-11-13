@@ -10,7 +10,7 @@ import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import FlexLayout, { Actions, DockLocation, Model, Node, TabNode } from 'flexlayout-react';
 import 'flexlayout-react/style/light.css'
 import './workspace.css'
-import { getParameters, isSmallScreen, NavigationContext } from "./utils";
+import { getParameters, isElectron, isSmallScreen, NavigationContext } from "./utils";
 import { Button, Container, CssBaseline } from "@material-ui/core";
 import { isJsonString } from "unigraph-dev-common/lib/utils/utils";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
@@ -26,6 +26,7 @@ import Icon from '@mdi/react'
 import { mdiStarPlusOutline, mdiTagMultipleOutline } from '@mdi/js';
 
 const pages = window.unigraph.getState('registry/pages')
+const electron = isElectron();
 
 export function WorkspacePageComponent({ children, maximize, paddingTop, id }: any) {
     return <div id={"workspaceContainer"+id} style={{width: "100%", height: "100%", overflow: "auto"}}>
@@ -288,6 +289,10 @@ export function WorkSpace(this: any) {
                     }
                     
                     //renderValues.headerContent = <Button>Hi</Button>;
+                }} classNameMapper={(name) => {
+                    if (isElectron() && (name === "flexlayout__tab_border_left" || name === "flexlayout__border_left")) {
+                        return name + " " + name + "_electron";
+                    } else return name;
                 }}/>
             </DndProvider>
         </MuiPickersUtilsProvider>

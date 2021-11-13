@@ -10,6 +10,7 @@
 
 .flexlayout__tab_button {
     transition: 0.3s;
+    -webkit-app-region: no-drag;
 }
 
 .flexlayout__tab_button--selected {
@@ -59,4 +60,16 @@
 
 .flexlayout__splitter_horz {
     border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.flexlayout__border_left_electron {
+    padding-top: 40px;
+}
+
+.flexlayout__tab_border_left_electron {
+    padding-top: 40px;
+}
+
+.flexlayout__tab_toolbar {
+    -webkit-app-region: no-drag;
 }
