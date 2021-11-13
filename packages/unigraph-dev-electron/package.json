@@ -10,7 +10,7 @@
     },
     "homepage": "./",
     "devDependencies": {
-        "electron": "12.0.5",
+        "electron": "13.1.7",
         "electron-builder": "^22.10.5"
     },
     "dependencies": {
@@ -20,7 +20,7 @@
         "unigraph-dev-backend": "0.1.0",
         "unigraph-dev-common": "0.0.1"
     },
-    "electronVersion": "^12.0.5",
+    "electronVersion": "^13.1.7",
     "build": {
         "files": [
             "*.js",
