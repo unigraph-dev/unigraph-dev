@@ -63,12 +63,14 @@ export interface UnigraphObject {
  * documentations as well, since there would be more detail in context.
  */
 export interface Unigraph<TT = WebSocket | false> {
-    backendConnection: TT;
+    backendConnection: {current: TT};
     /** Messages received from backend. Only used when running over WebSocket. */
     backendMessages: string[];
     eventTarget: EventTarget;
     /** Gets the status of the current Unigraph daemon. */
     getStatus(): Promise<any>;
+    /** The specified callback will be invoked once initial Unigraph connecton is established. */
+    onReady?(callback: () => void): void;
     /** 
      * Create a new schema using the json-ts format and add it to cache.
      * 

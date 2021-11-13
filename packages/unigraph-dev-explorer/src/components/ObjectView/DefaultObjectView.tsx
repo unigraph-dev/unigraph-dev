@@ -147,7 +147,6 @@ const SubentityDropAcceptor = ({ uid }: any) => {
 
 export const ViewViewDetailed: DynamicViewRenderer = ({data, callbacks}) => {
     if (data.get('view')?.['_value']?.['dgraph.type'].includes('Executable')) {
-        console.log(data.get('view')['_value']);
         return <AutoDynamicViewDetailed object={new UnigraphObject(data.get('view')['_value'])} callbacks={callbacks} />
     } else {
         if (data.get('view').as('primitive')?.startsWith?.('/pages')) {

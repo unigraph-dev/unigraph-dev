@@ -13,6 +13,7 @@ import { init as re_init } from './examples/reddit/RedditPost';
 import { pb_init } from './components/UnigraphCore/Pinboard';
 
 import { ListObjectQuery, ListObjectView } from "./components/UnigraphCore/ListObjectView";
+import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
 
 /**
  * Things to do when Unigraph explorer loads
@@ -20,12 +21,14 @@ import { ListObjectQuery, ListObjectView } from "./components/UnigraphCore/ListO
 function init() {
     console.log("initialized!")
     let hst = window.location.hostname.length ? window.location.hostname : "localhost";
+    let browserId = `${getRandomInt()}${getRandomInt()}`;
 
     const defaultSettings: UserSettings = {
         serverLocation: `ws://${hst}:3001`,
         newWindow: "new-tab",
         nativeNotifications: true,
-        developerMode: false
+        developerMode: false,
+        browserId: browserId
     }
 
     let userSettings = defaultSettings;
@@ -33,11 +36,11 @@ function init() {
     if (!isJsonString(window.localStorage.getItem('userSettings'))) {
         window.localStorage.setItem('userSettings', JSON.stringify(defaultSettings));
     } else { // @ts-ignore: checked type already
-        userSettings = JSON.parse(window.localStorage.getItem('userSettings')) 
+        userSettings = JSON.parse(window.localStorage.getItem('userSettings'));
     }
 
     // Connect to Unigraph
-    window.unigraph = unigraph(userSettings.serverLocation);
+    window.unigraph = unigraph(userSettings.serverLocation, userSettings.browserId);
 
     const nfState = window.unigraph.addState('notification-center/notifications', []);
     nfState.subscribe((el: any[]) => {

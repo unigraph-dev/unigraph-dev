@@ -6,6 +6,8 @@ import { PackageDeclaration } from '../types/packages';
 import { Unigraph, AppState, UnigraphObject as IUnigraphObject } from '../types/unigraph';
 import { base64ToBlob, isJsonString } from '../utils/utils';
 
+const RETRY_CONNECTION_INTERVAL = 5000;
+
 function getPath (obj: any, path: string | string[]): any {
     if (path.length === 0) return new UnigraphObject(obj);
     if (!Array.isArray(path)) path = path.split('/').filter(e => e.length);
@@ -120,8 +122,8 @@ export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
 
 export function getRandomInt() {return Math.floor(Math.random() * Math.floor(1000000))}
 
-export default function unigraph(url: string): Unigraph<WebSocket> {
-    const connection = new WebSocket(url);
+export default function unigraph(url: string, browserId: string): Unigraph<WebSocket | undefined> {
+    let connection: {current: WebSocket | undefined} = {current: undefined}; 
     const messages: any[] = [];
     const eventTarget: EventTarget = new EventTarget();
     // eslint-disable-next-line @typescript-eslint/ban-types
@@ -133,70 +135,107 @@ export default function unigraph(url: string): Unigraph<WebSocket> {
         // @ts-expect-error: already checked if not JSON
         namespaceMap: isJsonString(window.localStorage.getItem("caches/namespaceMap")) ? JSON.parse(window.localStorage.getItem("caches/namespaceMap")) : false 
     };
+    let retries: any = false;
+    let readyCallback = () => {};
+    const msgQueue: string[] = [];
 
-    function sendEvent(conn: WebSocket, name: string, params: any, id?: number | undefined) {
+    const getState = (name: string) => {
+        if (name && states[name]) {
+            return states[name];
+        } else if (!name) {
+            return states
+        } else return api.addState(name, undefined);
+    }
+
+    const addState = (name: string, initialValue: any) => {
+        if (!states[name]) {
+            const subs: ((newValue: any) => any)[] = [];
+            const state = {
+                value: initialValue,
+                subscribers: subs,
+                subscribe: (subscriber: (newValue: any) => any) => subs.push(subscriber),
+                setValue: undefined as any
+            }
+            state.setValue = (newValue: any) => {
+                state.value = newValue;
+                subs.forEach(sub => sub(state.value));
+            }
+            states[name] = state;
+            return state;
+        } else {
+            return states[name];
+        }
+    }
+
+    function connect () {
+        const urlString = new URL(url);
+        urlString.searchParams.append('browserId', browserId);
+        if (getState('unigraph/connected').value !== undefined) urlString.searchParams.append('revival', "true");
+        console.log(connection.current?.CLOSED)
+        if (connection.current?.readyState !== 3 /* CLOSED */ && connection.current) return;
+        connection.current = new WebSocket(urlString.toString());
+
+        connection.current.onopen = () => {
+            getState('unigraph/connected').setValue(true);
+            if (retries) clearInterval(retries);
+            if (getState('unigraph/connected').value !== undefined && readyCallback) readyCallback(); 
+            msgQueue.forEach(el => connection.current?.send(el));
+            msgQueue.length = 0;
+        }
+        connection.current.onclose = () => {
+            getState('unigraph/connected').setValue(false);
+            retries = setInterval(() => {
+                connect();
+            }, RETRY_CONNECTION_INTERVAL)
+        }
+
+        connection.current.onmessage = (ev) => {
+            let parsed;
+            try {
+                parsed = JSON.parse(ev.data);
+            } catch (e) {
+                console.error("Returned non-JSON reply!")
+                console.log(e)
+                console.log(ev.data);
+                return false;
+            }
+            messages.push(parsed);
+            eventTarget.dispatchEvent(new Event("onmessage", parsed));
+            if (parsed.type === "response" && parsed.id && callbacks[parsed.id]) callbacks[parsed.id](parsed);
+            if (parsed.type === "cache_updated" && parsed.name) {
+                caches[parsed.name] = parsed.result;
+                window.localStorage.setItem("caches/"+parsed.name, JSON.stringify(parsed.result))
+            }
+            if (parsed.type === "subscription" && parsed.id && subscriptions[parsed.id]) subscriptions[parsed.id](parsed.result);
+            if (parsed.type === "open_url" && window) window.open(parsed.url, "_blank") 
+        }
+    }
+
+    addState('unigraph/connected', undefined);
+
+    connect();
+
+    function sendEvent(conn: {current: WebSocket | undefined}, name: string, params: any, id?: number | undefined) {
         if (!id) id = getRandomInt();
-        conn.send(JSON.stringify({
+        const msg = JSON.stringify({
             "type": "event",
             "event": name,
             "id": id,
             ...params
-        }))
-    }
-
-    connection.onmessage = (ev) => {
-        let parsed;
-        try {
-            parsed = JSON.parse(ev.data);
-        } catch (e) {
-            console.error("Returned non-JSON reply!")
-            console.log(e)
-            console.log(ev.data);
-            return false;
-        }
-        messages.push(parsed);
-        eventTarget.dispatchEvent(new Event("onmessage", parsed));
-        if (parsed.type === "response" && parsed.id && callbacks[parsed.id]) callbacks[parsed.id](parsed);
-        if (parsed.type === "cache_updated" && parsed.name) {
-            caches[parsed.name] = parsed.result;
-            window.localStorage.setItem("caches/"+parsed.name, JSON.stringify(parsed.result))
-        }
-        if (parsed.type === "subscription" && parsed.id && subscriptions[parsed.id]) subscriptions[parsed.id](parsed.result);
-        if (parsed.type === "open_url" && window) window.open(parsed.url, "_blank") 
+        });
+        if (getState('unigraph/connected').value === true && conn.current) conn.current.send(msg)
+        else {msgQueue.push(msg); connect()}
     }
     
-    const api: Unigraph<WebSocket>  = {
-        getState: (name) => {
-            if (name && states[name]) {
-                return states[name];
-            } else if (!name) {
-                return states
-            } else return api.addState(name, undefined);
-        },
-        addState: (name, initialValue) => {
-            if (!states[name]) {
-                const subs: ((newValue: any) => any)[] = [];
-                const state = {
-                    value: initialValue,
-                    subscribers: subs,
-                    subscribe: (subscriber: (newValue: any) => any) => subs.push(subscriber),
-                    setValue: undefined as any
-                }
-                state.setValue = (newValue: any) => {
-                    state.value = newValue;
-                    subs.forEach(sub => sub(state.value));
-                }
-                states[name] = state;
-                return state;
-            } else {
-                return states[name];
-            }
-        },
+    const api: Unigraph<WebSocket | undefined>  = {
+        getState: getState,
+        addState: addState,
         deleteState: (name) => delete states[name],
         backendConnection: connection,
         backendMessages: messages,
         eventTarget: eventTarget,
         buildGraph: buildGraph,
+        onReady: (callback: any) => {readyCallback = callback},
         getStatus: () => new Promise((resolve, reject) => {
             const id = getRandomInt();
             callbacks[id] = (response: any) => {

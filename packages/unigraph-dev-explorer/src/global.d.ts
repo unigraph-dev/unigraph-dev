@@ -4,7 +4,7 @@ import { Unigraph } from "unigraph-dev-common/lib/types/unigraph";
 
 declare global {
     interface Window {
-        unigraph: Unigraph<WebSocket>,
+        unigraph: Unigraph<WebSocket | undefined>,
         layoutModel: Model,
         registerNotifications: (callback: ((data: any[]) => any)) => any,
         newTab: any,
@@ -25,7 +25,8 @@ declare type UserSettings = {
     serverLocation: string,
     newWindow: "new-tab" | "new-pane" | "new-popout",
     nativeNotifications: boolean,
-    developerMode: boolean
+    developerMode: boolean,
+    browserId: string
 }
 
 declare module '*.d.ts' {

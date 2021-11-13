@@ -15,7 +15,9 @@ export type Subscription = {
     function?: Function,
     msgPort?: IWebsocket,
     regTime: number, // time of registration, can be used to manually terminate subscription going too long
-    connId?: string
+    connId?: string,
+    clientId?: string,
+    hibernated?: boolean,
 };
 
 export function buildPollingQuery(subs: Subscription[]) {
@@ -33,7 +35,7 @@ export async function pollSubscriptions(subs: Subscription[], client: DgraphClie
     if (!ids) ids = subs.map(el => el.id);
     if (subs.length >= 1) {
         subs.map(el => ids?.includes(el.id) ? el : false).forEach(async (el, index) => {
-            if (el) {
+            if (el && !el.hibernated) {
                 let query: string;
                 if (el.queryFragment.startsWith("$/executable/")) {
                     const exec = serverStates.caches["executables"].data[el.queryFragment];
@@ -51,7 +53,7 @@ export async function pollSubscriptions(subs: Subscription[], client: DgraphClie
     }
 }
 
-export function createSubscriptionWS(id: string | number, msgPort: IWebsocket, queryFragment: string, connId: string) {
+export function createSubscriptionWS(id: string | number, msgPort: IWebsocket, queryFragment: string, connId: string, clientId: string) {
     return {
         data: null,
         queryFragment: queryFragment,
@@ -60,7 +62,8 @@ export function createSubscriptionWS(id: string | number, msgPort: IWebsocket, q
         id: id,
         msgPort: msgPort,
         regTime: new Date().getTime(),
-        connId: connId
+        connId: connId,
+        clientId: clientId,
     } as Subscription;
 }
 
@@ -76,6 +79,15 @@ export function createSubscriptionLocal(id: string | number, callback: (data: an
     } as Subscription;
 }
 
-export function removeSubscriptionsById(subscriptions: Subscription[], connId: string) {
-    return subscriptions.filter((it) => !(it.connId === connId))
+export function removeOrHibernateSubscriptionsById(subscriptions: Subscription[], connId: string, clientId: string | undefined) {
+    if (!clientId) {
+        return subscriptions.filter((it) => !(it.connId === connId))
+    } else {
+        return subscriptions.map((it) => {
+            return {
+                ...it,
+                ...(it.clientId === clientId ? {hibernated: true} : {})
+            }
+        })
+    }
 }

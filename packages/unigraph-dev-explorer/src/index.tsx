@@ -17,12 +17,11 @@ function render(component: any) {
   )
 }
 
-const notConnectedScreen = React.createElement(React.Fragment, {}, [
-  React.createElement(SplashScreen, {key: "splashscreen"}),
-  React.createElement(Settings, {key: "settings"})
-])
+if (typeof window.electronPreload === "function") window.electronPreload();
 
-window.unigraph.backendConnection.onopen = () => {
+render((new URLSearchParams(window.location.search)).get('pageName') ? <App/> : <WorkSpace />);
+
+window.unigraph.onReady!(() => {
   // Register notification center
   window.unigraph.subscribeToType("$/schema/notification", (data: any[]) => {
     const nfState = window.unigraph.getState('notification-center/notifications');
@@ -33,17 +32,12 @@ window.unigraph.backendConnection.onopen = () => {
   window.unigraph.getSchemas(['$/schema/interface/semantic']).then((schemas: any) => { 
     semanticChildrenState.setValue((schemas['$/schema/interface/semantic']?._definition as any)?._parameters?._definitions.map((el: any) => el?.type?.['unigraph.id']) || []) 
   })
-
-  if (typeof window.electronPreload === "function") window.electronPreload();
-
-  render((new URLSearchParams(window.location.search)).get('pageName') ? <App/> :<WorkSpace />);
-
   
-  window.unigraph.backendConnection.onclose = () => {
+  /*window.unigraph.backendConnection.onclose = () => {
     //setTimeout(() => {window.location.reload()}, 1000) 
     render(notConnectedScreen,)
-  };
-}
+  };*/
+})
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
