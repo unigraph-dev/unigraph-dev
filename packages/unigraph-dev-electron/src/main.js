@@ -86,7 +86,7 @@ function createMainWindow(props, mainPage) {
       nativeWindowOpen: true,
       contextIsolation: false,
     },
-    ...(props ? props : {})
+    ...(props ? props : {titleBarStyle: "hiddenInset"})
   })
 
   win.loadFile(path.join(__dirname, '..', 'buildweb', mainPage || 'loading_bar.html'))
