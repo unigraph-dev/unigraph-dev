@@ -1,7 +1,7 @@
 import { TextField, Button, List, ListItem, Divider } from "@material-ui/core";
 import React from "react";
 import { withUnigraphSubscription } from "unigraph-dev-common/lib/api/unigraph-react"
-import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView";
+import { AutoDynamicView } from "../../components/ObjectView/AutoDynamicView";
 
 export const NotesListBody = ({data}: any) => {
     return <div>

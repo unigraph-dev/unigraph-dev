@@ -1,8 +1,7 @@
 import { Card, Typography } from "@material-ui/core";
 import React from "react";
 import { getRandomInt, UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
-import { AutoDynamicViewDetailed, ViewViewDetailed } from "../components/ObjectView/DefaultObjectView";
-import { AllApps } from "../components/PackageManager/AppLibraryWidget"
+import { AutoDynamicViewDetailed } from "../components/ObjectView/AutoDynamicViewDetailed";
 
 type HomeSection = {
   header: string,

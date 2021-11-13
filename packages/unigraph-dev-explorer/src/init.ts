@@ -5,7 +5,7 @@ import { CodeOrComponentView, DefaultSkeleton, Executable, ViewViewDetailed } fr
 import { ANotification, Notification as CNotification } from "./components/UnigraphCore/Notification";
 import { UserSettings } from "./global";
 
-import { init as nb_init } from './examples/notes/NoteBlock';
+import { init as nb_init } from './examples/notes/init';
 import { init as sm_init } from './examples/semantic/init';
 import { init as cl_init } from './examples/calendar/init';
 import { init as tw_init } from './examples/twitter/Tweet';

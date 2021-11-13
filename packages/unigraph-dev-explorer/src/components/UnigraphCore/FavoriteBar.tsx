@@ -5,7 +5,7 @@ import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
 import { registerDynamicViews } from "unigraph-dev-common/lib/api/unigraph-react";
 import { byElementIndex, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { DynamicViewRenderer } from "../../global";
-import { AutoDynamicView } from "../ObjectView/DefaultObjectView";
+import { AutoDynamicView } from "../ObjectView/AutoDynamicView";
 
 const ViewItem: DynamicViewRenderer = ({data, callbacks}) => {
     let unpadded: any = unpad(data);

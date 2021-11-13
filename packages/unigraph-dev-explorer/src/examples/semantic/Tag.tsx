@@ -5,7 +5,7 @@ import { getContrast, NavigationContext } from '../../utils';
 import { DynamicViewRenderer } from '../../global';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { registerDynamicViews } from 'unigraph-dev-common/lib/api/unigraph-react';
-import { AutoDynamicView } from '../../components/ObjectView/DefaultObjectView';
+import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 
 import Icon from '@mdi/react'
 import { mdiTagOutline } from '@mdi/js';

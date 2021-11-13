@@ -4,7 +4,7 @@ import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 import _ from "lodash";
 import React from "react";
 import { onUnigraphContextMenu } from "../../components/ObjectView/DefaultObjectContextMenu";
-import { AutoDynamicView } from "../../components/ObjectView/DefaultObjectView"
+import { AutoDynamicView } from "../../components/ObjectView/AutoDynamicView"
 import { DynamicViewRenderer } from "../../global"
 
 const makeCSS = (style: Style) => {

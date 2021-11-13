@@ -11,7 +11,7 @@ import { Delete, Menu, Save } from '@material-ui/icons';
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import { BacklinkView } from '../ObjectView/BacklinkView';
 import { onUnigraphContextMenu } from '../ObjectView/DefaultObjectContextMenu';
-import { AutoDynamicView } from '../ObjectView/DefaultObjectView';
+import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
 import { getDynamicViews } from 'unigraph-dev-common/lib/api/unigraph-react';
 
 const useStyles = makeStyles({

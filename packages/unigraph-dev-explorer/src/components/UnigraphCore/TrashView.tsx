@@ -2,7 +2,7 @@ import { Divider, ListItem, ListItemIcon, Typography } from "@material-ui/core"
 import { Delete } from "@material-ui/icons";
 import React from "react";
 import { buildGraph, getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
-import { AutoDynamicView } from "../ObjectView/DefaultObjectView";
+import { AutoDynamicView } from "../ObjectView/AutoDynamicView";
 
 export const TrashView = () => {
 

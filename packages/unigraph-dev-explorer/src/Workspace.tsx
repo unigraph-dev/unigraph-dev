@@ -299,6 +299,22 @@ export function WorkSpace(this: any) {
                     } else if (tabSetNode.getId() === "border_bottom") {
                         renderValues.buttons.push(<ConnectionIndicator />)
                     }
+                    if (isElectron() && tabSetNode.getId() === "border_left") {
+                        const getTopLeft = () => Array.from(document.querySelectorAll('.flexlayout__tabset_tabbar_outer'))
+                            .filter(el => (el.parentElement || undefined)?.style?.top === "0px")
+                            // @ts-expect-error: already checked for nullness above
+                            .sort((a, b) => {return parseInt(a.parentElement.style.left) - parseInt(b.parentElement.style.left)})[0];
+                        const topLeft = getTopLeft();
+                        if (topLeft) {
+                            const isLeftOpen = (model.getNodeById('border_left') as any)._attributes.selected === -1;
+                            window.requestAnimationFrame(() => {
+                                const newTopLeft = getTopLeft();
+                                if (isLeftOpen) newTopLeft.classList.add('topleft_bar_with_electron');
+                                else newTopLeft.classList.remove('topleft_bar_with_electron');
+                            })
+                            
+                        }
+                    }
                     
                     //renderValues.headerContent = <Button>Hi</Button>;
                 }} classNameMapper={(name) => {

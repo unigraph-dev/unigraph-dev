@@ -6,9 +6,7 @@ import './pages';
 import * as serviceWorker from './serviceWorker';
 
 import App from './App';
-import { SplashScreen } from './pages/SplashScreen';
 import { WorkSpace } from './Workspace';
-import Settings from './pages/Settings';
 
 function render(component: any) {
   ReactDOM.render(

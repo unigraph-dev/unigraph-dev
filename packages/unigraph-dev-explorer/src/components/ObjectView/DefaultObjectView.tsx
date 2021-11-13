@@ -2,18 +2,16 @@ import { Checkbox, FormControlLabel, IconButton, ListItemIcon, ListItemText, Typ
 import { MoreVert, OpenInNew, PlayArrow, TrendingFlat } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import React, { FC } from 'react';
-import { useDrag, useDrop} from 'react-dnd';
 import ReactJson, { InteractionProps } from 'react-json-view';
-import { useSwipeable } from 'react-swipeable';
+
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { DynamicViewRenderer } from '../../global';
-import { AutoDynamicViewProps } from '../../types/ObjectView';
-import { isMobile, isMultiSelectKeyPressed, selectUid } from '../../utils';
 import { ExecutableCodeEditor } from './DefaultCodeEditor';
-import { DefaultObjectContextMenu, onUnigraphContextMenu } from './DefaultObjectContextMenu';
-import {ErrorBoundary} from 'react-error-boundary'
+import { DefaultObjectContextMenu } from './DefaultObjectContextMenu';
 import { DynamicComponentView, getComponentAsView } from './DynamicComponentView';
-import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
+import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
+import { AutoDynamicView } from './AutoDynamicView';
+import { AutoDynamicViewDetailed } from './AutoDynamicViewDetailed';
 
 type ObjectViewOptions = {
     viewer?: "string" | "json-tree" | "dynamic-view" | "code-editor" | "dynamic-view-detailed",
@@ -29,7 +27,7 @@ type DefaultObjectViewProps = {
     callbacks?: Record<string, any>
 };
 
-const StringObjectViewer = ({object}: {object: any}) => {
+export const StringObjectViewer = ({object}: {object: any}) => {
     const finalObject = unpad(object)
 
     return <div style={{maxHeight: "160px", width: "100%", overflowX: "auto"}}>
@@ -56,7 +54,7 @@ const onPropertyEdit = (edit: InteractionProps, pad: boolean) => {
     }
 }
 
-const JsontreeObjectViewer = ({object, options}: {object: any, options: ObjectViewOptions}) => {
+export const JsontreeObjectViewer = ({object, options}: {object: any, options: ObjectViewOptions}) => {
 
     const [showPadded, setShowPadded] = React.useState(false);
     const onedit = (props: InteractionProps) => onPropertyEdit(props, !showPadded);
@@ -115,36 +113,6 @@ export const CodeOrComponentView = (props: any) => {
     }
 }
 
-const SubentityDropAcceptor = ({ uid }: any) => {
-    const [{ isOver, canDrop }, dropSub] = useDrop(() => ({
-        // @ts-expect-error: already checked for namespace map
-        accept: Object.keys(window.unigraph.getNamespaceMap() || {}),
-        drop: (item: {uid: string, itemType: string}, monitor) => {
-            if (!monitor.didDrop() && item.uid !== uid) {
-                window.unigraph.updateObject(uid, {
-                    children: [{
-                        type: {"unigraph.id": "$/schema/subentity"},
-                        _value: {
-                            //"type": {"unigraph.id": item.itemType},
-                            uid: item.uid
-                        }
-                    }]
-                })
-            }
-        },
-        collect: (monitor) => ({
-            isOver: !!monitor.isOver(),
-            canDrop: !!monitor.canDrop(),
-        })
-    }))
-
-    const opacities: Record<string, number> = {"truetrue": 1, "truefalse": 0.5, "falsefalse": 0, "falsetrue": 0}
-
-    return <div ref={dropSub} style={{opacity: opacities[canDrop + "" + isOver], width: "100%", height: canDrop ? "16px" : "0px", margin: "0px"}}>
-        <hr style={{height: "50%", backgroundColor: "gray", margin: "0px", marginLeft: "48px"}}/>
-    </div>
-}
-
 export const ViewViewDetailed: DynamicViewRenderer = ({data, callbacks}) => {
     if (data.get('view')?.['_value']?.['dgraph.type'].includes('Executable')) {
         return <AutoDynamicViewDetailed object={new UnigraphObject(data.get('view')['_value'])} callbacks={callbacks} />
@@ -159,130 +127,6 @@ export const ViewViewDetailed: DynamicViewRenderer = ({data, callbacks}) => {
                 .constructor()
         }
     }
-}
-
-export const AutoDynamicView = ({ object, callbacks, component, attributes, inline, allowSubentity, style, noDrag, noDrop, noContextMenu }: AutoDynamicViewProps) => {
-    allowSubentity = allowSubentity === true;
-
-    const [{ isDragging }, drag] = useDrag(() => ({
-        type: object?.['type']?.['unigraph.id'] || "$/schema/any",
-        item: {uid: object?.uid, itemType: object?.type?.['unigraph.id']},
-        collect: (monitor) => ({
-          isDragging: !!monitor.isDragging()
-        })
-    }))
-
-    const [, drop] = useDrop(() => ({
-          accept: window.unigraph.getState('referenceables/semantic_children').value,
-          drop: (item: {uid: string, itemType: string}, monitor) => {
-            if (!monitor.didDrop() && item.uid !== object?.uid) {
-                window.unigraph.updateObject(object?.uid, {
-                    children: [{
-                        "type": {"unigraph.id": "$/schema/interface/semantic"},
-                        "_value": {
-                            "type": {"unigraph.id": item.itemType},
-                            uid: item.uid
-                        }
-                    }]
-                })
-            }
-          },
-    }))
-
-    const handlers = useSwipeable({
-        onSwipedRight: (eventData) => onUnigraphContextMenu(({clientX: eventData.absX, clientY: eventData.absY} as any), object, contextEntity, callbacks),
-      });
-
-    const contextEntity = typeof callbacks?.context === "object" ? callbacks.context : null; 
-    const [isSelected, setIsSelected] = React.useState(false);
-    const selectedState = window.unigraph.getState('global/selected');
-    selectedState.subscribe((sel: any) => {if (sel?.includes?.(object.uid)) setIsSelected(true); else setIsSelected(false);})
-
-    const attach = React.useCallback((domElement) => {
-        if (!noDrag) drag(domElement);
-        if (!noDrop) drop(domElement);
-    }, [isDragging, drag, callbacks])
-
-    //console.log(object) 
-    let el;
-    const DynamicViews = window.unigraph.getState('registry/dynamicView').value
-    if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViews).includes(object.type['unigraph.id'])) {
-        el = React.createElement(component?.[object.type['unigraph.id']] ? component[object.type['unigraph.id']] : DynamicViews[object.type['unigraph.id']], {
-            data: object, callbacks: callbacks ? callbacks : undefined, ...(attributes ? attributes : {})
-        });
-    } else if (object) {
-        el = <StringObjectViewer object={object}/>
-    }
-    return el ? <ErrorBoundary onError={(error: Error, info: {componentStack: string}) => {
-        console.error(error);
-      }} FallbackComponent={({error}) => <div style={{backgroundColor: "floralwhite", borderRadius: "8px"}}>
-        <Typography>Error in AutoDynamicView: (for object {object?.uid})</Typography>
-        <p>{error.message}</p>
-    </div>}>
-        <div 
-            id={"object-view-"+object?.uid} 
-            style={{
-                backgroundColor: isSelected ? "whitesmoke" : "unset",
-                opacity: isDragging ? 0.5 : 1, 
-                display: "inline-flex", alignItems: "center",
-                ...(inline ? {} : {width: "100%"}),
-                ...(isMobile() ? {touchAction: "pan-y"} : {}),
-                ...style
-            }} 
-            ref={attach} 
-            aria-label={"Object view for uid " + object?.uid + ", of type " + (object?.type?.['unigraph.id'] || "unknown")}
-            onContextMenu={noContextMenu ? () => {} : (event) => onUnigraphContextMenu(event, object, contextEntity, callbacks)}
-            onClickCapture={(ev) => { if (isMultiSelectKeyPressed(ev)) {ev.stopPropagation(); selectUid(object.uid, false) } }}
-            {...(attributes ? attributes : {})}
-            {...(isMobile() ? handlers : {})}
-        >
-            {el}
-        </div>
-        {(allowSubentity && !noDrop) ? <SubentityDropAcceptor uid={object?.uid} /> : []}
-    </ErrorBoundary> : <React.Fragment/>;
-}
-
-const isStub = (object: any) =>
-    (typeof object === "object" && Object.keys(object).length === 3 && object['_stub'] && object.uid && object.type &&
-     typeof object.type['unigraph.id'] === "string" && typeof object.type['unigraph.id'].startsWith('$/'))
-
-
-export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, callbacks, context, component, attributes, useFallback }) => {
-
-    const isObjectStub = isStub(object)
-    const [loadedObj, setLoadedObj] = React.useState<any>(false)
-    const [subsId, setSubsId] = React.useState(getRandomInt());
-
-    const DynamicViewsDetailed = {...window.unigraph.getState('registry/dynamicViewDetailed').value, ...(component || {})}
-
-    React.useEffect(() => {
-        const newSubs = getRandomInt();
-        if (isObjectStub) {
-            window.unigraph.unsubscribe(subsId);
-            const query = DynamicViewsDetailed[object.type['unigraph.id']].query(object.uid)
-            window.unigraph.subscribeToQuery(query, (objects: any[]) => {
-                setLoadedObj(objects[0]);
-            }, newSubs, true);
-            setSubsId(newSubs);
-            callbacks = {...callbacks, subsId: newSubs}
-        }
-
-        return function cleanup () { window.unigraph.unsubscribe(newSubs); }
-    }, [object])
-
-    
-    if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViewsDetailed).includes(object.type['unigraph.id']) && ((isObjectStub && loadedObj) || !isObjectStub)) {
-        return <ErrorBoundary FallbackComponent={(error) => <div>
-            <Typography>Error in detailed AutoDynamicView: </Typography>
-            <p>{JSON.stringify(error, null, 4)}</p>
-        </div>}>
-            {React.createElement(DynamicViewsDetailed[object.type['unigraph.id']].view, {
-            data: isObjectStub ? loadedObj : object, callbacks, options: options || {}, context, ...(attributes ? attributes : {})
-        })}
-        </ErrorBoundary>;
-    } else if (useFallback) {
-        return <JsontreeObjectViewer object={isObjectStub ? loadedObj : object} options={options}/>
-    } else return <React.Fragment/>
 }
 
 const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options, callbacks }) => {
