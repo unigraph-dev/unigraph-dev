@@ -6,7 +6,7 @@ import { NoteEditorContext } from "./types";
 
 export const focusUid = (uid: string) => {
     console.log("UID " + uid);
-    (document.getElementById(`object-view-${uid}`)?.children[0].children[0] as any)?.click();
+    (document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0] as any)?.click();
 }
 
 export const setCaret = (document: Document, element: any, pos: number, length?: number) => {
@@ -30,6 +30,9 @@ export const addChild = (data: any, context: NoteEditorContext) => {
                 text: {
                     type: {"unigraph.id": "$/schema/markdown"},
                     _value: ""
+                },
+                "$context": {
+                    "_hide": true
                 }
             }
         }]

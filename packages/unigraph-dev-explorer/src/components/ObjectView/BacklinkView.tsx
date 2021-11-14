@@ -22,7 +22,7 @@ export const BacklinkView = ({data, hideHeader, forward, callbacks, uid}: any) =
     if (callbacks?.isEmbed) hideHeader = true;
 
     useEffectOnce(() => {
-        window.unigraph.subscribeToQuery(getQuery(data?.uid || uid, forward), (objects: any[]) => { setObjects(buildGraph(objects).filter((el: any) => (el.uid !== (data?.uid || uid)))) }, id);
+        window.unigraph.subscribeToQuery(getQuery(data?.uid || uid, forward), (objects: any[]) => { setObjects(buildGraph(objects).filter((el: any) => (el.uid !== (data?.uid || uid)))) }, id, true);
 
         return function cleanup () {
             window.unigraph.unsubscribe(id);
