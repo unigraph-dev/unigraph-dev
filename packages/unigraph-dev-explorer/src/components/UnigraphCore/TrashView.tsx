@@ -12,7 +12,7 @@ export const TrashView = () => {
         const subsId = getRandomInt();
         window.unigraph.subscribeToQuery(`(func: type(Deleted)) @recurse {uid expand(_userpredicate_) <unigraph.id>}`, (res: any[]) => {
             setTotalDeleted(buildGraph(res));
-        }, subsId);
+        }, subsId, true);
 
         return function cleanup () {
             window.unigraph.unsubscribe(subsId);
