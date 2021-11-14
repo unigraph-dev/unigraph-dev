@@ -267,10 +267,14 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
         const localSchema = schemaMap[schemaName]._definition
         const unigraphId = raw?.['unigraph.id'];
         if (unigraphId) delete raw?.['unigraph.id'];
-        let timestamp: any = {};
+        let timestamp: any = {}; let context: any = {};
         if (raw._timestamp) {
             timestamp = raw._timestamp;
             delete raw._timestamp;
+        }
+        if (raw['$context']) {
+            context = raw['$context'];
+            delete raw['$context'];
         }
         const bodyObject: Record<string, any> = padding ? buildUnigraphEntityPart(raw, options, schemaMap, localSchema, {}) : raw
         const now = new Date().toISOString();
@@ -282,6 +286,7 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
             ...bodyObject,
             "_timestamp": timestamp,
             ...propDesc,
+            ...context,
             "unigraph.indexes": options.states.indexes
         };
         if (result.type?.['unigraph.id']?.startsWith('$/schema/interface')) result['dgraph.type'] = 'Interface'
