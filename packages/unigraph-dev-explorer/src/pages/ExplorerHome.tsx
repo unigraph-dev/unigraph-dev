@@ -28,6 +28,7 @@ export const HomeSection = ({data}: any) => {
 export default function ExplorerHome({id}: any) {
 
   const [sections, setSection] = React.useState<Partial<HomeSection>[]>([]);
+  console.log(sections)
 
   React.useEffect(() => {
     const id = getRandomInt();

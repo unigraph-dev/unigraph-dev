@@ -6,7 +6,7 @@
  * @param {number} days How many days to look ahead (only matters if current is not true, default to 7 = next week)
  * @param {boolean} getFrames whether to pair the events with their corresponding timeframes. 
  */
-let { current, days, start, getFrames, getAll } = context.params
+let { current, days, start, getFrames, getAll, greaterThanNow, allEnd } = context.params
 if (!days) days = 7;
 
 const getSod = (date) => {
@@ -38,13 +38,13 @@ frames as var(func: uid(partf)) @cascade {
         start {
             _value {
                 _value {
-                    datetime @filter(le(<_value.%dt>, "${current ? start.toJSON() : getEod(end)}")) {
+                    datetime @filter(le(<_value.%dt>, "${current ? start.toJSON() : getEod(end)}") ${greaterThanNow ? `AND ge(<_value.%dt>, "${(new Date()).toJSON()}")` : ""}) {
                         <_value.%dt>
                     }
                 }
             }
         }
-        end {
+        ${allEnd ? "" : `end {
             _value {
                 _value {
                     datetime @filter(ge(<_value.%dt>, "${current ? start.toJSON() : getSod(start)}")) {
@@ -52,7 +52,7 @@ frames as var(func: uid(partf)) @cascade {
                     }
                 }
             }
-        }
+        }`}
     }
 }
 var(func: eq(<unigraph.id>, "$/schema/time_frame")) {
