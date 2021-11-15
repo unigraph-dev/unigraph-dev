@@ -100,9 +100,9 @@ function initContextMenu() {
 
 function initRegistry() {
     window.unigraph.addState('registry/dynamicView', {
-        "$/schema/executable": Executable,
-        "$/skeleton/default": DefaultSkeleton,
-        "$/schema/notification": CNotification
+        "$/schema/executable": {view: Executable},
+        "$/skeleton/default": {view: DefaultSkeleton},
+        "$/schema/notification": {view: CNotification}
     });
     window.unigraph.addState('registry/dynamicViewDetailed', {
         "$/schema/executable": {view: CodeOrComponentView},
