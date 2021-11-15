@@ -72,7 +72,7 @@ export const UnigraphSearch = ({id}: any) => {
 
     const dynamicViews = window.unigraph.getState('registry/dynamicView').value
 
-    return <div id={"scrollableDiv" + id} style={{height: "100%"}}>
+    return <React.Fragment>
         <SearchBar onQueryUpdate={(newQuery: any[]) => {setQuery(newQuery)}} searchNow={() => search.flush()}/>
         <FormControlLabel
             control={<Switch checked={showHidden} onChange={() => setShowHidden(!showHidden)} name={"showHidden"} />}
@@ -84,5 +84,5 @@ export const UnigraphSearch = ({id}: any) => {
             defaultFilter={showHidden ? "no-filter" : undefined}
             buildGraph={true}
         />
-    </div>
+    </React.Fragment>
 }

@@ -78,7 +78,7 @@ const buildRefs = (refs: {env: string, package: string, import: string | undefin
     return [refStrings, refValues]
 }
 
-export const getComponentFromExecutable = async (data: any, params: any) => {
+export const getComponentFromExecutable = async (data: any, params: any, globalImports: Record<string, any> = {}) => {
     const ret = await (window as any).unigraph.runExecutable(data['unigraph.id'] || data.uid, params, {}, true);
     const imports = (data?.['_value']?.['imports']?.['_value['] || []).map((el: any) => {return {
         env: el?.['_value']?.['env']['_value.%'],
@@ -88,6 +88,10 @@ export const getComponentFromExecutable = async (data: any, params: any) => {
     }});
     console.log(imports)
     const [refstr, refval] = buildRefs(imports);
+    Object.entries(globalImports).forEach(([key, value]) => {
+        refstr.push(key);
+        refval.push(value);
+    })
     // eslint-disable-next-line no-new-func
     const retFn = new Function('React', ...refstr, 'return ' + ret?.return_function_component)(React, ...refval);
     // Build the component with imports!

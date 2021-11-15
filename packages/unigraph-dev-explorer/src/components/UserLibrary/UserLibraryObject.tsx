@@ -39,16 +39,16 @@ export default function DetailedObjectView ({ uid, viewer, id, context, componen
 
     React.useEffect(() => {setId(Date.now())}, [uid])
 
-    return (viewer ? <div key={object?.uid}>
+    return (viewerId !== "dynamic-view-detailed" ? <React.Fragment key={object?.uid}>
         <DefaultObjectView object={object} options={{
             viewer: viewerId,
             canEdit: true,
             unpad: !showPadded,
             viewId: id
         }} callbacks={{subsId: myid}}></DefaultObjectView>
-    </div> : <div key={object?.uid} style={{height: "100%", width: "100%", opacity: object?.uid ? 1: 0}}>
+    </React.Fragment> : <React.Fragment key={object?.uid}>
         <AutoDynamicViewDetailed object={object} options={{
             viewId: id
         }} callbacks={{...callbacks, subsId: myid}} context={contextObj} component={component}></AutoDynamicViewDetailed>
-    </div>)
+    </React.Fragment>)
 }

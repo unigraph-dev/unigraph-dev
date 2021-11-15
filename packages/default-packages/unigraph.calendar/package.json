@@ -32,7 +32,24 @@
                 "id": "sync-google-calendar-specific",
                 "src": "executables/syncGoogleCalendarSpecific.js",
                 "editable": true
+            },
+            {
+                "name": "Upcoming events",
+                "env": "component/react-jsx",
+                "id": "home-next-events",
+                "src": "executables/homeNextEvents.jsx",
+                "editable": true
+            },
+            {
+                "name": "Upcoming events: condition",
+                "env": "routine/js",
+                "id": "home-next-events-condition",
+                "src": "executables/homeNextEventsCondition.js",
+                "editable": true
             }
+        ],
+        "entities": [
+            {"id": "home_section_upcoming_events", "src": "entities/home_section_upcoming_events.json"}
         ]
     }
 }

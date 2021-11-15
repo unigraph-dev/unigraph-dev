@@ -15,7 +15,7 @@ const UserLibraryAll = ({id}: any) => {
 
     useEffectOnce(() => {
         const subsId = getRandomInt();
-        window.unigraph.subscribeToType("any", (result: any[]) => {setData(result.map(el => el.uid))}, subsId, {uidsOnly: true});
+        window.unigraph.subscribeToType("any", (result: any[]) => {setData(result.map(el => el.uid))}, subsId, {uidsOnly: true, first: -2000});
 
         return function cleanup() { window.unigraph.unsubscribe(subsId); }
     })

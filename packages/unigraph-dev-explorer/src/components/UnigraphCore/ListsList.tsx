@@ -22,7 +22,7 @@ export const MiniListView = ({data}: any) => {
         <Card
             onContextMenu={(event) => onUnigraphContextMenu(event, data)}
             variant="outlined" style={{padding: "8px", display: "flex"}} 
-            onClick={() => {window.wsnavigator(`/library/object?uid=${data.uid}&viewer=${"dynamic-view-detailed"}`)}}
+            onClick={() => {window.wsnavigator(`/library/object?uid=${data.uid}&isStub=true&type=$/schema/list`)}}
         >
             <List style={{marginRight: "8px"}}/>
             <Typography>{data?.['_value']?.['name']?.['_value.%']} ({(data?.['_value']?.['children']?.items || 0).toString()})</Typography>

@@ -141,7 +141,7 @@ const RSSItemsListBody: React.FC<any> = ({data, viewId}) => {
         if (setupProps?.cleanup) setupProps.cleanup();
         let newProps: any = undefined;
         if (data.length) {
-            newProps = setupInfiniteScrolling(data.map((el: any) => el.uid), 100, (items: any[]) => {
+            newProps = setupInfiniteScrolling(data.map((el: any) => el.uid), 10, (items: any[]) => {
                 setLoadedItems(items);
             });
             setSetupProps(newProps);
