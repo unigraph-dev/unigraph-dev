@@ -95,7 +95,16 @@ for (let i=0; i<items.length; ++i) {
     else {
       let recurrenceObj = {};
       if (ev.recurrence) {
-        const frames = parseRecurrence(ev.start.dateTime || (new Date(ev.start.date)).toJSON(), ev.end.dateTime || toEod(new Date(ev.end.date)).toJSON(), ev.recurrence[0], ev.start.timeZone)
+        const frames = parseRecurrence(ev.start.dateTime || (new Date(ev.start.date)).toJSON(), ev.end.dateTime || toEod(new Date(ev.end.date)).toJSON(), ev.recurrence[0], ev.start.timeZone);
+        const uid = (await unigraph.getQueries([queryFromEventId(ev.id)]))?.[0]?.[0]?.uid;
+        if (uid) {
+          // delete all previous recurrences
+          const prevFrames = (await unigraph.getQueries([`(func: uid(${uid})) { _value { recurrence_rules { uid } recurrence { uid <_value[> { uid } }} }`]))?.[0]?.[0];
+          if (prevFrames && prevFrames._value.recurrence_rules?.uid && prevFrames._value.recurrence?.['_value[']) {
+            await unigraph.deleteObject(prevFrames._value.recurrence_rules.uid, true);
+            await unigraph.deleteItemFromArray(prevFrames._value.recurrence.uid, prevFrames._value.recurrence['_value['].map(el => el.uid), uid, []);
+          }
+        }
         recurrenceObj = {
           recurrence_rules: ev.recurrence,
           recurrence: frames.map(el => {

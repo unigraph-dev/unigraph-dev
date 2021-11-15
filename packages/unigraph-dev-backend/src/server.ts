@@ -439,7 +439,7 @@ export default async function startServer(client: DgraphClient) {
 
   /** Maps from clientIds to connIds, from this server start  */
   const historialClients: Record<string, string> = {}
-  serverStates.getClientId = (connId: string) => Object.entries(historialClients).filter(el => el[1] === connId)[0][0];
+  serverStates.getClientId = (connId: string) => Object.entries(historialClients).filter(el => el[1] === connId)?.[0]?.[0] || getRandomInt();
 
   server.on('connection', (ws, req) => {
     // Set up connId and clientId

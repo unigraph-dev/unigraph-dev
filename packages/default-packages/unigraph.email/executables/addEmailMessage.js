@@ -15,7 +15,7 @@ const dest = parsed.map((el) => {
     return {
         name: {
             type: {"unigraph.id": "$/schema/note"},
-            _value: el.subject
+            _value: el.subject || ""
         },
         message_id: el.messageId,
         message: {
@@ -30,7 +30,7 @@ const dest = parsed.map((el) => {
             },
             text: {
                 type: {"unigraph.id": "$/schema/html"},
-                _value: el.html || el.textAsHtml || el.text
+                _value: el.html || el.textAsHtml || el.text || ""
             }
         },
         _timestamp: {

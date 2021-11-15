@@ -55,9 +55,9 @@ const groupersDefault: Record<string, Grouper> = {
     },
 }
 
-const DynamicListItem = ({ listUid, item, index, context, callbacks, itemUids, itemRemover }: any) => {
+const DynamicListItem = ({ reverse, listUid, item, index, context, callbacks, itemUids, itemRemover }: any) => {
     return <React.Fragment>
-        <Slide direction="up" in key={item.uid}>
+        <Slide direction={reverse ? "down" : "up"} in key={item.uid}>
             <ListItem>
                 <ListItemIcon onClick={() => {
                     itemRemover(item['uid'])
@@ -98,14 +98,14 @@ export type DynamicObjectListViewProps = {
     groupers?: any
 }
 
-const DynamicListBasic = ({ items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true }: any) => {
+const DynamicListBasic = ({ reverse, items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true }: any) => {
     return items.map((el: any, index: number) => <DynamicListItem 
         item={itemGetter(el)} index={index} context={context} listUid={listUid} 
-        callbacks={callbacks} itemUids={itemUids} itemRemover={itemRemover}
+        callbacks={callbacks} itemUids={itemUids} itemRemover={itemRemover} reverse={reverse}
     />);
 }
 
-const DynamicList = ({ items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true, buildGraph }: any) => {
+const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true, buildGraph }: any) => {
 
     const [loadedItems, setLoadedItems] = React.useState<any[]>([]);
     const [setupProps, setSetupProps] = React.useState<{next: any, cleanup: any} | null>(null);
@@ -135,7 +135,7 @@ const DynamicList = ({ items, context, listUid, callbacks, itemUids, itemRemover
         scrollableTarget="scrollableDiv"
     >
         {loadedItems.map((el: any, index: number) => <DynamicListItem
-            item={el} index={index} context={context} listUid={listUid}
+            item={el} index={index} context={context} listUid={listUid} reverse={reverse}
             callbacks={callbacks} itemUids={items.map((el: any) => itemGetter(el).uid)} itemRemover={itemRemover}
         />)}
     </InfiniteScroll>  
@@ -258,10 +258,10 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
         </div>
         <div style={{ flexGrow: 1, overflowY: "auto" }} id="scrollableDiv" >
             {!groupBy.length ? 
-                React.createElement(isStub ? DynamicList : DynamicListBasic, { items: procItems, context, listUid, callbacks, itemRemover, itemUids: procItems.map(el => el.uid), itemGetter, buildGraph }) :
+                React.createElement(isStub ? DynamicList : DynamicListBasic, { reverse: reverseOrder, items: procItems, context, listUid, callbacks, itemRemover, itemUids: procItems.map(el => el.uid), itemGetter, buildGraph }) :
                 groupers[groupBy](procItems.map(itemGetter)).map((el: Group) => <React.Fragment>
                     <ListSubheader>{el.name}</ListSubheader>
-                    {React.createElement(isStub ? DynamicList : DynamicListBasic, { items: el.items, context, listUid, callbacks, itemRemover, itemUids: el.items.map(ell => ell.uid), itemGetter: _.identity, infinite: false, buildGraph})}
+                    {React.createElement(isStub ? DynamicList : DynamicListBasic, { reverse: reverseOrder, items: el.items, context, listUid, callbacks, itemRemover, itemUids: el.items.map(ell => ell.uid), itemGetter: _.identity, infinite: false, buildGraph})}
                 </React.Fragment>)
             }
         </div>
