@@ -30,7 +30,7 @@ const electron = isElectron();
 
 export function WorkspacePageComponent({ children, maximize, paddingTop, id }: any) {
     return <div id={"workspaceContainer"+id} style={{width: "100%", height: "100%", overflow: "auto"}}>
-        <Container maxWidth={maximize ? false : "lg"} disableGutters style={{paddingTop: (maximize || !paddingTop) ? "0px" : "12px", height: "100%"}}>
+        <Container maxWidth={maximize ? false : "lg"} disableGutters style={{paddingTop: (maximize || !paddingTop) ? "0px" : "12px", height: "100%", display: "flex", flexDirection: "column"}}>
             <CssBaseline/>
             {children}
         </Container>

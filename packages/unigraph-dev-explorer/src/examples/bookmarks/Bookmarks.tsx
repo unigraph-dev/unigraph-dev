@@ -43,15 +43,17 @@ function BookmarksBody ({data}: { data: ABookmark[] }) {
     const bookmarks = data;
     const [newName, setNewName] = useState("");
 
-    return <div>
+    return <React.Fragment>
         <DynamicObjectListView 
             items={bookmarks}
-            context={null} reverse
+            context={null} reverse defaultFilter={"no-filter"}
         />
+        <div>
         <TextField value={newName} onChange={(e) => setNewName(e.target.value)}></TextField>
         <Button onClick={() => createBookmark(newName).then((obj: any) => {return false;})}>Add</Button>
         For example, enter #tag1 https://example.com
-    </div>
+        </div>
+    </React.Fragment>
 }
 
 export const Bookmarks = withUnigraphSubscription(
@@ -59,7 +61,7 @@ export const Bookmarks = withUnigraphSubscription(
     BookmarksBody,
     { defaultData: [], schemas: [], packages: [bookmarkPackage]},
     { afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
-        window.unigraph.subscribeToType("$/schema/web_bookmark", (result: ABookmark[]) => {setData(result)}, subsId);
+        window.unigraph.subscribeToType("$/schema/web_bookmark", (result: ABookmark[]) => {setData(result)}, subsId, {uidsOnly: true}); 
     }}
 )
 

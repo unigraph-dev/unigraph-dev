@@ -29,7 +29,7 @@ export const BacklinkView = ({data, hideHeader, forward, callbacks, uid}: any) =
         }
     })
 
-    return <div>
+    return <React.Fragment>
         <Typography gutterBottom variant="h4" style={{display: hideHeader ? "none" : "unset"}}>
             Backlinks of: {hideHeader || data?.get?.('name').as('primitive') || data?.uid || uid}
         </Typography>
@@ -45,5 +45,5 @@ export const BacklinkView = ({data, hideHeader, forward, callbacks, uid}: any) =
                 }
             }}
         />
-    </div>
+    </React.Fragment>
 }
