@@ -16,7 +16,7 @@ export const EmailSettings = ({}) => {
     useEffect(() => {
         if (loaded) {
             const id = getRandomInt();
-            window.unigraph.subscribeToQuery(`(func: type(Entity)) @cascade {
+            window.unigraph.subscribeToQuery(`(func: uid(parAcc)) @cascade {
                 uid
                 type @filter(eq(<unigraph.id>, "$/schema/internet_account")) {<unigraph.id>}
                 _value {
@@ -32,6 +32,8 @@ export const EmailSettings = ({}) => {
                     name { <_value.%> }
                     username { <_value.%> }
                 }
+            } var(func: eq(<unigraph.id>, "$/schema/internet_account")) {
+                <~type> { parAcc as uid }
             }`, (res: any[]) => {
                 setAccount(res[0])
             }, id, true);
@@ -47,5 +49,6 @@ export const EmailSettings = ({}) => {
         <Typography variant="body1">Account info</Typography>
         <p><strong>Name: </strong>{account?.get?.("name").as?.("primitive")}</p>
         <p><strong>Username: </strong>{account?.get?.("username").as?.("primitive")}</p>
+        <Button onClick={() => window.unigraph.runExecutable("$/executable/gmail-full-sync", {})}>FUll sync Gmail inbox</Button>
     </div> : <React.Fragment>Loading...</React.Fragment>
 }

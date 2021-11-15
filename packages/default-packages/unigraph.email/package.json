@@ -17,6 +17,12 @@
             "src": "executables/addGmailAccount.js",
             "editable": true
         }, {
+            "name": "Fully sync a Gmail inbox",
+            "env": "routine/js",
+            "id": "gmail-full-sync",
+            "src": "executables/gmailFullSync.js",
+            "editable": true
+        }, {
             "id": "update-gmail-inbox",
             "env": "routine/js",
             "src": "executables/updateGmailInbox.js",
