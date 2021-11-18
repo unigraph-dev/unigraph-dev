@@ -18,7 +18,7 @@ const compFactory = (name: string, {node, inline, className, children, ...props}
             (event.target as HTMLElement).setAttribute("markdownPos", String((props.sourcePosition?.start.column || 0) - 1 + (window.getSelection()?.anchorOffset || 0)))};
         },
         ...props,
-        style: {display: "contents"}
+        style: {...props.style, display: "contents"}
     })
 }
 
@@ -33,6 +33,7 @@ export const Markdown: DynamicViewRenderer = ({data, callbacks, isHeading}) => {
             strong: compFactory.bind(this, "strong"),
             em: compFactory.bind(this, "em"),
             code: compFactory.bind(this, "code"),
+            ol: (props) => compFactory('ol', {...props, inline: true, style: {marginLeft: "8px"}}),
             span: ({node, inline, className, children, ...props}: any) => {
                 if (className?.includes('wikilink')) {
                     const matches = (callbacks?.['get-semantic-properties']?.()?.['_value']?.['children']?.['_value['] || [])

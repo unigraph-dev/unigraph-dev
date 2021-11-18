@@ -6,7 +6,7 @@ import { pkg as rssReaderPackage } from 'unigraph-dev-common/lib/data/unigraph.r
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { AutoDynamicView } from "../../components/ObjectView/AutoDynamicView";
 import { DynamicViewRenderer } from "../../global";
-import { download, upload } from "../../utils";
+import { download, openUrl, upload } from "../../utils";
 import { Description, Link } from "@material-ui/icons";
 import { getComponentFromPage } from "../../Workspace";
 import Sugar from "sugar";
@@ -66,7 +66,7 @@ const RSSItem: DynamicViewRenderer = ({data, callbacks}) => {
             <Avatar alt={"favicon of "+unpadded.feed?.site_info?.name} src={unpadded.item_data?.favicon}>{unpadded.feed?.site_info?.name}</Avatar>
         </ListItemIcon>
         <ListItemText
-            primary={<a href={unpadded.item_data?.url}>{unpadded.item_data?.name}</a>}
+            primary={<a href="#" onClick={() => {openUrl(unpadded.item_data?.url)}}>{unpadded.item_data?.name}</a>}
             secondary={<div>
                 <div style={{display: "flex", alignItems: "center"}}><Link onClick={() => {
                     const htmlUid = data?.get('content/text')?.['_value']?.['_value']?.['uid'];
