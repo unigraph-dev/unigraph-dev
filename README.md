@@ -1,19 +1,12 @@
-# unigraph-dev monorepo
+# Unigraph
 
-A local-first and universal graph database, knowledge engine, and workspace for your life.
+A local-first and universal knowledge graph, personal search engine, and workspace for your life.
 
-[Live demo](http://workspace.jingyixu.me:3000)
-
-[![Discord](https://img.shields.io/discord/591914197219016707.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/2x5DxcPnWf)
-
-## Projects
-
-This repository contains all relevant source code for unigraph-dev:
-
-- packages/
-    * backend/ : unigraph-dev local backend.
+[![Discord](https://img.shields.io/discord/835194192044621885.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/vDTkKar5Vz)
 
 ## Docs
+
+[TO BE UPDATED]
 
 Quick links:
 
@@ -23,22 +16,53 @@ Quick links:
 
 ## Getting started
 
-1. You'll need the custom dgraph binary from <https://github.com/unigraph-dev/dgraph>.
-2. Use the script `scripts/start_server.sh -d "<data directorty>" -b "<dgraph binary location>"` to start the dgraph and unigraph servers.
-3. Use `yarn explorer-start` to start the frontend.
+1. You'll need the custom dgraph binary from <https://github.com/unigraph-dev/dgraph>. Follow the instructions carefully, but the build process would just take a couple of minutes.
+2. At the project root run `yarn` and then `yarn build-deps` to fetch dependencies and build common files needed to build backend and frontend.
+3. Put your dgraph binary in a folder at `/opt/unigraph`, then run `./scripts/start_server.sh` (alternatively you can use `./scripts/start_server.sh -d "<data directorty>" -b "<dgraph binary location>"`).
+4. Run `yarn explorer-start` to start the web frontend. If you want to use electron instead, run `yarn electron-start` after.
 
-## Self-hosted vs Local server
+Note: If you want to use third-party API integrations, follow the steps below to put your API keys.
 
-Unigraph-dev provides two ways to manage your graph: either via a self-hosted server or via a local service. Here are a couple of reasons to choose different versions:
+Note: If the initial server setup failed, you'll need to manually remove `p/, w/, zw/` (dgraph data) from the data directory (normally `/opt/unigraph`)
 
-Reasons to choose self-hosted:
-- If you have existing self-hosted infrastructures (search, wiki, file host, calendar, feed, etc) and want good interop among them;
-- If you have multiple devices that can't connect to a LAN all the time (for example, if you have a mobile phone and want to use Unigraph with it);
+## Structure
 
-Reasons to choose local service:
-- If you use Unigraph on one device or multiple devices with LAN connectivity;
-- If you don't have a VPS or cloud service provider that's geographically near you;
-- If you work with a lot of data or blobs.
+This repository contains all relevant source code for Unigraph:
 
-## Demos
-![Demo1](./docs/demo1.png)
+- packages/
+    * unigraph-dev-backend/ : Unigraph local backend in Node.js.
+    * unigraph-dev-common/ : shared data and utilities between backend and frontend.
+    * unigraph-dev-explorer/ : Unigraph frontend in React.
+    * default-packages/ : schema, data and code declarations for packages providing default functionalities. If you are looking to build packages, you can study example projects here.
+
+## License
+
+MIT License.
+
+## Contributing
+
+This page will be updated in a few days, but please join the Discord community in the mean time to talk about contributing, or open a GitHub issue if you want to help!
+
+## API Keys
+
+To use third-party API integrations, obtain desired API keys and put them in this format in a file named `secrets.env.json` before starting the server:
+
+```
+{
+    "twitter": {
+        "api_key": "abc",
+        "api_secret_key": "abc",
+        "bearer_token": "abc"
+    },
+    "reddit": {
+        "client_id": "abc"
+    },
+    "openai": {
+        "api_key": "abc"
+    },
+    "google": {
+        "client_id": "abc",
+        "client_secret": "abc"
+    }
+}
+```
