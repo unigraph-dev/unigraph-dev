@@ -14,5 +14,5 @@ React.useEffect(() => {
 }, []);
 
 return <React.Fragment>
-    {events.map(el => <AutoDynamicView object={new UnigraphObject(el)} />)}
+    {events.map(el => <AutoDynamicView object={new UnigraphObject(el)} callbacks={{noDate: true}}/>)}
 </React.Fragment>

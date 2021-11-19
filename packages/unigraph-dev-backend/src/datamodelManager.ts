@@ -70,7 +70,7 @@ export function createSchemaCache(client: DgraphClient): Cache<any> {
                 // This is an interface object
                 const defn = obj._definition as ComposerUnionInstance;
                 const revPath = obj["unigraph.id"].split("/").reverse();
-                if (cache.data[`$/schema/interface/${revPath[0]}`]._definition?._parameters?._definitions?.length >= 0 && defn?._parameters?._definitions?.length >= 0) 
+                if (cache.data[`$/schema/interface/${revPath[0]}`]?._definition?._parameters?._definitions?.length >= 0 && defn?._parameters?._definitions?.length >= 0) 
                     (cache.data[`$/schema/interface/${revPath[0]}`]._definition as ComposerUnionInstance)
                         ._parameters._definitions?.push(...defn._parameters._definitions)
             } 

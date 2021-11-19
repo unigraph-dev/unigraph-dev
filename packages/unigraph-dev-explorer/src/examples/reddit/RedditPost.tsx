@@ -6,6 +6,7 @@ import { AddCircle, ArrowDownward, ArrowUpward, Chat, Image, Link, RemoveCircle 
 import React from "react";
 import { AutoDynamicView } from "../../components/ObjectView/AutoDynamicView";
 import { UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
+import { openUrl } from "../../utils";
 
 const getThumbnail = (url: string) => {
     if (url === "image") {
@@ -52,8 +53,9 @@ export const RedditPost: DynamicViewRenderer = ({data, callbacks}) => {
                 <div style={{display: "flex", color: "gray"}}>
                     <Expand expanded={innerExpanded} toggleExpanded={setInnerExpanded}/>
                     <div>
+                        
                         <Typography variant="body2">Submitted {Sugar.Date.relative(new Date(data['_timestamp']['_updatedAt']))} to r/{data.get('subreddit/name').as('primitive')}</Typography>
-                        <a href={data.get('permalink').as('primitive')} target="_blank" rel="noreferrer" style={{color: "gray"}} onClick={() => {if (callbacks?.removeFromContext) callbacks.removeFromContext();}}>Comment</a>
+                        <div style={{color: "gray", textDecoration: "underline", cursor: "pointer"}} onClick={() => {if (callbacks?.removeFromContext) callbacks.removeFromContext(); openUrl(data.get('permalink').as('primitive'))}}>Comment</div>
                     </div>
                 </div>
                 {innerExpanded ? <div>

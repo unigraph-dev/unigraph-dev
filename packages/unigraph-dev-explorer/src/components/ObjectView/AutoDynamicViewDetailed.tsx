@@ -28,7 +28,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, 
         return function cleanup () { window.unigraph.unsubscribe(newSubs); }
     }, [object])
 
-    callbacks = {...callbacks, subsId}
+    if (isObjectStub) callbacks = {...callbacks, subsId}
     
     if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViewsDetailed).includes(object.type['unigraph.id']) && ((isObjectStub && loadedObj) || !isObjectStub)) {
         return <ErrorBoundary FallbackComponent={(error) => <div>

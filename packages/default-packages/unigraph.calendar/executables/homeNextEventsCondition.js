@@ -5,4 +5,4 @@ const query = await unigraph.runExecutable('$/executable/get-next-events',
     }
 );
 const events = (await unigraph.getQueries([query]))?.[0];
-return events?.length >= 0
+return events?.length > 0

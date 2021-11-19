@@ -119,7 +119,8 @@ const setTitleOnRenderTab = (model: Model) => {
 export function WorkSpace(this: any) {
     var json = {
         global: {
-            "tabSetTabStripHeight": 40
+            "tabSetTabStripHeight": 40,
+            "tabEnableRename": false
         },
         borders: [{
 		    "type":"border",
