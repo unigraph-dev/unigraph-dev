@@ -144,6 +144,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             return res;
         },
         deleteObject: async (uid, permanent) => {
+            if (uid.startsWith('$/') && states.namespaceMap[uid]) uid = states.namespaceMap[uid].uid;
             permanent ? await client.deleteUnigraphObjectPermanently(uid) : await client.deleteUnigraphObject(uid);
             callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
         },

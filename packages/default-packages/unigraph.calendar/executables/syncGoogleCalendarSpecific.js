@@ -27,7 +27,7 @@ const sync = async (syncToken) => {
     }
     return {items, nextSyncToken};
 }
-syncToken = cal['_value']['sync_token']['_value.%'] || undefined;
+syncToken = cal['_value']?.['sync_token']?.['_value.%'] || undefined;
 const {items, nextSyncToken} = await sync(syncToken);
 //console.log(items[items.length-1])
 

@@ -1,0 +1,23 @@
+{
+    "displayName": "Unigraph Onboarding",
+    "version": "0.0.1",
+    "description": "Initial setup instructions for Unigraph",
+    "unigraph": {
+        "package_name": "unigraph.onboarding",
+        "entities": [
+            {"id": "section_onboarding", "src": "entities/onboarding.json"}
+        ],
+        "executables": [
+            {
+                "name": "Onboarding view",
+                "env": "component/react-jsx",
+                "id": "onboarding-view",
+                "src": "executables/onboarding.jsx",
+                "imports": [
+                    {"env": "npm", "package": "@material-ui/core", "import": "Typography", "as": "Typography"}
+                ],
+                "editable": true
+            }
+        ]
+    }
+}

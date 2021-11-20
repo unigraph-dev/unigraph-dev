@@ -16,14 +16,14 @@ Quick links:
 
 ## Getting started
 
-1. You'll need the custom dgraph binary from <https://github.com/unigraph-dev/dgraph>. Follow the instructions carefully, but the build process would just take a couple of minutes.
+1. You'll need the custom dgraph binary from <https://github.com/unigraph-dev/dgraph>. Follow the **Build from Source section** instructions carefully, but the build process would just take a couple of minutes.
 2. At the project root run `yarn` and then `yarn build-deps` to fetch dependencies and build common files needed to build backend and frontend.
 3. Put your dgraph binary in a folder at `/opt/unigraph`, then run `./scripts/start_server.sh` (alternatively you can use `./scripts/start_server.sh -d "<data directorty>" -b "<dgraph binary location>"`).
 4. Run `yarn explorer-start` to start the web frontend. If you want to use electron instead, run `yarn electron-start` after.
 
 Note: If you want to use third-party API integrations, follow the steps below to put your API keys.
 
-Note: If the initial server setup failed, you'll need to manually remove `p/, w/, zw/` (dgraph data) from the data directory (normally `/opt/unigraph`)
+Note: If the initial server setup failed, you'll need to kill all Dgraph processes (`killall dgraph`), then manually remove `p/, w/, zw/` (dgraph data) from the data directory (normally `/opt/unigraph`)
 
 ## Structure
 

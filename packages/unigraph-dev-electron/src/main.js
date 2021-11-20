@@ -14,6 +14,8 @@ const userData = app.getPath('userData')
 
 const unigraph_trayIcon = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAVCAYAAACpF6WWAAADiXRFWHRteGZpbGUAJTNDbXhmaWxlJTIwaG9zdCUzRCUyMmFwcC5kaWFncmFtcy5uZXQlMjIlMjBtb2RpZmllZCUzRCUyMjIwMjEtMDUtMDNUMTclM0EwNiUzQTA5LjUxMlolMjIlMjBhZ2VudCUzRCUyMjUuMCUyMChNYWNpbnRvc2glM0IlMjBJbnRlbCUyME1hYyUyME9TJTIwWCUyMDExXzNfMCklMjBBcHBsZVdlYktpdCUyRjUzNy4zNiUyMChLSFRNTCUyQyUyMGxpa2UlMjBHZWNrbyklMjBDaHJvbWUlMkY4OC4wLjQzMjQuMTUwJTIwU2FmYXJpJTJGNTM3LjM2JTIyJTIwZXRhZyUzRCUyMmFKRldEQUR0MlEzVk5fZVpKd3I0JTIyJTIwdmVyc2lvbiUzRCUyMjE0LjYuOSUyMiUyMHR5cGUlM0QlMjJkZXZpY2UlMjIlM0UlM0NkaWFncmFtJTIwaWQlM0QlMjJCV0JHLVBoeFRTZkFxRlZBOTdhRSUyMiUyMG5hbWUlM0QlMjJQYWdlLTElMjIlM0VqWkxCYm9Nd0RJYWZobU1sS0czSGpvTjEzV1hTcXFyck9TSXVpUnBpRkVLaGUlMkZxWmtaU3lxdEl1eVA1c3glMkJhM2d6Z3J1NDFobGZoQURpcVloN3dMNHRkZ1BuOWVyT2piZzhzQWxxdkZBQW9qJTJCWUNpRWV6a056Z1lPdHBJRHZVazBTSXFLNnNwekZGcnlPMkVNV093bmFZZFVVMjdWcXlBTzdETG1icW5COG10R0dpeURFZiUyQkRySVF2bk1VdWtqSmZMSUR0V0FjMnhzVXI0TTRNNGgyc01vdUE5VnI1M1VaNnQ0ZVJLJTJCREdkRDJQd1d6elZjaW5qNlhNamx2RDlYMnhMcDRQM092bkpscTNBJTJGdjNiVDI0aVd3MEZHRFZOaFNFWWpJckszQkUyU28wQkRScUNrelBVcWwlMkZpQ21aS0hKeldsRUlKNmV3VmhKNHI2NFFDazU3OXVrclpBV2RoWEwlMkI1NHRYUkl4ZzQzbTBFOGZrdWNHcFFlZ2U2aEFkTldWN2hHd0JHc3VsTktPbSUyRlBiRURkTDg0eTVXeW11bGFPY1pEaEZ2VHR1N2pkMmMlMkY3eCUyQmdjJTNEJTNDJTJGZGlhZ3JhbSUzRSUzQyUyRm14ZmlsZSUzRQ4QufQAAACnSURBVDhP7dQxDgFREIDhb1vR6PTEFbiCOARX4ABKxyERdGqJG0hwBAWFREM22WIRu2vZbl/yqjfvn8k/mQkUcIICmEro/60mOe1ixZv3OfYYfSonCdrDooS+KvrJaQcbVHCNNWWN8E7yNKqGE9rYxgBn9DHLAw3/7HDAADcMMUYDx7zQJpZoRYBLlGCaNDJZF0od1ajqe9oMZoWmcZ7eS+hXujIFPwCUDCEWIOzIUgAAAABJRU5ErkJggg=="
 
+const frontendLocation = process.env.FRONTEND_LOCATION || "localhost";
+
 let logs = [];
 let mainWindow = null;
 let todayWindow = null;
@@ -28,7 +30,7 @@ function isDev() {
 
 function isUnigraphPortOpen(port) {
   return new Promise((resolve, reject) => {
-    var server = net.createServer(function(socket) {
+    var server = net.createServer(function (socket) {
       socket.write('Echo server\r\n');
       socket.pipe(socket);
     });
@@ -43,11 +45,18 @@ function isUnigraphPortOpen(port) {
   })
 }
 
-async function startServer() {
+async function startServer(logHandler) {
+  console.log("Starting server - checking is port open?")
   const portopen = await isUnigraphPortOpen(3000);
-  if (store.get('startServer') && !portopen) {
+  console.log(portopen, fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', 'dgraph')), path.join(userData, 'w'), store.get('startServer') !== false)
+  if (store.get('startServer') !== false && !portopen) {
     let oldConsoleLog = console.log;
-    console.log = (...data) => { logs.push(...data); checkIfUComplete(...data); return oldConsoleLog(...data) }
+    console.log = (data) => { 
+      if (!Array.isArray(data)) data = [data];
+      logs.push(...data); 
+      checkIfUComplete(...data); 
+      logHandler.send('loading_log', logs)
+      return oldConsoleLog(...data) }
     alpha = spawn(fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', 'dgraph')), ["alpha", '--wal', path.join(userData, 'w'), '--postings', path.join(userData, 'p')])
     zero = spawn(fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', 'dgraph')), ["zero", '--wal', path.join(userData, 'zw')])
 
@@ -62,7 +71,7 @@ async function startServer() {
       if (str.includes && str.includes(completedULog)) unigraphLoaded();
     }
 
-    function processData (data, header) {
+    function processData(data, header) {
       console.log(header + ': ' + data.toString());
       checkIfComplete(data.toString())
     }
@@ -71,13 +80,13 @@ async function startServer() {
     alpha.stderr.on('data', (data) => processData(data, "alpha_stderr"));
     zero.stdout.on('data', (data) => processData(data, "zero_stdout"));
     zero.stderr.on('data', (data) => processData(data, "zero_stderr"));
-    
+
   } else {
     unigraphLoaded();
   }
 }
 
-function createMainWindow(props, mainPage) {
+function createMainWindow(props) {
   const win = new BrowserWindow({
     width: 800,
     height: 600,
@@ -86,10 +95,27 @@ function createMainWindow(props, mainPage) {
       nativeWindowOpen: true,
       contextIsolation: false,
     },
-    ...(props ? props : {titleBarStyle: "hiddenInset"})
+    ...(props ? props : { titleBarStyle: "hiddenInset" })
   })
 
-  win.loadFile(path.join(__dirname, '..', 'buildweb', mainPage || 'loading_bar.html'))
+  //if (mainPage) win.loadFile(path.join(__dirname, '..', 'buildweb', mainPage))
+
+  return win;
+}
+
+function createLoadingWindow(props) {
+  const win = new BrowserWindow({
+    width: 800,
+    height: 600,
+    webPreferences: {
+      preload: path.join(__dirname, '..', 'src', 'preload.js'),
+      nativeWindowOpen: true,
+      contextIsolation: false,
+    },
+    ...(props ? props : { titleBarStyle: "hiddenInset" })
+  })
+
+  win.loadFile(path.join(__dirname, '..', 'buildweb', 'loading_bar.html'))
 
   return win;
 }
@@ -100,15 +126,28 @@ const createTodayWindow = () => createMainWindow({
   backgroundColor: '#00ffffff'
 });
 
-const createMainWindowNoLoad = () => createMainWindow(null, 'index.html')
+const createMainWindowNoLoad = () => createMainWindow(null)
 
 function dgraphLoaded() {
   index = require(path.join(__dirname, '..', 'distnode', 'index.js'))
 }
 
 function unigraphLoaded() {
-  if (mainWindow) !isDev() ? mainWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html')) : mainWindow.loadURL('http://localhost:3000/')
-  if (todayWindow) {!isDev() ? todayWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html') , {query: {"pageName": "today"}}) : todayWindow.loadURL('http://localhost:3000/?pageName=today'); todayWindow.hide(); }
+  setTimeout(() => {
+    if (mainWindow) {
+      mainWindow
+      if (!isDev()) {
+        mainWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'))
+      } else {
+        mainWindow.loadURL('http://' + frontendLocation + ':3000/')
+      }
+    }
+    if (todayWindow) {
+      !isDev() ?
+        todayWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'), { query: { "pageName": "today" } }) :
+        todayWindow.loadURL('http://' + frontendLocation + ':3000/?pageName=today'); todayWindow.hide();
+    }
+  }, 2000)
 }
 
 let isAppClosing = false;
@@ -116,19 +155,19 @@ let isAppClosing = false;
 app.whenReady().then(() => {
   tray = new Tray(nativeImage.createFromDataURL(unigraph_trayIcon))
   tray.setToolTip('Unigraph')
-  trayMenu = createTrayMenu((newTemplate) => {tray.setContextMenu(Menu.buildFromTemplate(newTemplate))});
+  trayMenu = createTrayMenu((newTemplate) => { tray.setContextMenu(Menu.buildFromTemplate(newTemplate)) });
   const _ = globalShortcut.register('Alt+Tab', () => {
     if (todayWindow) {
       todayWindow.isVisible() ? todayWindow.hide() : todayWindow.show();
     };
   })
   setTimeout(() => {
-    mainWindow = createMainWindow(), todayWindow = createTodayWindow()
+    mainWindow = createLoadingWindow(), todayWindow = createTodayWindow()
     todayWindow.maximize();
     mainWindow.maximize();
     todayWindow.setVisibleOnAllWorkspaces(true);
     trayMenu.setMainWindow(mainWindow), trayMenu.setTodayWindow(todayWindow)
-    startServer();
+    startServer(mainWindow.webContents);
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) {
         createMainWindowNoLoad()
@@ -145,7 +184,7 @@ app.whenReady().then(() => {
       }
     }))
     windows.map(el => el.on('hide', (event) => {
-      
+
     }))
   }, 0)
 })
@@ -175,6 +214,6 @@ app.on('will-quit', async function (e) {
   }
 });
 
-app.on('before-quit', function() {
+app.on('before-quit', function () {
   isAppClosing = true;
 });

@@ -13,6 +13,7 @@ import {pkg as notes} from 'unigraph-dev-common/lib/data/unigraph.notes.pkg';
 import {pkg as home} from 'unigraph-dev-common/lib/data/unigraph.home.pkg';
 
 // Userspace packages
+import {pkg as onboarding} from 'unigraph-dev-common/lib/data/unigraph.onboarding.pkg';
 import {pkg as todo} from 'unigraph-dev-common/lib/data/unigraph.todo.pkg';
 import {pkg as bookmark} from 'unigraph-dev-common/lib/data/unigraph.bookmark.pkg';
 import {pkg as rss_reader} from 'unigraph-dev-common/lib/data/unigraph.rss_reader.pkg';
@@ -304,5 +305,5 @@ export const defaultUserlandSchemas = [
 
 export const defaultPackages = [
     semantic, core, execexample, coreuser, home, calendar, notes,
-    todo, bookmark, rss_reader, email, reddit, twitter, nlp, openai
+    onboarding, todo, bookmark, rss_reader, email, reddit, twitter, nlp, openai
 ]
