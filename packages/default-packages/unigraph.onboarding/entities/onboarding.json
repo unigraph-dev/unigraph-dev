@@ -1,0 +1,14 @@
+{
+    "type": {"unigraph.id": "$/schema/home_section"},
+    "view": {
+        "name": "Welcome to Unigraph!",
+        "env": "react-explorer",
+        "view": {"unigraph.id": "$/package/unigraph.onboarding/0.0.1/executable/onboarding-view"}
+    },
+    "condition": {
+        "type": {"unigraph.id": "$/schema/executable"},
+        "env": "routine/js",
+        "src": "return true;",
+        "editable": true
+    }
+}

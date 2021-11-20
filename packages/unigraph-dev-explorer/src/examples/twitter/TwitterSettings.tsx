@@ -58,6 +58,7 @@ export const TwitterSettings = () => {
     return loaded ? <div>
         <Typography variant="h4">Twitter settings</Typography>
         <Button onClick={() => window.unigraph.runExecutable("$/executable/add-twitter-account", {})}>Sign in with Twitter</Button>
+        <Typography>Note: for now, in order to sync with Twitter, you need to create a twitter list nameed 'Subscription' (exactly) and add any accounts you want to sync to unigraph there.</Typography>
         <Typography variant="body1">Account info</Typography>
         <p><strong>Name: </strong>{account?.get?.("name").as?.("primitive")}</p>
         <p><strong>Username: </strong>{account?.get?.("username").as?.("primitive")}</p>
