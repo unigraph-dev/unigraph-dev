@@ -9,8 +9,9 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   })
 
+const { ipcRenderer, shell } = require('electron');
+
 window.electronPreload = () => {
-  const { ipcRenderer, shell } = require('electron');
   window.electronShell = shell;
   let unigraph = window.unigraph;
   unigraph.addState('favorites', []).subscribe((newFavs) => {
@@ -25,5 +26,10 @@ window.electronPreload = () => {
       enableFloat: 'true'
   })
   })
-
 }
+
+ipcRenderer.on('loading_log', (event, newLog) => {
+  if (document.getElementById('loading_log')) {
+    document.getElementById('loading_log').innerHTML = newLog.slice(-10).join('\n')
+  }
+})

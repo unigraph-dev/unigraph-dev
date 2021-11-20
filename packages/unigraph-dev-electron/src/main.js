@@ -30,7 +30,7 @@ function isDev() {
 
 function isUnigraphPortOpen(port) {
   return new Promise((resolve, reject) => {
-    var server = net.createServer(function(socket) {
+    var server = net.createServer(function (socket) {
       socket.write('Echo server\r\n');
       socket.pipe(socket);
     });
@@ -45,11 +45,18 @@ function isUnigraphPortOpen(port) {
   })
 }
 
-async function startServer() {
+async function startServer(logHandler) {
+  console.log("Starting server - checking is port open?")
   const portopen = await isUnigraphPortOpen(3000);
-  if (store.get('startServer') && !portopen) {
+  console.log(portopen, fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', 'dgraph')), path.join(userData, 'w'), store.get('startServer') !== false)
+  if (store.get('startServer') !== false && !portopen) {
     let oldConsoleLog = console.log;
-    console.log = (...data) => { logs.push(...data); checkIfUComplete(...data); return oldConsoleLog(...data) }
+    console.log = (data) => { 
+      if (!Array.isArray(data)) data = [data];
+      logs.push(...data); 
+      checkIfUComplete(...data); 
+      logHandler.send('loading_log', logs)
+      return oldConsoleLog(...data) }
     alpha = spawn(fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', 'dgraph')), ["alpha", '--wal', path.join(userData, 'w'), '--postings', path.join(userData, 'p')])
     zero = spawn(fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', 'dgraph')), ["zero", '--wal', path.join(userData, 'zw')])
 
@@ -64,7 +71,7 @@ async function startServer() {
       if (str.includes && str.includes(completedULog)) unigraphLoaded();
     }
 
-    function processData (data, header) {
+    function processData(data, header) {
       console.log(header + ': ' + data.toString());
       checkIfComplete(data.toString())
     }
@@ -73,13 +80,13 @@ async function startServer() {
     alpha.stderr.on('data', (data) => processData(data, "alpha_stderr"));
     zero.stdout.on('data', (data) => processData(data, "zero_stdout"));
     zero.stderr.on('data', (data) => processData(data, "zero_stderr"));
-    
+
   } else {
     unigraphLoaded();
   }
 }
 
-function createMainWindow(props, mainPage) {
+function createMainWindow(props) {
   const win = new BrowserWindow({
     width: 800,
     height: 600,
@@ -88,10 +95,27 @@ function createMainWindow(props, mainPage) {
       nativeWindowOpen: true,
       contextIsolation: false,
     },
-    ...(props ? props : {titleBarStyle: "hiddenInset"})
+    ...(props ? props : { titleBarStyle: "hiddenInset" })
   })
 
-  win.loadFile(path.join(__dirname, '..', 'buildweb', mainPage || 'loading_bar.html'))
+  //if (mainPage) win.loadFile(path.join(__dirname, '..', 'buildweb', mainPage))
+
+  return win;
+}
+
+function createLoadingWindow(props) {
+  const win = new BrowserWindow({
+    width: 800,
+    height: 600,
+    webPreferences: {
+      preload: path.join(__dirname, '..', 'src', 'preload.js'),
+      nativeWindowOpen: true,
+      contextIsolation: false,
+    },
+    ...(props ? props : { titleBarStyle: "hiddenInset" })
+  })
+
+  win.loadFile(path.join(__dirname, '..', 'buildweb', 'loading_bar.html'))
 
   return win;
 }
@@ -102,15 +126,28 @@ const createTodayWindow = () => createMainWindow({
   backgroundColor: '#00ffffff'
 });
 
-const createMainWindowNoLoad = () => createMainWindow(null, 'index.html')
+const createMainWindowNoLoad = () => createMainWindow(null)
 
 function dgraphLoaded() {
   index = require(path.join(__dirname, '..', 'distnode', 'index.js'))
 }
 
 function unigraphLoaded() {
-  if (mainWindow) !isDev() ? mainWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html')) : mainWindow.loadURL('http://' + frontendLocation + ':3000/')
-  if (todayWindow) {!isDev() ? todayWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html') , {query: {"pageName": "today"}}) : todayWindow.loadURL('http://' + frontendLocation + ':3000/?pageName=today'); todayWindow.hide(); }
+  setTimeout(() => {
+    if (mainWindow) {
+      mainWindow
+      if (!isDev()) {
+        mainWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'))
+      } else {
+        mainWindow.loadURL('http://' + frontendLocation + ':3000/')
+      }
+    }
+    if (todayWindow) {
+      !isDev() ?
+        todayWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'), { query: { "pageName": "today" } }) :
+        todayWindow.loadURL('http://' + frontendLocation + ':3000/?pageName=today'); todayWindow.hide();
+    }
+  }, 2000)
 }
 
 let isAppClosing = false;
@@ -118,19 +155,19 @@ let isAppClosing = false;
 app.whenReady().then(() => {
   tray = new Tray(nativeImage.createFromDataURL(unigraph_trayIcon))
   tray.setToolTip('Unigraph')
-  trayMenu = createTrayMenu((newTemplate) => {tray.setContextMenu(Menu.buildFromTemplate(newTemplate))});
+  trayMenu = createTrayMenu((newTemplate) => { tray.setContextMenu(Menu.buildFromTemplate(newTemplate)) });
   const _ = globalShortcut.register('Alt+Tab', () => {
     if (todayWindow) {
       todayWindow.isVisible() ? todayWindow.hide() : todayWindow.show();
     };
   })
   setTimeout(() => {
-    mainWindow = createMainWindow(), todayWindow = createTodayWindow()
+    mainWindow = createLoadingWindow(), todayWindow = createTodayWindow()
     todayWindow.maximize();
     mainWindow.maximize();
     todayWindow.setVisibleOnAllWorkspaces(true);
     trayMenu.setMainWindow(mainWindow), trayMenu.setTodayWindow(todayWindow)
-    startServer();
+    startServer(mainWindow.webContents);
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) {
         createMainWindowNoLoad()
@@ -147,7 +184,7 @@ app.whenReady().then(() => {
       }
     }))
     windows.map(el => el.on('hide', (event) => {
-      
+
     }))
   }, 0)
 })
@@ -177,6 +214,6 @@ app.on('will-quit', async function (e) {
   }
 });
 
-app.on('before-quit', function() {
+app.on('before-quit', function () {
   isAppClosing = true;
 });
