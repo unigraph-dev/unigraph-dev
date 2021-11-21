@@ -68,7 +68,7 @@ export const JsontreeObjectViewer = ({object, options}: {object: any, options: O
             color="primary"
         />} label="Show object as padded"/>
         {JSON.stringify(options)}
-        <ReactJson src={showPadded ? object : unpad(object)} onEdit={options.canEdit ? onedit : false} onAdd={options.canEdit ? onedit : false} />
+        <ReactJson src={showPadded ? object : unpad(object)} onEdit={(options.canEdit && showPadded) ? onedit : false} onAdd={(options.canEdit && showPadded) ? onedit : false} />
     </div>
 }
 
