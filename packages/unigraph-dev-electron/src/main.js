@@ -22,7 +22,11 @@ let todayWindow = null;
 let tray = null;
 let trayMenu = null;
 let index = null;
+let dontCheck = false;
+let shouldStartBackend = true;
 let alpha, zero;
+
+if (frontendLocation) shouldStartBackend = false;
 
 function isDev() {
   return process.argv[2] == '--dev';
@@ -49,12 +53,12 @@ async function startServer(logHandler) {
   console.log("Starting server - checking is port open?")
   const portopen = await isUnigraphPortOpen(3000);
   console.log(portopen, fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', 'dgraph')), path.join(userData, 'w'), store.get('startServer') !== false)
-  if (store.get('startServer') !== false && !portopen) {
+  if (store.get('startServer') !== false && !portopen && shouldStartBackend) {
     let oldConsoleLog = console.log;
     console.log = (data) => { 
       if (!Array.isArray(data)) data = [data];
       logs.push(...data); 
-      checkIfUComplete(...data); 
+      if (!dontCheck) checkIfUComplete(...data); 
       logHandler.send('loading_log', logs)
       return oldConsoleLog(...data) }
     alpha = spawn(fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', 'dgraph')), ["alpha", '--wal', path.join(userData, 'w'), '--postings', path.join(userData, 'p')])
@@ -133,9 +137,9 @@ function dgraphLoaded() {
 }
 
 function unigraphLoaded() {
+  dontCheck = true;
   setTimeout(() => {
     if (mainWindow) {
-      mainWindow
       if (!isDev()) {
         mainWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'))
       } else {
@@ -147,7 +151,7 @@ function unigraphLoaded() {
         todayWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'), { query: { "pageName": "today" } }) :
         todayWindow.loadURL('http://' + frontendLocation + ':3000/?pageName=today'); todayWindow.hide();
     }
-  }, 2000)
+  }, 0)
 }
 
 let isAppClosing = false;
