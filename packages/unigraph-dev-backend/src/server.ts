@@ -428,6 +428,8 @@ export default async function startServer(client: DgraphClient) {
     }
   };
 
+  await Promise.all(Object.values(caches).map((el: Cache<any>) => el.updateNow()));
+
   const server = new WebSocket.Server({
     port: PORT,
     perMessageDeflate: true

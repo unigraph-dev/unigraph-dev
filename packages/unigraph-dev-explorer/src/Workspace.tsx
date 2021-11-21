@@ -52,7 +52,7 @@ const ConnectionIndicator = () => {
             setConnected(conn)
         })
     }, [])
-    return <span style={{height: "16px", width: "16px", borderRadius: "8px", backgroundColor: connected ? "lightgreen" : "white", border: "1px solid grey", marginRight: "8px"}}></span>
+    return <span style={{height: "16px", width: "16px", borderRadius: "8px", backgroundColor: connected ? "lightgreen" : "red", border: "1px solid grey", marginRight: "8px"}}></span>
 }
 
 const newWindowActions = {
