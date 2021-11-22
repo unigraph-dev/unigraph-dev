@@ -23,17 +23,22 @@ export const getSemanticChildren = (data: any) => data?.['_value']?.['children']
 
 export const addChild = (data: any, context: NoteEditorContext) => {
     window.unigraph.updateObject(data.uid, {
-        children: [{
-            type: {"unigraph.id": "$/schema/subentity"},
-            _value: {
-                type: {"unigraph.id": "$/schema/note_block"},
-                text: {
-                    type: {"unigraph.id": "$/schema/markdown"},
-                    _value: ""
+        "children": [{
+            "type": {"unigraph.id": "$/schema/subentity"},
+            "_value": {
+                "type": {"unigraph.id": "$/schema/note_block"},
+                "_value": {
+                    "text": {
+                        "type": {"unigraph.id": "$/schema/markdown"},
+                        "_value": ""
+                    },
+                    "$context": { //this maps to the note_block object
+                        "_hide": true
+                    }
                 },
-                "$context": {
+                "$context": { // this maps to the subentity object
                     "_hide": true
-                }
+                },
             }
         }]
     }, undefined, undefined, context.callbacks.subsId);

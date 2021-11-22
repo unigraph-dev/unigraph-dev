@@ -31,7 +31,7 @@ export const NoteBlock = ({ data }: any) => {
     const [subentities, otherChildren] = getSubentities(data);
     const unpadded = unpad(data);
 
-    return <div onClick={() => { window.wsnavigator(`/library/object?uid=${data.uid}`) }} style={{display: "flex", alignItems: "center", width: "100%"}}>
+    return <div onClick={() => { window.wsnavigator(`/library/object?uid=${data.uid}&isStub=true&type=$/schema/note_block`) }} style={{display: "flex", alignItems: "center", width: "100%"}}>
         <div style={{flexGrow: 1}}>
             <Typography variant="body1">{unpadded.text}</Typography>
             <Typography variant="body2" color="textSecondary">{subentities.length ? " and " + subentities.length + " children" : " no children"}</Typography>
@@ -162,7 +162,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
         <div style={{ width: "100%", }} ref={boxRef} >
             <NoteViewTextWrapper 
                 isRoot={!isChildren} onContextMenu={(event: any) => onUnigraphContextMenu(event, data, undefined, callbacks)} 
-                semanticChildren={buildGraph(otherChildren).filter((el: any) => el.type).map((el: any) => <AutoDynamicView object={el} style={{width: "unset"}}/>)}
+                semanticChildren={buildGraph(otherChildren).filter((el: any) => el.type).map((el: any) => <AutoDynamicView object={el.type?.['unigraph.id'] === "$/schema/note_block" ? el : {uid: el.uid, type: el.type}} style={{width: "unset"}}/>)}
             >
                 <div onClick={(ev) => {
                     if (!isEditing) {
@@ -314,7 +314,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                         createBelow={() => { addChild(dataref.current, editorContext) }}
                     >
                         <AutoDynamicView
-                            object={el}
+                            object={el.type?.['unigraph.id'] === "$/schema/note_block" ? el : {uid: el.uid, type: el.type}}
                             callbacks={{
                                 "get-view-id": () => options?.viewId, // only used at root
                                 ...callbacks,

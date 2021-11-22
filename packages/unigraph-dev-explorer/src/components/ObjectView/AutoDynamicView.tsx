@@ -70,7 +70,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     const contextEntity = typeof callbacks?.context === "object" ? callbacks.context : null; 
     const [isSelected, setIsSelected] = React.useState(false);
     const selectedState = window.unigraph.getState('global/selected');
-    selectedState.subscribe((sel: any) => {if (sel?.includes?.(object.uid)) setIsSelected(true); else setIsSelected(false);})
+    selectedState.subscribe((sel: any) => {if (sel?.includes?.(object?.uid)) setIsSelected(true); else setIsSelected(false);})
 
     const attach = React.useCallback((domElement) => {
         if (!noDrag) drag(domElement);
