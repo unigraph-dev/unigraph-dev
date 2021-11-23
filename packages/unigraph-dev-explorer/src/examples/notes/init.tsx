@@ -1,4 +1,4 @@
-import { MenuItem } from "@material-ui/core";
+import { MenuItem, Typography } from "@material-ui/core";
 import { registerDynamicViews, registerDetailedDynamicViews, registerContextMenuItems, registerQuickAdder } from "../../unigraph-react";
 import { NoteBlock, DetailedNoteBlock } from "./NoteBlock";
 
@@ -55,7 +55,11 @@ export const init = () => {
         else return [{text: {_value: inputStr, type: {'unigraph.id': "$/schema/markdown"}}}, "$/schema/note_block"];
     }
 
-    registerQuickAdder({'n': quickAdder, 'note': quickAdder})
+    const tt = () => <div>
+        <Typography>Enter the note's title, then press Enter to go</Typography>
+    </div>
+
+    registerQuickAdder({'n': {adder: quickAdder, tooltip: tt}, 'note': {adder: quickAdder, tooltip: tt}})
 
     registerContextMenuItems("$/schema/note_block", [(uid: any, object: any, handleClose: any, callbacks: any) => <MenuItem onClick={() => {
         handleClose(); callbacks['convert-child-to-todo']();

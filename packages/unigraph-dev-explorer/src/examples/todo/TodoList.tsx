@@ -1,4 +1,4 @@
-import { Button, Checkbox, Chip, ListItemIcon, ListItemText, TextField } from '@material-ui/core';
+import { Button, Checkbox, Chip, ListItemIcon, ListItemText, TextField, Typography } from '@material-ui/core';
 import { CalendarToday, PriorityHigh } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { DynamicViewRenderer } from '../../global';
@@ -35,12 +35,6 @@ function TodoListBody ({data}: { data: ATodoList[] }) {
             () => window.unigraph.addObject(parseTodoObject(newName), "$/schema/todo")
             //() => console.log(parseTodoObject(newName))
         }>Add</Button>
-        <p>
-            Examples: <br/>
-            @tomorrow-"next Friday" #unigraph hello world     // doable from tomorrow, due next Friday<br/>
-            @tomorrow #unigraph hello world     // due tomorrow<br/>
-            !5 very important stuff     // priority 5
-        </p>
     </div>
 }
 
@@ -86,7 +80,17 @@ const quickAdder = async (inputStr: string, preview = true) => {
     else return [parsed, '$/schema/todo'];
 }
 
-registerQuickAdder({'todo': quickAdder, 'td': quickAdder})
+const tt = () => <React.Fragment>
+    <Typography style={{color: "gray"}}>Examples:</Typography>
+    <Typography>@tomorrow-"next Friday" #unigraph hello world</Typography>
+    <Typography style={{color: "gray"}} variant="body2">doable from tomorrow, due next Friday</Typography>
+    <Typography>@tomorrow #unigraph hello world</Typography>
+    <Typography style={{color: "gray"}} variant="body2">due tomorrow</Typography>
+    <Typography>!5 very important stuff</Typography>
+    <Typography style={{color: "gray"}} variant="body2">priority 5</Typography>
+</React.Fragment>
+
+registerQuickAdder({'todo': {adder: quickAdder, tooltip: tt}, 'td': {adder: quickAdder, tooltip: tt}})
 
 export const TodoList = withUnigraphSubscription( 
     // @ts-ignore
