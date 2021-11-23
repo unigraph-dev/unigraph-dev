@@ -35,13 +35,23 @@ export const SearchOverlay = ({open, setClose}: any) => {
             }); else {
                 setParsed({});
                 setEntries([]);
+                setEntities([]);
             }
-        } else {
+        } else if (input.startsWith('?')) {
+            const query = input.slice(1);
             setParsed({
                 type: "query",
+                value: query
+            });
+            setEntries([]);
+            setEntities([]);
+        } else {
+            setParsed({
+                type: "command",
                 value: input
             });
             setEntries([]);
+            setEntities([]);
         }
     }, [input])
 
@@ -91,6 +101,7 @@ export const SearchOverlay = ({open, setClose}: any) => {
             onChange={(ev) => {
                 setInput(ev.target.value);
             }}
+            placeholder={"Enter: +<type shortname> to create; ?<search query> to search; <command> to execute command"}
             onKeyPress={async (ev) => {
                 if (ev.key === "Enter" && parsed?.type === "quickAdder" && window.unigraph.getState('registry/quickAdder').value[parsed?.key]) {
                     await window.unigraph.getState('registry/quickAdder').value[parsed?.key](JSON.parse(JSON.stringify(parsed?.value)), false);
@@ -99,17 +110,18 @@ export const SearchOverlay = ({open, setClose}: any) => {
                 }
             }}
         />
-        <Divider />
-        {parsed?.type === "quickAdder" ? <Typography>
-            {"Adding " + parsed?.key + " (Enter to add)"}
-        </Typography> : []}
-        {entries}
-        {entities.length > 0 ? <DynamicObjectListView 
-            items={entities}
-            context={null}
-            buildGraph={true}
-            noBar
-        /> : []}
+        <div>
+            {parsed?.type === "quickAdder" ? <Typography>
+                {"Adding " + parsed?.key + " (Enter to add)"}
+            </Typography> : []}
+            {entries}
+            {entities.length > 0 ? <DynamicObjectListView 
+                items={entities}
+                context={null}
+                buildGraph={true}
+                noBar
+            /> : []}
+        </div>
     </div>
 }
 
@@ -144,11 +156,13 @@ export const SearchOverlayPopover = () => {
     }, [searchEnabled])
 
     return <Card
+    elevation={12} 
         style={{
             zIndex: 99,
             position: "absolute",
             width: "calc(100% - 128px)",
-            left: "64px",
+            maxWidth: "800px",
+            left: "max(64px, 50% - 400px)",
             "top": "64px",
             "maxHeight": "60%",
             overflow: "auto",
