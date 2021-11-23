@@ -13,6 +13,7 @@ import _ from "lodash";
 import { PackageDeclaration } from "unigraph-dev-common/lib/types/packages";
 import { addHook } from "./hooks";
 import Babel from '@babel/core';
+import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
 
 export type Executable = {
     name?: string,
@@ -65,10 +66,26 @@ export function createExecutableCache(client: DgraphClient, context: Partial<Exe
 
 }
 
-export function buildExecutable(exec: Executable, context: ExecContext, unigraph: Unigraph): any {
+export function buildExecutable(exec: Executable, context: ExecContext, unigraph: Unigraph, states: any): any {
+
+    function wrapExecutable (fn: any) {
+        if (typeof fn === "function") return async () => {
+            const execId = getRandomInt();
+            states.addRunningExecutable({
+                id: execId,
+                name: exec.name,
+                slug: exec["unigraph.id"],
+                since: new Date()
+            });
+            const ret = await fn();
+            states.removeRunningExecutable(execId)
+            return ret;
+        }; else return fn;
+    }
+
     if (Object.keys(environmentRunners).includes(exec.env)) {
         // @ts-expect-error: already checked for environment runner inclusion
-        return environmentRunners[exec.env](exec.src, context, unigraph);
+        return wrapExecutable(environmentRunners[exec.env](exec.src, context, unigraph));
     }
     return undefined;
 }
@@ -77,11 +94,11 @@ export function initExecutables(executables: [string, Executable][], context: Pa
     executables.forEach(([key, el]) => {
         if (key.startsWith("0x") && el.periodic) {
             schedule[el["unigraph.id"]]?.stop();
-            schedule[el["unigraph.id"]] = cron.schedule(el.periodic, buildExecutable(el, {...context, definition: el, params: {}}, unigraph))
+            schedule[el["unigraph.id"]] = cron.schedule(el.periodic, buildExecutable(el, {...context, definition: el, params: {}}, unigraph, states))
         }
         if (key.startsWith("0x") && el.on_hook) {
             states.hooks = addHook(states.hooks, el.on_hook, async (params: any) => {
-                return (buildExecutable(el, {...context, definition: el, params}, unigraph))();
+                return (buildExecutable(el, {...context, definition: el, params}, unigraph, states))();
             })
         }
     })

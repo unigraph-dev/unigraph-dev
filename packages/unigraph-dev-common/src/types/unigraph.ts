@@ -71,6 +71,7 @@ export interface Unigraph<TT = WebSocket | false> {
     getStatus(): Promise<any>;
     /** The specified callback will be invoked once initial Unigraph connecton is established. */
     onReady?(callback: () => void): void;
+    onCacheUpdated?(cache: string, callback: (newEl: any) => void): void;
     /** 
      * Create a new schema using the json-ts format and add it to cache.
      * 

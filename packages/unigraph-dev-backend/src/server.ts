@@ -81,14 +81,35 @@ export default async function startServer(client: DgraphClient) {
 
   let namespaceMap: any = {}
 
-  serverStates = {
+  Object.assign(serverStates, {
     caches: caches,
     subscriptions: _subscriptions,
     hooks: hooks,
     namespaceMap: namespaceMap,
     localApi: {} as Unigraph,
-    httpCallbacks: {}
-  }
+    httpCallbacks: {},
+    runningExecutables: [],
+    addRunningExecutable: (defn: any) => {
+      serverStates.runningExecutables.push(defn);
+      Object.values(connections).forEach(el => {
+        el.send(stringify({
+          "type": "cache_updated",
+          "name": "runningExecutables",
+          result: serverStates.runningExecutables
+        }))
+      })
+    },
+    removeRunningExecutable: (id: any) => {
+      serverStates.runningExecutables = serverStates.runningExecutables.filter((el: any) => el.id !== id);
+      Object.values(connections).forEach(el => {
+        el.send(stringify({
+          "type": "cache_updated",
+          "name": "runningExecutables",
+          result: serverStates.runningExecutables
+        }))
+      })
+    }
+  })
 
   const namespaceSub = createSubscriptionLocal(getRandomInt(), (data) => {
     namespaceMap = data[0];

@@ -39,7 +39,7 @@ export async function pollSubscriptions(subs: Subscription[], client: DgraphClie
                 let query: string;
                 if (el.queryFragment.startsWith("$/executable/")) {
                     const exec = serverStates.caches["executables"].data[el.queryFragment];
-                    const executed = await buildExecutable(exec, {"hello": "ranfromExecutable", params: (el as any).params || {}, definition: exec}, serverStates.localApi)();
+                    const executed = await buildExecutable(exec, {"hello": "ranfromExecutable", params: (el as any).params || {}, definition: exec}, serverStates.localApi, serverStates)();
                     query = buildPollingQuery([{...el, queryFragment: executed}])
                 } else query = buildPollingQuery([el]);
                 let results: any[] = await client.queryDgraph(query).catch(e => {console.log(e, query); return []});
