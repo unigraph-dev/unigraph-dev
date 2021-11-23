@@ -59,13 +59,13 @@ const ExecutablesIndicator = () => {
     const [totalExecutables, setTotalExecutables] = React.useState([]);
     const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
     React.useMemo(() => {
-        window.unigraph.onCacheUpdated('runningExecutables', (cacheResult: any) => {
+        window.unigraph.onCacheUpdated?.('runningExecutables', (cacheResult: any) => {
             setTotalExecutables(cacheResult)
         })
     }, [])
     return <div style={{marginRight: "16px"}}>
         <Popover
-            open={totalExecutables.length && Boolean(anchorEl)}
+            open={totalExecutables.length > 0 && Boolean(anchorEl)}
             anchorEl={anchorEl}
             disableRestoreFocus
             style={{pointerEvents: "none"}}

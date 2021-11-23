@@ -127,6 +127,8 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
         edited, setCommand, childrenref, callbacks, nodesState
     }
 
+    
+
     //console.log(data);
 
     const [isChildrenCollapsed, setIsChildrenCollapsed] = React.useState<any>({});
@@ -164,25 +166,38 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                 isRoot={!isChildren} onContextMenu={(event: any) => onUnigraphContextMenu(event, data, undefined, callbacks)} 
                 semanticChildren={buildGraph(otherChildren).filter((el: any) => el.type).map((el: any) => <AutoDynamicView object={el.type?.['unigraph.id'] === "$/schema/note_block" ? el : {uid: el.uid, type: el.type}} style={{width: "unset"}}/>)}
             >
-                <div onClick={(ev) => {
+                <div onPointerUp={(ev) => {
                     if (!isEditing) {
                         setIsEditing(true);
                         const caretPos = Number((ev.target as HTMLElement).getAttribute("markdownPos") || 0);
-
                         setTimeout(() => {
-                            textInput.current?.focus()
-
                             if (textInput.current.firstChild) {
                                 setCaret(document, textInput.current.firstChild, caretPos || textInput.current?.textContent?.length)
+                            } else {
+                                setCaret(document, textInput.current, 0);
                             }
                         }, 0)
                     }
-                }} onBlur={(ev) => { setIsEditing(false); inputDebounced.current.flush(); }} style={{ width: "100%" }}>
+                }} onClick={(ev) => {
+                    if (!isEditing) {
+                        setIsEditing(true);
+                        const caretPos = Number((ev.target as HTMLElement).getAttribute("markdownPos") || 0);
+                        setTimeout(() => {
+                            if (textInput.current.firstChild) {
+                                setCaret(document, textInput.current.firstChild, caretPos || textInput.current?.textContent?.length)
+                            } else {
+                                setCaret(document, textInput.current, 0);
+                            }
+                        }, 0)
+                    }
+                }}
+                onBlur={(ev) => { setIsEditing(false); inputDebounced.current.flush(); }} style={{ width: "100%" }}>
 
                     {(isEditing) ? <Typography
                         variant={isChildren ? "body1" : "h4"}
                         onContextMenu={isChildren ? undefined : (event) => onUnigraphContextMenu(event, data, undefined, callbacks)}
                         contentEditable={true}
+                        style={{outline: "0px solid transparent"}}
                         suppressContentEditableWarning={true}
                         ref={textInput}
                         onInput={(ev) => {
@@ -255,7 +270,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
 
                                 case 'Backspace':
                                     //console.log(caret, document.getSelection()?.type)
-                                    if (caret === 0 && document.getSelection()?.type === "Caret" && !(textref.current || data.get('text').as('primitive')).length) {
+                                    if (caret === 0 && document.getSelection()?.type === "Caret" && !(textref.current).length) {
                                         ev.preventDefault();
                                         //inputDebounced.cancel();
                                         edited.current = false;

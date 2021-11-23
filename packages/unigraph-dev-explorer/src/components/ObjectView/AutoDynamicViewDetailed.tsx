@@ -17,7 +17,6 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, 
     React.useEffect(() => {
         const newSubs = getRandomInt();
         if (isObjectStub) {
-            window.unigraph.unsubscribe(subsId);
             const query = DynamicViewsDetailed[object.type['unigraph.id']].query(object.uid)
             window.unigraph.subscribeToQuery(query, (objects: any[]) => {
                 setLoadedObj(objects[0]);

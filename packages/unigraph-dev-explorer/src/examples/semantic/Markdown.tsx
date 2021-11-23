@@ -13,8 +13,8 @@ const compFactory = (name: string, {node, inline, className, children, ...props}
         className, children,
         contentEditable: true,
         suppressContentEditableWarning: true,
-        onClick: (event: MouseEvent) => { if (!(event.target as HTMLElement).getAttribute("markdownPos")) {
-            console.log(props.sourcePosition);
+        onPointerUp: (event: MouseEvent) => { if (!(event.target as HTMLElement).getAttribute("markdownPos")) {
+            console.log(props.sourcePosition, window.getSelection());
             (event.target as HTMLElement).setAttribute("markdownPos", String((props.sourcePosition?.start.column || 0) - 1 + (window.getSelection()?.anchorOffset || 0)))};
         },
         ...props,
@@ -26,8 +26,9 @@ export const Markdown: DynamicViewRenderer = ({data, callbacks, isHeading}) => {
     
     return <Typography
         variant={!isHeading ? "body1" : "h4"}
+        style={{opacity: data['_value.%'] ? "unset": "0"}}
     >
-        <ReactMarkdown children={data['_value.%']} remarkPlugins={[remarkMath, remarkWikilink, remarkBreaks]}
+        <ReactMarkdown children={data['_value.%'] || "a"} remarkPlugins={[remarkMath, remarkWikilink, remarkBreaks]}
             rehypePlugins={[rehypeKatex]} components={{
             p: compFactory.bind(this, "p"),
             strong: compFactory.bind(this, "strong"),
@@ -45,7 +46,7 @@ export const Markdown: DynamicViewRenderer = ({data, callbacks, isHeading}) => {
                             className, children,
                             contentEditable: true,
                             suppressContentEditableWarning: true,
-                            onClick: (event: MouseEvent) => {
+                            onPointerUp: (event: MouseEvent) => {
                                 event.stopPropagation();
                                 event.preventDefault();
                                 if (matches[0]) window.wsnavigator(`/library/object?uid=${matches[0]._value._value.uid}&viewer=${"dynamic-view-detailed"}`);
