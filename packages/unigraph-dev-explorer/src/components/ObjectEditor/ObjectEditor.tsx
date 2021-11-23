@@ -12,7 +12,7 @@ import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import { BacklinkView } from '../ObjectView/BacklinkView';
 import { onUnigraphContextMenu } from '../ObjectView/DefaultObjectContextMenu';
 import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
-import { getDynamicViews } from 'unigraph-dev-common/lib/api/unigraph-react';
+import { getDynamicViews } from '../../unigraph-react';
 
 const useStyles = makeStyles({
     editorFrame: {

@@ -1,5 +1,5 @@
 import { Avatar, Badge, Typography } from "@material-ui/core";
-import { registerDynamicViews } from "unigraph-dev-common/lib/api/unigraph-react";
+import { registerDynamicViews } from "../../unigraph-react";
 import { AutoDynamicView } from "../../components/ObjectView/AutoDynamicView";
 import { DynamicViewRenderer } from "../../global"
 import Sugar from "sugar";

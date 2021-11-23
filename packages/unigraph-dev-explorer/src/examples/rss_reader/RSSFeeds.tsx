@@ -1,7 +1,7 @@
 import { Avatar, Button, Divider, ListItem, ListItemIcon, ListItemText, TextField, Typography } from "@material-ui/core";
 import React from "react";
 import { getExecutableId, UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
-import { registerDynamicViews, registerDetailedDynamicViews, withUnigraphSubscription } from "unigraph-dev-common/lib/api/unigraph-react"
+import { registerDynamicViews, registerDetailedDynamicViews, withUnigraphSubscription } from "../../unigraph-react"
 import { pkg as rssReaderPackage } from 'unigraph-dev-common/lib/data/unigraph.rss_reader.pkg';
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { AutoDynamicView } from "../../components/ObjectView/AutoDynamicView";

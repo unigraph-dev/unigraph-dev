@@ -1,6 +1,6 @@
 import { Avatar, ListItem, ListItemAvatar, ListItemText } from "@material-ui/core";
 import React from "react";
-import { registerDynamicViews, withUnigraphSubscription } from "unigraph-dev-common/lib/api/unigraph-react"
+import { registerDynamicViews, withUnigraphSubscription } from "../../unigraph-react"
 import { pkg as emailPackage } from 'unigraph-dev-common/lib/data/unigraph.email.pkg';
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { DynamicViewRenderer } from "../../global";

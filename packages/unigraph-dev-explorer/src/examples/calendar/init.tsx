@@ -1,4 +1,4 @@
-import { registerDynamicViews } from "unigraph-dev-common/lib/api/unigraph-react";
+import { registerDynamicViews } from "../../unigraph-react";
 import { TimeFrame, CalendarEvent } from "./Calendar";
 
 export const init = () => {

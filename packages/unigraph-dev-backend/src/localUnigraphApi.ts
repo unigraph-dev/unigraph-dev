@@ -1,4 +1,4 @@
-import { buildGraph, getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
+import { buildGraph, getRandomInt } from "unigraph-dev-common/lib/utils/utils";
 import { Unigraph } from "unigraph-dev-common/lib/types/unigraph";
 import { processAutorefUnigraphId, makeQueryFragmentFromType, clearEmpties, buildUnigraphEntity, processAutoref, getUpsertFromUpdater, flatten, unflatten, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { UnigraphUpsert } from "./custom";

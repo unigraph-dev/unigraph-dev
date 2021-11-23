@@ -16,7 +16,7 @@ import fetch from 'node-fetch';
 import { uniqueId } from 'lodash';
 import { createExecutableCache } from './executableManager';
 import { getLocalUnigraphAPI } from './localUnigraphApi';
-import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
+import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { addNotification } from './notifications';
 import { Unigraph } from 'unigraph-dev-common/lib/types/unigraph';
 import stringify from 'json-stable-stringify';

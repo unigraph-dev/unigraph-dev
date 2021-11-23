@@ -13,7 +13,7 @@ import _ from "lodash";
 import { PackageDeclaration } from "unigraph-dev-common/lib/types/packages";
 import { addHook } from "./hooks";
 import Babel from '@babel/core';
-import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
+import { getRandomInt } from "unigraph-dev-common/lib/utils/utils";
 
 export type Executable = {
     name?: string,
@@ -167,7 +167,7 @@ export const runEnvReactJSX: ExecRunner = (src, context, unigraph) => {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         transpiled = (require("@babel/core").transformSync(`function comp (params) {
 ${src}
-}`, {presets: ['@babel/preset-react']}) as any).code;
+}`, {presets: [require("@babel/preset-react")]}) as any).code;
     } catch (e) {
         unigraph.addNotification({
             from: "Executable manager", 

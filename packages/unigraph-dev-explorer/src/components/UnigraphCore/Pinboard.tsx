@@ -1,4 +1,4 @@
-import { registerDetailedDynamicViews } from "unigraph-dev-common/lib/api/unigraph-react"
+import { registerDetailedDynamicViews } from "../../unigraph-react"
 import { isTouchDevice } from '../../utils';
 import { UnigraphWidget } from '../../components/UnigraphCore/UnigraphWidget';
 

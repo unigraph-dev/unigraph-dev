@@ -2,7 +2,7 @@ import { UnigraphUpsert } from "../types/unigraph"
 import _, { has, uniqueId } from "lodash";
 
 import { typeMap } from '../types/consts'
-import { getRandomInt } from "../api/unigraph";
+import { getRandomInt } from "../utils/utils";
 
 function buildDgraphFunctionFromRefQuery(query: {key: string, value: string}[]) {
     let string = "";

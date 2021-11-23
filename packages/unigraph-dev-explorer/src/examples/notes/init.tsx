@@ -1,5 +1,5 @@
 import { MenuItem } from "@material-ui/core";
-import { registerDynamicViews, registerDetailedDynamicViews, registerContextMenuItems } from "unigraph-dev-common/lib/api/unigraph-react";
+import { registerDynamicViews, registerDetailedDynamicViews, registerContextMenuItems } from "../../unigraph-react";
 import { NoteBlock, DetailedNoteBlock } from "./NoteBlock";
 
 const getQuery: ((depth: number) => string) = (depth: number) => {

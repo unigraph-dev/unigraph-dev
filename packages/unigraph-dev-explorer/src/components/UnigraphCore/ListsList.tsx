@@ -1,5 +1,5 @@
 import { Card, Grid, Typography } from "@material-ui/core";
-import { withUnigraphSubscription } from "unigraph-dev-common/lib/api/unigraph-react";
+import { withUnigraphSubscription } from "../../unigraph-react";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
 import { List } from "@material-ui/icons";
 import { onUnigraphContextMenu } from "../ObjectView/DefaultObjectContextMenu";
