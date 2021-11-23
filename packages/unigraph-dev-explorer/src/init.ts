@@ -109,6 +109,7 @@ function initRegistry() {
         "$/schema/view": {view: ViewViewDetailed},
         '$/schema/list': {view: ListObjectView, query: ListObjectQuery},
     });
+    window.unigraph.addState('registry/quickAdder', {})
     window.unigraph.addState('registry/pages', {});
     window.unigraph.addState('registry/widgets', {});
     window.unigraph.addState('registry/components', {});

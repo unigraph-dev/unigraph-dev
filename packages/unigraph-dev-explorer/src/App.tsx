@@ -8,6 +8,7 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { ContextMenu } from "./components/UnigraphCore/ContextMenu";
 import { InlineSearch } from "./components/UnigraphCore/InlineSearchPopup";
+import { SearchOverlayPopover } from "./pages/SearchOverlay";
 
 
 // TODO: custom theme
@@ -44,6 +45,7 @@ function App() {
       <div className={classes.root}>
         <DndProvider backend={HTML5Backend}>
           <div id="global-elements">
+            <SearchOverlayPopover />
             <ContextMenu />
             <InlineSearch />
           </div>

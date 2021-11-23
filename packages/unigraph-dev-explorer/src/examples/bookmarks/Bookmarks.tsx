@@ -5,7 +5,7 @@ import { pkg as bookmarkPackage } from 'unigraph-dev-common/lib/data/unigraph.bo
 import { DynamicViewRenderer } from "../../global";
 import { List, ListItem, TextField, Button, IconButton, ListItemSecondaryAction, ListItemText, ListItemIcon, Avatar, Typography } from "@material-ui/core";
 import { Delete, Description, Link, Public } from "@material-ui/icons";
-import { registerDynamicViews, withUnigraphSubscription } from '../../unigraph-react'
+import { registerDynamicViews, registerQuickAdder, withUnigraphSubscription } from '../../unigraph-react'
 import { Tag } from "../semantic/Tag";
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { getExecutableId } from "unigraph-dev-common/lib/api/unigraph";
@@ -27,15 +27,35 @@ type ABookmark = {
     }
 }
 
-export const createBookmark: (t: string) => Promise<ABookmark> = (text: string) => {
+export const createBookmark: (t: string, a?: boolean) => Promise<any> = (text: string, add: boolean = true) => {
     let tags_regex = /#[a-zA-Z0-9]*\b ?/gm;
     let tags = text.match(tags_regex) || [];
     tags = tags.map(tag => tag.slice(1).trim());
     text = text.replace(tags_regex, '');
 
-    const url = new URL(text.trim());
-    window.unigraph.runExecutable(getExecutableId(bookmarkPackage, "add-bookmark"), {url: url, tags: tags})
-    return new Promise((res, rej) => {res(undefined as any)});
+    let url: any;
+    let name: any;
+    try {
+        url = new URL(text.trim());
+        name = url.toString();
+    } catch (e) {
+        name = "Invalid url"
+    }
+    if (add) {
+        window.unigraph.runExecutable(getExecutableId(bookmarkPackage, "add-bookmark"), {url: url, tags: tags})
+        return new Promise((res, rej) => {res(undefined as any)});
+    } else return new Promise((res, rej) => {
+        res({
+            name,
+            children: tags.map(tagName => {return {"type": {"unigraph.id": "$/schema/subentity"},
+                "_value": {
+                    "type": {"unigraph.id": "$/schema/tag"},
+                    name: tagName
+                }}
+            })
+        })
+    })
+    
 } 
 
 function BookmarksBody ({data}: { data: ABookmark[] }) {
@@ -96,5 +116,12 @@ export const BookmarkItem: DynamicViewRenderer = ({data, callbacks}) => {
         </ListItemText>
     </React.Fragment>
 }
+
+const quickAdder = async (inputStr: string, preview = true) => {
+    if (!preview) return await createBookmark(inputStr);
+    else return [await createBookmark(inputStr, false), '$/schema/web_bookmark']
+}
+
+registerQuickAdder({'bookmark': quickAdder, 'bm': quickAdder})
 
 registerDynamicViews({"$/schema/web_bookmark": BookmarkItem})
