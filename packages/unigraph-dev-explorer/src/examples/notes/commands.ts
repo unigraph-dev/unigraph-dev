@@ -6,7 +6,8 @@ import { NoteEditorContext } from "./types";
 
 export const focusUid = (uid: string) => {
     console.log("UID " + uid);
-    (document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0] as any)?.click();
+    console.log(document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]);
+    (document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0] as any)?.click();
 }
 
 export const setCaret = (document: Document, element: any, pos: number, length?: number) => {
@@ -116,7 +117,7 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
         window.unigraph.deleteItemFromArray(getSemanticChildren(data).uid, children[delAt].uid, data.uid, context.callbacks.subsId);
         if (index !== 0) {
             context.edited.current = true;
-            context.setCommand(() => () => {focusUid(children[index - 1]['_value']['_value'].uid)})
+            focusLastDFSNode({uid: children[delAt]['_value']['_value'].uid}, context, index)
         }
     }
 }
@@ -186,7 +187,11 @@ export const indentChild = (data: any, context: NoteEditorContext, index: number
     window.unigraph.updateObject(data?.['_value']?.uid, {children: {'_value[': finalChildren}}, false, false, context.callbacks.subsId);
     context.edited.current = true;
     
-    context.setCommand(() => () => {focusUid(newUid['_value'].uid)});
+    context.setCommand(() => 
+        setTimeout(() => {
+            focusUid(newUid['_value'].uid)
+        }, 250)
+    );
     //context.setCommand(() => noteBlockCommands['set-focus'].bind(this, data, {...context, childrenref: {current: context.childrenref.current.children[parent as number].children[0].children[0].children[1]}}, -1))
 }
 
@@ -235,7 +240,9 @@ export const unindentChild = async (data: any, context: NoteEditorContext, paren
     await window.unigraph.updateObject(data?.['_value']?.uid, {...data['_value'], children: {'_value[': newChildren}}, false, false, []);
     await window.unigraph.deleteItemFromArray(delUidPar, delUidChild)
     context.edited.current = true;
-    context.setCommand(() => () => focusUid(newChildren[parent+1]['_value']['_value'].uid))
+    context.setCommand(() => setTimeout(() => {
+        focusUid(newChildren[parent+1]['_value']['_value'].uid)
+    }, 250))
 }
 
 export const focusLastDFSNode = (data: any, context: NoteEditorContext, _: number) => {
