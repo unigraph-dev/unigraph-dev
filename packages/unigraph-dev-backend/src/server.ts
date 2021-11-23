@@ -56,7 +56,7 @@ export default async function startServer(client: DgraphClient) {
     }
   }
 
-  let serverStates: any = {};
+  const serverStates: any = {};
 
   const hooks: Hooks = {
     "after_subscription_added": [async (context: HookAfterSubscriptionAddedParams) => {
