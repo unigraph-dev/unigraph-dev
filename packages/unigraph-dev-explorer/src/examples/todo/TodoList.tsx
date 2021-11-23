@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { DynamicViewRenderer } from '../../global';
 
 import { pkg as todoPackage } from 'unigraph-dev-common/lib/data/unigraph.todo.pkg';
-import { registerDynamicViews, withUnigraphSubscription } from '../../unigraph-react'
+import { registerDynamicViews, registerQuickAdder, withUnigraphSubscription } from '../../unigraph-react'
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import Sugar from 'sugar';
@@ -79,6 +79,14 @@ export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
 }
 
 registerDynamicViews({"$/schema/todo": TodoItem})
+
+const quickAdder = async (inputStr: string, preview = true) => {
+    const parsed = parseTodoObject(inputStr);
+    if (!preview) return await window.unigraph.addObject(parsed, "$/schema/todo");
+    else return [parsed, '$/schema/todo'];
+}
+
+registerQuickAdder({'todo': quickAdder, 'td': quickAdder})
 
 export const TodoList = withUnigraphSubscription( 
     // @ts-ignore

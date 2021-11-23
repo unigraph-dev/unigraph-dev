@@ -95,7 +95,8 @@ export type DynamicObjectListViewProps = {
     virtualized?: boolean,
     groupBy?: string,
     buildGraph?: boolean
-    groupers?: any
+    groupers?: any,
+    noBar?: boolean,
 }
 
 const DynamicListBasic = ({ reverse, items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true }: any) => {
@@ -150,7 +151,7 @@ const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, it
  * @param param0 
  * @returns 
  */
-export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ items, groupers, groupBy, listUid, context, callbacks, itemGetter = _.identity, itemRemover = _.noop, filters = [], defaultFilter, reverse, virtualized, buildGraph }) => {
+export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ items, groupers, groupBy, listUid, context, callbacks, itemGetter = _.identity, itemRemover = _.noop, filters = [], defaultFilter, reverse, virtualized, buildGraph, noBar }) => {
 
     const [optionsOpen, setOptionsOpen] = React.useState(false);
     let setGroupBy: any;
@@ -203,7 +204,8 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
         height: "100%", width: "100%",
         display: "flex", flexDirection: "column", overflowY: "hidden"
     }} ref={drop}>
-        <div style={{ display: "flex" }}><Accordion expanded={optionsOpen} onChange={() => setOptionsOpen(!optionsOpen)} variant={"outlined"} style={{ flexGrow: 1, minWidth: 0 }}>
+        <div style={{ display: "flex" }}>
+            {noBar ? [] : <Accordion expanded={optionsOpen} onChange={() => setOptionsOpen(!optionsOpen)} variant={"outlined"} style={{ flexGrow: 1, minWidth: 0 }}>
             <AccordionSummary
                 expandIcon={<ExpandMore />}
                 aria-controls="panel1bh-content"
@@ -251,7 +253,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
                 </List>
 
             </AccordionDetails>
-        </Accordion>
+        </Accordion>}
             <IconButton
                 onClick={() => itemRemover(procItems.map((el, idx) => idx))}
                 style={{ display: itemRemover === _.noop ? "none" : "" }}

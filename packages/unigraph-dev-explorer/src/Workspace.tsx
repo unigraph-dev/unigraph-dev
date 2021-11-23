@@ -24,6 +24,7 @@ import MomentUtils from '@date-io/moment';
 
 import Icon from '@mdi/react'
 import { mdiStarPlusOutline, mdiSync, mdiTagMultipleOutline } from '@mdi/js';
+import { SearchOverlayPopover } from "./pages/SearchOverlay";
 
 const pages = window.unigraph.getState('registry/pages')
 const electron = isElectron();
@@ -240,6 +241,7 @@ export function WorkSpace(this: any) {
             const page = pages.value[(component.replace('/pages/', '') as string)]
             return <WorkspacePageComponent maximize={page.maximize} paddingTop={page.paddingTop} id={config.id}>
                 {node._attributes.floating ? <div id="global-elements">
+                    <SearchOverlayPopover /> 
                     <ContextMenu />
                     <InlineSearch />
                 </div> : []}
@@ -281,11 +283,13 @@ export function WorkSpace(this: any) {
 
     return <NavigationContext.Provider value={workspaceNavigator.bind(this, model)}>
         <MuiPickersUtilsProvider utils={MomentUtils}>
+        <DndProvider backend={HTML5Backend}>
             <div id="global-elements">
+                <SearchOverlayPopover />
                 <ContextMenu />
                 <InlineSearch />
             </div>
-            <DndProvider backend={HTML5Backend}>
+            
                 <FlexLayout.Layout model={model} factory={factory} popoutURL={"./popout_page.html"} onRenderTab={(node: TabNode, renderValues: any) => {
                     setTitleOnRenderTab(model);
                     const nodeId = node.getId();
