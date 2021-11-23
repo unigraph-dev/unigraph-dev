@@ -1,6 +1,7 @@
 // FIXME: This file is ambiguous in purpose! Move utils to utils folder and keep this a small interface with a window object.
 
 import React from 'react';
+import { string } from 'yargs';
 import { typeMap } from '../types/consts'
 import { PackageDeclaration } from '../types/packages';
 import { Unigraph, AppState, UnigraphObject as IUnigraphObject } from '../types/unigraph';
@@ -135,6 +136,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
         // @ts-expect-error: already checked if not JSON
         namespaceMap: isJsonString(window.localStorage.getItem("caches/namespaceMap")) ? JSON.parse(window.localStorage.getItem("caches/namespaceMap")) : false 
     };
+    const cacheCallbacks: Record<string, any[]> = {};
     let retries: any = false;
     let readyCallback = () => undefined;
     const msgQueue: string[] = [];
@@ -190,7 +192,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
         }
 
         connection.current.onmessage = (ev) => {
-            let parsed;
+            let parsed: any;
             try {
                 parsed = JSON.parse(ev.data);
             } catch (e) {
@@ -204,7 +206,8 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             if (parsed.type === "response" && parsed.id && callbacks[parsed.id]) callbacks[parsed.id](parsed);
             if (parsed.type === "cache_updated" && parsed.name) {
                 caches[parsed.name] = parsed.result;
-                window.localStorage.setItem("caches/"+parsed.name, JSON.stringify(parsed.result))
+                window.localStorage.setItem("caches/"+parsed.name, JSON.stringify(parsed.result));
+                cacheCallbacks[parsed.name]?.forEach(el => el(parsed.result));
             }
             if (parsed.type === "subscription" && parsed.id && subscriptions[parsed.id] && parsed.result) subscriptions[parsed.id](parsed.result);
             if (parsed.type === "open_url" && window) window.open(parsed.url, "_blank") 
@@ -244,6 +247,11 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             };
             sendEvent(connection, 'get_status', {}, id)
         }),
+        onCacheUpdated: (cache, callback) => {
+            if (Array.isArray(cacheCallbacks[cache])) {
+                cacheCallbacks[cache].push(callback)
+            } else cacheCallbacks[cache] = [callback];
+        },
         createSchema: (schema) => new Promise((resolve, reject) => {
             const id = getRandomInt();
             callbacks[id] = (response: any) => {

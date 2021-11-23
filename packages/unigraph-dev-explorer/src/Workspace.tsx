@@ -11,7 +11,7 @@ import FlexLayout, { Actions, DockLocation, Model, Node, TabNode } from 'flexlay
 import 'flexlayout-react/style/light.css'
 import './workspace.css'
 import { getParameters, isElectron, isSmallScreen, NavigationContext } from "./utils";
-import { Button, Container, CssBaseline } from "@material-ui/core";
+import { Button, Container, CssBaseline, ListItem, Popover } from "@material-ui/core";
 import { isJsonString } from "unigraph-dev-common/lib/utils/utils";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
 import { Search, StarOutlined, Menu, LocalOffer, Details } from "@material-ui/icons";
@@ -23,7 +23,7 @@ import { InlineSearch } from "./components/UnigraphCore/InlineSearchPopup";
 import MomentUtils from '@date-io/moment';
 
 import Icon from '@mdi/react'
-import { mdiStarPlusOutline, mdiTagMultipleOutline } from '@mdi/js';
+import { mdiStarPlusOutline, mdiSync, mdiTagMultipleOutline } from '@mdi/js';
 
 const pages = window.unigraph.getState('registry/pages')
 const electron = isElectron();
@@ -53,6 +53,41 @@ const ConnectionIndicator = () => {
         })
     }, [])
     return <span style={{height: "16px", width: "16px", borderRadius: "8px", backgroundColor: connected ? "lightgreen" : "red", border: "1px solid grey", marginRight: "8px"}}></span>
+}
+
+const ExecutablesIndicator = () => {
+    const [totalExecutables, setTotalExecutables] = React.useState([]);
+    const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
+    React.useMemo(() => {
+        window.unigraph.onCacheUpdated('runningExecutables', (cacheResult: any) => {
+            setTotalExecutables(cacheResult)
+        })
+    }, [])
+    return <div style={{marginRight: "16px"}}>
+        <Popover
+            open={totalExecutables.length && Boolean(anchorEl)}
+            anchorEl={anchorEl}
+            disableRestoreFocus
+            style={{pointerEvents: "none"}}
+            anchorOrigin={{
+                vertical: 'bottom',
+                horizontal: 'left',
+              }}
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'left',
+              }}
+        >
+            {totalExecutables.map((el: any) => <ListItem>
+                {el.name},
+                {new Date(el.since).toLocaleString()}
+            </ListItem>)}
+        </Popover>
+        <div onMouseEnter={(event) => {setAnchorEl(event.currentTarget)}} onMouseLeave={() => {setAnchorEl(null); console.log("aaaa")}}>
+            <Icon path={mdiSync} size={0.7} style={{verticalAlign: "middle"}} key="icon"/>
+            {totalExecutables.length}
+        </div>
+    </div>
 }
 
 const newWindowActions = {
@@ -298,7 +333,7 @@ export function WorkSpace(this: any) {
                             <Icon path={mdiStarPlusOutline} size={0.7} style={{marginTop: "5px"}}/>
                         </span>);
                     } else if (tabSetNode.getId() === "border_bottom") {
-                        renderValues.buttons.push(<ConnectionIndicator />)
+                        renderValues.buttons.push(<ExecutablesIndicator/>, <ConnectionIndicator />);
                     }
                     if (isElectron() && tabSetNode.getId() === "border_left") {
                         const getTopLeft = () => Array.from(document.querySelectorAll('.flexlayout__tabset_tabbar_outer'))
