@@ -1,5 +1,5 @@
 import { Badge, Avatar, Typography } from "@material-ui/core";
-import { registerDynamicViews } from "unigraph-dev-common/lib/api/unigraph-react";
+import { registerDynamicViews } from "../../unigraph-react";
 import { DynamicViewRenderer } from "../../global";
 import Sugar from "sugar";
 import { AddCircle, ArrowDownward, ArrowUpward, Chat, Image, Link, RemoveCircle } from "@material-ui/icons";

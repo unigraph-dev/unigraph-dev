@@ -5,7 +5,7 @@ import { pkg as bookmarkPackage } from 'unigraph-dev-common/lib/data/unigraph.bo
 import { DynamicViewRenderer } from "../../global";
 import { List, ListItem, TextField, Button, IconButton, ListItemSecondaryAction, ListItemText, ListItemIcon, Avatar, Typography } from "@material-ui/core";
 import { Delete, Description, Link, Public } from "@material-ui/icons";
-import { registerDynamicViews, withUnigraphSubscription } from 'unigraph-dev-common/lib/api/unigraph-react'
+import { registerDynamicViews, withUnigraphSubscription } from '../../unigraph-react'
 import { Tag } from "../semantic/Tag";
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { getExecutableId } from "unigraph-dev-common/lib/api/unigraph";

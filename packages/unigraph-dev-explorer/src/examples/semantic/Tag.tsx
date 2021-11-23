@@ -4,7 +4,7 @@ import { LocalOffer } from '@material-ui/icons';
 import { getContrast, NavigationContext } from '../../utils';
 import { DynamicViewRenderer } from '../../global';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
-import { registerDynamicViews } from 'unigraph-dev-common/lib/api/unigraph-react';
+import { registerDynamicViews } from '../../unigraph-react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 
 import Icon from '@mdi/react'

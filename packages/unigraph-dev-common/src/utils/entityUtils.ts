@@ -2,7 +2,7 @@
 
 import { jsonToGraphQLQuery } from "json-to-graphql-query";
 import _ from "lodash";
-import { buildGraph } from "../api/unigraph";
+import { buildGraph } from "../utils/utils";
 import { ComposerUnionInstance, Definition, EntityDgraph, Field, RefUnigraphIdType, Schema, UnigraphIdType, UnigraphTypeString } from "../types/json-ts";
 
 //function uid<IdType extends string>(id: IdType): UidType<IdType> {return {"uid": id}}

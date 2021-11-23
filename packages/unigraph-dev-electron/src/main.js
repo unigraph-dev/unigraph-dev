@@ -26,7 +26,7 @@ let dontCheck = false;
 let shouldStartBackend = true;
 let alpha, zero;
 
-if (frontendLocation) shouldStartBackend = false;
+if (process.env.FRONTEND_LOCATION) shouldStartBackend = false;
 
 function isDev() {
   return process.argv[2] == '--dev';

@@ -5,7 +5,7 @@ import _ from "lodash";
 import React from "react";
 import { useDrop } from "react-dnd";
 import { UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
-import { getDynamicViews } from "unigraph-dev-common/lib/api/unigraph-react";
+import { getDynamicViews } from "../../unigraph-react";
 import { AutoDynamicView } from "./AutoDynamicView";
 import { isMobile } from "../../utils";
 import { buildGraph as buildGraphFn } from "unigraph-dev-common/lib/api/unigraph";

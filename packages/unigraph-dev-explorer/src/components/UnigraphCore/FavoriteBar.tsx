@@ -2,7 +2,7 @@ import { ListItem, ListItemText } from "@material-ui/core";
 import React from "react";
 import { useEffectOnce } from "react-use";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
-import { registerDynamicViews } from "unigraph-dev-common/lib/api/unigraph-react";
+import { registerDynamicViews } from "../../unigraph-react";
 import { byElementIndex, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { DynamicViewRenderer } from "../../global";
 import { AutoDynamicView } from "../ObjectView/AutoDynamicView";

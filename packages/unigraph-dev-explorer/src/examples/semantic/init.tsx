@@ -1,4 +1,4 @@
-import { registerDetailedDynamicViews, registerDynamicViews } from "unigraph-dev-common/lib/api/unigraph-react";
+import { registerDetailedDynamicViews, registerDynamicViews } from "../../unigraph-react";
 import { BacklinkView } from "../../components/ObjectView/BacklinkView";
 import { Html } from "./Html";
 import { InterfaceSemantic } from "./InterfaceSemantic";

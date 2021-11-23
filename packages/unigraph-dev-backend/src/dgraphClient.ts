@@ -1,6 +1,6 @@
 import AsyncLock from 'async-lock';
 import dgraph, { DgraphClient as ActualDgraphClient, DgraphClientStub, Operation, Mutation, Check } from 'dgraph-js';
-import { getRandomInt } from '../../unigraph-dev-common/lib/api/unigraph';
+import { getRandomInt } from '../../unigraph-dev-common/lib/utils/utils';
 import { getAsyncLock, withLock } from './asyncManager';
 import { UnigraphUpsert } from './custom';
 import { perfLogStartDbTransaction, perfLogAfterDbTransaction } from './logging';

@@ -1,3 +1,117 @@
+function getPath (obj: any, path: string | string[]): any {
+    if (path.length === 0) return new UnigraphObject(obj);
+    if (!Array.isArray(path)) path = path.split('/').filter(e => e.length);
+    const values = Object.keys(obj).filter(el => el.startsWith('_value'));
+    if (values.length > 1) {
+        throw new TypeError('Object should have one value only');
+    } else if (values.length === 1) {
+        return getPath(obj[values[0]], path);
+    } else if (Object.keys(obj).includes(path[0])){
+        return getPath(obj[path[0]], path.slice(1));
+    } else {
+        return undefined;
+        //throw new RangeError('Requested path doesn\'t exist')
+    }
+}
+
+function getObjectAsRecursivePrimitive (object: any) {
+    let targetValue: any = undefined;
+    Object.keys(object).forEach(el => {
+        if (el.startsWith("_value.")) {
+            targetValue = object[el];
+        } else if (el.startsWith("_value") && typeof object[el] === "object") {
+            const subObj = getObjectAsRecursivePrimitive(object[el]);
+            if (subObj || subObj === "" || subObj === 0 || subObj === false) targetValue = subObj;
+        }
+    });
+    return targetValue;
+}
+
+export const getObjectAs = (object: any, type: "primitive") => {
+    if (type === "primitive") {
+        return getObjectAsRecursivePrimitive(object);
+    }
+}
+
+// TODO: Switch to prototype-based, faster helper functions
+// TODO: Benchmark these helper functions
+export class UnigraphObject extends Object {
+
+    constructor(obj: any) {
+        super(obj);
+        Object.setPrototypeOf(this, UnigraphObject.prototype)
+    }
+
+    get = (path: string | string[]) => {
+        try { 
+            return getPath(this, path)
+        } catch (e) {
+            console.error(e);
+            console.log(this)
+            return e;
+        }};
+    getMetadata = () => {
+        return undefined;
+    }
+    getType = () => {
+        return (this as any).type['unigraph.id'];
+    }
+    getRefType = () => {
+        return undefined;
+    }
+    as = (type: string) => getObjectAs(this, type as any)
+}
+
+/**
+ * Implement a graph-like data structure based on js pointers from uid references.
+ * 
+ * Since pointers are not serializable, this must be done on the client side.
+ * 
+ * @param objects Objects with uid references
+ */
+export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
+
+    const objs: any[] = JSON.parse(JSON.stringify(objects)).map((el: any) => new UnigraphObject(el))
+    const dict: any = {}
+    objs.forEach(object => {if (object?.uid) dict[object.uid] = object})
+
+    function buildDictRecurse(obj: any) {
+        if (obj && typeof obj === "object" && Array.isArray(obj)) {
+            obj.forEach((val, index) => {
+                if(val?.uid && !dict[val.uid] && Object.keys(val).length !== 1) dict[val.uid] = obj[index];
+                buildDictRecurse(val)
+            })
+        } else if (obj && typeof obj === "object") {
+            Object.entries(obj).forEach(([key, value]: [key: string, value: any]) => {
+                if(value?.uid && !dict[value.uid] && Object.keys(value).length !== 1) dict[value.uid] = obj[key];
+                buildDictRecurse(value)
+            })
+        }
+    }
+
+    function buildGraphRecurse(obj: any) {
+        if (obj && typeof obj === "object" && Array.isArray(obj)) {
+            obj.forEach((val, index) => {
+                if(val?.uid && dict[val.uid]) obj[index] = dict[val.uid];
+                buildGraphRecurse(val)
+            })
+        } else if (obj && typeof obj === "object") {
+            Object.entries(obj).forEach(([key, value]: [key: string, value: any]) => {
+                if(value?.uid && dict[value.uid]) obj[key] = dict[value.uid];
+                buildGraphRecurse(value)
+            })
+        }
+    }
+
+    objs.forEach(object => buildDictRecurse(object))
+    objs.forEach(object => buildGraphRecurse(object))
+
+    return objs
+
+}
+
+export function getRandomInt() {return Math.floor(Math.random() * Math.floor(1000000))}
+
 export function isJsonString(str: any) {
     if (!(typeof str === "string")) return false;
     try {
