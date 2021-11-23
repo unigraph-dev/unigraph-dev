@@ -60,13 +60,15 @@ const ImportItem = ({data}: any) => {
 const lang: any = {
     'component/react-jsx': 'jsx',
     'routine/js': "javascript",
-    "lambda/js": "javascript"
+    "lambda/js": "javascript",
+    "client/js": "javascript",
 }
 
 const ext: any = {
     'component/react-jsx': '.jsx',
     'routine/js': ".js",
-    "lambda/js": ".js"
+    "lambda/js": ".js",
+    "client/js": ".js",
 }
 
 export const ExecutableCodeEditor = ({data, options}: any) => {

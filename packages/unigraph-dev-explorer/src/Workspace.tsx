@@ -113,6 +113,11 @@ const newWindowActions = {
     }
 }
 
+window.closeTab = (tabId: any) => {
+    let action = Actions.deleteTab(tabId);
+    window.layoutModel.doAction(action);
+}
+
 const newTab = (model: Model, initJson: any) => {
     // @ts-expect-error: already checked for isJsonString
     let userSettings = JSON.parse(isJsonString(window.localStorage.getItem('userSettings')) ? window.localStorage.getItem('userSettings') : "{}")

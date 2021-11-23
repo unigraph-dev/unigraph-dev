@@ -46,10 +46,10 @@ export const ContextMenu = () => {
             <ListItemText>{state.contextObject?.type?.['unigraph.id']}</ListItemText>
         </MenuItem>
         <Divider/>
-        {state.menuContent?.map(el => el(state.contextUid!, state.contextObject, handleClose, state.callbacks))}
+        {state.menuContent?.map(el => el(state.contextUid!, state.contextObject, handleClose, state.callbacks, state.contextContextUid))}
         {schemaMenuConstructors.length > 0 ? <React.Fragment>
             <Divider/>
-            {schemaMenuConstructors.map((el: any) => el(state.contextUid!, state.contextObject, handleClose, {...state.callbacks, removeFromContext: state.removeFromContext}))}
+            {schemaMenuConstructors.map((el: any) => el(state.contextUid!, state.contextObject, handleClose, {...state.callbacks, removeFromContext: state.removeFromContext}, state.contextContextUid))}
         </React.Fragment> : []}
         {state.contextContextUid ? <React.Fragment>
             <Divider/>
@@ -60,7 +60,7 @@ export const ContextMenu = () => {
                 <ListItemText>{state.contextContextObject?.type?.['unigraph.id']}</ListItemText>
             </MenuItem>
             <Divider/>
-            {state.menuContextContent?.map(el => el(state.contextUid!, state.contextObject, handleClose, {...state.callbacks, removeFromContext: state.removeFromContext}))}
+            {state.menuContextContent?.map(el => el(state.contextUid!, state.contextObject, handleClose, {...state.callbacks, removeFromContext: state.removeFromContext}, state.contextContextUid))}
         </React.Fragment>: []}
         {state.extraContent ? state.extraContent(handleClose) : []}
         </MenuList>

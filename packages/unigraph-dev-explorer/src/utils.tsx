@@ -1,6 +1,7 @@
 import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 import React from 'react';
+import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 
 export const NavigationContext = React.createContext((location: string) => {});
 
@@ -197,4 +198,18 @@ export const deselectUid = (uid?: string) => {
 
 export const isMultiSelectKeyPressed = (event: React.MouseEvent) => {
     return event.altKey;
+}
+
+export const runClientExecutable = (src: string, params: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor
+    const fn = new AsyncFunction("require", "unpad", "context", "unigraph", `try {${src}
+    } catch (e) {
+            unigraph.addNotification({
+                from: "Executable manager", 
+                name: "Failed to run executable",
+                content: "Error was: " + e.toString() + e.stack }
+            )
+    }`).bind(this, require, unpad, {params}, window.unigraph);
+    fn();
 }

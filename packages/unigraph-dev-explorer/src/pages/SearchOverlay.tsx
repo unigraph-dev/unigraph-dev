@@ -115,7 +115,7 @@ export const SearchOverlay = ({open, setClose}: any) => {
             placeholder={"Enter: +<type shortname> to create; ?<search query> to search; <command> to execute command"}
             onKeyPress={async (ev) => {
                 if (ev.key === "Enter" && parsed?.type === "quickAdder" && window.unigraph.getState('registry/quickAdder').value[parsed?.key]) {
-                    await window.unigraph.getState('registry/quickAdder').value[parsed?.key](JSON.parse(JSON.stringify(parsed?.value)), false);
+                    await window.unigraph.getState('registry/quickAdder').value[parsed?.key]?.adder(JSON.parse(JSON.stringify(parsed?.value)), false);
                     setInput('');
                     setClose();
                 }

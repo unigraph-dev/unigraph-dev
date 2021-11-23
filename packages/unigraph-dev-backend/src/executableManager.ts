@@ -122,7 +122,7 @@ export type ExecContext = {
  * A type of functions that "runs" the executable once. 
  * Takes the necessary contexts and returns a paramless function that executes ther executable when called.
  */
-export type ExecRunner = (src: string, context: ExecContext, unigraph: Unigraph) => (() => any & string);
+export type ExecRunner = (src: string, context: ExecContext, unigraph: Unigraph) => (() => any) | string;
 
 export const runEnvRoutineJs: ExecRunner = (src, context, unigraph) => {
     //const fn = () => eval(src);
@@ -179,11 +179,16 @@ ${src}
     return transpiled;
 }
 
+export const runEnvClientJs: ExecRunner = (src, context, unigraph) => {
+    return src;
+}
+
 /** Environments */
 
 export const environmentRunners = {
     "routine/js": runEnvRoutineJs,
     "lambda/js": runEnvLambdaJs,
     "component/react-jsx": runEnvReactJSX,
+    "client/js": runEnvClientJs,
 } /** List of all environments supported in Unigraph */
 

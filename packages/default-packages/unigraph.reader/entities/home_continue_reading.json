@@ -1,0 +1,9 @@
+{
+    "type": {"unigraph.id": "$/schema/home_section"},
+    "view": {
+        "name": "Continue reading",
+        "env": "react-explorer",
+        "view": {"unigraph.id": "$/package/unigraph.reader/0.0.1/executable/home-continue-reading"}
+    },
+    "condition": {"unigraph.id": "$/package/unigraph.reader/0.0.1/executable/home-continue-reading-condition"}
+}
