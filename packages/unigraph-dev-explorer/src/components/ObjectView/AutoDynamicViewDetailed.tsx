@@ -3,10 +3,11 @@ import React from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
 import { DynamicViewRenderer } from "../../global";
+import { ObjectEditor } from "../ObjectEditor/ObjectEditor";
 import { JsontreeObjectViewer } from "./DefaultObjectView";
 import { isStub } from "./utils";
 
-export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, callbacks, context, component, attributes, useFallback }) => {
+export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, callbacks, context, component, attributes, useFallback = true }) => {
 
     const isObjectStub = isStub(object)
     const [loadedObj, setLoadedObj] = React.useState<any>(false)
@@ -16,7 +17,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, 
 
     React.useEffect(() => {
         const newSubs = getRandomInt();
-        if (isObjectStub) {
+        if (isObjectStub && Object.keys(DynamicViewsDetailed).includes(object.type?.['unigraph.id'])) {
             const query = DynamicViewsDetailed[object.type['unigraph.id']].query(object.uid)
             window.unigraph.subscribeToQuery(query, (objects: any[]) => {
                 setLoadedObj(objects[0]);
@@ -39,6 +40,6 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, 
         })}
         </ErrorBoundary>;
     } else if (useFallback) {
-        return <JsontreeObjectViewer object={isObjectStub ? loadedObj : object} options={options}/>
+        return (object && ((isObjectStub && loadedObj) || !isObjectStub)) ? <ObjectEditor uid={object?.uid} /> : <React.Fragment />
     } else return <React.Fragment/>
 }

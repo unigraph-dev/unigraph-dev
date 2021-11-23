@@ -7,7 +7,7 @@ import { ViewViewDetailed } from "../../components/ObjectView/DefaultObjectView"
 import _ from "lodash";
 import { buildGraph } from "unigraph-dev-common/lib/api/unigraph";
 import { Actions } from "flexlayout-react";
-import { addChild, convertChildToTodo, focusLastDFSNode, focusNextDFSNode, indentChild, setCaret, setFocus, splitChild, unindentChild, unsplitChild } from "./commands";
+import { addChild, convertChildToTodo, focusLastDFSNode, focusNextDFSNode, indentChild, setCaret, setFocus, splitChild, unindentChild, unsplitChild, replaceChildWithUid } from "./commands";
 import { onUnigraphContextMenu } from "../../components/ObjectView/DefaultObjectContextMenu";
 import { FiberManualRecord, MoreVert } from "@material-ui/icons";
 import { setSearchPopup } from "./searchPopup";
@@ -56,6 +56,7 @@ const noteBlockCommands = {
     "indent-child": indentChild,
     "unindent-child": unindentChild,
     "convert-child-to-todo": convertChildToTodo,
+    "replace-child-with-uid": replaceChildWithUid,
 }
 
 export const PlaceholderNoteBlock = ({ callbacks }: any) => {
@@ -207,6 +208,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                             const caret = (document.getSelection()?.anchorOffset) as number;
                             // Check if inside a reference block
                             const placeholder = /\[\[([^[\]]*)\]\]/g;
+                            const placeholder2 = /\(\(([^[\)]*)\)\)/g;
 
                             let hasMatch = false;
                             for (let match: any; (match = placeholder.exec(textInput.current.textContent)) !== null;) {
@@ -238,6 +240,15 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                                                 }
                                             }
                                         }, true, false);
+                                        window.unigraph.getState('global/searchPopup').setValue({ show: false });
+                                    })
+                                }
+                            }
+                            for (let match: any; (match = placeholder2.exec(textInput.current.textContent)) !== null;) {
+                                if (match.index <= caret && placeholder2.lastIndex >= caret) {
+                                    hasMatch = true;
+                                    setSearchPopup(boxRef, match[1], async (newName: string, newUid: string) => {
+                                        callbacks['replace-child-with-uid'](newUid);
                                         window.unigraph.getState('global/searchPopup').setValue({ show: false });
                                     })
                                 }
@@ -303,6 +314,19 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                                     }
                                     break;
 
+                                case 'Digit9':
+                                    if (ev.shiftKey) {
+                                        ev.preventDefault();
+                                        //console.log(document.getSelection())
+                                        let middle = document.getSelection()?.toString() || "";
+                                        let end = "";
+                                        if (middle.endsWith(' ')) { middle = middle.slice(0, middle.length - 1); end = " "; }
+                                        document.execCommand('insertText', false, '(' + middle + ')' + end);
+                                        //console.log(caret, document.getSelection(), middle)
+                                        setCaret(document, textInput.current.firstChild, caret + 1, middle.length)
+                                    }
+                                    break;
+
                                 default:
                                     //console.log(ev);
                                     break;
@@ -325,6 +349,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
             {!(isCollapsed === true) ? <div ref={childrenref} style={{ width: "100%" }} >
                 {(subentities.length || isChildren) ? buildGraph(subentities).map((el: any, elindex) => {
                     const isCol = isChildrenCollapsed[el.uid];
+                    console.log(el.type);
                     return <OutlineComponent key={el.uid} isChildren={isChildren} collapsed={isCol} setCollapsed={(val: boolean) => setIsChildrenCollapsed({ ...isChildrenCollapsed, [el.uid]: val })}
                         createBelow={() => { addChild(dataref.current, editorContext) }}
                     >

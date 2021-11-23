@@ -286,3 +286,26 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
     stubConverted.uid = newUid[0];
     await window.unigraph.updateObject(data?.['_value']?.uid, {...data['_value'], children: {'_value[': newChildren}}, false, false, context.callbacks.subsId);
 }
+
+export const replaceChildWithUid = async (data: any, context: NoteEditorContext, index: number, uid: string) => {
+    //console.log(index);
+    let currSubentity = -1;
+    const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
+    const newChildren = children?.reduce((prev: any[], el: any, elindex: any) => {
+        if (el?.['_value']?.['type']?.['unigraph.id'] === "$/schema/subentity" && ++currSubentity === index) {
+            /* something something*/
+            const newel = {
+                'uid': el.uid,
+                '_value': {
+                    // subentity
+                    uid: el._value.uid,
+                    '_value': {uid: uid},
+                }
+            };
+            return [...prev, newel];
+        } else {
+            return [...prev, {uid: el.uid}]
+        };
+    }, []);
+    await window.unigraph.updateObject(data?.['_value']?.uid, {...data['_value'], children: {'_value[': newChildren}}, false, false, context.callbacks.subsId);
+}
