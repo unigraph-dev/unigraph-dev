@@ -1,0 +1,6 @@
+{
+    "type": { "unigraph.id": "$/schema/object_view_detailed" },
+    "name": "Incremental reader view",
+    "item_type": {"unigraph.id": "$/schema/incremental_reader_item"},
+    "view": {"unigraph.id": "$/package/unigraph.reader/0.0.1/executable/incremental-reader-view-detailed"}
+}

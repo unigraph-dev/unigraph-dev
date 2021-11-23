@@ -1,0 +1,35 @@
+{
+    "dgraph.type": "Type",
+    "_definition": {
+        "type": { "unigraph.id": "$/composer/Object" },
+        "_parameters": {
+            "_indexedBy": { "unigraph.id": "$/primitive/string" }
+        },
+        "_properties": [
+            {
+                "_key": "item",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/any" }
+                }
+            },
+            {
+                "_key": "context",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/any" }
+                }
+            },
+            {
+                "_key": "progress",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                }
+            },
+            {
+                "_key": "percent",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/number" }
+                }
+            }
+        ]
+    }
+}

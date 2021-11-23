@@ -1,0 +1,69 @@
+{
+    "displayName": "Unigraph Reader",
+    "version": "0.0.1",
+    "description": "Read articles and PDFs with style and efficiency.",
+    "unigraph": {
+        "package_name": "unigraph.reader",
+        "executables": [
+            {
+                "id": "save-reading-progress",
+                "env": "client/js",
+                "src": "executables/saveReadingProgress.js",
+                "editable": true,
+                "name": "Save current reading progress"
+            },
+            {
+                "id": "incremental-reader-view",
+                "env": "component/react-jsx",
+                "src": "executables/incrementalReaderView.jsx",
+                "editable": true,
+                "name": "Incremental reader view"
+            },
+            {
+                "id": "incremental-reader-view-detailed",
+                "env": "component/react-jsx",
+                "src": "executables/incrementalReaderViewDetailed.jsx",
+                "editable": true,
+                "name": "Incremental reader view detailed"
+            },
+            {
+                "name": "Continue reading",
+                "env": "component/react-jsx",
+                "id": "home-continue-reading",
+                "src": "executables/homeContinueReading.jsx",
+                "editable": true
+            },
+            {
+                "name": "Continue reading: condition",
+                "env": "routine/js",
+                "id": "home-continue-reading-condition",
+                "src": "executables/homeContinueReadingCondition.js",
+                "editable": true
+            }
+        ],
+        "schemas": [
+            {
+                "id": "incremental_reader_item",
+                "src": "schemas/incremental_reader_item.json"
+            }
+        ],
+        "entities": [
+            {
+                "id": "continue_reading_context_menu",
+                "src": "entities/continue_reading_context_menu.json"
+            },
+            {
+                "id": "incremental_reader_view",
+                "src": "entities/incremental_reader_view.json"
+            },
+            {
+                "id": "incremental_reader_view_detailed",
+                "src": "entities/incremental_reader_view_detailed.json"
+            },
+            {
+                "id": "section_continue_reading",
+                "src": "entities/home_continue_reading.json"
+            }
+        ]
+    }
+}

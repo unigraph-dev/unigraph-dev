@@ -23,7 +23,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
         const newSubs = getRandomInt();
         if (isObjectStub) {
             if (subsId) window.unigraph.unsubscribe(subsId);
-            let query = DynamicViews[object.type['unigraph.id']].query?.(object.uid)
+            let query = DynamicViews[object.type['unigraph.id']]?.query?.(object.uid)
             if (!query) query = `(func: uid(${object.uid})) @recurse {
                 uid
                 unigraph.id

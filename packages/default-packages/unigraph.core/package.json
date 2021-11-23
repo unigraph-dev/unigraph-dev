@@ -8,6 +8,12 @@
             "id": "list",
             "src": "schemas/list.json"
         }, {
+            "id": "object_view",
+            "src": "schemas/object_view.json"
+        }, {
+            "id": "object_view_detailed",
+            "src": "schemas/object_view_detailed.json"
+        }, {
             "id": "view",
             "src": "schemas/view.json"
         }, {

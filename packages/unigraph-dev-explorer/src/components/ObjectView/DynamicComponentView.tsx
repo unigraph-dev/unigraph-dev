@@ -5,11 +5,13 @@ import { getComponentFromExecutable } from "../../unigraph-react";
 import { buildGraph, getRandomInt, UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
 import { AutoDynamicView } from "./AutoDynamicView";
 import { AutoDynamicViewDetailed } from "./AutoDynamicViewDetailed";
+import { DynamicObjectListView } from "./DynamicObjectListView";
 
 export const globalImports = {
     "HelloWorld": () => <p>Hello world!!!</p>,
     "AutoDynamicView": (props: any) => <AutoDynamicView {...props} />,
     "AutoDynamicViewDetailed": (props: any) => <AutoDynamicViewDetailed {...props} />,
+    "DynamicObjectListView": (props: any) => <DynamicObjectListView {...props} />,
     "UnigraphObject": UnigraphObject,
     "buildGraph": buildGraph
 }

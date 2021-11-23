@@ -7,6 +7,17 @@ import { AutoDynamicView } from "../components/ObjectView/AutoDynamicView";
 import { DynamicObjectListView } from "../components/ObjectView/DynamicObjectListView";
 import { parseQuery } from "../components/UnigraphCore/UnigraphSearch";
 
+export const SearchOverlayTooltip = () => {
+    return <div style={{marginTop: "16px"}}>
+        <Typography style={{color: "gray"}}>Add an item</Typography>
+        <Typography>+todo / +td : add todo item</Typography>
+        <Typography>+note / +n : create new note page and start editing</Typography>
+        <Typography>+bookmark / +bm : add bookmark from URL</Typography>
+        <Typography style={{color: "gray"}}>Search Unigraph</Typography>
+        <Typography>?&lt;search query&gt; : search Unigraph</Typography>
+    </div>
+}
+
 export const SearchOverlay = ({open, setClose}: any) => {
     const tf = React.useRef<HTMLDivElement | null>(null);
     const [input, setInput] = React.useState("");
@@ -58,7 +69,7 @@ export const SearchOverlay = ({open, setClose}: any) => {
     React.useEffect(() => {
         if (parsed?.type === "quickAdder") {
             const allAdders = window.unigraph.getState('registry/quickAdder').value;
-            allAdders[parsed?.key](parsed?.value).then((res: any) => {
+            allAdders[parsed?.key].adder(parsed?.value).then((res: any) => {
                 const [object, type] = res;
                 console.log(JSON.stringify(object))
                 window.unigraph.getSchemas().then((schemas: any) => {
@@ -104,7 +115,7 @@ export const SearchOverlay = ({open, setClose}: any) => {
             placeholder={"Enter: +<type shortname> to create; ?<search query> to search; <command> to execute command"}
             onKeyPress={async (ev) => {
                 if (ev.key === "Enter" && parsed?.type === "quickAdder" && window.unigraph.getState('registry/quickAdder').value[parsed?.key]) {
-                    await window.unigraph.getState('registry/quickAdder').value[parsed?.key](JSON.parse(JSON.stringify(parsed?.value)), false);
+                    await window.unigraph.getState('registry/quickAdder').value[parsed?.key]?.adder(JSON.parse(JSON.stringify(parsed?.value)), false);
                     setInput('');
                     setClose();
                 }
@@ -121,6 +132,10 @@ export const SearchOverlay = ({open, setClose}: any) => {
                 buildGraph={true}
                 noBar
             /> : []}
+            {entries.length + entities.length === 0 ? <SearchOverlayTooltip /> : []}
+            {parsed?.type === "quickAdder" ? <div style={{marginTop: "32px"}}>
+                {React.createElement(window.unigraph.getState('registry/quickAdder').value[parsed?.key].tooltip)}
+            </div> : []}
         </div>
     </div>
 }

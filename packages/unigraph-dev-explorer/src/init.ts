@@ -67,11 +67,11 @@ function init() {
 
 export type ContextMenuState = {
     anchorPosition: {top: number, left: number},
-    menuContent: ((uid: string, object: any, onfire: () => any, callbacks?: any) => React.ReactElement)[],
+    menuContent: ((uid: string, object: any, onfire: () => any, callbacks?: any, contextUid?: string) => React.ReactElement)[],
     contextObject: any,
     contextUid: string,
-    schemaMenuContent: ((uid: string, object: any, onfire: () => any, callbacks?: any) => React.ReactElement)[],
-    menuContextContent: ((uid: string, object: any, onfire: () => any, callbacks?: any) => React.ReactElement)[],
+    schemaMenuContent: ((uid: string, object: any, onfire: () => any, callbacks?: any, contextUid?: string) => React.ReactElement)[],
+    menuContextContent: ((uid: string, object: any, onfire: () => any, callbacks?: any, contextUid?: string) => React.ReactElement)[],
     contextContextObject?: any,
     contextContextUid?: string,
     removeFromContext?: string,

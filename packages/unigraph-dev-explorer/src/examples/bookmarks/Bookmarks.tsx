@@ -68,11 +68,6 @@ function BookmarksBody ({data}: { data: ABookmark[] }) {
             items={bookmarks}
             context={null} reverse defaultFilter={"no-filter"}
         />
-        <div>
-        <TextField value={newName} onChange={(e) => setNewName(e.target.value)}></TextField>
-        <Button onClick={() => createBookmark(newName).then((obj: any) => {return false;})}>Add</Button>
-        For example, enter #tag1 https://example.com
-        </div>
     </React.Fragment>
 }
 
@@ -122,6 +117,10 @@ const quickAdder = async (inputStr: string, preview = true) => {
     else return [await createBookmark(inputStr, false), '$/schema/web_bookmark']
 }
 
-registerQuickAdder({'bookmark': quickAdder, 'bm': quickAdder})
+const tt = () => <div>
+    For example, enter #tag1 https://example.com
+</div>
+
+registerQuickAdder({'bookmark': {adder: quickAdder, tooltip: tt}, 'bm': {adder: quickAdder, tooltip: tt}})
 
 registerDynamicViews({"$/schema/web_bookmark": BookmarkItem})

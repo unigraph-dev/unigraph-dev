@@ -403,7 +403,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             const id = getRandomInt();
             callbacks[id] = (response: any) => {
                 if (response.success) {
-                    if (response.returns?.return_function_component && !fnString) {
+                    if (response.returns?.return_function_component !== undefined && !fnString) {
                         // eslint-disable-next-line no-new-func
                         const retFn = new Function('React', 'return ' + response.returns?.return_function_component)(React);
                         console.log(retFn);

@@ -205,7 +205,8 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
         display: "flex", flexDirection: "column", overflowY: "hidden"
     }} ref={drop}>
         <div style={{ display: "flex" }}>
-            {noBar ? [] : <Accordion expanded={optionsOpen} onChange={() => setOptionsOpen(!optionsOpen)} variant={"outlined"} style={{ flexGrow: 1, minWidth: 0 }}>
+            {noBar ? [] : <React.Fragment>
+                <Accordion expanded={optionsOpen} onChange={() => setOptionsOpen(!optionsOpen)} variant={"outlined"} style={{ flexGrow: 1, minWidth: 0 }}>
             <AccordionSummary
                 expandIcon={<ExpandMore />}
                 aria-controls="panel1bh-content"
@@ -253,11 +254,12 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
                 </List>
 
             </AccordionDetails>
-        </Accordion>}
+        </Accordion>
             <IconButton
                 onClick={() => itemRemover(procItems.map((el, idx) => idx))}
                 style={{ display: itemRemover === _.noop ? "none" : "" }}
-            ><ClearAll /></IconButton>
+            ><ClearAll /></IconButton>    
+            </React.Fragment>}
         </div>
         <div style={{ flexGrow: 1, overflowY: "auto" }} id="scrollableDiv" >
             {!groupBy.length ? 

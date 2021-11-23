@@ -76,6 +76,7 @@ export const Executable: DynamicViewRenderer = ({data, callbacks}) => {
     const unpadded = unpad(data);
     const icons: any = {
         "routine/js": <PlayArrow/>,
+        "client/js": <PlayArrow/>,
         "component/react-jsx": <OpenInNew/>,
         "lambda/js": <TrendingFlat/>
     }

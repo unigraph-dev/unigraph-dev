@@ -40,6 +40,18 @@
                 }
             },
             {
+                "_key": "icon",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/icon_url" }
+                }
+            },
+            {
+                "_key": "is_shortcut",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/boolean" }
+                }
+            },
+            {
                 "_key": "item_type",
                 "_definition": {
                     "type": { "unigraph.id": "$/schema/any" }

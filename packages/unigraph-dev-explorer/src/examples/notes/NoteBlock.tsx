@@ -261,15 +261,15 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                         onKeyDown={async (ev) => {
                             const sel = document.getSelection();
                             const caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
-                            switch (ev.code) {
-                                case 'Enter':
+                            switch (ev.keyCode) {
+                                case 13: //enter
                                     ev.preventDefault();
                                     edited.current = false;
                                     inputDebounced.current.cancel();
                                     setCommand(() => callbacks['split-child']?.bind(this, textref.current || data.get('text').as('primitive'), caret))
                                     break;
 
-                                case 'Tab':
+                                case 9: // tab
                                     ev.preventDefault();
                                     inputDebounced.current.flush();
                                     if (ev.shiftKey) {
@@ -279,7 +279,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                                     }
                                     break;
 
-                                case 'Backspace':
+                                case 8: // backspace
                                     //console.log(caret, document.getSelection()?.type)
                                     if (caret === 0 && document.getSelection()?.type === "Caret" && !(textref.current).length) {
                                         ev.preventDefault();
@@ -289,19 +289,19 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                                     }
                                     break;
 
-                                case 'ArrowUp':
+                                case 38: // up arrow
                                     ev.preventDefault();
                                     inputDebounced.current.flush();
                                     setCommand(() => callbacks['focus-last-dfs-node'].bind(this, data, editorContext, 0))
                                     break;
 
-                                case 'ArrowDown':
+                                case 40: // down arrow
                                     ev.preventDefault();
                                     inputDebounced.current.flush();
                                     setCommand(() => callbacks['focus-next-dfs-node'].bind(this, data, editorContext, 0))
                                     break;
 
-                                case 'BracketLeft':
+                                case 219: // left bracket
                                     if (!ev.shiftKey) {
                                         ev.preventDefault();
                                         //console.log(document.getSelection())
@@ -314,7 +314,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                                     }
                                     break;
 
-                                case 'Digit9':
+                                case 57: // 9 or parenthesis
                                     if (ev.shiftKey) {
                                         ev.preventDefault();
                                         //console.log(document.getSelection())

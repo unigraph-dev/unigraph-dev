@@ -49,6 +49,6 @@ export default function DetailedObjectView ({ uid, viewer, id, context, componen
     </React.Fragment> : <React.Fragment key={object?.uid}>
         <AutoDynamicViewDetailed object={object} options={{
             viewId: id
-        }} callbacks={{...callbacks, subsId: myid}} context={contextObj} component={component}></AutoDynamicViewDetailed>
+        }} callbacks={{...callbacks, subsId: myid, viewId: id}} context={contextObj} component={component}></AutoDynamicViewDetailed>
     </React.Fragment>)
 }

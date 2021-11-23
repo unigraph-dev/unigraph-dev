@@ -8,6 +8,7 @@ declare global {
         layoutModel: Model,
         registerNotifications: (callback: ((data: any[]) => any)) => any,
         newTab: any,
+        closeTab: any,
         crcTable: any,
         wsnavigator: (sth: string) => any,
         electronPreload: any,
