@@ -633,6 +633,7 @@ export const byUpdatedAt = (a: any, b: any) => (new Date((a["_timestamp"]?.["_up
 
 export function unpadRecurse(object: any, visitedUids: any[] = []) {
     let result: any = undefined;
+    if (object?.uid && visitedUids.includes(object.uid)) return {uid: object.uid};
     if (typeof object === "object" && !Array.isArray(object)) {
         result = {};
         let newVisited = object['uid'] ? [...visitedUids, object['uid']] : visitedUids

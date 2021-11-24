@@ -47,7 +47,9 @@ if (progress) {
         percent
     };
     //console.log(obj);
-    const uids = await unigraph.addObject(obj, '$/schema/incremental_reader_item');
-    await unigraph.runExecutable("$/executable/add-item-to-list", {where: "$/entity/read_later", item: uids[0]});
+    setTimeout(async () => {
+        const uids = await unigraph.addObject(obj, '$/schema/incremental_reader_item');
+        await unigraph.runExecutable("$/executable/add-item-to-list", {where: "$/entity/read_later", item: uids[0]});
+    }, 0)
     callbacks.closeTab();
 }

@@ -71,34 +71,34 @@ export class UnigraphObject extends Object {
  */
 export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
 
-    const objs: any[] = JSON.parse(JSON.stringify(objects)).map((el: any) => new UnigraphObject(el))
+    const objs: any[] = [...objects].map((el: any) => new UnigraphObject(el))
     const dict: any = {}
     objs.forEach(object => {if (object?.uid) dict[object.uid] = object})
 
-    function buildDictRecurse(obj: any) {
+    function buildDictRecurse(obj: any, pastUids: any[] = []) {
         if (obj && typeof obj === "object" && Array.isArray(obj)) {
             obj.forEach((val, index) => {
                 if(val?.uid && !dict[val.uid] && Object.keys(val).length !== 1) dict[val.uid] = obj[index];
-                buildDictRecurse(val)
+                if (!pastUids.includes(val?.uid)) buildGraphRecurse(val, Object.keys(val).length !== 1 ? [...pastUids, val?.uid] : pastUids)
             })
         } else if (obj && typeof obj === "object") {
             Object.entries(obj).forEach(([key, value]: [key: string, value: any]) => {
                 if(value?.uid && !dict[value.uid] && Object.keys(value).length !== 1) dict[value.uid] = obj[key];
-                buildDictRecurse(value)
+                if (!pastUids.includes(value?.uid)) buildGraphRecurse(value, [...pastUids, value?.uid])
             })
         }
     }
 
-    function buildGraphRecurse(obj: any) {
+    function buildGraphRecurse(obj: any, pastUids: any[] = []) {
         if (obj && typeof obj === "object" && Array.isArray(obj)) {
             obj.forEach((val, index) => {
                 if(val?.uid && dict[val.uid]) obj[index] = dict[val.uid];
-                buildGraphRecurse(val)
+                if (!pastUids.includes(val?.uid)) buildGraphRecurse(val, [...pastUids, val?.uid])
             })
         } else if (obj && typeof obj === "object") {
             Object.entries(obj).forEach(([key, value]: [key: string, value: any]) => {
                 if(value?.uid && dict[value.uid]) obj[key] = dict[value.uid];
-                buildGraphRecurse(value)
+                if (!pastUids.includes(value?.uid)) buildGraphRecurse(value, Object.keys(value).length !== 1 ? [...pastUids, value?.uid] : pastUids)
             })
         }
     }

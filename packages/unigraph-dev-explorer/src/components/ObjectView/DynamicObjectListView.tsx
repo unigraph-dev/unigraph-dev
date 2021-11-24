@@ -8,7 +8,7 @@ import { UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
 import { getDynamicViews } from "../../unigraph-react";
 import { AutoDynamicView } from "./AutoDynamicView";
 import { isMobile } from "../../utils";
-import { buildGraph as buildGraphFn } from "unigraph-dev-common/lib/api/unigraph";
+import { buildGraph as buildGraphFn } from "unigraph-dev-common/lib/utils/utils";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { setupInfiniteScrolling } from "./infiniteScrolling";
 

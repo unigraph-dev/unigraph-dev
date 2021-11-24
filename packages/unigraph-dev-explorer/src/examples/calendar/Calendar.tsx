@@ -1,7 +1,7 @@
 import { Avatar, Badge, Typography } from "@material-ui/core";
 import { CalendarToday } from "@material-ui/icons";
 import React from "react";
-import { buildGraph, getRandomInt, UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
+import { buildGraph, getRandomInt, UnigraphObject } from "unigraph-dev-common/lib/utils/utils";
 import { DynamicObjectListView } from "../../components/ObjectView/DynamicObjectListView";
 import Sugar from 'sugar';
 import { AutoDynamicView } from "../../components/ObjectView/AutoDynamicView";

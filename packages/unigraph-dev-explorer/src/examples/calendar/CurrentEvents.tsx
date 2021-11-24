@@ -1,6 +1,6 @@
 import { Typography } from "@material-ui/core";
 import React from "react"
-import { buildGraph, getRandomInt, UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
+import { buildGraph, getRandomInt, UnigraphObject } from "unigraph-dev-common/lib/utils/utils";
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { DynamicObjectListView } from "../../components/ObjectView/DynamicObjectListView";
 import Sugar from 'sugar';
