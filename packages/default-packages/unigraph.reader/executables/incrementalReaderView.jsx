@@ -7,6 +7,7 @@ return <div style={{display: "flex"}}>
         const ctxUid = data._value.context._value.uid
         if (htmlUid) window.wsnavigator('/library/object?uid=' + data.uid);
         if (callbacks?.removeFromContext) callbacks.removeFromContext();
+        window.unigraph.deleteObject(data.uid);
     }}>
         <p>{data._value.percent["_value.#i"]}%</p>
         <p>&gt;&gt;</p>
