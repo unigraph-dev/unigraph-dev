@@ -25,12 +25,12 @@ const getSemanticEntities = async (el) => {
     await Promise.all(el.entities?.urls?.map(async el => {
         const url = el.unwound?.url || el.expanded_url;
         const uids = await unigraph.runExecutable('$/executable/add-bookmark', {url: url, context: {_hide: true}});
-        children.push({
+        if (uids?.[0]) children.push({
             key: el.url,
             value: {
                 uid: uids[0]
             }
-        });
+        }); else console.log(url);
     }));
     return children.map((el, index) => {return {
             '_index': {'_value.#i': index},

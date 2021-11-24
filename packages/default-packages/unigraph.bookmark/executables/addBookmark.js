@@ -37,6 +37,8 @@ if (result.favicon?.startsWith("/")) {
 
 const uid = await unigraph.addObject(result, "$/schema/web_bookmark");
 
-unigraph.callHook('after_bookmark_updated', {uids: [uid[0]]});
+setTimeout(() => {
+    unigraph.callHook('after_bookmark_updated', {uids: [uid[0]]});
+})
 
 return uid
