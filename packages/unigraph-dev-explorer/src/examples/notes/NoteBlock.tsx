@@ -5,7 +5,7 @@ import { AutoDynamicView } from "../../components/ObjectView/AutoDynamicView";
 import { ViewViewDetailed } from "../../components/ObjectView/DefaultObjectView";
 
 import _ from "lodash";
-import { buildGraph } from "unigraph-dev-common/lib/api/unigraph";
+import { buildGraph } from "unigraph-dev-common/lib/utils/utils";
 import { Actions } from "flexlayout-react";
 import { addChild, convertChildToTodo, focusLastDFSNode, focusNextDFSNode, indentChild, setCaret, setFocus, splitChild, unindentChild, unsplitChild, replaceChildWithUid } from "./commands";
 import { onUnigraphContextMenu } from "../../components/ObjectView/DefaultObjectContextMenu";
@@ -349,7 +349,6 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
             {!(isCollapsed === true) ? <div ref={childrenref} style={{ width: "100%" }} >
                 {(subentities.length || isChildren) ? buildGraph(subentities).map((el: any, elindex) => {
                     const isCol = isChildrenCollapsed[el.uid];
-                    console.log(el.type);
                     return <OutlineComponent key={el.uid} isChildren={isChildren} collapsed={isCol} setCollapsed={(val: boolean) => setIsChildrenCollapsed({ ...isChildrenCollapsed, [el.uid]: val })}
                         createBelow={() => { addChild(dataref.current, editorContext) }}
                     >

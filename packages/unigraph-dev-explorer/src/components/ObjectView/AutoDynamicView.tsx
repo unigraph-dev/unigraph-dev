@@ -16,6 +16,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     const isObjectStub = isStub(object);
     const [loadedObj, setLoadedObj] = React.useState<any>(false);
     const [subsId, setSubsId] = React.useState(0);
+    const [isRecursion, setIsRecursion] = React.useState<any>(undefined);
     const getObject = () => isObjectStub ? loadedObj : object;
     const DynamicViews = {...window.unigraph.getState('registry/dynamicView').value, ...(component ? component : {})}
 
@@ -72,23 +73,46 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     const selectedState = window.unigraph.getState('global/selected');
     selectedState.subscribe((sel: any) => {if (sel?.includes?.(object?.uid)) setIsSelected(true); else setIsSelected(false);})
 
+    function getParents(elem: any) {
+        var parents = [];
+        while(elem.parentNode && elem.parentNode.nodeName.toLowerCase() != 'body') {
+          elem = elem.parentNode;
+          if (elem.id) parents.push(elem.id);
+        }
+        return parents;
+      }
+
     const attach = React.useCallback((domElement) => {
+        if (domElement && object.uid) {
+            const ids = getParents(domElement);
+            if (ids.includes("object-view-"+object?.uid)) {
+                // recursive - deal with it somehow
+                setIsRecursion(true);
+            } else setIsRecursion(false);
+        } else if (!object.uid) {
+            setIsRecursion(false)
+        }
+
         if (!noDrag) drag(domElement);
         if (!noDrop) drop(domElement);
         if (isMobile()) handlers.ref(domElement);
     }, [isDragging, drag, callbacks])
 
-    //console.log(object) 
     let el;
-    if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViews).includes(object.type['unigraph.id']) && getObject()) {
+    if (isRecursion === false && object?.type && object.type['unigraph.id'] && Object.keys(DynamicViews).includes(object.type['unigraph.id']) && getObject()) {
         el = React.createElement(DynamicViews[object.type['unigraph.id']].view, {
             data: getObject(), callbacks: callbacks ? callbacks : undefined, ...(attributes ? attributes : {})
         });
-    } else if (object && getObject()) {
+    } else if (isRecursion === false && object && getObject()) {
         el = <StringObjectViewer object={getObject()}/>
+    } else if (isRecursion === true) {
+        el = <Typography style={{color: "red"}}>
+            Recursive element (uid: {object.uid}), ignored!
+        </Typography>
     } else {
         el = <React.Fragment />
     }
+    
     return el ? <ErrorBoundary onError={(error: Error, info: {componentStack: string}) => {
         console.error(error);
       }} FallbackComponent={({error}) => <div style={{backgroundColor: "floralwhite", borderRadius: "8px"}}>

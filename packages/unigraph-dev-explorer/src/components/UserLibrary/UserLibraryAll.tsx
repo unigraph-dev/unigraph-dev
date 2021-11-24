@@ -3,7 +3,7 @@ import _ from 'lodash';
 import React from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useEffectOnce } from 'react-use';
-import { buildGraph, getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
+import { buildGraph, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
 import { setupInfiniteScrolling } from '../ObjectView/infiniteScrolling';
 

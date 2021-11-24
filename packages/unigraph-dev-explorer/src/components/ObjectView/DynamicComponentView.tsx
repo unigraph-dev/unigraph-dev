@@ -2,7 +2,7 @@ import React from "react";
 import { useEffectOnce } from "react-use";
 import { DynamicViewRenderer } from "../../global"
 import { getComponentFromExecutable } from "../../unigraph-react";
-import { buildGraph, getRandomInt, UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
+import { buildGraph, getRandomInt, UnigraphObject } from "unigraph-dev-common/lib/utils/utils";
 import { AutoDynamicView } from "./AutoDynamicView";
 import { AutoDynamicViewDetailed } from "./AutoDynamicViewDetailed";
 import { DynamicObjectListView } from "./DynamicObjectListView";

@@ -1,5 +1,6 @@
 const url = context.params.url;
 const tags = context.params.tags ? context.params.tags : [];
+const ctx = context.params.context;
 const scrape = require('html-metadata');
 
 let res;
@@ -25,7 +26,8 @@ const result = {
             type: {'unigraph.id': '$/schema/html'},
             _value: res?.general?.description || res?.openGraph?.description || res?.twitter?.description || ""
         }
-    }
+    },
+    ...(ctx ? {'$context': ctx} : {})
 }
 
 if (result.favicon?.startsWith("/")) {
@@ -35,4 +37,8 @@ if (result.favicon?.startsWith("/")) {
 
 const uid = await unigraph.addObject(result, "$/schema/web_bookmark");
 
-unigraph.callHook('after_bookmark_updated', {uids: [uid[0]]});
+setTimeout(() => {
+    unigraph.callHook('after_bookmark_updated', {uids: [uid[0]]});
+})
+
+return uid

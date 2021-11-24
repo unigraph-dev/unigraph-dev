@@ -1,7 +1,7 @@
 import { Typography } from "@material-ui/core";
 import React from "react";
 import { useEffectOnce } from "react-use";
-import { buildGraph } from "unigraph-dev-common/lib/api/unigraph";
+import { buildGraph } from "unigraph-dev-common/lib/utils/utils";
 import { DynamicObjectListView } from "./DynamicObjectListView";
 
 const getQuery = (uid: string, forward?: boolean) => `(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted))) @recurse(depth: 8) {

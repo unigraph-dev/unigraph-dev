@@ -14,7 +14,7 @@ const oauth = new OAuth.OAuth(
     'HMAC-SHA1'
 );
 
-const getSemanticEntities = (el) => {
+const getSemanticEntities = async (el) => {
     const children = [];
     el.entities?.media?.forEach(el => {
         children.push({
@@ -22,22 +22,16 @@ const getSemanticEntities = (el) => {
             value: unigraph.buildUnigraphEntity(el.media_url, '$/schema/icon_url')
         })
     });
-    el.entities?.urls?.forEach(el => {
-        children.push({
+    await Promise.all(el.entities?.urls?.map(async el => {
+        const url = el.unwound?.url || el.expanded_url;
+        const uids = await unigraph.runExecutable('$/executable/add-bookmark', {url: url, context: {_hide: true}});
+        if (uids?.[0]) children.push({
             key: el.url,
-            value: unigraph.buildUnigraphEntity({
-                url: el.unwound?.url || el.expanded_url,
-                name: el.unwound?.title || "No title",
-                creative_work: {
-                    abstract: {
-                        type: {'unigraph.id': '$/schema/html'},
-                        _value: el.unwound?.description || "No description"
-                    }
-                }
-            }, '$/schema/web_bookmark', {globalStates: {nextUid: (children.length+1) * 1000}})
-        });
-        children[children.length-1].value._hide = true;
-    });
+            value: {
+                uid: uids[0]
+            }
+        }); else console.log(url);
+    }));
     return children.map((el, index) => {return {
             '_index': {'_value.#i': index},
             '_key': el.key,
@@ -50,12 +44,12 @@ const getSemanticEntities = (el) => {
     }});
 }
 
-const objects = await (new Promise((resolve, reject) => oauth.get(`https://api.twitter.com/1.1/lists/statuses.json?list_id=${id}&tweet_mode=extended&count=100&since_id=${last_id_fetched}`, access_token, access_token_secret, (err, result, response) => {
+const objects = await (new Promise((resolve, reject) => oauth.get(`https://api.twitter.com/1.1/lists/statuses.json?list_id=${id}&tweet_mode=extended&count=100&since_id=${last_id_fetched}`, access_token, access_token_secret, async (err, result, response) => {
     if (!result) {
         resolve([]);
     } else {
         const resObjects = JSON.parse(result);
-        const unigraphObjects = resObjects?.map?.(el => {
+        const unigraphObjects = await Promise.all(resObjects?.map?.(async el => {
             if (el.truncated) console.log("Truncated"); 
             const entity = {
                 _timestamp: {
@@ -79,9 +73,9 @@ const objects = await (new Promise((resolve, reject) => oauth.get(`https://api.t
                 children: [{uid: "0x123"}]
             };
             const padded = unigraph.buildUnigraphEntity(entity, '$/schema/tweet');
-            padded['_value']['children']['_value['] = getSemanticEntities(el);
+            padded['_value']['children']['_value['] = await getSemanticEntities(el);
             return padded;
-        }) || [];
+        })) || [];
         resolve(unigraphObjects);
     }
 })))

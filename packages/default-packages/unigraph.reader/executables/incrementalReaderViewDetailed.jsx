@@ -2,6 +2,12 @@ const {data, callbacks, ...props} = params;
 const htmlUid = data._value.item._value
 const ctxUid = data._value.context._value
 
+React.useEffect(() => {
+    return function cleanup () {
+        window.unigraph.deleteObject(data, true);
+    }
+}, [])
+
 return <AutoDynamicViewDetailed object={new UnigraphObject(htmlUid)} context={new UnigraphObject(ctxUid)} callbacks={{
     onLoad: (iframeRef) => {
         const doc = iframeRef.current.contentDocument;

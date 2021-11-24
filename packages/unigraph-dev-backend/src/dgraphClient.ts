@@ -159,8 +159,11 @@ export default class DgraphClient {
     //return ["0x" + getRandomInt().toString()];
     return data.mutations.map((el, index) => {
       let targetUid = `upsert${index}`;
+      //console.log(el.uid, targetUid, response.getUidsMap(), response.getJson())
       if (el.uid) {
-        if (el.uid.startsWith('_:')) targetUid = el.uid.slice(2);
+        if (el.uid.startsWith('0x')) return el.uid;
+        else if (el.uid.startsWith('_:')) targetUid = el.uid.slice(2);
+        else if (el.uid.startsWith('uid(') && response.getUidsMap().get(el.uid)) targetUid = el.uid
         else if (el.uid.startsWith('uid(')) return response.getJson()?.["uidreq" +el.uid.slice(4, -1)]?.[0]?.uid;
         else targetUid = el.uid
       }
