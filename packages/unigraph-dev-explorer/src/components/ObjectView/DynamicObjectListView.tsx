@@ -8,7 +8,7 @@ import { UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
 import { getDynamicViews } from "../../unigraph-react";
 import { AutoDynamicView } from "./AutoDynamicView";
 import { isMobile } from "../../utils";
-import { buildGraph as buildGraphFn } from "unigraph-dev-common/lib/utils/utils";
+import { buildGraph as buildGraphFn, getRandomInt } from "unigraph-dev-common/lib/utils/utils";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { setupInfiniteScrolling } from "./infiniteScrolling";
 
@@ -106,7 +106,7 @@ const DynamicListBasic = ({ reverse, items, context, listUid, callbacks, itemUid
     />);
 }
 
-const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true, buildGraph }: any) => {
+const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true, buildGraph, parId }: any) => {
 
     const [loadedItems, setLoadedItems] = React.useState<any[]>([]);
     const [setupProps, setSetupProps] = React.useState<{next: any, cleanup: any} | null>(null);
@@ -130,10 +130,10 @@ const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, it
         next={setupProps?.next || (() => {})}
         hasMore={loadedItems.length < items.length}
         loader={<React.Fragment/>}
+        scrollableTarget={"scrollableDiv"+parId}
         endMessage={
             <React.Fragment/>
         }
-        scrollableTarget="scrollableDiv"
     >
         {loadedItems.map((el: any, index: number) => <DynamicListItem
             item={el} index={index} context={context} listUid={listUid} reverse={reverse}
@@ -184,6 +184,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
 
     const contextRef = React.useRef(context);
     React.useEffect(() => contextRef.current = context, [context]);
+    const [parId] = React.useState(getRandomInt());
 
     const [{ canDrop }, drop] = useDrop(() => ({
         // @ts-expect-error: already checked for namespace map
@@ -261,12 +262,12 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
             ><ClearAll /></IconButton>    
             </React.Fragment>}
         </div>
-        <div style={{ flexGrow: 1, overflowY: "auto" }} id="scrollableDiv" >
+        <div style={{ flexGrow: 1, overflowY: "auto" }} id={"scrollableDiv"+parId} >
             {!groupBy.length ? 
-                React.createElement(isStub ? DynamicList : DynamicListBasic, { reverse: reverseOrder, items: procItems, context, listUid, callbacks, itemRemover, itemUids: procItems.map(el => el.uid), itemGetter, buildGraph }) :
+                React.createElement(isStub ? DynamicList : DynamicListBasic, { reverse: reverseOrder, items: procItems, context, listUid, callbacks, itemRemover, itemUids: procItems.map(el => el.uid), itemGetter, buildGraph, parId }) :
                 groupers[groupBy](procItems.map(itemGetter)).map((el: Group) => <React.Fragment>
                     <ListSubheader>{el.name}</ListSubheader>
-                    {React.createElement(isStub ? DynamicList : DynamicListBasic, { reverse: reverseOrder, items: el.items, context, listUid, callbacks, itemRemover, itemUids: el.items.map(ell => ell.uid), itemGetter: _.identity, infinite: false, buildGraph})}
+                    {React.createElement(isStub ? DynamicList : DynamicListBasic, { reverse: reverseOrder, items: el.items, context, listUid, callbacks, itemRemover, itemUids: el.items.map(ell => ell.uid), itemGetter: _.identity, infinite: false, buildGraph, parId})}
                 </React.Fragment>)
             }
         </div>
