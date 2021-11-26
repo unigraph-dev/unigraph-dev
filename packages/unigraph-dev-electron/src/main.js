@@ -164,10 +164,10 @@ function unigraphLoaded() {
       }
     }
     if (todayWindow) {
-      !isDev() ?
-        todayWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'), { query: { "pageName": "today" } }) :
-        todayWindow.loadURL('http://' + frontendLocation + ':3000/?pageName=today');
-      todayWindow.hide();
+      //!isDev() ?
+        //todayWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'), { query: { "pageName": "today" } }) :
+        //todayWindow.loadURL('http://' + frontendLocation + ':3000/?pageName=today');
+      //todayWindow.hide();
     }
     if (omnibar) {
       !isDev() ?
@@ -186,7 +186,7 @@ app.whenReady().then(() => {
   trayMenu = createTrayMenu((newTemplate) => { tray.setContextMenu(Menu.buildFromTemplate(newTemplate)) });
   globalShortcut.register('Alt+Tab', () => {
     if (todayWindow) {
-      todayWindow.isVisible() ? todayWindow.hide() : todayWindow.show();
+      //todayWindow.isVisible() ? todayWindow.hide() : todayWindow.show();
     };
   });
   globalShortcut.register('CommandOrControl+E', () => {
@@ -195,17 +195,17 @@ app.whenReady().then(() => {
     };
   })
   setTimeout(() => {
-    mainWindow = createLoadingWindow(), todayWindow = createTodayWindow()
+    mainWindow = createLoadingWindow()//, todayWindow = createTodayWindow()
     omnibar = createOmnibar();
     omnibar.on('blur', () => {
       //console.log("buhf")
       closeOmnibar();
     })
-    todayWindow.maximize();
+    //todayWindow.maximize();
     mainWindow.maximize();
-    todayWindow.setVisibleOnAllWorkspaces(true);
+    //todayWindow.setVisibleOnAllWorkspaces(true);
     omnibar.setVisibleOnAllWorkspaces(true);
-    trayMenu.setMainWindow(mainWindow), trayMenu.setTodayWindow(todayWindow)
+    trayMenu.setMainWindow(mainWindow)//, trayMenu.setTodayWindow(todayWindow)
     startServer(mainWindow.webContents);
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) {
@@ -215,7 +215,7 @@ app.whenReady().then(() => {
         mainWindow.show();
       }
     })
-    const windows = [mainWindow, todayWindow, omnibar]
+    const windows = [mainWindow, omnibar]
     windows.map(el => el.on('close', (event) => {
       if (!isAppClosing) {
         event.preventDefault();
@@ -231,25 +231,26 @@ app.whenReady().then(() => {
 ipcMain.on('favorites_updated', (event, args) => {
   if (trayMenu) trayMenu.setFavorites(args)
 })
-
-ipcMain.on('newTabByUrl', (event, args) => {
-  mainWindow.webContents.send('newTabByUrl', args);
-  mainWindow.show();
-})
 //const applescript = require('applescript');
 
 function closeOmnibar () {
   if (!mainWasFocused && process.platform === "darwin") {
     console.log("hi")
     mainWindow.setFocusable(false);
-    todayWindow.setFocusable(false);
+    //todayWindow.setFocusable(false);
     omnibar.hide();
     mainWindow.setFocusable(true);
-    todayWindow.setFocusable(true);
+    //todayWindow.setFocusable(true);
   } else {
     omnibar.hide();
   }
 }
+
+ipcMain.on('newTabByUrl', (event, args) => {
+  mainWindow.webContents.send('newTabByUrl', args);
+  mainWindow.show();
+})
+//const applescript = require('applescript');
 
 function showOmnibar () {
   mainWasFocused = mainWindow.isFocused();
