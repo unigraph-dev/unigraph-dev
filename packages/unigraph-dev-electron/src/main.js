@@ -131,6 +131,17 @@ const createTodayWindow = () => createMainWindow({
   backgroundColor: '#00ffffff'
 });
 
+const createOmnibar = () => createMainWindow({
+  transparent: true,
+  frame: false,
+  backgroundColor: '#00ffffff',
+  webPreferences: {
+    preload: path.join(__dirname, '..', 'src', 'preload_omnibar.js'),
+    nativeWindowOpen: true,
+    contextIsolation: false,
+  }
+});
+
 const createMainWindowNoLoad = () => createMainWindow(null)
 
 function dgraphLoaded() {
@@ -170,17 +181,17 @@ app.whenReady().then(() => {
   trayMenu = createTrayMenu((newTemplate) => { tray.setContextMenu(Menu.buildFromTemplate(newTemplate)) });
   globalShortcut.register('Alt+Tab', () => {
     if (todayWindow) {
-      todayWindow.isVisible() ? todayWindow.hide() : todayWindow.show();
+      todayWindow.isVisible() ? Menu.sendActionToFirstResponder('hide:') : todayWindow.show();
     };
   });
   globalShortcut.register('CommandOrControl+E', () => {
     if (omnibar) {
-      omnibar.isVisible() ? omnibar.hide() : omnibar.show();
+      omnibar.isVisible() ? Menu.sendActionToFirstResponder('hide:') : omnibar.show();
     };
   })
   setTimeout(() => {
     mainWindow = createLoadingWindow(), todayWindow = createTodayWindow()
-    omnibar = createTodayWindow();
+    omnibar = createOmnibar();
     todayWindow.maximize();
     mainWindow.maximize();
     todayWindow.setVisibleOnAllWorkspaces(true);
@@ -213,7 +224,8 @@ ipcMain.on('favorites_updated', (event, args) => {
 })
 
 ipcMain.on('close_omnibar', () => {
-  omnibar.hide();
+  Menu.sendActionToFirstResponder('hide:')
+  console.log("Omnibar hidden!")
 })
 
 app.on('window-all-closed', () => {
