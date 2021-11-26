@@ -165,10 +165,10 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
         { id: "no-filter", fn: () => true },
         { id: "no-deleted", fn: (obj) => (obj?.['dgraph.type']?.includes?.('Deleted')) ? null : obj },
         { id: "no-noview", fn: (obj) => getDynamicViews().includes(obj?.['type']?.['unigraph.id']) ? obj : null },
-        { id: "no-textual", fn: (obj) => ["$/schema/markdown"].includes(obj?.['type']?.['unigraph.id']) ? null : obj },
+        { id: "no-trivial", fn: (obj) => ["$/schema/markdown", "$/schema/subentity"].includes(obj?.['type']?.['unigraph.id']) ? null : obj },
         { id: "no-hidden", fn: (obj) => obj['_hide'] !== true },
         ...filters];
-    const [filtersUsed, setFiltersUsed] = React.useState([...(defaultFilter ? [defaultFilter] : ["no-noview", "no-deleted", "no-textual", "no-hidden"])]);
+    const [filtersUsed, setFiltersUsed] = React.useState([...(defaultFilter ? [defaultFilter] : ["no-noview", "no-deleted", "no-trivial", "no-hidden"])]);
 
     const [procItems, setProcItems] = React.useState<any[]>([]);
     React.useEffect(() => {

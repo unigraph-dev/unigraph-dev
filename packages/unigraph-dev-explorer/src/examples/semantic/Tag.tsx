@@ -40,6 +40,3 @@ export const SemanticProperties = ({data}: any) => {
         return <AutoDynamicView object={unpad(el['_value'])} />
     })) : []
 }
-
-
-registerDynamicViews({"$/schema/tag": Tag})

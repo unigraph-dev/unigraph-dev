@@ -4,13 +4,15 @@ import { useDrag, useDrop } from 'react-dnd';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useSwipeable } from 'react-swipeable';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
+import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { AutoDynamicViewProps } from '../../types/ObjectView';
 import { isMobile, isMultiSelectKeyPressed, selectUid } from '../../utils';
 import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import { StringObjectViewer } from './DefaultObjectView';
-import { isStub, SubentityDropAcceptor } from './utils';
+import { getSubentities, isStub, SubentityDropAcceptor } from './utils';
 
 export const AutoDynamicView = ({ object, callbacks, component, attributes, inline, allowSubentity, style, noDrag, noDrop, noContextMenu }: AutoDynamicViewProps) => {
+    if (!callbacks) callbacks = {};
     allowSubentity = allowSubentity === true;
 
     const isObjectStub = isStub(object);
@@ -18,7 +20,14 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     const [subsId, setSubsId] = React.useState(0);
     const [isRecursion, setIsRecursion] = React.useState<any>(undefined);
     const getObject = () => isObjectStub ? loadedObj : object;
+
+    const [showSubentities, setShowSubentities] = React.useState(false);
+
     const DynamicViews = {...window.unigraph.getState('registry/dynamicView').value, ...(component ? component : {})}
+
+    if (getSubentities(object)?.length > 0) {
+        callbacks!.showSubentities = (show?: boolean) => { setShowSubentities(show === undefined ? !showSubentities : show) }
+    }
 
     React.useEffect(() => {
         const newSubs = getRandomInt();
@@ -119,6 +128,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
         <Typography>Error in AutoDynamicView: (for object {object?.uid})</Typography>
         <p>{error.message}</p>
     </div>}>
+        <div style={{display: inline ? "inline" : "block", ...(inline ? {} : {width: "100%"}),}}>
         <div 
             id={"object-view-"+object?.uid} 
             style={{
@@ -137,6 +147,10 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
         >
             {el}
         </div>
+        {showSubentities ? <div style={{width: "100%", paddingLeft: "24px"}}>
+                <ul>{getSubentities(object).map((el: any) => <li><AutoDynamicView object={new UnigraphObject(el['_value'])} callbacks={callbacks} /></li>)}</ul>
+            </div> : []}
         {(allowSubentity && !noDrop) ? <SubentityDropAcceptor uid={object?.uid} /> : []}
+        </div>
     </ErrorBoundary> : <React.Fragment/>;
 }

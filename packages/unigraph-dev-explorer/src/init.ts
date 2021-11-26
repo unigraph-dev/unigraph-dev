@@ -14,6 +14,7 @@ import { pb_init } from './components/UnigraphCore/Pinboard';
 
 import { ListObjectQuery, ListObjectView } from "./components/UnigraphCore/ListObjectView";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
+import { SubentityView } from "./components/UnigraphCore/SubentityView";
 
 /**
  * Things to do when Unigraph explorer loads
@@ -102,7 +103,8 @@ function initRegistry() {
     window.unigraph.addState('registry/dynamicView', {
         "$/schema/executable": {view: Executable},
         "$/skeleton/default": {view: DefaultSkeleton},
-        "$/schema/notification": {view: CNotification}
+        "$/schema/notification": {view: CNotification},
+        "$/schema/subentity": {view: SubentityView},
     });
     window.unigraph.addState('registry/dynamicViewDetailed', {
         "$/schema/executable": {view: CodeOrComponentView},
