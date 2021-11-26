@@ -19,12 +19,16 @@ const frontendLocation = process.env.FRONTEND_LOCATION || "localhost";
 let logs = [];
 let mainWindow = null;
 let todayWindow = null;
+let omnibar = null;
 let tray = null;
 let trayMenu = null;
 let index = null;
 let dontCheck = false;
 let shouldStartBackend = true;
 let alpha, zero;
+
+let mainWasVisible = false;
+let mainWasFocused = false;
 
 if (process.env.FRONTEND_LOCATION) shouldStartBackend = false;
 
@@ -130,6 +134,19 @@ const createTodayWindow = () => createMainWindow({
   backgroundColor: '#00ffffff'
 });
 
+const createOmnibar = () => createMainWindow({
+  transparent: true,
+  frame: false,
+  backgroundColor: '#00ffffff',
+  skipTaskbar: true,
+  useContentSize: true,
+  webPreferences: {
+    preload: path.join(__dirname, '..', 'src', 'preload_omnibar.js'),
+    nativeWindowOpen: true,
+    contextIsolation: false,
+  }
+});
+
 const createMainWindowNoLoad = () => createMainWindow(null)
 
 function dgraphLoaded() {
@@ -147,9 +164,16 @@ function unigraphLoaded() {
       }
     }
     if (todayWindow) {
+      //!isDev() ?
+        //todayWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'), { query: { "pageName": "today" } }) :
+        //todayWindow.loadURL('http://' + frontendLocation + ':3000/?pageName=today');
+      //todayWindow.hide();
+    }
+    if (omnibar) {
       !isDev() ?
-        todayWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'), { query: { "pageName": "today" } }) :
-        todayWindow.loadURL('http://' + frontendLocation + ':3000/?pageName=today'); todayWindow.hide();
+        omnibar.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'), { query: { "pageName": "omnibar" } }) :
+        omnibar.loadURL('http://' + frontendLocation + ':3000/?pageName=omnibar'); 
+      omnibar.hide();
     }
   }, 0)
 }
@@ -160,17 +184,28 @@ app.whenReady().then(() => {
   tray = new Tray(nativeImage.createFromDataURL(unigraph_trayIcon))
   tray.setToolTip('Unigraph')
   trayMenu = createTrayMenu((newTemplate) => { tray.setContextMenu(Menu.buildFromTemplate(newTemplate)) });
-  const _ = globalShortcut.register('Alt+Tab', () => {
+  globalShortcut.register('Alt+Tab', () => {
     if (todayWindow) {
-      todayWindow.isVisible() ? todayWindow.hide() : todayWindow.show();
+      //todayWindow.isVisible() ? todayWindow.hide() : todayWindow.show();
+    };
+  });
+  globalShortcut.register('CommandOrControl+E', () => {
+    if (omnibar) {
+      omnibar.isVisible() ? closeOmnibar() : showOmnibar();
     };
   })
   setTimeout(() => {
-    mainWindow = createLoadingWindow(), todayWindow = createTodayWindow()
-    todayWindow.maximize();
+    mainWindow = createLoadingWindow()//, todayWindow = createTodayWindow()
+    omnibar = createOmnibar();
+    omnibar.on('blur', () => {
+      //console.log("buhf")
+      closeOmnibar();
+    })
+    //todayWindow.maximize();
     mainWindow.maximize();
-    todayWindow.setVisibleOnAllWorkspaces(true);
-    trayMenu.setMainWindow(mainWindow), trayMenu.setTodayWindow(todayWindow)
+    //todayWindow.setVisibleOnAllWorkspaces(true);
+    omnibar.setVisibleOnAllWorkspaces(true);
+    trayMenu.setMainWindow(mainWindow)//, trayMenu.setTodayWindow(todayWindow)
     startServer(mainWindow.webContents);
     app.on('activate', () => {
       if (BrowserWindow.getAllWindows().length === 0) {
@@ -180,7 +215,7 @@ app.whenReady().then(() => {
         mainWindow.show();
       }
     })
-    const windows = [mainWindow, todayWindow]
+    const windows = [mainWindow, omnibar]
     windows.map(el => el.on('close', (event) => {
       if (!isAppClosing) {
         event.preventDefault();
@@ -196,6 +231,35 @@ app.whenReady().then(() => {
 ipcMain.on('favorites_updated', (event, args) => {
   if (trayMenu) trayMenu.setFavorites(args)
 })
+//const applescript = require('applescript');
+
+function closeOmnibar () {
+  if (!mainWasFocused && process.platform === "darwin") {
+    console.log("hi")
+    mainWindow.setFocusable(false);
+    //todayWindow.setFocusable(false);
+    omnibar.hide();
+    mainWindow.setFocusable(true);
+    //todayWindow.setFocusable(true);
+  } else {
+    omnibar.hide();
+  }
+}
+
+ipcMain.on('newTabByUrl', (event, args) => {
+  mainWindow.webContents.send('newTabByUrl', args);
+  mainWindow.show();
+})
+//const applescript = require('applescript');
+
+function showOmnibar () {
+  mainWasFocused = mainWindow.isFocused();
+  mainWasVisible = mainWindow.isVisible();
+  console.log(mainWasFocused, process.platform)
+  omnibar.show();
+}
+
+ipcMain.on('close_omnibar', closeOmnibar)
 
 app.on('window-all-closed', () => {
   // Prevent app quitting

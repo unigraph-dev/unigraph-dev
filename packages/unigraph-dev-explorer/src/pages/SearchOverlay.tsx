@@ -140,7 +140,7 @@ export const SearchOverlay = ({open, setClose}: any) => {
     </div>
 }
 
-export const SearchOverlayPopover = () => {
+export const SearchOverlayPopover = ({open, setClose, noShadow}: any) => {
     const [searchEnabled, setSearchEnabled] = React.useState(false);
     const overlay = React.useRef(null);
 
@@ -148,21 +148,21 @@ export const SearchOverlayPopover = () => {
         document.onkeydown = function(evt) {
             evt = evt || window.event;
             if ((evt.ctrlKey || evt.metaKey) && evt.key === 'e') {
-                setSearchEnabled(!searchEnabled);
+                if (open === undefined) setSearchEnabled(!searchEnabled);
             }
-            if (searchEnabled && evt.key === 'Escape') {
-                setSearchEnabled(false);
+            if ((open || searchEnabled) && evt.key === 'Escape') {
+                setClose ? setClose() : setSearchEnabled(false);
             }
         };
     }, [searchEnabled])
 
     React.useEffect(() => {
-        if (searchEnabled) {
+        if (open || searchEnabled) {
             const listener = (event: MouseEvent) => {
                 const withinBoundaries = overlay && event.composedPath().includes((overlay as any).current)
                 
                 if (!withinBoundaries) {
-                    setSearchEnabled(false);
+                    setClose ? setClose() : setSearchEnabled(false);
                     document.removeEventListener('click', listener)
                 } 
             }
@@ -171,7 +171,7 @@ export const SearchOverlayPopover = () => {
     }, [searchEnabled])
 
     return <Card
-    elevation={12} 
+    elevation={noShadow ? 0 : 12} 
         style={{
             zIndex: 99,
             position: "absolute",
@@ -183,10 +183,10 @@ export const SearchOverlayPopover = () => {
             overflow: "auto",
             "padding": "16px",
             "borderRadius": "16px",
-            display: searchEnabled ? "block" : "none"
+            display: (open || searchEnabled) ? "block" : "none"
         }}
         ref={overlay}
     >
-        <SearchOverlay open={searchEnabled} setClose={() => setSearchEnabled(false)}/>
+        <SearchOverlay open={open || searchEnabled} setClose={setClose || (() => setSearchEnabled(false))}/>
     </Card>
 }

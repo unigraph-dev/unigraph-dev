@@ -26,6 +26,9 @@ window.electronPreload = () => {
       enableFloat: 'true'
   })
   })
+  ipcRenderer.on('newTabByUrl', (event, tab) => {
+    window.wsnavigator(tab);
+  })
 }
 
 ipcRenderer.on('loading_log', (event, newLog) => {

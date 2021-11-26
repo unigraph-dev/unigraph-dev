@@ -246,7 +246,7 @@ export function WorkSpace(this: any) {
             const page = pages.value[(component.replace('/pages/', '') as string)]
             return <WorkspacePageComponent maximize={page.maximize} paddingTop={page.paddingTop} id={config.id}>
                 {node._attributes.floating ? <div id="global-elements">
-                    <SearchOverlayPopover /> 
+                    {isElectron() ? [] : <SearchOverlayPopover /> }
                     <ContextMenu />
                     <InlineSearch />
                 </div> : []}
@@ -290,7 +290,7 @@ export function WorkSpace(this: any) {
         <MuiPickersUtilsProvider utils={MomentUtils}>
         <DndProvider backend={HTML5Backend}>
             <div id="global-elements">
-                <SearchOverlayPopover />
+                {isElectron() ? [] : <SearchOverlayPopover /> }
                 <ContextMenu />
                 <InlineSearch />
             </div>
