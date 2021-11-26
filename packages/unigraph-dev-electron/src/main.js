@@ -27,6 +27,9 @@ let dontCheck = false;
 let shouldStartBackend = true;
 let alpha, zero;
 
+let mainWasVisible = false;
+let mainWasFocused = false;
+
 if (process.env.FRONTEND_LOCATION) shouldStartBackend = false;
 
 function isDev() {
@@ -135,6 +138,8 @@ const createOmnibar = () => createMainWindow({
   transparent: true,
   frame: false,
   backgroundColor: '#00ffffff',
+  skipTaskbar: true,
+  useContentSize: true,
   webPreferences: {
     preload: path.join(__dirname, '..', 'src', 'preload_omnibar.js'),
     nativeWindowOpen: true,
@@ -181,17 +186,21 @@ app.whenReady().then(() => {
   trayMenu = createTrayMenu((newTemplate) => { tray.setContextMenu(Menu.buildFromTemplate(newTemplate)) });
   globalShortcut.register('Alt+Tab', () => {
     if (todayWindow) {
-      todayWindow.isVisible() ? Menu.sendActionToFirstResponder('hide:') : todayWindow.show();
+      todayWindow.isVisible() ? todayWindow.hide() : todayWindow.show();
     };
   });
   globalShortcut.register('CommandOrControl+E', () => {
     if (omnibar) {
-      omnibar.isVisible() ? Menu.sendActionToFirstResponder('hide:') : omnibar.show();
+      omnibar.isVisible() ? closeOmnibar() : showOmnibar();
     };
   })
   setTimeout(() => {
     mainWindow = createLoadingWindow(), todayWindow = createTodayWindow()
     omnibar = createOmnibar();
+    omnibar.on('blur', () => {
+      //console.log("buhf")
+      closeOmnibar();
+    })
     todayWindow.maximize();
     mainWindow.maximize();
     todayWindow.setVisibleOnAllWorkspaces(true);
@@ -223,10 +232,33 @@ ipcMain.on('favorites_updated', (event, args) => {
   if (trayMenu) trayMenu.setFavorites(args)
 })
 
-ipcMain.on('close_omnibar', () => {
-  Menu.sendActionToFirstResponder('hide:')
-  console.log("Omnibar hidden!")
+ipcMain.on('newTabByUrl', (event, args) => {
+  mainWindow.webContents.send('newTabByUrl', args);
+  mainWindow.show();
 })
+//const applescript = require('applescript');
+
+function closeOmnibar () {
+  if (!mainWasFocused && process.platform === "darwin") {
+    console.log("hi")
+    mainWindow.setFocusable(false);
+    todayWindow.setFocusable(false);
+    omnibar.hide();
+    mainWindow.setFocusable(true);
+    todayWindow.setFocusable(true);
+  } else {
+    omnibar.hide();
+  }
+}
+
+function showOmnibar () {
+  mainWasFocused = mainWindow.isFocused();
+  mainWasVisible = mainWindow.isVisible();
+  console.log(mainWasFocused, process.platform)
+  omnibar.show();
+}
+
+ipcMain.on('close_omnibar', closeOmnibar)
 
 app.on('window-all-closed', () => {
   // Prevent app quitting
