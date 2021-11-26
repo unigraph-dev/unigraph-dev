@@ -140,7 +140,7 @@ export const SearchOverlay = ({open, setClose}: any) => {
     </div>
 }
 
-export const SearchOverlayPopover = () => {
+export const SearchOverlayPopover = ({open, onClose}: any) => {
     const [searchEnabled, setSearchEnabled] = React.useState(false);
     const overlay = React.useRef(null);
 
@@ -187,6 +187,6 @@ export const SearchOverlayPopover = () => {
         }}
         ref={overlay}
     >
-        <SearchOverlay open={searchEnabled} setClose={() => setSearchEnabled(false)}/>
+        <SearchOverlay open={open || searchEnabled} setClose={onClose || (() => setSearchEnabled(false))}/>
     </Card>
 }

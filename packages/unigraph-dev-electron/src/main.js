@@ -168,9 +168,14 @@ app.whenReady().then(() => {
   tray = new Tray(nativeImage.createFromDataURL(unigraph_trayIcon))
   tray.setToolTip('Unigraph')
   trayMenu = createTrayMenu((newTemplate) => { tray.setContextMenu(Menu.buildFromTemplate(newTemplate)) });
-  const _ = globalShortcut.register('Alt+Tab', () => {
+  globalShortcut.register('Alt+Tab', () => {
     if (todayWindow) {
       todayWindow.isVisible() ? todayWindow.hide() : todayWindow.show();
+    };
+  });
+  globalShortcut.register('CommandOrControl+E', () => {
+    if (omnibar) {
+      omnibar.isVisible() ? omnibar.hide() : omnibar.show();
     };
   })
   setTimeout(() => {
