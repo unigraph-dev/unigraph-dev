@@ -19,6 +19,7 @@ const frontendLocation = process.env.FRONTEND_LOCATION || "localhost";
 let logs = [];
 let mainWindow = null;
 let todayWindow = null;
+let omnibar = null;
 let tray = null;
 let trayMenu = null;
 let index = null;
@@ -149,7 +150,14 @@ function unigraphLoaded() {
     if (todayWindow) {
       !isDev() ?
         todayWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'), { query: { "pageName": "today" } }) :
-        todayWindow.loadURL('http://' + frontendLocation + ':3000/?pageName=today'); todayWindow.hide();
+        todayWindow.loadURL('http://' + frontendLocation + ':3000/?pageName=today');
+      todayWindow.hide();
+    }
+    if (omnibar) {
+      !isDev() ?
+        omnibar.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'), { query: { "pageName": "omnibar" } }) :
+        omnibar.loadURL('http://' + frontendLocation + ':3000/?pageName=omnibar'); 
+      omnibar.hide();
     }
   }, 0)
 }
@@ -167,9 +175,11 @@ app.whenReady().then(() => {
   })
   setTimeout(() => {
     mainWindow = createLoadingWindow(), todayWindow = createTodayWindow()
+    omnibar = createTodayWindow();
     todayWindow.maximize();
     mainWindow.maximize();
     todayWindow.setVisibleOnAllWorkspaces(true);
+    omnibar.setVisibleOnAllWorkspaces(true);
     trayMenu.setMainWindow(mainWindow), trayMenu.setTodayWindow(todayWindow)
     startServer(mainWindow.webContents);
     app.on('activate', () => {
@@ -180,7 +190,7 @@ app.whenReady().then(() => {
         mainWindow.show();
       }
     })
-    const windows = [mainWindow, todayWindow]
+    const windows = [mainWindow, todayWindow, omnibar]
     windows.map(el => el.on('close', (event) => {
       if (!isAppClosing) {
         event.preventDefault();
@@ -195,6 +205,10 @@ app.whenReady().then(() => {
 
 ipcMain.on('favorites_updated', (event, args) => {
   if (trayMenu) trayMenu.setFavorites(args)
+})
+
+ipcMain.on('close_omnibar', () => {
+  omnibar.hide();
 })
 
 app.on('window-all-closed', () => {

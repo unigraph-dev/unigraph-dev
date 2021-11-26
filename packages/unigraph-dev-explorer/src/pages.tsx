@@ -31,6 +31,7 @@ import { AllApps, AppLibraryWidget } from './components/PackageManager/AppLibrar
 import { EmailSettings } from './examples/email/EmailSettings';
 import { BacklinkView } from './components/ObjectView/BacklinkView';
 import ExplorerDashboard from './pages/ExplorerDashboard';
+import { SearchOverlay } from './pages/SearchOverlay';
 
 const pages: Record<string, any> = {
     'datamodel-playground': {
@@ -158,7 +159,12 @@ const pages: Record<string, any> = {
       'constructor': (props: any) => <TodayView {...props} />,
       'maximize': true,
       'name': "Today View"
-    }
+    },
+    'omnibar': { // only used in electron
+      'constructor': (props: any) => <SearchOverlay {...props} open={true} setClose={() => (window as any).setClose()}/>,
+      'maximize': true,
+      'name': "Omnibar"
+    },
   }
 
 export const components: Record<string, any> = {
