@@ -13,6 +13,7 @@ import { AutoDynamicView } from "../../components/ObjectView/AutoDynamicView";
 import { getComponentFromPage } from "../../Workspace";
 import { openUrl } from "../../utils";
 import { DynamicObjectListView } from "../../components/ObjectView/DynamicObjectListView";
+import { UnigraphObject } from "unigraph-dev-common/lib/utils/utils";
 
 type ABookmark = {
     uid?: string,
@@ -42,29 +43,32 @@ export const createBookmark: (t: string, a?: boolean) => Promise<any> = (text: s
         name = "Invalid url"
     }
     if (add) {
-        window.unigraph.runExecutable(getExecutableId(bookmarkPackage, "add-bookmark"), {url: url, tags: tags})
-        return new Promise((res, rej) => {res(undefined as any)});
+        window.unigraph.runExecutable(getExecutableId(bookmarkPackage, "add-bookmark"), { url: url, tags: tags })
+        return new Promise((res, rej) => { res(undefined as any) });
     } else return new Promise((res, rej) => {
         res({
             name,
-            children: tags.map(tagName => {return {"type": {"unigraph.id": "$/schema/subentity"},
-                "_value": {
-                    "type": {"unigraph.id": "$/schema/tag"},
-                    name: tagName
-                }}
+            children: tags.map(tagName => {
+                return {
+                    "type": { "unigraph.id": "$/schema/subentity" },
+                    "_value": {
+                        "type": { "unigraph.id": "$/schema/tag" },
+                        name: tagName
+                    }
+                }
             })
         })
     })
-    
-} 
 
-function BookmarksBody ({data}: { data: ABookmark[] }) {
-    
+}
+
+function BookmarksBody({ data }: { data: ABookmark[] }) {
+
     const bookmarks = data;
     const [newName, setNewName] = useState("");
 
     return <React.Fragment>
-        <DynamicObjectListView 
+        <DynamicObjectListView
             items={bookmarks}
             context={null} reverse defaultFilter={"no-filter"}
         />
@@ -74,16 +78,18 @@ function BookmarksBody ({data}: { data: ABookmark[] }) {
 export const Bookmarks = withUnigraphSubscription(
     // @ts-ignore
     BookmarksBody,
-    { defaultData: [], schemas: [], packages: [bookmarkPackage]},
-    { afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
-        window.unigraph.subscribeToType("$/schema/web_bookmark", (result: ABookmark[]) => {setData(result)}, subsId, {uidsOnly: true}); 
-    }}
+    { defaultData: [], schemas: [], packages: [bookmarkPackage] },
+    {
+        afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
+            window.unigraph.subscribeToType("$/schema/web_bookmark", (result: ABookmark[]) => { setData(result) }, subsId, { uidsOnly: true });
+        }
+    }
 )
 
-export const BookmarkItem: DynamicViewRenderer = ({data, callbacks}) => {
+export const BookmarkItem: DynamicViewRenderer = ({ data, callbacks }) => {
     let unpadded: ABookmark = unpad(data);
     let name = data.get('name').as('primitive');
-    //console.log(unpadded)
+    console.log(callbacks)
     let totalCallbacks = callbacks || {
         'onUpdate': (data: Record<string, any>) => {
             throw new Error("not implemented")
@@ -92,21 +98,21 @@ export const BookmarkItem: DynamicViewRenderer = ({data, callbacks}) => {
     };
 
     return <React.Fragment>
-        <ListItemIcon><Avatar alt={"favicon of "+unpadded.name} src={unpadded.favicon}><Public/></Avatar></ListItemIcon>
+        <ListItemIcon><Avatar alt={"favicon of " + unpadded.name} src={unpadded.favicon}><Public /></Avatar></ListItemIcon>
         <ListItemText>
             <Typography>{name && name !== "No title" ? name : data.get('url').as('primitive')}</Typography>
-            <div style={{display: "inline", alignItems: "center", overflowWrap: "break-word", color: "gray"}}>
+            <div style={{ display: "inline", alignItems: "center", overflowWrap: "break-word", color: "gray" }}>
                 <Link onClick={() => {
                     openUrl(unpadded.url)
-                }} style={{verticalAlign: "middle"}}/>
+                }} style={{ verticalAlign: "middle" }} />
                 {typeof unpadded.creative_work?.text === "string" ? <Description onClick={() => {
                     const htmlUid = data?.get('creative_work/text')?.['_value']?.['_value']?.['uid'];
-                    if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid, context: data.uid}));
+                    if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', { uid: htmlUid, context: data.uid }));
                     if (callbacks?.removeFromContext) callbacks.removeFromContext();
-                }} style={{verticalAlign: "middle"}}/> : []}
-                {!unpadded.children?.map ? [] :
-                unpadded.children?.map(it => <Tag data={it}/>)}
-                <p style={{fontSize: "0.875rem", display: "contents"}}>{typeof unpadded.creative_work?.abstract === "string" ? unpadded.creative_work?.abstract : []}</p>
+                }} style={{ verticalAlign: "middle" }} /> : []}
+                {data?.['_value']?.['children']?.['_value[']?.map ?
+                    data['_value']['children']['_value['].map((it: any) => <AutoDynamicView object={new UnigraphObject(it['_value'])} callbacks={callbacks} inline style={{verticalAlign: "middle"}}/>) : []}
+                <p style={{ fontSize: "0.875rem", display: "contents" }}>{typeof unpadded.creative_work?.abstract === "string" ? unpadded.creative_work?.abstract : []}</p>
             </div>
         </ListItemText>
     </React.Fragment>
@@ -121,6 +127,6 @@ const tt = () => <div>
     For example, enter #tag1 https://example.com
 </div>
 
-registerQuickAdder({'bookmark': {adder: quickAdder, tooltip: tt}, 'bm': {adder: quickAdder, tooltip: tt}})
+registerQuickAdder({ 'bookmark': { adder: quickAdder, tooltip: tt }, 'bm': { adder: quickAdder, tooltip: tt } })
 
-registerDynamicViews({"$/schema/web_bookmark": BookmarkItem})
+registerDynamicViews({ "$/schema/web_bookmark": BookmarkItem })
