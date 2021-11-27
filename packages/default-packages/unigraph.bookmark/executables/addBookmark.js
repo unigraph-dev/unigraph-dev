@@ -15,7 +15,7 @@ const result = {
     name: res?.general?.title || res?.openGraph?.title || res?.twitter?.title,
     url: url,
     favicon: res?.general?.icons?.pop().href || res?.general?.icons?.[0]?.href || res?.openGraph?.image?.url || res?.twitter?.image?.src || res?.twitter?.image,
-    children: tags.map(tagName => {return {"type": {"unigraph.id": "$/schema/subentity"},
+    children: tags.map(tagName => {return {"type": {"unigraph.id": "$/schema/interface/semantic"},
         "_value": {
             "type": {"unigraph.id": "$/schema/tag"},
             name: tagName
