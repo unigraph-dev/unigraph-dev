@@ -1,3 +1,6 @@
+---
+updated_at: 2021-11-27T14:56:29-05:00
+---
 # Dgraph
 
 Dgraph is our preferred underlying graph database written in Go. This document contains notes about how unigraph works with dgraph and some useful snippets to navigate the database.
@@ -15,7 +18,7 @@ We use a custom fork of dgraph which can be founded in the github organization.
 ```{
   "set": {
   "uid": "0xa4",
-  "_value.[": [
+  "_value[": [
   {"_value": {"uid": "0x7a"}}
 ]
 }

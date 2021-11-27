@@ -1,5 +1,6 @@
-LAST UPDATED: Nov 27, 2021
-
+---
+updated_at: 2021-11-27T14:56:29-05:00
+---
 # Core apps
 
 Unigraph has a number of core apps and packages that provides common abstractions and utility functions for users and developers.

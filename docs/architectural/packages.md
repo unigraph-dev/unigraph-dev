@@ -1,3 +1,6 @@
+---
+updated_at: 2021-11-27T14:44:57-05:00
+---
 # Packages
 
 NOTE: This is a low-level documentation about packages. For a higher abstraction of how packages (apps) are viewed in the Unigraph ecosystem, see [apps](./apps.md).
@@ -22,8 +25,8 @@ Keys: `pkgManifest`, `pkgSchemas`, `pkgExecutables`, `pkgEntities`.
 
 This is used to map shorthand types to all possible resolutions that takes namespace clashes into consideration.
 
-# Adding packages
+# Creating a package
 
 1. Create schemas for all packaged schemas
 2. Create entities for all packaged entities/executables
-3. 
+3. Declare them in `manifest.json`

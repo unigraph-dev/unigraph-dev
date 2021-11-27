@@ -1,5 +1,6 @@
-LAST UPDATED: Nov 27, 2021
-
+---
+updated_at: 2021-11-27T14:56:29-05:00
+---
 # Data Model and Graphs
 
 Unigraph provides a graph-centric approach to data modeling (in comparison to conventional object-based models). As a result, there are some caveats and key differences which will be covered in this documentation.

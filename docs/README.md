@@ -1,6 +1,9 @@
-# unigraph-dev Documentation
+---
+updated_at: 2021-11-27T14:51:01-05:00
+---
+# Unigraph Documentation
 
-Welcome to the unigraph-dev documentation! This is a work-in-progress under rapid development.
+Welcome to Unigrah documentation! This is a work-in-progress under rapid development.
 
 ## Table of Contents
 
@@ -28,4 +31,5 @@ Welcome to the unigraph-dev documentation! This is a work-in-progress under rapi
 
 ## App design
 - [Apps](./apps.md) 
-- [Designing custom Data schema](./app_design/designing_custom_data_schema.md)
+- [Designing custom Data schema](./app_design/entity_data_and_metadata.md)
+- [Optimization](./app_design/optimization.md)
