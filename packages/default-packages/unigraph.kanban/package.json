@@ -1,0 +1,11 @@
+{
+    "displayName": "Unigraph Kanban",
+    "version": "0.0.1",
+    "description": "Kanban component for Unigraph",
+    "unigraph": {
+        "schemas": [
+            {"id": "kanban", "src": "schemas/kanban.json"}
+        ],
+        "package_name": "unigraph.kanban"
+    }
+}
