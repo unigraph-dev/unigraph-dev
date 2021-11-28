@@ -38,7 +38,7 @@ export const ListsList = withUnigraphSubscription(({data}: any) => {
     </div>
 }, {schemas: [], defaultData: [], packages: []}, {afterSchemasLoaded: (subsId, data, setData) => {
     const id = getRandomInt().toString();
-    window.unigraph.subscribeToQuery(`(func: uid(lists${id})) {
+    window.unigraph.subscribeToQuery(`(func: uid(lists${id})) @filter((NOT type(Deleted)) AND (NOT eq(<_hide>, true))) {
         uid
         _value {
 			name {

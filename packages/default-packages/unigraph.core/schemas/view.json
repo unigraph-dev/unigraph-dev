@@ -14,6 +14,12 @@
                 "_indexAs": "name"
             },
             {
+                "_key": "maximize",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/boolean" }
+                }
+            },
+            {
                 "_key": "env",
                 "_definition": {
                     "type": { "unigraph.id": "$/primitive/string" }

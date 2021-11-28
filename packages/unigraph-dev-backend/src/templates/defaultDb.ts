@@ -22,6 +22,7 @@ import {pkg as reddit} from 'unigraph-dev-common/lib/data/unigraph.reddit.pkg';
 import {pkg as twitter} from 'unigraph-dev-common/lib/data/unigraph.twitter.pkg';
 import {pkg as nlp} from 'unigraph-dev-common/lib/data/unigraph.nlp.pkg';
 import {pkg as openai} from 'unigraph-dev-common/lib/data/unigraph.openai.pkg';
+import {pkg as kanban} from 'unigraph-dev-common/lib/data/unigraph.kanban.pkg';
 
 export const defaultTypes = `<_value>: uid .
 <_value.#i>: int .
@@ -305,5 +306,5 @@ export const defaultUserlandSchemas = [
 
 export const defaultPackages = [
     semantic, core, execexample, coreuser, home, calendar, notes,
-    onboarding, todo, bookmark, rss_reader, email, reddit, twitter, nlp, openai
+    onboarding, todo, bookmark, rss_reader, email, reddit, twitter, nlp, openai, kanban
 ]

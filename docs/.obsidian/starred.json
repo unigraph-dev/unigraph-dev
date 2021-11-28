@@ -1,0 +1,14 @@
+{
+  "items": [
+    {
+      "type": "file",
+      "title": "README",
+      "path": "README.md"
+    },
+    {
+      "type": "file",
+      "title": "glossary",
+      "path": "glossary.md"
+    }
+  ]
+}

@@ -2,6 +2,12 @@
     "type": { "unigraph.id": "$/schema/context_menu_item" },
     "name": "Open in speed reader view",
     "item_type": {"unigraph.id": "$/schema/html"},
-    "view": {"unigraph.id": "$/package/unigraph.coreuser/0.0.1/executable/speed-reader"}
+    "view": {
+        "name": "Speed reader",
+        "env": "react-explorer",
+        "view": {
+            "unigraph.id": "$/package/unigraph.coreuser/0.0.1/executable/speed-reader"
+        }
+    }
 
 }

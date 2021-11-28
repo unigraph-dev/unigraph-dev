@@ -55,13 +55,13 @@ const groupersDefault: Record<string, Grouper> = {
     },
 }
 
-const DynamicListItem = ({ reverse, listUid, item, index, context, callbacks, itemUids, itemRemover }: any) => {
+const DynamicListItem = ({ reverse, listUid, item, index, context, callbacks, itemUids, itemRemover, noRemover }: any) => {
     return <React.Fragment>
         <Slide direction={reverse ? "down" : "up"} in key={item.uid}>
             <ListItem>
                 <ListItemIcon onClick={() => {
                     itemRemover(item['uid'])
-                }} style={{ display: (itemRemover === _.noop || isMobile()) ? "none" : "" }}><ClearAll /></ListItemIcon>
+                }} style={{ display: (itemRemover === _.noop || isMobile() || noRemover) ? "none" : "" }}><ClearAll /></ListItemIcon>
                 <AutoDynamicView object={new UnigraphObject(item)} callbacks={{
                     ...callbacks,
                     context: context,
@@ -97,16 +97,17 @@ export type DynamicObjectListViewProps = {
     buildGraph?: boolean
     groupers?: any,
     noBar?: boolean,
+    noRemover?: boolean,
 }
 
-const DynamicListBasic = ({ reverse, items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true }: any) => {
+const DynamicListBasic = ({ reverse, items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true, noRemover }: any) => {
     return items.map((el: any, index: number) => <DynamicListItem 
         item={itemGetter(el)} index={index} context={context} listUid={listUid} 
-        callbacks={callbacks} itemUids={itemUids} itemRemover={itemRemover} reverse={reverse}
+        callbacks={callbacks} itemUids={itemUids} itemRemover={itemRemover} reverse={reverse} noRemover={noRemover}
     />);
 }
 
-const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true, buildGraph, parId }: any) => {
+const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true, buildGraph, parId, noRemover }: any) => {
 
     const [loadedItems, setLoadedItems] = React.useState<any[]>([]);
     const [setupProps, setSetupProps] = React.useState<{next: any, cleanup: any} | null>(null);
@@ -137,7 +138,7 @@ const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, it
     >
         {loadedItems.map((el: any, index: number) => <DynamicListItem
             item={el} index={index} context={context} listUid={listUid} reverse={reverse}
-            callbacks={callbacks} itemUids={items.map((el: any) => itemGetter(el).uid)} itemRemover={itemRemover}
+            callbacks={callbacks} itemUids={items.map((el: any) => itemGetter(el).uid)} itemRemover={itemRemover} noRemover={noRemover}
         />)}
     </InfiniteScroll>  
 }
@@ -151,7 +152,7 @@ const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, it
  * @param param0 
  * @returns 
  */
-export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ items, groupers, groupBy, listUid, context, callbacks, itemGetter = _.identity, itemRemover = _.noop, filters = [], defaultFilter, reverse, virtualized, buildGraph, noBar }) => {
+export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ items, groupers, groupBy, listUid, context, callbacks, itemGetter = _.identity, itemRemover = _.noop, filters = [], defaultFilter, reverse, virtualized, buildGraph, noBar, noRemover }) => {
 
     const [optionsOpen, setOptionsOpen] = React.useState(false);
     let setGroupBy: any;
@@ -203,7 +204,8 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center",
         height: "100%", width: "100%",
-        display: "flex", flexDirection: "column", overflowY: "hidden"
+        display: "flex", flexDirection: "column", overflowY: "hidden",
+        minHeight: canDrop ? "200px" : "",
     }} ref={drop}>
         <div style={{ display: "flex" }}>
             {noBar ? [] : <React.Fragment>
@@ -249,7 +251,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
                             renderInput={(params) => <TextField {...params} label="Filter presets" variant="outlined" />}
                         />
                     </ListItem>
-                    <ListItem style={{ display: context?.uid ? "" : "none" }}>
+                    <ListItem style={{ display: (context?.uid && !noRemover) ? "" : "none" }}>
                         <Button onClick={() => { window.wsnavigator(`/graph?uid=${context.uid}`) }}>Show Graph view</Button>
                     </ListItem>
                 </List>
@@ -264,10 +266,10 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
         </div>
         <div style={{ flexGrow: 1, overflowY: "auto" }} id={"scrollableDiv"+parId} >
             {!groupBy.length ? 
-                React.createElement(isStub ? DynamicList : DynamicListBasic, { reverse: reverseOrder, items: procItems, context, listUid, callbacks, itemRemover, itemUids: procItems.map(el => el.uid), itemGetter, buildGraph, parId }) :
+                React.createElement(isStub ? DynamicList : DynamicListBasic, { reverse: reverseOrder, items: procItems, context, listUid, callbacks, itemRemover, itemUids: procItems.map(el => el.uid), itemGetter, buildGraph, parId, noRemover }) :
                 groupers[groupBy](procItems.map(itemGetter)).map((el: Group) => <React.Fragment>
                     <ListSubheader>{el.name}</ListSubheader>
-                    {React.createElement(isStub ? DynamicList : DynamicListBasic, { reverse: reverseOrder, items: el.items, context, listUid, callbacks, itemRemover, itemUids: el.items.map(ell => ell.uid), itemGetter: _.identity, infinite: false, buildGraph, parId})}
+                    {React.createElement(isStub ? DynamicList : DynamicListBasic, { reverse: reverseOrder, items: el.items, context, listUid, callbacks, itemRemover, itemUids: el.items.map(ell => ell.uid), itemGetter: _.identity, infinite: false, buildGraph, parId, noRemover})}
                 </React.Fragment>)
             }
         </div>

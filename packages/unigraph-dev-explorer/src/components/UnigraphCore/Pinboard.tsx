@@ -17,7 +17,7 @@ const parseLayout = (it: any) => {
     return {i: it._value._value.uid, x: parseInt(x), y: parseInt(y), w: parseInt(w), h: parseInt(h)}
 }
 
-export const Pinboard = ({data}: any) => {
+export const Pinboard = ({data, callbacks}: any) => {
     const layout = data._value._value.children['_value['].map(parseLayout)
     //console.log(layout)
 
@@ -44,7 +44,7 @@ export const Pinboard = ({data}: any) => {
             >
                 {data._value._value.children['_value['].map((el: any) => <div key={el._value._value.uid}>
                     <UnigraphWidget>
-                        <AutoDynamicViewDetailed object={new UnigraphObject(el._value._value)} />
+                        <AutoDynamicViewDetailed object={new UnigraphObject(el._value._value)} callbacks={callbacks}/>
                     </UnigraphWidget>
                 </div>)}
             </ResponsiveGridLayout>

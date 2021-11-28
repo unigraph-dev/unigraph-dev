@@ -7,7 +7,10 @@
             "type": {"unigraph.id": "$/schema/view"},
             "name": "Connection",
             "env": "react-explorer",
-            "view": "/widgets/unigraph-connection"
+            "view": "/widgets/unigraph-connection",
+            "$context": {
+                "_hide": true
+            }
         },
         "$parentcontext": {
             "_pos": "0:0:6:8"
@@ -18,7 +21,10 @@
             "type": {"unigraph.id": "$/schema/view"},
             "name": "Apps",
             "env": "react-explorer",
-            "view": "/widgets/recommended-apps"
+            "view": "/widgets/recommended-apps",
+            "$context": {
+                "_hide": true
+            }
         },
         "$parentcontext": {
             "_pos": "6:0:6:8"
@@ -30,7 +36,10 @@
             "name": "Inbox",
             "env": "react-explorer",
             "view": "/pages/inbox",
-            "props": "{\"config\": {}}"
+            "props": "{\"config\": {}}",
+            "$context": {
+                "_hide": true
+            }
         },
         "$parentcontext": {
             "_pos": "0:8:12:8"

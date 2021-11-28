@@ -84,14 +84,12 @@ export const Executable: DynamicViewRenderer = ({data, callbacks}) => {
         "routine/js": () => {window.unigraph.runExecutable(unpadded['unigraph.id'] || data.uid, {})},
         "component/react-jsx": () => {
             // Open in new
-            getComponentAsView(data, {}).then((viewId: any) => {
-                window.newTab(window.layoutModel, {
-                    type: "tab",
-                    name: "Component view",
-                    component: viewId,
-                    enableFloat: "true",
-                    config: {}
-                })
+            window.newTab(window.layoutModel, {
+                type: "tab",
+                name: "Component preview",
+                component: "/pages/" + data.uid,
+                enableFloat: "true",
+                config: {}
             })
         },
         "lambda/js": async () => {
