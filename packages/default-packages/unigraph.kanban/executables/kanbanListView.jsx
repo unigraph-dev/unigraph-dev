@@ -14,9 +14,9 @@ React.useEffect(() => {
 return <div>
     <TextField value={newName} onChange={(e) => setNewName(e.target.value)}></TextField>
     <Button onClick={() => unigraph.addObject({title: {_value: newName, type: {'unigraph.id': "$/schema/markdown"}}, children: [
-        {name: "Todo", children: [], $context: {_hide: true}},
-        {name: "Doing", children: [], $context: {_hide: true}},
-        {name: "Done", children: [], $context: {_hide: true}},
+        {type: {"unigraph.id": '$/schema/list'}, _value: {name: "Todo", children: [], $context: {_hide: true}}},
+        {type: {"unigraph.id": '$/schema/list'}, _value: {name: "Doing", children: [], $context: {_hide: true}}},
+        {type: {"unigraph.id": '$/schema/list'}, _value: {name: "Done", children: [], $context: {_hide: true}}},
     ]}, "$/schema/kanban")}>Add</Button>
     {kanbans.map(el => <AutoDynamicView object={new UnigraphObject(el)} />)}
 </div>

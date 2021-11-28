@@ -251,7 +251,7 @@ export function WorkSpace(this: any) {
 
             return <WorkspacePageComponent maximize={page.maximize} paddingTop={page.paddingTop} id={config.id}>
                 {node._attributes.floating ? <div id="global-elements">
-                    {isElectron() ? [] : <SearchOverlayPopover /> }
+                    <SearchOverlayPopover />
                     <ContextMenu />
                     <InlineSearch />
                 </div> : []}
@@ -292,7 +292,7 @@ export function WorkSpace(this: any) {
         <MuiPickersUtilsProvider utils={MomentUtils}>
         <DndProvider backend={HTML5Backend}>
             <div id="global-elements">
-                {isElectron() ? [] : <SearchOverlayPopover /> }
+                <SearchOverlayPopover />
                 <ContextMenu />
                 <InlineSearch />
             </div>

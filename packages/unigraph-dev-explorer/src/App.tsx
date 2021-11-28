@@ -45,7 +45,7 @@ function App() {
       <div className={classes.root}>
         <DndProvider backend={HTML5Backend}>
           <div id="global-elements">
-            {isElectron() ? [] : <SearchOverlayPopover /> }
+            <SearchOverlayPopover />
             <ContextMenu />
             <InlineSearch />
           </div>

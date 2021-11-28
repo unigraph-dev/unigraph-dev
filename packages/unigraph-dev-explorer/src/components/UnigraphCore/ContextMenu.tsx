@@ -38,31 +38,31 @@ export const ContextMenu = () => {
             horizontal: 'center',
         }}
     >
-        <MenuList>
-        <MenuItem style={{paddingTop: "2px", paddingBottom: "2px"}} >
-            <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiCubeOutline} size={1}/></ListItemIcon>
-            <ListItemText>{state.contextUid}</ListItemText>
-            <ListItemIcon style={{minWidth: "36px", marginLeft: "12px"}}><Icon path={mdiDatabaseOutline} size={1}/></ListItemIcon>
-            <ListItemText>{state.contextObject?.type?.['unigraph.id']}</ListItemText>
-        </MenuItem>
-        <Divider/>
-        {state.menuContent?.map(el => el(state.contextUid!, state.contextObject, handleClose, state.callbacks, state.contextContextUid))}
-        {schemaMenuConstructors.length > 0 ? <React.Fragment>
-            <Divider/>
-            {schemaMenuConstructors.map((el: any) => el(state.contextUid!, state.contextObject, handleClose, {...state.callbacks, removeFromContext: state.removeFromContext}, state.contextContextUid))}
-        </React.Fragment> : []}
-        {state.contextContextUid ? <React.Fragment>
-            <Divider/>
+        <div style={{paddingTop: "4px", paddingBottom: "4px"}}>
             <MenuItem style={{paddingTop: "2px", paddingBottom: "2px"}} >
-                <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiRelationManyToMany} size={1}/></ListItemIcon>
-                <ListItemText>{state.contextContextUid}</ListItemText>
-                <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiDatabaseOutline} size={1}/></ListItemIcon>
-                <ListItemText>{state.contextContextObject?.type?.['unigraph.id']}</ListItemText>
+                <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiCubeOutline} size={1}/></ListItemIcon>
+                <ListItemText>{state.contextUid}</ListItemText>
+                <ListItemIcon style={{minWidth: "36px", marginLeft: "12px"}}><Icon path={mdiDatabaseOutline} size={1}/></ListItemIcon>
+                <ListItemText>{state.contextObject?.type?.['unigraph.id']}</ListItemText>
             </MenuItem>
             <Divider/>
-            {state.menuContextContent?.map(el => el(state.contextUid!, state.contextObject, handleClose, {...state.callbacks, removeFromContext: state.removeFromContext}, state.contextContextUid))}
-        </React.Fragment>: []}
-        {state.extraContent ? state.extraContent(handleClose) : []}
-        </MenuList>
+            {state.menuContent?.map(el => el(state.contextUid!, state.contextObject, handleClose, state.callbacks, state.contextContextUid))}
+            {schemaMenuConstructors.length > 0 ? <React.Fragment>
+                <Divider/>
+                {schemaMenuConstructors.map((el: any) => el(state.contextUid!, state.contextObject, handleClose, {...state.callbacks, removeFromContext: state.removeFromContext}, state.contextContextUid))}
+            </React.Fragment> : []}
+            {state.contextContextUid ? <React.Fragment>
+                <Divider/>
+                <MenuItem style={{paddingTop: "2px", paddingBottom: "2px"}} >
+                    <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiRelationManyToMany} size={1}/></ListItemIcon>
+                    <ListItemText>{state.contextContextUid}</ListItemText>
+                    <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiDatabaseOutline} size={1}/></ListItemIcon>
+                    <ListItemText>{state.contextContextObject?.type?.['unigraph.id']}</ListItemText>
+                </MenuItem>
+                <Divider/>
+                {state.menuContextContent?.map(el => el(state.contextUid!, state.contextObject, handleClose, {...state.callbacks, removeFromContext: state.removeFromContext}, state.contextContextUid))}
+            </React.Fragment>: []}
+            {state.extraContent ? state.extraContent(state.contextUid!, state.contextObject, handleClose, {...state.callbacks, removeFromContext: state.removeFromContext}) : []}
+        </div>
     </Popover></div>
 }

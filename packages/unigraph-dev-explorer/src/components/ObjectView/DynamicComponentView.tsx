@@ -7,6 +7,7 @@ import { AutoDynamicView } from "./AutoDynamicView";
 import { AutoDynamicViewDetailed } from "./AutoDynamicViewDetailed";
 import { DynamicObjectListView } from "./DynamicObjectListView";
 import { byElementIndex } from "unigraph-dev-common/lib/utils/entityUtils";
+import { onUnigraphContextMenu } from "./DefaultObjectContextMenu";
 
 export const globalImports = {
     "HelloWorld": () => <p>Hello world!!!</p>,
@@ -17,6 +18,7 @@ export const globalImports = {
     "buildGraph": buildGraph,
     "getRandomInt": getRandomInt,
     "byElementIndex": byElementIndex,
+    "onUnigraphContextMenu": onUnigraphContextMenu,
 }
 
 export const DynamicComponentView: DynamicViewRenderer = ({data, callbacks}) => {
