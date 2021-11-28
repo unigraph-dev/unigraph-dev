@@ -1,3 +1,6 @@
+---
+updated_at: 2021-11-27T15:14:54-05:00
+---
 # Glossary
 
 Here is a list of uncommon terms we use in Unigraph, both in source code and user interface, that might be helpful to understanding the system.

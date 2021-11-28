@@ -1,1 +1,0 @@
-# Designing custom data schema

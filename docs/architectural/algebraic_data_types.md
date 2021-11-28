@@ -1,5 +1,6 @@
-LAST UPDATED: Nov 27, 2021
-
+---
+updated_at: 2021-11-27T14:56:29-05:00
+---
 # Algebraic data types
 
 Unigraph schema supports [algebraic data types](https://en.wikipedia.org/wiki/Algebraic_data_type), which is a kind of complex typing system.

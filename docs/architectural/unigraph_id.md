@@ -1,3 +1,6 @@
+---
+updated_at: 2021-11-27T15:14:53-05:00
+---
 # unigraph.id
 
 `unigraph.id` is the canonical namespace, regardless of database implementations. All `unigraph.id`s start with `$/`.

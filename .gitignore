@@ -17,3 +17,7 @@ secrets.env.json
 
 # Etc
 packages/unigraph-dev-backend/exports.json
+
+# Obsidian for docs
+docs/.obsidian/workspace
+docs/.obsidian/plugins
