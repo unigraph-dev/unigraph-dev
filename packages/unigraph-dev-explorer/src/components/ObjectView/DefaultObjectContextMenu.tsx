@@ -101,18 +101,18 @@ var(func: eq(<unigraph.id>, "${schema}")) {
 
 export const onDynamicContextMenu = (data: any, uid: string, object: any, callbacks?: any, contextUid?: string) => {
     const view = data['_value']?.['view']?.['_value'];
-    if (view && view['dgraph.type']?.includes?.('Executable') && view?.['_value']?.['env']?.['_value.%']?.startsWith?.('component')) {
-        getComponentAsView(view, {uid, object, contextUid}).then((newViewId: any) => {
-            window.newTab(window.layoutModel, {
-                type: "tab",
-                name: "Temp view",
-                component: newViewId,
-                enableFloat: "true",
-                config: {}
-            })
+    console.log(view);
+    const onClick = data['_value']?.['on_click']?.['_value'];
+    if (view && view?._value?.view?._value?.['dgraph.type']?.includes?.('Executable') && view?._value.view?.['_value']?.['_value']?.['env']?.['_value.%']?.startsWith?.('component')) {
+        window.newTab(window.layoutModel, {
+            type: "tab",
+            name: view?.['_value']?.['name']?.['_value.%'] || "Custom view",
+            component: "/pages/" + view._value.view._value.uid,
+            enableFloat: "true",
+            config: {object, contextUid}
         });
-    } else if (view && view['dgraph.type']?.includes?.('Executable')) {
-        window.unigraph.runExecutable(view.uid, {uid, callbacks, contextUid}, undefined, true).then((ret: any) => {
+    } else if (onClick && onClick['dgraph.type']?.includes?.('Executable')) {
+        window.unigraph.runExecutable(onClick.uid, {uid, callbacks, contextUid}, undefined, true).then((ret: any) => {
             if (ret?.return_function_component !== undefined) {
                 // Not a component, but custom code to be run here
                 runClientExecutable(ret.return_function_component, {uid, callbacks, contextUid})

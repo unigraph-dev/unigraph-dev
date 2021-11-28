@@ -7,8 +7,8 @@ import * as serviceWorker from './serviceWorker';
 
 import App from './App';
 import { WorkSpace } from './Workspace';
-import { DynamicComponentView } from './components/ObjectView/DynamicComponentView';
-import { registerDetailedDynamicViews, registerDynamicViews } from './unigraph-react';
+import { DynamicComponentView, getComponentAsView } from './components/ObjectView/DynamicComponentView';
+import { getComponentFromExecutable, registerDetailedDynamicViews, registerDynamicViews } from './unigraph-react';
 
 function render(component: any) {
   ReactDOM.render(
@@ -23,22 +23,35 @@ render((new URLSearchParams(window.location.search)).get('pageName') ? <App/> : 
 
 function initDynamicObjectViews() {
   window.unigraph.subscribeToType('$/schema/object_view', (views: any[]) => {
-      console.log(views);   
-      views.forEach((el) => {
-        const typeId = el.get('item_type')._value['unigraph.id'];
-        const view = (props: any) => <DynamicComponentView data={el.get('view')['_value']} callbacks={{...(props.callbacks || {}), props}} />
-        registerDynamicViews({[typeId]: {view}})
-      })
+    console.log(views);   
+    views.forEach(async (el) => {
+      const typeId = el.get('item_type')._value['unigraph.id'];
+      const view = await getComponentAsView(el._value.view['_value'], {})
+      registerDynamicViews({[typeId]: {view}})
+    })
   });
 
   window.unigraph.subscribeToType('$/schema/object_view_detailed', (views: any[]) => {
     console.log(views);   
-    views.forEach((el) => {
+    views.forEach(async (el) => {
       const typeId = el.get('item_type')._value['unigraph.id'];
-      const view = (props: any) => <DynamicComponentView data={el.get('view')['_value']} callbacks={{...(props.callbacks || {}), props}} />
+      const view = await getComponentAsView(el._value.view['_value'], {})
       registerDetailedDynamicViews({[typeId]: {view}})
     })
-})
+  });
+
+  window.unigraph.subscribeToType('$/schema/view', async (views: any[]) => {
+    console.log(views)
+    const resolvedViews = await Promise.all(views.filter(el => el?._value?.view?.['_value']?.type?.['unigraph.id'] === "$/schema/executable").map(async (el) => {
+      return [el._value.view._value.uid, {
+        name: el._value.name['_value.%'],
+        constructor: await getComponentAsView(el._value.view['_value'], {})
+      }]
+    }));
+    console.log(resolvedViews);
+    const currPages = window.unigraph.getState('registry/pages');
+    currPages.setValue({...currPages.value, ...Object.fromEntries(resolvedViews)})
+  }, undefined);
 }
 
 window.unigraph.onReady!(() => {

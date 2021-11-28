@@ -5,7 +5,7 @@ import { AutoDynamicView } from "../../components/ObjectView/AutoDynamicView";
 import { ViewViewDetailed } from "../../components/ObjectView/DefaultObjectView";
 
 import _ from "lodash";
-import { buildGraph } from "unigraph-dev-common/lib/utils/utils";
+import { buildGraph, getRandomInt } from "unigraph-dev-common/lib/utils/utils";
 import { Actions } from "flexlayout-react";
 import { addChild, convertChildToTodo, focusLastDFSNode, focusNextDFSNode, indentChild, setCaret, setFocus, splitChild, unindentChild, unsplitChild, replaceChildWithUid } from "./commands";
 import { onUnigraphContextMenu } from "../../components/ObjectView/DefaultObjectContextMenu";
@@ -94,6 +94,7 @@ const NoteViewTextWrapper = ({ children, semanticChildren, isRoot, onContextMenu
 }
 
 export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isCollapsed }: any) => {
+    if (!callbacks?.viewId) callbacks = {...(callbacks ? callbacks : {}), viewId: getRandomInt()};
     const [subentities, otherChildren] = getSubentities(data);
     const [command, setCommand] = React.useState<() => any | undefined>();
     const inputter = (text: string) => {
@@ -123,7 +124,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
     const edited = React.useRef(false);
     const [isEditing, setIsEditing] = React.useState(false);
     const textInput: any = React.useRef();
-    const nodesState = window.unigraph.addState(`${options?.viewId || callbacks['get-view-id']()}/nodes`, [])
+    const nodesState = window.unigraph.addState(`${options?.viewId || callbacks?.viewId || callbacks['get-view-id']()}/nodes`, [])
     const editorContext = {
         edited, setCommand, childrenref, callbacks, nodesState
     }
@@ -165,7 +166,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
         <div style={{ width: "100%", }} ref={boxRef} >
             <NoteViewTextWrapper 
                 isRoot={!isChildren} onContextMenu={(event: any) => onUnigraphContextMenu(event, data, undefined, callbacks)} 
-                semanticChildren={buildGraph(otherChildren).filter((el: any) => el.type).map((el: any) => <AutoDynamicView object={el.type?.['unigraph.id'] === "$/schema/note_block" ? el : {uid: el.uid, type: el.type}} style={{width: "unset"}}/>)}
+                semanticChildren={buildGraph(otherChildren).filter((el: any) => el.type).map((el: any) => <AutoDynamicView object={el.type?.['unigraph.id'] === "$/schema/note_block" ? el : {uid: el.uid, type: el.type}} inline/>)}
             >
                 <div onPointerUp={(ev) => {
                     if (!isEditing) {

@@ -36,6 +36,12 @@
             {
                 "_key": "view",
                 "_definition": {
+                    "type": { "unigraph.id": "$/schema/view" }
+                }
+            },
+            {
+                "_key": "on_click",
+                "_definition": {
                     "type": { "unigraph.id": "$/schema/executable" }
                 }
             },

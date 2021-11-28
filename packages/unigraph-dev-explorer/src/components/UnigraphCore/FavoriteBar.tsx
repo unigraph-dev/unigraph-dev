@@ -6,6 +6,7 @@ import { registerDynamicViews } from "../../unigraph-react";
 import { byElementIndex, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { DynamicViewRenderer } from "../../global";
 import { AutoDynamicView } from "../ObjectView/AutoDynamicView";
+import { isJsonString } from "unigraph-dev-common/lib/utils/utils";
 
 const ViewItem: DynamicViewRenderer = ({data, callbacks}) => {
     let unpadded: any = unpad(data);
@@ -13,9 +14,9 @@ const ViewItem: DynamicViewRenderer = ({data, callbacks}) => {
     return <React.Fragment>
         <div onClick={() => window.newTab(window.layoutModel, {
             type: 'tab',
-            config: JSON.parse(unpadded.props).config,
+            config: isJsonString(unpadded?.props) ? JSON.parse(unpadded.props).config : {},
             name: unpadded.name,
-            component: unpadded.view,
+            component: typeof unpadded.view === "string" ? unpadded.view : "/pages/" + data._value.view._value.uid,
             enableFloat: 'true'
         })} style={{display: "contents"}}>
             <ListItemText primary={unpadded.name}></ListItemText>

@@ -6,6 +6,7 @@ import { buildGraph, getRandomInt, UnigraphObject } from "unigraph-dev-common/li
 import { AutoDynamicView } from "./AutoDynamicView";
 import { AutoDynamicViewDetailed } from "./AutoDynamicViewDetailed";
 import { DynamicObjectListView } from "./DynamicObjectListView";
+import { byElementIndex } from "unigraph-dev-common/lib/utils/entityUtils";
 
 export const globalImports = {
     "HelloWorld": () => <p>Hello world!!!</p>,
@@ -13,7 +14,9 @@ export const globalImports = {
     "AutoDynamicViewDetailed": (props: any) => <AutoDynamicViewDetailed {...props} />,
     "DynamicObjectListView": (props: any) => <DynamicObjectListView {...props} />,
     "UnigraphObject": UnigraphObject,
-    "buildGraph": buildGraph
+    "buildGraph": buildGraph,
+    "getRandomInt": getRandomInt,
+    "byElementIndex": byElementIndex,
 }
 
 export const DynamicComponentView: DynamicViewRenderer = ({data, callbacks}) => {
@@ -30,11 +33,6 @@ export const DynamicComponentView: DynamicViewRenderer = ({data, callbacks}) => 
 export const getComponentAsView = async (view: any, params: any) => {
     const ret = await getComponentFromExecutable(view, params || {}, globalImports);
     if (typeof ret === "function") {
-        const tempViewId = "/temp/" + getRandomInt().toString();
-        window.unigraph.addState(tempViewId, {
-            component: ret,
-            params: params
-        });
-        return tempViewId;
+        return ret;
     }
 }

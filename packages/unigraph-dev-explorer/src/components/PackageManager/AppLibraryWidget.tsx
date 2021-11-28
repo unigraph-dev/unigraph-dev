@@ -3,7 +3,7 @@ import { Apps, Bookmarks, CalendarToday, CodeRounded, Email, Inbox, Note, Playli
 import { NavigationContext } from "../../utils"
 
 import Icon from '@mdi/react'
-import { mdiViewDashboardOutline, mdiFeatureSearchOutline, mdiRss, mdiAppsBox, mdiEmailOpenMultipleOutline, mdiCalendarOutline, mdiCalendarClockOutline, mdiInboxOutline, mdiBookmarkMultipleOutline, mdiCheckboxMarkedCirclePlusOutline, mdiNoteMultipleOutline } from '@mdi/js';
+import { mdiViewDashboardOutline, mdiFeatureSearchOutline, mdiRss, mdiAppsBox, mdiEmailOpenMultipleOutline, mdiCalendarOutline, mdiCalendarClockOutline, mdiInboxOutline, mdiBookmarkMultipleOutline, mdiCheckboxMarkedCirclePlusOutline, mdiNoteMultipleOutline, mdiTrello } from '@mdi/js';
 
 type AppShortcutProps = {avatar: React.ReactElement<any>, address: string, text: string}
 
@@ -46,6 +46,9 @@ export const AllApps = () => {
         </Grid>
         <Grid item xs={3}>
         <AppShortcut avatar={<Icon path={mdiCalendarOutline} size={1}/>} address="/calendar" text="Calendar" />
+        </Grid>
+        <Grid item xs={3}>
+        <AppShortcut avatar={<Icon path={mdiTrello} size={1}/>} address="/$/executable/kanban-list-view" text="Kanban" />
         </Grid>
         <Grid item xs={3}>
         <AppShortcut avatar={<Icon path={mdiAppsBox} size={1}/>} address="/app-library" text="All Apps" />

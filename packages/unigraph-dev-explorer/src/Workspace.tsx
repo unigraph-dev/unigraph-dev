@@ -11,10 +11,10 @@ import FlexLayout, { Actions, DockLocation, Model, Node, TabNode } from 'flexlay
 import 'flexlayout-react/style/light.css'
 import './workspace.css'
 import { getParameters, isElectron, isSmallScreen, NavigationContext } from "./utils";
-import { Button, Container, CssBaseline, ListItem, Popover } from "@material-ui/core";
+import { Container, CssBaseline, ListItem, Popover } from "@material-ui/core";
 import { isJsonString } from "unigraph-dev-common/lib/utils/utils";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
-import { Search, StarOutlined, Menu, LocalOffer, Details } from "@material-ui/icons";
+import { Search, Menu, Details } from "@material-ui/icons";
 import { ContextMenu } from "./components/UnigraphCore/ContextMenu";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from 'react-dnd-html5-backend'
@@ -27,7 +27,6 @@ import { mdiStarPlusOutline, mdiSync, mdiTagMultipleOutline } from '@mdi/js';
 import { SearchOverlayPopover } from "./pages/SearchOverlay";
 
 const pages = window.unigraph.getState('registry/pages')
-const electron = isElectron();
 
 export function WorkspacePageComponent({ children, maximize, paddingTop, id }: any) {
     return <div id={"workspaceContainer"+id} style={{width: "100%", height: "100%", overflow: "auto"}}>
@@ -38,13 +37,17 @@ export function WorkspacePageComponent({ children, maximize, paddingTop, id }: a
     </div>
 }
 
-export const getComponentFromPage = (location: string, params: any = {}) => {return {
-    type: 'tab',
-    config: params,
-    name: pages.value[location.slice(1)].name,
-    component: '/pages' + location,
-    enableFloat: 'true'
-}}
+export const getComponentFromPage = (location: string, params: any = {}) => {
+    console.log(location.substring(1));
+    if (location.startsWith('/$/')) location = "/" + (window.unigraph.getNamespaceMap as any)()[location.substring(1)].uid
+    return {
+        type: 'tab',
+        config: params,
+        name: pages.value[location.slice(1)].name,
+        component: (location.startsWith('/') ? '/pages' : '/pages/') + location,
+        enableFloat: 'true'
+    }
+}
 
 const ConnectionIndicator = () => {
     const [connected, setConnected] = React.useState(false);
@@ -121,6 +124,7 @@ window.closeTab = (tabId: any) => {
 const newTab = (model: Model, initJson: any) => {
     // @ts-expect-error: already checked for isJsonString
     let userSettings = JSON.parse(isJsonString(window.localStorage.getItem('userSettings')) ? window.localStorage.getItem('userSettings') : "{}")
+    console.log(initJson)
     let newWindowBehavior = userSettings['newWindow'] && Object.keys(newWindowActions).includes(userSettings['newWindow']) ? userSettings['newWindow'] : "new-tab"
     // @ts-expect-error: already checked and added fallback
     newWindowActions[newWindowBehavior](model, initJson)
@@ -244,6 +248,7 @@ export function WorkSpace(this: any) {
         var config = node.getConfig() || {};
         if (component.startsWith('/pages/')) {
             const page = pages.value[(component.replace('/pages/', '') as string)]
+
             return <WorkspacePageComponent maximize={page.maximize} paddingTop={page.paddingTop} id={config.id}>
                 {node._attributes.floating ? <div id="global-elements">
                     {isElectron() ? [] : <SearchOverlayPopover /> }
@@ -254,9 +259,6 @@ export function WorkSpace(this: any) {
             </WorkspacePageComponent>
         } else if (component.startsWith('/components/')) {
             return components[(component.replace('/components/', '') as string)].constructor(config)
-        } else if (component.startsWith('/temp/')) {
-            const tempComponent = window.unigraph.getState(component).value;
-            return tempComponent.component({...config, ...tempComponent.params});
         }
     }
 
@@ -331,7 +333,10 @@ export function WorkSpace(this: any) {
                                     name: node.getName(),
                                     env: "react-explorer",
                                     view: node.getComponent(),
-                                    props: JSON.stringify({config: config}) 
+                                    props: JSON.stringify({config: config}),
+                                    "$context": {
+                                        '_hide': true
+                                    }
                                 }, "$/schema/view");
                                 await window.unigraph.runExecutable("$/package/unigraph.core/0.0.1/executable/add-item-to-list", {
                                     item: uid[0],
