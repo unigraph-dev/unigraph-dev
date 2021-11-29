@@ -6,7 +6,6 @@ import Icon from '@mdi/react'
 export const SubentityView = ({data, callbacks}: any) => {
     const [isMain, setIsMain] = React.useState(false);
     const [subEntities, setSubentities] = React.useState(1);
-    console.log(callbacks)
 
     React.useEffect(() => {
         if (!callbacks.addSubentity) {

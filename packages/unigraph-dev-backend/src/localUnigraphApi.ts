@@ -195,6 +195,57 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             await client.deleteRelationbyJson({uid: uid, ...relation});
             callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
         },
+        reorderItemInArray: async (uid, item, relUid, subIds) => {
+            const items: [(number | string), number][] = (Array.isArray(item[0]) ? item : [item]) as any
+            const query = `query { res(func: uid(${uid})) {
+                uid
+                <_value[> {
+                    uid
+                    _index { uid <_value.#i> }
+                    _value { uid 
+                        _value { uid }
+                    }
+                }
+            }}`
+            const origObject = (await client.queryDgraph(query))[0][0];
+            if (!origObject || !(Array.isArray(origObject['_value[']))) {
+                throw Error("Cannot reorder as source item is not an array!");
+            }
+            origObject['_value['].sort((a: any, b: any) => (a["_index"]?.["_value.#i"] || 0) - (b["_index"]?.["_value.#i"] || 0));
+            // Reorder items
+            let newObject = origObject['_value['].map(el => el['_index']['uid']);
+            const permutations: [string, number][] = items.map((el) => {
+                const targetIndex = el[1];
+                let source;
+                origObject['_value['].forEach((ell: any, index: number) => {
+                    if (el[0] === index || el[0] === ell.uid || el[0] === ell['_value']?.uid || el[0] === ell['_value']?.['_value']?.uid) {
+                        source = ell._index.uid;
+                    }
+                })
+                return source ? [source, targetIndex] : undefined
+            }).filter(el => el !== undefined) as any;
+            permutations.forEach(([source, target]) => {
+                let oldIndex = newObject.length;
+                const toInsert = newObject.filter((el, index) => {
+                    if (el === source) oldIndex = index;
+                    return el !== source
+                });
+                toInsert.splice(oldIndex < target ? target : target+1, 0, source);
+                newObject = toInsert;
+            });
+            const quads = newObject.map((el, index) => `<${el}> <_value.#i> "${index}" .\n`);
+            const create_json = new dgraph.Mutation();
+            create_json.setSetNquads(quads.join(''));
+            const result = await client.createDgraphUpsert({
+                query: false,
+                mutations: [
+                    create_json
+                ]
+            });
+
+            callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches, subIds: subIds})
+            return result
+        },
         deleteItemFromArray: async (uid, item, relUid, subIds) => {
             const items = Array.isArray(item) ? item : [item]
             const query = `query { res(func: uid(${uid})) {

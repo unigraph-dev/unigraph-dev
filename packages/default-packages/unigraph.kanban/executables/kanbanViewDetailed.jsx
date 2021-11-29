@@ -3,7 +3,7 @@ const {data, callbacks} = params;
 const List = React.useMemo(() => {
     return ({column}) => {
         const listValue = column?.['_value']?.children
-        return <Card style={{width: "270px", padding: "12px", margin: "8px", height: "100%"}} variant="outlined" >
+        return <Card style={{width: "360px", padding: "12px", margin: "8px", height: "100%"}} variant="outlined" >
             <Typography variant="body1"><b>{column._value.name['_value.%']}</b></Typography>
             <DynamicObjectListView
                 items={listValue?.['_value['] || []} context={column} listUid={listValue?.uid} callbacks={{...callbacks}}
@@ -61,7 +61,7 @@ const AddBoard = React.useMemo(() => {
     }
 }, [])
 
-return <div style={{padding: "24px", ...(data?._backgroundImage ? {backgroundImage: `url(${data?._backgroundImage})`, backgroundSize: "cover"}: {}), height: "100%", width: "100%"}}>
+return <div style={{padding: "24px", overflow: "scroll", ...(data?._backgroundImage ? {backgroundImage: `url(${data?._backgroundImage})`, backgroundSize: "cover"}: {}), height: "100%", width: "100%"}}>
     <div style={{display: "flex"}}>
         <Typography variant="h5" gutterBottom style={{marginTop: "8px", width: "100%"}}>{data.get('title').as('primitive')}</Typography>
         <MoreVert onClick={(event) => onUnigraphContextMenu(event, data, undefined, callbacks, (uid, object, handleClose, callbacks) => {return <div>

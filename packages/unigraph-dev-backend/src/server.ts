@@ -4,7 +4,7 @@ import WebSocket from 'ws';
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import DgraphClient from './dgraphClient';
 import { insertsToUpsert } from 'unigraph-dev-common/lib/utils/txnWrapper';
-import { EventAddNotification, EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteItemFromArray, EventDeleteRelation, EventDeleteUnigraphObject, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventExportObjects, EventGetPackages, EventGetQueries, EventGetSchemas, EventGetSearchResults, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventResponser, EventRunExecutable, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeQuery, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
+import { EventAddNotification, EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteItemFromArray, EventDeleteRelation, EventDeleteUnigraphObject, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventExportObjects, EventGetPackages, EventGetQueries, EventGetSchemas, EventGetSearchResults, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventReorderItemInArray, EventResponser, EventRunExecutable, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeQuery, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
 import { buildUnigraphEntity, processAutoref, dectxObjects, processAutorefUnigraphId } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { addUnigraphPackage, checkOrCreateDefaultDataModel, createPackageCache, createSchemaCache } from './datamodelManager';
 import { Cache } from './caches';
@@ -172,6 +172,11 @@ export default async function startServer(client: DgraphClient) {
     "subscribe_to_object": function (event: EventSubscribeObject, ws: IWebsocket) {
       serverStates.localApi.subscribeToObject(event.uid, {ws: ws, connId: event.connId}, event.id, event.options || {})
         .then((res: any) => ws.send(makeResponse(event, true)));
+    },
+
+    "get_object": function (event: EventSubscribeObject, ws: IWebsocket) {
+      serverStates.localApi.getObject(event.uid, {ws: ws, connId: event.connId}, event.id, event.options || {})
+        .then((res: any) => ws.send(makeResponse(event, true, {result: res})));
     },
 
     "subscribe_to_type": function (event: EventSubscribeType, ws: IWebsocket) {
@@ -351,6 +356,12 @@ export default async function startServer(client: DgraphClient) {
 
     "delete_relation": async function (event: EventDeleteRelation, ws: IWebsocket) {
       localApi.deleteRelation(event.uid, event.relation).then(() => {
+        ws.send(makeResponse(event, true))
+      }).catch((e: any) => ws.send(makeResponse(event, false, {"error": e})));
+    },
+
+    "reorder_item_in_array": async function (event: EventReorderItemInArray, ws: IWebsocket) {
+      (localApi as any).reorderItemInArray(event.uid, event.item, event.relUid, event.subIds).then((_: any) => {
         ws.send(makeResponse(event, true))
       }).catch((e: any) => ws.send(makeResponse(event, false, {"error": e})));
     },

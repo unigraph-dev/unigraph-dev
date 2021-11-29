@@ -13,6 +13,7 @@ export type AutoDynamicViewProps = {
     attributes?: Record<string, any>,
     inline?: boolean,
     allowSubentity?: boolean,
+    allowSemantic?: boolean,
     style?: React.CSSProperties,
     noDrag?: boolean,
     noDrop?: boolean,

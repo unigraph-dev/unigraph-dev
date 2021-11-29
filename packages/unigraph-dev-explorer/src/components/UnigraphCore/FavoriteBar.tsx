@@ -7,6 +7,7 @@ import { byElementIndex, unpad } from "unigraph-dev-common/lib/utils/entityUtils
 import { DynamicViewRenderer } from "../../global";
 import { AutoDynamicView } from "../ObjectView/AutoDynamicView";
 import { isJsonString } from "unigraph-dev-common/lib/utils/utils";
+import { DynamicObjectListView } from "../ObjectView/DynamicObjectListView";
 
 const ViewItem: DynamicViewRenderer = ({data, callbacks}) => {
     let unpadded: any = unpad(data);
@@ -15,6 +16,7 @@ const ViewItem: DynamicViewRenderer = ({data, callbacks}) => {
         <div onClick={() => window.newTab(window.layoutModel, {
             type: 'tab',
             config: isJsonString(unpadded?.props) ? JSON.parse(unpadded.props).config : {},
+            customTitle: true,
             name: unpadded.name,
             component: typeof unpadded.view === "string" ? unpadded.view : "/pages/" + data._value.view._value.uid,
             enableFloat: 'true'
@@ -51,9 +53,15 @@ export const FavoriteBar = () => {
     })
 
     return <React.Fragment>
-        {fav.map((el, index) => <ListItem>
-            <AutoDynamicView object={el['_value']['_value']} callbacks={{context: favEntity, removeFromContext: () => window.unigraph.deleteItemFromArray(favEntity?.['_value']?.children?.uid, index)}}/>
-        </ListItem>)}
+        <DynamicObjectListView 
+            items={fav}
+            context={favEntity}
+            listUid={favEntity?.['_value']?.children?.uid}
+            itemGetter={(el: any) => el['_value']['_value']}
+            noBar noRemover
+            defaultFilter={['no-deleted', 'no-noview']}
+            itemRemover={(uids) => {window.unigraph.deleteItemFromArray(favEntity?.['_value']?.children?.uid, uids, favEntity.uid)}}
+        />
     </React.Fragment>
 
 }

@@ -3,6 +3,7 @@ import React from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
 import { DynamicViewRenderer } from "../../global";
+import { TabContext } from "../../utils";
 import { ObjectEditor } from "../ObjectEditor/ObjectEditor";
 import { JsontreeObjectViewer } from "./DefaultObjectView";
 import { isStub } from "./utils";
@@ -35,9 +36,11 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, 
             <Typography>Error in detailed AutoDynamicView: </Typography>
             <p>{JSON.stringify(error, null, 4)}</p>
         </div>}>
-            {React.createElement(DynamicViewsDetailed[object.type['unigraph.id']].view, {
-            data: isObjectStub ? loadedObj : object, callbacks, options: options || {}, context, ...(attributes ? attributes : {})
+        <TabContext.Consumer>
+                {({viewId, setTitle}) => React.createElement(DynamicViewsDetailed[object.type['unigraph.id']].view, {
+            data: isObjectStub ? loadedObj : object, callbacks: {viewId, setTitle, ...(callbacks ? callbacks : {})}, options: {viewId, setTitle, ...options || {}}, context, ...(attributes ? attributes : {})
         })}
+            </TabContext.Consumer>
         </ErrorBoundary>;
     } else if (useFallback) {
         return (object && ((isObjectStub && loadedObj) || !isObjectStub)) ? <ObjectEditor uid={object?.uid} /> : <React.Fragment />

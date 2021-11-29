@@ -6,14 +6,17 @@ import { useSwipeable } from 'react-swipeable';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { AutoDynamicViewProps } from '../../types/ObjectView';
-import { isMobile, isMultiSelectKeyPressed, selectUid } from '../../utils';
+import { DataContext, isMobile, isMultiSelectKeyPressed, selectUid, TabContext } from '../../utils';
 import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import { StringObjectViewer } from './DefaultObjectView';
 import { getSubentities, isStub, SubentityDropAcceptor } from './utils';
 
-export const AutoDynamicView = ({ object, callbacks, component, attributes, inline, allowSubentity, style, noDrag, noDrop, noContextMenu }: AutoDynamicViewProps) => {
+export const AutoDynamicView = ({ object, callbacks, component, attributes, inline, allowSubentity, allowSemantic, style, noDrag, noDrop, noContextMenu }: AutoDynamicViewProps) => {
     if (!callbacks) callbacks = {};
     allowSubentity = allowSubentity === true;
+
+    const dataContext = React.useContext(DataContext);
+    const tabContext = React.useContext(TabContext);
 
     const isObjectStub = isStub(object);
     const [loadedObj, setLoadedObj] = React.useState<any>(false);
@@ -50,7 +53,13 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
 
     const [{ isDragging }, drag] = useDrag(() => ({
         type: object?.['type']?.['unigraph.id'] || "$/schema/any",
-        item: {uid: object?.uid, itemType: object?.type?.['unigraph.id']},
+        item: {
+            uid: object?.uid, 
+            itemType: object?.type?.['unigraph.id'],
+            dndContext: tabContext.viewId,
+            dataContext: dataContext.rootUid,
+            removeFromContext: callbacks?.removeFromContext,
+        },
         collect: (monitor) => ({
           isDragging: !!monitor.isDragging()
         })
@@ -107,33 +116,35 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
         if (isMobile()) handlers.ref(domElement);
     }, [isDragging, drag, callbacks])
 
-    let el;
-    if (isRecursion === false && object?.type && object.type['unigraph.id'] && Object.keys(DynamicViews).includes(object.type['unigraph.id']) && getObject()) {
-        el = React.createElement(DynamicViews[object.type['unigraph.id']].view, {
-            data: getObject(), callbacks: callbacks ? callbacks : undefined, ...(attributes ? attributes : {})
-        });
-    } else if (isRecursion === false && object && getObject()) {
-        el = <StringObjectViewer object={getObject()}/>
-    } else if (isRecursion === true) {
-        el = <Typography style={{color: "red"}}>
-            Recursive element (uid: {object.uid}), ignored!
-        </Typography>
-    } else {
-        el = <React.Fragment />
-    }
+    const getEl = React.useCallback((viewId, setTitle) => {
+        if (isRecursion === false && object?.type && object.type['unigraph.id'] && Object.keys(DynamicViews).includes(object.type['unigraph.id']) && getObject()) {
+            return React.createElement(DynamicViews[object.type['unigraph.id']].view, {
+                data: getObject(), callbacks: {viewId, setTitle, ...(callbacks ? callbacks : {})}, ...(attributes ? attributes : {})
+            });
+        } else if (isRecursion === false && object && getObject()) {
+            return <StringObjectViewer object={getObject()}/>
+        } else if (isRecursion === true) {
+            return <Typography style={{color: "red"}}>
+                Recursive element (uid: {object.uid}), ignored!
+            </Typography>
+        } else {
+            return <React.Fragment />
+        }
+    }, [isRecursion, object, object.uid, callbacks, attributes, DynamicViews, isObjectStub]);
     
-    return el ? <ErrorBoundary onError={(error: Error, info: {componentStack: string}) => {
+    
+    return <ErrorBoundary onError={(error: Error, info: {componentStack: string}) => {
         console.error(error);
       }} FallbackComponent={({error}) => <div style={{backgroundColor: "floralwhite", borderRadius: "8px"}}>
         <Typography>Error in AutoDynamicView: (for object {object?.uid})</Typography>
         <p>{error.message}</p>
     </div>}>
-        <div style={{display: inline ? "inline" : "block", ...(inline ? {} : {width: "100%"}),}}>
+        <div style={{display: inline ? "inline" : "block", ...(inline ? {} : {width: "100%"}), backgroundColor: (isSelected || isDragging) ? "whitesmoke" : "unset", borderRadius: (isSelected || isDragging) ? "12px" : "",}}>
         <div 
             id={"object-view-"+object?.uid} 
             style={{
-                backgroundColor: isSelected ? "whitesmoke" : "unset",
-                opacity: isDragging ? 0.5 : 1, 
+                opacity: isDragging ? 0 : 1,
+                boxSizing: "border-box",
                 display: "inline-flex", alignItems: "center",
                 ...(inline ? {} : {width: "100%"}),
                 ...(isMobile() ? {touchAction: "pan-y"} : {}),
@@ -145,12 +156,12 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
             {...(attributes ? attributes : {})}
             ref={attach} 
         >
-            {el}
+                {getEl(tabContext.viewId, tabContext.setTitle)}   
         </div>
         {showSubentities ? <div style={{width: "100%", paddingLeft: "24px"}}>
                 <ul>{getSubentities(object).map((el: any) => <li><AutoDynamicView object={new UnigraphObject(el['_value'])} callbacks={callbacks} /></li>)}</ul>
             </div> : []}
         {(allowSubentity && !noDrop) ? <SubentityDropAcceptor uid={object?.uid} /> : []}
         </div>
-    </ErrorBoundary> : <React.Fragment/>;
+    </ErrorBoundary>;
 }

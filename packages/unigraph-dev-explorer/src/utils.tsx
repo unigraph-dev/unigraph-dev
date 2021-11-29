@@ -5,6 +5,14 @@ import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 
 export const NavigationContext = React.createContext((location: string) => {});
 
+export const TabContext = React.createContext({
+    viewId: 0,
+    setTitle: (title: string) => {}
+})
+export const DataContext = React.createContext({
+    rootUid: "0x0"
+})
+
 export function getParameters(search: string) {
     // Params obj
     var params: any = {};
