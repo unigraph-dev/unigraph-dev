@@ -27,10 +27,8 @@ export const SubentityDropAcceptor = ({ uid }: any) => {
         })
     }))
 
-    const opacities: Record<string, number> = {"truetrue": 1, "truefalse": 0.5, "falsefalse": 0, "falsetrue": 0}
-
-    return <div ref={dropSub} style={{opacity: opacities[canDrop + "" + isOver], width: "100%", height: canDrop ? "16px" : "0px", margin: "0px"}}>
-        <hr style={{height: "50%", backgroundColor: "gray", margin: "0px", marginLeft: "48px"}}/>
+    return <div ref={dropSub} style={{opacity: (canDrop && isOver) ? 1 : 0, width: "100%", height: "6px", position: "absolute", marginTop: "-3px"}}>
+        <div style={{height: "100%", backgroundColor: "gray", margin: "0px", marginLeft: "48px", borderRadius: "4px"}}/>
     </div>
 }
 

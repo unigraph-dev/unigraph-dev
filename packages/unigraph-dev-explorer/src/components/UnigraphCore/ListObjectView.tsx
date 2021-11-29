@@ -5,6 +5,9 @@ export const ListObjectQuery = (uid: string) => `(func: uid(${uid})) {
     _value {
         name { <_value.%> }
         children { uid <_value[> {
+            _index {
+                <_value.#i>
+            }
             _value { 
                 uid
                 type { <unigraph.id> }

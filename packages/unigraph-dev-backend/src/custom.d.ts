@@ -192,6 +192,16 @@ declare type EventDeleteItemFromArray = {
   subIds: any[] | any,
 }
 
+declare type EventReorderItemInArray = {
+  type: "event",
+  event: "reorder_item_in_array",
+  id: number,
+  uid: string,
+  item: any,
+  relUid?: string,
+  subIds: any[] | any,
+}
+
 declare type EventResponser = (event: any, ws: IWebsocket) => any
 
 declare type EventProxyFetch = {

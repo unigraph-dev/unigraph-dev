@@ -29,6 +29,7 @@ function TodoListBody ({data}: { data: ATodoList[] }) {
             context={null}
             filters={filters}
             defaultFilter={"only-incomplete"}
+            compact
         />
         <TextField value={newName} onChange={(e) => setNewName(e.target.value)}></TextField>
         <Button onClick={
@@ -53,14 +54,12 @@ export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
         }
     };
     //console.log(data.uid, unpadded)
-    return <React.Fragment>
-        <ListItemIcon>
+    return <div style={{display: "flex"}}>
             <Checkbox checked={unpadded.done} onClick={_ => {
                 //window.unigraph.updateSimpleObject(todo, "done", !unpadded.done);
                 data.get('done')['_value.!'] = !data.get('done')['_value.!'];
                 totalCallbacks['onUpdate'](data);
             }} />
-        </ListItemIcon>
         <ListItemText 
             primary={<AutoDynamicView object={data.get('name')['_value']['_value']} noDrag noDrop noContextMenu />}
             secondary={<div style={{display: "flex", alignItems: "baseline"}} children={[...(!unpadded.children?.map ? [] :
@@ -69,7 +68,7 @@ export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
             ...(unpadded.time_frame?.start?.datetime && (new Date(unpadded.time_frame?.start?.datetime)).getTime() !== 0 ? [<Chip size="small" icon={<CalendarToday/>} label={"Start: " + Sugar.Date.relative(new Date(unpadded.time_frame?.start?.datetime))} />] : []),
             ...(unpadded.time_frame?.end?.datetime && (new Date(unpadded.time_frame?.start?.datetime)).getTime() !== maxDateStamp ? [<Chip size="small" icon={<CalendarToday/>} label={"End: " + Sugar.Date.relative(new Date(unpadded.time_frame?.end?.datetime))} />] : [])]}></div>}
         />
-    </React.Fragment>
+    </div>
 }
 
 registerDynamicViews({"$/schema/todo": TodoItem})

@@ -333,6 +333,9 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
         deleteRelation: (uid, relation) => {
             sendEvent(connection, "delete_relation", {uid: uid, relation: relation});
         },
+        reorderItemInArray: (uid, item, relUid, subIds) => {
+            sendEvent(connection, "reorder_item_in_array", {uid: uid, item: item, relUid: relUid, subIds: subIds});
+        },
         deleteItemFromArray: (uid, item, relUid, subIds) => {
             sendEvent(connection, "delete_item_from_array", {uid: uid, item: item, relUid: relUid, subIds: subIds});
         },

@@ -202,6 +202,7 @@ export interface Unigraph<TT = WebSocket | false> {
      * }`
      */
     deleteRelation(uid: string, relation: any): any;
+    reorderItemInArray?(uid: string, item: [(number | string), number] | [(number | string), number][], relationUid?: string, subIds?: any[] | any): any;
     /**
      * Deletes an item from an array (ordered list).
      *
