@@ -3,13 +3,12 @@ const {data, callbacks} = params;
 const List = React.useMemo(() => {
     return ({column}) => {
         const listValue = column?.['_value']?.children
-        return <Card style={{width: "360px", padding: "12px", margin: "8px", height: "100%"}} variant="outlined" >
+        return <Card style={{width: "360px", minWidth: "360px", padding: "12px", margin: "8px", height: "100%", overflow: "scroll"}} variant="outlined" >
             <Typography variant="body1"><b>{column._value.name['_value.%']}</b></Typography>
             <DynamicObjectListView
-                items={listValue?.['_value['] || []} context={column} listUid={listValue?.uid} callbacks={{...callbacks}}
+                items={(listValue?.['_value['] || []).sort(byElementIndex) || []} context={column} listUid={listValue?.uid} callbacks={{...callbacks}}
                 itemGetter={(el) => el['_value']['_value']}
-                noBar
-                noRemover
+                noBar noRemover compact defaultFilter={[]}
                 itemRemover={(uids) => {window.unigraph.deleteItemFromArray(listValue?.uid, uids, column['uid'], callbacks?.subsId || undefined)}}
             />
             <Typography onClick={() => {
