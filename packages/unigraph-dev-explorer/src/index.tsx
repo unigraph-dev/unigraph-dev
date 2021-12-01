@@ -22,36 +22,33 @@ if (typeof window.electronPreload === "function") window.electronPreload();
 render((new URLSearchParams(window.location.search)).get('pageName') ? <App/> : <WorkSpace />);
 
 function initDynamicObjectViews() {
-  window.unigraph.subscribeToType('$/schema/object_view', (views: any[]) => {
-    console.log(views);   
+  window.unigraph.subscribeToType('$/schema/object_view', (views: any[]) => {  
+    //console.log(views);
     views.forEach(async (el) => {
       const typeId = el.get('item_type')._value['unigraph.id'];
       const view = await getComponentAsView(el._value.view['_value'], {})
       registerDynamicViews({[typeId]: {view}})
     })
-  });
+  }, undefined, {all: true});
 
   window.unigraph.subscribeToType('$/schema/object_view_detailed', (views: any[]) => {
-    console.log(views);   
     views.forEach(async (el) => {
       const typeId = el.get('item_type')._value['unigraph.id'];
       const view = await getComponentAsView(el._value.view['_value'], {})
       registerDetailedDynamicViews({[typeId]: {view}})
     })
-  });
+  }, undefined, {all: true});
 
   window.unigraph.subscribeToType('$/schema/view', async (views: any[]) => {
-    console.log(views)
     const resolvedViews = await Promise.all(views.filter(el => el?._value?.view?.['_value']?.type?.['unigraph.id'] === "$/schema/executable").map(async (el) => {
       return [el._value.view._value.uid, {
         name: el._value.name['_value.%'],
         constructor: await getComponentAsView(el._value.view['_value'], {})
       }]
     }));
-    console.log(resolvedViews);
     const currPages = window.unigraph.getState('registry/pages');
     currPages.setValue({...currPages.value, ...Object.fromEntries(resolvedViews)})
-  }, undefined);
+  }, undefined, {all: true});
 }
 
 window.unigraph.onReady!(() => {

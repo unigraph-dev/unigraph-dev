@@ -173,7 +173,6 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
         const urlString = new URL(url);
         urlString.searchParams.append('browserId', browserId);
         if (getState('unigraph/connected').value !== undefined) urlString.searchParams.append('revival', "true");
-        console.log(connection.current?.CLOSED)
         if (connection.current?.readyState !== 3 /* CLOSED */ && connection.current) return;
         connection.current = new WebSocket(urlString.toString());
 

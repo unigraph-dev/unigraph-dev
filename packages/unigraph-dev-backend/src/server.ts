@@ -508,7 +508,7 @@ export default async function startServer(client: DgraphClient) {
       if (msgObject) {
         // match events
         if (msgObject.type === "event" && msgObject.event && eventRouter[msgObject.event]) {
-          if (verbose >= 1) console.log("Event: " + msgObject.event + ", from: " + clientBrowserId + " | " + connId);
+          if (verbose >= 1 && msgObject.event !== "run_executable") console.log("Event: " + msgObject.event + ", from: " + clientBrowserId + " | " + connId);
           eventRouter[msgObject.event]({...msgObject, connId: connId}, ws);
         }
         if (verbose >= 6) console.log(msgObject);

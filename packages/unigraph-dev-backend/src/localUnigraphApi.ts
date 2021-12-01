@@ -43,7 +43,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             const query = name === "any" ? ((all || uidsOnly) ? queryAnyAll : queryAny) : `(func: uid(par${eventId})${first ? ", first: "+first : ""}) 
                 @filter((type(Entity)) AND (NOT eq(<_propertyType>, "inheritance")) 
                 ${ showHidden ? "" : "AND (NOT eq(<_hide>, true))" } AND (NOT type(Deleted)))
-            ${uidsOnly ? "{ uid }" : (metadataOnly ? " { uid <dgraph.type> type { <unigraph.id> } } " : makeQueryFragmentFromType(name, states.caches["schemas"].data, depth))}
+            ${uidsOnly ? "{ uid }" : (all ? "@recurse { uid <unigraph.id> expand(_userpredicate_) } " : (metadataOnly ? " { uid <dgraph.type> type { <unigraph.id> } } " : makeQueryFragmentFromType(name, states.caches["schemas"].data, depth)))}
             var(func: eq(<unigraph.id>, "${name}")) {
             <~type> {
             par${eventId} as uid

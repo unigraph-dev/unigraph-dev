@@ -58,14 +58,17 @@ export const InlineSearch = () => {
                     })
                 }}
             >{el.label(state.search!)}</Typography>
-            <Divider/>
         </React.Fragment>)}
         {searchResults.map((el: any) => <React.Fragment>
             <div onClick={() => {state.onSelected?.(el.name, el.uid)}}>
-                <Typography variant="body1">{el.name}</Typography>
-                <Typography variant="body2" style={{color: "gray"}}>{el.type}</Typography>
+                
+                <div style={{display: "inline-flex"}}>
+                    <div style={{minHeight: "18px", minWidth: "18px", height: "18px", width: "18px", alignSelf: "center", marginRight: "3px", opacity: 0.54, backgroundImage: `url("data:image/svg+xml,${(window.unigraph.getNamespaceMap)?.()?.[el.type]?._icon}")`}}/>
+                    <Typography style={{color: "grey", marginLeft: "2px"}}>{(window.unigraph.getNamespaceMap)?.()?.[el.type]?._name}</Typography>
+                    <Divider variant="middle" orientation="vertical" style={{height: "16px", alignSelf: "center"}} />
+                    <Typography variant="body1">{el.name}</Typography>
+                </div>
             </div>
-            <Divider/>
         </React.Fragment>)}
     </Popover></div>
 }

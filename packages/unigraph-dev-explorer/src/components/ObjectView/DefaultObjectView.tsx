@@ -73,6 +73,7 @@ export const JsontreeObjectViewer = ({object, options}: {object: any, options: O
 }
 
 export const Executable: DynamicViewRenderer = ({data, callbacks}) => {
+    //console.log(data);
     const unpadded = unpad(data);
     const icons: any = {
         "routine/js": <PlayArrow/>,

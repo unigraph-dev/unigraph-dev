@@ -4,15 +4,22 @@ const [count, setCount] = React.useState({
 });
 
 React.useEffect(() => {
+    const subsId = getRandomInt();
     const inboxUid = window.unigraph.getNamespaceMap()['$/entity/inbox'].uid;
     const readLaterUid = window.unigraph.getNamespaceMap()['$/entity/read_later'].uid;
-    window.unigraph.getQueries([`(func: uid(${inboxUid})) @normalize { _value { children { <_value[> {items: count(uid)} } } }`, 
-        `(func: uid(${readLaterUid})) @normalize { _value { children { <_value[> {items: count(uid)} } } }`]).then((results) => {
-            setCount({
-                "$/entity/inbox": results[0]?.[0]?.items || 0,
-                "$/entity/read_later": results[1]?.[0]?.items || 0
-            })
+    window.unigraph.subscribeToQuery(`(func: uid(${inboxUid}, ${readLaterUid})) @normalize { uid: uid _value { children { <_value[> {items: count(uid)} } } }`,
+    (res) => {
+        const ibx = results[0].uid === inboxUid ? results[0] : results[1];
+        const rlt = results[0].uid === readLaterUid ? results[0] : results[1];
+        setCount({
+            "$/entity/inbox": ibx?.items || 0,
+            "$/entity/read_later": rlt?.items || 0
         })
+    }, subsId);
+
+    return function cleanup () {
+        window.unigraph.unsubscribe(subsId);
+    }
 }, []);
 
 return <div>

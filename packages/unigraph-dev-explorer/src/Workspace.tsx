@@ -264,20 +264,22 @@ export function WorkSpace(this: any) {
     const factory = (node: any) => {
         var component = node.getComponent();
         var config = node.getConfig() || {};
+        console.log(node, config)
         if (component.startsWith('/pages/')) {
             const page = pages.value[(component.replace('/pages/', '') as string)]
 
             return <TabContext.Provider value={{
-                viewId: config.id,
+                viewId: node._attributes.id,
                 setTitle: (title: string) => {
                     if (config.customTitle) {
                         return false;
                     } else {
 
                     }
-                }
+                },
+                isVisible: () => window.layoutModel.getNodeById(node._attributes.id).isVisible(),
             }}>
-                <WorkspacePageComponent maximize={page.maximize} paddingTop={page.paddingTop} id={config.id}>
+                <WorkspacePageComponent maximize={page.maximize} paddingTop={page.paddingTop} id={node._attributes.id}>
                     {node._attributes.floating ? <div id="global-elements">
                         <SearchOverlayPopover />
                         <ContextMenu />

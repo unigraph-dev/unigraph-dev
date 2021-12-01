@@ -91,7 +91,6 @@ export const getComponentFromExecutable = async (data: any, params: any, globalI
         import: el?.['_value']?.['import']?.['_value.%'],
         as: el?.['_value']?.['as']['_value.%'],
     }});
-    console.log(imports)
     const [refstr, refval] = buildRefs(imports);
     Object.entries(globalImports).forEach(([key, value]) => {
         refstr.push(key);
