@@ -1,6 +1,6 @@
 const {data, callbacks} = params;
 
-return <Card style={{padding: "8px", margin: "8px", width: "100%"}} variant="outlined" onClick={() => {
+return <Card style={{padding: "8px", margin: "8px", width: "100%", ...(data?._backgroundImage ? {backgroundImage: `url(${data?._backgroundImage})`, backgroundSize: "cover"}: {})}} variant="outlined" onClick={() => {
     window.wsnavigator('/library/object?uid=' + data.uid)
 }}>
     <Typography>{data.get('title').as('primitive')}</Typography>

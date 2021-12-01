@@ -371,13 +371,13 @@ export const queries: Record<string, (a: string, uidsOnly?: boolean) => string> 
       }
       cca${a} as min(val(ca${a}))
     }`,
-  "queryAnyAll": (a: any, uidsOnly?: boolean) => `(func: uid(es${a}), orderdesc: val(cca${a})) ${uidsOnly ? "{uid}" : `@recurse {
+  "queryAnyAll": (a: any, uidsOnly?: boolean) => `(func: uid(es${a}), orderdesc: val(cca${a}), first: -1000) ${uidsOnly ? "{uid}" : `@recurse {
       uid
       unigraph.id
       expand(_userpredicate_)
     }`}
     
-    es${a} as var(func: type(Entity)) @filter((NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true)))
+    es${a} as var(func: type(Entity), first: -1000) @filter((NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true)))
       { 
         _timestamp {
           ca${a} as _updatedAt
