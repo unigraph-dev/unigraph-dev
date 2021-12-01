@@ -13,7 +13,6 @@ export const HomeSection = ({data}: any) => {
   const [shouldDisplay, setShouldDisplay] = React.useState(false);
 
   React.useEffect(() => {
-    console.log(data.get('view/view'))
     window.unigraph.runExecutable(data.get('condition')._value.uid, {}).then((ret: any) => {
       if (ret === true) setShouldDisplay(true);
     })
@@ -28,7 +27,6 @@ export const HomeSection = ({data}: any) => {
 export default function ExplorerHome({id}: any) {
 
   const [sections, setSection] = React.useState<Partial<HomeSection>[]>([]);
-  console.log(sections)
 
   React.useEffect(() => {
     const id = getRandomInt();
