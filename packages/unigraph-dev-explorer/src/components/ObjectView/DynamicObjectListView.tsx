@@ -230,6 +230,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
         setTotalItems([...allItems]);
         if (currentTab.length >= 1) allItems = allItems.filter((it: any) => itemGetter(it).type['unigraph.id'] === currentTab)
         setProcItems(allItems);
+        if (allItems.length === 0) setCurrentTab("");
     }, [reverseOrder, items, filtersUsed, currentTab])
 
     const contextRef = React.useRef(context);
@@ -315,7 +316,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
                         </AccordionDetails>
                     </Accordion>
                     <IconButton
-                        onClick={() => itemRemover(procItems.map((el, idx) => idx))}
+                        onClick={() => itemRemover(procItems.map((el, idx) => itemGetter(el).uid))}
                         style={{ display: itemRemover === _.noop ? "none" : "" }}
                     ><ClearAll /></IconButton>
                     <IconButton
