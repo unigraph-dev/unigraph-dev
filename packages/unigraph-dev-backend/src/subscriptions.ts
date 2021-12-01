@@ -18,6 +18,8 @@ export type Subscription = {
     connId?: string,
     clientId?: string,
     hibernated?: boolean,
+    queryNow?: any,
+    finalQuery?: any,
 };
 
 export function buildPollingQuery(subs: Subscription[]) {
@@ -42,11 +44,27 @@ export async function pollSubscriptions(subs: Subscription[], client: DgraphClie
                     const executed = await buildExecutable(exec, {"hello": "ranfromExecutable", params: (el as any).params || {}, definition: exec}, serverStates.localApi, serverStates)();
                     query = buildPollingQuery([{...el, queryFragment: executed}])
                 } else query = buildPollingQuery([el]);
-                let results: any[] = await client.queryDgraph(query).catch(e => {console.log(e, query); return []});
-                const val = results[0];
-                if (stringify(val) !== stringify(subs[index].data)) {
-                    subs[index].data = val;
-                    msgCallback(subs[index].id, val, subs[index].msgPort!, subs[index]);
+
+                const queryFn = async () => {
+                    let results: any[] = await client.queryDgraph(query).catch(e => {console.log(e, query); return []});
+                    el.queryNow = true;
+                    const val = results[0];
+                    if (stringify(val) !== stringify(subs[index].data)) {
+                        subs[index].data = val;
+                        msgCallback(subs[index].id, val, subs[index].msgPort!, subs[index]);
+                    }
+                    el.queryNow = false;
+                    if (el.finalQuery) {
+                        const fq = el.finalQuery;
+                        el.finalQuery = false;
+                        fq();
+                    }
+                }
+
+                if (!el.queryNow) {
+                    queryFn();
+                } else {
+                    el.finalQuery = queryFn;
                 }
             }
         })

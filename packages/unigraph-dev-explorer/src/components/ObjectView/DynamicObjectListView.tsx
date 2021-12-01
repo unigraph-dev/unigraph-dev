@@ -1,4 +1,4 @@
-import { Accordion, AccordionSummary, Typography, AccordionDetails, List, ListItem, Select, MenuItem, IconButton, ListItemIcon, ListSubheader, FormControlLabel, Switch, Button, TextField, Slide, Divider } from "@material-ui/core";
+import { Accordion, AccordionSummary, Typography, AccordionDetails, List, ListItem, Select, MenuItem, IconButton, ListItemIcon, ListSubheader, FormControlLabel, Switch, Button, TextField, Slide, Divider, makeStyles } from "@material-ui/core";
 import { ExpandMore, ClearAll, InboxOutlined } from "@material-ui/icons";
 import { Autocomplete } from "@material-ui/lab";
 import _ from "lodash";
@@ -53,7 +53,7 @@ const groupersDefault: Record<string, Grouper> = {
                 groupsMap[type] = [it]
             }
         })
-        return Object.entries(groupsMap).map(([k, v]) => { return { name: k, items: v as any[] } })
+        return Object.entries(groupsMap).map(([k, v]) => { return { name: k, items: v as any[] } }).sort((a, b) => a.name > b.name ? 1 : -1)
     },
 }
 
@@ -153,7 +153,7 @@ const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, it
     </InfiniteScroll>
 }
 
-const MultiTypeDescriptor = ({items}: {items: any[]}) => {
+const MultiTypeDescriptor = ({items, selectedTab, setSelectedTab}: {items: any[], selectedTab: string, setSelectedTab: any}) => {
 
     const itemGroups = groupersDefault['type'](items);
     console.log(itemGroups)
@@ -162,13 +162,26 @@ const MultiTypeDescriptor = ({items}: {items: any[]}) => {
         <Divider variant="middle" orientation="vertical" style={{height: "auto"}} />
         <div style={{whiteSpace: "nowrap", overflow: "auto", display: "flex"}}>
         {itemGroups.map((el, index) => {
-            return <React.Fragment>
-                <div style={{height: "18px", width: "18px", alignSelf: "center", marginRight: "3px", opacity: 0.54, backgroundImage: `url("data:image/svg+xml,${(window.unigraph.getNamespaceMap)?.()?.[el.name]?._icon}")`}}/>
+            return <TabButton isSelected={selectedTab === el.name} onClick={() => setSelectedTab(el.name)}>
+                <div style={{minHeight: "18px", minWidth: "18px", height: "18px", width: "18px", alignSelf: "center", marginRight: "3px", opacity: 0.54, backgroundImage: `url("data:image/svg+xml,${(window.unigraph.getNamespaceMap)?.()?.[el.name]?._icon}")`}}/>
                 <Typography style={{color: "grey", marginRight: "4px"}}>{(window.unigraph.getNamespaceMap)?.()?.[el.name]?._name}:</Typography>
-                <Typography style={{marginRight: "8px"}}>{el.items.length}{index === itemGroups.length - 1 ? "" : ","}</Typography>
-            </React.Fragment>
+                <Typography style={{marginRight: "8px"}}>{el.items.length}</Typography>
+            </TabButton>
         })}
     </div> </React.Fragment>: <React.Fragment />
+}
+
+const useStyles = makeStyles(theme => ({
+    content: {
+      width: "100%",
+      overflow: "scroll",
+    },
+  }));
+
+const TabButton = ({children, isSelected, onClick}: any) => {
+    return <div style={{cursor: "pointer", display: "flex", padding: "4px", paddingTop: "2px", paddingBottom: "2px", borderRadius: "8px", ...(isSelected ? {backgroundColor: "#E9E9E9", borderRadius: "8px"} : {})}} onClick={onClick}>
+        {children}
+    </div>
 }
 
 /**
@@ -182,13 +195,16 @@ const MultiTypeDescriptor = ({items}: {items: any[]}) => {
  */
 export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ items, groupers, groupBy, listUid, context, callbacks, itemGetter = _.identity, itemRemover = _.noop, filters = [], defaultFilter, reverse, virtualized, buildGraph, noBar, noRemover, noDrop, compact }) => {
 
-    const tabContext = React.useContext(TabContext);
+    const classes = useStyles();
 
+    const tabContext = React.useContext(TabContext);
+    
     const [optionsOpen, setOptionsOpen] = React.useState(false);
     let setGroupBy: any;
     [groupBy, setGroupBy] = React.useState(groupBy || '');
     groupers = { ...groupers, ...groupersDefault }
     const [reverseOrder, setReverseOrder] = React.useState(reverse);
+    const [currentTab, setCurrentTab] = React.useState("");
 
     const isStub = !items[0] || Object.keys(itemGetter(items[0])).filter(el => el.startsWith('_value')).length < 1 || items[0]._stub;
 
@@ -201,6 +217,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
         ...filters];
     const [filtersUsed, setFiltersUsed] = React.useState([...(defaultFilter ? (Array.isArray(defaultFilter) ? defaultFilter : [defaultFilter]) : ["no-noview", "no-deleted", "no-trivial", "no-hidden"])]);
 
+    const [totalItems, setTotalItems] = React.useState<any[]>([]);
     const [procItems, setProcItems] = React.useState<any[]>([]);
     React.useEffect(() => {
         let allItems: any[] = [];
@@ -210,8 +227,10 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
             const filter = totalFilters.find((flt) => flt.id === el);
             allItems = allItems.filter((it: any) => (filter?.fn || (() => true))(itemGetter(it)));
         })
-        setProcItems(allItems)
-    }, [reverseOrder, items, filtersUsed])
+        setTotalItems([...allItems]);
+        if (currentTab.length >= 1) allItems = allItems.filter((it: any) => itemGetter(it).type['unigraph.id'] === currentTab)
+        setProcItems(allItems);
+    }, [reverseOrder, items, filtersUsed, currentTab])
 
     const contextRef = React.useRef(context);
     React.useEffect(() => contextRef.current = context, [context]);
@@ -242,14 +261,18 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
         <DataContext.Provider value={{ rootUid: context?.uid || "0x0" }}>
             <div style={{ display: "flex" }}>
                 {noBar ? [] : <React.Fragment>
-                    <Accordion expanded={optionsOpen} onChange={() => setOptionsOpen(!optionsOpen)} variant={"outlined"} style={{ flexGrow: 1, minWidth: 0, margin: "8px" }}>
+                    <Accordion expanded={optionsOpen} variant={"outlined"} style={{ flexGrow: 1, minWidth: 0, margin: "8px" }}>
                         <AccordionSummary
-                            expandIcon={<ExpandMore />}
+                            expandIcon={<ExpandMore onClick={() => setOptionsOpen(!optionsOpen)}/>}
                             aria-controls="panel1bh-content"
                             id="panel1bh-header"
+                            classes={{content: classes.content}}
+                            style={{cursor: "initial"}}
                         >
-                            <Typography style={{whiteSpace: "nowrap"}}>{procItems.length} items</Typography>
-                            <MultiTypeDescriptor items={procItems.map(itemGetter)} />
+                            <TabButton isSelected={currentTab === "" && groupersDefault['type']?.(totalItems.map(itemGetter))?.length > 1} onClick={() => {setCurrentTab("")}}>
+                                <Typography style={{whiteSpace: "nowrap"}}>{totalItems.length} items</Typography>
+                            </TabButton>
+                            <MultiTypeDescriptor items={totalItems.map(itemGetter)} selectedTab={currentTab} setSelectedTab={setCurrentTab} />
                         </AccordionSummary>
                         <AccordionDetails>
                             <List>

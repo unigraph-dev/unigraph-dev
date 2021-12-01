@@ -78,7 +78,7 @@ export function createSchemaCache(client: DgraphClient): Cache<any> {
                 cache.data[obj["unigraph.id"]] = obj;
             }
         })
-        //cache.data = buildGraphFromMap(cache.data);
+        cache.data = buildGraphFromMap(cache.data);
     };
 
     cache.updateNow();
