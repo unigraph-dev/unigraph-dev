@@ -143,6 +143,10 @@ const newTab = (model: Model, initJson: any) => {
 window.newTab = newTab;
 
 const workspaceNavigator = (model: Model, location: string) => {
+    if (location === "/home") {
+        window.layoutModel.doAction(Actions.selectTab("home"));
+        return;
+    }
     let search = "?" + location.split('?')[1];
     location = location.split('?')[0];
     newTab(model, getComponentFromPage(location, getParameters(search.slice(1))))
@@ -184,6 +188,8 @@ export function WorkSpace(this: any) {
             "location": "left",
             "id": "border-left",
             "selected": isSmallScreen() ? -1 : 0,
+            minSize: 240,
+            size: 240,
             "children": [
                 {
                     "type": "tab",
@@ -248,7 +254,7 @@ export function WorkSpace(this: any) {
                     "weight": 50,
                     "selected": 0,
                     "children": [
-                        { ...getComponentFromPage('/home'), enableClose: false, id: "dashboard", enableDrag: false }
+                        { ...getComponentFromPage('/home'), enableClose: false, id: "home", enableDrag: false }
                     ]
                 }
             ]
@@ -349,7 +355,7 @@ export function WorkSpace(this: any) {
                     if (tabSetNode.getType() === "tabset") {
                         renderValues.buttons.push(<span onClick={async () => {
                             const node: TabNode = tabSetNode.getSelectedNode() as any;
-                            if (node && node.getId() !== "dashboard") {
+                            if (node && node.getId() !== "home") {
                                 const config = node.getConfig();
                                 if (config) { delete config.undefine; delete config.id };
                                 const uid = await window.unigraph.addObject({

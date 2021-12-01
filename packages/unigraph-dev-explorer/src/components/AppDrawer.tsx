@@ -12,17 +12,16 @@ import { NavigationContext } from '../utils';
 import { FavoriteBar } from './UnigraphCore/FavoriteBar';
 
 import Icon from '@mdi/react'
-import { mdiViewDashboardOutline, mdiBookOpenOutline, mdiPencilBoxMultipleOutline, mdiXml, mdiPackageVariantClosed, mdiDeleteOutline, mdiCogOutline, mdiBellOutline } from '@mdi/js';
-
-const drawerWidth = 240;
+import { mdiViewDashboardOutline, mdiBookOpenOutline, mdiPencilBoxMultipleOutline, mdiXml, mdiPackageVariantClosed, mdiDeleteOutline, mdiCogOutline, mdiBellOutline, mdiHomeOutline } from '@mdi/js';
 
 const useStyles = makeStyles(theme => ({
   drawer: {
-    width: drawerWidth,
+    width: "100%",
     flexShrink: 0,
   },
   drawerPaper: {
-    width: drawerWidth,
+    width: "100%",
+    border: "none",
   },
 }));
 
@@ -46,9 +45,9 @@ export default function DrawerRouter() {
           <List>
             <ListSubheader component="div" id="subheader-home"> Home </ListSubheader>
 
-            <ListItem button onClick={()=>navigator('/dashboard')}>
-              <ListItemIcon><Icon path={mdiViewDashboardOutline} size={1}/></ListItemIcon>
-              <ListItemText primary="Dashboard" />
+            <ListItem button onClick={()=>navigator('/home')}>
+              <ListItemIcon><Icon path={mdiHomeOutline} size={1}/></ListItemIcon>
+              <ListItemText primary="Home" />
             </ListItem>
             
             <ListItem button onClick={()=>navigator('/library')}>
@@ -60,10 +59,7 @@ export default function DrawerRouter() {
               <ListItemIcon><Icon path={mdiPencilBoxMultipleOutline} size={1}/></ListItemIcon>
               <ListItemText primary="Object Editor" />
             </ListItem>
-            <ListItem button onClick={()=>navigator('/code-editor')}>
-              <ListItemIcon><Icon path={mdiXml} size={1}/></ListItemIcon>
-              <ListItemText primary="Code Editor" />
-            </ListItem>
+            
             <ListItem button onClick={()=>navigator('/trash')}>
               <ListItemIcon><Icon path={mdiDeleteOutline} size={1}/></ListItemIcon>
               <ListItemText primary="Trash bin" />
@@ -83,6 +79,10 @@ export default function DrawerRouter() {
             </ListItem>
             <div style={{display: devMode ? "inherit" : "none"}}>
               <ListSubheader component="div" id="subheader-developer-tools"> Developer Tools </ListSubheader>
+              <ListItem button onClick={()=>navigator('/code-editor')}>
+              <ListItemIcon><Icon path={mdiXml} size={1}/></ListItemIcon>
+              <ListItemText primary="Code Editor" />
+            </ListItem>
               <ListItem button onClick={()=>navigator('/request')}>
                 <ListItemIcon><Comment /></ListItemIcon>
                 <ListItemText primary="Request" />
