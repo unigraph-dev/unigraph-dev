@@ -56,12 +56,16 @@ export type Primitive = {"type": PrimitiveTypes}
 export type Schema = {
     "unigraph.id"?: string,
     _hide?: boolean,
+    _name?: string,
+    _icon?: string,
     _definition: Definition
 }
 
 export type SchemaDgraph = {
     "unigraph.id"?: string,
     _hide?: boolean,
+    _name?: string,
+    _icon?: string,
     _definition: Definition,
     "dgraph.type": "Type"
 }

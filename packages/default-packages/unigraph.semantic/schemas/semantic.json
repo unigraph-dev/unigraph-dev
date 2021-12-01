@@ -1,5 +1,6 @@
 {
     "dgraph.type": "Type",
+    "_name": "Semantic interface",
     "_definition": {
         "type": { "unigraph.id": "$/composer/Union" },
         "_parameters": {

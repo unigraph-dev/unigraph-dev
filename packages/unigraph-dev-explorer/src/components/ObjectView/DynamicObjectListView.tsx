@@ -1,4 +1,4 @@
-import { Accordion, AccordionSummary, Typography, AccordionDetails, List, ListItem, Select, MenuItem, IconButton, ListItemIcon, ListSubheader, FormControlLabel, Switch, Button, TextField, Slide } from "@material-ui/core";
+import { Accordion, AccordionSummary, Typography, AccordionDetails, List, ListItem, Select, MenuItem, IconButton, ListItemIcon, ListSubheader, FormControlLabel, Switch, Button, TextField, Slide, Divider } from "@material-ui/core";
 import { ExpandMore, ClearAll, InboxOutlined } from "@material-ui/icons";
 import { Autocomplete } from "@material-ui/lab";
 import _ from "lodash";
@@ -153,6 +153,24 @@ const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, it
     </InfiniteScroll>
 }
 
+const MultiTypeDescriptor = ({items}: {items: any[]}) => {
+
+    const itemGroups = groupersDefault['type'](items);
+    console.log(itemGroups)
+
+    return itemGroups.length > 1 ? <React.Fragment>
+        <Divider variant="middle" orientation="vertical" style={{height: "auto"}} />
+        <div style={{whiteSpace: "nowrap", overflow: "auto", display: "flex"}}>
+        {itemGroups.map((el, index) => {
+            return <React.Fragment>
+                <div style={{height: "18px", width: "18px", alignSelf: "center", marginRight: "3px", opacity: 0.54, backgroundImage: `url("data:image/svg+xml,${(window.unigraph.getNamespaceMap)?.()?.[el.name]?._icon}")`}}/>
+                <Typography style={{color: "grey", marginRight: "4px"}}>{(window.unigraph.getNamespaceMap)?.()?.[el.name]?._name}:</Typography>
+                <Typography style={{marginRight: "8px"}}>{el.items.length}{index === itemGroups.length - 1 ? "" : ","}</Typography>
+            </React.Fragment>
+        })}
+    </div> </React.Fragment>: <React.Fragment />
+}
+
 /**
  * Component for a list of objects with various functionalities.
  * 
@@ -230,8 +248,8 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
                             aria-controls="panel1bh-content"
                             id="panel1bh-header"
                         >
-                            <Typography style={{ flexBasis: '50%', flexShrink: 0 }}>View options</Typography>
-                            <Typography>{procItems.length} items</Typography>
+                            <Typography style={{whiteSpace: "nowrap"}}>{procItems.length} items</Typography>
+                            <MultiTypeDescriptor items={procItems.map(itemGetter)} />
                         </AccordionSummary>
                         <AccordionDetails>
                             <List>
