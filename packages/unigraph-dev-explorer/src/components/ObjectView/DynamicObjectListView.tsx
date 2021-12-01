@@ -160,13 +160,15 @@ const MultiTypeDescriptor = ({items}: {items: any[]}) => {
 
     return itemGroups.length > 1 ? <React.Fragment>
         <Divider variant="middle" orientation="vertical" style={{height: "auto"}} />
+        <div style={{whiteSpace: "nowrap", overflow: "auto", display: "flex"}}>
         {itemGroups.map((el, index) => {
             return <React.Fragment>
+                <div style={{height: "18px", width: "18px", alignSelf: "center", marginRight: "3px", opacity: 0.54, backgroundImage: `url("data:image/svg+xml,${(window.unigraph.getNamespaceMap)?.()?.[el.name]?._icon}")`}}/>
                 <Typography style={{color: "grey", marginRight: "4px"}}>{(window.unigraph.getNamespaceMap)?.()?.[el.name]?._name}:</Typography>
                 <Typography style={{marginRight: "8px"}}>{el.items.length}{index === itemGroups.length - 1 ? "" : ","}</Typography>
             </React.Fragment>
         })}
-    </React.Fragment> : <React.Fragment />
+    </div> </React.Fragment>: <React.Fragment />
 }
 
 /**
@@ -246,7 +248,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
                             aria-controls="panel1bh-content"
                             id="panel1bh-header"
                         >
-                            <Typography>{procItems.length} items</Typography>
+                            <Typography style={{whiteSpace: "nowrap"}}>{procItems.length} items</Typography>
                             <MultiTypeDescriptor items={procItems.map(itemGetter)} />
                         </AccordionSummary>
                         <AccordionDetails>
