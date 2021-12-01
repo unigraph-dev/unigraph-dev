@@ -1,5 +1,6 @@
 {
     "dgraph.type": "Type",
+    "_name": "Pinboard",
     "_definition": {
         "type": { "unigraph.id": "$/schema/list" }
     }

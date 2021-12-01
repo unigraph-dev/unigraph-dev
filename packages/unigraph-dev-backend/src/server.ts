@@ -124,7 +124,20 @@ export default async function startServer(client: DgraphClient) {
   }, `(func: eq(<unigraph.id>, "$/meta/namespace_map")) {
     uid
     <unigraph.id>
-    expand(_userpredicate_) {uid}
+    _name
+    _icon
+    expand(_userpredicate_) {
+      uid
+      <unigraph.id>
+      _name
+      _icon
+      <_value[> {
+        uid
+        <unigraph.id>
+        _name
+        _icon
+      }
+    }
   }`);
 
   serverStates.subscriptions.push(namespaceSub);

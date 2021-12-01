@@ -1,5 +1,6 @@
 {
     "dgraph.type": "Type",
+    "_name": "Subentity",
     "_definition": {
         "type": { "unigraph.id": "$/schema/any" }
     }

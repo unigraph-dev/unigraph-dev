@@ -1,5 +1,6 @@
 {
     "dgraph.type": "Type",
+    "_name": "Home section",
     "_definition": {
         "type": { "unigraph.id": "$/schema/conditional_view" }
     }

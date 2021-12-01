@@ -42,8 +42,10 @@ export const ContextMenu = () => {
             <MenuItem style={{paddingTop: "2px", paddingBottom: "2px"}} >
                 <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiCubeOutline} size={1}/></ListItemIcon>
                 <ListItemText>{state.contextUid}</ListItemText>
-                <ListItemIcon style={{minWidth: "36px", marginLeft: "12px"}}><Icon path={mdiDatabaseOutline} size={1}/></ListItemIcon>
-                <ListItemText>{state.contextObject?.type?.['unigraph.id']}</ListItemText>
+                {(window.unigraph.getNamespaceMap)?.()?.[state.contextObject?.type?.['unigraph.id']]?._icon ? 
+                 <ListItemIcon style={{minWidth: "24px", minHeight: "24px", marginLeft: "12px", marginRight: "8px", backgroundImage: `url("data:image/svg+xml,${(window.unigraph.getNamespaceMap)?.()?.[state.contextObject?.type?.['unigraph.id']]?._icon}")`}}></ListItemIcon>
+                : <ListItemIcon style={{minWidth: "36px", marginLeft: "12px"}}><Icon path={mdiDatabaseOutline} size={1}/></ListItemIcon>}
+                <ListItemText>{(window.unigraph.getNamespaceMap)?.()?.[state.contextObject?.type?.['unigraph.id']]?._name || state.contextObject?.type?.['unigraph.id']}</ListItemText>
             </MenuItem>
             <Divider/>
             {state.menuContent?.map(el => el(state.contextUid!, state.contextObject, handleClose, state.callbacks, state.contextContextUid))}
@@ -54,10 +56,12 @@ export const ContextMenu = () => {
             {state.contextContextUid ? <React.Fragment>
                 <Divider/>
                 <MenuItem style={{paddingTop: "2px", paddingBottom: "2px"}} >
-                    <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiRelationManyToMany} size={1}/></ListItemIcon>
-                    <ListItemText>{state.contextContextUid}</ListItemText>
-                    <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiDatabaseOutline} size={1}/></ListItemIcon>
-                    <ListItemText>{state.contextContextObject?.type?.['unigraph.id']}</ListItemText>
+                <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiCubeOutline} size={1}/></ListItemIcon>
+                <ListItemText>{state.contextContextUid}</ListItemText>
+                {(window.unigraph.getNamespaceMap)?.()?.[state.contextContextObject?.type?.['unigraph.id']]?._icon ? 
+                 <ListItemIcon style={{minWidth: "24px", minHeight: "24px", marginLeft: "12px", marginRight: "8px", backgroundImage: `url("data:image/svg+xml,${(window.unigraph.getNamespaceMap)?.()?.[state.contextContextObject?.type?.['unigraph.id']]?._icon}")`}}></ListItemIcon>
+                : <ListItemIcon style={{minWidth: "36px", marginLeft: "12px"}}><Icon path={mdiDatabaseOutline} size={1}/></ListItemIcon>}
+                <ListItemText>{(window.unigraph.getNamespaceMap)?.()?.[state.contextContextObject?.type?.['unigraph.id']]?._name || state.contextContextObject?.type?.['unigraph.id']}</ListItemText>
                 </MenuItem>
                 <Divider/>
                 {state.menuContextContent?.map(el => el(state.contextUid!, state.contextObject, handleClose, {...state.callbacks, removeFromContext: state.removeFromContext}, state.contextContextUid))}

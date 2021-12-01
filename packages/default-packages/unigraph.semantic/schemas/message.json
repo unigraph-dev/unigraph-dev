@@ -1,5 +1,6 @@
 {
     "dgraph.type": "Type",
+    "_name": "Message",
     "_definition": {
         "type": { "unigraph.id": "$/composer/Object" },
         "_parameters": {

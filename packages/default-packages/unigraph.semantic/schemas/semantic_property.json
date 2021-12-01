@@ -1,5 +1,6 @@
 {
     "dgraph.type": "Type",
+    "_name": "Semantic property",
     "_definition": {
         "type": { "unigraph.id": "$/schema/any" }
     }

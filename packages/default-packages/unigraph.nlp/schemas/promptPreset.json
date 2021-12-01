@@ -1,5 +1,6 @@
 {
     "dgraph.type": "Type",
+    "_name": "Prompt preset",
     "_definition": {
         "type": { "unigraph.id": "$/composer/Object" },
         "_parameters": {
