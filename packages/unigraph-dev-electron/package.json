@@ -1,5 +1,6 @@
 {
     "name": "unigraph-dev-electron",
+    "productName": "Unigraph",
     "version": "0.1.0",
     "author": "Unigraph contributors",
     "description": "A local-first and universal graph database, knowledge engine, and workspace",
@@ -24,6 +25,13 @@
     },
     "electronVersion": "^13.1.7",
     "build": {
+        "mac": {
+            "icon": "./public/icons/unigraph.icns",
+            "category": "public.app-category.utilities"
+        },
+        "win": {
+            "icon": "./public/icons/unigraph.png"
+        },
         "files": [
             "**/*",
             "*.js",
