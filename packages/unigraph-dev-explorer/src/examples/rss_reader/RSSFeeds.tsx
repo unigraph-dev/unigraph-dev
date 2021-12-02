@@ -90,7 +90,7 @@ const RSSItemDetailed = ({data, callbacks}: any) => {
 }
 
 const RSSFeed: DynamicViewRenderer = ({data, callbacks}) => {
-    return <AutoDynamicView object={new UnigraphObject(data?.['_value']?.['site_info']?.['_value'])} noContextMenu noDrop/>
+    return <AutoDynamicView object={new UnigraphObject(data?.['_value']?.['site_info']?.['_value'])} noContextMenu />
 }
 
 const dynamicComponents = {

@@ -178,7 +178,7 @@ const TypedObjectPartEditor: any = {
         const [showReplacer, setShowReplacer] = React.useState(false);
         const [viewOrEdit, setViewOrEdit] = React.useState<any>(getDynamicViews().includes(localObject['type']?.['unigraph.id']) ? "view" : "edit")
         const classes = useStyles();
-        const definition = localSchema === "$/schema/any" ? schemaMap[localObject[Object.keys(localObject).filter((s: string) => s.startsWith( '_value'))[0]]['type']['unigraph.id']]['_definition'] : schemaMap[localSchema]['_definition']
+        const definition = localSchema === "$/schema/any" ? schemaMap[localObject[Object.keys(localObject).filter((s: string) => s.startsWith( '_value'))[0]]?.['type']?.['unigraph.id']]?.['_definition'] : schemaMap[localSchema]['_definition']
         //console.log(localSchema, localObject, definition)
         return <Paper variant="outlined" className={classes.editorFrame}>
             <div style={editorHeader}>

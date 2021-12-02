@@ -210,7 +210,7 @@ function buildUnigraphEntityPart (rawPart: any, options: BuildEntityOptions, sch
                 definitions = unionSchema._parameters._definitions.filter((el: any) => el.type['unigraph.id'] === userType['unigraph.id'])
                 //rawPart = (rawPart['_value'] || rawPart['_value'] === '') ? rawPart['_value'] : rawPart;
             }
-            let choicesResults = definitions.map(defn => {
+            let choicesResults = (_.uniqBy(definitions, "uid")).map(defn => {
                 try {
                     return [defn, buildUnigraphEntityPart(rawPart, options, schemaMap, defn)]
                 } catch (e) {console.log(e.message || e); return undefined};
