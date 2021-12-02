@@ -80,6 +80,7 @@ export default async function startServer(client: DgraphClient) {
   }
 
   let namespaceMap: any = {}
+  let debounceId: NodeJS.Timeout;
 
   Object.assign(serverStates, {
     caches: caches,
@@ -91,23 +92,29 @@ export default async function startServer(client: DgraphClient) {
     runningExecutables: [],
     addRunningExecutable: (defn: any) => {
       serverStates.runningExecutables.push(defn);
-      Object.values(connections).forEach(el => {
-        el.send(stringify({
-          "type": "cache_updated",
-          "name": "runningExecutables",
-          result: serverStates.runningExecutables
-        }))
-      })
+      clearTimeout(debounceId);
+      debounceId = setTimeout(() => {
+        Object.values(connections).forEach(el => {
+          el.send(stringify({
+            "type": "cache_updated",
+            "name": "runningExecutables",
+            result: serverStates.runningExecutables
+          }))
+        })
+      }, 250)
     },
     removeRunningExecutable: (id: any) => {
       serverStates.runningExecutables = serverStates.runningExecutables.filter((el: any) => el.id !== id);
-      Object.values(connections).forEach(el => {
-        el.send(stringify({
-          "type": "cache_updated",
-          "name": "runningExecutables",
-          result: serverStates.runningExecutables
-        }))
-      })
+      clearTimeout(debounceId);
+      debounceId = setTimeout(() => {
+        Object.values(connections).forEach(el => {
+          el.send(stringify({
+            "type": "cache_updated",
+            "name": "runningExecutables",
+            result: serverStates.runningExecutables
+          }))
+        })
+      }, 250)
     }
   })
 
