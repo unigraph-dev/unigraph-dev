@@ -11,7 +11,7 @@ import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import { StringObjectViewer } from './DefaultObjectView';
 import { getSubentities, isStub, SubentityDropAcceptor } from './utils';
 
-export const AutoDynamicView = ({ object, callbacks, component, attributes, inline, allowSubentity, allowSemantic, style, noDrag, noDrop, noContextMenu }: AutoDynamicViewProps) => {
+export const AutoDynamicView = ({ object, callbacks, component, attributes, inline, allowSubentity, allowSemantic, style, noDrag, noDrop, noContextMenu, subentityExpandByDefault }: AutoDynamicViewProps) => {
     if (!callbacks) callbacks = {};
     allowSubentity = allowSubentity === true;
 
@@ -24,7 +24,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     const [isRecursion, setIsRecursion] = React.useState<any>(undefined);
     const getObject = () => isObjectStub ? loadedObj : object;
 
-    const [showSubentities, setShowSubentities] = React.useState(false);
+    const [showSubentities, setShowSubentities] = React.useState(!!subentityExpandByDefault);
 
     const DynamicViews = {...window.unigraph.getState('registry/dynamicView').value, ...(component ? component : {})}
 
@@ -158,7 +158,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
         >
                 {getEl(tabContext.viewId, tabContext.setTitle)}   
         </div>
-        {showSubentities ? <div style={{width: "100%", paddingLeft: "24px"}}>
+        {showSubentities && getSubentities(object)?.length > 0 ? <div style={{width: "100%", paddingLeft: "24px"}}>
                 <ul>{getSubentities(object).map((el: any) => <li><AutoDynamicView object={new UnigraphObject(el['_value'])} callbacks={callbacks} /></li>)}</ul>
             </div> : []}
         {(allowSubentity && !noDrop) ? <SubentityDropAcceptor uid={object?.uid} /> : []}

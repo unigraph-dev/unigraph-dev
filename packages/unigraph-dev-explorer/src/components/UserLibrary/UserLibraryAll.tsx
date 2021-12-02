@@ -15,7 +15,7 @@ const UserLibraryAll = ({id}: any) => {
 
     useEffectOnce(() => {
         const subsId = getRandomInt();
-        window.unigraph.subscribeToType("any", (result: any[]) => {setData(result.map(el => el.uid))}, subsId, {uidsOnly: true, first: -2000});
+        window.unigraph.subscribeToType("any", (result: any[]) => {setData(result.map(el => el.uid))}, subsId, {uidsOnly: true, first: -500});
 
         return function cleanup() { window.unigraph.unsubscribe(subsId); }
     })
@@ -24,7 +24,7 @@ const UserLibraryAll = ({id}: any) => {
         if (setupProps?.cleanup) setupProps.cleanup();
         let newProps: any = undefined;
         if (data.length) {
-            newProps = setupInfiniteScrolling(data, 100, (items: any[]) => {
+            newProps = setupInfiniteScrolling(data, 25, (items: any[]) => {
                 setLoadedItems(items);
             });
             setSetupProps(newProps);

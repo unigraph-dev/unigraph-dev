@@ -354,6 +354,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                         createBelow={() => { addChild(dataref.current, editorContext) }}
                     >
                         <AutoDynamicView
+                            subentityExpandByDefault={!(el.type?.['unigraph.id'] === "$/schema/note_block")}
                             object={el.type?.['unigraph.id'] === "$/schema/note_block" ? el : {uid: el.uid, type: el.type}}
                             callbacks={{
                                 "get-view-id": () => options?.viewId, // only used at root

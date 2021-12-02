@@ -1,4 +1,4 @@
-import { Avatar, Button, Divider, ListItem, ListItemIcon, ListItemText, TextField, Typography } from "@material-ui/core";
+import { Avatar, Badge, Button, Divider, ListItem, ListItemIcon, ListItemText, TextField, Typography } from "@material-ui/core";
 import React from "react";
 import { getExecutableId, UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
 import { registerDynamicViews, registerDetailedDynamicViews, withUnigraphSubscription } from "../../unigraph-react"
@@ -7,13 +7,15 @@ import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { AutoDynamicView } from "../../components/ObjectView/AutoDynamicView";
 import { DynamicViewRenderer } from "../../global";
 import { download, openUrl, upload } from "../../utils";
-import { Description, Link } from "@material-ui/icons";
+import { Description, Link, OpenInBrowserOutlined } from "@material-ui/icons";
 import { getComponentFromPage } from "../../Workspace";
 import Sugar from "sugar";
 import InfiniteScroll from 'react-infinite-scroll-component';
 //import _ from "lodash";
 import { Html } from "../semantic/Html";
 import { setupInfiniteScrolling } from "../../components/ObjectView/infiniteScrolling";
+import Icon from "@mdi/react";
+import { mdiRssBox, mdiTwitter } from "@mdi/js";
 
 export type ARSSFeed = {
     uid?: string,
@@ -63,12 +65,25 @@ const RSSItem: DynamicViewRenderer = ({data, callbacks}) => {
 
     return <React.Fragment>
         <ListItemIcon>
-            <Avatar alt={"favicon of "+unpadded.feed?.site_info?.name} src={unpadded.item_data?.favicon}>{unpadded.feed?.site_info?.name}</Avatar>
+        <Badge
+        overlap="circle"
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        badgeContent={<Icon path={mdiRssBox} size={0.75} style={{opacity: 1}}/>}
+      >
+        <Avatar alt={"favicon of "+unpadded.feed?.site_info?.name} src={unpadded.item_data?.favicon}>{unpadded.feed?.site_info?.name}</Avatar>
+      </Badge>
         </ListItemIcon>
         <ListItemText
-            primary={<a href="#" onClick={() => {openUrl(unpadded.item_data?.url)}}>{unpadded.item_data?.name}</a>}
+            primary={unpadded.item_data?.name}
             secondary={<div>
-                <div style={{display: "flex", alignItems: "center"}}><Link onClick={() => {
+                <div style={{display: "flex", alignItems: "center"}}>
+                <OpenInBrowserOutlined onClick={() => {
+                    openUrl(unpadded.item_data?.url);
+                    if (callbacks?.removeFromContext) callbacks.removeFromContext();
+                }}/><Link onClick={() => {
                     const htmlUid = data?.get('content/text')?.['_value']?.['_value']?.['uid'];
                     if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid, context: data.uid}));
                     if (callbacks?.removeFromContext) callbacks.removeFromContext();
