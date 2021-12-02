@@ -114,7 +114,10 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
         } else return prev;
     }, 0)
     if (/*children[delAt]?.['_value']?.['_value']?.['_value']?.['text']?.['_value']?.['_value']?.['_value.%'] === ""*/ true ) {
-        window.unigraph.deleteItemFromArray(getSemanticChildren(data).uid, children[delAt].uid, data.uid, context.callbacks.subsId);
+        window.unigraph.deleteItemFromArray(getSemanticChildren(data).uid, children[delAt].uid, data.uid, context.callbacks.subsId).then(() => {
+            // subentity AND note block
+            window.unigraph.deleteObject(([children[delAt].uid, children[delAt]._value.uid] as any), true)
+        });
         if (index !== 0) {
             context.edited.current = true;
             focusLastDFSNode({uid: children[delAt]['_value']['_value'].uid}, context, index)

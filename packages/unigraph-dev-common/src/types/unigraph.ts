@@ -175,7 +175,7 @@ export interface Unigraph<TT = WebSocket | false> {
      */
     getSearchResults(query: {method: "fulltext" | "type" | "uid", value: any}[], display?: string, hops?: number, searchOptions?: {limit?: number, noPrimitives?: boolean, resultsOnly?: boolean}): Promise<{results: any[], entities: any[]}>;
     /** Deletes an object by its UID. */
-    deleteObject(uid: string, permanent?: boolean): any;
+    deleteObject(uid: string | string[], permanent?: boolean): any;
     /**
      * Updates a object simply using the SPO triplet format.
      * 

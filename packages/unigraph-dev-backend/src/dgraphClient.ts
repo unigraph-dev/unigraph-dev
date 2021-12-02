@@ -334,17 +334,22 @@ export default class DgraphClient {
   `, {})
   }
 
-  async deleteUnigraphObject(uid: string) {
-    return this.createData({
-      uid: uid,
-      "dgraph.type": "Deleted"
-    })
-  }
-
-  async deleteUnigraphObjectPermanently(uid: string) {
+  async deleteUnigraphObject(uid: string[]) {
     const txn = this.dgraphClient.newTxn({readOnly: false});
     const mu = new dgraph.Mutation();
-    mu.setDeleteJson({uid: uid});
+    mu.setSetNquads(uid.map(el => `<${el}> <dgraph.type> "Deleted" .`).join('\n'));
+    const req = new dgraph.Request();
+    req.setMutationsList([mu]);
+    req.setCommitNow(true);
+    return await withLock(this.txnlock, 'txn', () => txn.doRequest(req));;
+  }
+
+  async deleteUnigraphObjectPermanently(uid: string[]) {
+    const txn = this.dgraphClient.newTxn({readOnly: false});
+    const mu = new dgraph.Mutation();
+    mu.setDelNquads(uid.map(el => `<${el}> * * .
+<${el}> <~unigraph.origin> * .
+<${el}> <unigraph.origin> * .`).join('\n'));
     const req = new dgraph.Request();
     req.setMutationsList([mu]);
     req.setCommitNow(true);
