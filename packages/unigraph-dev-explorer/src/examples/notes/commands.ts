@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { buildUnigraphEntity, byElementIndex } from "unigraph-dev-common/lib/utils/entityUtils";
-import { dfs } from "../../utils";
+import { dfs, removeAllPropsFromObj } from "../../utils";
 import { parseTodoObject } from "../todo/parseTodoObject";
 import { NoteEditorContext } from "./types";
 
@@ -51,6 +51,7 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
     //console.log(JSON.stringify([data, index, at], null, 4))
     let currSubentity = -1;
     let isInserted = false;
+    removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
     const newChildren = children?.reduce((prev: any[], el: any, elindex: any) => {
         if (el?.['_value']?.['type']?.['unigraph.id'] === "$/schema/subentity" && ++currSubentity === index) {
@@ -105,6 +106,7 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
 
 export const unsplitChild = async (data: any, context: NoteEditorContext, index: number) => {
     let currSubentity = -1;
+    removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
     const delAt = children?.reduce((prev: any[], el: any, elindex: any) => {
         if (el?.['_value']?.['type']?.['unigraph.id'] === "$/schema/subentity") {
@@ -146,6 +148,7 @@ export const setFocus = (data: any, context: NoteEditorContext, index: number) =
  * TODO: This code is very poorly written. We need to change it after we have unigraph object prototypes.
  */
 export const indentChild = (data: any, context: NoteEditorContext, index: number, parent?: number) => {
+    removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     if (!parent && index !== 0) {
         parent = index - 1;
     } else if (!parent) {
@@ -207,6 +210,7 @@ export const indentChild = (data: any, context: NoteEditorContext, index: number
 }
 
 export const unindentChild = async (data: any, context: NoteEditorContext, parent: number, index: number) => {
+    removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     //console.log(parent, index)
     let currSubentity = -1;
     let isCompleted = false;
@@ -269,6 +273,7 @@ export const focusNextDFSNode = (data: any, context: NoteEditorContext, _: numbe
 }
 
 export const convertChildToTodo = async (data: any, context: NoteEditorContext, index: number) => {
+    removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     //console.log(index);
     let currSubentity = -1;
     const stubConverted = {uid: ""}

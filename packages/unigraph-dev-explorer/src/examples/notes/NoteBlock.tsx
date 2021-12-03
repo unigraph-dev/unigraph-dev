@@ -12,6 +12,7 @@ import { onUnigraphContextMenu } from "../../components/ObjectView/DefaultObject
 import { FiberManualRecord, MoreVert } from "@material-ui/icons";
 import { setSearchPopup } from "./searchPopup";
 import { noteQuery } from "./init";
+import { getParentsAndReferences } from "./utils";
 
 export const getSubentities = (data: any) => {
     let subentities: any, otherChildren: any;
@@ -138,6 +139,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
     React.useEffect(() => {
         const newNodes = _.unionBy([{ uid: data.uid, children: subentities.map((el: any) => el.uid), root: !isChildren }], nodesState.value, 'uid');
         nodesState.setValue(newNodes)
+        if (!isChildren) console.log(getParentsAndReferences(data['~_value'], data['unigraph.origin'].filter((el: any) => el.uid !== data.uid)))
 
         return function cleanup() { inputDebounced.current.flush(); }
     }, [data])

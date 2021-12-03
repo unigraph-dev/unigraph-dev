@@ -5,7 +5,7 @@ return <div style={{display: "flex"}}>
         // Now we load it to the detailed view
         const htmlUid = data._value.item._value.uid
         const ctxUid = data._value.context._value.uid
-        if (htmlUid) window.wsnavigator('/library/object?uid=' + data.uid);
+        if (htmlUid) window.wsnavigator('/library/object?uid=' + data.uid+ `&type=${data?.type?.['unigraph.id']}`);
         if (callbacks?.removeFromContext) callbacks.removeFromContext();
         window.unigraph.deleteObject(data.uid);
     }}>

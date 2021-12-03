@@ -85,12 +85,12 @@ const RSSItem: DynamicViewRenderer = ({data, callbacks}) => {
                     if (callbacks?.removeFromContext) callbacks.removeFromContext();
                 }}/><Link onClick={() => {
                     const htmlUid = data?.get('content/text')?.['_value']?.['_value']?.['uid'];
-                    if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid, context: data.uid}));
+                    if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid, context: data.uid, type: data?.type?.['unigraph.id']}));
                     if (callbacks?.removeFromContext) callbacks.removeFromContext();
                 }}/>
                 {unpadded.item_data?.creative_work?.text ? <Description onClick={() => {
                     const htmlUid = data?.get('item_data/creative_work/text')?.['_value']?.['_value']?.['uid'];
-                    if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid, context: data.uid}));
+                    if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid, context: data.uid, type: data?.type?.['unigraph.id']}));
                     if (callbacks?.removeFromContext) callbacks.removeFromContext();
                 }}/> : []}
                 <div>Added: {(() => {try { return Sugar.Date.relative(new Date(unpadded?.item_data?.date_created))} catch (e) {return "unknown"}})()}, updated: {(() => {try { return Sugar.Date.relative(new Date(unpadded?._timestamp?._updatedAt))} catch (e) {return "unknown"}})()}</div></div>

@@ -14,6 +14,19 @@ export const DataContext = React.createContext({
     rootUid: "0x0"
 })
 
+export const removeAllPropsFromObj = function(obj: any, propsToRemove: any, maxLevel?: any) {
+    if (typeof maxLevel !== "number") maxLevel = 20
+    for (var prop in obj) {
+        if (typeof propsToRemove === "string" && prop === propsToRemove)
+            delete obj[prop];
+        else if (propsToRemove.indexOf(prop) >= 0)      // it must be an array
+            delete obj[prop];
+        else if (typeof obj[prop] === "object" && maxLevel>0)
+            removeAllPropsFromObj(obj[prop], propsToRemove, maxLevel-1);
+    }
+    return obj
+}
+
 export function getParameters(search: string) {
     // Params obj
     var params: any = {};

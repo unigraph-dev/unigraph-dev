@@ -51,7 +51,7 @@ export const Markdown: DynamicViewRenderer = ({data, callbacks, isHeading}) => {
                             onPointerUp: (event: MouseEvent) => {
                                 event.stopPropagation();
                                 event.preventDefault();
-                                if (matches[0]) window.wsnavigator(`/library/object?uid=${matches[0]._value._value.uid}&viewer=${"dynamic-view-detailed"}`);
+                                if (matches[0]) window.wsnavigator(`/library/object?uid=${matches[0]._value._value.uid}&viewer=${"dynamic-view-detailed"}&type=${matches[0]._value._value?.type?.['unigraph.id']}`);
                                 else if (callbacks?.namespaceLink) {window.open(callbacks.namespaceLink(children[0]), "_blank")}
                             },
                             ...props,
