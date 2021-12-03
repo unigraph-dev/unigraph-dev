@@ -8,7 +8,7 @@ import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
  * @param chunk Number, default to 50, meaning how much objects to get in a given subscription.
  * @param stateCallback A callback that would be called every time loaded items are updated.
  */
-export const setupInfiniteScrolling = (uids: string[], chunk = 50, stateCallback: (loadedItems: any[]) => void) => {
+export const setupInfiniteScrolling = (uids: string[], chunk = 50, stateCallback: (loadedItems: any[]) => void, subscribeOptions?: any) => {
 
     const states = {
         subs: [] as any[],
@@ -31,7 +31,7 @@ export const setupInfiniteScrolling = (uids: string[], chunk = 50, stateCallback
                 results.forEach ? results.forEach((el: any) => {uidsMap[el.uid] = el}) : uidsMap[results.uid] = results;
                 states.subs[subsHead].result = toSub.map(el => uidsMap[el]);
                 onStateUpdated();
-            }, subsId);
+            }, subsId, subscribeOptions);
         }
     }
 

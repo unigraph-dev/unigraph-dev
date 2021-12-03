@@ -10,7 +10,7 @@ import Icon from '@mdi/react'
 import { mdiCubeOutline, mdiDatabaseOutline, mdiCloseBoxOutline, mdiCloseBoxMultipleOutline, mdiViewDayOutline, mdiFileTreeOutline, mdiVectorPolylineEdit, mdiInboxArrowDownOutline, mdiLinkBoxVariantOutline, mdiDeleteOutline, mdiGraphOutline } from '@mdi/js';
 
 export const defaultContextMenu: Array<ContextMenuGenerator> = [
-    (uid, object, handleClose, callbacks) => <MenuItem style={{paddingTop: "2px", paddingBottom: "2px"}} onClick={() => {handleClose(); window.wsnavigator(`/library/object?uid=${uid}&viewer=${"dynamic-view-detailed"}`)}}>
+    (uid, object, handleClose, callbacks) => <MenuItem style={{paddingTop: "2px", paddingBottom: "2px"}} onClick={() => {handleClose(); window.wsnavigator(`/library/object?uid=${uid}&viewer=${"dynamic-view-detailed"}&type=${object?.type?.['unigraph.id']}`)}}>
         <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiViewDayOutline} size={1}/></ListItemIcon>
         <ListItemText>View object with its default</ListItemText>
         

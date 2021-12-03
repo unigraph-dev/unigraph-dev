@@ -39,8 +39,10 @@ export const Markdown: DynamicViewRenderer = ({data, callbacks, isHeading}) => {
                 if (className?.includes('wikilink')) {
                     const matches = (callbacks?.['get-semantic-properties']?.()?.['_value']?.['children']?.['_value['] || [])
                         .filter((el: any) => el['_key'] === `[[${children[0]}]]`);
+                    const objDef = (window.unigraph.getNamespaceMap)?.()?.[matches[0]?._value?._value?.type?.['unigraph.id']];
                     return <React.Fragment>
                         <span style={{color: "darkgray"}}>[[</span>
+                        {objDef ? <div style={{ display: "inline-flex", minWidth: "16px", minHeight: "15px", backgroundImage: `url("data:image/svg+xml,${objDef?._icon}")`, opacity: 0.54 }}></div> : []}
                         {/*callbacks?.namespaceLink ? <Public style={{height: "16px"}}/> : []*/}
                         {React.createElement('span', {
                             className, children,
@@ -49,7 +51,7 @@ export const Markdown: DynamicViewRenderer = ({data, callbacks, isHeading}) => {
                             onPointerUp: (event: MouseEvent) => {
                                 event.stopPropagation();
                                 event.preventDefault();
-                                if (matches[0]) window.wsnavigator(`/library/object?uid=${matches[0]._value._value.uid}&viewer=${"dynamic-view-detailed"}`);
+                                if (matches[0]) window.wsnavigator(`/library/object?uid=${matches[0]._value._value.uid}&viewer=${"dynamic-view-detailed"}&type=${matches[0]._value._value?.type?.['unigraph.id']}`);
                                 else if (callbacks?.namespaceLink) {window.open(callbacks.namespaceLink(children[0]), "_blank")}
                             },
                             ...props,

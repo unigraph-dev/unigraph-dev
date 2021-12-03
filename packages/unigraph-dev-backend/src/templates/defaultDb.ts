@@ -24,11 +24,11 @@ import {pkg as nlp} from 'unigraph-dev-common/lib/data/unigraph.nlp.pkg';
 import {pkg as openai} from 'unigraph-dev-common/lib/data/unigraph.openai.pkg';
 import {pkg as kanban} from 'unigraph-dev-common/lib/data/unigraph.kanban.pkg';
 
-export const defaultTypes = `<_value>: uid .
+export const defaultTypes = `<_value>: uid @reverse .
 <_value.#i>: int .
 <_value.#>: float .
 <_value.?>: bool .
-<_value.%>: string @index(fulltext) .
+<_value.%>: string @index(fulltext, regexp) .
 <_value.>: default .
 <_value[>: [uid] .
 <_value.%dt>: dateTime @index(hour) .

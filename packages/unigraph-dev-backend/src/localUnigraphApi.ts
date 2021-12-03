@@ -60,8 +60,8 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
                 // Is named entity
                 uid = states.namespaceMap[uid].uid;
             }
-            const frag = `(func: uid(${Array.isArray(uid) ? uid.reduce((prev: string, el: string) => prev + el + ",", "").slice(0, -1): uid })) 
-                ${options?.queryAsType ? makeQueryFragmentFromType(options.queryAsType, states.caches["schemas"].data) : "@recurse { uid unigraph.id expand(_userpredicate_) }"}`
+            const frag = options.queryFn ? options.queryFn.replace('QUERYFN_TEMPLATE', (Array.isArray(uid) ? uid.join(', ') : uid)) :`(func: uid(${Array.isArray(uid) ? uid.join(', ') : uid })) 
+                ${options?.queryAsType ? makeQueryFragmentFromType(options.queryAsType, states.caches["schemas"].data, options?.depth) : "@recurse { uid unigraph.id expand(_userpredicate_) }"}`
             const newSub = typeof callback === "function" ? 
                 createSubscriptionLocal(eventId, callback, frag) :
                 createSubscriptionWS(eventId, callback.ws, frag, callback.connId, states.getClientId(callback.connId));
@@ -122,6 +122,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         },
         getQueries: async (fragments, getAll = false, batch = 50) => {
             let allQueries;
+            if (!Array.isArray(fragments)) fragments = [fragments];
             if (getAll) allQueries = fragments.map((it, index) => `query${index}(func: uid(par${index})) @recurse {uid unigraph.id expand(_userpredicate_)}
             par${index} as var${it}`)
             else allQueries = fragments.map((it, index) => `query${index}${it}`)
@@ -144,7 +145,8 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             return res;
         },
         deleteObject: async (uid, permanent) => {
-            if (uid.startsWith('$/') && states.namespaceMap[uid]) uid = states.namespaceMap[uid].uid;
+            if (!Array.isArray(uid)) uid = [uid]
+            const toDel = uid.map((uidi: any) => (uidi.startsWith('$/') && states.namespaceMap[uidi]) ? states.namespaceMap[uidi].uid : uidi);
             permanent ? await client.deleteUnigraphObjectPermanently(uid) : await client.deleteUnigraphObject(uid);
             callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
         },
@@ -162,13 +164,15 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
                 callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
             }
         },
-        updateObject: async (uid, newObject, isUpsert = true, pad = true, subIds) => {
+        updateObject: async (uid, newObject, isUpsert = true, pad = true, subIds, origin) => {
             clearEmpties(newObject);
             const newUid = uid ? uid : newObject.uid
             // Get new object's unigraph.origin first
             //console.log("update: 1")
-            let origin = newObject['unigraph.origin'] ? newObject['unigraph.origin'] : (await client.queryData<any>(`query { entity(func: uid(${newUid})) { <unigraph.origin> { uid } }}`, []))[0]?.['unigraph.origin']
-            if (!Array.isArray(origin)) origin = [origin];
+            if (!origin) {
+                origin = newObject['unigraph.origin'] ? newObject['unigraph.origin'] : (await client.queryData<any>(`query { entity(func: uid(${newUid})) { <unigraph.origin> { uid } }}`, []))[0]?.['unigraph.origin']
+                if (!Array.isArray(origin)) origin = [origin];
+            }
             //console.log("update: 2", uid)
             const origObject = (await client.queryUID(uid))[0];
             let finalUpdater = newObject;

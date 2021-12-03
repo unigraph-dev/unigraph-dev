@@ -15,9 +15,11 @@ export default function DetailedObjectView ({ uid, viewer, id, context, componen
 
     const [showPadded, setShowPadded] = React.useState(false);
 
+    const DynamicViewsDetailed = {...window.unigraph.getState('registry/dynamicViewDetailed').value, ...(component || {})}
+
     React.useEffect(() => {
         if (myid !== undefined) {
-            if (!isStub) {
+            if (!isStub && (viewerId !== "dynamic-view-detailed" || !Object.keys(DynamicViewsDetailed).includes(type) || !DynamicViewsDetailed[type].query)) {
                 window.unigraph.subscribeToObject(objectId, (object: any) => {
                     setObject(object)
                 }, myid);

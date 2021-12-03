@@ -11,7 +11,7 @@ import FlexLayout, { Actions, DockLocation, Model, Node, TabNode } from 'flexlay
 import 'flexlayout-react/style/light.css'
 import './workspace.css'
 import { getParameters, isElectron, isSmallScreen, NavigationContext, TabContext } from "./utils";
-import { Container, CssBaseline, ListItem, Popover } from "@material-ui/core";
+import { Container, CssBaseline, ListItem, Popover, Typography } from "@material-ui/core";
 import { isJsonString } from "unigraph-dev-common/lib/utils/utils";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
 import { Search, Menu, Details } from "@material-ui/icons";
@@ -57,7 +57,7 @@ const ConnectionIndicator = () => {
             setConnected(conn)
         })
     }, [])
-    return <span style={{ height: "16px", width: "16px", borderRadius: "8px", backgroundColor: connected ? "lightgreen" : "red", border: "1px solid grey", marginRight: "8px" }}></span>
+    return <span style={{ height: "16px", width: "16px", borderRadius: "8px", backgroundColor: connected ? "lightgreen" : "red", border: "1px solid grey", marginRight: "8px", display: connected ? "none" : ""}}></span>
 }
 
 const ExecutablesIndicator = () => {
@@ -68,7 +68,7 @@ const ExecutablesIndicator = () => {
             setTotalExecutables(cacheResult)
         })
     }, [])
-    return <div style={{ marginRight: "16px" }}>
+    return <div style={{ marginRight: "16px", display: totalExecutables.length > 0 ? "" : "none" }}>
         <Popover
             open={totalExecutables.length > 0 && Boolean(anchorEl)}
             anchorEl={anchorEl}
@@ -169,9 +169,9 @@ const setTitleOnRenderTab = (model: Model) => {
         // @ts-expect-error: using private API
         selName = model.getActiveTabset()?._children?.[selIndex]?.getName();
     } catch (e) { }
-    const titleStr = `${selName} and ${count - 5} other tabs - Unigraph`
+    const titleStr = `${selName} and ${count - 4} other tabs - Unigraph`
     const titleStrZero = `${selName} - Unigraph`
-    const finalTitle = count - 5 > 0 ? titleStr : titleStrZero
+    const finalTitle = count - 4 > 0 ? titleStr : titleStrZero
     document.title = finalTitle;
 }
 
@@ -199,15 +199,6 @@ export function WorkSpace(this: any) {
                     "name": "App Drawer",
                     "id": "app-drawer",
                     "component": "/components/appdrawer",
-                },
-                {
-                    "type": "tab",
-                    "enableClose": false,
-                    "minSize": 700,
-                    "maxSize": 700,
-                    "name": "Search",
-                    "id": "search-pane",
-                    "component": "/pages/search",
                 }
             ]
         }, {
@@ -334,14 +325,11 @@ export function WorkSpace(this: any) {
                     if (nodeId === "app-drawer") {
                         renderValues.content = <Menu style={{ verticalAlign: "middle", transform: "rotate(90deg)" }} key="icon" />;
                     }
-                    if (nodeId === "search-pane") {
-                        renderValues.content = <Search style={{ verticalAlign: "middle", transform: "rotate(90deg)" }} key="icon" />;
-                    }
                     if (nodeId === "inspector-pane") {
                         renderValues.content = <Details style={{ verticalAlign: "middle", transform: "rotate(270deg)" }} key="icon" />;
                     }
                     if (nodeId === "category-pane") {
-                        renderValues.content = [<Icon path={mdiTagMultipleOutline} size={1} style={{ verticalAlign: "middle" }} key="icon" />, renderValues.content];
+                        renderValues.content = [<Icon path={mdiTagMultipleOutline} size={1} style={{ verticalAlign: "middle" }} key="icon" />, <Typography style={{marginLeft: "4px", display: "inline"}}>{renderValues.content}</Typography>];
                     }
                     renderValues.buttons.push(<div id={"tabId" + nodeId} key={"tabId" + nodeId}></div>);
                     setTimeout(() => {

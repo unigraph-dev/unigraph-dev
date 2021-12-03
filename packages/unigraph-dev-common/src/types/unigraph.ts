@@ -175,7 +175,7 @@ export interface Unigraph<TT = WebSocket | false> {
      */
     getSearchResults(query: {method: "fulltext" | "type" | "uid", value: any}[], display?: string, hops?: number, searchOptions?: {limit?: number, noPrimitives?: boolean, resultsOnly?: boolean}): Promise<{results: any[], entities: any[]}>;
     /** Deletes an object by its UID. */
-    deleteObject(uid: string, permanent?: boolean): any;
+    deleteObject(uid: string | string[], permanent?: boolean): any;
     /**
      * Updates a object simply using the SPO triplet format.
      * 
@@ -193,7 +193,7 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param pad Whether to pad the new object - for partial update this should be false.
      * @param subIds Subscriptions (if known) associated with the updated object.
      */
-    updateObject(uid: string, newObject: any, upsert?: boolean, pad?: boolean, subIds?: any[] | any): any;
+    updateObject(uid: string, newObject: any, upsert?: boolean, pad?: boolean, subIds?: any[] | any, origin?: any[]): any;
     /**
      * Deletes relationships by supplying the origin UID and JSONs to delete.
      * 
