@@ -48,6 +48,7 @@ describe('should build unigraph entity using union types', () => {
         expect(() => buildUnigraphEntity(testEntities_3['todo-entity-test'], "$/schema/todo", {
             "$/schema/todo": testEntities_3['todo-schema-test_2'],
             "$/schema/user": testEntities_3['user-schema-test'],
+            "$/schema/user_2": testEntities_3['user-schema-test'],
         }))
         .toThrowError("Union type does not allow ambiguous or nonexistent selections!")
     })

@@ -101,12 +101,14 @@
                                 },
                                 "_parameters": {
                                     "_definitions": [{
+                                        "uid": "0x1",
                                         "type": {
                                             "unigraph.id": "$/schema/user"
                                         }
                                     }, {
+                                        "uid": "0x2",
                                         "type": {
-                                            "unigraph.id": "$/schema/user"
+                                            "unigraph.id": "$/schema/user_2"
                                         }
                                     }]
                                 }
