@@ -10,8 +10,8 @@ A local-first and universal knowledge graph, personal search engine, and workspa
 
 Quick links:
 
-- [Schemas and Objects (overview)](./docs/schemas_and_objects.md)
-- [Data model](./docs/data_model.md)
+- [Schemas and Objects (overview)](./docs/architectural/schemas_and_objects.md)
+- [Data model](./docs/architectural/data_model.md)
 - [Glossary](./docs/glossary.md)
 
 ## Getting started
