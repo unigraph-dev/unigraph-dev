@@ -292,6 +292,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 else reject(response);
             };
             subscriptions[id] = (result: any) => result.length === 1 ? callback(new UnigraphObject(result[0])) : callback(result.map((el: any) => new UnigraphObject(el)));
+            if (typeof options?.queryFn === "function") options.queryFn = options.queryFn("QUERYFN_TEMPLATE")
             sendEvent(connection, "subscribe_to_object", {uid, options}, id);
         }), 
         subscribeToQuery: (fragment, callback, eventId = undefined, noExpand = false) => new Promise((resolve, reject) => {
@@ -321,13 +322,13 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             const predicateUid = object['_value'][predicate].uid;
             sendEvent(connection, "update_spo", {uid: predicateUid, predicate: typeMap[typeof value], value: value})
         },
-        updateObject: (uid, newObject, upsert = true, pad = true, subIds) => new Promise((resolve, reject) => {
+        updateObject: (uid, newObject, upsert = true, pad = true, subIds, origin) => new Promise((resolve, reject) => {
             const id = getRandomInt();
             callbacks[id] = (response: any) => {
                 if (response.success) resolve(id);
                 else reject(response);
             };
-            sendEvent(connection, "update_object", {uid: uid, newObject: newObject, upsert: upsert, pad: pad, id: id, subIds: subIds});
+            sendEvent(connection, "update_object", {uid, newObject, upsert, pad, id, subIds, origin});
         }),
         deleteRelation: (uid, relation) => {
             sendEvent(connection, "delete_relation", {uid: uid, relation: relation});

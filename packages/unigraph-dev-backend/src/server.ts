@@ -335,8 +335,11 @@ export default async function startServer(client: DgraphClient) {
       perfLogStartPreprocessing();
       const newUid = event.uid ? event.uid : event.newObject.uid
       // Get new object's unigraph.origin first
-      let origin = event.newObject['unigraph.origin'] ? event.newObject['unigraph.origin'] : (await dgraphClient.queryData<any>(`query { entity(func: uid(${newUid})) { <unigraph.origin> { uid }}}`, []))[0]?.['unigraph.origin']
-      if (!Array.isArray(origin)) origin = [origin];
+      let origin;
+      if (!event.origin) {
+        origin = event.newObject['unigraph.origin'] ? event.newObject['unigraph.origin'] : (await dgraphClient.queryData<any>(`query { entity(func: uid(${newUid})) { <unigraph.origin> { uid }}}`, []))[0]?.['unigraph.origin']
+        if (!Array.isArray(origin)) origin = [origin];
+      } else origin = event.origin;
       if (typeof event.upsert === "boolean" && !event.upsert) {
         if (event.pad) { 
           ws.send(makeResponse(event, false, {"error": "In non-upsert mode, you have to supply a padded object, since we are mutating metadata explicitly as well."})) 
@@ -344,7 +347,6 @@ export default async function startServer(client: DgraphClient) {
           let newObject = {...event.newObject, uid: newUid, 'unigraph.origin': origin}; // If specifying UID, override with it
           let autorefObject = processAutorefUnigraphId(newObject);
           const upsert = insertsToUpsert([autorefObject], false);
-          //console.log(JSON.stringify(upsert, null, 4))
           perfLogStartDbTransaction();
           dgraphClient.createUnigraphUpsert(upsert).then(_ => {
             perfLogAfterDbTransaction();
@@ -358,7 +360,7 @@ export default async function startServer(client: DgraphClient) {
           const origObject = (await dgraphClient.queryUID(event.uid))[0];
           const schema = origObject['type']['unigraph.id'];
           const paddedUpdater = buildUnigraphEntity(event.newObject, schema, caches['schemas'].data, true, {validateSchema: true, isUpdate: true, states: {}, globalStates: {}});
-          finalUpdater = processAutoref({...paddedUpdater, uid: event.uid}, schema, caches['schemas'].data);
+          finalUpdater = processAutoref({...paddedUpdater, uid: event.uid, 'unigraph.origin': origin}, schema, caches['schemas'].data);
           //console.log(upsert);
           console.log(JSON.stringify(finalUpdater, null, 4))
         } else {

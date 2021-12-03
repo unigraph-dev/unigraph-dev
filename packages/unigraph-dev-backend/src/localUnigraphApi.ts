@@ -60,7 +60,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
                 // Is named entity
                 uid = states.namespaceMap[uid].uid;
             }
-            const frag = `(func: uid(${Array.isArray(uid) ? uid.reduce((prev: string, el: string) => prev + el + ",", "").slice(0, -1): uid })) 
+            const frag = options.queryFn ? options.queryFn.replace('QUERYFN_TEMPLATE', (Array.isArray(uid) ? uid.join(', ') : uid)) :`(func: uid(${Array.isArray(uid) ? uid.join(', ') : uid })) 
                 ${options?.queryAsType ? makeQueryFragmentFromType(options.queryAsType, states.caches["schemas"].data, options?.depth) : "@recurse { uid unigraph.id expand(_userpredicate_) }"}`
             const newSub = typeof callback === "function" ? 
                 createSubscriptionLocal(eventId, callback, frag) :
@@ -164,13 +164,15 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
                 callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
             }
         },
-        updateObject: async (uid, newObject, isUpsert = true, pad = true, subIds) => {
+        updateObject: async (uid, newObject, isUpsert = true, pad = true, subIds, origin) => {
             clearEmpties(newObject);
             const newUid = uid ? uid : newObject.uid
             // Get new object's unigraph.origin first
             //console.log("update: 1")
-            let origin = newObject['unigraph.origin'] ? newObject['unigraph.origin'] : (await client.queryData<any>(`query { entity(func: uid(${newUid})) { <unigraph.origin> { uid } }}`, []))[0]?.['unigraph.origin']
-            if (!Array.isArray(origin)) origin = [origin];
+            if (!origin) {
+                origin = newObject['unigraph.origin'] ? newObject['unigraph.origin'] : (await client.queryData<any>(`query { entity(func: uid(${newUid})) { <unigraph.origin> { uid } }}`, []))[0]?.['unigraph.origin']
+                if (!Array.isArray(origin)) origin = [origin];
+            }
             //console.log("update: 2", uid)
             const origObject = (await client.queryUID(uid))[0];
             let finalUpdater = newObject;

@@ -3,6 +3,7 @@ import { buildUnigraphEntity, byElementIndex } from "unigraph-dev-common/lib/uti
 import { dfs, removeAllPropsFromObj } from "../../utils";
 import { parseTodoObject } from "../todo/parseTodoObject";
 import { NoteEditorContext } from "./types";
+import { getParentsAndReferences } from "./utils";
 
 export const focusUid = (uid: string) => {
     console.log("UID " + uid);
@@ -23,6 +24,8 @@ export const setCaret = (document: Document, element: any, pos: number, length?:
 export const getSemanticChildren = (data: any) => data?.['_value']?.['children']
 
 export const addChild = (data: any, context: NoteEditorContext) => {
+    const parents = getParentsAndReferences(data['~_value'], (data['unigraph.origin'] || []))[0].map((el: any) => {return {uid: el.uid}});
+    if (!data._hide) parents.push({uid: data.uid});
     window.unigraph.updateObject(data.uid, {
         "children": [{
             "type": {"unigraph.id": "$/schema/subentity"},
@@ -42,13 +45,15 @@ export const addChild = (data: any, context: NoteEditorContext) => {
                 },
             }
         }]
-    }, undefined, undefined, context.callbacks.subsId);
+    }, undefined, undefined, context.callbacks.subsId, parents);
     context.edited.current = true;
     context.setCommand(() => setFocus.bind(this, data, context, 0));
 }
 
 export const splitChild = (data: any, context: NoteEditorContext, index: number, oldtext: string, at: number) => {
     //console.log(JSON.stringify([data, index, at], null, 4))
+    const parents = getParentsAndReferences(data['~_value'], (data['unigraph.origin'] || []))[0].map((el: any) => {return {uid: el.uid}});
+    if (!data._hide) parents.push({uid: data.uid});
     let currSubentity = -1;
     let isInserted = false;
     removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
@@ -99,7 +104,7 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
         };
     }, [])
     console.log(newChildren)
-    window.unigraph.updateObject(data?.['_value']?.uid, {children: {'_value[': newChildren}}, false, false, context.callbacks.subsId);
+    window.unigraph.updateObject(data?.['_value']?.uid, {children: {'_value[': newChildren}}, false, false, context.callbacks.subsId, parents);
     context.edited.current = true;
     context.setCommand(() => setFocus.bind(this, data, context, index + 1))
 }
@@ -148,6 +153,8 @@ export const setFocus = (data: any, context: NoteEditorContext, index: number) =
  * TODO: This code is very poorly written. We need to change it after we have unigraph object prototypes.
  */
 export const indentChild = (data: any, context: NoteEditorContext, index: number, parent?: number) => {
+    const parents = getParentsAndReferences(data['~_value'], (data['unigraph.origin'] || []))[0].map((el: any) => {return {uid: el.uid}});
+    if (!data._hide) parents.push({uid: data.uid});
     removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     if (!parent && index !== 0) {
         parent = index - 1;
@@ -198,7 +205,7 @@ export const indentChild = (data: any, context: NoteEditorContext, index: number
     };
     const finalChildren = newChildren.filter((el: any) => el !== undefined);
     console.log(finalChildren)
-    window.unigraph.updateObject(data?.['_value']?.uid, {children: {'_value[': finalChildren}}, false, false, context.callbacks.subsId);
+    window.unigraph.updateObject(data?.['_value']?.uid, {children: {'_value[': finalChildren}}, false, false, context.callbacks.subsId, parents);
     context.edited.current = true;
     
     context.setCommand(() => 
@@ -210,6 +217,8 @@ export const indentChild = (data: any, context: NoteEditorContext, index: number
 }
 
 export const unindentChild = async (data: any, context: NoteEditorContext, parent: number, index: number) => {
+    const parents = getParentsAndReferences(data['~_value'], (data['unigraph.origin'] || []))[0].map((el: any) => {return {uid: el.uid}});
+    if (!data._hide) parents.push({uid: data.uid});
     removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     //console.log(parent, index)
     let currSubentity = -1;
@@ -252,7 +261,7 @@ export const unindentChild = async (data: any, context: NoteEditorContext, paren
         };
     }, [])
     console.log(newChildren, newChildren[parent+1]['_value']['_value'].uid);
-    await window.unigraph.updateObject(data?.['_value']?.uid, {...data['_value'], children: {'_value[': newChildren}}, false, false, []);
+    await window.unigraph.updateObject(data?.['_value']?.uid, {...data['_value'], children: {'_value[': newChildren}}, false, false, [], parents);
     await window.unigraph.deleteItemFromArray(delUidPar, delUidChild)
     context.edited.current = true;
     context.setCommand(() => setTimeout(() => {
@@ -273,6 +282,8 @@ export const focusNextDFSNode = (data: any, context: NoteEditorContext, _: numbe
 }
 
 export const convertChildToTodo = async (data: any, context: NoteEditorContext, index: number) => {
+    const parents = getParentsAndReferences(data['~_value'], (data['unigraph.origin'] || []))[0].map((el: any) => {return {uid: el.uid}});
+    if (!data._hide) parents.push({uid: data.uid});
     removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     //console.log(index);
     let currSubentity = -1;
@@ -300,7 +311,7 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
     //console.log(textIt, newChildren, )
     const newUid = await window.unigraph.addObject(parseTodoObject(textIt), "$/schema/todo")
     stubConverted.uid = newUid[0];
-    await window.unigraph.updateObject(data?.['_value']?.uid, {...data['_value'], children: {'_value[': newChildren}}, false, false, context.callbacks.subsId);
+    await window.unigraph.updateObject(data?.['_value']?.uid, {...data['_value'], children: {'_value[': newChildren}}, false, false, context.callbacks.subsId, parents);
 }
 
 export const replaceChildWithUid = async (data: any, context: NoteEditorContext, index: number, uid: string) => {

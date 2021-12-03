@@ -193,7 +193,7 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param pad Whether to pad the new object - for partial update this should be false.
      * @param subIds Subscriptions (if known) associated with the updated object.
      */
-    updateObject(uid: string, newObject: any, upsert?: boolean, pad?: boolean, subIds?: any[] | any): any;
+    updateObject(uid: string, newObject: any, upsert?: boolean, pad?: boolean, subIds?: any[] | any, origin?: any[]): any;
     /**
      * Deletes relationships by supplying the origin UID and JSONs to delete.
      * 

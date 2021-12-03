@@ -13,6 +13,7 @@ import { FiberManualRecord, MoreVert } from "@material-ui/icons";
 import { setSearchPopup } from "./searchPopup";
 import { noteQuery } from "./init";
 import { getParentsAndReferences } from "./utils";
+import { DynamicObjectListView } from "../../components/ObjectView/DynamicObjectListView";
 
 export const getSubentities = (data: any) => {
     let subentities: any, otherChildren: any;
@@ -29,13 +30,14 @@ export const getSubentities = (data: any) => {
 }
 
 export const NoteBlock = ({ data }: any) => {
+    const [parents, references] = getParentsAndReferences(data['~_value'], (data['unigraph.origin'] || []).filter((el: any) => el.uid !== data.uid))
     const [subentities, otherChildren] = getSubentities(data);
     const unpadded = unpad(data);
 
     return <div onClick={() => { window.wsnavigator(`/library/object?uid=${data.uid}&isStub=true&type=$/schema/note_block`) }} style={{display: "flex", alignItems: "center", width: "100%"}}>
         <div style={{flexGrow: 1}}>
             <Typography variant="body1">{unpadded.text}</Typography>
-            <Typography variant="body2" color="textSecondary">{subentities.length ? " and " + subentities.length + " children" : " no children"}</Typography>
+            <Typography variant="body2" color="textSecondary">{subentities.length} immediate children, {parents.length} parents, {references.length} linked references</Typography>
         </div>
         <div>
             {otherChildren.map((el: any) => <AutoDynamicView object={el} />)}
@@ -77,6 +79,15 @@ export const OutlineComponent = ({ children, collapsed, setCollapsed, isChildren
         <div style={{ flexGrow: 1 }}>
             {children}
         </div>
+    </div>
+}
+
+export const ParentsAndReferences = ({data}: any) => {
+    const [parents, references] = getParentsAndReferences(data['~_value'], (data['unigraph.origin'] || []).filter((el: any) => el.uid !== data.uid))
+
+    return <div style={{marginTop: "36px"}}>
+        <DynamicObjectListView items={parents} context={null} compact titleBar=" parents"/>
+        <DynamicObjectListView items={references} context={null} compact titleBar=" linked references"/>
     </div>
 }
 
@@ -139,7 +150,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
     React.useEffect(() => {
         const newNodes = _.unionBy([{ uid: data.uid, children: subentities.map((el: any) => el.uid), root: !isChildren }], nodesState.value, 'uid');
         nodesState.setValue(newNodes)
-        if (!isChildren) console.log(getParentsAndReferences(data['~_value'], data['unigraph.origin'].filter((el: any) => el.uid !== data.uid)))
+        //if (!isChildren) console.log(getParentsAndReferences(data['~_value'], (data['unigraph.origin'] || []).filter((el: any) => el.uid !== data.uid)))
 
         return function cleanup() { inputDebounced.current.flush(); }
     }, [data])
@@ -219,6 +230,8 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                                     hasMatch = true;
                                     //inputDebounced.cancel();
                                     setSearchPopup(boxRef, match[1], async (newName: string, newUid: string) => {
+                                        const parents = getParentsAndReferences(data['~_value'], (data['unigraph.origin'] || []))[0].map((el: any) => {return {uid: el.uid}});
+                                        if (!data._hide) parents.push({uid: data.uid});
                                         const newStr = newContent?.slice?.(0, match.index) + '[[' + newName + ']]' + newContent?.slice?.(match.index + match[0].length);
                                         //console.log(newName, newUid, newStr, newContent);
                                         // This is an ADDITION operation
@@ -242,7 +255,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                                                     }]
                                                 }
                                             }
-                                        }, true, false);
+                                        }, true, false, parents);
                                         window.unigraph.getState('global/searchPopup').setValue({ show: false });
                                     })
                                 }
@@ -377,6 +390,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                     <PlaceholderNoteBlock callbacks={{ "add-child": () => noteBlockCommands['add-child'](dataref.current, editorContext) }} />
                 </OutlineComponent>}
             </div> : []}
+            {!isChildren ? <ParentsAndReferences data={data} /> : []}
         </div>
     </NoteViewPageWrapper>
 }

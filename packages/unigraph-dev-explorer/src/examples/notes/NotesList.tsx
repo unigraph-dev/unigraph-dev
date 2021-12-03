@@ -3,9 +3,10 @@ import React from "react";
 import { withUnigraphSubscription } from "../../unigraph-react"
 import { AutoDynamicView } from "../../components/ObjectView/AutoDynamicView";
 import { DynamicObjectListView } from "../../components/ObjectView/DynamicObjectListView";
+import { noteQuery } from "./init";
 
 export const NotesListBody = ({data}: any) => {
-    return <DynamicObjectListView context={null} items={data} subscribeOptions={{queryAsType: "$/schema/note_block", depth: 9}}/>
+    return <DynamicObjectListView context={null} items={data} subscribeOptions={{queryAsType: "$/schema/note_block", depth: 9, queryFn: noteQuery}}/>
 }
 
 export const NotesListAll = withUnigraphSubscription(NotesListBody, { schemas: [], defaultData: [], packages: []},

@@ -103,6 +103,7 @@ export type DynamicObjectListViewProps = {
     noDrop?: boolean,
     compact?: boolean,
     subscribeOptions?: any,
+    titleBar?: any,
 }
 
 const DynamicListBasic = ({ reverse, items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true, noRemover, compact }: any) => {
@@ -133,7 +134,7 @@ const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, it
         } else { setLoadedItems([]) };
 
         return function cleanup() { newProps?.cleanup() }
-    }, [items])
+    }, [JSON.stringify(items.map((el: any) => el.uid))])
 
     return <InfiniteScroll
         dataLength={loadedItems.length}
@@ -194,7 +195,7 @@ const TabButton = ({children, isSelected, onClick}: any) => {
  * @param param0 
  * @returns 
  */
-export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ items, groupers, groupBy, listUid, context, callbacks, itemGetter = _.identity, itemRemover = _.noop, filters = [], defaultFilter, reverse, virtualized, buildGraph, noBar, noRemover, noDrop, compact, subscribeOptions }) => {
+export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ titleBar, items, groupers, groupBy, listUid, context, callbacks, itemGetter = _.identity, itemRemover = _.noop, filters = [], defaultFilter, reverse, virtualized, buildGraph, noBar, noRemover, noDrop, compact, subscribeOptions }) => {
 
     const classes = useStyles();
 
@@ -272,7 +273,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
                             style={{cursor: "initial"}}
                         >
                             <TabButton isSelected={currentTab === "" && groupersDefault['type']?.(totalItems.map(itemGetter))?.length > 1} onClick={() => {setCurrentTab("")}}>
-                                <Typography style={{whiteSpace: "nowrap"}}>{totalItems.length} items</Typography>
+                                <Typography style={{whiteSpace: "nowrap"}}>{totalItems.length}{titleBar || " items"}</Typography>
                             </TabButton>
                             <MultiTypeDescriptor items={totalItems.map(itemGetter)} selectedTab={currentTab} setSelectedTab={setCurrentTab} />
                         </AccordionSummary>

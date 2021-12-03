@@ -52,11 +52,13 @@ const getQuery: ((depth: number) => string) = (depth: number) => {
     }`
 }
 
-export const noteQuery = (uid: string, depth = 0) => `(func: uid(${uid})) ${getQuery(depth + 1)}` 
+export const noteQueryDetailed = (uid: string, depth = 0) => `(func: uid(${uid})) ${getQuery(depth + 1)}` 
+
+export const noteQuery = (uid: string) => `(func: uid(${uid})) ${getQuery(7)}`
 
 export const init = () => {
-    registerDynamicViews({ "$/schema/note_block": NoteBlock })
-    registerDetailedDynamicViews({ "$/schema/note_block": { view: DetailedNoteBlock, query: noteQuery } })
+    registerDynamicViews({ "$/schema/note_block": { view: NoteBlock, query: noteQuery} })
+    registerDetailedDynamicViews({ "$/schema/note_block": { view: DetailedNoteBlock, query: noteQueryDetailed } })
 
     const quickAdder = async (inputStr: string, preview = true) => {
         if (!preview) {
