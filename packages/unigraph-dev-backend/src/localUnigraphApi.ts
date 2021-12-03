@@ -61,7 +61,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
                 uid = states.namespaceMap[uid].uid;
             }
             const frag = `(func: uid(${Array.isArray(uid) ? uid.reduce((prev: string, el: string) => prev + el + ",", "").slice(0, -1): uid })) 
-                ${options?.queryAsType ? makeQueryFragmentFromType(options.queryAsType, states.caches["schemas"].data) : "@recurse { uid unigraph.id expand(_userpredicate_) }"}`
+                ${options?.queryAsType ? makeQueryFragmentFromType(options.queryAsType, states.caches["schemas"].data, options?.depth) : "@recurse { uid unigraph.id expand(_userpredicate_) }"}`
             const newSub = typeof callback === "function" ? 
                 createSubscriptionLocal(eventId, callback, frag) :
                 createSubscriptionWS(eventId, callback.ws, frag, callback.connId, states.getClientId(callback.connId));
@@ -122,6 +122,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         },
         getQueries: async (fragments, getAll = false, batch = 50) => {
             let allQueries;
+            if (!Array.isArray(fragments)) fragments = [fragments];
             if (getAll) allQueries = fragments.map((it, index) => `query${index}(func: uid(par${index})) @recurse {uid unigraph.id expand(_userpredicate_)}
             par${index} as var${it}`)
             else allQueries = fragments.map((it, index) => `query${index}${it}`)

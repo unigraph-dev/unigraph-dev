@@ -102,6 +102,7 @@ export type DynamicObjectListViewProps = {
     noRemover?: boolean,
     noDrop?: boolean,
     compact?: boolean,
+    subscribeOptions?: any,
 }
 
 const DynamicListBasic = ({ reverse, items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true, noRemover, compact }: any) => {
@@ -113,7 +114,7 @@ const DynamicListBasic = ({ reverse, items, context, listUid, callbacks, itemUid
         />)}</DragandDrop>;
 }
 
-const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true, buildGraph, parId, noRemover, compact }: any) => {
+const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true, buildGraph, parId, noRemover, compact, subscribeOptions }: any) => {
 
     const tabContext = React.useContext(TabContext);
     const [loadedItems, setLoadedItems] = React.useState<any[]>([]);
@@ -124,9 +125,9 @@ const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, it
         let newProps: any = undefined;
         if (items.length) {
             items.sort(byElementIndex);
-            newProps = setupInfiniteScrolling(items.map((el: any) => itemGetter(el).uid), infinite ? 15 : items.length, (items: any[]) => {
+            newProps = setupInfiniteScrolling(items.map((el: any) => itemGetter(el).uid), infinite ? 25 : items.length, (items: any[]) => {
                 setLoadedItems(buildGraph ? buildGraphFn(items) : items);
-            });
+            }, subscribeOptions);
             setSetupProps(newProps);
             newProps.next();
         } else { setLoadedItems([]) };
@@ -160,7 +161,7 @@ const MultiTypeDescriptor = ({items, selectedTab, setSelectedTab}: {items: any[]
 
     return itemGroups.length > 1 ? <React.Fragment>
         <Divider variant="middle" orientation="vertical" style={{height: "auto"}} />
-        <div style={{whiteSpace: "nowrap", overflow: "auto", display: "flex"}}>
+        <div style={{whiteSpace: "nowrap", display: "flex"}}>
         {itemGroups.map((el, index) => {
             return <TabButton isSelected={selectedTab === el.name} onClick={() => setSelectedTab(el.name)}>
                 <div style={{minHeight: "18px", minWidth: "18px", height: "18px", width: "18px", alignSelf: "center", marginRight: "3px", opacity: 0.54, backgroundImage: `url("data:image/svg+xml,${(window.unigraph.getNamespaceMap)?.()?.[el.name]?._icon}")`}}/>
@@ -174,7 +175,7 @@ const MultiTypeDescriptor = ({items, selectedTab, setSelectedTab}: {items: any[]
 const useStyles = makeStyles(theme => ({
     content: {
       width: "100%",
-      overflow: "scroll",
+      overflow: "auto",
     },
   }));
 
@@ -193,7 +194,7 @@ const TabButton = ({children, isSelected, onClick}: any) => {
  * @param param0 
  * @returns 
  */
-export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ items, groupers, groupBy, listUid, context, callbacks, itemGetter = _.identity, itemRemover = _.noop, filters = [], defaultFilter, reverse, virtualized, buildGraph, noBar, noRemover, noDrop, compact }) => {
+export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ items, groupers, groupBy, listUid, context, callbacks, itemGetter = _.identity, itemRemover = _.noop, filters = [], defaultFilter, reverse, virtualized, buildGraph, noBar, noRemover, noDrop, compact, subscribeOptions }) => {
 
     const classes = useStyles();
 
@@ -327,10 +328,10 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ it
             <div style={{ flexGrow: 1, overflowY: "auto" }} id={"scrollableDiv" + parId} >
                 {!groupBy.length ?
 
-                    React.createElement(isStub ? DynamicList : DynamicListBasic, { reverse: reverseOrder, items: procItems, context, listUid, callbacks, itemRemover, itemUids: procItems.map(el => el.uid), itemGetter, buildGraph, parId, noRemover, compact }) :
+                    React.createElement(isStub ? DynamicList : DynamicListBasic, { reverse: reverseOrder, items: procItems, context, listUid, callbacks, itemRemover, itemUids: procItems.map(el => el.uid), itemGetter, buildGraph, parId, noRemover, compact, subscribeOptions }) :
                     groupers[groupBy](procItems.map(itemGetter)).map((el: Group) => <React.Fragment>
                         <ListSubheader>{el.name}</ListSubheader>
-                        {React.createElement(isStub ? DynamicList : DynamicListBasic, { reverse: reverseOrder, items: el.items, context, listUid, callbacks, itemRemover, itemUids: el.items.map(ell => ell.uid), itemGetter: _.identity, infinite: false, buildGraph, parId, noRemover, compact })}
+                        {React.createElement(isStub ? DynamicList : DynamicListBasic, { reverse: reverseOrder, items: el.items, context, listUid, callbacks, itemRemover, itemUids: el.items.map(ell => ell.uid), itemGetter: _.identity, infinite: false, buildGraph, parId, noRemover, compact, subscribeOptions })}
                     </React.Fragment>)
                 }
             </div>

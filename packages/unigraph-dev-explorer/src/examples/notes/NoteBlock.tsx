@@ -163,7 +163,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
     }, [command])
 
     return <NoteViewPageWrapper isRoot={!isChildren}>
-        <div style={{ width: "100%", }} ref={boxRef} >
+        <div style={{ width: "100%", ...(!isChildren ? {overflow: "hidden"} : {}) }} ref={boxRef} >
             <NoteViewTextWrapper 
                 isRoot={!isChildren} onContextMenu={(event: any) => onUnigraphContextMenu(event, data, undefined, callbacks)} 
                 semanticChildren={buildGraph(otherChildren).filter((el: any) => el.type).map((el: any) => <AutoDynamicView object={el.type?.['unigraph.id'] === "$/schema/note_block" ? el : {uid: el.uid, type: el.type}} inline/>)}
@@ -347,7 +347,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                 </div>
             </NoteViewTextWrapper>
             {!isChildren ? <div style={{ height: "12px" }} /> : []}
-            {!(isCollapsed === true) ? <div ref={childrenref} style={{ width: "100%" }} >
+            {!(isCollapsed === true) ? <div ref={childrenref} style={{ width: "100%"}} >
                 {(subentities.length || isChildren) ? buildGraph(subentities).map((el: any, elindex) => {
                     const isCol = isChildrenCollapsed[el.uid];
                     return <OutlineComponent key={el.uid} isChildren={isChildren} collapsed={isCol} setCollapsed={(val: boolean) => setIsChildrenCollapsed({ ...isChildrenCollapsed, [el.uid]: val })}
