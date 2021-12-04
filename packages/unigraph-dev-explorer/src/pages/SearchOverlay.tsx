@@ -165,17 +165,18 @@ export const SearchOverlayPopover = ({open, setClose, noShadow}: any) => {
     
     React.useEffect(() => {
         omnibarSummoner.subscribe((v) => {
-            console.log(v);
             setSummonerState(v);
-            if (v?.show) setSearchEnabled(true);
-            else setSearchEnabled(false);
         });
     }, [])
 
     React.useEffect(() => {
+        if (summonerState?.show) setSearchEnabled(true);
+        else setSearchEnabled(false);
+    }, [summonerState])
+
+    React.useEffect(() => {
         if (!searchEnabled && omnibarSummoner.value?.show) {
             omnibarSummoner.setValue({});
-            console.log(window.unigraph.getState('global/omnibarSummoner'));
         }
         if (!isElectron()) document.onkeydown = function(evt) {
             evt = evt || window.event;
