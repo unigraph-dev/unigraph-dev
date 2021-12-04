@@ -259,7 +259,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ ti
     return <div style={{
         height: "100%", width: "100%",
         display: "flex", flexDirection: "column", overflowY: "hidden",
-        minHeight: canDrop ? "200px" : "",
+        minHeight: (canDrop && !noDrop) ? "200px" : "",
     }} ref={drop}>
         <DataContext.Provider value={{ rootUid: context?.uid || "0x0" }}>
             <div style={{ display: "flex" }}>

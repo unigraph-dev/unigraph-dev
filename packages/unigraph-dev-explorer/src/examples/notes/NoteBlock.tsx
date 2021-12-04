@@ -86,8 +86,8 @@ export const ParentsAndReferences = ({data}: any) => {
     const [parents, references] = getParentsAndReferences(data['~_value'], (data['unigraph.origin'] || []).filter((el: any) => el.uid !== data.uid))
 
     return <div style={{marginTop: "36px"}}>
-        <DynamicObjectListView items={parents} context={null} compact titleBar=" parents"/>
-        <DynamicObjectListView items={references} context={null} compact titleBar=" linked references"/>
+        <DynamicObjectListView items={parents} context={null} compact noDrop titleBar=" parents"/>
+        <DynamicObjectListView items={references} context={null} compact noDrop titleBar=" linked references"/>
     </div>
 }
 

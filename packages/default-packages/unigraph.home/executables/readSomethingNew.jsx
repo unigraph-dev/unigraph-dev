@@ -8,14 +8,14 @@ React.useEffect(() => {
     const inboxUid = window.unigraph.getNamespaceMap()['$/entity/inbox'].uid;
     const readLaterUid = window.unigraph.getNamespaceMap()['$/entity/read_later'].uid;
     window.unigraph.subscribeToQuery(`(func: uid(${inboxUid}, ${readLaterUid})) @normalize { uid: uid _value { children { <_value[> {items: count(uid)} } } }`,
-    (res) => {
+    (results) => {
         const ibx = results[0].uid === inboxUid ? results[0] : results[1];
         const rlt = results[0].uid === readLaterUid ? results[0] : results[1];
         setCount({
             "$/entity/inbox": ibx?.items || 0,
             "$/entity/read_later": rlt?.items || 0
         })
-    }, subsId);
+    }, subsId, true);
 
     return function cleanup () {
         window.unigraph.unsubscribe(subsId);

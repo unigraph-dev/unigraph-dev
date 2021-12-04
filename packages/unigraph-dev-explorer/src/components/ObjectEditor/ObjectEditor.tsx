@@ -137,7 +137,7 @@ const TypedObjectPartEditor: any = {
         </Paper>
     },
     "default": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
-        return <Typography>Object part</Typography>
+        return <Typography>Object part, uid: {localObject?.uid}</Typography>
     },
     "$/primitive/number": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
         const [currentInputValue, setCurrentInputValue] = React.useState(localObject['_value.#i']);
@@ -208,7 +208,7 @@ const TypedObjectPartEditor: any = {
 
 function getPartEditor(type: string, localSchema: any) {
     return Object.keys(TypedObjectPartEditor).includes(type) ? TypedObjectPartEditor[type] : 
-        (type.startsWith('$/schema/') ? TypedObjectPartEditor['schemaRef'] : TypedObjectPartEditor['default'])
+        (type?.startsWith('$/schema/') ? TypedObjectPartEditor['schemaRef'] : TypedObjectPartEditor['default'])
 }
 
 export const ObjectPartEditor = ({localSchema, localObject, setLocalObject, schemaMap}: any) => {

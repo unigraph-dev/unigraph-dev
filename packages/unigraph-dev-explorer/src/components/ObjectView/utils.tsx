@@ -33,5 +33,5 @@ export const SubentityDropAcceptor = ({ uid }: any) => {
 }
 
 export const getSubentities = (data: any) => {
-    return data?._value?.children?.['_value[']?.map?.((el: any) => el['_value']).filter((el: any) => el.type['unigraph.id'] === "$/schema/subentity") 
+    return data?._value?.children?.['_value[']?.map?.((el: any) => el['_value']).filter((el: any) => el?.type['unigraph.id'] === "$/schema/subentity") 
 }
