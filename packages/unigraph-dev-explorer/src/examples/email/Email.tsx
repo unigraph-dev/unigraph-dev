@@ -37,16 +37,16 @@ const EmailMessage: DynamicViewRenderer = ({data, callbacks}) => {
         <ListItemAvatar><Avatar>{unpadded.message?.sender?.[0]?.[0]}</Avatar></ListItemAvatar>
         <ListItemText
             primary={[<strong>{unpadded.message?.sender?.[0]}</strong>, <br/>, data?.get('name')?.['_value']?.['_value']?.['_value.%']]}
-            secondary={<div style={{display: "flex", alignItems: "center"}}>
+            secondary={[Sugar.Date.relative(new Date(unpadded?.message?.date_received)), <div style={{display: "flex", alignItems: "center"}}>
+                
                 <Link onClick={() => {
                     const htmlUid = data?.get('content/text')?.['_value']?.['_value']?.['uid'];
                     if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid, context: data.uid, type: data?.type?.['unigraph.id']}));
                     if (callbacks?.removeFromContext) callbacks.removeFromContext();
                 }}/>
                 {unpadded.content?.abstract + "..."}
-            </div>}
+            </div>]}
         />
-        <ListItemText style={{flex: "none"}} secondary={Sugar.Date.relative(new Date(unpadded?.message?.date_received))}/>
     </ListItem>
 }
 

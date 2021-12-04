@@ -80,7 +80,13 @@ export const getQueryString = (query: {method: "fulltext" | "type" | "uid", valu
     const entityQueries: string[] = [];
     const resultQueries: string[] = [];
     const queries = query.map((el, index) => {
-        if (el.method === "fulltext") {resultQueries.push(`queryresult${index.toString()}`); return `queryresult${index.toString()} as var(func: alloftext(<_value.%>, "${el.value}"))`;}
+        if (el.method === "fulltext") {
+            if (el.value.startsWith('/') && el.value.endsWith('/')) {
+                resultQueries.push(`queryresult${index.toString()}`); return `queryresult${index.toString()} as var(func: regexp(<_value.%>, ${el.value}i))`;
+            } else {
+                resultQueries.push(`queryresult${index.toString()}`); return `queryresult${index.toString()} as var(func: alloftext(<_value.%>, "${el.value}"))`;
+            }
+        }
         else if (el.method === "type") {entityQueries.push(`queryresult${index.toString()}`); return `var(func: eq(<unigraph.id>, "${el.value}")) { <~type> { queryresult${index.toString()} as uid } }`}
         else if (el.method === "uid") {resultQueries.push(`queryresult${index.toString()}`); return `queryresult${index.toString()} as var(func: uid(${el.value}))`}
     })
