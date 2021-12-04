@@ -255,7 +255,6 @@ export function WorkSpace(this: any) {
     const factory = (node: any) => {
         var component = node.getComponent();
         var config = node.getConfig() || {};
-        console.log(node, config)
         if (component.startsWith('/pages/')) {
             const page = pages.value[(component.replace('/pages/', '') as string)]
 

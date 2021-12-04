@@ -90,10 +90,10 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
                 let upchildren: any[] = [];
                 oldChildren['_value['] = oldChildren['_value['].filter((elc: any) => {
                     if (elc['_key'] && prevText.includes(elc['_key'])) {
-                        upchildren.push({...elc, "_index": {"_value.#i": upchildren.length}});
+                        upchildren.push({uid: elc.uid, "_index": {"_value.#i": upchildren.length}});
                         return false;
                     } else return true;
-                }).map((ell: any, idx: number) => {return {...ell, "_index": {"_value.#i": idx}}})
+                }).map((ell: any, idx: number) => {return {uid: ell.uid, "_index": {"_value.#i": idx}}})
                 //console.log(oldChildren);
                 _.merge(newel, {'_value': {'_value': {'_value': {'children': {'_value[': upchildren}}}}})
             }
