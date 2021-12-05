@@ -298,6 +298,12 @@ export const defaultUserlandSchemas = [
         "dgraph.type": [ "Type" ]
     },
     {
+        "unigraph.id": "$/schema/executable"
+    },
+    {
+        "unigraph.id": "$/schema/package_manifest"
+    },
+    {
         "unigraph.id": "$/unigraph",
         "_version": "schema-v0.0.1dev"
     },
