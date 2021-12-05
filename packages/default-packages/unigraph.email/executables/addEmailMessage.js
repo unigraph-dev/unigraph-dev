@@ -33,9 +33,7 @@ const dest = parsed.map((el) => {
                 _value: el.html || el.textAsHtml || el.text || ""
             }
         },
-        _timestamp: {
-            _updatedAt: el.date.toISOString()
-        }
+        _updatedAt: el.date.toISOString()
     }
 })
 

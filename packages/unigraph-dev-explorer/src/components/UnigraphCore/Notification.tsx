@@ -10,9 +10,7 @@ export type ANotification = {
     from: string,
     content: string,
     actions?: any,
-    _timestamp?: {
-        _updatedAt: any
-    }
+    _updatedAt: any
 }
 
 export const Notification: DynamicViewRenderer = ({data, callbacks}) => {
@@ -29,7 +27,7 @@ export const Notification: DynamicViewRenderer = ({data, callbacks}) => {
                 color="textPrimary"
                 style={{paddingRight: "4px"}}
               >
-                {unpadded.from}{", updated: "}{timeago.format(new Date(unpadded?._timestamp?._updatedAt))}:
+                {unpadded.from}{", updated: "}{timeago.format(new Date(unpadded?._updatedAt))}:
               </Typography>
               {unpadded.content}
             </React.Fragment>
