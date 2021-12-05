@@ -218,6 +218,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
     connect();
 
     function sendEvent(conn: {current: WebSocket | undefined}, name: string, params: any, id?: number | undefined) {
+        if ((window as any).onEventSend) (window as any).onEventSend(name)
         if (!id) id = getRandomInt();
         const msg = JSON.stringify({
             "type": "event",
