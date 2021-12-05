@@ -78,7 +78,7 @@ if (account?.uid) {
     const newMsgResps = await Promise.all(newMsgs.map(id => 
         gmail.users.messages.get({userId: "me", id, format: "raw"})));
 
-    if (newMsgs.length) unigraph.runExecutable('$/executable/add-email', {
+    if (newMsgs.length) await unigraph.runExecutable('$/executable/add-email', {
         dont_check_unique: true, 
         messages: newMsgResps.map(el => {return {message: Buffer.from(el.data.raw, 'base64').toString(), read: !el.data.labelIds.includes('UNREAD')}})
     });

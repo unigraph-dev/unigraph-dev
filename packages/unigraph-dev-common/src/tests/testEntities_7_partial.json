@@ -10,11 +10,8 @@
                 },
                 "_value": {
                     "uid": "0x4",
-                    "_timestamp": {
-                        "uid": "0x5",
-                        "_createdAt": "1970-01-01T00:00:00.000Z",
-                        "_updatedAt": "1970-01-01T00:00:00.000Z"
-                    },
+                    "_createdAt": "1970-01-01T00:00:00.000Z",
+                    "_updatedAt": "1970-01-01T00:00:00.000Z",
                     "_value": {
                         "uid": "0x6",
                         "name": {
@@ -38,11 +35,8 @@
                 },
                 "_value": {
                     "uid": "0x4",
-                    "_timestamp": {
-                        "uid": "0x5",
-                        "_createdAt": "1970-01-01T00:00:00.000Z",
-                        "_updatedAt": "1970-01-01T00:00:00.000Z"
-                    },
+                    "_createdAt": "1970-01-01T00:00:00.000Z",
+                    "_updatedAt": "1970-01-01T00:00:00.000Z",
                     "_value": {
                         "uid": "0x6",
                         "name": {
@@ -70,11 +64,8 @@
                 },
                 "_value": {
                     "uid": "0x4",
-                    "_timestamp": {
-                        "uid": "0x5",
-                        "_createdAt": "1970-01-01T00:00:00.000Z",
-                        "_updatedAt": "1970-01-01T00:00:00.000Z"
-                    },
+                    "_createdAt": "1970-01-01T00:00:00.000Z",
+                    "_updatedAt": "1970-01-01T00:00:00.000Z",
                     "_value": {
                         "uid": "0x6",
                         "name": {
@@ -85,8 +76,8 @@
                     "dgraph.type": "Entity",
                     "type": {
                         "uid": "0x8",
-                        "$ref":  {
-                            "query":  [
+                        "$ref": {
+                            "query": [
                                 {
                                     "key": "unigraph.id",
                                     "value": "$/schema/user"

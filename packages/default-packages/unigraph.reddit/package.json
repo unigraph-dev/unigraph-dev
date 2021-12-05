@@ -21,7 +21,8 @@
             "src": "executables/updateRedditSubscriptions.js",
             "periodic": "*/3 * * * *",
             "editable": true,
-            "name": "Update Reddit subscriptions every 3 minutes"
+            "name": "Update Reddit subscriptions every 3 minutes",
+            "concurrency": 1
         }]
     }
 }

@@ -71,6 +71,6 @@ if (account?.uid) {
     });
     for (let i=0; i<calObjs.length; ++i) {
         const uids = await unigraph.addObject(calObjs[i], '$/schema/calendar');
-        unigraph.runExecutable('$/executable/sync-google-calendar-specific', {uid: uids[0]}, {calendar: calendar});
+        await unigraph.runExecutable('$/executable/sync-google-calendar-specific', {uid: uids[0]}, {calendar: calendar});
     }
 }

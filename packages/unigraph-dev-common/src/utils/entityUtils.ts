@@ -637,14 +637,16 @@ export function unpadRecurse(object: any, visitedUids: any[] = []) {
         result = {};
         let newVisited = object['uid'] ? [...visitedUids, object['uid']] : visitedUids
         const predicate = Object.keys(object).find(p => p.startsWith("_value"));
-        const timestamp = Object.keys(object).find(p => p.startsWith("_timestamp"));
+        const timestamp_c = Object.keys(object).find(p => p.startsWith("_createdAt"));
+        const timestamp_u = Object.keys(object).find(p => p.startsWith("_updatedAt"));
         if (predicate) { // In simple settings, if contains _value ignore all edge annotations
             result = unpadRecurse(object[predicate], newVisited);
         } else {
             result = Object.fromEntries(Object.entries(object).map(([k, v]) => [k, unpadRecurse(v, newVisited)]));
         }
         if (object['unigraph.id']) result['unigraph.id'] = object['unigraph.id'];
-        if (timestamp && typeof result === "object" && !Array.isArray(result)) result["_timestamp"] = object["_timestamp"]
+        if (timestamp_c && typeof result === "object" && !Array.isArray(result)) result["_createdAt"] = object["_createdAt"]
+        if (timestamp_u && typeof result === "object" && !Array.isArray(result)) result["_updatedAt"] = object["_updatedAt"]
     } else if (Array.isArray(object)) {
         result = [];
         object.sort(byElementIndex);

@@ -3,10 +3,12 @@
         "name": "Hello world",
         "done": false,
         "semantic_properties": {
-            "tags": [{
-                "name": "unigraph",
-                "color": "#b8a2c8"
-            }]
+            "tags": [
+                {
+                    "name": "unigraph",
+                    "color": "#b8a2c8"
+                }
+            ]
         }
     },
     "typealias-todo-expected": {
@@ -14,10 +16,8 @@
             "unigraph.id": "$/schema/todo"
         },
         "dgraph.type": "Entity",
-        "_timestamp": {
-            "_createdAt": "1970-01-01T00:00:00.000Z",
-            "_updatedAt": "1970-01-01T00:00:00.000Z"
-        },
+        "_createdAt": "1970-01-01T00:00:00.000Z",
+        "_updatedAt": "1970-01-01T00:00:00.000Z",
         "_value": {
             "name": {
                 "_value.%": "Hello world"
@@ -34,10 +34,8 @@
                     },
                     "dgraph.type": "Entity",
                     "unigraph.indexes": {},
-                    "_timestamp": {
-                        "_createdAt": "1970-01-01T00:00:00.000Z",
-                        "_updatedAt": "1970-01-01T00:00:00.000Z"
-                    },
+                    "_createdAt": "1970-01-01T00:00:00.000Z",
+                    "_updatedAt": "1970-01-01T00:00:00.000Z",
                     "_value": {
                         "tags": {
                             "type": {
@@ -54,10 +52,8 @@
                                         },
                                         "dgraph.type": "Entity",
                                         "unigraph.indexes": {},
-                                        "_timestamp": {
-                                            "_createdAt": "1970-01-01T00:00:00.000Z",
-                                            "_updatedAt": "1970-01-01T00:00:00.000Z"
-                                        },
+                                        "_createdAt": "1970-01-01T00:00:00.000Z",
+                                        "_updatedAt": "1970-01-01T00:00:00.000Z",
                                         "_value": {
                                             "name": {
                                                 "_value.%": "unigraph"
@@ -69,10 +65,8 @@
                                                     },
                                                     "dgraph.type": "Entity",
                                                     "unigraph.indexes": {},
-                                                    "_timestamp": {
-                                                        "_createdAt": "1970-01-01T00:00:00.000Z",
-                                                        "_updatedAt": "1970-01-01T00:00:00.000Z"
-                                                    },
+                                                    "_createdAt": "1970-01-01T00:00:00.000Z",
+                                                    "_updatedAt": "1970-01-01T00:00:00.000Z",
                                                     "_value.%": "#b8a2c8"
                                                 }
                                             }
@@ -92,10 +86,8 @@
             "unigraph.id": "$/schema/todo"
         },
         "dgraph.type": "Entity",
-        "_timestamp": {
-            "_createdAt": "1970-01-01T00:00:00.000Z",
-            "_updatedAt": "1970-01-01T00:00:00.000Z"
-        },
+        "_createdAt": "1970-01-01T00:00:00.000Z",
+        "_updatedAt": "1970-01-01T00:00:00.000Z",
         "_value": {
             "name": {
                 "_value.%": "Hello world"
@@ -112,10 +104,8 @@
                     },
                     "unigraph.indexes": {},
                     "dgraph.type": "Entity",
-                    "_timestamp": {
-                        "_createdAt": "1970-01-01T00:00:00.000Z",
-                        "_updatedAt": "1970-01-01T00:00:00.000Z"
-                    },
+                    "_createdAt": "1970-01-01T00:00:00.000Z",
+                    "_updatedAt": "1970-01-01T00:00:00.000Z",
                     "_value": {
                         "tags": {
                             "type": {
