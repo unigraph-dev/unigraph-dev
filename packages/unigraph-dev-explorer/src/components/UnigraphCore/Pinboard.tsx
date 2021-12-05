@@ -26,7 +26,7 @@ export const Pinboard = ({data, callbacks}: any) => {
     const [layoutLocked, setLayoutLocked] = React.useState(true);
 
     return <ReactResizeDetector handleWidth targetRef={divRef}>
-        {({width}) => <div ref={divRef} onContextMenu={(event) => onUnigraphContextMenu(event, data, undefined, undefined, (handleClose: any) => <React.Fragment>
+        {({width}) => <div ref={divRef} onContextMenu={(event) => onUnigraphContextMenu(event, data, undefined, undefined, (a: any, b: any, handleClose: any) => <React.Fragment>
             <MenuItem onClick={() => {handleClose(); setLayoutLocked(!layoutLocked);}}>{layoutLocked ? "Unlock" : "Lock"} pinboard layout</MenuItem>
         </React.Fragment>)}>
             <ResponsiveGridLayout 

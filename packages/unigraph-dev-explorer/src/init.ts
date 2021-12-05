@@ -16,6 +16,22 @@ import { ListObjectQuery, ListObjectView } from "./components/UnigraphCore/ListO
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
 import { SubentityView } from "./components/UnigraphCore/SubentityView";
 
+window.reloadCommands = () => {
+    const commandsState = window.unigraph.getState("registory/commands");
+  
+    const pageCommands = Object.entries(window.unigraph.getState('registry/pages').value).map(([k, v]: any) => {
+      return {
+        name: "Open: " + v.name,
+        about: "Open the page " + v.name,
+        onClick: () => {
+          window.wsnavigator('/' + k)
+        }
+      }
+    });
+  
+    commandsState.setValue(pageCommands);
+}
+
 /**
  * Things to do when Unigraph explorer loads
  */
@@ -117,6 +133,7 @@ function initRegistry() {
     window.unigraph.addState('registry/widgets', {});
     window.unigraph.addState('registry/components', {});
     window.unigraph.addState('registry/contextMenu', {});
+    window.unigraph.addState('registry/commands', {});
 }
 
 function initPackages() {

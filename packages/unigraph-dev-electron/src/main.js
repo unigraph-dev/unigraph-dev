@@ -201,7 +201,7 @@ app.whenReady().then(() => {
       //console.log("buhf")
       closeOmnibar();
     })
-    //todayWindow.maximize();
+    omnibar.maximize();
     mainWindow.maximize();
     //todayWindow.setVisibleOnAllWorkspaces(true);
     omnibar.setVisibleOnAllWorkspaces(true);

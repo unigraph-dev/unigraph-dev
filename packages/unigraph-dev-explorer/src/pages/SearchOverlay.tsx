@@ -17,6 +17,7 @@ export const SearchOverlayTooltip = () => {
         <Typography>+bookmark / +bm : add bookmark from URL</Typography>
         <Typography style={{color: "gray"}}>Search Unigraph</Typography>
         <Typography>?&lt;search query&gt; : search Unigraph</Typography>
+        <Typography style={{color: "gray"}}>Commands</Typography>
     </div>
 }
 
@@ -31,6 +32,15 @@ export const SearchOverlay = ({open, setClose, callback, summonerTooltip, defaul
     const [results, setResults] = React.useState<any[]>([]);
     const [entities, setEntities] = React.useState<string[]>([]);
     const [response, setResponse] = React.useState(false);
+    const [commands, setCommands] = React.useState<any[]>([]);
+
+    React.useEffect(() => {
+        window.unigraph.getState("registory/commands").subscribe(res => {
+            if (parsed.type !== "command") {
+                setCommands(res);
+            }
+        })
+    })
 
     React.useEffect(() => { 
         tf.current?.focus();
@@ -63,8 +73,11 @@ export const SearchOverlay = ({open, setClose, callback, summonerTooltip, defaul
             setEntries([]);
             setEntities([]);
         } else {
+            if (parsed.type === "command" && input === "") {
+                setCommands(window.unigraph.getState("registory/commands").value)
+            }
             setParsed({
-                type: "command",
+                type: input === "" ? "" : "command",
                 value: input
             });
             setEntries([]);
@@ -89,6 +102,10 @@ export const SearchOverlay = ({open, setClose, callback, summonerTooltip, defaul
             });
         } else if (parsed?.type === "query") {
             setQuery(parseQuery(parsed?.value));
+        } else if (parsed?.type === "command") {
+            // list all commands
+            const commands = window.unigraph.getState("registory/commands").value;
+            setCommands(commands.filter((el: any) => (el.name as string).toLowerCase().includes(parsed.value.toLowerCase()) !== false))
         }
     }, [parsed])
 
@@ -141,7 +158,11 @@ export const SearchOverlay = ({open, setClose, callback, summonerTooltip, defaul
                 buildGraph={true}
                 noBar
             /> : []}
-            {entries.length + entities.length === 0 ? <SearchOverlayTooltip /> : []}
+            {entries.length + entities.length === 0 && parsed?.type !== "command" ? <SearchOverlayTooltip /> : []}
+            {commands.map((el: any) => <div onClick={el.onClick} style={{display: "flex", marginTop: "8px", marginBottom: "8px"}}>
+                <Typography style={{flexGrow: 1}}>{el.name}</Typography>
+                <Typography style={{color: "gray"}}>{el.about}</Typography>
+            </div>)}
             {parsed?.type === "quickAdder" ? <div style={{marginTop: "32px"}}>
                 {React.createElement(window.unigraph.getState('registry/quickAdder').value[parsed?.key].tooltip)}
             </div> : []}
@@ -165,17 +186,18 @@ export const SearchOverlayPopover = ({open, setClose, noShadow}: any) => {
     
     React.useEffect(() => {
         omnibarSummoner.subscribe((v) => {
-            console.log(v);
             setSummonerState(v);
-            if (v?.show) setSearchEnabled(true);
-            else setSearchEnabled(false);
         });
     }, [])
 
     React.useEffect(() => {
+        if (summonerState?.show) setSearchEnabled(true);
+        else setSearchEnabled(false);
+    }, [summonerState])
+
+    React.useEffect(() => {
         if (!searchEnabled && omnibarSummoner.value?.show) {
             omnibarSummoner.setValue({});
-            console.log(window.unigraph.getState('global/omnibarSummoner'));
         }
         if (!isElectron()) document.onkeydown = function(evt) {
             evt = evt || window.event;

@@ -86,8 +86,8 @@ export const ParentsAndReferences = ({data}: any) => {
     const [parents, references] = getParentsAndReferences(data['~_value'], (data['unigraph.origin'] || []).filter((el: any) => el.uid !== data.uid))
 
     return <div style={{marginTop: "36px"}}>
-        <DynamicObjectListView items={parents} context={null} compact titleBar=" parents"/>
-        <DynamicObjectListView items={references} context={null} compact titleBar=" linked references"/>
+        <DynamicObjectListView items={parents} context={null} compact noDrop titleBar=" parents"/>
+        <DynamicObjectListView items={references} context={null} compact noDrop titleBar=" linked references"/>
     </div>
 }
 
@@ -118,9 +118,9 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
             if (deadLinks.length) window.unigraph.deleteItemFromArray(data['_value']['children']['uid'], deadLinks, data['uid'])
         }
 
-        return window.unigraph.updateObject(data.uid, {
-            text: { type: { 'unigraph.id': "$/schema/markdown" }, _value: text }
-        });
+        return window.unigraph.updateObject(data.get('text')._value._value.uid, {
+            "_value.%": text
+        }, false, false, callbacks.subsId);
 
     }
     /** Reference for the data object (for children) */
@@ -131,7 +131,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
     const childrenref = React.useRef<any>();
     /** Reference for the box of this element. Used for positioning only */
     const boxRef = React.useRef<any>();
-    const inputDebounced = React.useRef(_.debounce(inputter, 1000))
+    const inputDebounced = React.useRef(_.debounce(inputter, 333))
     const setCurrentText = (text: string) => { textInput.current.textContent = text };
     const edited = React.useRef(false);
     const [isEditing, setIsEditing] = React.useState(false);
@@ -255,7 +255,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                                                     }]
                                                 }
                                             }
-                                        }, true, false, parents);
+                                        }, true, false, callbacks.subsId, parents);
                                         window.unigraph.getState('global/searchPopup').setValue({ show: false });
                                     })
                                 }
@@ -369,6 +369,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                         createBelow={() => { addChild(dataref.current, editorContext) }}
                     >
                         <AutoDynamicView
+                            noDrop noDrag
                             subentityExpandByDefault={!(el.type?.['unigraph.id'] === "$/schema/note_block")}
                             object={el.type?.['unigraph.id'] === "$/schema/note_block" ? el : {uid: el.uid, type: el.type}}
                             callbacks={{

@@ -20,7 +20,7 @@ export const BelowDropAcceptor = ({ onDrop, isReverse }: any) => {
 export const WithDropBelow = ({children, onDrop, isReverse}: any) => {
     return <React.Fragment>
         {children}
-        <BelowDropAcceptor onDrop={onDrop} isReverse={isReverse} />
+        <BelowDropAcceptor onDrop={onDrop} isReverse={isReverse} key={"_dropacceptor"} />
     </React.Fragment>
 }
 
@@ -43,6 +43,6 @@ const onDrop = (dndContext: any, listId: any, arrayId: any, index: any, dropperP
 export const DragandDrop = ({children, style = {}, dndContext, listId, arrayId, isReverse}: any) => {
     <BelowDropAcceptor onDrop={onDrop.bind(this, dndContext, listId, -1)} isReverse={isReverse}/>
     return <div style={{...style}}>
-        {children.map((child: any, index: number) => <WithDropBelow children={child} onDrop={onDrop?.bind(this, dndContext, listId, arrayId, index)} isReverse={isReverse}/>)}
+        {children.map((child: any, index: number) => <WithDropBelow children={child} onDrop={onDrop?.bind(this, dndContext, listId, arrayId, index)} isReverse={isReverse} key={index + "_dnd"}/>)}
     </div>
 }

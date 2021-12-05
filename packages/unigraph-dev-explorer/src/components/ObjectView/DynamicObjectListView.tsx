@@ -147,7 +147,7 @@ const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, it
         }
     >
         <DragandDrop dndContext={tabContext.viewId} listId={context?.uid} isReverse={reverse}  arrayId={listUid}>
-            {loadedItems.map((el: any, index: number) => <DynamicListItem
+            {loadedItems.map((el: any, index: number) => <DynamicListItem key={el?.uid || index}
                 item={el} index={index} context={context} listUid={listUid} reverse={reverse} compact={compact}
                 callbacks={callbacks} itemUids={items.map((el: any) => itemGetter(el).uid)} itemRemover={itemRemover} noRemover={noRemover}
             />)}
@@ -158,7 +158,6 @@ const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, it
 const MultiTypeDescriptor = ({items, selectedTab, setSelectedTab}: {items: any[], selectedTab: string, setSelectedTab: any}) => {
 
     const itemGroups = groupersDefault['type'](items);
-    console.log(itemGroups)
 
     return itemGroups.length > 1 ? <React.Fragment>
         <Divider variant="middle" orientation="vertical" style={{height: "auto"}} />
@@ -259,7 +258,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ ti
     return <div style={{
         height: "100%", width: "100%",
         display: "flex", flexDirection: "column", overflowY: "hidden",
-        minHeight: canDrop ? "200px" : "",
+        minHeight: (canDrop && !noDrop) ? "200px" : "",
     }} ref={drop}>
         <DataContext.Provider value={{ rootUid: context?.uid || "0x0" }}>
             <div style={{ display: "flex" }}>

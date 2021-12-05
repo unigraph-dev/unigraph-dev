@@ -1,6 +1,6 @@
 const query = await unigraph.runExecutable('$/executable/get-next-events', 
     {
-        current: true, start: (new Date((new Date()).getTime() + 1000*60*60*8)).getTime(), 
+        current: true, start: (new Date((new Date()).getTime() + 1000*60*60*24)).getTime(), 
         greaterThanNow: true, allEnd: true
     }
 );

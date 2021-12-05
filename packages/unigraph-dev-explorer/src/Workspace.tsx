@@ -10,7 +10,7 @@ import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import FlexLayout, { Actions, DockLocation, Model, Node, TabNode } from 'flexlayout-react';
 import 'flexlayout-react/style/light.css'
 import './workspace.css'
-import { getParameters, isElectron, isSmallScreen, NavigationContext, TabContext } from "./utils";
+import { getParameters, isElectron, isMobile, isSmallScreen, NavigationContext, TabContext } from "./utils";
 import { Container, CssBaseline, ListItem, Popover, Typography } from "@material-ui/core";
 import { isJsonString } from "unigraph-dev-common/lib/utils/utils";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
@@ -23,7 +23,7 @@ import { InlineSearch } from "./components/UnigraphCore/InlineSearchPopup";
 import MomentUtils from '@date-io/moment';
 
 import Icon from '@mdi/react'
-import { mdiStarPlusOutline, mdiSync, mdiTagMultipleOutline } from '@mdi/js';
+import { mdiFormTextarea, mdiStarPlusOutline, mdiSync, mdiTagMultipleOutline } from '@mdi/js';
 import { SearchOverlayPopover } from "./pages/SearchOverlay";
 
 const pages = window.unigraph.getState('registry/pages')
@@ -58,6 +58,18 @@ const ConnectionIndicator = () => {
         })
     }, [])
     return <span style={{ height: "16px", width: "16px", borderRadius: "8px", backgroundColor: connected ? "lightgreen" : "red", border: "1px solid grey", marginRight: "8px", display: connected ? "none" : ""}}></span>
+}
+
+const MobileOmnibarIndicator = () => {
+    return <div style={{ marginRight: "16px", display: isMobile() ? "" : "none" }} onClick={() => {
+        window.unigraph.getState('global/omnibarSummoner').setValue({
+            show: true,
+            tooltip: "",
+            defaultValue: "",
+        })
+    }}>
+        <Icon path={mdiFormTextarea} size={0.7} style={{ verticalAlign: "middle" }} key="icon" />
+    </div>
 }
 
 const ExecutablesIndicator = () => {
@@ -255,7 +267,6 @@ export function WorkSpace(this: any) {
     const factory = (node: any) => {
         var component = node.getComponent();
         var config = node.getConfig() || {};
-        console.log(node, config)
         if (component.startsWith('/pages/')) {
             const page = pages.value[(component.replace('/pages/', '') as string)]
 
@@ -366,7 +377,7 @@ export function WorkSpace(this: any) {
                             <Icon path={mdiStarPlusOutline} size={0.7} style={{ marginTop: "5px" }} />
                         </span>);
                     } else if (tabSetNode.getId() === "border_bottom") {
-                        renderValues.buttons.push(<ExecutablesIndicator />, <ConnectionIndicator />);
+                        renderValues.buttons.push(<MobileOmnibarIndicator/>, <ExecutablesIndicator />, <ConnectionIndicator />);
                     }
                     if (isElectron() && tabSetNode.getId() === "border_left") {
                         const getTopLeft = () => Array.from(document.querySelectorAll('.flexlayout__tabset_tabbar_outer'))
