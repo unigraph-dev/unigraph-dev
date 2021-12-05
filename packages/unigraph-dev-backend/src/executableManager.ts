@@ -84,7 +84,7 @@ export function buildExecutable(exec: Executable, context: ExecContext, unigraph
         }; else return fn;
     }
 
-    if (Object.keys(environmentRunners).includes(exec.env) && (!exec.concurrency || states.runningExecutables.filter((el: any) => el.slug === exec["unigraph.id"]) <= exec.concurrency)) {
+    if (Object.keys(environmentRunners).includes(exec.env) && (!exec.concurrency || states.runningExecutables.filter((el: any) => el.slug === exec["unigraph.id"]).length < exec.concurrency)) {
         // @ts-expect-error: already checked for environment runner inclusion
         return wrapExecutable(environmentRunners[exec.env](exec.src, context, unigraph));
     }
@@ -95,7 +95,7 @@ export function initExecutables(executables: [string, Executable][], context: Pa
     executables.forEach(([key, el]) => {
         if (key.startsWith("0x") && el.periodic) {
             schedule[el["unigraph.id"]]?.stop();
-            schedule[el["unigraph.id"]] = cron.schedule(el.periodic, buildExecutable(el, {...context, definition: el, params: {}}, unigraph, states))
+            schedule[el["unigraph.id"]] = cron.schedule(el.periodic, () => buildExecutable(el, {...context, definition: el, params: {}}, unigraph, states)())
         }
         if (key.startsWith("0x") && el.on_hook) {
             states.hooks = addHook(states.hooks, el.on_hook, async (params: any) => {
