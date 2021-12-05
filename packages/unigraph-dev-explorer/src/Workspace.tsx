@@ -7,7 +7,7 @@ import React from "react";
 import { components } from './pages';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 
-import FlexLayout, { Actions, DockLocation, Model, Node, TabNode } from 'flexlayout-react';
+import FlexLayout, { Action, Actions, DockLocation, Model, Node, TabNode } from 'flexlayout-react';
 import 'flexlayout-react/style/light.css'
 import './workspace.css'
 import { getParameters, isElectron, isMobile, isSmallScreen, NavigationContext, TabContext } from "./utils";
@@ -145,6 +145,9 @@ window.closeTab = (tabId: any) => {
 }
 
 const newTab = (model: Model, initJson: any) => {
+    if (initJson.component && window.localStorage.getItem('enableAnalytics') === "true") {
+        window.mixpanel?.track("selectTab", {component: initJson.component, new: true})
+    }
     // @ts-expect-error: already checked for isJsonString
     let userSettings = JSON.parse(isJsonString(window.localStorage.getItem('userSettings')) ? window.localStorage.getItem('userSettings') : "{}")
     let newWindowBehavior = userSettings['newWindow'] && Object.keys(newWindowActions).includes(userSettings['newWindow']) ? userSettings['newWindow'] : "new-tab"
@@ -330,7 +333,12 @@ export function WorkSpace(this: any) {
                     <InlineSearch />
                 </div>
 
-                <FlexLayout.Layout model={model} factory={factory} popoutURL={"./popout_page.html"} onRenderTab={(node: TabNode, renderValues: any) => {
+                <FlexLayout.Layout model={model} factory={factory} popoutURL={"./popout_page.html"}  onAction={(action: Action) => {
+                    if (action.type === "FlexLayout_SelectTab" && window.localStorage.getItem('enableAnalytics') === "true") {
+                        window.mixpanel?.track("selectTab", {component: (window.layoutModel.getNodeById(action.data.tabNode) as any)?._attributes?.component})
+                    }
+                    return action;
+                }} onRenderTab={(node: TabNode, renderValues: any) => {
                     setTitleOnRenderTab(model);
                     const nodeId = node.getId();
                     if (nodeId === "app-drawer") {

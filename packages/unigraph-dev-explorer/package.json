@@ -20,6 +20,7 @@
     "lodash": "^4.17.20",
     "mdast-util-wiki-link": "^0.0.2",
     "micromark-extension-wiki-link": "^0.0.4",
+    "mixpanel-browser": "^2.42.0",
     "moment": "^2.29.1",
     "monaco-editor": "^0.23.0",
     "postcss-loader": "^5.3.0",

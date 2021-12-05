@@ -13,6 +13,10 @@ export default function Settings () {
     const [devMode, setDevMode] = React.useState(devState.value);
     devState.subscribe((newState: boolean) => setDevMode(newState));
 
+    const analyticsState = window.unigraph.getState('settings/enableAnalytics');
+    const [analyticsMode, setAnalyticsMode] = React.useState(analyticsState.value);
+    analyticsState.subscribe((newState: boolean) => setAnalyticsMode(newState));
+
     const handleClick = (event: any, n: number) => {
         let total = anchorEl; total[n] = event.currentTarget;
         setAnchorEl(total);
@@ -60,6 +64,17 @@ export default function Settings () {
                         <MenuItem value={"new-pane"}>Open in new pane side by side</MenuItem>
                         <MenuItem value={"new-popout"}>Open in new popout window</MenuItem>
                     </Select>
+                </ListItemSecondaryAction>
+            </ListItem>
+            <ListItem button onClick={e => {}} key="analytics">
+                <ListItemText id="switch-list-label-analytics-mode" primary="Enable analytics" secondary="Opt-in to analytics with mixpanel" />
+                <ListItemSecondaryAction>
+                    <Switch
+                        edge="end"
+                        onChange={(e) => {analyticsState.setValue(!analyticsMode)}}
+                        checked={analyticsMode}
+                        inputProps={{ 'aria-labelledby': 'switch-list-label-developer-mode' }}
+                    />
                 </ListItemSecondaryAction>
             </ListItem>
             <ListSubheader component="div" id="nested-list-subheader" key="developers">
