@@ -130,7 +130,7 @@ export const onDynamicContextMenu = (data: any, uid: string, object: any, callba
  * @param callbacks 
  * @param extra UI-specific context menu items. These are not stored in the database and instead fixed with particular UIs because they are subject to individual views.
  */
-export const onUnigraphContextMenu = (event: React.MouseEvent, object: UnigraphObject | any, context?: UnigraphObject | any, callbacks?: AutoDynamicViewCallbacks, extra?: (handleClose: any) => React.ReactElement) => {
+export const onUnigraphContextMenu = (event: React.MouseEvent, object: UnigraphObject | any, context?: UnigraphObject | any, callbacks?: AutoDynamicViewCallbacks, extra?: any) => {
     event.preventDefault?.();
     event.stopPropagation?.();
 

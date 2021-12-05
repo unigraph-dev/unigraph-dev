@@ -45,6 +45,7 @@ const addViewToRegistry = (state: any, views: Record<string, any>): void => {
 export const registerDynamicViews = (views: Record<string, any>): void => {
     const state = (window as any).unigraph.getState('registry/dynamicView');
     addViewToRegistry(state, views);
+    window.reloadCommands();
 }
 
 export const getDynamicViews = () => Object.keys((window as any).unigraph.getState('registry/dynamicView').value)
@@ -52,6 +53,7 @@ export const getDynamicViews = () => Object.keys((window as any).unigraph.getSta
 export const registerDetailedDynamicViews = (views: Record<string, any>): void => {
     const state = (window as any).unigraph.getState('registry/dynamicViewDetailed');
     addViewToRegistry(state, views);
+    window.reloadCommands();
 }
 
 export const registerQuickAdder = (adders: Record<string, any>): void => {
@@ -62,6 +64,7 @@ export const registerQuickAdder = (adders: Record<string, any>): void => {
 export const registerContextMenuItems = (schema: string, items: any[]): void => {
     const state = (window as any).unigraph.getState('registry/contextMenu');
     state.setValue({...state, [schema]: [...(state[schema] || []), ...items]});
+    window.reloadCommands();
 }
 
 const refsMap = {

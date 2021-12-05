@@ -64,6 +64,7 @@ window.unigraph.onReady!(() => {
   })
 
   initDynamicObjectViews();
+  window.reloadCommands();
   
   /*window.unigraph.backendConnection.onclose = () => {
     //setTimeout(() => {window.location.reload()}, 1000) 

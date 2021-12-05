@@ -13,6 +13,7 @@ declare global {
         wsnavigator: (sth: string) => any,
         electronPreload: any,
         electronShell: any,
+        reloadCommands: () => any,
     }
 };
 
