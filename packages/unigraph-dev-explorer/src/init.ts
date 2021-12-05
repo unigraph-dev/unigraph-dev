@@ -75,11 +75,19 @@ function init() {
         window.localStorage.setItem('userSettings', JSON.stringify({...JSON.parse(window.localStorage.getItem('userSettings')!), developerMode: val}))
     });
 
+    const analyticsState = window.unigraph.addState('settings/enableAnalytics', window.localStorage.getItem('enableAnalytics') === "true");
+    analyticsState.subscribe((val: boolean) => {
+        if (val && !window.mixpanel) initAnalyticsIfOptedIn();
+        window.localStorage.setItem('enableAnalytics', JSON.stringify(val));
+    });
+
     window.unigraph.addState('global/selected', []);
 
     initContextMenu();
     initRegistry();
     initPackages();
+
+    if (window.localStorage.getItem('enableAnalytics') === "true") initAnalyticsIfOptedIn();
 }
 
 export type ContextMenuState = {
@@ -134,6 +142,18 @@ function initRegistry() {
     window.unigraph.addState('registry/components', {});
     window.unigraph.addState('registry/contextMenu', {});
     window.unigraph.addState('registry/commands', {});
+}
+
+function initAnalyticsIfOptedIn () {
+    const mixpanel = require('mixpanel-browser');
+    window.mixpanel = mixpanel;
+
+    mixpanel.init('d15629c3a0ad692d3b7491a9091dd2be', {debug: true});
+    mixpanel.track("initAnalyticsAndUserOptedIn");
+    
+    (window as any).onEventSend = (eventName: string) => {
+        window.mixpanel?.track("event/" + eventName);
+    }
 }
 
 function initPackages() {

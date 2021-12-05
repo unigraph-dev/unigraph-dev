@@ -14,6 +14,7 @@ declare global {
         electronPreload: any,
         electronShell: any,
         reloadCommands: () => any,
+        mixpanel?: any,
     }
 };
 
