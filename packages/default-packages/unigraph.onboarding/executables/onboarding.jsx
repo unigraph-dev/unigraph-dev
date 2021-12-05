@@ -18,7 +18,7 @@ return <div>
         </li>
     </ul>
     <button onClick={() => {
-        window.unigraph.deleteObject('$/entity/section_onboarding')
+        window.unigraph.deleteObject('$/entity/section_onboarding', true)
     }}>Never show again</button>
 
 </div>
