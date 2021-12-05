@@ -24,7 +24,8 @@ export type Executable = {
     on_hook?: string,
     editable?: boolean,
     edited?: boolean,
-    children?: any
+    children?: any,
+    concurrency?: number,
 }
 
 export function createExecutableCache(client: DgraphClient, context: Partial<ExecContext>, unigraph: Unigraph, states: any): Cache<any> {
@@ -83,7 +84,7 @@ export function buildExecutable(exec: Executable, context: ExecContext, unigraph
         }; else return fn;
     }
 
-    if (Object.keys(environmentRunners).includes(exec.env)) {
+    if (Object.keys(environmentRunners).includes(exec.env) && (!exec.concurrency || states.runningExecutables.filter((el: any) => el.slug === exec["unigraph.id"]) <= exec.concurrency)) {
         // @ts-expect-error: already checked for environment runner inclusion
         return wrapExecutable(environmentRunners[exec.env](exec.src, context, unigraph));
     }

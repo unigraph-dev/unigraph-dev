@@ -219,6 +219,14 @@ export const packageExecutableSchema = {
                 }
             },
             {
+                "_key": "concurrency",
+                "_definition": {
+                    "type": {
+                        "unigraph.id": "$/primitive/number"
+                    }
+                }
+            },
+            {
                 "_key": "editable",
                 "_definition": {
                     "type": {
