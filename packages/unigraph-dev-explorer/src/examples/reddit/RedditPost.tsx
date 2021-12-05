@@ -54,7 +54,7 @@ export const RedditPost: DynamicViewRenderer = ({data, callbacks}) => {
                     <Expand expanded={innerExpanded} toggleExpanded={setInnerExpanded}/>
                     <div>
                         
-                        <Typography variant="body2">Submitted {Sugar.Date.relative(new Date(data['_updatedAt']))} to r/{data.get('subreddit/name').as('primitive')}</Typography>
+                        <Typography variant="body2">Submitted {Sugar.Date.relative(new Date(data['_updatedAt'] || data['_timestamp']['_updatedAt']))} to r/{data.get('subreddit/name').as('primitive')}</Typography>
                         <div style={{color: "gray", textDecoration: "underline", cursor: "pointer"}} onClick={() => {if (callbacks?.removeFromContext) callbacks.removeFromContext(); openUrl(data.get('permalink').as('primitive'))}}>Comment</div>
                     </div>
                 </div>

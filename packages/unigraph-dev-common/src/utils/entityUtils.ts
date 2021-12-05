@@ -270,7 +270,7 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
         let timestamp: any = {}; let context: any = {};
         if (raw._createdAt || raw._updatedAt) {
             timestamp = {_createdAt: raw._createdAt, _updatedAt: raw._updatedAt};
-            delete raw._timestamp;
+            delete raw._createdAt; delete raw._updatedAt;
         }
         if (raw['$context']) {
             context = raw['$context'];
