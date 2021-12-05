@@ -63,9 +63,7 @@ if (account?.uid) {
     const subJson = await subs.json();
     const updatedObjs = subJson.data.children.map(el => el.data).map(el => {
         return {
-            _timestamp: {
-                _updatedAt: (new Date(el['created'] * 1000)).toISOString()
-            },
+            _updatedAt: (new Date(el['created'] * 1000)).toISOString(),
             name: {
                 type: {"unigraph.id": "$/schema/markdown"},
                 _value: el['title']

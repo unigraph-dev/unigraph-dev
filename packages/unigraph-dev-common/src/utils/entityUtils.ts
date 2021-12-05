@@ -268,8 +268,8 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
         const unigraphId = raw?.['unigraph.id'];
         if (unigraphId) delete raw?.['unigraph.id'];
         let timestamp: any = {}; let context: any = {};
-        if (raw._timestamp) {
-            timestamp = raw._timestamp;
+        if (raw._createdAt || raw._updatedAt) {
+            timestamp = {_createdAt: raw._createdAt, _updatedAt: raw._updatedAt};
             delete raw._timestamp;
         }
         if (raw['$context']) {
@@ -284,7 +284,7 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
             "type": makeUnigraphId(schemaName) as UnigraphIdType<`$/schema/${string}`>,
             "dgraph.type": "Entity",
             ...bodyObject,
-            "_timestamp": timestamp,
+            ...timestamp,
             ...propDesc,
             ...context,
             "unigraph.indexes": options.states.indexes
@@ -302,10 +302,8 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
 export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<string, any>, maxDepth = 15, toString = true) {
 
     const timestampQuery = {
-        _timestamp: {
-            _updatedAt: {},
-            _createdAt: {}
-        }
+        _updatedAt: {},
+        _createdAt: {}
     };
 
     function removeDups (entries: any) {
@@ -630,7 +628,7 @@ export function dectxObjects(objects: any[], prefix = "_:"): any[] {
 
 export const byElementIndex = (a: any, b: any) => (a["_index"]?.["_value.#i"] || 0) - (b["_index"]?.["_value.#i"] || 0)
 
-export const byUpdatedAt = (a: any, b: any) => (new Date((a["_timestamp"]?.["_updatedAt"] || 0))).getTime() - (new Date((b["_timestamp"]?.["_updatedAt"] || 0))).getTime()
+export const byUpdatedAt = (a: any, b: any) => (new Date((a?.["_updatedAt"] || 0))).getTime() - (new Date((b?.["_updatedAt"] || 0))).getTime()
 
 export function unpadRecurse(object: any, visitedUids: any[] = []) {
     let result: any = undefined;

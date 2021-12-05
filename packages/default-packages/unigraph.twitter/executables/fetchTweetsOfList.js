@@ -52,9 +52,7 @@ const objects = await (new Promise((resolve, reject) => oauth.get(`https://api.t
         const unigraphObjects = await Promise.all(resObjects?.map?.(async el => {
             if (el.truncated) console.log("Truncated"); 
             const entity = {
-                _timestamp: {
-                    _updatedAt: (new Date(el['created_at'])).toISOString()
-                },
+                _updatedAt: (new Date(el['created_at'])).toISOString(),
                 text: {
                     type: {"unigraph.id": "$/schema/markdown"},
                     _value: el['full_text']

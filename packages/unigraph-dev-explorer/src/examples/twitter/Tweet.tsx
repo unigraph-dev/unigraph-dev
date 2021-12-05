@@ -43,7 +43,7 @@ export const Tweet: DynamicViewRenderer = ({data, callbacks}) => {
         <div>
             <div style={{display: "flex", alignItems: "center"}}>
                 <Typography variant="body1" style={{marginRight: "8px"}}><strong>{data.get('from_user/name').as("primitive")}</strong></Typography>
-                <Typography variant="body2" style={{color: "gray"}}>@{data.get('from_user/username').as("primitive")}, {Sugar.Date.relative(new Date(data['_timestamp']['_updatedAt']))}</Typography>
+                <Typography variant="body2" style={{color: "gray"}}>@{data.get('from_user/username').as("primitive")}, {Sugar.Date.relative(new Date(data['_updatedAt']))}</Typography>
             </div>
             
             <AutoDynamicView object={removeContextEntities(data.get('text')['_value']['_value'], data?.['_value']?.['children']?.['_value['] || [])} callbacks={{namespaceLink: nslnk}} noContextMenu />

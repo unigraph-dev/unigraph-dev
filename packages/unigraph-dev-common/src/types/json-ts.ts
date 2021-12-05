@@ -82,10 +82,8 @@ export type Entity<T extends string> = {
     "uid"?: string,
     type?: UnigraphIdType<`$/schema/${T}`>,
     "_value": any,
-    "_timestamp": {
-        "_createdAt": any,
-        "_updatedAt": any
-    }
+    "_createdAt": any,
+    "_updatedAt": any
     'unigraph.id'?: string
 }
 

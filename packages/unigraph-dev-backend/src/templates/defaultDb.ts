@@ -40,13 +40,10 @@ export const defaultTypes = `<_value>: uid @reverse .
 <_timestamp>: uid .
 <_createdAt>: dateTime @index(hour) .
 <_updatedAt>: dateTime @index(hour) .
-type <Timestamp> {
-    _createdAt
-    _updatedAt
-}
 type <Entity> {
     type
-    _timestamp
+    _createdAt
+    _updatedAt
 }
 type <Type> {
 	_definition

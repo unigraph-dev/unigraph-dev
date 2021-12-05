@@ -25,8 +25,8 @@ const groupersDefault: Record<string, Grouper> = {
     'date': (el: any[]) => {
         let groupsMap: any = { "Today": [], "Last week": [], "Last month": [], "Earlier": [] };
         el.forEach(it => {
-            if (it && it._timestamp && it._timestamp._updatedAt) {
-                let day = new Date(it._timestamp._updatedAt);
+            if (it && it._updatedAt) {
+                let day = new Date(it._updatedAt);
                 let now = new Date();
                 if (now.getTime() - day.getTime() <= 1000 * 60 * 60 * 24) {
                     groupsMap['Today'].push(it);
