@@ -43,11 +43,13 @@
                                     "unigraph.id": "$/composer/Union"
                                 },
                                 "_parameters": {
-                                    "_definitions": [{
-                                        "type": {
-                                            "unigraph.id": "$/schema/user"
+                                    "_definitions": [
+                                        {
+                                            "type": {
+                                                "unigraph.id": "$/schema/user"
+                                            }
                                         }
-                                    }]
+                                    ]
                                 }
                             }
                         }
@@ -100,17 +102,20 @@
                                     "unigraph.id": "$/composer/Union"
                                 },
                                 "_parameters": {
-                                    "_definitions": [{
-                                        "uid": "0x1",
-                                        "type": {
-                                            "unigraph.id": "$/schema/user"
+                                    "_definitions": [
+                                        {
+                                            "uid": "0x1",
+                                            "type": {
+                                                "unigraph.id": "$/schema/user"
+                                            }
+                                        },
+                                        {
+                                            "uid": "0x2",
+                                            "type": {
+                                                "unigraph.id": "$/schema/user_2"
+                                            }
                                         }
-                                    }, {
-                                        "uid": "0x2",
-                                        "type": {
-                                            "unigraph.id": "$/schema/user_2"
-                                        }
-                                    }]
+                                    ]
                                 }
                             }
                         }
@@ -162,10 +167,8 @@
         "type": {
             "unigraph.id": "$/schema/todo"
         },
-        "_timestamp": {
-            "_createdAt": "1970-01-01T00:00:00.000Z",
-            "_updatedAt": "1970-01-01T00:00:00.000Z"
-        },
+        "_createdAt": "1970-01-01T00:00:00.000Z",
+        "_updatedAt": "1970-01-01T00:00:00.000Z",
         "_value": {
             "name": {
                 "_value.%": "Write initial definitions of JSON-TS"
@@ -190,10 +193,8 @@
                             },
                             "dgraph.type": "Entity",
                             "unigraph.indexes": {},
-                            "_timestamp": {
-                                "_createdAt": "1970-01-01T00:00:00.000Z",
-                                "_updatedAt": "1970-01-01T00:00:00.000Z"
-                            },
+                            "_createdAt": "1970-01-01T00:00:00.000Z",
+                            "_updatedAt": "1970-01-01T00:00:00.000Z",
                             "type": {
                                 "unigraph.id": "$/schema/user"
                             }
@@ -205,10 +206,8 @@
     },
     "todo-entity-test-target-ref": {
         "dgraph.type": "Entity",
-        "_timestamp": {
-            "_createdAt": "1970-01-01T00:00:00.000Z",
-            "_updatedAt": "1970-01-01T00:00:00.000Z"
-        },
+        "_createdAt": "1970-01-01T00:00:00.000Z",
+        "_updatedAt": "1970-01-01T00:00:00.000Z",
         "type": {
             "$ref": {
                 "query": [
@@ -244,10 +243,8 @@
                                 }
                             },
                             "dgraph.type": "Entity",
-                            "_timestamp": {
-                                "_createdAt": "1970-01-01T00:00:00.000Z",
-                                "_updatedAt": "1970-01-01T00:00:00.000Z"
-                            },
+                            "_createdAt": "1970-01-01T00:00:00.000Z",
+                            "_updatedAt": "1970-01-01T00:00:00.000Z",
                             "type": {
                                 "$ref": {
                                     "query": [
@@ -266,10 +263,8 @@
     },
     "simpletodo-entity-test-target-noref": {
         "dgraph.type": "Entity",
-        "_timestamp": {
-            "_createdAt": "1970-01-01T00:00:00.000Z",
-            "_updatedAt": "1970-01-01T00:00:00.000Z"
-        },
+        "_createdAt": "1970-01-01T00:00:00.000Z",
+        "_updatedAt": "1970-01-01T00:00:00.000Z",
         "type": {
             "unigraph.id": "$/schema/todo"
         },
@@ -284,10 +279,8 @@
     },
     "simpletodo-entity-test-target-ref": {
         "dgraph.type": "Entity",
-        "_timestamp": {
-            "_createdAt": "1970-01-01T00:00:00.000Z",
-            "_updatedAt": "1970-01-01T00:00:00.000Z"
-        },
+        "_createdAt": "1970-01-01T00:00:00.000Z",
+        "_updatedAt": "1970-01-01T00:00:00.000Z",
         "type": {
             "$ref": {
                 "query": [

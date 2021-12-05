@@ -5,6 +5,7 @@ import { NoteBlock, DetailedNoteBlock } from "./NoteBlock";
 const getQuery: ((depth: number) => string) = (depth: number) => {
     if (depth >= 8) return `{ uid _hide type {<unigraph.id>} }`;
     else return `{
+        _updatedAt
         uid
         _hide
         <~_value> {

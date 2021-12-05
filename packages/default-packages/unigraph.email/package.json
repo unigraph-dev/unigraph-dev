@@ -28,7 +28,8 @@
             "src": "executables/updateGmailInbox.js",
             "periodic": "*/2 * * * *",
             "editable": true,
-            "name": "Sync Gmail inbox every 2 minutes"
+            "name": "Sync Gmail inbox every 2 minutes",
+            "concurrency": 1
         }],
         "package_name": "unigraph.email"
     }

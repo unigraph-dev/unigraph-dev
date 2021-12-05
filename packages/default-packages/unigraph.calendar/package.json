@@ -24,7 +24,8 @@
                 "id": "sync-google-calendar",
                 "periodic": "*/2 * * * *",
                 "src": "executables/syncGoogleCalendar.js",
-                "editable": true
+                "editable": true,
+                "concurrency": 1
             },
             {
                 "name": "Sync a specific Google calendar",

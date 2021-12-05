@@ -22,7 +22,8 @@
                 "src": "executables/updateTwitterSubscriptions.js",
                 "periodic": "* * * * *",
                 "editable": true,
-                "name": "Update twitter subscriptions every minute"
+                "name": "Update twitter subscriptions every minute",
+                "concurrency": 1
             },{ 
                 "id": "fetch-tweets-of-list",
                 "env": "routine/js",
