@@ -26,7 +26,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         getStatus: () => {throw Error("Not implemented")},
         createSchema: async (schemain) => {
             const autorefSchema = processAutorefUnigraphId(schemain);
-            const upsert: UnigraphUpsert = insertsToUpsert([autorefSchema]);
+            const upsert: UnigraphUpsert = insertsToUpsert([autorefSchema], undefined, states.caches['schemas'].dataAlt![0]);
             await client.createUnigraphUpsert(upsert);
             await states.caches['schemas'].updateNow();
             await states.caches['packages'].updateNow();
@@ -87,11 +87,14 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         addObject: async (object, schema, padded) => {
             clearEmpties(object);
             //console.log(JSON.stringify(object, null, 4));
-            let unigraphObject = object;
-            if (!padded) unigraphObject = buildUnigraphEntity(object, schema, states.caches['schemas'].data);
-            const finalUnigraphObject = processAutoref(unigraphObject, schema, states.caches['schemas'].data)
+            const objects = Array.isArray(object) ? object : [object];
+            const finalUnigraphObjects = objects.map((obj, index) => {
+                let unigraphObject = obj;
+                if (!padded) unigraphObject = buildUnigraphEntity(obj, schema, states.caches['schemas'].data, undefined, {globalStates: {nextUid: 100000 * index}} as any);
+                return processAutoref(unigraphObject, schema, states.caches['schemas'].data)
+            })
             //console.log(JSON.stringify(finalUnigraphObject, null, 4));
-            const upsert = insertsToUpsert([finalUnigraphObject]);
+            const upsert = insertsToUpsert(finalUnigraphObjects, undefined, states.caches['schemas'].dataAlt![0]);
             const uids = await client.createUnigraphUpsert(upsert);
             callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches});
             return uids;
@@ -187,7 +190,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
                 }
                 const upsert = {...finalUpdater, uid: newUid, 'unigraph.origin': origin};
                 //console.log(finalUpdater, upsert)
-                const finalUpsert = insertsToUpsert([upsert], isUpsert);
+                const finalUpsert = insertsToUpsert([upsert], isUpsert, states.caches['schemas'].dataAlt![0]);
                 //console.log(finalUpsert)
                 await client.createUnigraphUpsert(finalUpsert);
                 callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches, subIds: subIds})

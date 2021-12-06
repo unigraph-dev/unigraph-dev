@@ -25,7 +25,7 @@ export async function checkOrCreateDefaultDataModel(client: DgraphClient) {
         await client.setSchema(defaultTypes);
         for (let i=0; i<defaultUserlandSchemas.length; ++i) {
             const schema = processAutorefUnigraphId(defaultUserlandSchemas[i]);
-            await client.createUnigraphUpsert(insertsToUpsert([schema]));
+            await client.createUnigraphUpsert(insertsToUpsert([schema], undefined, tempSchemaCache.dataAlt![0]));
         }
 
         await tempSchemaCache.updateNow();
@@ -44,6 +44,7 @@ export function createSchemaCache(client: DgraphClient): Cache<any> {
 
     const cache: Cache<any> = {
         data: {},
+        dataAlt: [{}],
         updateNow: async () => null,
         cacheType: "manual",
         subscribe: (listener) => null
@@ -73,9 +74,12 @@ export function createSchemaCache(client: DgraphClient): Cache<any> {
                 if (cache.data[`$/schema/interface/${revPath[0]}`]?._definition?._parameters?._definitions?.length >= 0 && defn?._parameters?._definitions?.length >= 0) 
                     (cache.data[`$/schema/interface/${revPath[0]}`]._definition as ComposerUnionInstance)
                         ._parameters._definitions?.push(...defn._parameters._definitions)
-            } 
-            if (obj && typeof obj["unigraph.id"] === "string" && obj["unigraph.id"].includes('/schema/') && !cache.data[obj["unigraph.id"]]) {
-                cache.data[obj["unigraph.id"]] = obj;
+            }
+            if (obj && typeof obj["unigraph.id"] === "string" && obj["unigraph.id"].includes('/schema/')) {
+                cache.dataAlt![0][obj["unigraph.id"]] = obj;
+                if (!cache.data[obj["unigraph.id"]]) {
+                    cache.data[obj["unigraph.id"]] = obj;
+                }
             }
         })
         cache.data = buildGraphFromMap(cache.data);
@@ -134,9 +138,9 @@ export async function addUnigraphPackage(client: DgraphClient, pkg: PackageDecla
             "_value[": getRefQueryUnigraphId(schemas[i]["unigraph.id"])
         }
         const schemaAutoref = processAutorefUnigraphId(schemas[i])
-        const upsert = insertsToUpsert([schemaAutoref]);
+        const upsert = insertsToUpsert([schemaAutoref], undefined, caches['schemas'].dataAlt![0]);
         await client.createUnigraphUpsert(upsert)
-        const upsert2 = insertsToUpsert([schemaShorthandRef]);
+        const upsert2 = insertsToUpsert([schemaShorthandRef], undefined, caches['schemas'].dataAlt![0]);
         await client.createUnigraphUpsert(upsert2)
     }
     await caches['schemas'].updateNow();
@@ -171,12 +175,12 @@ export async function addUnigraphPackage(client: DgraphClient, pkg: PackageDecla
     // TODO: Use concurrency here
     for(let i=0; i<executables.length; ++i) {
         const autoRefExecutable = processAutorefUnigraphId(executables[i]);
-        const upsert = insertsToUpsert([autoRefExecutable]);
+        const upsert = insertsToUpsert([autoRefExecutable], undefined, caches['schemas'].dataAlt![0]);
         await client.createUnigraphUpsert(upsert)
     }
     for(let i=0; i<entities.length; ++i) {
         const autoRefEntity = processAutorefUnigraphId(entities[i]);
-        const upsert = insertsToUpsert([autoRefEntity]);
+        const upsert = insertsToUpsert([autoRefEntity], undefined, caches['schemas'].dataAlt![0]);
         await client.createUnigraphUpsert(upsert)
     }
     // 2. Create package object and link to all schemas
@@ -200,9 +204,9 @@ export async function addUnigraphPackage(client: DgraphClient, pkg: PackageDecla
         ...getRefQueryUnigraphId(`$/package/${pkg.pkgManifest.package_name}/${pkg.pkgManifest.version}`)
     }
     console.log(JSON.stringify(pkgObj, null, 4))
-    const upsertM = insertsToUpsert([autorefManifest]);
+    const upsertM = insertsToUpsert([autorefManifest], undefined, caches['schemas'].dataAlt![0]);
     await client.createUnigraphUpsert(upsertM);
-    const upsert = insertsToUpsert([pkgObj]);
+    const upsert = insertsToUpsert([pkgObj], undefined, caches['schemas'].dataAlt![0]);
     await client.createUnigraphUpsert(upsert);
     // 3. Update schema reference table for these schemas
     const upsert2 = insertsToUpsert([{
@@ -219,6 +223,6 @@ export async function addUnigraphPackage(client: DgraphClient, pkg: PackageDecla
             `$/entity/${Object.keys(pkg.pkgEntities!)[i]}`,
             getRefQueryUnigraphId(et["unigraph.id"])
         ]))
-    }])
+    }], undefined, caches['schemas'].dataAlt![0])
     await client.createUnigraphUpsert(upsert2);
 }
