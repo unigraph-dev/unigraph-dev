@@ -41,16 +41,24 @@ const results = dontCheckUnique ? dest.map(el => []) : await unigraph.getQueries
     <~type> { parIds as uid }
 }`]);
 
+let readMask = []
+let toAdd = []
+
 let inbox_els = []
 let count = 0
 
 for (let i=0; i<dest.length; ++i) {
     if (results[i].length === 0) {
         count ++;
-        const uid = await unigraph.addObject(dest[i], '$/schema/email_message');
-        if (msgs[i]?.read === false) inbox_els.push(uid[0]);
+        toAdd.push(dest[i]);
+        readMask.push(msgs[i]?.read);
     }
 }
+
+console.log(count);
+
+const uids = await unigraph.addObject(toAdd, '$/schema/email_message');
+uids.forEach((el, index) => {if (!readMask[index]) inbox_els.push(el)});
 
 await unigraph.runExecutable("$/executable/add-item-to-list", {where: "$/entity/inbox", item: inbox_els.reverse()});
 setTimeout(() => unigraph.addNotification({name: "Inboxes synced", from: "unigraph.email", content: "Added " + count + " emails (" + inbox_els.length + " unread).", actions: []}), 1000); 

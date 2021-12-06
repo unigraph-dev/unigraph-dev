@@ -57,11 +57,7 @@ const objects = results.map((els, index) => els.length >= 1 ? undefined : {
       date_created: queries[index].item.isoDate
   }
 }).filter(el => el !== undefined);
-const uids = [];
-for(let i=0; i<objects.length; ++i) {
-  const uid = await unigraph.addObject(objects[i], "$/schema/rss_item");
-  uids.push(uid[0])
-}
+const uids = await unigraph.addObject(objects, "$/schema/rss_item");
 const bookmarks = (await unigraph.getQueries(uids.map(el => `(func: uid(${el})) {_value {item_data {_value {uid}}}}`)))
   .map(el => el[0]?.['_value']['item_data']['_value']['uid'])
   .filter(el => el !== undefined)

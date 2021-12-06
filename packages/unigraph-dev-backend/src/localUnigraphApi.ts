@@ -88,9 +88,9 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             clearEmpties(object);
             //console.log(JSON.stringify(object, null, 4));
             let objects = Array.isArray(object) ? object : [object];
-            const finalUnigraphObjects = objects.map(obj => {
+            const finalUnigraphObjects = objects.map((obj, index) => {
                 let unigraphObject = obj;
-                if (!padded) unigraphObject = buildUnigraphEntity(object, schema, states.caches['schemas'].data);
+                if (!padded) unigraphObject = buildUnigraphEntity(obj, schema, states.caches['schemas'].data, undefined, {globalStates: {nextUid: 100000 * index}} as any);
                 return processAutoref(unigraphObject, schema, states.caches['schemas'].data)
             })
             //console.log(JSON.stringify(finalUnigraphObject, null, 4));

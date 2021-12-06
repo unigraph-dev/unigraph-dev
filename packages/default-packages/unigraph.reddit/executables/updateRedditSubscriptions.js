@@ -93,15 +93,9 @@ if (account?.uid) {
         <~type> (first: -250) { redd as uid }
     }`], false, 100);
 
-    let inbox_els = []
-    let count = 0
-
-    for (let i=0; i<updatedObjs.length; ++i) {
-        if (results[i].length === 0) {
-            const uid = await unigraph.addObject(updatedObjs[i], '$/schema/reddit_post');
-            inbox_els.push(uid[0]);
-        }
-    }
+    let count = updatedObjs.length;
+    let uids = await unigraph.addObject(updatedObjs.filter((el, index) => results[index] === 0), '$/schema/reddit_post');
+    let inbox_els = uids;
 
     if (updatedObjs?.[0]?.['id']) {
         await unigraph.updateObject(account['_value']['subscriptions']['_value['][0]['_value']['uid'], {

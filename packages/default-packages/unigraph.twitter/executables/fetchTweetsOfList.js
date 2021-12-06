@@ -80,7 +80,7 @@ const objects = await (new Promise((resolve, reject) => oauth.get(`https://api.t
 
 const count = objects.length;
 const uids = await unigraph.addObject(objects, '$/schema/tweet', true);
-const inbox_els = uids.slice(count);
+const inbox_els = uids.slice(0, count);
 
 if (objects?.[0]?.['_value']?.['twitter_id']?.['_value.%']) {
     await unigraph.updateObject(uid, {

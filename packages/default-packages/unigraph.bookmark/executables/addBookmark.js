@@ -5,10 +5,25 @@ const scrape = require('html-metadata');
 
 let res;
 
+const tryScrape = () => new Promise(async (resolve, reject) => {
+    setTimeout(() => {reject();}, 10000) // Timeout after 10 seconds
+    try {
+        res = await scrape({url, headers: {'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'}});
+    } catch (e) {
+        try {
+            res = await scrape({url, headers: {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36'}})
+        } catch (e) {
+            reject();
+        }
+    }
+    resolve(res);
+})
+
 try {
-    res = await scrape({url, headers: {'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'}});
+    res = await tryScrape();
 } catch (e) {
-    res = await scrape({url, headers: {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36'}})
+    // Timeout or not being able to resolve, should just return.
+    return [undefined];
 }
 
 const result = {
