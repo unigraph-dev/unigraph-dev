@@ -49,7 +49,7 @@ const objects = await (new Promise((resolve, reject) => oauth.get(`https://api.t
         resolve([]);
     } else {
         const resObjects = JSON.parse(result);
-        const unigraphObjects = await Promise.all(resObjects?.map?.(async el => {
+        const unigraphObjects = await Promise.all(resObjects?.map?.(async (el, index) => {
             if (el.truncated) console.log("Truncated"); 
             const entity = {
                 _updatedAt: (new Date(el['created_at'])).toISOString(),
@@ -68,9 +68,9 @@ const objects = await (new Promise((resolve, reject) => oauth.get(`https://api.t
                     profile_image: el.user['profile_image_url_https']
                 },
                 twitter_id: el['id_str'],
-                children: [{uid: "0x123"}]
+                children: [{uid: "0x123" + index}] // prevent duplicate placehoder UIDs
             };
-            const padded = unigraph.buildUnigraphEntity(entity, '$/schema/tweet');
+            const padded = unigraph.buildUnigraphEntity(entity, '$/schema/tweet', {globalStates: {nextUid: 100000 * index}});
             padded['_value']['children']['_value['] = await getSemanticEntities(el);
             return padded;
         })) || [];
@@ -78,16 +78,9 @@ const objects = await (new Promise((resolve, reject) => oauth.get(`https://api.t
     }
 })))
 
-let inbox_els = []
-let count = 0
-
-for (let i=0; i<objects.length; ++i) {
-    if (true /*results[i].length === 0*/) {
-        count ++;
-        const uid = await unigraph.addObject(objects[i], '$/schema/tweet', true);
-        inbox_els.push(uid[0]);
-    }
-}
+const count = objects.length;
+const uids = await unigraph.addObject(objects, '$/schema/tweet', true);
+const inbox_els = uids.slice(count);
 
 if (objects?.[0]?.['_value']?.['twitter_id']?.['_value.%']) {
     await unigraph.updateObject(uid, {

@@ -297,19 +297,11 @@ export default async function startServer(client: DgraphClient) {
      * @param ws Websocket connection
      */
     "create_unigraph_object": function (event: EventCreateUnigraphObject, ws: IWebsocket) {
-      // TODO: Talk about schema verifications
-      perfLogStartPreprocessing();
-      const unigraphObject = buildUnigraphEntity(event.object, event.schema, caches['schemas'].data);
-      const finalUnigraphObject = processAutoref(unigraphObject, event.schema, caches['schemas'].data)
-      //console.log(JSON.stringify(finalUnigraphObject, null, 4))
-      const upsert = insertsToUpsert([finalUnigraphObject], undefined, serverStates.caches['schemas'].dataAlt![0]);
-      //console.log(JSON.stringify(upsert, null, 2))
-      perfLogStartDbTransaction();
-      dgraphClient.createUnigraphUpsert(upsert).then(res => {
-        perfLogAfterDbTransaction();
+      if (!event.schema) { ws.send(makeResponse(event, false, {"error": "Cannot add Unigraph object without a schema!"})); return false; }
+      localApi.addObject(event.object, event.schema, event.padding).then((uids: any[]) => {
         callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
-        ws.send(makeResponse(event, true, {results: res}))
-      }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
+        ws.send(makeResponse(event, true, {results: uids}))
+      }).catch((e: any) => ws.send(makeResponse(event, false, {"error": e})));
     },
 
     "update_spo": function (event: EventUpdateSPO, ws: IWebsocket) {

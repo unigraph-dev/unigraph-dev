@@ -87,11 +87,14 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         addObject: async (object, schema, padded) => {
             clearEmpties(object);
             //console.log(JSON.stringify(object, null, 4));
-            let unigraphObject = object;
-            if (!padded) unigraphObject = buildUnigraphEntity(object, schema, states.caches['schemas'].data);
-            const finalUnigraphObject = processAutoref(unigraphObject, schema, states.caches['schemas'].data)
+            let objects = Array.isArray(object) ? object : [object];
+            const finalUnigraphObjects = objects.map(obj => {
+                let unigraphObject = obj;
+                if (!padded) unigraphObject = buildUnigraphEntity(object, schema, states.caches['schemas'].data);
+                return processAutoref(unigraphObject, schema, states.caches['schemas'].data)
+            })
             //console.log(JSON.stringify(finalUnigraphObject, null, 4));
-            const upsert = insertsToUpsert([finalUnigraphObject], undefined, states.caches['schemas'].dataAlt![0]);
+            const upsert = insertsToUpsert(finalUnigraphObjects, undefined, states.caches['schemas'].dataAlt![0]);
             console.log(upsert)
             const uids = await client.createUnigraphUpsert(upsert);
             callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches});
