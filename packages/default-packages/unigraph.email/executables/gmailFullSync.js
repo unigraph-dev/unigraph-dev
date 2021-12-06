@@ -55,12 +55,17 @@ if (account?.uid) {
         token_expires_in: (new Date((new Date()).getTime() + 3600 * 1000)).toISOString()
     });
 
+    let auth = new google.auth.OAuth2(
+        gmailClientId,
+        gmailClientSecret,
+        'https://localhost:4001/callback?key=gmail'
+    );
+    auth.setCredentials({...accessTokenResult, access_token: token});
+
     const gmail = google.gmail({
         version: "v1",
-        headers: {
-            Authorization: 'Bearer ' + token
-        }
-    });
+        auth: auth,
+    })
 
     const newMsgs = [];
     const syncPage = async (pageToken) => {

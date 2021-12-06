@@ -123,6 +123,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
         }, false, false, callbacks.subsId);
 
     }
+    const [inSearch, setInSearch] = React.useState(false);
     /** Reference for the data object (for children) */
     const dataref = React.useRef<any>();
     /** Reference for text content as a string */
@@ -227,6 +228,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                             let hasMatch = false;
                             for (let match: any; (match = placeholder.exec(textInput.current.textContent)) !== null;) {
                                 if (match.index <= caret && placeholder.lastIndex >= caret) {
+                                    setInSearch(true);
                                     hasMatch = true;
                                     //inputDebounced.cancel();
                                     setSearchPopup(boxRef, match[1], async (newName: string, newUid: string) => {
@@ -238,6 +240,14 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                                         //console.log(data);
                                         const semChildren = data?.['_value'];
                                         //inputDebounced.cancel();
+                                        textInput.current.textContent = newStr;
+                                        textref.current = newStr;
+                                        edited.current = false;
+                                        if (textInput.current.firstChild) {
+                                            setCaret(document, textInput.current.firstChild, match.index + newName.length + 4);
+                                        } else {
+                                            setCaret(document, textInput.current, match.index + newName.length + 4);
+                                        }
                                         await window.unigraph.updateObject(data.uid, {
                                             '_value': {
                                                 'text': { '_value': { '_value': { '_value.%': newStr } } },
@@ -262,14 +272,22 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                             }
                             for (let match: any; (match = placeholder2.exec(textInput.current.textContent)) !== null;) {
                                 if (match.index <= caret && placeholder2.lastIndex >= caret) {
+                                    setInSearch(true);
                                     hasMatch = true;
                                     setSearchPopup(boxRef, match[1], async (newName: string, newUid: string) => {
                                         callbacks['replace-child-with-uid'](newUid);
+                                        await callbacks['add-child']();
                                         window.unigraph.getState('global/searchPopup').setValue({ show: false });
+                                        setTimeout(() => {
+                                            callbacks['focus-next-dfs-node'](data, editorContext, 0)
+                                        }, 500);
                                     })
                                 }
                             }
-                            if (!hasMatch) window.unigraph.getState('global/searchPopup').setValue({ show: false })
+                            if (!hasMatch) {
+                                window.unigraph.getState('global/searchPopup').setValue({ show: false });
+                                setInSearch(false);
+                            }
 
                             textref.current = ev.currentTarget.textContent;
                             onNoteInput(inputDebounced, ev);

@@ -42,7 +42,7 @@ export const InlineSearch = () => {
             vertical: 'bottom',
             horizontal: 'left',
         }}
-        transformOrigin={{
+        transformOrigin={{ 
             vertical: 'top',
             horizontal: 'left',
         }}
@@ -52,7 +52,10 @@ export const InlineSearch = () => {
     >
         {state.default?.map(el => <React.Fragment>
             <Typography variant="body1"
-                onClick={() => {
+                onMouseDown={(ev) => {
+                    console.log("Yo")
+                    ev.preventDefault();
+                    ev.stopPropagation();
                     el.onSelected(state.search!).then((newUid: string) => {
                         state.onSelected?.(state.search!, newUid)
                     })
@@ -60,7 +63,7 @@ export const InlineSearch = () => {
             >{el.label(state.search!)}</Typography>
         </React.Fragment>)}
         {searchResults.map((el: any) => <React.Fragment>
-            <div onClick={() => {state.onSelected?.(el.name, el.uid)}}>
+            <div onMouseDown={(ev) => {console.log("Yo"); ev.preventDefault(); ev.stopPropagation(); state.onSelected?.(el.name, el.uid)}}>
                 
                 <div style={{display: "inline-flex"}}>
                     <div style={{minHeight: "18px", minWidth: "18px", height: "18px", width: "18px", alignSelf: "center", marginRight: "3px", opacity: 0.54, backgroundImage: `url("data:image/svg+xml,${(window.unigraph.getNamespaceMap)?.()?.[el.type]?._icon}")`}}/>

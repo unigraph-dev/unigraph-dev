@@ -62,7 +62,7 @@ export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
             }} />
         <ListItemText 
             primary={<AutoDynamicView object={data.get('name')['_value']['_value']} noDrag noDrop noContextMenu />}
-            secondary={<div style={{display: "flex", alignItems: "baseline"}} children={[...(!unpadded.children?.map ? [] :
+            secondary={<div style={{display: "flex", alignItems: "baseline", flexWrap: "wrap"}} children={[...(!unpadded.children?.map ? [] :
                 data?.['_value']?.children?.['_value[']?.map((it: any) => <AutoDynamicView object={it['_value']?.['_value']} inline/>
             )), ...(unpadded.priority > 0 ? [<Chip size="small" icon={<PriorityHigh/>} label={"Priority " + unpadded.priority}/>]: []),
             ...(unpadded.time_frame?.start?.datetime && (new Date(unpadded.time_frame?.start?.datetime)).getTime() !== 0 ? [<Chip size="small" icon={<CalendarToday/>} label={"Start: " + Sugar.Date.relative(new Date(unpadded.time_frame?.start?.datetime))} />] : []),

@@ -25,6 +25,7 @@ const sync = async (syncToken) => {
             if (resp.data.nextSyncToken) nextSyncToken = resp.data.nextSyncToken;
         } else nextPageToken = resp.data.nextPageToken;
     }
+    items.slice(items.length - 101)
     return {items, nextSyncToken};
 }
 syncToken = cal['_value']?.['sync_token']?.['_value.%'] || undefined;
