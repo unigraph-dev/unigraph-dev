@@ -25,6 +25,7 @@ const account = (await unigraph.getQueries([`(func: uid(accs)) @cascade {
 var(func: eq(<unigraph.id>, "$/schema/internet_account")) {
     <~type> { accs as uid }
 }`]))?.[0]?.[0];
+console.log(account);
 
 const getQuery = (msgid) => `(func: uid(parIds)) @cascade { 
     uid
@@ -46,6 +47,7 @@ if (account?.uid) {
             client_secret: gmailClientSecret,
         })
     })
+    console.log(resp);
 
     const accessTokenResult = await resp.json();
     if (accessTokenResult['access_token']) token = accessTokenResult['access_token'];
@@ -55,11 +57,16 @@ if (account?.uid) {
         token_expires_in: (new Date((new Date()).getTime() + 3600 * 1000)).toISOString()
     });
 
+    let auth = new google.auth.OAuth2(
+        gmailClientId,
+        gmailClientSecret,
+        'https://localhost:4001/callback?key=gmail'
+    );
+    auth.setCredentials({...accessTokenResult, access_token: token});
+
     const gmail = google.gmail({
         version: "v1",
-        headers: {
-            Authorization: 'Bearer ' + token
-        }
+        auth: auth,
     })
 
     const res = await gmail.users.messages.list({userId: 'me', maxResults: 25});
