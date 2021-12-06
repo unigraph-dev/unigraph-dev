@@ -16,6 +16,7 @@ if (destUidOrName.startsWith('$/entity')) {
 const sources = !Array.isArray(sourceUid) ? [sourceUid] : sourceUid
 
 console.log(sources, destUid)
+if (sources.length === 0) return;
 
 await unigraph.updateObject(destUid, {
     children: sources.map(el => {return {
