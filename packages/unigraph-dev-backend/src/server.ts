@@ -243,7 +243,7 @@ export default async function startServer(client: DgraphClient) {
       lock.acquire('caches/schema', function (done: Function) {
         const schema = event.schema;
         const schemaAutoref = processAutorefUnigraphId(schema);
-        const upsert: UnigraphUpsert = insertsToUpsert([schemaAutoref]);
+        const upsert: UnigraphUpsert = insertsToUpsert([schemaAutoref], undefined, serverStates.caches['schemas'].dataAlt![0]);
         dgraphClient.createUnigraphUpsert(upsert).then(async _ => {
           await callHooks(hooks, "after_schema_updated", {caches: caches});
           ws.send(makeResponse(event, true));
@@ -302,7 +302,7 @@ export default async function startServer(client: DgraphClient) {
       const unigraphObject = buildUnigraphEntity(event.object, event.schema, caches['schemas'].data);
       const finalUnigraphObject = processAutoref(unigraphObject, event.schema, caches['schemas'].data)
       //console.log(JSON.stringify(finalUnigraphObject, null, 4))
-      const upsert = insertsToUpsert([finalUnigraphObject]);
+      const upsert = insertsToUpsert([finalUnigraphObject], undefined, serverStates.caches['schemas'].dataAlt![0]);
       //console.log(JSON.stringify(upsert, null, 2))
       perfLogStartDbTransaction();
       dgraphClient.createUnigraphUpsert(upsert).then(res => {
@@ -346,7 +346,7 @@ export default async function startServer(client: DgraphClient) {
         } else {
           let newObject = {...event.newObject, uid: newUid, 'unigraph.origin': origin}; // If specifying UID, override with it
           let autorefObject = processAutorefUnigraphId(newObject);
-          const upsert = insertsToUpsert([autorefObject], false);
+          const upsert = insertsToUpsert([autorefObject], false, serverStates.caches['schemas'].dataAlt![0]);
           perfLogStartDbTransaction();
           dgraphClient.createUnigraphUpsert(upsert).then(_ => {
             perfLogAfterDbTransaction();
@@ -368,7 +368,7 @@ export default async function startServer(client: DgraphClient) {
           finalUpdater = processAutorefUnigraphId(updater);
         }
 
-        const finalUpsert = insertsToUpsert([finalUpdater]);
+        const finalUpsert = insertsToUpsert([finalUpdater], undefined, serverStates.caches['schemas'].dataAlt![0]);
         dgraphClient.createUnigraphUpsert(finalUpsert).then(_ => {
           callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches, subIds: event.subIds})
           ws.send(makeResponse(event, true))
@@ -449,7 +449,7 @@ export default async function startServer(client: DgraphClient) {
       }).filter(el => el !== undefined);
       const fs = require('fs');
       fs.writeFileSync('imports_log.json', JSON.stringify(ref));
-      const upsert = insertsToUpsert(ref);
+      const upsert = insertsToUpsert(ref, undefined, serverStates.caches['schemas'].dataAlt![0]);
       dgraphClient.createUnigraphUpsert(upsert).then(_ => {
           callHooks(hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
           ws.send(makeResponse(event, true))

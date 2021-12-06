@@ -3,6 +3,7 @@ import _, { has, uniqueId } from "lodash";
 
 import { typeMap } from '../types/consts'
 import { getRandomInt } from "../utils/utils";
+import stringify from "json-stable-stringify";
 
 function buildDgraphFunctionFromRefQuery(query: {key: string, value: string}[]) {
     let string = "";
@@ -138,9 +139,10 @@ function* nextUid() {
  * This function will ensure that the field `unigraph.id` is unique and all references to be resolved.
  * @param inserts An array of objects or schemas to insert, containing the `$ref` field
  */
-export function insertsToUpsert(inserts: any[], upsert = true): UnigraphUpsert {
+export function insertsToUpsert(inserts: any[], upsert = true, schemasMap?: Record<string, any>): UnigraphUpsert {
 
     const refUids: string[] = [];
+    const refQueries: Record<string, string> = {};
     const genUid = nextUid();
     const blankUids: any[] = [];
     const blankUidsToRef: Record<string, string> = {}
@@ -150,6 +152,13 @@ export function insertsToUpsert(inserts: any[], upsert = true): UnigraphUpsert {
         // If this is a reference object
         if (currentObject) {
             if (currentObject.uid?.startsWith('_:')) isBlankUid = true;
+            if (currentObject?.['$ref']?.query?.length === 1 && currentObject?.['$ref']?.query[0]?.key === "unigraph.id") {
+                // If we can find something in the schema map, just use that
+                const nsRefValue = currentObject?.['$ref']?.query[0]?.value;
+                if (schemasMap?.[nsRefValue]?.uid) {
+                    currentObject.uid = schemasMap[nsRefValue].uid;
+                }
+            }
             if (currentObject.uid && currentObject.uid.startsWith('0x')) { 
                 // uid takes precedence over $ref: when specifying explicit; otherwise doesnt care
                 delete currentObject['$ref'];
@@ -164,12 +173,17 @@ export function insertsToUpsert(inserts: any[], upsert = true): UnigraphUpsert {
                 if (currentObject.uid && currentObject.uid.startsWith('_:')) {
                     // definitely switch to same UID import
                     refUid = "unigraphref" + currentObject.uid.slice(2)
-                } 
+                }
+                // check for existing refUids - and detect if found in existing query
+                if (Object.keys(refQueries).includes(stringify(currentObject["$ref"]))) {
+                    refUid = refQueries[stringify(currentObject["$ref"])];
+                } else { refQueries[stringify(currentObject["$ref"])] = refUid; }
+
                 currentOrigin?.map(el => {if (el?.uid === currentObject.uid) el.uid = `uid(${refUid})`;})
                 const query = currentObject['$ref'].query;
                 delete currentObject['$ref'];
                 // FIXME: Some objects (e.g. with standoff properties or type aliases) doesn't use `_value`
-                const [upsertObject, upsertQueries] = wrapUpsertFromUpdater({"_value": currentObject['_value']}, refUid, false, blankUidsToRef);
+                const [upsertObject, upsertQueries] = wrapUpsertFromUpdater({"_value": currentObject['_value'], ...(currentObject['unigraph.indexes'] ? {"unigraph.indexes": currentObject['unigraph.indexes']} : {})}, refUid, false, blankUidsToRef);
 
                 if (!refUids.includes(refUid)) {
                     refUids.push(refUid)

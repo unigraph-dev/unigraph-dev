@@ -26,7 +26,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         getStatus: () => {throw Error("Not implemented")},
         createSchema: async (schemain) => {
             const autorefSchema = processAutorefUnigraphId(schemain);
-            const upsert: UnigraphUpsert = insertsToUpsert([autorefSchema]);
+            const upsert: UnigraphUpsert = insertsToUpsert([autorefSchema], undefined, states.caches['schemas'].dataAlt![0]);
             await client.createUnigraphUpsert(upsert);
             await states.caches['schemas'].updateNow();
             await states.caches['packages'].updateNow();
@@ -91,7 +91,8 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             if (!padded) unigraphObject = buildUnigraphEntity(object, schema, states.caches['schemas'].data);
             const finalUnigraphObject = processAutoref(unigraphObject, schema, states.caches['schemas'].data)
             //console.log(JSON.stringify(finalUnigraphObject, null, 4));
-            const upsert = insertsToUpsert([finalUnigraphObject]);
+            const upsert = insertsToUpsert([finalUnigraphObject], undefined, states.caches['schemas'].dataAlt![0]);
+            console.log(upsert)
             const uids = await client.createUnigraphUpsert(upsert);
             callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches});
             return uids;
@@ -187,7 +188,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
                 }
                 const upsert = {...finalUpdater, uid: newUid, 'unigraph.origin': origin};
                 //console.log(finalUpdater, upsert)
-                const finalUpsert = insertsToUpsert([upsert], isUpsert);
+                const finalUpsert = insertsToUpsert([upsert], isUpsert, states.caches['schemas'].dataAlt![0]);
                 //console.log(finalUpsert)
                 await client.createUnigraphUpsert(finalUpsert);
                 callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches, subIds: subIds})
