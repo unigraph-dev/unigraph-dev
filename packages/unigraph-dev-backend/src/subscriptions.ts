@@ -46,8 +46,8 @@ export async function pollSubscriptions(subs: Subscription[], client: DgraphClie
                 } else query = buildPollingQuery([el]);
 
                 const queryFn = async () => {
-                    let results: any[] = await client.queryDgraph(query).catch(e => {console.log(e, query); return []});
                     el.queryNow = true;
+                    let results: any[] = await client.queryDgraph(query).catch(e => {console.log(e, query); return []});
                     const val = results[0];
                     if (stringify(val) !== stringify(subs[index].data)) {
                         subs[index].data = val;

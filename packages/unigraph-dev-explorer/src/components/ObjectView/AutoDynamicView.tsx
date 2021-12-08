@@ -4,7 +4,7 @@ import { useDrag, useDrop } from 'react-dnd';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useSwipeable } from 'react-swipeable';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
-import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
+import { buildGraph, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { AutoDynamicViewProps } from '../../types/ObjectView';
 import { DataContext, isMobile, isMultiSelectKeyPressed, selectUid, TabContext } from '../../utils';
 import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
@@ -43,7 +43,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
                 expand(_userpredicate_)
               }`
             window.unigraph.subscribeToQuery(query, (objects: any[]) => {
-                setLoadedObj(objects[0]); 
+                setLoadedObj(buildGraph(objects)[0]); 
             }, newSubs, true);
             setSubsId(newSubs);
             callbacks = {...callbacks, subsId: newSubs}

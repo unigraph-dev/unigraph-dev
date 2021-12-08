@@ -47,11 +47,11 @@ export const InlineSearch = () => {
             horizontal: 'left',
         }}
         PaperProps={{
-            style: { maxHeight: '320px', padding: "8px" },
+            style: { maxHeight: '320px', padding: "8px", borderRadius: "8px" },
           }}
     >
-        {state.default?.map(el => <React.Fragment>
-            <Typography variant="body1"
+        {state.default?.map((el, index) => <React.Fragment>
+            <Typography style={index === 0 ? {borderRadius: "6px", backgroundColor: "gainsboro", }: {}} variant="body1"
                 onMouseDown={(ev) => {
                     console.log("Yo")
                     ev.preventDefault();

@@ -94,7 +94,7 @@ if (account?.uid) {
     }`], false, 100);
 
     let count = updatedObjs.length;
-    let uids = await unigraph.addObject(updatedObjs.filter((el, index) => results[index] === 0), '$/schema/reddit_post');
+    let uids = await unigraph.addObject(updatedObjs.filter((el, index) => results[index]?.length === 0), '$/schema/reddit_post');
     let inbox_els = uids;
 
     if (updatedObjs?.[0]?.['id']) {
