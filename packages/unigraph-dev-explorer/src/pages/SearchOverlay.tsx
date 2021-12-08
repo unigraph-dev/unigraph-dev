@@ -159,10 +159,10 @@ export const SearchOverlay = ({open, setClose, callback, summonerTooltip, defaul
                 noBar
             /> : []}
             {entries.length + entities.length === 0 && parsed?.type !== "command" ? <SearchOverlayTooltip /> : []}
-            {commands.map((el: any) => <div onClick={el.onClick} style={{display: "flex", marginTop: "8px", marginBottom: "8px"}}>
+            {(parsed?.type === "command" || parsed?.type === "") ? commands.map((el: any) => <div onClick={el.onClick} style={{display: "flex", marginTop: "8px", marginBottom: "8px"}}>
                 <Typography style={{flexGrow: 1}}>{el.name}</Typography>
                 <Typography style={{color: "gray"}}>{el.about}</Typography>
-            </div>)}
+            </div>) : []}
             {parsed?.type === "quickAdder" ? <div style={{marginTop: "32px"}}>
                 {React.createElement(window.unigraph.getState('registry/quickAdder').value[parsed?.key].tooltip)}
             </div> : []}

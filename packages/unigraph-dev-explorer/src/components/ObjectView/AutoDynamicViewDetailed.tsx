@@ -5,7 +5,6 @@ import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
 import { DynamicViewRenderer } from "../../global";
 import { TabContext } from "../../utils";
 import { ObjectEditor } from "../ObjectEditor/ObjectEditor";
-import { JsontreeObjectViewer } from "./DefaultObjectView";
 import { isStub } from "./utils";
 
 export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, callbacks, context, component, attributes, useFallback = true }) => {

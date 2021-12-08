@@ -79,12 +79,12 @@ export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
         if (obj && typeof obj === "object" && Array.isArray(obj)) {
             obj.forEach((val, index) => {
                 if(val?.uid && !dict[val.uid] && Object.keys(val).length !== 1) dict[val.uid] = obj[index];
-                if (!pastUids.includes(val?.uid)) buildGraphRecurse(val, Object.keys(val).length !== 1 ? [...pastUids, val?.uid] : pastUids)
+                if (!pastUids.includes(val?.uid)) buildDictRecurse(val, Object.keys(val).length !== 1 ? [...pastUids, val?.uid] : pastUids)
             })
         } else if (obj && typeof obj === "object") {
             Object.entries(obj).forEach(([key, value]: [key: string, value: any]) => {
                 if(value?.uid && !dict[value.uid] && Object.keys(value).length !== 1) dict[value.uid] = obj[key];
-                if (!pastUids.includes(value?.uid)) buildGraphRecurse(value, [...pastUids, value?.uid])
+                if (!pastUids.includes(value?.uid)) buildDictRecurse(value, [...pastUids, value?.uid])
             })
         }
     }
