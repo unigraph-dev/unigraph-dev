@@ -14,6 +14,8 @@ import { setSearchPopup } from "./searchPopup";
 import { noteQuery } from "./init";
 import { getParentsAndReferences } from "./utils";
 import { DynamicObjectListView } from "../../components/ObjectView/DynamicObjectListView";
+import { TabContext } from "../../utils";
+import { DragandDrop } from "../../components/ObjectView/DragandDrop";
 
 export const getSubentities = (data: any) => {
     let subentities: any, otherChildren: any;
@@ -141,8 +143,16 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
     const editorContext = {
         edited, setCommand, childrenref, callbacks, nodesState
     }
+    const tabContext = React.useContext(TabContext);
 
-    
+    const commandFn = () => {
+        console.log(edited.current, command)
+        if (edited.current !== true && command) {
+            command();
+            setCommand(undefined);
+        }
+    }
+    const resetEdited = () => {edited.current = false; setTimeout(() => {commandFn()});}
 
     //console.log(data);
 
@@ -162,19 +172,14 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
         if (dataText && options?.viewId) window.layoutModel.doAction(Actions.renameTab(options.viewId, `Note: ${dataText}`))
         if (isEditing && textref.current !== dataText && !edited.current) { setCurrentText(dataText); textInput.current.textContent = dataText; }
         if (textref.current !== dataText && !edited.current) { textref.current = dataText; }
-        else if ((textref.current === dataText && edited.current) || textref.current === undefined) edited.current = false;
+        else if ((textref.current === dataText && edited.current) || textref.current === undefined) resetEdited();
     }, [data, isEditing])
 
     React.useEffect(() => {
         if (isEditing && textInput.current?.textContent === "" && data.get('text').as('primitive')) { textInput.current.textContent = textref.current }
     }, [isEditing])
 
-    React.useEffect(() => {
-        if (!edited.current && command) {
-            command();
-            setCommand(undefined);
-        }
-    }, [command])
+    React.useEffect(commandFn, [command])
 
     return <NoteViewPageWrapper isRoot={!isChildren}>
         <div style={{ width: "100%", ...(!isChildren ? {overflow: "hidden"} : {}) }} ref={boxRef} >
@@ -242,7 +247,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                                         //inputDebounced.cancel();
                                         textInput.current.textContent = newStr;
                                         textref.current = newStr;
-                                        edited.current = false;
+                                        resetEdited();
                                         if (textInput.current.firstChild) {
                                             setCaret(document, textInput.current.firstChild, match.index + newName.length + 4);
                                         } else {
@@ -381,13 +386,14 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
             </NoteViewTextWrapper>
             {!isChildren ? <div style={{ height: "12px" }} /> : []}
             {!(isCollapsed === true) ? <div ref={childrenref} style={{ width: "100%"}} >
-                {(subentities.length || isChildren) ? buildGraph(subentities).map((el: any, elindex) => {
+                {(subentities.length || isChildren) ? 
+                <DragandDrop dndContext={tabContext.viewId} listId={data?.uid} arrayId={data?.['_value']?.['children']?.uid} style={{position: "absolute"}} >{buildGraph(subentities).map((el: any, elindex) => {
                     const isCol = isChildrenCollapsed[el.uid];
                     return <OutlineComponent key={el.uid} isChildren={isChildren} collapsed={isCol} setCollapsed={(val: boolean) => setIsChildrenCollapsed({ ...isChildrenCollapsed, [el.uid]: val })}
                         createBelow={() => { addChild(dataref.current, editorContext) }}
                     >
                         <AutoDynamicView
-                            noDrop noDrag
+                            noDrag allowSubentity
                             subentityExpandByDefault={!(el.type?.['unigraph.id'] === "$/schema/note_block")}
                             object={el.type?.['unigraph.id'] === "$/schema/note_block" ? el : {uid: el.uid, type: el.type}}
                             callbacks={{
@@ -400,12 +406,13 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                                 "dataref": dataref,
                                 isEmbed: true
                             }}
-                            component={{ "$/schema/note_block": {view: DetailedNoteBlock, query: noteQuery}, "$/schema/view": {view: ViewViewDetailed} }} attributes={{ isChildren: true, isCollapsed: isCol }} allowSubentity
+                            component={{ "$/schema/note_block": {view: DetailedNoteBlock, query: noteQuery}, "$/schema/view": {view: ViewViewDetailed} }} 
+                            attributes={{ isChildren: true, isCollapsed: isCol }}
                             style={el.type?.['unigraph.id'] === "$/schema/note_block" ? {} :
-                                { border: "lightgray", borderStyle: "solid", borderWidth: 'thin', margin: "4px", borderRadius: "8px", minWidth: "calc(100% - 8px)" }}
+                                { border: "lightgray", borderStyle: "solid", borderWidth: 'thin', margin: "4px", borderRadius: "8px", maxWidth: "fit-content", padding: "4px" }}
                         />
                     </OutlineComponent>
-                }) : <OutlineComponent isChildren={isChildren}>
+                })}</DragandDrop> : <OutlineComponent isChildren={isChildren}>
                     <PlaceholderNoteBlock callbacks={{ "add-child": () => noteBlockCommands['add-child'](dataref.current, editorContext) }} />
                 </OutlineComponent>}
             </div> : []}

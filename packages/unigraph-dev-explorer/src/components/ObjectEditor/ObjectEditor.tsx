@@ -8,7 +8,7 @@ import { KeyboardDateTimePicker } from "@material-ui/pickers";
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { ReferenceableSelectorControlled } from '../ObjectView/ReferenceableSelector';
 import { Delete, Menu, Save } from '@material-ui/icons';
-import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
+import { isJsonString, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { BacklinkView } from '../ObjectView/BacklinkView';
 import { onUnigraphContextMenu } from '../ObjectView/DefaultObjectContextMenu';
 import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
@@ -63,7 +63,7 @@ const TypedObjectPartEditor: any = {
                     <Switch checked={viewOrEdit === "view"} onChange={() => viewOrEdit === "view" ? setViewOrEdit("edit") : setViewOrEdit("view")}/>
                 </div>
                 <MetadataDisplay metadata={metadata} />
-                {viewOrEdit === "view" ? <AutoDynamicView object={localObject} /> : fields.map((key) => <div style={editorHeader}>
+                {viewOrEdit === "view" ? <AutoDynamicView object={new UnigraphObject(localObject)} /> : fields.map((key) => <div style={editorHeader}>
                     <Typography variant="body1" style={{paddingRight: "8px"}}>{key}:</Typography>
                     <ObjectPartEditor
                         localSchema={(localSchema['_properties']).filter((el: any) => el['_key'] === key)[0]['_definition']}
@@ -104,16 +104,14 @@ const TypedObjectPartEditor: any = {
         </React.Fragment>
     },
     "$/composer/Union": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
-        //console.log(localObject, localSchema)
         if (Object.keys(localObject['_value'] || {}).length === 1 && !localObject['_value']['type']) return "Deleted object";
         const currentUnionType = localObject['_value']?.['type']?.['unigraph.id'] || "Primitive";
         const classes = useStyles();
-        console.log("localObject")
         return <Paper variant="outlined" className={classes.editorFrame}>
             <Typography>Union type: {localObject['type']?.['unigraph.id'] || "anonymous union"} - object type: {currentUnionType}</Typography>
             <ObjectPartEditor
                 localSchema={schemaMap[currentUnionType]?.['_definition'] || localSchema['_parameters']?.['_definitions']?.filter((el: any) => el?.['type']?.['unigraph.id'].startsWith('$/primitive'))[0]}
-                localObject={currentUnionType === "Primitive" ? localObject : localObject[Object.keys(localObject).filter((s: string) => s.startsWith( '_value'))[0]]}
+                localObject={currentUnionType === "Primitive" ? localObject : localObject['_value']}
                 schemaMap={schemaMap}
                 setLocalObject={() => {}}
             />
@@ -151,7 +149,7 @@ const TypedObjectPartEditor: any = {
         const [currentInputValue, setCurrentInputValue] = React.useState(localObject['_value.%']);
 
         return <React.Fragment>
-            <TextField onChange={(e) => {setCurrentInputValue(e.target.value)}} value={currentInputValue}></TextField>
+            <TextField onChange={(e) => {setCurrentInputValue(e.target.value)}} value={currentInputValue} multiline fullWidth></TextField>
             <Save onClick={() => window.unigraph.updateObject(localObject.uid, {"_value.%": currentInputValue}, false, false)} opacity={currentInputValue === localObject['_value.%'] ? 0 : 1}></Save>
         </React.Fragment>
     },
