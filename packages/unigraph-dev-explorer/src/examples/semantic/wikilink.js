@@ -50,6 +50,7 @@ function fromMarkdown (opts = {}) {
       if (wikiLink.data.alias) {
         displayName = wikiLink.data.alias
       }
+      console.log(wikiLink)
     
       wikiLink.data.alias = displayName
 
@@ -62,6 +63,15 @@ function fromMarkdown (opts = {}) {
         value: displayName
       }]
     }
+
+    console.log({enter: {
+      wikiLink: enterWikiLink
+    },
+    exit: {
+      wikiLinkTarget: exitWikiLinkTarget,
+      wikiLinkAlias: exitWikiLinkAlias,
+      wikiLink: exitWikiLink
+    }})
   
     return {
       enter: {
