@@ -6,9 +6,9 @@ import { NoteEditorContext } from "./types";
 import { getParentsAndReferences } from "./utils";
 
 export const focusUid = (uid: string) => {
-    console.log("UID " + uid);
-    console.log(document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]);
-    (document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0] as any)?.click();
+    //console.log("UID " + uid);
+    //console.log(document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]);
+    (document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]?.children[0] as any)?.click();
 }
 
 export const setCaret = (document: Document, element: any, pos: number, length?: number) => {
@@ -56,6 +56,7 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
     if (!data._hide) parents.push({uid: data.uid});
     let currSubentity = -1;
     let isInserted = false;
+    let targetUid: string = "";
     removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
     const newChildren = children?.reduce((prev: any[], el: any, elindex: any) => {
@@ -80,6 +81,7 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
                     '_value': splittedEntity
                 }
             }
+            targetUid = el['_value']['_value'].uid;
             //console.log(el)
             el['_index']['_value.#i'] = elindex + 1;
             el['_value']['_hide'] = true; el['_value']['_value']['_hide'] = true;
@@ -103,10 +105,10 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
             else return [...prev, {uid: el.uid}]
         };
     }, [])
-    console.log(newChildren)
+    //console.log(newChildren)
     window.unigraph.updateObject(data?.['_value']?.uid, {children: {'_value[': newChildren}}, false, false, context.callbacks.subsId, parents);
     context.edited.current = true;
-    context.setCommand(() => setFocus.bind(this, data, context, index + 1))
+    context.setCommand(() => () => focusUid(targetUid))
 }
 
 export const unsplitChild = async (data: any, context: NoteEditorContext, index: number) => {
@@ -133,16 +135,16 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
                 children[delAt]._value._value._value.text._value._value.uid
             ] as any), true)
         }, 1000)
-        if (index !== 0) {
+
             context.edited.current = true;
             focusLastDFSNode({uid: children[delAt]['_value']['_value'].uid}, context, index)
-        }
+        
     }
 }
 
 export const setFocus = (data: any, context: NoteEditorContext, index: number) => {
     console.log(data, index, context.childrenref.current?.children)
-    console.log(context.childrenref.current?.children[index]?.children?.slice?.(-1)[0]?.children[0]?.children[0]?.click());
+    console.log(context.childrenref.current?.children[index]?.children?.slice?.(-1)[0]?.children[0]?.children[0]?.children[0]?.click());
 }
 
 /**
@@ -204,14 +206,12 @@ export const indentChild = (data: any, context: NoteEditorContext, index: number
         }}
     };
     const finalChildren = newChildren.filter((el: any) => el !== undefined);
-    console.log(finalChildren)
+    //console.log(finalChildren)
     window.unigraph.updateObject(data?.['_value']?.uid, {children: {'_value[': finalChildren}}, false, false, context.callbacks.subsId, parents);
     context.edited.current = true;
     
     context.setCommand(() => 
-        setTimeout(() => {
-            focusUid(newUid['_value'].uid)
-        }, 250)
+        () => focusUid(newUid['_value'].uid)
     );
     //context.setCommand(() => noteBlockCommands['set-focus'].bind(this, data, {...context, childrenref: {current: context.childrenref.current.children[parent as number].children[0].children[0].children[1]}}, -1))
 }
@@ -260,25 +260,33 @@ export const unindentChild = async (data: any, context: NoteEditorContext, paren
             else return [...prev, {uid: curr.uid}]
         };
     }, [])
-    console.log(newChildren, newChildren[parent+1]['_value']['_value'].uid);
+    //console.log(newChildren, newChildren[parent+1]['_value']['_value'].uid);
     await window.unigraph.updateObject(data?.['_value']?.uid, {...data['_value'], children: {'_value[': newChildren}}, false, false, [], parents);
     await window.unigraph.deleteItemFromArray(delUidPar, delUidChild)
     context.edited.current = true;
-    context.setCommand(() => setTimeout(() => {
-        focusUid(newChildren[parent+1]['_value']['_value'].uid)
-    }, 250))
+    context.setCommand(() => () => focusUid(newChildren[parent+1]['_value']['_value'].uid));
 }
 
 export const focusLastDFSNode = (data: any, context: NoteEditorContext, _: number) => {
-    const orderedNodes = dfs(context.nodesState.value);
-    const newIndex = orderedNodes.findIndex(el => el.uid === data.uid) - 1;
-    if (orderedNodes[newIndex] && !orderedNodes[newIndex].root) focusUid(orderedNodes[newIndex].uid)
+    focusUid(getLastDFSNode(data, context, _))
 }
 
 export const focusNextDFSNode = (data: any, context: NoteEditorContext, _: number) => {
+    focusUid(getNextDFSNode(data, context, _))
+}
+
+export const getLastDFSNode = (data: any, context: NoteEditorContext, _: number) => {
+    const orderedNodes = dfs(context.nodesState.value);
+    const newIndex = orderedNodes.findIndex(el => el.uid === data.uid) - 1;
+    if (orderedNodes[newIndex] && !orderedNodes[newIndex].root) return orderedNodes[newIndex].uid;
+    else return "";
+}
+
+export const getNextDFSNode = (data: any, context: NoteEditorContext, _: number) => {
     const orderedNodes = dfs(context.nodesState.value);
     const newIndex = orderedNodes.findIndex(el => el.uid === data.uid) + 1;
-    if (orderedNodes[newIndex] && !orderedNodes[newIndex].root) focusUid(orderedNodes[newIndex].uid)
+    if (orderedNodes[newIndex] && !orderedNodes[newIndex].root) return orderedNodes[newIndex].uid;
+    else return "";
 }
 
 export const convertChildToTodo = async (data: any, context: NoteEditorContext, index: number) => {
