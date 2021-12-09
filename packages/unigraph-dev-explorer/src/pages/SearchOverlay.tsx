@@ -181,10 +181,18 @@ export const SearchOverlayPopover = ({open, setClose, noShadow}: any) => {
     const [searchEnabled, setSearchEnabled] = React.useState(false);
     const [summonerState, setSummonerState] = React.useState<Partial<OmnibarSummonerType>>({});
     const overlay = React.useRef(null);
+    console.log(open, searchEnabled)
 
     const omnibarSummoner: AppState<Partial<OmnibarSummonerType>> = window.unigraph.getState('global/omnibarSummoner');
+
+    React.useEffect(() => {
+        setSearchEnabled(open);
+    }, [open])
     
     React.useEffect(() => {
+        (window as any).showOmnibar = () => {
+            setSearchEnabled(true);
+        }
         omnibarSummoner.subscribe((v) => {
             setSummonerState(v);
         });
@@ -196,32 +204,31 @@ export const SearchOverlayPopover = ({open, setClose, noShadow}: any) => {
     }, [summonerState])
 
     React.useEffect(() => {
-        if (!searchEnabled && omnibarSummoner.value?.show) {
-            omnibarSummoner.setValue({});
-        }
-        if (!isElectron()) document.onkeydown = function(evt) {
-            evt = evt || window.event;
-            if ((evt.ctrlKey || evt.metaKey) && evt.key === 'e') {
-                if (open === undefined) setSearchEnabled(!searchEnabled);
-            }
-            if ((open || searchEnabled) && evt.key === 'Escape') {
-                setClose ? setClose() : setSearchEnabled(false);
-            }
-        };
-    }, [searchEnabled])
-
-    React.useEffect(() => {
-        if (open || searchEnabled) {
+        if (searchEnabled) {
             const listener = (event: MouseEvent) => {
                 const withinBoundaries = overlay && event.composedPath().includes((overlay as any).current)
                 
                 if (!withinBoundaries) {
-                    setClose ? setClose() : setSearchEnabled(false);
+                    setSearchEnabled(false);
                     document.removeEventListener('click', listener)
                 } 
             }
             document.addEventListener('click', listener)
+        } else {
+            if (omnibarSummoner.value?.show) {
+                omnibarSummoner.setValue({});
+            }
+            if (setClose) setClose();
         }
+        document.onkeydown = function(evt) {
+            evt = evt || window.event;
+            if ((evt.ctrlKey || evt.metaKey) && evt.key === 'e' && !isElectron()) {
+                if (open === undefined) setSearchEnabled(!searchEnabled);
+            }
+            if ((searchEnabled) && evt.key === 'Escape') {
+                setSearchEnabled(false);
+            }
+        };
     }, [searchEnabled])
 
     return <Card
@@ -237,13 +244,13 @@ export const SearchOverlayPopover = ({open, setClose, noShadow}: any) => {
             overflow: "auto",
             "padding": "16px",
             "borderRadius": "16px",
-            display: (open || searchEnabled) ? "block" : "none"
+            display: (searchEnabled) ? "block" : "none"
         }}
         ref={overlay}
     >
         <SearchOverlay 
-            open={open || searchEnabled} callback={summonerState.callback} 
+            open={searchEnabled} callback={summonerState.callback} 
             summonerTooltip={summonerState.tooltip} defaultValue={summonerState.defaultValue}
-            setClose={setClose || (() => {setSearchEnabled(false);})}/>
+            setClose={(() => {setSearchEnabled(false);})}/>
     </Card>
 }
