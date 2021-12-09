@@ -96,7 +96,7 @@ function wikiLinkPlugin (opts = {}) {
     )
   }
 
-  add('micromarkExtensions', syntax(opts))
+  add('micromarkExtensions', syntax({aliasDivider: "±", ...opts}))
   add('fromMarkdownExtensions', fromMarkdown(opts))
   add('toMarkdownExtensions', toMarkdown(opts))
 }

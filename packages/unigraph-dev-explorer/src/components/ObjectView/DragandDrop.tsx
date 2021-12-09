@@ -1,7 +1,7 @@
 import React from "react"
 import { useDrop } from "react-dnd"
 
-export const BelowDropAcceptor = ({ onDrop, isReverse }: any) => {
+export const BelowDropAcceptor = ({ onDrop, isReverse, style }: any) => {
     const [{ isOver, canDrop }, dropSub] = useDrop(() => ({
         // @ts-expect-error: already checked for namespace map
         accept: Object.keys(window.unigraph.getNamespaceMap() || {}),
@@ -12,15 +12,15 @@ export const BelowDropAcceptor = ({ onDrop, isReverse }: any) => {
         })
     }))
 
-    return <div ref={dropSub} style={{opacity: (canDrop && isOver && !isReverse) ? 1 : 0, width: "100%", height: "10px", marginTop: "-5px"}}>
+    return <div ref={dropSub} style={{opacity: (canDrop && isOver && !isReverse) ? 1 : 0, width: "100%", height: "10px", marginTop: "-5px", ...style}}>
         <div style={{height: "60%", marginTop: "20%", backgroundColor: "gray", margin: "0px", borderRadius: "4px"}}/>
     </div>
 }
 
-export const WithDropBelow = ({children, onDrop, isReverse}: any) => {
+export const WithDropBelow = ({children, onDrop, isReverse, style}: any) => {
     return <React.Fragment>
         {children}
-        <BelowDropAcceptor onDrop={onDrop} isReverse={isReverse} key={"_dropacceptor"} />
+        <BelowDropAcceptor onDrop={onDrop} isReverse={isReverse} key={"_dropacceptor"} style={style} />
     </React.Fragment>
 }
 
@@ -42,7 +42,7 @@ const onDrop = (dndContext: any, listId: any, arrayId: any, index: any, dropperP
 
 export const DragandDrop = ({children, style = {}, dndContext, listId, arrayId, isReverse}: any) => {
     <BelowDropAcceptor onDrop={onDrop.bind(this, dndContext, listId, -1)} isReverse={isReverse}/>
-    return <div style={{...style}}>
-        {children.map((child: any, index: number) => <WithDropBelow children={child} onDrop={onDrop?.bind(this, dndContext, listId, arrayId, index)} isReverse={isReverse} key={index + "_dnd"}/>)}
+    return <div>
+        {children.map((child: any, index: number) => <WithDropBelow style={style} children={child} onDrop={onDrop?.bind(this, dndContext, listId, arrayId, index)} isReverse={isReverse} key={index + "_dnd"}/>)}
     </div>
 }

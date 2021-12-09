@@ -257,6 +257,7 @@ function showOmnibar () {
   mainWasVisible = mainWindow.isVisible();
   console.log(mainWasFocused, process.platform)
   omnibar.show();
+  omnibar.webContents.send('showOmnibar');
 }
 
 ipcMain.on('close_omnibar', closeOmnibar)
