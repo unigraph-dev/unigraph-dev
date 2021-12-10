@@ -10,7 +10,7 @@ export const CalendarEvent = ({data, callbacks}: any) => {
     return <div style={{display: "flex"}}>
         <div style={{alignSelf: "center", marginRight: "16px"}}>
             <Avatar
-                style={{ width: 16, height: 16, backgroundColor: data.get('calendar/color').as('primitive') }}
+                style={{ width: 16, height: 16, backgroundColor: data.get('calendar/color')?.as?.('primitive') }}
             >{" "}</Avatar>
         </div>
         
