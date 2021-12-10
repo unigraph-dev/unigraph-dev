@@ -6,6 +6,6 @@ export const Inbox = () => {
         uid: window.unigraph.getNamespaceMap?.()?.['$/entity/inbox']?.['uid'],
         _stub: true,
         type: { "unigraph.id": "$/schema/list" }
-    }} attributes={{virtualized: true}}/>
+    }} />
 
 }

@@ -1,5 +1,4 @@
 const {data, callbacks, ...props} = params;
-console.log(data);
 return <div style={{display: "flex"}}>
     <div style={{marginRight: "16px"}} onClick={() => {
         // Now we load it to the detailed view

@@ -16,6 +16,12 @@
                 "src": "executables/addTwitterAccount.js",
                 "editable": true,
                 "name": "Adds a twitter account"
+            },{ 
+                "id": "get-twitter-lists",
+                "env": "routine/js",
+                "src": "executables/getTwitterLists.js",
+                "editable": true,
+                "name": "Gets all lists in your account"
             },{
                 "id": "update-twitter-subscriptions",
                 "env": "routine/js",
