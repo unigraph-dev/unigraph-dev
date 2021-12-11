@@ -7,7 +7,7 @@ import { isMultiSelectKeyPressed, NavigationContext, runClientExecutable, select
 import { getComponentAsView } from './DynamicComponentView';
 
 import Icon from '@mdi/react'
-import { mdiCubeOutline, mdiDatabaseOutline, mdiCloseBoxOutline, mdiCloseBoxMultipleOutline, mdiViewDayOutline, mdiFileTreeOutline, mdiVectorPolylineEdit, mdiInboxArrowDownOutline, mdiLinkBoxVariantOutline, mdiDeleteOutline, mdiGraphOutline } from '@mdi/js';
+import { mdiCubeOutline, mdiDatabaseOutline, mdiCloseBoxOutline, mdiCloseBoxMultipleOutline, mdiViewDayOutline, mdiFileTreeOutline, mdiVectorPolylineEdit, mdiInboxArrowDownOutline, mdiLinkBoxVariantOutline, mdiDeleteOutline, mdiGraphOutline, mdiBookOutline } from '@mdi/js';
 
 export const defaultContextMenu: Array<ContextMenuGenerator> = [
     (uid, object, handleClose, callbacks) => <MenuItem style={{paddingTop: "2px", paddingBottom: "2px"}} onClick={() => {handleClose(); window.wsnavigator(`/library/object?uid=${uid}&viewer=${"dynamic-view-detailed"}&type=${object?.type?.['unigraph.id']}`)}}>
@@ -28,6 +28,11 @@ export const defaultContextMenu: Array<ContextMenuGenerator> = [
     (uid, object, handleClose, callbacks) => <MenuItem style={{paddingTop: "2px", paddingBottom: "2px"}} onClick={() => {handleClose(); window.unigraph.runExecutable('$/executable/add-item-to-list', {where: "$/entity/inbox", item: uid})}}>
         <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiInboxArrowDownOutline} size={1}/></ListItemIcon>
         <ListItemText>Add item to inbox</ListItemText>
+        
+    </MenuItem>,
+    (uid, object, handleClose, callbacks) => <MenuItem style={{paddingTop: "2px", paddingBottom: "2px"}} onClick={() => {handleClose(); window.unigraph.runExecutable('$/executable/add-item-to-list', {where: "$/entity/read_later", item: uid})}}>
+        <ListItemIcon style={{minWidth: "36px"}}><Icon path={mdiBookOutline} size={1}/></ListItemIcon>
+        <ListItemText>Add item to read later</ListItemText>
         
     </MenuItem>,
     (uid, object, handleClose, callbacks) => <MenuItem style={{paddingTop: "2px", paddingBottom: "2px"}} onClick={() => {handleClose(); window.wsnavigator(`/library/backlink?uid=${uid}`);}}>

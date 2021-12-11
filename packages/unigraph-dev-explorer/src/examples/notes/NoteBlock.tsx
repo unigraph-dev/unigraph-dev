@@ -77,7 +77,7 @@ export const OutlineComponent = ({ children, collapsed, setCollapsed, isChildren
     return <div style={{ flex: "0 0 auto", display: "flex", alignItems: "baseline", position: "relative" }}>
         <div style={{ position: "absolute", left: "-4px" }} className="showOnHover" onClick={() => setCollapsed(!collapsed)}>O</div>
         <div style={{ position: "absolute", left: "-4px", top: "8px" }} className="showOnHover" onClick={() => createBelow()}>V</div>
-        <div style={{ height: "100%", width: "1px", backgroundColor: "gray", position: "absolute", left: "-12px", display: isChildren ? "" : "none" }}></div>
+        <div style={{ height: "calc(100% + 4px)", width: "1px", backgroundColor: "gray", position: "absolute", left: "-12px", display: isChildren ? "" : "none" }}></div>
         <FiberManualRecord style={{ fontSize: "0.5rem", marginLeft: "8px", marginRight: "8px", ...(collapsed ? { borderRadius: "4px", color: "lightgray", backgroundColor: "black" } : {}) }} />
         <div style={{ flexGrow: 1 }}>
             {children}
@@ -395,7 +395,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
             {!isChildren ? <div style={{ height: "12px" }} /> : []}
             {!(isCollapsed === true) ? <div ref={childrenref} style={{ width: "100%"}} >
                 {(subentities.length || isChildren) ? 
-                <DragandDrop dndContext={tabContext.viewId} listId={data?.uid} arrayId={data?.['_value']?.['children']?.uid} style={{position: "absolute"}} >{buildGraph(subentities).map((el: any, elindex) => {
+                <DragandDrop dndContext={tabContext.viewId} listId={data?.uid} arrayId={data?.['_value']?.['children']?.uid} style={{position: "absolute", height: "6px", marginTop: "-3px", marginBottom: "1px", zIndex: 999}}>{buildGraph(subentities).map((el: any, elindex) => {
                     const isCol = isChildrenCollapsed[el.uid];
                     return <OutlineComponent key={el.uid} isChildren={isChildren} collapsed={isCol} setCollapsed={(val: boolean) => setIsChildrenCollapsed({ ...isChildrenCollapsed, [el.uid]: val })}
                         createBelow={() => { addChild(dataref.current, editorContext) }}
