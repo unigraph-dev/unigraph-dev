@@ -55,7 +55,7 @@ yarn && yarn build-deps
 # run backend with default data and bin path:  /opt/unigraph
 ./scripts start_server.sh
 # or, run backend with custom paths:
-./scripts/start_server.sh -d "<data directorty>" -b "<dgraph binary location>"
+./scripts/start_server.sh -d "<data directory>" -b "<dgraph binary location>"
 ```
 
 
