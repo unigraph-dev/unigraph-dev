@@ -1,0 +1,7 @@
+{
+    "dgraph.type": "Type",
+    "_name": "Regular expression",
+    "_definition": {
+        "type": { "unigraph.id": "$/primitive/string" }
+    }
+}

@@ -3,6 +3,28 @@ const tags = context.params.tags ? context.params.tags : [];
 const ctx = context.params.context;
 const scrape = require('html-metadata');
 
+const handlers = (await unigraph.getQueries([`(func: uid(parType)) @normalize {
+    uid
+  _value {
+        match_domain {
+            _value {
+                md: <_value.%>
+    }
+  }
+  handler {
+            <_value> {
+                huid: uid
+      }
+       }
+}
+}
+var(func: eq(<unigraph.id>, "$/schema/bookmark_handler")) {
+            <~type> { parType as uid }
+        }`]))[0];
+
+const good = handlers.filter(el => (new RegExp(el['md'])).exec(url) != null);
+if (good.length !== 0) return [(await unigraph.runExecutable(good[0].huid, {url}))];
+
 let res;
 
 const tryScrape = () => new Promise(async (resolve, reject) => {

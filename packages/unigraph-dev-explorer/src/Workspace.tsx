@@ -61,7 +61,7 @@ const ConnectionIndicator = () => {
 }
 
 const MobileOmnibarIndicator = () => {
-    return <div style={{ marginRight: "16px", display: isMobile() ? "" : "none" }} onClick={() => {
+    return <div style={{ marginRight: "16px" }} onClick={() => {
         window.unigraph.getState('global/omnibarSummoner').setValue({
             show: true,
             tooltip: "",

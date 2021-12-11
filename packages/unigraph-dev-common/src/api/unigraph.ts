@@ -200,7 +200,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 console.log(ev.data);
                 return false;
             }
-            messages.push(parsed);
+            //messages.push(parsed);
             eventTarget.dispatchEvent(new Event("onmessage", parsed));
             if (parsed.type === "response" && parsed.id && callbacks[parsed.id]) callbacks[parsed.id](parsed);
             if (parsed.type === "cache_updated" && parsed.name) {

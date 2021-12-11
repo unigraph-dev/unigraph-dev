@@ -30,13 +30,13 @@ const addAccount = async (userAccToken, userAccTokenSecret) => {
         username: details.screen_name,
         access_token: userAccToken,
         access_token_secret: userAccTokenSecret,
-        subscriptions: [{
+        subscriptions: subObj ? [{
             type: {"unigraph.id": "$/schema/twitter_list"},
             twitter_id: subObj?.id_str,
             name: subObj?.name,
             //description: subObj?.description,
             last_id_fetched: "1"
-        }]
+        }] : []
     };
     //console.log(account)
     unigraph.addObject(account, "$/schema/internet_account");

@@ -16,6 +16,10 @@
             {
                 "id": "web_bookmark",
                 "src": "schemas/web_bookmark.json"
+            },
+            {
+                "id": "bookmark_handler",
+                "src": "schemas/bookmark_handler.json"
             }
         ],
         "executables": [{
