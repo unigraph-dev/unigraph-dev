@@ -5,7 +5,7 @@ source ./secrets.env
 helpFunction()
 {
    echo ""
-   echo "Usage: $0 -d \"<data directorty>\" -b \"<dgraph binary location>\""
+   echo "Usage: $0 -d \"<data directory>\" -b \"<dgraph binary location>\""
    exit 1 # Exit script after printing help
 }
 
