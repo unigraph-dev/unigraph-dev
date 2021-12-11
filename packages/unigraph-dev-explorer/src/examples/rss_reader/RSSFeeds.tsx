@@ -59,7 +59,7 @@ export type ARSSItem = {
 type ParserParam = {url: string}
 
 const RSSItem: DynamicViewRenderer = ({data, callbacks}) => {
-    let unpadded: ARSSItem = unpad(data);
+    let unpadded: ARSSItem = React.useMemo(() => unpad(data), [data]);
 
     return <React.Fragment>
         <ListItemIcon>

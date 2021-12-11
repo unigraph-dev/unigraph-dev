@@ -1,6 +1,5 @@
 import AsyncLock from 'async-lock';
 import dgraph, { DgraphClient as ActualDgraphClient, DgraphClientStub, Operation, Mutation, Check } from 'dgraph-js';
-import { getRandomInt } from '../../unigraph-dev-common/lib/utils/utils';
 import { getAsyncLock, withLock } from './asyncManager';
 import { UnigraphUpsert } from './custom';
 import { perfLogStartDbTransaction, perfLogAfterDbTransaction } from './logging';
@@ -21,7 +20,6 @@ export default class DgraphClient {
       throw new Error("Could not establish connection to Dgraph client, exiting...");
     }})
     this.dgraphClient = new ActualDgraphClient(this.dgraphClientStub);
-    // TODO(haojixu): Check if default db exists - if not, set default
     this.txnlock = getAsyncLock();
   }
 
@@ -35,7 +33,7 @@ export default class DgraphClient {
       }
     }`, {});
     return {
-      "version": await (await this.dgraphClientStub.checkVersion(new Check())).toString(),
+      "version": (await this.dgraphClientStub.checkVersion(new Check())).toString(),
       "objects": count[0][0].totalObjects,
       "schemas": count[1][0].totalSchemas
     }
@@ -107,6 +105,7 @@ export default class DgraphClient {
     !test ? true : console.log("Trying to create upsert....============================================")
     const txn = this.dgraphClient.newTxn();
     let response: dgraph.Response;
+    if (!data.appends.length && !data.mutations.length && !data.queries.length) return [];
     try {
       const mutations: Mutation[] = [...data.mutations, ...data.appends].map((obj: any, index) => {
         const mu = new dgraph.Mutation();

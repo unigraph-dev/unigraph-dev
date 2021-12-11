@@ -38,6 +38,16 @@ export function WorkspacePageComponent({ children, maximize, paddingTop, id }: a
     </div>
 }
 
+const WorkspaceInnerEl_ = ({config, component}: any) => {
+    if (component.startsWith('/pages/')) {
+        const page = pages.value[(component.replace('/pages/', '') as string)];
+        return page.constructor(config);
+    } else if (component.startsWith('/components/')) {
+        return components[(component.replace('/components/', '') as string)].constructor(config.viewConfig);
+    }
+};
+const WorkspaceInnerEl = React.memo(WorkspaceInnerEl_, (a, b) => JSON.stringify(a) === JSON.stringify(b))
+
 export const getComponentFromPage = (location: string, params: any = {}) => {
     console.log(location.substring(1));
     if (location.startsWith('/$/')) location = "/" + (window.unigraph.getNamespaceMap as any)()[location.substring(1)].uid
@@ -197,6 +207,7 @@ export function WorkSpace(this: any) {
             "tabEnableRename": false,
             "splitterSize": 1,
             "splitterExtra": 12,
+            tabEnableRenderOnDemand: true,
         },
         borders: [{
             "type": "border",
@@ -270,32 +281,31 @@ export function WorkSpace(this: any) {
     const factory = (node: any) => {
         var component = node.getComponent();
         var config = node.getConfig() || {};
-        if (component.startsWith('/pages/')) {
-            const page = pages.value[(component.replace('/pages/', '') as string)]
+        const page = pages.value[(component.replace('/pages/', '') as string)];
 
-            return <TabContext.Provider value={{
-                viewId: node._attributes.id,
-                setTitle: (title: string) => {
-                    if (config.customTitle) {
-                        return false;
-                    } else {
+        //if (node._visible === false) return <React.Fragment/>
+        
+        return (component.startsWith('/pages/')) ? <TabContext.Provider value={{
+            viewId: node._attributes.id,
+            setTitle: (title: string) => {
+                if (config.customTitle) {
+                    return false;
+                } else {
 
-                    }
-                },
-                isVisible: () => window.layoutModel.getNodeById(node._attributes.id).isVisible(),
-            }}>
-                <WorkspacePageComponent maximize={page.maximize} paddingTop={page.paddingTop} id={node._attributes.id}>
-                    {node._attributes.floating ? <div id="global-elements">
-                        <SearchOverlayPopover />
-                        <ContextMenu />
-                        <InlineSearch />
-                    </div> : []}
-                    {page.constructor({id: config.id, ...(config.viewConfig || {})})}
-                </WorkspacePageComponent>
-            </TabContext.Provider >
-        } else if (component.startsWith('/components/')) {
-            return components[(component.replace('/components/', '') as string)].constructor(config.viewConfig)
-        }
+                }
+            },
+            isVisible: () => window.layoutModel.getNodeById(node._attributes.id).isVisible(),
+        }}>
+            <WorkspacePageComponent maximize={page.maximize} paddingTop={page.paddingTop} id={node._attributes.id}>
+                {node._attributes.floating ? <div id="global-elements">
+                    <SearchOverlayPopover />
+                    <ContextMenu />
+                    <InlineSearch />
+                </div> : []}
+                <WorkspaceInnerEl config={{id: config.id, ...(config.viewConfig || {})}} component={component}/>
+            </WorkspacePageComponent>
+        </TabContext.Provider > : <WorkspaceInnerEl config={{id: config.id, ...(config.viewConfig || {})}} component={component}/>
+        
     }
 
     const [model] = React.useState(FlexLayout.Model.fromJson(json));

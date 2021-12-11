@@ -13,6 +13,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import { setupInfiniteScrolling } from "./infiniteScrolling";
 import { byElementIndex } from "unigraph-dev-common/lib/utils/entityUtils";
 import { DragandDrop } from "./DragandDrop";
+import { TransitionGroup } from 'react-transition-group';
 
 type Group = {
     name: string,
@@ -109,11 +110,11 @@ export type DynamicObjectListViewProps = {
 
 const DynamicListBasic = ({ reverse, items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true, noRemover, compact }: any) => {
     const tabContext = React.useContext(TabContext);
-    return <DragandDrop dndContext={tabContext.viewId} listId={context?.uid} isReverse={reverse} arrayId={listUid}>
+    return <TransitionGroup><DragandDrop dndContext={tabContext.viewId} listId={context?.uid} isReverse={reverse} arrayId={listUid}>
         {items.map((el: any, index: number) => <DynamicListItem
             item={itemGetter(el)} index={index} context={context} listUid={listUid} compact={compact}
             callbacks={callbacks} itemUids={itemUids} itemRemover={itemRemover} reverse={reverse} noRemover={noRemover}
-        />)}</DragandDrop>;
+        />)}</DragandDrop></TransitionGroup>;
 }
 
 const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true, buildGraph, parId, noRemover, compact, subscribeOptions }: any) => {
@@ -145,12 +146,14 @@ const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, it
             <React.Fragment />
         }
     >
+        <TransitionGroup>
         <DragandDrop dndContext={tabContext.viewId} listId={context?.uid} isReverse={reverse}  arrayId={listUid}>
             {loadedItems.map((el: any, index: number) => <DynamicListItem key={el?.uid || index}
                 item={el} index={index} context={context} listUid={listUid} reverse={reverse} compact={compact}
                 callbacks={callbacks} itemUids={items.map((el: any) => itemGetter(el).uid)} itemRemover={itemRemover} noRemover={noRemover}
             />)}
         </DragandDrop>
+        </TransitionGroup>
     </InfiniteScroll>
 }
 
