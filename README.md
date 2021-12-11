@@ -16,14 +16,68 @@ Quick links:
 
 ## Getting started
 
-1. You'll need the custom dgraph binary from <https://github.com/unigraph-dev/dgraph>. Follow the **Build from Source section** instructions carefully, but the build process would just take a couple of minutes.
-2. At the project root run `yarn` and then `yarn build-deps` to fetch dependencies and build common files needed to build backend and frontend.
-3. Put your dgraph binary in a folder at `/opt/unigraph`, then run `./scripts/start_server.sh` (alternatively you can use `./scripts/start_server.sh -d "<data directorty>" -b "<dgraph binary location>"`).
-4. Run `yarn explorer-start` to start the web frontend. If you want to use electron instead, run `yarn electron-start` after.
+**1)** Build the [`dgraph`](https://github.com/unigraph-dev/dgraph) backend binary from source [[reference](https://github.com/unigraph-dev/dgraph#install-from-source)]
 
-Note: If you want to use third-party API integrations, follow the steps below to put your API keys.
+> requires `gcc`, `make`, `go>=1.13`
 
-Note: If the initial server setup failed, you'll need to kill all Dgraph processes (`killall dgraph`), then manually remove `p/, w/, zw/` (dgraph data) from the data directory (normally `/opt/unigraph`)
+```bash
+git clone https://github.com/unigraph-dev/dgraph.git
+cd ./dgraph
+make install  # installs built binary in $GOPATH/bin
+```
+
+```bash
+# you can view your $GOPATH by running:  go env GOPATH
+# and similarly, confirm binary exists:
+> ls $(go env GOPATH)/bin | grep dgraph
+dgraph
+```
+
+
+**2)** In the `unigraph` project root, fetch and build project dependencies:
+
+> if you have `node.js` versioning issues, consider using [`nvm`](https://github.com/nvm-sh/nvm)
+
+```bash
+yarn && yarn build-deps
+```
+
+**3)** Move the `dgraph` binary you built in step **1)** to a new `/opt/unigraph` directory. This is a project default, but you can use a path of your choosing (as well as keep a separate data directory & bin path).
+
+> check that your user can read/write to the path(s) — you may need to e.g. `chown -R $(whoami) /opt/unigraph`
+
+**4)** Run the backend and frontend from the `unigraph` project root!
+
+> the `dgraph` backend currently requires its [default ports](https://dgraph.io/docs/deploy/ports-usage/#default-ports-used-by-different-nodes) to be free, especially `8080`.
+
+
+```bash
+# run backend with default data and bin path:  /opt/unigraph
+./scripts start_server.sh
+# or, run backend with custom paths:
+./scripts/start_server.sh -d "<data directory>" -b "<dgraph binary location>"
+```
+
+
+```bash
+# run frontend application in a browser:
+yarn explorer-start
+# or, to run as an electron application:
+yarn electron-start
+```
+
+> **NOTE:** if the backend failed **during server initialization**, you'll need a clean application state before reattempting:
+>
+>- `killall dgraph` to kill all running `dgraph` processes, then
+>- remove `p/`, `w/`, `zw/` in your data directory (by default `/opt/unigraph`)
+
+> Server initialization is successful upon `unigraph> Unigraph server listening on port 3001` and announcing upserts.
+
+
+**5)** If you want to use third-party API integrations, consult the **"**API Keys**"** section below.
+
+----
+
 
 ## Structure
 
