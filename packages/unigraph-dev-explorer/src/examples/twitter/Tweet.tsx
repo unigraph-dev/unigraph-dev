@@ -7,6 +7,7 @@ import { externalNamespaces } from "../../externalNamespaceStub";
 import { openUrl } from "../../utils";
 import React from "react";
 import { UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
+import { buildGraph } from "unigraph-dev-common/lib/utils/utils";
 
 const removeContextEntities = (tweet: any, entities: any[]) => {
   let finalStr: string = tweet['_value.%'];
@@ -19,12 +20,13 @@ const removeContextEntities = (tweet: any, entities: any[]) => {
 }
 
 export const Tweet: DynamicViewRenderer = ({data, callbacks}) => {
+  buildGraph([data]);
   const twid = data.get('from_user/twitter_id').as('primitive');
   const nslnk = externalNamespaces.filter(el => el.participants.includes(twid))[0]?.createLink;
   
 
     return <div style={{display: "flex"}}>
-        <div style={{alignSelf: "center", marginRight: "16px"}}>
+        <div style={{alignSelf: "baseline", marginRight: "16px", marginTop: "16px"}}>
         <Badge
         overlap="circle"
         anchorOrigin={{
@@ -52,9 +54,9 @@ export const Tweet: DynamicViewRenderer = ({data, callbacks}) => {
                 const elObj = el['_value']['_value'];
                 if (elObj['type']['unigraph.id'] === "$/schema/icon_url") {
                   return <img src={elObj['_value.%']} style={{maxWidth: "240px", borderRadius: "8px"}} alt=""/>
-                } else if (elObj['type']['unigraph.id'] === "$/schema/web_bookmark") {
+                } else {
                   return <AutoDynamicView object={new UnigraphObject(elObj)} />
-                } else return <React.Fragment/>
+                }
               })}
             </div>
         </div>

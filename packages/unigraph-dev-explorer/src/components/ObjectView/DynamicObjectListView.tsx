@@ -126,16 +126,14 @@ const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, it
         if (setupProps?.cleanup) setupProps.cleanup();
         let newProps: any = undefined;
         if (items.length) {
-            items.sort(byElementIndex);
             newProps = setupInfiniteScrolling(items.map((el: any) => itemGetter(el).uid), infinite ? 25 : items.length, (items: any[]) => {
                 setLoadedItems(buildGraph ? buildGraphFn(items) : items);
             }, subscribeOptions);
             setSetupProps(newProps);
             newProps.next();
         } else { setLoadedItems([]) };
-
         return function cleanup() { newProps?.cleanup() }
-    }, [JSON.stringify(items.map((el: any) => el.uid))])
+    }, [items])
 
     return <InfiniteScroll
         dataLength={loadedItems.length}
@@ -205,7 +203,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ ti
     let setGroupBy: any;
     [groupBy, setGroupBy] = React.useState(groupBy || '');
     groupers = { ...groupers, ...groupersDefault }
-    const [reverseOrder, setReverseOrder] = React.useState(reverse);
+    const [reverseOrder, setReverseOrder] = React.useState(reverse || false);
     const [currentTab, setCurrentTab] = React.useState("");
 
     const isStub = !items[0] || Object.keys(itemGetter(items[0])).filter(el => el.startsWith('_value')).length < 1 || items[0]._stub;
@@ -223,8 +221,9 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ ti
     const [procItems, setProcItems] = React.useState<any[]>([]);
     React.useEffect(() => {
         let allItems: any[] = [];
-        if (reverseOrder) allItems = [...items].reverse();
-        else allItems = [...items];
+        const currItems = [...items].sort(byElementIndex);
+        if (reverseOrder) allItems = [...currItems].reverse();
+        else allItems = [...currItems];
         filtersUsed.forEach(el => {
             const filter = totalFilters.find((flt) => flt.id === el);
             allItems = allItems.filter((it: any) => (filter?.fn || (() => true))(itemGetter(it)));

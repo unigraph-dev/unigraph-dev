@@ -143,7 +143,7 @@ export default class DgraphClient {
       //const fs = require('fs');
       //fs.writeFileSync('imports_uidslog.json', JSON.stringify(response.getUidsMap()));
       const tns = response?.getLatency()?.getTotalNs();
-      if (tns && tns > 200000000) console.log(`[PERF] Slow - Upsertion complete - but took ${tns / 1000000.0} ms. `)
+      if (tns && tns > 400000000) console.log(`[PERF] Slow - Upsertion complete - but took ${tns / 1000000.0} ms. `)
       //!test ? true : console.log(JSON.stringify(response, null, 2));
       if (!response) {
         console.log(JSON.stringify(data, null, 4))
@@ -239,7 +239,7 @@ export default class DgraphClient {
       .newTxn({ readOnly: true })
       .queryWithVars(query, vars).catch(e => {console.log(e); return e});
     const tns = res.getLatency().getTotalNs();
-    if (tns > 200000000) console.log(`[PERF] Slow - Transaction complete - but took ${tns / 1000000.0} ms. ` + query.slice(0, 100) + '...')
+    if (tns > 400000000) console.log(`[PERF] Slow - Transaction complete - but took ${tns / 1000000.0} ms. ` + query.slice(0, 100) + '...')
     return Object.values(res.getJson());
   }
 

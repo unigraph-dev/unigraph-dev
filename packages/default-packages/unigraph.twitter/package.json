@@ -36,7 +36,17 @@
                 "src": "executables/fetchTweetsOfList.js",
                 "editable": true,
                 "name": "Fetch all new tweets of a list, given access token and list ID"
+            },{ 
+                "id": "add-tweet-from-url",
+                "env": "routine/js",
+                "src": "executables/addTweetFromUrl.js",
+                "editable": true,
+                "name": "Adds a new tweet from a URL"
             }
-        ]
+        ],
+        "entities": [{
+            "id": "add_tweet_handler",
+            "src": "entities/add_tweet_handler.json"
+        }]
     }
 }
