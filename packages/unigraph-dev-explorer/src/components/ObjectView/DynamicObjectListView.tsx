@@ -181,7 +181,7 @@ const useStyles = makeStyles(theme => ({
     },
   }));
 
-const TabButton = ({children, isSelected, onClick}: any) => {
+export const TabButton = ({children, isSelected, onClick}: any) => {
     return <div style={{cursor: "pointer", display: "flex", padding: "4px", paddingTop: "2px", paddingBottom: "2px", borderRadius: "8px", ...(isSelected ? {backgroundColor: "#E9E9E9", borderRadius: "8px"} : {})}} onClick={onClick}>
         {children}
     </div>

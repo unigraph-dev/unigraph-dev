@@ -4,7 +4,7 @@ import { useEffectOnce } from "react-use";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
 import { download, upload } from "../../utils"; 
 
-const getQuery = (name: string) => `(func: eq(<unigraph.id>, "${name}")) {
+export const getStatsQuery = (name: string) => `(func: eq(<unigraph.id>, "${name}")) {
     uid
 		objects: count(~type)
   }`
@@ -17,7 +17,7 @@ export const ConnectionWidget: React.FC = ({}) => {
 
     useEffectOnce(() => {
         window.unigraph.getStatus().then((st: any) => setContent(st));
-        window.unigraph.getQueries(nsmap.map(el => getQuery(el))).then((res: any[]) => {
+        window.unigraph.getQueries(nsmap.map(el => getStatsQuery(el))).then((res: any[]) => {
             setCounts(res.map((el, index) => [nsmap[index], el[0]?.['objects']]))
         })
     })
@@ -33,7 +33,7 @@ export const ConnectionWidget: React.FC = ({}) => {
         <div>
             <Button onClick={() => {
                 window.unigraph.getStatus().then((st: any) => setContent(st))
-                window.unigraph.getQueries(nsmap.map(el => getQuery(el))).then((res: any[]) => {
+                window.unigraph.getQueries(nsmap.map(el => getStatsQuery(el))).then((res: any[]) => {
                     setCounts(res.map((el, index) => [nsmap[index], el[0]?.['objects']]))
                 })
             }}>Refresh</Button>

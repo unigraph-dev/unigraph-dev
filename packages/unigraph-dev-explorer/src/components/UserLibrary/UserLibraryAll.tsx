@@ -1,58 +1,59 @@
-import { ListItem, Typography } from '@material-ui/core';
+import { Card, Divider, ListItem, Typography } from '@material-ui/core';
 import _ from 'lodash';
 import React from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { useEffectOnce } from 'react-use';
 import { buildGraph, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
+import { DynamicObjectListView, TabButton } from '../ObjectView/DynamicObjectListView';
 import { setupInfiniteScrolling } from '../ObjectView/infiniteScrolling';
+import { getStatsQuery } from '../UnigraphCore/ConnectionWidget';
+
+const MultiTypeDescriptor = ({itemGroups, currentType, setCurrentType}: any) => {
+
+    return <Card variant="outlined" style={{padding: "12px", margin: "12px", whiteSpace: "nowrap", display: "flex", flexWrap: "wrap", maxHeight: "20%", overflow: "auto"}}>
+        {itemGroups.map((el: any, index: any) => {
+            return <TabButton isSelected={currentType === el.name} onClick={() => setCurrentType(el.name)}>
+                <div style={{minHeight: "18px", minWidth: "18px", height: "18px", width: "18px", alignSelf: "center", marginRight: "3px", opacity: 0.54, backgroundImage: `url("data:image/svg+xml,${(window.unigraph.getNamespaceMap)?.()?.[el.name]?._icon}")`}}/>
+                <Typography style={{color: "grey", marginRight: "4px"}}>{(window.unigraph.getNamespaceMap)?.()?.[el.name]?._name}:</Typography>
+                <Typography style={{marginRight: "8px"}}>{el.items}</Typography>
+            </TabButton>
+        })}
+    </Card>
+}
 
 const UserLibraryAll = ({id}: any) => {
 
-    const [data, setData] = React.useState<string[]>([]);
-    const [loadedItems, setLoadedItems] = React.useState<any[]>([]);
-    const [setupProps, setSetupProps] = React.useState<{next: any, cleanup: any} | null>(null);
-
-    useEffectOnce(() => {
-        const subsId = getRandomInt();
-        window.unigraph.subscribeToType("any", (result: any[]) => {setData(result.map(el => el.uid))}, subsId, {uidsOnly: true, first: -500});
-
-        return function cleanup() { window.unigraph.unsubscribe(subsId); }
-    })
+    const [data, setData] = React.useState<any[]>([]);
+    const [itemGroups, setItemGroups] = React.useState<any[]>([]);
+    const [currentType, setCurrentType] = React.useState<string>("");
 
     React.useEffect(() => {
-        if (setupProps?.cleanup) setupProps.cleanup();
-        let newProps: any = undefined;
-        if (data.length) {
-            newProps = setupInfiniteScrolling(data, 25, (items: any[]) => {
-                setLoadedItems(items);
-            });
-            setSetupProps(newProps);
-            newProps.next();
+        const subsId = getRandomInt();
+        if (currentType.length) {
+            window.unigraph.subscribeToType(currentType, (result: any[]) => {setData(result.reverse())}, subsId, {metadataOnly: true, first: -500});
         }
+        return function cleanup() { window.unigraph.unsubscribe(subsId); }
+    }, [currentType])
 
-        return function cleanup () { newProps?.cleanup() }
-    }, [data])
-    
+    useEffectOnce(() => {
+        const nsmap = Object.keys(window.unigraph?.getNamespaceMap?.() || {}).filter(el => el.startsWith('$/schema'));
+        window.unigraph.getQueries(nsmap.map(el => getStatsQuery(el))).then((res: any[]) => {
+            setItemGroups(res.map((el, index) => ({name: nsmap[index], items: el[0]?.['objects']})))
+        })
+    })
 
-    return <div>
-        <Typography gutterBottom variant="h4">
-            Library - Recent items
-        </Typography>
-        <InfiniteScroll
-            dataLength={loadedItems.length} //This is important field to render the next data
-            next={setupProps?.next || (() => {})}
-            scrollableTarget={"workspaceContainer"+id}
-            hasMore={loadedItems.length < data.length}
-            loader={<h4>Loading...</h4>}
-            endMessage={
-                <React.Fragment/>
-            }
-        >
-            {buildGraph(loadedItems || []).map((it: any) => <ListItem button key={it.uid}>
-                <AutoDynamicView object={it} />
-            </ListItem>)}
-        </InfiniteScroll>
+    return <div style={{display: "flex", flexDirection: "column", height: "100%"}}>
+        <MultiTypeDescriptor itemGroups={itemGroups} currentType={currentType} setCurrentType={setCurrentType}/>
+        {currentType.length ? <DynamicObjectListView 
+            items={data}
+            context={null}
+            defaultFilter={[]}
+            compact
+            noBar
+        /> : <div>
+            <Typography style={{margin: "12px"}}>Select a type to see items</Typography>    
+        </div>}
     </div>
 }
 

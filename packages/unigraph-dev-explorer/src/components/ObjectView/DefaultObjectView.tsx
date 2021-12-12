@@ -31,8 +31,8 @@ export const StringObjectViewer = ({object}: {object: any}) => {
     const finalObject = unpad(object)
 
     return <div style={{maxHeight: "160px", width: "100%", overflowX: "auto"}}>
-        Type: {object?.type?.["unigraph.id"]}<br/>
-        {JSON.stringify(finalObject, null, 2)}
+        Type: {(window.unigraph.getNamespaceMap)?.()?.[object?.type?.["unigraph.id"]]?._name}<br/>
+        {(!object['_value']) ? (new UnigraphObject({...object})).as('primitive') : <pre>{JSON.stringify(finalObject, null, 2)}</pre>}
     </div>;
 }
 
