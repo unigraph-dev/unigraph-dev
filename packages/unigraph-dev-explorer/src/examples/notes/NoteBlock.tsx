@@ -294,7 +294,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                                         setTimeout(() => {
                                             callbacks['focus-next-dfs-node'](data, editorContext, 0)
                                         }, 500);
-                                    })
+                                    }, false)
                                 }
                             }
                             if (!hasMatch) {

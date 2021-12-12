@@ -1,6 +1,7 @@
-export const setSearchPopup = (boxRef: any, searchString: string, onSelected: any) => {
+export const setSearchPopup = (boxRef: any, searchString: string, onSelected: any, hideHidden?: boolean) => {
     window.unigraph.getState('global/searchPopup').setValue({
         show: true, search: searchString, anchorEl: boxRef.current,
+        hideHidden: hideHidden,
         onSelected, default: [{
             label: (search: string) => `Create new page named ${search}`,
             onSelected: async (search: string) => {

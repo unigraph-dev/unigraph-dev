@@ -1,5 +1,5 @@
 const resQueries = {
-    "indexes": (qual: string, filter: string) => `result(${qual}) @filter(${filter} type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) {
+    "indexes": (qual: string, filter: string, showHidden: boolean) => `result(${qual}) @filter(${filter} type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) ${showHidden ? '' : 'AND (NOT eq(<_hide>, true))'}) {
         uid
         type {
           unigraph.id
@@ -11,16 +11,16 @@ const resQueries = {
             uid expand(_userpredicate_) { uid expand(_userpredicate_) { uid expand(_userpredicate_) } } } } }
         }
     }`,
-    "uids": (qual: string, filter: string) => `result(${qual}) @filter(${filter} type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) {
+    "uids": (qual: string, filter: string, showHidden: boolean) => `result(${qual}) @filter(${filter} type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) ${showHidden ? '' : 'AND (NOT eq(<_hide>, true))'}) {
         uid
     }`,
-    "metadata": (qual: string, filter: string) => `result(${qual}) @filter(${filter} type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) {
+    "metadata": (qual: string, filter: string, showHidden: boolean) => `result(${qual}) @filter(${filter} type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) ${showHidden ? '' : 'AND (NOT eq(<_hide>, true))'}) {
         uid
         type {
             unigraph.id
         }
     }`,
-    "default": (qual: string, filter: string) => `result(${qual}) @filter(${filter} type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) AND (NOT eq(<_hide>, true))) @recurse(depth: 15) {
+    "default": (qual: string, filter: string, showHidden: boolean) => `result(${qual}) @filter(${filter} type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) ${showHidden ? '' : 'AND (NOT eq(<_hide>, true))'}) @recurse(depth: 15) {
         uid
         expand(_userpredicate_)
         unigraph.id
@@ -61,7 +61,7 @@ export const makeSearchQuery = (
             }
         }`)
     }
-    const resultQuery = resQueries[display || "default"](`func: uid(${getQualUids(hops)})${getQualFromOptions(searchOptions)}`, queryString[2])
+    const resultQuery = resQueries[display || "default"](`func: uid(${getQualUids(hops)})${getQualFromOptions(searchOptions)}`, queryString[2], searchOptions.hideHidden === false)
     const fq = `query {
         ${queryString[0]}
         uhops0 as var${queryString[1]}
@@ -72,7 +72,7 @@ export const makeSearchQuery = (
         ${qhops.join('\n')}
         ${resultQuery}
     }`
-    console.log(fq)
+    //console.log(fq)
     return fq;
 }
 
