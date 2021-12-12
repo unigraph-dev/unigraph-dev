@@ -4,7 +4,7 @@ import { AutoDynamicViewDetailed } from '../ObjectView/AutoDynamicViewDetailed';
 import { DefaultObjectView } from '../ObjectView/DefaultObjectView';
 
 export default function DetailedObjectView ({ uid, viewer, id, context, component, callbacks, isStub, type }: any) {
-    console.log(uid, isStub, type)
+    //console.log(uid, isStub, type)
     let objectId: any = uid;
 
     const viewerId = viewer ? viewer : "dynamic-view-detailed"

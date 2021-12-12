@@ -111,6 +111,7 @@ export type SearchPopupState = {
     anchorEl?: any,
     show: boolean,
     search?: string,
+    hideHidden?: boolean,
     onSelected?: (newName: string, newUid: string) => any;
     default: {
         label: (search: string) => string;
