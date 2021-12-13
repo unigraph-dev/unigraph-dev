@@ -48,7 +48,7 @@ const argv = process.argv.slice(2);
 const writeStatsJson = argv.indexOf('--stats') !== -1;
 
 // Generate configuration
-const config = configFactory('production');
+const config = configFactory(argv.indexOf('--lib') !== -1 ? 'lib' : 'production');
 
 // We require that you explicitly set browsers and do not fall back to
 // browserslist defaults.
@@ -64,7 +64,7 @@ checkBrowsers(paths.appPath, isInteractive)
     // if you're in it, you don't end up in Trash
     fs.emptyDirSync(paths.appBuild);
     // Merge with the public folder
-    copyPublicFolder();
+    copyPublicFolder(argv.indexOf('--lib') !== -1);
     // Start the webpack build
     return build(previousFileSizes);
   })
@@ -135,6 +135,7 @@ checkBrowsers(paths.appPath, isInteractive)
 // Create the production build and print the deployment instructions.
 function build(previousFileSizes) {
   console.log('Creating an optimized production build...');
+  console.log(config);
 
   const compiler = webpack(config);
   return new Promise((resolve, reject) => {
@@ -204,8 +205,8 @@ function build(previousFileSizes) {
   });
 }
 
-function copyPublicFolder() {
-  fs.copySync(paths.appPublic, paths.appBuild, {
+function copyPublicFolder(isEnvLib) {
+  fs.copySync(paths.appPublic, isEnvLib ? paths.appBuildLib : paths.appBuild, {
     dereference: true,
     filter: file => file !== paths.appHtml,
   });
