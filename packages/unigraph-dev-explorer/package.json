@@ -1,6 +1,6 @@
 {
   "name": "unigraph-dev-explorer",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "dependencies": {
     "@babel/core": "7.12.3",
     "@date-io/moment": "1.x",
@@ -126,7 +126,7 @@
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js",
-    "postinstall": "node scripts/build.js --lib"
+    "prepare": "node scripts/build.js --lib"
   },
   "eslintConfig": {
     "extends": "react-app"
