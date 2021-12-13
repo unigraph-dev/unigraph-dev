@@ -1,7 +1,6 @@
 {
   "name": "unigraph-dev-explorer",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.1.1",
   "dependencies": {
     "@date-io/moment": "1.x",
     "@material-ui/core": "^4.11.0",
@@ -35,7 +34,6 @@
     "react-markdown": "^6.0.2",
     "react-resize-detector": "^6.7.6",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "^4.0.3",
     "react-splitter-layout": "^4.0.0",
     "react-swipeable": "^6.1.2",
     "react-transition-group": "^4.4.2",
@@ -66,7 +64,8 @@
     "@types/react-router-dom": "^5.1.6",
     "@types/react-virtualized": "^9.21.13",
     "@types/uuid": "^8.3.0",
-    "raw-loader": "^4.0.2"
+    "raw-loader": "^4.0.2",
+    "react-scripts": "^4.0.3"
   },
   "scripts": {
     "start": "react-scripts start",
