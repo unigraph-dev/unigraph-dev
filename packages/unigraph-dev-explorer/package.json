@@ -1,6 +1,6 @@
 {
   "name": "unigraph-dev-explorer",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "dependencies": {
     "@babel/core": "7.12.3",
     "@date-io/moment": "1.x",
