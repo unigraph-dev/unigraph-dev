@@ -187,6 +187,8 @@ export const widgets: Record<string, any> = {
   }
 }
 
-window.unigraph.getState('registry/pages').setValue(pages);
-window.unigraph.getState('registry/components').setValue(components);
-window.unigraph.getState('registry/widgets').setValue(widgets);
+export const initDefaultComponents = () => {
+  window.unigraph.getState('registry/pages').setValue(pages);
+  window.unigraph.getState('registry/components').setValue(components);
+  window.unigraph.getState('registry/widgets').setValue(widgets);
+}

@@ -1,4 +1,4 @@
-import { Button, Checkbox, Chip, ListItemIcon, ListItemText, TextField, Typography } from '@material-ui/core';
+import { Button, Checkbox, Chip, ListItemText, TextField, Typography } from '@material-ui/core';
 import { CalendarToday, PriorityHigh } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { DynamicViewRenderer } from '../../global';
@@ -71,8 +71,6 @@ export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
     </div>
 }
 
-registerDynamicViews({"$/schema/todo": TodoItem})
-
 const quickAdder = async (inputStr: string, preview = true) => {
     const parsed = parseTodoObject(inputStr);
     if (!preview) return await window.unigraph.addObject(parsed, "$/schema/todo");
@@ -89,7 +87,10 @@ const tt = () => <React.Fragment>
     <Typography style={{color: "gray"}} variant="body2">priority 5</Typography>
 </React.Fragment>
 
-registerQuickAdder({'todo': {adder: quickAdder, tooltip: tt}, 'td': {adder: quickAdder, tooltip: tt}})
+export const init = () => {
+    registerDynamicViews({"$/schema/todo": TodoItem})
+    registerQuickAdder({'todo': {adder: quickAdder, tooltip: tt}, 'td': {adder: quickAdder, tooltip: tt}})
+}
 
 export const TodoList = withUnigraphSubscription( 
     // @ts-ignore

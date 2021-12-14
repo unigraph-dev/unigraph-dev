@@ -62,7 +62,7 @@ checkBrowsers(paths.appPath, isInteractive)
   .then(previousFileSizes => {
     // Remove all content but keep the directory so that
     // if you're in it, you don't end up in Trash
-    fs.emptyDirSync(paths.appBuild);
+    fs.emptyDirSync(argv.indexOf('--lib') !== -1 ? paths.appBuildLib : paths.appBuild);
     // Merge with the public folder
     copyPublicFolder(argv.indexOf('--lib') !== -1);
     // Start the webpack build
@@ -88,10 +88,10 @@ checkBrowsers(paths.appPath, isInteractive)
       }
 
       console.log('File sizes after gzip:\n');
-      printFileSizesAfterBuild(
+      argv.indexOf('--lib') !== -1 ? undefined : printFileSizesAfterBuild(
         stats,
         previousFileSizes,
-        paths.appBuild,
+        argv.indexOf('--lib') !== -1 ? paths.appBuildLib : paths.appBuild,
         WARN_AFTER_BUNDLE_GZIP_SIZE,
         WARN_AFTER_CHUNK_GZIP_SIZE
       );
@@ -135,7 +135,6 @@ checkBrowsers(paths.appPath, isInteractive)
 // Create the production build and print the deployment instructions.
 function build(previousFileSizes) {
   console.log('Creating an optimized production build...');
-  console.log(config);
 
   const compiler = webpack(config);
   return new Promise((resolve, reject) => {

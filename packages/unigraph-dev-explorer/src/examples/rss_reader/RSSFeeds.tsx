@@ -15,7 +15,7 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 import { Html } from "../semantic/Html";
 import { setupInfiniteScrolling } from "../../components/ObjectView/infiniteScrolling";
 import Icon from "@mdi/react";
-import { mdiRssBox, mdiTwitter } from "@mdi/js";
+import { mdiRssBox } from "@mdi/js";
 
 export type ARSSFeed = {
     uid?: string,
@@ -106,13 +106,15 @@ const RSSFeed: DynamicViewRenderer = ({data, callbacks}) => {
     return <AutoDynamicView object={new UnigraphObject(data?.['_value']?.['site_info']?.['_value'])} noContextMenu />
 }
 
-const dynamicComponents = {
-    "$/schema/rss_item": RSSItem,
-    "$/schema/rss_feed": RSSFeed
+export const init = () => {
+    const dynamicComponents = {
+        "$/schema/rss_item": RSSItem,
+        "$/schema/rss_feed": RSSFeed
+    }
+    
+    registerDynamicViews(dynamicComponents);
+    registerDetailedDynamicViews({"$/schema/rss_item": {view: RSSItemDetailed}});
 }
-
-registerDynamicViews(dynamicComponents);
-registerDetailedDynamicViews({"$/schema/rss_item": {view: RSSItemDetailed}})
 
 const RSSFeedsBody: React.FC<{data: ARSSFeed[]}> = ({data}) => {
     const [newUrl, setNewUrl] = React.useState("");
