@@ -5,9 +5,8 @@ import { WidgetFocus } from "./WidgetFocus"
 import { WidgetPomodoro } from "./WidgetPomodoro"
 import Sugar from "sugar"
 
-const pages = window.unigraph.getState('registry/pages')
-
 export const TodayView = ({pageName}: any) => {
+    const pages = window.unigraph.getState('registry/pages');
 
     const [currentTime, setCurrentTime] = React.useState(new Date())
     React.useMemo(() => setInterval(() => setCurrentTime(new Date()), 1000), [])

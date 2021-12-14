@@ -26,8 +26,6 @@ import Icon from '@mdi/react'
 import { mdiFormTextarea, mdiStarPlusOutline, mdiSync, mdiTagMultipleOutline } from '@mdi/js';
 import { SearchOverlayPopover } from "./pages/SearchOverlay";
 
-const pages = window.unigraph.getState('registry/pages')
-
 export function WorkspacePageComponent({ children, maximize, paddingTop, id }: any) {
     return <div id={"workspaceContainer" + id} style={{ width: "100%", height: "100%", overflow: "auto" }}>
         <Container maxWidth={maximize ? false : "lg"} disableGutters style={{ paddingTop: (maximize || !paddingTop) ? "0px" : "12px", height: "100%", display: "flex", flexDirection: "column" }}>
@@ -39,6 +37,7 @@ export function WorkspacePageComponent({ children, maximize, paddingTop, id }: a
 }
 
 const WorkspaceInnerEl_ = ({config, component}: any) => {
+    const pages = window.unigraph.getState('registry/pages');
     if (component.startsWith('/pages/')) {
         const page = pages.value[(component.replace('/pages/', '') as string)];
         return page.constructor(config);
@@ -49,7 +48,7 @@ const WorkspaceInnerEl_ = ({config, component}: any) => {
 const WorkspaceInnerEl = React.memo(WorkspaceInnerEl_, (a, b) => JSON.stringify(a) === JSON.stringify(b))
 
 export const getComponentFromPage = (location: string, params: any = {}) => {
-    console.log(location.substring(1));
+    const pages = window.unigraph.getState('registry/pages');
     if (location.startsWith('/$/')) location = "/" + (window.unigraph.getNamespaceMap as any)()[location.substring(1)].uid
     return {
         type: 'tab',
@@ -277,6 +276,8 @@ export function WorkSpace(this: any) {
             ]
         }
     };
+
+    const pages = window.unigraph.getState('registry/pages');
 
     const factory = (node: any) => {
         var component = node.getComponent();

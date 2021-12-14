@@ -50,7 +50,9 @@ const EmailMessage: DynamicViewRenderer = ({data, callbacks}) => {
     </ListItem>
 }
 
-registerDynamicViews({'$/schema/email_message': EmailMessage})
+export const init = () => {
+    registerDynamicViews({'$/schema/email_message': EmailMessage})
+}
 
 export const EmailList = withUnigraphSubscription(
     EmailListBody,

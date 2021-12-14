@@ -1,12 +1,13 @@
 {
   "name": "unigraph-dev-common",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Common libraries and files for unigraph-dev",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
+    "build": "tsc",
+    "prepare": "tsc"
   },
   "devDependencies": {
     "typescript": "^4.2.2"

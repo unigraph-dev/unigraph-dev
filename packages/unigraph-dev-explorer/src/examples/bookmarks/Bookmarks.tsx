@@ -3,10 +3,9 @@ import React, { useState } from "react";
 import { pkg as bookmarkPackage } from 'unigraph-dev-common/lib/data/unigraph.bookmark.pkg';
 
 import { DynamicViewRenderer } from "../../global";
-import { List, ListItem, TextField, Button, IconButton, ListItemSecondaryAction, ListItemText, ListItemIcon, Avatar, Typography } from "@material-ui/core";
+import { ListItemText, ListItemIcon, Avatar, Typography } from "@material-ui/core";
 import { Delete, Description, Link, Public } from "@material-ui/icons";
 import { registerDynamicViews, registerQuickAdder, withUnigraphSubscription } from '../../unigraph-react'
-import { Tag } from "../semantic/Tag";
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { getExecutableId } from "unigraph-dev-common/lib/api/unigraph";
 import { AutoDynamicView } from "../../components/ObjectView/AutoDynamicView";
@@ -122,10 +121,12 @@ const quickAdder = async (inputStr: string, preview = true) => {
     else return [await createBookmark(inputStr, false), '$/schema/web_bookmark']
 }
 
-const tt = () => <div>
-    For example, enter #tag1 https://example.com
-</div>
+export const init = () => {
+    const tt = () => <div>
+        For example, enter #tag1 https://example.com
+    </div>
 
-registerQuickAdder({ 'bookmark': { adder: quickAdder, tooltip: tt }, 'bm': { adder: quickAdder, tooltip: tt } })
+    registerQuickAdder({ 'bookmark': { adder: quickAdder, tooltip: tt }, 'bm': { adder: quickAdder, tooltip: tt } })
 
-registerDynamicViews({ "$/schema/web_bookmark": BookmarkItem })
+    registerDynamicViews({ "$/schema/web_bookmark": BookmarkItem })
+}

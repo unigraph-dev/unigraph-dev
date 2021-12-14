@@ -1,15 +1,13 @@
-import { ListItem, ListItemText } from "@material-ui/core";
+import { ListItemText } from "@material-ui/core";
 import React from "react";
 import { useEffectOnce } from "react-use";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
-import { registerDynamicViews } from "../../unigraph-react";
 import { byElementIndex, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { DynamicViewRenderer } from "../../global";
-import { AutoDynamicView } from "../ObjectView/AutoDynamicView";
 import { isJsonString } from "unigraph-dev-common/lib/utils/utils";
 import { DynamicObjectListView } from "../ObjectView/DynamicObjectListView";
 
-const ViewItem: DynamicViewRenderer = ({data, callbacks}) => {
+export const ViewItem: DynamicViewRenderer = ({data, callbacks}) => {
     let unpadded: any = unpad(data);
 
     return <React.Fragment>
@@ -25,8 +23,6 @@ const ViewItem: DynamicViewRenderer = ({data, callbacks}) => {
         </div>
     </React.Fragment>
 }
-
-registerDynamicViews({"$/schema/view": ViewItem})
 
 export const FavoriteBar = () => {
 

@@ -1,6 +1,6 @@
 {
-  "private": true,
   "name": "unigraph-dev",
+  "private": true,
   "workspaces": {
     "packages": [
       "packages/*"
@@ -55,5 +55,6 @@
   },
   "resolutions": {
     "bezier-js": "4.0.3"
-  }
+  },
+  "version": "0.0.1"
 }

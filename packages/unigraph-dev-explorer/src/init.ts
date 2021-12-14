@@ -10,11 +10,16 @@ import { init as sm_init } from './examples/semantic/init';
 import { init as cl_init } from './examples/calendar/init';
 import { init as tw_init } from './examples/twitter/Tweet';
 import { init as re_init } from './examples/reddit/RedditPost';
+import { init as bm_init } from './examples/bookmarks/Bookmarks';
+import { init as em_init } from './examples/email/Email';
+import { init as td_init } from './examples/todo/TodoList';
+import { init as rss_init } from './examples/rss_reader/RSSFeeds';
 import { pb_init } from './components/UnigraphCore/Pinboard';
 
 import { ListObjectQuery, ListObjectView } from "./components/UnigraphCore/ListObjectView";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
 import { SubentityView } from "./components/UnigraphCore/SubentityView";
+import { ViewItem } from "./components/UnigraphCore/FavoriteBar";
 
 window.reloadCommands = () => {
     const commandsState = window.unigraph.getState("registory/commands");
@@ -35,9 +40,9 @@ window.reloadCommands = () => {
 /**
  * Things to do when Unigraph explorer loads
  */
-function init() {
+export function init(hostname?: string) {
     console.log("initialized!")
-    let hst = window.location.hostname.length ? window.location.hostname : "localhost";
+    let hst = hostname || (window.location.hostname.length ? window.location.hostname : "localhost");
     let browserId = `${getRandomInt()}${getRandomInt()}`;
 
     const defaultSettings: UserSettings = {
@@ -131,6 +136,7 @@ function initRegistry() {
         "$/skeleton/default": {view: DefaultSkeleton},
         "$/schema/notification": {view: CNotification},
         "$/schema/subentity": {view: SubentityView},
+        "$/schema/view": {view: ViewItem},
     });
     window.unigraph.addState('registry/dynamicViewDetailed', {
         "$/schema/executable": {view: CodeOrComponentView},
@@ -158,7 +164,5 @@ function initAnalyticsIfOptedIn () {
 }
 
 function initPackages() {
-    nb_init(); sm_init(); tw_init(); re_init(); cl_init(); pb_init();
+    bm_init(); em_init(); td_init(); rss_init(); nb_init(); sm_init(); tw_init(); re_init(); cl_init(); pb_init();
 }
-
-init();

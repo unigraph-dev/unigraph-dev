@@ -21,7 +21,7 @@
         "@babel/preset-react": "^7.14.5",
         "json-stable-stringify": "^1.0.1",
         "unigraph-dev-backend": "0.1.0",
-        "unigraph-dev-common": "0.0.1"
+        "unigraph-dev-common": "0.0.2"
     },
     "electronVersion": "^13.1.7",
     "build": {

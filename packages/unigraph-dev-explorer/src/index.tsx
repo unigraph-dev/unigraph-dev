@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import './init';
-import './pages';
+import { init } from './init';
+import { initDefaultComponents } from './pages';
 import * as serviceWorker from './serviceWorker';
 
 import App from './App';
@@ -16,6 +16,9 @@ function render(component: any) {
     document.getElementById('root')
   )
 }
+
+init();
+initDefaultComponents();
 
 if (typeof window.electronPreload === "function") window.electronPreload();
 
