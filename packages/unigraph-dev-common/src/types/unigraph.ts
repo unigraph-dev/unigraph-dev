@@ -164,7 +164,7 @@ export interface Unigraph<TT = WebSocket | false> {
      * 
      * @param fragments Array of DQL (GraphQL+-) Query fragments - such as `(func: fn1(something)){ uid expand(_predicate_) }`
      */
-    getQueries(fragments: string[]): any;
+    getQueries(fragments: string[]|string, getAll?: boolean, batch?: number, commonVars?: string): any;
     /**
      * Gets search results given a search query.
      * 
