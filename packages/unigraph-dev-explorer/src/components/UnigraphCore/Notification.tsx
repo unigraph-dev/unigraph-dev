@@ -27,9 +27,9 @@ export const Notification: DynamicViewRenderer = ({data, callbacks}) => {
                 color="textPrimary"
                 style={{paddingRight: "4px"}}
               >
-                {unpadded.from}{", updated: "}{timeago.format(new Date(unpadded?._updatedAt))}:
+                <span style={{color: "gray"}}>From: </span>{unpadded.from}<span style={{color: "gray"}}>, updated: </span>{timeago.format(new Date(unpadded?._updatedAt))}
               </Typography>
-              {unpadded.content}
+              <Typography variant="body2" style={{whiteSpace: "pre"}}>{unpadded.content}</Typography>
             </React.Fragment>
           }
         />

@@ -30,6 +30,12 @@
             "editable": true,
             "name": "Sync Gmail inbox every 2 minutes",
             "concurrency": 1
+        }, {
+            "id": "set-emails-as-read",
+            "env": "routine/js",
+            "src": "executables/setEmailsAsRead.js",
+            "editable": true,
+            "name": "Set emails as read"
         }],
         "package_name": "unigraph.email"
     }
