@@ -123,7 +123,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             const ret = (await client.queryDgraph('query { ' + frag + ' }'))[0]?.[0];
             return ret;
         },
-        getQueries: async (fragments, getAll = false, batch = 50) => {
+        getQueries: async (fragments, getAll = false, batch = 50, commonVars) => {
             let allQueries;
             if (!Array.isArray(fragments)) fragments = [fragments];
             if (getAll) allQueries = fragments.map((it, index) => `query${index}(func: uid(par${index})) @recurse {uid unigraph.id expand(_userpredicate_)}
@@ -143,6 +143,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
               }, [] as any)
             const res: any[] = [];
             for (let i=0; i<batchedQueries.length; ++i) {
+                if (commonVars) batchedQueries[i].push(commonVars);
                 res.push(...(await client.queryDgraph(`query {${batchedQueries[i].join('\n')}}`)))
             }
             return res;

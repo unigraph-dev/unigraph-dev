@@ -25,7 +25,6 @@ const account = (await unigraph.getQueries([`(func: uid(accs)) @cascade {
 var(func: eq(<unigraph.id>, "$/schema/internet_account")) {
     <~type> { accs as uid }
 }`]))?.[0]?.[0];
-console.log(account);
 
 const getQuery = (msgid) => `(func: uid(parIds)) @cascade { 
     uid
@@ -47,7 +46,6 @@ if (account?.uid) {
             client_secret: gmailClientSecret,
         })
     })
-    console.log(resp);
 
     const accessTokenResult = await resp.json();
     if (accessTokenResult['access_token']) token = accessTokenResult['access_token'];
@@ -82,15 +80,19 @@ if (account?.uid) {
     }`]));
     const newMsgs = messages.filter((el, index) => results[index].length === 0);
 
-    const newMsgResps = await Promise.all(newMsgs.map(id => 
-        gmail.users.messages.get({userId: "me", id, format: "raw"})));
+    let newMsgResps = (await Promise.all(newMsgs.map(id => 
+        gmail.users.messages.get({userId: "me", id, format: "raw"}))))
+    
+    // Do not insert drafts to Unigraph
+    newMsgResps = newMsgResps.filter(el => !el.data.labelIds.includes('DRAFT'));
 
     if (newMsgs.length) await unigraph.runExecutable('$/executable/add-email', {
         dont_check_unique: true, 
         messages: newMsgResps.map(el => {return {message: Buffer.from(el.data.raw, 'base64').toString(), read: !el.data.labelIds.includes('UNREAD')}})
     });
 
-    // Now we can sync gmail inboxes
+    const readMsgs = msgIdResps.map((el, index) => el.data.labelIds.includes('UNREAD') ? undefined : results[index]?.[0]?.uid)
+    await unigraph.runExecutable('$/executable/delete-item-from-list' , {where: '$/entity/inbox', item: readMsgs.filter(el => el !== undefined)});
 
 }
 

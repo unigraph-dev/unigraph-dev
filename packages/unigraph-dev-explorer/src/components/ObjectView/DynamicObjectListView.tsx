@@ -63,7 +63,7 @@ const DynamicListItem = ({ reverse, listUid, item, index, context, callbacks, it
         <Slide direction={reverse ? "down" : "up"} in key={item.uid}>
             <ListItem style={{ ...(compact ? { paddingTop: "2px", paddingBottom: "2px" } : {}) }}>
                 <ListItemIcon onClick={() => {
-                    itemRemover(item['uid'])
+                    itemRemover([item['uid']])
                 }} style={{ display: (itemRemover === _.noop || isMobile() || noRemover) ? "none" : "" }}><ClearAll /></ListItemIcon>
                 <AutoDynamicView object={new UnigraphObject(item)} callbacks={{
                     ...callbacks,
@@ -82,7 +82,7 @@ const DynamicListItem = ({ reverse, listUid, item, index, context, callbacks, it
     </React.Fragment>
 }
 
-export type ItemRemover = (uids: string | string[] | number | number[]) => void;
+export type ItemRemover = (uids: string[]) => void;
 export type Filter = { id: string, fn: (_: any) => boolean }
 
 export type DynamicObjectListViewProps = {
@@ -113,7 +113,7 @@ const DynamicListBasic = ({ reverse, items, context, listUid, callbacks, itemUid
     return <TransitionGroup><DragandDrop dndContext={tabContext.viewId} listId={context?.uid} isReverse={reverse} arrayId={listUid}>
         {items.map((el: any, index: number) => <DynamicListItem
             item={itemGetter(el)} index={index} context={context} listUid={listUid} compact={compact}
-            callbacks={callbacks} itemUids={itemUids} itemRemover={itemRemover} reverse={reverse} noRemover={noRemover}
+            callbacks={callbacks} itemUids={items.map((el: any) => itemGetter(el).uid)} itemRemover={itemRemover} reverse={reverse} noRemover={noRemover}
         />)}</DragandDrop></TransitionGroup>;
 }
 

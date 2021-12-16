@@ -1,4 +1,4 @@
-const getQuery = (targetUrl, index) => `(func: uid(par${index.toString()})) @cascade { 
+const getQuery = (targetUrl, index) => `(func: uid(parType)) @cascade { 
   uid
   _value {
     item_data {
@@ -10,11 +10,6 @@ const getQuery = (targetUrl, index) => `(func: uid(par${index.toString()})) @cas
         }
       }
     }
-  }
-}
-var(func: eq(unigraph.id, "$/schema/rss_item")) {
-  <unigraph.origin> {
-    par${index.toString()} as uid
   }
 }`
 
@@ -37,7 +32,11 @@ parser.parseURL(el).then(res => rresolve(res.items)).catch((e) => {
 totalItems.forEach((items, i) => items.forEach((item, index) => queries.push({query: getQuery(item.link, i+'_'+index), item: item, feedId: i})));
 
 console.log("All items loaded!");
-const results = await unigraph.getQueries(queries.map(el => el.query));
+const results = await unigraph.getQueries(queries.map(el => el.query), undefined, 50, `var(func: eq(unigraph.id, "$/schema/rss_item")) {
+  <unigraph.origin> {
+    parType as uid
+  }
+}`);
 console.log("Got current entities!")
 //console.log(results)
 const objects = results.map((els, index) => els.length >= 1 ? undefined : {
