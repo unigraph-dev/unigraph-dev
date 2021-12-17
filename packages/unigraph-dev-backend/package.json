@@ -8,7 +8,9 @@
     "npm": "^7.7.6"
   },
   "scripts": {
-    "build": "tsc && (cp ../../secrets.env.json dist || true)",
+    "build": "run-script-os",
+    "build:linux:darwin": "tsc && (cp ../../secrets.env.json dist || true)",
+    "build:windows": "pwsh -Command \"tsc && (Copy-Item ../../secrets.env.json.gpg -Destination dist)\"",
     "start": "yarn build && node --trace-warnings dist",
     "example": "yarn build && node dist/example",
     "test": "echo \"Error: no test specified\" && exit 1"

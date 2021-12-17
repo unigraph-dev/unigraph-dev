@@ -11,6 +11,7 @@ node_modules
 packages/*/dist
 .ignore
 coverage/
+.history
 
 # Secrets
 secrets.env.json
