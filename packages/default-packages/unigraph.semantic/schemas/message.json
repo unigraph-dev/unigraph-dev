@@ -21,7 +21,24 @@
                     },
                     "_parameters": {
                         "_element": {
-                            "type": { "unigraph.id": "$/schema/person" }
+                            "type": { "unigraph.id": "$/composer/Object" },
+                            "_parameters": {
+                                "_indexedBy": { "unigraph.id": "$/primitive/string" }
+                            },
+                            "_properties": [
+                                {
+                                    "_key": "person",
+                                    "_definition": {
+                                        "type": { "unigraph.id": "$/schema/interface/person" }
+                                    }
+                                },
+                                {
+                                    "_key": "identifier",
+                                    "_definition": {
+                                        "type": { "unigraph.id": "$/primitive/string" }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -34,7 +51,24 @@
                     },
                     "_parameters": {
                         "_element": {
-                            "type": { "unigraph.id": "$/schema/person" }
+                            "type": { "unigraph.id": "$/composer/Object" },
+                            "_parameters": {
+                                "_indexedBy": { "unigraph.id": "$/primitive/string" }
+                            },
+                            "_properties": [
+                                {
+                                    "_key": "person",
+                                    "_definition": {
+                                        "type": { "unigraph.id": "$/schema/interface/person" }
+                                    }
+                                },
+                                {
+                                    "_key": "identifier",
+                                    "_definition": {
+                                        "type": { "unigraph.id": "$/primitive/string" }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }
@@ -47,7 +81,24 @@
                     },
                     "_parameters": {
                         "_element": {
-                            "type": { "unigraph.id": "$/schema/person" }
+                            "type": { "unigraph.id": "$/composer/Object" },
+                            "_parameters": {
+                                "_indexedBy": { "unigraph.id": "$/primitive/string" }
+                            },
+                            "_properties": [
+                                {
+                                    "_key": "person",
+                                    "_definition": {
+                                        "type": { "unigraph.id": "$/schema/interface/person" }
+                                    }
+                                },
+                                {
+                                    "_key": "identifier",
+                                    "_definition": {
+                                        "type": { "unigraph.id": "$/primitive/string" }
+                                    }
+                                }
+                            ]
                         }
                     }
                 }

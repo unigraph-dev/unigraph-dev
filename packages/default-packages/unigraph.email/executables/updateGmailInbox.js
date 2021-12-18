@@ -88,7 +88,7 @@ if (account?.uid) {
 
     if (newMsgs.length) await unigraph.runExecutable('$/executable/add-email', {
         dont_check_unique: true, 
-        messages: newMsgResps.map(el => {return {message: Buffer.from(el.data.raw, 'base64').toString(), read: !el.data.labelIds.includes('UNREAD')}})
+        messages: newMsgResps.map(el => {return {message: Buffer.from(el.data.raw, 'base64').toString(), read: !el.data.labelIds?.includes('UNREAD')}})
     });
 
     const readMsgs = msgIdResps.map((el, index) => el.data.labelIds.includes('UNREAD') ? undefined : results[index]?.[0]?.uid)

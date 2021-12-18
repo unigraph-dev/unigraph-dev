@@ -36,6 +36,10 @@ export const StringObjectViewer = ({object}: {object: any}) => {
     </div>;
 }
 
+export const BasicPersonView = ({data}: any) => {
+    return data['_value.%']
+}
+
 export const DefaultSkeleton = () => {
     return <div style={{width: "100%"}}><Skeleton /> <Skeleton /> <Skeleton /></div>
 }

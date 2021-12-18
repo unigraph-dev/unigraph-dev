@@ -20,8 +20,8 @@ const dest = parsed.map((el) => {
         message_id: el.messageId,
         message: {
             date_received: el.date.toISOString(),
-            sender: [el.from?.text].filter(it => it !== undefined),
-            recipient: [el.to?.text].filter(it => it !== undefined),
+            sender: (el.from?.value || []).map(it => ({person: `${it.name} <${it.address}>`, identifier: it.address})),
+            recipient: (el.to?.value || []).map(it => ({person: `${it.name} <${it.address}>`, identifier: it.address})),
         },
         content: {
             abstract: {
@@ -54,8 +54,6 @@ for (let i=0; i<dest.length; ++i) {
         readMask.push(msgs[i]?.read);
     }
 }
-
-console.log(count);
 
 const uids = await unigraph.addObject(toAdd, '$/schema/email_message');
 uids.forEach((el, index) => {if (!readMask[index]) inbox_els.push(el)});
