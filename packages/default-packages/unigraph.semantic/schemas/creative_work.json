@@ -29,7 +29,7 @@
             {
                 "_key": "author",
                 "_definition": {
-                    "type": { "unigraph.id": "$/schema/person" }
+                    "type": { "unigraph.id": "$/schema/interface/person" }
                 }
             }
         ]

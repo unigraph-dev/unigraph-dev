@@ -125,19 +125,39 @@ export function createPackageCache(client: DgraphClient): Cache<any> {
  */
 export async function addUnigraphPackage(client: DgraphClient, pkg: PackageDeclaration, caches: Record<string, Cache<any>>, update = false) {
     // 1. Create all schemas associated with the package in the correct namespace
+    const interfaces: any[] = []; // additional interfaces for every schema
     const schemas = Object.entries(pkg.pkgSchemas).map(([key, schema]) => {
+        const currentUnigraphId = `$/package/${pkg.pkgManifest.package_name}/${pkg.pkgManifest.version}/schema/${key}`;
+        const currentUnigraphInterfaceId = `$/package/${pkg.pkgManifest.package_name}/${pkg.pkgManifest.version}/schema/interface/${key}`;
+        if (!key.startsWith('interface/')) {
+            // add interface definition as well
+            interfaces.push({
+                "unigraph.id": currentUnigraphInterfaceId,
+                "dgraph.type": "Type",
+                "_name": "Interface: " + schema._name,
+                "_definition": {
+                    "type": { "unigraph.id": "$/composer/Union" },
+                    "_parameters": {
+                        "_definitions": [{
+                            "type": { "unigraph.id": `$/schema/${key}` }
+                        }]
+                    }
+                }
+            })
+        }
         return {
-            "unigraph.id": `$/package/${pkg.pkgManifest.package_name}/${pkg.pkgManifest.version}/schema/${key}`,
+            "unigraph.id": currentUnigraphId,
             ...schema
         }
     });
-    for(let i=0; i<schemas.length; ++i) {
+    const fullSchemas = [...schemas, ...interfaces];
+    for(let i=0; i<fullSchemas.length; ++i) {
         const schemaShorthandRef = {
-            ...getRefQueryUnigraphId(`$/schema/${Object.keys(pkg.pkgSchemas)[i]}`),
+            ...getRefQueryUnigraphId(`$/` + fullSchemas[i]['unigraph.id'].split('/').slice(4).join('/')),
             "dgraph.type": ['Type'],
-            "_value[": getRefQueryUnigraphId(schemas[i]["unigraph.id"])
+            "_value[": getRefQueryUnigraphId(fullSchemas[i]["unigraph.id"])
         }
-        const schemaAutoref = processAutorefUnigraphId(schemas[i])
+        const schemaAutoref = processAutorefUnigraphId(fullSchemas[i])
         const upsert = insertsToUpsert([schemaAutoref], undefined, caches['schemas'].dataAlt![0]);
         await client.createUnigraphUpsert(upsert)
         const upsert2 = insertsToUpsert([schemaShorthandRef], undefined, caches['schemas'].dataAlt![0]);
@@ -211,8 +231,8 @@ export async function addUnigraphPackage(client: DgraphClient, pkg: PackageDecla
     // 3. Update schema reference table for these schemas
     const upsert2 = insertsToUpsert([{
         ...getRefQueryUnigraphId("$/meta/namespace_map"),
-        ...Object.fromEntries(schemas.map((schema, i) => [
-            `$/schema/${Object.keys(pkg.pkgSchemas)[i]}`, 
+        ...Object.fromEntries(fullSchemas.map((schema, i) => [
+            `$/` + schema['unigraph.id'].split('/').slice(4).join('/'), 
             getRefQueryUnigraphId(schema["unigraph.id"])
         ])),
         ...!(pkg.pkgExecutables && Object.entries(pkg.pkgExecutables)) ? undefined : Object.fromEntries(executables.map((exec, i) => [

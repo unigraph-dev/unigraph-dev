@@ -1,7 +1,7 @@
 import { unigraph } from "unigraph-dev-common";
 import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { isJsonString } from "unigraph-dev-common/lib/utils/utils";
-import { CodeOrComponentView, DefaultSkeleton, Executable, ViewViewDetailed } from "./components/ObjectView/DefaultObjectView";
+import { BasicPersonView, CodeOrComponentView, DefaultSkeleton, Executable, ViewViewDetailed } from "./components/ObjectView/DefaultObjectView";
 import { ANotification, Notification as CNotification } from "./components/UnigraphCore/Notification";
 import { UserSettings } from "./global";
 
@@ -135,6 +135,7 @@ function initRegistry() {
         "$/schema/executable": {view: Executable},
         "$/skeleton/default": {view: DefaultSkeleton},
         "$/schema/notification": {view: CNotification},
+        "$/schema/person": {view: BasicPersonView},
         "$/schema/subentity": {view: SubentityView},
         "$/schema/view": {view: ViewItem},
     });

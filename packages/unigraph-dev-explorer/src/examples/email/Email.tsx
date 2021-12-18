@@ -8,6 +8,8 @@ import Sugar from 'sugar';
 import { Link } from "@material-ui/icons";
 import { getComponentFromPage } from "../../Workspace";
 import { DynamicObjectListView } from "../../components/ObjectView/DynamicObjectListView";
+import { UnigraphObject } from "unigraph-dev-common/lib/utils/utils";
+import { AutoDynamicView } from "../../components/ObjectView/AutoDynamicView";
 
 type AEmail = {
     name: string,
@@ -33,10 +35,12 @@ const EmailListBody: React.FC<{data: any[]}> = ({data}) => {
 
 const EmailMessage: DynamicViewRenderer = ({data, callbacks}) => {
     let unpadded: AEmail = unpad(data);
+    const fromPerson = (new UnigraphObject(data.get('message/sender')['_value['][0]?.['_value']?.['person']?.['_value']?.['_value']));
+    console.log(fromPerson)
     return <ListItem>
         <ListItemAvatar><Avatar>{unpadded.message?.sender?.[0]?.[0]}</Avatar></ListItemAvatar>
         <ListItemText
-            primary={[<strong>{unpadded.message?.sender?.[0]}</strong>, <br/>, data?.get('name')?.['_value']?.['_value']?.['_value.%']]}
+            primary={[<strong><AutoDynamicView object={fromPerson} inline/></strong>, <br/>, data?.get('name')?.['_value']?.['_value']?.['_value.%']]}
             secondary={[Sugar.Date.relative(new Date(unpadded?.message?.date_received)), <div style={{display: "flex", alignItems: "center"}}>
                 
                 <Link onClick={() => {
