@@ -223,6 +223,7 @@ export const SearchOverlayPopover = ({open, setClose, noShadow}: any) => {
         document.onkeydown = function(evt) {
             evt = evt || window.event;
             if ((evt.ctrlKey || evt.metaKey) && evt.key === 'e' && !isElectron()) {
+                evt.preventDefault();
                 if (open === undefined) setSearchEnabled(!searchEnabled);
             }
             if ((searchEnabled) && evt.key === 'Escape') {
