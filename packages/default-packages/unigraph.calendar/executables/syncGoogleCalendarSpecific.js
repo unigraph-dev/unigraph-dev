@@ -148,6 +148,10 @@ for (let i=0; i<items.length; ++i) {
         },
         icaluid: ev.iCalUID,
         eventuid: ev.id,
+        attendee: (ev.attendees || []).map(el => ({
+          person: `${el.displayName || el.email} <${el.email}>`,
+          identifier: el.email,
+        })),
         ...recurrenceObj
       }
       await unigraph.addObject(evObj, "$/schema/calendar_event")

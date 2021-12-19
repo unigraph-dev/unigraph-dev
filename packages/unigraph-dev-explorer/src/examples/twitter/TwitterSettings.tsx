@@ -24,35 +24,53 @@ export const TwitterSettings = () => {
     useEffect(() => {
         if (loaded) {
             const id = getRandomInt();
-            window.unigraph.subscribeToQuery(`(func: type(Entity)) @cascade {
+            window.unigraph.subscribeToQuery(`(func: uid(parTwitter)) {
                 uid
-                type @filter(eq(<unigraph.id>, "$/schema/internet_account")) {<unigraph.id>}
                 _value {
                         site {
                             _value {
                                 _value {
-                                    name @filter(eq(<_value.%>, "Twitter")) {
+                                    name {
                                         <_value.%>
+                                    }
+                                }
+                            }
                         }
-                    }
-                    }
+                        name { <_value.%> }
+                        username { <_value.%> }
+                        access_token { <_value.%> }
+                        access_token_secret { <_value.%> }
+                        subscriptions {
+                            <_value[> {
+                                _value {
+                                    _value {
+                                        name { <_value.%> }
+                                        twitter_id { <_value.%> }
+                                        last_id_fetched { <_value.%> }
+                                    }
+                                }
+                            }
+                        }
                 }
-                name { <_value.%> }
-                username { <_value.%> }
-                access_token { <_value.%> }
-                access_token_secret { <_value.%> }
-                subscriptions {
-                    <_value[> {
+            } 
+            
+            parTwitter as var(func: uid(parAcc)) @cascade {
+                uid
+                _value {
+                    site {
                         _value {
                             _value {
-                                name { <_value.%> }
-                                twitter_id { <_value.%> }
-                                last_id_fetched { <_value.%> }
+                                name @filter(eq(<_value.%>, "Twitter")) {
+                                    <_value.%>
+                                }
                             }
                         }
                     }
                 }
-                }
+            }
+
+            var(func: eq(<unigraph.id>, "$/schema/internet_account")) {
+                <~type> { parAcc as uid }
             }`, (res: any[]) => {
                 setAccount(res[0])
             }, id, true);

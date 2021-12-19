@@ -17,14 +17,13 @@ export const RedditSettings = () => {
     useEffect(() => {
         if (loaded) {
             const id = getRandomInt();
-            window.unigraph.subscribeToQuery(`(func: type(Entity)) @cascade {
+            window.unigraph.subscribeToQuery(`(func: uid(parReddit)) {
                 uid
-                type @filter(eq(<unigraph.id>, "$/schema/internet_account")) {<unigraph.id>}
                 _value {
                     site {
                         _value {
                             _value {
-                                name @filter(eq(<_value.%>, "Reddit")) {
+                                name {
                                     <_value.%>
                                 }
                             }
@@ -45,6 +44,25 @@ export const RedditSettings = () => {
                         }
                     }
                 }
+            }
+            
+            parReddit as var(func: uid(parAcc)) @cascade {
+                uid
+                _value {
+                    site {
+                        _value {
+                            _value {
+                                name @filter(eq(<_value.%>, "Reddit")) {
+                                    <_value.%>
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            var(func: eq(<unigraph.id>, "$/schema/internet_account")) {
+                <~type> { parAcc as uid }
             }`, (res: any[]) => {
                 setAccount(res[0])
             }, id, true);
