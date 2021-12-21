@@ -11,7 +11,7 @@ import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import { StringObjectViewer } from './DefaultObjectView';
 import { getSubentities, isStub, SubentityDropAcceptor } from './utils';
 
-export const AutoDynamicView = ({ object, callbacks, component, attributes, inline, allowSubentity, allowSemantic, style, noDrag, noDrop, noContextMenu, subentityExpandByDefault }: AutoDynamicViewProps) => {
+export const AutoDynamicView = ({ object, callbacks, component, attributes, inline, allowSubentity, allowSemantic = true, style, noDrag, noDrop, noContextMenu, subentityExpandByDefault }: AutoDynamicViewProps) => {
     if (!callbacks) callbacks = {};
     allowSubentity = allowSubentity === true;
 

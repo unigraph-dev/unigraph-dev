@@ -9,6 +9,8 @@ return <div style={{display: "flex", alignItems: "center"}}>
     <ListItemText>
         <Typography>{name || data['_value']['emails']['_value['][0]['_value.%']}</Typography>
         <div style={{ display: "inline", alignItems: "center", overflowWrap: "break-word", color: "gray" }}>
+            {data?.['_value']?.['children']?.['_value[']?.map ?
+            <div style={{display: "inline", marginRight: "8px"}}>{data['_value']['children']['_value['].map((it) => <AutoDynamicView object={new UnigraphObject(it['_value'])} callbacks={callbacks} inline style={{verticalAlign: "middle"}}/>)}</div> : []}
             <p style={{ fontSize: "0.875rem", display: "contents" }}>{data.get('emails')['_value['][0]['_value.%']}</p>
         </div>
     </ListItemText>

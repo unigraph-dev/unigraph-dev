@@ -52,7 +52,8 @@
                 {"env": "npm", "package": "@material-ui/core", "import": "TextField", "as": "TextField"},
                 {"env": "npm", "package": "@material-ui/core", "import": "Button", "as": "Button"},
                 {"env": "npm", "package": "@material-ui/core", "import": "MenuItem", "as": "MenuItem"},
-                {"env": "npm", "package": "@material-ui/icons", "import": "MoreVert", "as": "MoreVert"}
+                {"env": "npm", "package": "@material-ui/icons", "import": "MoreVert", "as": "MoreVert"},
+                {"env": "npm", "package": "@material-ui/core", "import": "Grid", "as": "Grid"}
             ]
         }],
         "entities": [{
