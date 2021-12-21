@@ -85,7 +85,7 @@ export default async function startServer(client: DgraphClient) {
           objectCreatedHooks[schemaName] = serverStates.hooks[el];
         }
       })
-      lock.acquire('caches/head', async function (done: Function) {
+      lock.acquire('caches/head', async function (done: any) {
         await afterObjectCreatedHooks(serverStates, objectCreatedHooks, client);
         done(false, null);
       });
