@@ -14,6 +14,7 @@ import { PackageDeclaration } from "unigraph-dev-common/lib/types/packages";
 import { addHook } from "./hooks";
 import Babel from '@babel/core';
 import { getRandomInt } from "unigraph-dev-common/lib/utils/utils";
+import { mergeWithConcatArray } from "./utils";
 
 export type Executable = {
     name?: string,
@@ -92,17 +93,19 @@ export function buildExecutable(exec: Executable, context: ExecContext, unigraph
 }
 
 export function initExecutables(executables: [string, Executable][], context: Partial<ExecContext>, unigraph: Unigraph, schedule: Record<string, cron.ScheduledTask>, states: any) {
+    let newHooks = {};
     executables.forEach(([key, el]) => {
         if (key.startsWith("0x") && el.periodic) {
             schedule[el["unigraph.id"]]?.stop();
             schedule[el["unigraph.id"]] = cron.schedule(el.periodic, () => buildExecutable(el, {...context, definition: el, params: {}}, unigraph, states)())
         }
         if (key.startsWith("0x") && el.on_hook) {
-            states.hooks = addHook(states.hooks, el.on_hook, async (params: any) => {
+            newHooks = addHook(newHooks, el.on_hook, async (params: any) => {
                 return (buildExecutable(el, {...context, definition: el, params}, unigraph, states))();
             })
         }
     })
+    states.hooks = _.mergeWith({}, states.defaultHooks, newHooks, mergeWithConcatArray);
 }
 
 /** Routines */

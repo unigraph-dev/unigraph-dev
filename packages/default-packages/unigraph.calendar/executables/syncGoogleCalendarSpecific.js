@@ -85,7 +85,7 @@ const toEod = (date) => {
 
 // Process the changes, looping through all the events one by one
 //if (cal['_value'].id?.['_value.%'] !== "c_5le2cv45o72utfkh4bcntpj2f4@group.calendar.google.com") return;
-
+const toAdd = [];
 for (let i=0; i<items.length; ++i) {
   const ev = items[i];
   if (ev.status === "cancelled") {
@@ -153,13 +153,13 @@ for (let i=0; i<items.length; ++i) {
           identifier: el.email,
         })),
         ...recurrenceObj
-      }
-      await unigraph.addObject(evObj, "$/schema/calendar_event")
+      };
+      toAdd.push(evObj);
     }
   }
 }
 
-
-await unigraph.updateObject(calUid, {
+if (toAdd.length) await unigraph.addObject(toAdd, "$/schema/calendar_event");
+if (syncToken !== nextSyncToken) await unigraph.updateObject(calUid, {
   sync_token: nextSyncToken
 });
