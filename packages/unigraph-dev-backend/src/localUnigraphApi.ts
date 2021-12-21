@@ -84,10 +84,11 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
                 else {prev.push(curr); return prev}
             }, []);
         },
-        addObject: async (object, schema, padded) => {
+        addObject: async (object, schema, padded, subIds) => {
             clearEmpties(object);
             //console.log(JSON.stringify(object, null, 4));
             const objects = Array.isArray(object) ? object : [object];
+            if (objects.length === 0) return [];
             const finalUnigraphObjects = objects.map((obj, index) => {
                 let unigraphObject = obj;
                 if (!padded) unigraphObject = buildUnigraphEntity(obj, schema, states.caches['schemas'].data, undefined, {globalStates: {nextUid: 100000 * index}} as any);
@@ -96,7 +97,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             //console.log(JSON.stringify(finalUnigraphObject, null, 4));
             const upsert = insertsToUpsert(finalUnigraphObjects, undefined, states.caches['schemas'].dataAlt![0]);
             const uids = await client.createUnigraphUpsert(upsert);
-            callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches});
+            callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches, subIds});
             return uids;
         },
         getNamespaceMapUid: (name) => {
@@ -120,7 +121,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             }
             const frag = `query(func: uid(${Array.isArray(uid) ? uid.reduce((prev: string, el: string) => prev + el + ",", "").slice(0, -1): uid })) 
                 ${options?.queryAsType ? makeQueryFragmentFromType(options.queryAsType, states.caches["schemas"].data) : "@recurse { uid unigraph.id expand(_userpredicate_) }"}`
-            const ret = (await client.queryDgraph('query { ' + frag + ' }'))[0]?.[0];
+            const ret = Array.isArray(uid) ? (await client.queryDgraph('query { ' + frag + ' }'))[0] : (await client.queryDgraph('query { ' + frag + ' }'))[0]?.[0];
             return ret;
         },
         getQueries: async (fragments, getAll = false, batch = 50, commonVars) => {

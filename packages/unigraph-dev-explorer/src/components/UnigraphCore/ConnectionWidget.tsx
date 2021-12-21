@@ -6,7 +6,7 @@ import { download, upload } from "../../utils";
 
 export const getStatsQuery = (name: string) => `(func: eq(<unigraph.id>, "${name}")) {
     uid
-		objects: count(~type)
+		objects: count(~type) @filter(type(Entity))
   }`
 
 export const ConnectionWidget: React.FC = ({}) => {

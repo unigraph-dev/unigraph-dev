@@ -144,7 +144,7 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param object The object to be added.
      * @param schema Schema of that object, must be valid. Such as: `$/schema/abc`
      */
-    addObject(object: any, schema: string, padded?: boolean): any;
+    addObject(object: any, schema: string, padded?: boolean, subIds?: any[]): any;
     /**
      * Reach into the namespace map cache and get a UID corresponding to the name.
      * 
