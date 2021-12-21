@@ -287,16 +287,25 @@ export default class DgraphClient {
 
   /** Only get schemas that are registered through the package manager. */
   async getSchemasFromTable() {
-    return (await this.queryData<any[]>(`
-    query findByName() {
-      entities(func: eq(unigraph.id, "$/meta/namespace_map")) @recurse {
-        uid
-        unigraph.id
-        _definition
-        expand(_userpredicate_)
+    const res = (await this.queryDgraph(`
+      query findByName() {
+        entities(func: uid(uu)) @filter(NOT type(Named)) @recurse {
+          uid
+          unigraph.id
+          _definition
+          expand(_userpredicate_)
+        }
+        map(func: eq(unigraph.id, "$/meta/namespace_map")) {
+          uid
+          unigraph.id
+          expand(_userpredicate_) {
+            uu as uid
+          }
+        }
       }
-    }
-  `, {}))[0]
+    `, {}))
+    const idsMap = Object.fromEntries(res[0].map((el: any) => [el.uid, el]));
+    return Object.fromEntries(Object.entries(res[1][0]).map((el: any) => [el[0], el[1]?.uid ? idsMap[el[1].uid] : el[1]]))
   }
 
   async getSearchResults(query: string[], display: any, hops = 2, searchOptions: any) {
