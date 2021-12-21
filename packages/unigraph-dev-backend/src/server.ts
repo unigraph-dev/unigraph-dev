@@ -289,7 +289,7 @@ export default async function startServer(client: DgraphClient) {
 
     "add_unigraph_package": function (event: EventAddUnigraphPackage, ws: IWebsocket) {
       lock.acquire('caches/schema', function(done: Function) {
-        addUnigraphPackage(dgraphClient, event.package, caches, event.update).then(async _ => {
+        addUnigraphPackage(dgraphClient, event.package, serverStates.caches, event.update).then(async _ => {
           await callHooks(serverStates.hooks, "after_schema_updated", {caches: caches});
           done(false, null)
           //console.log("Hooks called")
