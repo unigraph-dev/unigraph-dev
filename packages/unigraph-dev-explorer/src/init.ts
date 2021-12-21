@@ -19,7 +19,7 @@ import { pb_init } from './components/UnigraphCore/Pinboard';
 import { ListObjectQuery, ListObjectView } from "./components/UnigraphCore/ListObjectView";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
 import { SubentityView } from "./components/UnigraphCore/SubentityView";
-import { ViewItem } from "./components/UnigraphCore/FavoriteBar";
+import { ViewItem } from "./components/ObjectView/ViewObjectView";
 
 window.reloadCommands = () => {
     const commandsState = window.unigraph.getState("registory/commands");

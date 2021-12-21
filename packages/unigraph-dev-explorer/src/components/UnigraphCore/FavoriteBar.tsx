@@ -1,28 +1,8 @@
-import { ListItemText } from "@material-ui/core";
 import React from "react";
 import { useEffectOnce } from "react-use";
 import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
 import { byElementIndex, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
-import { DynamicViewRenderer } from "../../global";
-import { isJsonString } from "unigraph-dev-common/lib/utils/utils";
 import { DynamicObjectListView } from "../ObjectView/DynamicObjectListView";
-
-export const ViewItem: DynamicViewRenderer = ({data, callbacks}) => {
-    let unpadded: any = unpad(data);
-
-    return <React.Fragment>
-        <div onClick={() => window.newTab(window.layoutModel, {
-            type: 'tab',
-            config: isJsonString(unpadded?.props) ? JSON.parse(unpadded.props).config : {},
-            customTitle: true,
-            name: unpadded.name,
-            component: typeof unpadded.view === "string" ? unpadded.view : "/pages/" + data._value.view._value.uid,
-            enableFloat: 'true'
-        })} style={{display: "contents"}}>
-            <ListItemText primary={unpadded.name}></ListItemText>
-        </div>
-    </React.Fragment>
-}
 
 export const FavoriteBar = () => {
 
