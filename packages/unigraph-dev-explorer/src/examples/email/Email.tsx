@@ -36,11 +36,11 @@ const EmailListBody: React.FC<{data: any[]}> = ({data}) => {
 const EmailMessage: DynamicViewRenderer = ({data, callbacks}) => {
     let unpadded: AEmail = unpad(data);
     const fromPerson = (new UnigraphObject(data.get('message/sender')['_value['][0]?.['_value']?.['person']?.['_value']?.['_value']));
-    console.log(fromPerson)
+    const ider = data.get('message/sender')['_value['][0]?.['_value']?.['identifier']?.['_value.%'];
     return <ListItem>
-        <ListItemAvatar><Avatar>{unpadded.message?.sender?.[0]?.[0]}</Avatar></ListItemAvatar>
+        <ListItemAvatar><Avatar src={fromPerson?.get('profile_image')?.as('primitive') || ""}>{unpadded.message?.sender?.[0]?.[0]}</Avatar></ListItemAvatar>
         <ListItemText
-            primary={[<strong><AutoDynamicView object={fromPerson} inline/></strong>, <br/>, data?.get('name')?.['_value']?.['_value']?.['_value.%']]}
+            primary={[<strong><AutoDynamicView object={fromPerson} callbacks={{identifier: ider}} inline/></strong>, <br/>, data?.get('name')?.as('primitive')]}
             secondary={[Sugar.Date.relative(new Date(unpadded?.message?.date_received)), <div style={{display: "flex", alignItems: "center"}}>
                 
                 <Link onClick={() => {

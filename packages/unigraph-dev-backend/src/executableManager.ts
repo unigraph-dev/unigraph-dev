@@ -41,25 +41,28 @@ export function createExecutableCache(client: DgraphClient, context: Partial<Exe
     };
 
     cache.updateNow = async () => { 
-        const newdata = await client.getExecutables();
-        const newdata2 = await client.getSchemasFromTable();
-        
-        cache.data = newdata.reduce((prev, obj) => {
-            obj = unpad(obj);
-            if (obj && obj["unigraph.id"]) {
-                prev[obj["unigraph.id"]] = obj;
-            }
-            if (obj && obj.uid) {
-                prev[obj.uid] = obj;
-            }
-            return prev;
-        }, {})
+        states.lock.acquire('caches/exec', async function (done: any) {
+            const newdata = await client.getExecutables();
+            const newdata2 = await client.getSchemasFromTable();
+            
+            cache.data = newdata.reduce((prev, obj) => {
+                obj = unpad(obj);
+                if (obj && obj["unigraph.id"]) {
+                    prev[obj["unigraph.id"]] = obj;
+                }
+                if (obj && obj.uid) {
+                    prev[obj.uid] = obj;
+                }
+                return prev;
+            }, {})
 
-        Object.entries(newdata2).forEach(([k, v]) => {
-            if (k.startsWith('$/executable') && !cache.data[k]) cache.data[k] = unpad(v);
-        })
-        
-        initExecutables(Object.entries(cache.data), context, unigraph, schedule, states)
+            Object.entries(newdata2).forEach(([k, v]) => {
+                if (k.startsWith('$/executable') && !cache.data[k]) cache.data[k] = unpad(v);
+            })
+            
+            initExecutables(Object.entries(cache.data), context, unigraph, schedule, states)
+            done(false, null);
+        });  
     };
 
     cache.updateNow();
