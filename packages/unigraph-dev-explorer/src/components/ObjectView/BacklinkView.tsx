@@ -4,10 +4,10 @@ import { useEffectOnce } from "react-use";
 import { buildGraph } from "unigraph-dev-common/lib/utils/utils";
 import { DynamicObjectListView } from "./DynamicObjectListView";
 
-const getQuery = (uid: string, forward?: boolean) => `(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted))) @recurse(depth: 8) {
+const getQuery = (uid: string, forward?: boolean) => `(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted))) {
   uid
   <unigraph.id>
-  expand(_userpredicate_)
+  type { <unigraph.id> }
 }
 var(func: uid(${uid})) {
   <${forward?"~":""}unigraph.origin> {
@@ -44,6 +44,7 @@ export const BacklinkView = ({data, hideHeader, forward, callbacks, uid}: any) =
                         .forEach((el: any) => window.unigraph.deleteRelation(el, {"unigraph.origin": {uid: data?.uid || uid}}))
                 }
             }}
+            loadAll
         />
     </React.Fragment>
 }
