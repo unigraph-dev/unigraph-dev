@@ -119,7 +119,8 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     const getEl = React.useCallback((viewId, setTitle) => {
         if (isRecursion === false && object?.type && object.type['unigraph.id'] && Object.keys(DynamicViews).includes(object.type['unigraph.id']) && getObject()) {
             return React.createElement(DynamicViews[object.type['unigraph.id']].view, {
-                data: getObject(), callbacks: {viewId, setTitle, ...(callbacks ? callbacks : {})}, ...(attributes ? attributes : {})
+                data: getObject(), callbacks: {viewId, setTitle, ...(callbacks ? callbacks : {})}, ...(attributes ? attributes : {}),
+                inline: inline
             });
         } else if (isRecursion === false && object && getObject()) {
             return <StringObjectViewer object={getObject()}/>
