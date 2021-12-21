@@ -94,7 +94,9 @@ export const SearchOverlay = ({open, setClose, callback, summonerTooltip, defaul
                 window.unigraph.getSchemas().then((schemas: any) => {
                     try {
                         const padded = buildUnigraphEntity(JSON.parse(JSON.stringify(object)), type, schemas)
-                        setEntries([<AutoDynamicView object={new UnigraphObject(padded)} noDrag noDrop/>])
+                        setEntries([<div onClickCapture={(ev) => { ev.stopPropagation();}}>
+                            <AutoDynamicView object={new UnigraphObject(padded)} noDrag noDrop/>
+                        </div>])
                     } catch (e) {
                         console.log(e)
                     }
@@ -138,7 +140,7 @@ export const SearchOverlay = ({open, setClose, callback, summonerTooltip, defaul
             placeholder={"Enter: +<type shortname> to create; ?<search query> to search; <command> to execute command"}
             onKeyPress={async (ev) => {
                 if (ev.key === "Enter" && parsed?.type === "quickAdder" && window.unigraph.getState('registry/quickAdder').value[parsed?.key]) {
-                    window.unigraph.getState('registry/quickAdder').value[parsed?.key]?.adder(JSON.parse(JSON.stringify(parsed?.value)), false).then((uids: any[]) => {
+                    window.unigraph.getState('registry/quickAdder').value[parsed?.key]?.adder(JSON.parse(JSON.stringify(parsed?.value)), false, callback).then((uids: any[]) => {
                         if (callback && uids[0]) callback(uids[0])
                     });
                     setInput('');
