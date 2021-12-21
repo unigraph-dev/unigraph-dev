@@ -94,7 +94,9 @@ export const SearchOverlay = ({open, setClose, callback, summonerTooltip, defaul
                 window.unigraph.getSchemas().then((schemas: any) => {
                     try {
                         const padded = buildUnigraphEntity(JSON.parse(JSON.stringify(object)), type, schemas)
-                        setEntries([<AutoDynamicView object={new UnigraphObject(padded)} noDrag noDrop/>])
+                        setEntries([<div onClickCapture={(ev) => { ev.stopPropagation();}}>
+                            <AutoDynamicView object={new UnigraphObject(padded)} noDrag noDrop/>
+                        </div>])
                     } catch (e) {
                         console.log(e)
                     }
