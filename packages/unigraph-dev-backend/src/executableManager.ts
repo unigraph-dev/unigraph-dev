@@ -87,7 +87,7 @@ export function buildExecutable(exec: Executable, context: ExecContext, unigraph
             return ret;
         }; else return fn;
     }
-
+    
     if (Object.keys(environmentRunners).includes(exec.env) && (!exec.concurrency || states.runningExecutables.filter((el: any) => el.slug === exec["unigraph.id"]).length < exec.concurrency)) {
         // @ts-expect-error: already checked for environment runner inclusion
         return wrapExecutable(environmentRunners[exec.env](exec.src, context, unigraph));
