@@ -61,10 +61,11 @@ export const init = () => {
     registerDynamicViews({ "$/schema/note_block": { view: NoteBlock, query: noteQuery} })
     registerDetailedDynamicViews({ "$/schema/note_block": { view: DetailedNoteBlock, query: noteQueryDetailed } })
 
-    const quickAdder = async (inputStr: string, preview = true) => {
+    const quickAdder = async (inputStr: string, preview = true, callback: any) => {
         if (!preview) {
             const uids = await window.unigraph.addObject({text: {_value: inputStr, type: {'unigraph.id': "$/schema/markdown"}}}, "$/schema/note_block");
-            window.wsnavigator(`/library/object?uid=${uids[0]}&isStub=true&type=$/schema/note_block`)
+            if (!callback) window.wsnavigator(`/library/object?uid=${uids[0]}&isStub=true&type=$/schema/note_block`);
+            return uids;
         }
         else return [{text: {_value: inputStr, type: {'unigraph.id': "$/schema/markdown"}}}, "$/schema/note_block"];
     }

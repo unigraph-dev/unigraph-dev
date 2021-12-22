@@ -102,6 +102,7 @@ export default async function startServer(client: DgraphClient) {
     defaultHooks: hooks,
     namespaceMap: namespaceMap,
     localApi: {} as Unigraph,
+    lock: lock,
     httpCallbacks: {},
     runningExecutables: [],
     addRunningExecutable: (defn: any) => {

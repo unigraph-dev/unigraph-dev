@@ -14,7 +14,7 @@ export const AppLibrary = () => {
         }, viewId);
 
         return function cleanup () { window.unigraph.unsubscribe(viewId) }
-    })
+    }, [])
 
     return <div>
         {totalViews.map((el: any) =>

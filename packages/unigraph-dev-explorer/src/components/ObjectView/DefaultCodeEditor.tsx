@@ -49,12 +49,15 @@ const AddImportComponent = ({onAddImport}: any) => {
 }
 
 const ImportItem = ({data}: any) => {
-    return <React.Fragment>
-        <Typography>{data?.['env']['_value.%']}</Typography>
+    return <div style={{display: "flex"}}>
+        <Typography style={{color: "gray", marginRight: "0.5em"}}>from</Typography>
+        <Typography style={{marginRight: "0.5em"}}>{data?.['env']['_value.%']}</Typography>
         <Typography>{data?.['package']['_value.%']}</Typography>
+        <Typography style={{color: "gray", marginRight: "0.5em", marginLeft: "0.5em"}}>import</Typography>
         <Typography>{data?.['import']?.['_value.%'] || "*"}</Typography>
+        <Typography style={{color: "gray", marginRight: "0.5em", marginLeft: "0.5em"}}>as</Typography>
         <Typography>{data?.['as']['_value.%']}</Typography>
-    </React.Fragment>
+    </div>
 }
 
 const lang: any = {
