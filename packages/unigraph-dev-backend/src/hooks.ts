@@ -44,6 +44,7 @@ export async function initEntityHeads (states: any, schemas: string[], client: D
 }
 
 export async function afterObjectCreatedHooks (states: any, hooks: Record<string, any[]>, client: DgraphClient) {
+    if (Object.keys(hooks).length === 0) return;
     const queries = Object.keys(hooks).map((el, index) => `query${index} (func: eq(<unigraph.id>, "${el}")) {
         uid
         <~type> (after: ${states.entityHeadByType[el]}) {

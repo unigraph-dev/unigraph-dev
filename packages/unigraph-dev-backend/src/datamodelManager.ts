@@ -20,9 +20,15 @@ export async function checkOrCreateDefaultDataModel(client: DgraphClient) {
 
     if (unigraphObject.length < 1) {
         // Insert default data
-        const tempSchemaCache = createSchemaCache(client);
-
         await client.setSchema(defaultTypes);
+        await client.createUnigraphUpsert(insertsToUpsert([processAutorefUnigraphId({
+            "unigraph.id": "$/meta/namespace_map",
+            "$/schema/executable": { "unigraph.id": "$/schema/executable" },
+            "$/schema/package_manifest": { "unigraph.id": "$/schema/package_manifest" }
+        })]));
+
+        const tempSchemaCache = createSchemaCache(client);
+        
         for (let i=0; i<defaultUserlandSchemas.length; ++i) {
             const schema = processAutorefUnigraphId(defaultUserlandSchemas[i]);
             await client.createUnigraphUpsert(insertsToUpsert([schema], undefined, tempSchemaCache.dataAlt![0]));

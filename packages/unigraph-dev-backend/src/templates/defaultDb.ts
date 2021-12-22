@@ -10,6 +10,7 @@ import {pkg as coreuser} from 'unigraph-dev-common/lib/data/unigraph.coreuser.pk
 import {pkg as execexample} from 'unigraph-dev-common/lib/data/unigraph.execexample.pkg';
 import {pkg as calendar} from 'unigraph-dev-common/lib/data/unigraph.calendar.pkg';
 import {pkg as notes} from 'unigraph-dev-common/lib/data/unigraph.notes.pkg';
+import {pkg as contacts} from 'unigraph-dev-common/lib/data/unigraph.contacts.pkg';
 import {pkg as home} from 'unigraph-dev-common/lib/data/unigraph.home.pkg';
 
 // Userspace packages
@@ -41,6 +42,11 @@ export const defaultTypes = `<_value>: uid @reverse .
 <_createdAt>: dateTime @index(hour) .
 <_updatedAt>: dateTime @index(hour) .
 type <Entity> {
+    type
+    _createdAt
+    _updatedAt
+}
+type <Named> {
     type
     _createdAt
     _updatedAt
@@ -314,14 +320,9 @@ export const defaultUserlandSchemas = [
     },
     packageManifestSchema,
     packageExecutableSchema,
-    {
-        "unigraph.id": "$/meta/namespace_map",
-        "$/schema/executable": { "unigraph.id": "$/schema/executable" },
-        "$/schema/package_manifest": { "unigraph.id": "$/schema/package_manifest" }
-    },
 ]
 
 export const defaultPackages = [
-    semantic, core, execexample, coreuser, home, calendar, notes,
+    semantic, core, execexample, coreuser, home, calendar, notes, contacts,
     onboarding, todo, bookmark, rss_reader, email, reddit, twitter, nlp, openai, kanban
 ]
