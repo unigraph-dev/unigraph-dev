@@ -22,6 +22,12 @@
                 "_indexAs": "name"
             },
             {
+                "_key": "maximize",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/boolean" }
+                }
+            },
+            {
                 "_key": "view",
                 "_definition": {
                     "type": { "unigraph.id": "$/schema/executable" }

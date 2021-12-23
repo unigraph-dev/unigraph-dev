@@ -6,8 +6,9 @@ import { buildUnigraphEntity } from "unigraph-dev-common/lib/utils/entityUtils";
 import { UnigraphObject } from "unigraph-dev-common/lib/utils/utils";
 import { AutoDynamicView } from "../components/ObjectView/AutoDynamicView";
 import { DynamicObjectListView } from "../components/ObjectView/DynamicObjectListView";
+import { inlineTextSearch } from "../components/UnigraphCore/InlineSearchPopup";
 import { parseQuery } from "../components/UnigraphCore/UnigraphSearch";
-import { isElectron } from "../utils";
+import { isElectron, setCaret } from "../utils";
 
 export const SearchOverlayTooltip = () => {
     return <div style={{marginTop: "16px"}}>
@@ -34,8 +35,10 @@ export const SearchOverlay = ({open, setClose, callback, summonerTooltip, defaul
     const [response, setResponse] = React.useState(false);
     const [commands, setCommands] = React.useState<any[]>([]);
 
+    const [adderRefs, setAdderRefs] = React.useState<any[]>([]);
+
     React.useEffect(() => {
-        window.unigraph.getState("registory/commands").subscribe(res => {
+        window.unigraph.getState("registry/commands").subscribe(res => {
             if (parsed.type !== "command") {
                 setCommands(res);
             }
@@ -74,7 +77,7 @@ export const SearchOverlay = ({open, setClose, callback, summonerTooltip, defaul
             setEntities([]);
         } else {
             if (parsed.type === "command" && input === "") {
-                setCommands(window.unigraph.getState("registory/commands").value)
+                setCommands(window.unigraph.getState("registry/commands").value)
             }
             setParsed({
                 type: input === "" ? "" : "command",
@@ -106,7 +109,7 @@ export const SearchOverlay = ({open, setClose, callback, summonerTooltip, defaul
             setQuery(parseQuery(parsed?.value));
         } else if (parsed?.type === "command") {
             // list all commands
-            const commands = window.unigraph.getState("registory/commands").value;
+            const commands = window.unigraph.getState("registry/commands").value;
             setCommands(commands.filter((el: any) => (el.name as string).toLowerCase().includes(parsed.value.toLowerCase()) !== false))
         }
     }, [parsed])
@@ -135,12 +138,20 @@ export const SearchOverlay = ({open, setClose, callback, summonerTooltip, defaul
             inputRef={tf}
             value={input}
             onChange={(ev) => {
+                const newContent = ev.target.value;
+                const caret = ev.target.selectionStart || 0;
+                inlineTextSearch(ev.target.value, tf, caret, async (match: any, newName: string, newUid: string) => {
+                    const newStr = newContent?.slice?.(0, match.index) + '[[' + newName + ']]' + newContent?.slice?.(match.index + match[0].length);
+                    setInput(newStr);
+                    setAdderRefs([...adderRefs, {key: newName, value: newUid}]);
+                    window.unigraph.getState('global/searchPopup').setValue({ show: false });
+                })
                 setInput(ev.target.value);
             }}
             placeholder={"Enter: +<type shortname> to create; ?<search query> to search; <command> to execute command"}
             onKeyPress={async (ev) => {
                 if (ev.key === "Enter" && parsed?.type === "quickAdder" && window.unigraph.getState('registry/quickAdder').value[parsed?.key]) {
-                    window.unigraph.getState('registry/quickAdder').value[parsed?.key]?.adder(JSON.parse(JSON.stringify(parsed?.value)), false, callback).then((uids: any[]) => {
+                    window.unigraph.getState('registry/quickAdder').value[parsed?.key]?.adder(JSON.parse(JSON.stringify(parsed?.value)), false, callback, adderRefs).then((uids: any[]) => {
                         if (callback && uids[0]) callback(uids[0])
                     });
                     setInput('');
@@ -171,6 +182,9 @@ export const SearchOverlay = ({open, setClose, callback, summonerTooltip, defaul
             {parsed?.type === "quickAdder" ? <div style={{marginTop: "32px"}}>
                 {React.createElement(window.unigraph.getState('registry/quickAdder').value[parsed?.key].tooltip)}
             </div> : []}
+            <div>
+
+            </div>
         </div>
     </div>
 }

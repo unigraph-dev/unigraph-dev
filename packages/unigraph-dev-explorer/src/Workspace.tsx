@@ -27,8 +27,12 @@ import { mdiFormTextarea, mdiStarPlusOutline, mdiSync, mdiTagMultipleOutline } f
 import { SearchOverlayPopover } from "./pages/SearchOverlay";
 
 export function WorkspacePageComponent({ children, maximize, paddingTop, id }: any) {
+
+    const [_maximize, setMaximize] = React.useState(maximize);
+    React.useContext(TabContext).setMaximize = (val: boolean) => {setMaximize(val)};
+
     return <div id={"workspaceContainer" + id} style={{ width: "100%", height: "100%", overflow: "auto" }}>
-        <Container maxWidth={maximize ? false : "lg"} disableGutters style={{ paddingTop: (maximize || !paddingTop) ? "0px" : "12px", height: "100%", display: "flex", flexDirection: "column" }}>
+        <Container maxWidth={_maximize ? false : "lg"} disableGutters style={{ paddingTop: (_maximize || !paddingTop) ? "0px" : "12px", height: "100%", display: "flex", flexDirection: "column" }}>
 
             <CssBaseline />
             {children}
@@ -295,6 +299,7 @@ export function WorkSpace(this: any) {
 
                 }
             },
+            setMaximize: (val: boolean) => {},
             isVisible: () => window.layoutModel.getNodeById(node._attributes.id).isVisible(),
         }}>
             <WorkspacePageComponent maximize={page.maximize} paddingTop={page.paddingTop} id={node._attributes.id}>

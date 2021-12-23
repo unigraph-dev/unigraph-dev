@@ -8,8 +8,8 @@ React.useEffect(() => {
                 greaterThanNow: true, allEnd: true
             }
         ).then(async (query) => {
-            const events = (await unigraph.getQueries([query]))?.[0];
-            setEvents(buildGraph(events).filter(el => el['type']['unigraph.id'] !== "$/schema/time_frame"));
+            let els = await unigraph.getQueries([query]);
+            setEvents(els[0]);
         })
     };
 
@@ -23,5 +23,26 @@ React.useEffect(() => {
 }, []);
 
 return <React.Fragment>
-    {events.map(el => <AutoDynamicView object={new UnigraphObject(el)} callbacks={{noDate: true}}/>)}
+    <DynamicObjectListView items={events} groupBy={"time_frame"} groupers={{time_frame: (els) => {
+        els = buildGraph(els);
+        let groups = {};
+        groups[Sugar.Date.medium(new Date())] = []
+        els.filter(el => el.type['unigraph.id'] === "$/schema/time_frame").forEach(el => {
+            const dd = Sugar.Date.medium(new Date((new UnigraphObject(el)).get('start/datetime').as('primitive')));
+            if (groups[dd]) groups[dd].push(el);
+            else groups[dd] = [el];
+        });
+        // 2. Go through groups and find all entities associated with these timeframes
+        let finalGroups = [];
+        Object.entries(groups).sort((a, b) => Sugar.Date.create(a[0]).getTime() - Sugar.Date.create(b[0]).getTime()).map(([key, value]) => {
+            const insert = {name: key, items: []}
+            value.sort((a, b) => Sugar.Date.create(new Date((new UnigraphObject(a)).get('start/datetime').as('primitive'))).getTime() - Sugar.Date.create(new Date((new UnigraphObject(b)).get('start/datetime').as('primitive'))).getTime()).map((val) => {
+                els.filter(el => el.type['unigraph.id'] !== "$/schema/time_frame").forEach(el => {
+                    if (JSON.stringify(unpad(el, false)).includes(val._value.uid)) insert.items.push(el);
+                })
+            })
+            finalGroups.push(insert)
+        });
+        return finalGroups;
+    }}} callbacks={{noDate: true}} context={null} noBar compact/>
 </React.Fragment>
