@@ -37,7 +37,7 @@ const UserLibraryAll = ({id}: any) => {
     }, [currentType])
 
     useEffectOnce(() => {
-        const nsmap = Object.keys(window.unigraph?.getNamespaceMap?.() || {}).filter(el => el.startsWith('$/schema'));
+        const nsmap = Object.keys(window.unigraph?.getNamespaceMap?.() || {}).filter(el => el.startsWith('$/schema') && !el.startsWith('$/schema/interface'));
         window.unigraph.getQueries(nsmap.map(el => getStatsQuery(el))).then((res: any[]) => {
             setItemGroups(res.map((el, index) => ({name: nsmap[index], items: el[0]?.['objects']})))
         })
