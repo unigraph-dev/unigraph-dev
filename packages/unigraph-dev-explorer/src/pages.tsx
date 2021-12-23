@@ -102,7 +102,6 @@ const pages: Record<string, any> = {
     'library/object': {
       'constructor': (props: any) => <DetailedObjectView {...props} />,
       'name': 'Object View',
-      maximize: true,
     },
     'library/backlink': {
       'constructor': (props: any) => <BacklinkView {...props} />,

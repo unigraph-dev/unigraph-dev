@@ -35,7 +35,7 @@ export const SearchOverlay = ({open, setClose, callback, summonerTooltip, defaul
     const [commands, setCommands] = React.useState<any[]>([]);
 
     React.useEffect(() => {
-        window.unigraph.getState("registory/commands").subscribe(res => {
+        window.unigraph.getState("registry/commands").subscribe(res => {
             if (parsed.type !== "command") {
                 setCommands(res);
             }
@@ -74,7 +74,7 @@ export const SearchOverlay = ({open, setClose, callback, summonerTooltip, defaul
             setEntities([]);
         } else {
             if (parsed.type === "command" && input === "") {
-                setCommands(window.unigraph.getState("registory/commands").value)
+                setCommands(window.unigraph.getState("registry/commands").value)
             }
             setParsed({
                 type: input === "" ? "" : "command",
@@ -106,7 +106,7 @@ export const SearchOverlay = ({open, setClose, callback, summonerTooltip, defaul
             setQuery(parseQuery(parsed?.value));
         } else if (parsed?.type === "command") {
             // list all commands
-            const commands = window.unigraph.getState("registory/commands").value;
+            const commands = window.unigraph.getState("registry/commands").value;
             setCommands(commands.filter((el: any) => (el.name as string).toLowerCase().includes(parsed.value.toLowerCase()) !== false))
         }
     }, [parsed])

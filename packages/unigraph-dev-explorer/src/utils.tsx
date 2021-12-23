@@ -8,6 +8,7 @@ export const NavigationContext = React.createContext((location: string) => {});
 export const TabContext = React.createContext({
     viewId: 0,
     setTitle: (title: string) => {},
+    setMaximize: (val: boolean) => {},
     isVisible: () => true as boolean,
 })
 export const DataContext = React.createContext({
