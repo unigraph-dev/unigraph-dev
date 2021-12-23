@@ -8,11 +8,22 @@ export const NavigationContext = React.createContext((location: string) => {});
 export const TabContext = React.createContext({
     viewId: 0,
     setTitle: (title: string) => {},
+    setMaximize: (val: boolean) => {},
     isVisible: () => true as boolean,
 })
 export const DataContext = React.createContext({
     rootUid: "0x0"
 })
+
+export const setCaret = (document: Document, element: any, pos: number, length?: number) => {
+    let range = document.createRange()
+    let sel = document.getSelection()
+    range.setStart(element, pos)
+    if (length) {range.setEnd(element, length+pos)} else {range.collapse(true)};
+    
+    sel?.removeAllRanges()
+    sel?.addRange(range)
+}
 
 export const removeAllPropsFromObj = function(obj: any, propsToRemove: any, maxLevel?: any) {
     if (typeof maxLevel !== "number") maxLevel = 20
@@ -165,15 +176,16 @@ export const dfs = (nodes: TreeNode[]) => {
     const nmap: Record<string, TreeNode> = Object.fromEntries(nodes.map(el => [el.uid, el]));
     let traversal: TreeNode[] = [];
 
-    const recurse = (current: TreeNode) => {
+    const recurse = (current: TreeNode, visited: any[]) => {
+        if (visited.includes(current.uid)) return;
         if (current?.children) { // Ignores nodes referenced by but without uid
             traversal.push(current);
-            current.children.forEach(el => recurse(nmap[el]));
+            current.children.forEach(el => recurse(nmap[el], [...visited, current.uid]));
         } else if (current) {
             traversal.push(current);
         }
     }
-    recurse(root);
+    recurse(root, []);
     return traversal;
 }
 

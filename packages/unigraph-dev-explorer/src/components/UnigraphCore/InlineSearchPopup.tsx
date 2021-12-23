@@ -5,6 +5,8 @@ import { UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
 import { SearchPopupState } from "../../init";
 import _ from "lodash";
 import { parseQuery } from "./UnigraphSearch";
+import { setCaret } from "../../utils";
+import { setSearchPopup } from "../../examples/notes/searchPopup";
 
 export const InlineSearch = () => {
 
@@ -112,4 +114,49 @@ export const InlineSearch = () => {
             {el[0]}
         </div>)}
     </Popover></div>
+}
+
+/**
+ * Refactor notes
+ * domEl => boxRef
+ * 
+ */
+export const inlineTextSearch = (newText: string, domEl: any, caret: number, onMatch: any, setInSearch?: any) => {
+    let hasMatch = false;
+    const placeholder = /\[\[([^[\]]*)\]\]/g;
+    for (let match: any; (match = placeholder.exec(newText)) !== null;) {
+        if (match.index <= caret && placeholder.lastIndex >= caret) {
+            if (setInSearch) setInSearch(true);
+            hasMatch = true;
+            //inputDebounced.cancel();
+            setSearchPopup(domEl, match[1], onMatch.bind(this, match))
+        }
+    }
+    return hasMatch;
+}
+
+export const inlineObjectSearch = (newText: string, domEl: any, caret: number, onMatch: any, setInSearch?: any) => {
+    let hasMatch = false;
+    const placeholder = /\(\(([^[\)]*)\)\)/g;
+    for (let match: any; (match = placeholder.exec(newText)) !== null;) {
+        if (match.index <= caret && placeholder.lastIndex >= caret) {
+            if (setInSearch) setInSearch(true);
+            hasMatch = true;
+            //inputDebounced.cancel();
+            setSearchPopup(domEl, match[1], onMatch.bind(this, match))
+        }
+    }
+    return hasMatch;
+}
+
+export const inlineRefsToChildren = (refs?: any[]) => {
+    return (refs || []).map(({key, value}) => ({
+        "type": {
+            "unigraph.id": "$/schema/interface/semantic"
+        },
+        "$parentcontext": {
+            "_key": `[[${key}]]`
+        },
+        "_value": {"uid": value}
+    }))
 }

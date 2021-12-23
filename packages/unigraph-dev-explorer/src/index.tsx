@@ -38,7 +38,7 @@ function initDynamicObjectViews() {
     views.forEach(async (el) => {
       const typeId = el.get('item_type')._value['unigraph.id'];
       const view = await getComponentAsView(el._value.view['_value'], {})
-      registerDetailedDynamicViews({[typeId]: {view}})
+      registerDetailedDynamicViews({[typeId]: {view, maximize: el._value?.maximize?.['_value.!']}})
     })
   }, undefined, {all: true});
 

@@ -22,7 +22,7 @@ import { SubentityView } from "./components/UnigraphCore/SubentityView";
 import { ViewItem } from "./components/ObjectView/ViewObjectView";
 
 window.reloadCommands = () => {
-    const commandsState = window.unigraph.getState("registory/commands");
+    const commandsState = window.unigraph.getState("registry/commands");
   
     const pageCommands = Object.entries(window.unigraph.getState('registry/pages').value).map(([k, v]: any) => {
       return {

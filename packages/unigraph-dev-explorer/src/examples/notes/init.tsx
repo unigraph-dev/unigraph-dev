@@ -1,4 +1,5 @@
 import { MenuItem, Typography } from "@material-ui/core";
+import { inlineRefsToChildren } from "../../components/UnigraphCore/InlineSearchPopup";
 import { registerDynamicViews, registerDetailedDynamicViews, registerContextMenuItems, registerQuickAdder } from "../../unigraph-react";
 import { NoteBlock, DetailedNoteBlock } from "./NoteBlock";
 
@@ -61,9 +62,9 @@ export const init = () => {
     registerDynamicViews({ "$/schema/note_block": { view: NoteBlock, query: noteQuery} })
     registerDetailedDynamicViews({ "$/schema/note_block": { view: DetailedNoteBlock, query: noteQueryDetailed } })
 
-    const quickAdder = async (inputStr: string, preview = true, callback: any) => {
+    const quickAdder = async (inputStr: string, preview = true, callback: any, refs?: any) => {
         if (!preview) {
-            const uids = await window.unigraph.addObject({text: {_value: inputStr, type: {'unigraph.id': "$/schema/markdown"}}}, "$/schema/note_block");
+            const uids = await window.unigraph.addObject({text: {_value: inputStr, type: {'unigraph.id': "$/schema/markdown"}}, children: inlineRefsToChildren(refs)}, "$/schema/note_block");
             if (!callback) window.wsnavigator(`/library/object?uid=${uids[0]}&isStub=true&type=$/schema/note_block`);
             return uids;
         }

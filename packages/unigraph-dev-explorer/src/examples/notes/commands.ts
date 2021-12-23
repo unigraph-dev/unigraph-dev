@@ -11,16 +11,6 @@ export const focusUid = (uid: string) => {
     (document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]?.children[0] as any)?.click();
 }
 
-export const setCaret = (document: Document, element: any, pos: number, length?: number) => {
-    let range = document.createRange()
-    let sel = document.getSelection()
-    range.setStart(element, pos)
-    if (length) {range.setEnd(element, length+pos)} else {range.collapse(true)};
-    
-    sel?.removeAllRanges()
-    sel?.addRange(range)
-}
-
 export const getSemanticChildren = (data: any) => data?.['_value']?.['children']
 
 export const addChild = (data: any, context: NoteEditorContext) => {
@@ -47,7 +37,11 @@ export const addChild = (data: any, context: NoteEditorContext) => {
         }]
     }, undefined, undefined, context.callbacks.subsId, parents);
     context.edited.current = true;
-    context.setCommand(() => setFocus.bind(this, data, context, 0));
+    context.setCommand(() => {
+        setTimeout(() => {
+            focusNextDFSNode(data, context, 0)
+        }, 250)
+    });
 }
 
 export const splitChild = (data: any, context: NoteEditorContext, index: number, oldtext: string, at: number) => {
@@ -272,6 +266,7 @@ export const focusLastDFSNode = (data: any, context: NoteEditorContext, _: numbe
 }
 
 export const focusNextDFSNode = (data: any, context: NoteEditorContext, _: number) => {
+    console.log(getNextDFSNode(data, context, _));
     focusUid(getNextDFSNode(data, context, _))
 }
 
@@ -284,6 +279,7 @@ export const getLastDFSNode = (data: any, context: NoteEditorContext, _: number)
 
 export const getNextDFSNode = (data: any, context: NoteEditorContext, _: number) => {
     const orderedNodes = dfs(context.nodesState.value);
+    console.log(orderedNodes);
     const newIndex = orderedNodes.findIndex(el => el.uid === data.uid) + 1;
     if (orderedNodes[newIndex] && !orderedNodes[newIndex].root) return orderedNodes[newIndex].uid;
     else return "";
@@ -297,6 +293,7 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
     let currSubentity = -1;
     const stubConverted = {uid: ""}
     let textIt = "";
+    let refs: any[] = [];
     const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
     const newChildren = children?.reduce((prev: any[], el: any, elindex: any) => {
         if (el?.['_value']?.['type']?.['unigraph.id'] === "$/schema/subentity" && ++currSubentity === index) {
@@ -311,13 +308,14 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
                 }
             }
             textIt = el['_value']['_value']['_value']['text']['_value']['_value']['_value.%'];
+            refs = el['_value']['_value']['_value']?.['children']?.['_value[']?.filter?.((el: any) => el['_key']).map((el: any) => ({key: el['_key'].slice(2, -2), value: el['_value']['_value'].uid})) || []
             return [...prev, newel];
         } else {
             return [...prev, {uid: el.uid}]
         };
     }, []);
     //console.log(textIt, newChildren, )
-    const newUid = await window.unigraph.addObject(parseTodoObject(textIt), "$/schema/todo")
+    const newUid = await window.unigraph.addObject(parseTodoObject(textIt, refs), "$/schema/todo")
     stubConverted.uid = newUid[0];
     await window.unigraph.updateObject(data?.['_value']?.uid, {...data['_value'], children: {'_value[': newChildren}}, false, false, context.callbacks.subsId, parents);
 }

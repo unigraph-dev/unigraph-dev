@@ -7,16 +7,17 @@ import { ViewViewDetailed } from "../../components/ObjectView/DefaultObjectView"
 import _ from "lodash";
 import { buildGraph, getRandomInt } from "unigraph-dev-common/lib/utils/utils";
 import { Actions } from "flexlayout-react";
-import { addChild, convertChildToTodo, focusLastDFSNode, focusNextDFSNode, indentChild, setCaret, setFocus, splitChild, unindentChild, unsplitChild, replaceChildWithUid } from "./commands";
+import { addChild, convertChildToTodo, focusLastDFSNode, focusNextDFSNode, indentChild, setFocus, splitChild, unindentChild, unsplitChild, replaceChildWithUid } from "./commands";
 import { onUnigraphContextMenu } from "../../components/ObjectView/DefaultObjectContextMenu";
 import { FiberManualRecord, MoreVert } from "@material-ui/icons";
 import { setSearchPopup } from "./searchPopup";
 import { noteQuery } from "./init";
 import { getParentsAndReferences } from "./utils";
 import { DynamicObjectListView } from "../../components/ObjectView/DynamicObjectListView";
-import { TabContext } from "../../utils";
+import { setCaret, TabContext } from "../../utils";
 import { DragandDrop } from "../../components/ObjectView/DragandDrop";
 import stringify from "json-stable-stringify";
+import { inlineObjectSearch, inlineTextSearch } from "../../components/UnigraphCore/InlineSearchPopup";
 
 export const getSubentities = (data: any) => {
     let subentities: any, otherChildren: any;
@@ -235,68 +236,53 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                             const newContent = ev.currentTarget.textContent;
                             const caret = (document.getSelection()?.anchorOffset) as number;
                             // Check if inside a reference block
-                            const placeholder = /\[\[([^[\]]*)\]\]/g;
-                            const placeholder2 = /\(\(([^[\)]*)\)\)/g;
 
                             let hasMatch = false;
-                            for (let match: any; (match = placeholder.exec(textInput.current.textContent)) !== null;) {
-                                if (match.index <= caret && placeholder.lastIndex >= caret) {
-                                    setInSearch(true);
-                                    hasMatch = true;
-                                    //inputDebounced.cancel();
-                                    setSearchPopup(boxRef, match[1], async (newName: string, newUid: string) => {
-                                        const parents = getParentsAndReferences(data['~_value'], (data['unigraph.origin'] || []))[0].map((el: any) => {return {uid: el.uid}});
-                                        if (!data._hide) parents.push({uid: data.uid});
-                                        const newStr = newContent?.slice?.(0, match.index) + '[[' + newName + ']]' + newContent?.slice?.(match.index + match[0].length);
-                                        //console.log(newName, newUid, newStr, newContent);
-                                        // This is an ADDITION operation
-                                        //console.log(data);
-                                        const semChildren = data?.['_value'];
-                                        //inputDebounced.cancel();
-                                        textInput.current.textContent = newStr;
-                                        textref.current = newStr;
-                                        resetEdited();
-                                        if (textInput.current.firstChild) {
-                                            setCaret(document, textInput.current.firstChild, match.index + newName.length + 4);
-                                        } else {
-                                            setCaret(document, textInput.current, match.index + newName.length + 4);
-                                        }
-                                        await window.unigraph.updateObject(data.uid, {
-                                            '_value': {
-                                                'text': { '_value': { '_value': { '_value.%': newStr } } },
-                                                children: {
-                                                    '_value[': [{
-                                                        '_index': { '_value.#i': semChildren?.['children']?.['_value[']?.length || 0 },
-                                                        '_key': `[[${newName}]]`,
-                                                        '_value': {
-                                                            'dgraph.type': ['Interface'],
-                                                            'type': { 'unigraph.id': '$/schema/interface/semantic' },
-                                                            '_hide': true,
-                                                            '_value': { uid: newUid },
-                                                        }
-                            
-                                                    }]
+                            hasMatch = inlineTextSearch(textInput.current.textContent, boxRef, caret, async (match: any, newName: string, newUid: string) => {
+                                const parents = getParentsAndReferences(data['~_value'], (data['unigraph.origin'] || []))[0].map((el: any) => {return {uid: el.uid}});
+                                if (!data._hide) parents.push({uid: data.uid});
+                                const newStr = newContent?.slice?.(0, match.index) + '[[' + newName + ']]' + newContent?.slice?.(match.index + match[0].length);
+                                //console.log(newName, newUid, newStr, newContent);
+                                // This is an ADDITION operation
+                                //console.log(data);
+                                const semChildren = data?.['_value'];
+                                //inputDebounced.cancel();
+                                textInput.current.textContent = newStr;
+                                textref.current = newStr;
+                                resetEdited();
+                                if (textInput.current.firstChild) {
+                                    setCaret(document, textInput.current.firstChild, match.index + newName.length + 4);
+                                } else {
+                                    setCaret(document, textInput.current, match.index + newName.length + 4);
+                                }
+                                await window.unigraph.updateObject(data.uid, {
+                                    '_value': {
+                                        'text': { '_value': { '_value': { '_value.%': newStr } } },
+                                        children: {
+                                            '_value[': [{
+                                                '_index': { '_value.#i': semChildren?.['children']?.['_value[']?.length || 0 },
+                                                '_key': `[[${newName}]]`,
+                                                '_value': {
+                                                    'dgraph.type': ['Interface'],
+                                                    'type': { 'unigraph.id': '$/schema/interface/semantic' },
+                                                    '_hide': true,
+                                                    '_value': { uid: newUid },
                                                 }
-                                            }
-                                        }, true, false, callbacks.subsId, parents);
-                                        window.unigraph.getState('global/searchPopup').setValue({ show: false });
-                                    })
-                                }
-                            }
-                            for (let match: any; (match = placeholder2.exec(textInput.current.textContent)) !== null;) {
-                                if (match.index <= caret && placeholder2.lastIndex >= caret) {
-                                    setInSearch(true);
-                                    hasMatch = true;
-                                    setSearchPopup(boxRef, match[1], async (newName: string, newUid: string) => {
-                                        callbacks['replace-child-with-uid'](newUid);
-                                        await callbacks['add-child']();
-                                        window.unigraph.getState('global/searchPopup').setValue({ show: false });
-                                        setTimeout(() => {
-                                            callbacks['focus-next-dfs-node'](data, editorContext, 0)
-                                        }, 500);
-                                    }, false)
-                                }
-                            }
+                    
+                                            }]
+                                        }
+                                    }
+                                }, true, false, callbacks.subsId, parents);
+                                window.unigraph.getState('global/searchPopup').setValue({ show: false });
+                            }, setInSearch) || hasMatch;
+                            hasMatch = inlineObjectSearch(textInput.current.textContent, boxRef, caret, async (match: any, newName: string, newUid: string) => {
+                                callbacks['replace-child-with-uid'](newUid);
+                                await callbacks['add-child']();
+                                window.unigraph.getState('global/searchPopup').setValue({ show: false });
+                                setTimeout(() => {
+                                    callbacks['focus-next-dfs-node'](data, editorContext, 0)
+                                }, 500);
+                            }, setInSearch) || hasMatch;
                             if (!hasMatch) {
                                 window.unigraph.getState('global/searchPopup').setValue({ show: false });
                                 setInSearch(false);

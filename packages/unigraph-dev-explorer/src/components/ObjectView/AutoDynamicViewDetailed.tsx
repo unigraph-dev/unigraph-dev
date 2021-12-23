@@ -15,6 +15,8 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, 
 
     const DynamicViewsDetailed = {...window.unigraph.getState('registry/dynamicViewDetailed').value, ...(component || {})}
 
+    const tabContext = React.useContext(TabContext);
+
     React.useEffect(() => {
         const newSubs = getRandomInt();
         if (isObjectStub && Object.keys(DynamicViewsDetailed).includes(object.type?.['unigraph.id'])) {
@@ -23,6 +25,10 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, 
                 setLoadedObj(objects[0]);
             }, newSubs, true);
             setSubsId(newSubs);
+        }
+
+        if (Object.keys(DynamicViewsDetailed).includes(object?.type?.['unigraph.id'])) {
+            tabContext.setMaximize(DynamicViewsDetailed[object.type['unigraph.id']].maximize)
         }
 
         return function cleanup () { window.unigraph.unsubscribe(newSubs); }
