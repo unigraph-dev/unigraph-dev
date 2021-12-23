@@ -6,9 +6,10 @@ import { buildGraph, getRandomInt, UnigraphObject } from "unigraph-dev-common/li
 import { AutoDynamicView } from "./AutoDynamicView";
 import { AutoDynamicViewDetailed } from "./AutoDynamicViewDetailed";
 import { DynamicObjectListView } from "./DynamicObjectListView";
-import { byElementIndex } from "unigraph-dev-common/lib/utils/entityUtils";
+import { byElementIndex, unpad } from "unigraph-dev-common/lib/utils/entityUtils";
 import { onUnigraphContextMenu } from "./DefaultObjectContextMenu";
 import { BacklinkView } from "./BacklinkView";
+import Sugar from 'sugar';
 
 export const globalImports = {
     "HelloWorld": () => <p>Hello world!!!</p>,
@@ -17,10 +18,12 @@ export const globalImports = {
     "DynamicObjectListView": (props: any) => <DynamicObjectListView {...props} />,
     "UnigraphObject": UnigraphObject,
     "buildGraph": buildGraph,
+    "unpad": unpad,
     "getRandomInt": getRandomInt,
     "byElementIndex": byElementIndex,
     "onUnigraphContextMenu": onUnigraphContextMenu,
-    "BacklinkView": BacklinkView
+    "BacklinkView": BacklinkView,
+    "Sugar": Sugar,
 }
 
 export const DynamicComponentView: DynamicViewRenderer = ({data, callbacks}) => {
