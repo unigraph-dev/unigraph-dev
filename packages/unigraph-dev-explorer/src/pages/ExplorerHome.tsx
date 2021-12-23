@@ -43,13 +43,13 @@ export const HomeSection = ({data}: any) => {
 
 export default function ExplorerHome({id}: any) {
 
-  const [sections, setSection] = React.useState<Partial<HomeSection>[]>([]);
+  const [sections, setSections] = React.useState<Partial<any>[]>([]);
 
   React.useEffect(() => {
     const id = getRandomInt();
 
     window.unigraph.subscribeToType("$/schema/home_section", (its: any[]) => {
-      setSection(its);
+      setSections(its);
     }, id)
 
     return function cleanup () {window.unigraph.unsubscribe(id)}
@@ -57,6 +57,6 @@ export default function ExplorerHome({id}: any) {
 
 
   return <div>
-    {sections.map(el => <HomeSection data={el} />)}
+    {sections.map(el => <HomeSection data={el} key={el.uid} />)}
   </div>
 }
