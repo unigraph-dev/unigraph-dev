@@ -1,7 +1,8 @@
 import Sugar from 'sugar';
+import { inlineRefsToChildren } from '../../components/UnigraphCore/InlineSearchPopup';
 import { ATodoList, setHours, getMinDate, getMaxDate } from "./utils";
 
-export const parseTodoObject: (arg0: string) => ATodoList = (todoString: string) => {
+export const parseTodoObject: (arg0: string, refs?: any[]) => ATodoList = (todoString: string, refs?: any[]) => {
     // TODO: Using regex for now, we can switch to a more centralized parsing solution later
     let tags_regex = /#[a-zA-Z0-9]*\b ?/gm;
     let tags = todoString.match(tags_regex) || [];
@@ -36,12 +37,12 @@ export const parseTodoObject: (arg0: string) => ATodoList = (todoString: string)
         name: {type: {"unigraph.id": "$/schema/markdown"}, _value: todoString},
         done: false,
         priority: priority_num,
-        children: tags.map(tagName => {return {"type": {"unigraph.id": "$/schema/interface/semantic"},
+        children: [...tags.map(tagName => {return {"type": {"unigraph.id": "$/schema/interface/semantic"},
             "_value": {
                 "type": {"unigraph.id": "$/schema/tag"},
                 name: tagName
             }}
-        }),
+        }), ...inlineRefsToChildren(refs)],
         time_frame
     }
 }

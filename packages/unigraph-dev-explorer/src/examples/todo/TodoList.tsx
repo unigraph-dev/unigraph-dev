@@ -14,7 +14,6 @@ import { DynamicObjectListView } from '../../components/ObjectView/DynamicObject
 
 function TodoListBody ({data}: { data: ATodoList[] }) {
     const todoList = data;
-    const [newName, setNewName] = useState("");
 
     const [filteredItems, setFilteredItems] = React.useState(todoList);
 
@@ -31,11 +30,6 @@ function TodoListBody ({data}: { data: ATodoList[] }) {
             defaultFilter={"only-incomplete"}
             compact
         />
-        <TextField value={newName} onChange={(e) => setNewName(e.target.value)}></TextField>
-        <Button onClick={
-            () => window.unigraph.addObject(parseTodoObject(newName), "$/schema/todo")
-            //() => console.log(parseTodoObject(newName))
-        }>Add</Button>
     </div>
 }
 
@@ -60,9 +54,13 @@ export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
                 totalCallbacks['onUpdate'](data);
             }} />
         <ListItemText 
-            primary={<AutoDynamicView object={data.get('name')['_value']['_value']} noDrag noDrop noContextMenu />}
+            primary={<AutoDynamicView object={data.get('name')['_value']['_value']} noDrag noDrop noContextMenu callbacks={{
+                'get-semantic-properties': () => {
+                    return data;
+                }
+            }}/>}
             secondary={<div style={{display: "flex", alignItems: "baseline", flexWrap: "wrap"}} children={[...(!unpadded.children?.map ? [] :
-                data?.['_value']?.children?.['_value[']?.map((it: any) => <AutoDynamicView object={it['_value']?.['_value']} inline/>
+                data?.['_value']?.children?.['_value[']?.filter((it: any) => !it['_key']).map((it: any) => <AutoDynamicView object={it['_value']?.['_value']} inline/>
             )), ...(unpadded.priority > 0 ? [<Chip size="small" icon={<PriorityHigh/>} label={"Priority " + unpadded.priority}/>]: []),
             ...(unpadded.time_frame?.start?.datetime && (new Date(unpadded.time_frame?.start?.datetime)).getTime() !== 0 ? [<Chip size="small" icon={<CalendarToday/>} label={"Start: " + Sugar.Date.relative(new Date(unpadded.time_frame?.start?.datetime))} />] : []),
             ...(unpadded.time_frame?.end?.datetime && (new Date(unpadded.time_frame?.start?.datetime)).getTime() !== maxDateStamp ? [<Chip size="small" icon={<CalendarToday/>} label={"End: " + Sugar.Date.relative(new Date(unpadded.time_frame?.end?.datetime))} />] : [])]}></div>}
@@ -70,8 +68,9 @@ export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
     </div>
 }
 
-const quickAdder = async (inputStr: string, preview = true) => {
-    const parsed = parseTodoObject(inputStr);
+const quickAdder = async (inputStr: string, preview = true, callback?: any, refs?: any) => {
+    const parsed = parseTodoObject(inputStr, refs);
+    console.log(parsed)
     if (!preview) return await window.unigraph.addObject(parsed, "$/schema/todo");
     else return [parsed, '$/schema/todo'];
 }
