@@ -156,10 +156,10 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             callHooks(states.hooks, "after_object_changed", {subscriptions: states.subscriptions, caches: states.caches})
         },
         // latertodo
-        updateSimpleObject: async (object, predicate, value) => {
-            if (Array.isArray(object)) { // is triplet
+        updateTriplets: async (objects) => {
+            if (Array.isArray(objects)) { // is triplet
                 const update_triplets = new dgraph.Mutation();
-                update_triplets.setSetNquads(object.join('\n'));
+                update_triplets.setSetNquads(objects.join('\n'));
                 const result = await client.createDgraphUpsert({
                     query: false,
                     mutations: [

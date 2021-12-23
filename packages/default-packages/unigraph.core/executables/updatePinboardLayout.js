@@ -20,4 +20,4 @@ const newObjects = currBoard['_value']['_value']['children']['_value['].map(el =
     return "<"+el.uid+"> <_pos> \"" + [x.toString(), y.toString(), w.toString(), h.toString()].join(':') + "\" ."
 })
 
-await unigraph.updateSimpleObject(newObjects)
+await unigraph.updateTriplets(newObjects)

@@ -56,7 +56,6 @@ export const TodoItem: DynamicViewRenderer = ({data, callbacks}) => {
     //console.log(data.uid, unpadded)
     return <div style={{display: "flex"}}>
             <Checkbox checked={unpadded.done} onClick={_ => {
-                //window.unigraph.updateSimpleObject(todo, "done", !unpadded.done);
                 data.get('done')['_value.!'] = !data.get('done')['_value.!'];
                 totalCallbacks['onUpdate'](data);
             }} />

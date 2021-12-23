@@ -177,11 +177,9 @@ export interface Unigraph<TT = WebSocket | false> {
     /** Deletes an object by its UID. */
     deleteObject(uid: string | string[], permanent?: boolean): any;
     /**
-     * Updates a object simply using the SPO triplet format.
-     * 
-     * Deprecated: this is from a past era and should not be used.
+     * Updates objects simply using the SPO triplet format.
      */
-    updateSimpleObject(object: any, predicate: string, value: any): any;
+    updateTriplets(triplets: any[]): any;
     /**
      * Updates an existing object by its UID and describing the new object.
      * 

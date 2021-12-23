@@ -319,9 +319,8 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
         deleteObject: (uid, permanent?) => {
             sendEvent(connection, "delete_unigraph_object", {uid, permanent});
         },
-        updateSimpleObject: (object, predicate, value) => { // TODO: This is very useless, should be removed once we get something better
-            const predicateUid = object['_value'][predicate].uid;
-            sendEvent(connection, "update_spo", {uid: predicateUid, predicate: typeMap[typeof value], value: value})
+        updateTriplets: (objects) => { // TODO: This is very useless, should be removed once we get something better
+            sendEvent(connection, "update_spo", {objects})
         },
         updateObject: (uid, newObject, upsert = true, pad = true, subIds, origin) => new Promise((resolve, reject) => {
             const id = getRandomInt();

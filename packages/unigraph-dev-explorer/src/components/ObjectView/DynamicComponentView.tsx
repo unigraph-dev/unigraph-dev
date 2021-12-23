@@ -26,10 +26,10 @@ export const globalImports = {
 export const DynamicComponentView: DynamicViewRenderer = ({data, callbacks}) => {
     const [previewComponent, setPreviewComponent] = React.useState<any>("Loading...");
 
-    useEffectOnce(() => {
+    React.useEffect(() => {
         getComponentFromExecutable(data, callbacks?.props || {}, globalImports)
             .then((comp: any) => setPreviewComponent(React.createElement(comp, callbacks?.props || {}, [])))
-    });
+    }, [data]);
 
     return previewComponent
 }
