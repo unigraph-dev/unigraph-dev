@@ -16,14 +16,14 @@ const unigraphDecl: string = require('!!raw-loader!unigraph-dev-common/lib/types
 const beginStr = '/** Unigraph interface */'
 const endStr = '/** End of unigraph interface */'
 let decl = unigraphDecl.substring(
-    unigraphDecl.lastIndexOf(beginStr)+beginStr.length,
-    unigraphDecl.lastIndexOf(endStr)    
+    unigraphDecl.lastIndexOf(beginStr) + beginStr.length,
+    unigraphDecl.lastIndexOf(endStr)
 )
 decl = decl.replace(/export declare type /g, "declare type ")
 decl = decl.replace(/export interface /g, "declare interface ")
 decl = decl + "\ndeclare var unigraph: Unigraph<WebSocket>; declare const unpad = (a:any) => any;declare const require = (a:any) => any;\ndeclare var context = {params: any}";
 
-const AddImportComponent = ({onAddImport}: any) => {
+const AddImportComponent = ({ onAddImport }: any) => {
     const [pkgName, setPkgName] = React.useState("");
     const [impt, setImpt] = React.useState("");
     const [imptas, setImptas] = React.useState("");
@@ -48,14 +48,14 @@ const AddImportComponent = ({onAddImport}: any) => {
     </React.Fragment>
 }
 
-const ImportItem = ({data}: any) => {
-    return <div style={{display: "flex"}}>
-        <Typography style={{color: "gray", marginRight: "0.5em"}}>from</Typography>
-        <Typography style={{marginRight: "0.5em"}}>{data?.['env']['_value.%']}</Typography>
+const ImportItem = ({ data }: any) => {
+    return <div style={{ display: "flex" }}>
+        <Typography style={{ color: "gray", marginRight: "0.5em" }}>from</Typography>
+        <Typography style={{ marginRight: "0.5em" }}>{data?.['env']['_value.%']}</Typography>
         <Typography>{data?.['package']['_value.%']}</Typography>
-        <Typography style={{color: "gray", marginRight: "0.5em", marginLeft: "0.5em"}}>import</Typography>
+        <Typography style={{ color: "gray", marginRight: "0.5em", marginLeft: "0.5em" }}>import</Typography>
         <Typography>{data?.['import']?.['_value.%'] || "*"}</Typography>
-        <Typography style={{color: "gray", marginRight: "0.5em", marginLeft: "0.5em"}}>as</Typography>
+        <Typography style={{ color: "gray", marginRight: "0.5em", marginLeft: "0.5em" }}>as</Typography>
         <Typography>{data?.['as']['_value.%']}</Typography>
     </div>
 }
@@ -74,8 +74,8 @@ const ext: any = {
     "client/js": ".js",
 }
 
-export const ExecutableCodeEditor = ({data, options}: any) => {
-    
+export const ExecutableCodeEditor = ({ data, options }: any) => {
+
     const unpadded = unpad(data);
 
     const [currentCode, setCurrentCode] = React.useState(unpadded['src'])
@@ -83,8 +83,7 @@ export const ExecutableCodeEditor = ({data, options}: any) => {
 
     const [previewComponent, setPreviewComponent] = React.useState<any>("");
 
-    const updateCode = (newSrc: string) => 
-        {window.unigraph.updateObject(data.uid, {src: newSrc})}
+    const updateCode = (newSrc: string) => { window.unigraph.updateObject(data.uid, { src: newSrc }) }
 
     function handleEditorChange(value: any, event: any) {
         setCurrentCode(value);
@@ -92,37 +91,37 @@ export const ExecutableCodeEditor = ({data, options}: any) => {
 
     useEffectOnce(() => {
         if (options?.viewId) { window.layoutModel.doAction(Actions.renameTab(options.viewId, `Code: ${unpadded['unigraph.id']?.split('/').slice(-1).join('') || data.uid}`)) }
-    })    
+    })
 
-    return <div style={{width: "100%", display: "flex", flexDirection: "column", height: "calc(100vh - 75px)"}}>
-        <div style={{display: 'flex'}}>
-            <Accordion expanded={optionsOpen} onChange={() => setOptionsOpen(!optionsOpen)} variant={"outlined"} style={{flexGrow: 1, marginBottom: '16px'}}> 
-                <AccordionSummary  
-                expandIcon={<ExpandMore />}
-                aria-controls="panel1bh-content"
-                id="panel1bh-header"
+    return <div style={{ width: "100%", display: "flex", flexDirection: "column", height: "calc(100vh - 75px)" }}>
+        <div style={{ display: 'flex' }}>
+            <Accordion expanded={optionsOpen} onChange={() => setOptionsOpen(!optionsOpen)} variant={"outlined"} style={{ flexGrow: 1, marginBottom: '16px' }}>
+                <AccordionSummary
+                    expandIcon={<ExpandMore />}
+                    aria-controls="panel1bh-content"
+                    id="panel1bh-header"
                 >
-                <Typography style={{flexBasis: '50%', flexShrink: 0}}>{unpadded.name}</Typography>
-                <Typography color='textSecondary'>{unpadded.env}</Typography>
+                    <Typography style={{ flexBasis: '50%', flexShrink: 0 }}>{unpadded.name}</Typography>
+                    <Typography color='textSecondary'>{unpadded.env}</Typography>
                 </AccordionSummary>
                 <AccordionDetails>
-                    <List style={{width: "100%"}}>
+                    <List style={{ width: "100%" }}>
                         <ListItem>
-                            <Typography style={{flexBasis: '33.33%', flexShrink: 0, maxWidth: "240px"}}>unigraph.id</Typography>
+                            <Typography style={{ flexBasis: '33.33%', flexShrink: 0, maxWidth: "240px" }}>unigraph.id</Typography>
                             <Typography color='textSecondary'>{unpadded['unigraph.id'] || "none"}</Typography>
                         </ListItem>
                         <ListItem>
-                            <Typography style={{flexBasis: '33.33%', flexShrink: 0, maxWidth: "240px"}}>Periodic</Typography>
+                            <Typography style={{ flexBasis: '33.33%', flexShrink: 0, maxWidth: "240px" }}>Periodic</Typography>
                             <Typography color='textSecondary'>{unpadded.periodic || "none"}</Typography>
                         </ListItem>
-                        <ListItem style={{display: unpadded.env?.startsWith?.("component") ? "" : "none"}}>
+                        <ListItem style={{ display: unpadded.env?.startsWith?.("component") ? "" : "none" }}>
                             <Button onClick={() => window.unigraph.runExecutable(unpadded['unigraph.id'] || data.uid, {}).then(
                                 (comp: any) => setPreviewComponent(React.createElement(comp, {}, []))
                             )}>Preview</Button>
                         </ListItem><ListItem>
-                            <Typography style={{flexBasis: '33.33%', flexShrink: 0, maxWidth: "240px"}}>Imports</Typography>
+                            <Typography style={{ flexBasis: '33.33%', flexShrink: 0, maxWidth: "240px" }}>Imports</Typography>
                             <List>
-                                {(data?.['_value']?.['imports']?.['_value['] || []).map((el: any) => <ListItem><ImportItem data={el['_value']}/></ListItem>)}
+                                {(data?.['_value']?.['imports']?.['_value['] || []).map((el: any) => <ListItem><ImportItem data={el['_value']} /></ListItem>)}
                                 <ListItem>
                                     <AddImportComponent onAddImport={(env: string, pkg: string, impt: string, imptAs: string) => {
                                         window.unigraph.updateObject(data.uid, {
@@ -133,7 +132,7 @@ export const ExecutableCodeEditor = ({data, options}: any) => {
                                                 as: imptAs
                                             }]
                                         })
-                                    }}/>
+                                    }} />
                                 </ListItem>
                             </List>
                         </ListItem>
@@ -141,11 +140,9 @@ export const ExecutableCodeEditor = ({data, options}: any) => {
                     {previewComponent}
                 </AccordionDetails>
             </Accordion>
-            <IconButton onClick={() => updateCode(currentCode)}><Save/></IconButton>
+            <IconButton onClick={() => updateCode(currentCode)}><Save /></IconButton>
         </div>
-        <div style={{flexGrow: 1}}><ReactResizeDetector handleWidth handleHeight>{({width, height}: any) => <Editor
-            height={height ? `${height}px` : undefined}
-            width={`${width}px`}
+        <div style={{ flexGrow: 1 }}><Editor
             defaultLanguage="javascript"
             beforeMount={(monaco) => {
                 monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
@@ -170,7 +167,7 @@ export const ExecutableCodeEditor = ({data, options}: any) => {
             path={"main" + ext[unpadded['env']]}
             defaultValue={currentCode}
             onChange={handleEditorChange}
-        />}</ReactResizeDetector></div>
-        </div>
+        /></div>
+    </div>
 
 }
