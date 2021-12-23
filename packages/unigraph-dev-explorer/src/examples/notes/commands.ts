@@ -37,7 +37,11 @@ export const addChild = (data: any, context: NoteEditorContext) => {
         }]
     }, undefined, undefined, context.callbacks.subsId, parents);
     context.edited.current = true;
-    context.setCommand(() => setFocus.bind(this, data, context, 0));
+    context.setCommand(() => {
+        setTimeout(() => {
+            focusNextDFSNode(data, context, 0)
+        }, 250)
+    });
 }
 
 export const splitChild = (data: any, context: NoteEditorContext, index: number, oldtext: string, at: number) => {
@@ -262,6 +266,7 @@ export const focusLastDFSNode = (data: any, context: NoteEditorContext, _: numbe
 }
 
 export const focusNextDFSNode = (data: any, context: NoteEditorContext, _: number) => {
+    console.log(getNextDFSNode(data, context, _));
     focusUid(getNextDFSNode(data, context, _))
 }
 
@@ -274,6 +279,7 @@ export const getLastDFSNode = (data: any, context: NoteEditorContext, _: number)
 
 export const getNextDFSNode = (data: any, context: NoteEditorContext, _: number) => {
     const orderedNodes = dfs(context.nodesState.value);
+    console.log(orderedNodes);
     const newIndex = orderedNodes.findIndex(el => el.uid === data.uid) + 1;
     if (orderedNodes[newIndex] && !orderedNodes[newIndex].root) return orderedNodes[newIndex].uid;
     else return "";

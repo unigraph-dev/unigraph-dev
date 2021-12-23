@@ -125,10 +125,8 @@ export const inlineTextSearch = (newText: string, domEl: any, caret: number, onM
     let hasMatch = false;
     const placeholder = /\[\[([^[\]]*)\]\]/g;
     for (let match: any; (match = placeholder.exec(newText)) !== null;) {
-        console.log(match.index, caret, placeholder.lastIndex)
         if (match.index <= caret && placeholder.lastIndex >= caret) {
             if (setInSearch) setInSearch(true);
-            console.log("Hi")
             hasMatch = true;
             //inputDebounced.cancel();
             setSearchPopup(domEl, match[1], onMatch.bind(this, match))
