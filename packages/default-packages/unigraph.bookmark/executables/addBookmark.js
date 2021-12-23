@@ -3,7 +3,7 @@ const tags = context.params.tags ? context.params.tags : [];
 const ctx = context.params.context;
 const scrape = require('html-metadata');
 
-const handlers = (await unigraph.getQueries([`(func: uid(parType)) @normalize {
+const handlers = (await unigraph.getQueries([`(func: uid(parType)) @normalize @cascade {
     uid
   _value {
         match_domain {
