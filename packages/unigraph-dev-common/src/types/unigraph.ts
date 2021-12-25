@@ -112,7 +112,8 @@ export interface Unigraph<TT = WebSocket | false> {
         uidsOnly?: boolean | undefined,
         metadataOnly?: boolean | undefined,
         first?: number | undefined,
-        depth?: number | undefined
+        depth?: number | undefined,
+        queryAs?: string | undefined,
     }): Promise<any>;
     /**
      * Subscribe to a Unigraph object with a given UID or name, and call the callback function evry time the subscription is updated.
@@ -307,5 +308,9 @@ export interface Unigraph<TT = WebSocket | false> {
     callHook?(name: string, params: any): any;
     addPackage?(manifest: any, update?: boolean): any;
     buildUnigraphEntity?(entity: any, schema: string, options: any): any;
+    /**
+     * Gets all subscriptions of Unigraph. Used as a developer tool for debug.
+     */
+    getSubscriptions?(): any;
 }
 /** End of unigraph interface */ // Don't remove this line - needed for Monaco to work

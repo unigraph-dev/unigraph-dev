@@ -20,6 +20,7 @@ export type Subscription = {
     hibernated?: boolean,
     queryNow?: any,
     finalQuery?: any,
+    queryTime?: number,
 };
 
 export function buildPollingQuery(subs: Subscription[]) {
@@ -47,6 +48,7 @@ export async function pollSubscriptions(subs: Subscription[], client: DgraphClie
 
                 const queryFn = async () => {
                     el.queryNow = true;
+                    const startTime = new Date().getTime();
                     let results: any[] = await client.queryDgraph(query).catch(e => {console.log(e, query); return []});
                     const val = results[0];
                     if (stringify(val) !== stringify(subs[index].data)) {
@@ -54,6 +56,7 @@ export async function pollSubscriptions(subs: Subscription[], client: DgraphClie
                         msgCallback(subs[index].id, val, subs[index].msgPort!, subs[index]);
                     }
                     el.queryNow = false;
+                    el.queryTime = (new Date().getTime()) - startTime;
                     if (el.finalQuery) {
                         const fq = el.finalQuery;
                         el.finalQuery = false;

@@ -35,6 +35,7 @@ export const Markdown: DynamicViewRenderer = ({data, callbacks, isHeading}) => {
             em: compFactory.bind(this, "em"),
             code: compFactory.bind(this, "code"),
             ol: (props) => compFactory('ol', {...props, inline: true, style: {marginLeft: "8px"}}),
+            a: (props) => compFactory('a', {...props, onPointerUp: (ev: any) => {console.log(ev); ev.preventDefault(); ev.stopPropagation();}, target: "_blank", style: {cursor: "pointer"}}),
             span: ({node, inline, className, children, ...props}: any) => {
                 if (className?.includes('wikilink')) {
                     const matches = (callbacks?.['get-semantic-properties']?.()?.['_value']?.['children']?.['_value['] || [])
@@ -57,7 +58,7 @@ export const Markdown: DynamicViewRenderer = ({data, callbacks, isHeading}) => {
                             ...props,
                             style: {display: "contents", color: (matches[0] || callbacks?.namespaceLink) ? "mediumblue" : "black", ':hover':{
                                 textDecoration: 'underline',
-                            }}
+                            }, cursor: "pointer"}
                         })}
                         <span style={{color: "darkgray"}}>]]</span>
                     </React.Fragment>
