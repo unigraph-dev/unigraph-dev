@@ -177,7 +177,7 @@ export const dfs = (nodes: TreeNode[]) => {
     let traversal: TreeNode[] = [];
 
     const recurse = (current: TreeNode, visited: any[]) => {
-        if (visited.includes(current.uid)) return;
+        if (visited.includes(current?.uid)) return;
         if (current?.children) { // Ignores nodes referenced by but without uid
             traversal.push(current);
             current.children.forEach(el => recurse(nmap[el], [...visited, current.uid]));

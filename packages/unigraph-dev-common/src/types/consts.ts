@@ -10,3 +10,9 @@ export const typeMap: Record<string, string> = {
     "function": "_value",
     "symbol": "_value"
 }
+
+export const typeMapUnigraph: Record<string, string> = {
+    "$/primitive/number": "_value.#",
+    "$/primitive/boolean": "_value.!",
+    "$/primitive/string": "_value.%",
+}
