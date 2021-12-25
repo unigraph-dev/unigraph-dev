@@ -32,7 +32,7 @@ function initDynamicObjectViews() {
       const view = await getComponentAsView(el._value.view['_value'], {})
       registerDynamicViews({[typeId]: {view}})
     })
-  }, undefined, {all: true});
+  }, undefined, {all: false});
 
   window.unigraph.subscribeToType('$/schema/object_view_detailed', (views: any[]) => {
     views.forEach(async (el) => {
@@ -40,7 +40,7 @@ function initDynamicObjectViews() {
       const view = await getComponentAsView(el._value.view['_value'], {})
       registerDetailedDynamicViews({[typeId]: {view, maximize: el._value?.maximize?.['_value.!']}})
     })
-  }, undefined, {all: true});
+  }, undefined, {all: false});
 
   window.unigraph.subscribeToType('$/schema/view', async (views: any[]) => {
     const resolvedViews = await Promise.all(views.filter(el => el?._value?.view?.['_value']?.type?.['unigraph.id'] === "$/schema/executable").map(async (el) => {
@@ -51,7 +51,7 @@ function initDynamicObjectViews() {
     }));
     const currPages = window.unigraph.getState('registry/pages');
     currPages.setValue({...currPages.value, ...Object.fromEntries(resolvedViews)})
-  }, undefined, {all: true});
+  }, undefined, {all: false});
 }
 
 window.unigraph.onReady!(() => {

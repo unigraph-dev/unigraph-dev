@@ -4,7 +4,7 @@ import WebSocket from 'ws';
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import DgraphClient from './dgraphClient';
 import { insertsToUpsert } from 'unigraph-dev-common/lib/utils/txnWrapper';
-import { EventAddNotification, EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteItemFromArray, EventDeleteRelation, EventDeleteUnigraphObject, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventExportObjects, EventGetPackages, EventGetQueries, EventGetSchemas, EventGetSearchResults, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventReorderItemInArray, EventResponser, EventRunExecutable, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeQuery, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
+import { EventAddNotification, EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteItemFromArray, EventDeleteRelation, EventDeleteUnigraphObject, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventExportObjects, EventGetPackages, EventGetQueries, EventGetSchemas, EventGetSearchResults, EventGetSubscriptions, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventReorderItemInArray, EventResponser, EventRunExecutable, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeQuery, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
 import { buildUnigraphEntity, processAutoref, dectxObjects, processAutorefUnigraphId } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { addUnigraphPackage, checkOrCreateDefaultDataModel, createPackageCache, createSchemaCache } from './datamodelManager';
 import { Cache } from './caches';
@@ -486,6 +486,11 @@ export default async function startServer(client: DgraphClient) {
       const res = await serverStates.localApi.exportObjects(event.uids, event.options)
         .catch((e: any) => ws.send(makeResponse(event, false, {"error": e})));
       ws.send(makeResponse(event, true, {result: res}))
+    },
+
+    "get_subscriptions": async function (event: EventGetSubscriptions, ws: IWebsocket) {
+      const res = serverStates.localApi.getSubscriptions();
+      ws.send(makeResponse(event, true, {result: res}))
     }
   };
 
@@ -526,7 +531,7 @@ export default async function startServer(client: DgraphClient) {
       if (msgObject) {
         // match events
         if (msgObject.type === "event" && msgObject.event && eventRouter[msgObject.event]) {
-          if (verbose >= 1 && msgObject.event !== "run_executable") console.log("Event: " + msgObject.event + ", from: " + clientBrowserId + " | " + connId);
+          if (verbose >= 1 && !["run_executable", "get_subscriptions"].includes(msgObject.event)) console.log("Event: " + msgObject.event + ", from: " + clientBrowserId + " | " + connId);
           eventRouter[msgObject.event]({...msgObject, connId: connId}, ws);
         }
         if (verbose >= 6) console.log(msgObject);

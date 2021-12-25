@@ -251,3 +251,9 @@ declare type EventExportObjects = {
   uids: string[],
   options: any
 }
+
+declare type EventGetSubscriptions = {
+  type: "event",
+  event: "get_subscriptions",
+  id: number,
+}
