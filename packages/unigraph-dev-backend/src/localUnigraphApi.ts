@@ -36,7 +36,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         ensureSchema: async (name, fallback) => {return Error('Not implemented')},
         // latertodo
         ensurePackage: async (packageName, fallback) => {return Error('Not implemented')},
-        subscribeToType: async (name, callback: any, eventId = undefined, {all, showHidden, uidsOnly, first, metadataOnly, depth}: any) => {
+        subscribeToType: async (name, callback: any, eventId = undefined, {all, showHidden, uidsOnly, first, metadataOnly, depth, queryAs}: any) => {
             eventId = eventId || getRandomInt();
             const queryAny = queries.queryAny(eventId.toString(), uidsOnly)
             const queryAnyAll = queries.queryAnyAll(eventId.toString(), uidsOnly)
@@ -367,6 +367,21 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             clearEmpties(entity);
             const unigraphObject = buildUnigraphEntity(entity, schema, states.caches['schemas'].data, undefined, options);
             return unigraphObject;
+        },
+        getSubscriptions: () => {
+            return states?.subscriptions?.map(el => ({
+                data: (el.data || []).map?.((ell: any) => ({uid: ell.uid, type: {"unigraph.id": ell.type?.['unigraph.id']}})),
+                queryFragment: el.queryFragment,
+                subType: el.subType,
+                callbackType: el.callbackType,
+                id: el.id,
+                regTime: el.regTime,
+                connId: el.connId,
+                clientId: el.clientId,
+                hibernated: el.hibernated,
+                queryNow: el.queryNow,
+                queryTime: el.queryTime,
+            })) || []
         }
     }
 }

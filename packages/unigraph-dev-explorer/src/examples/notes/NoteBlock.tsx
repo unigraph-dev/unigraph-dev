@@ -40,7 +40,15 @@ export const NoteBlock = ({ data }: any) => {
 
     return <div onClick={() => { window.wsnavigator(`/library/object?uid=${data.uid}&isStub=true&type=$/schema/note_block`) }} style={{display: "flex", alignItems: "center", width: "100%"}}>
         <div style={{flexGrow: 1}}>
-            <Typography variant="body1">{unpadded.text}</Typography>
+            <Typography variant="body1"><AutoDynamicView
+                        object={data.get('text')['_value']['_value']}
+                        noDrag noContextMenu
+                        callbacks={{
+                            'get-semantic-properties': () => {
+                                return data;
+                            }
+                        }}
+                    /></Typography>
             <Typography variant="body2" color="textSecondary">{subentities.length} immediate children, {parents.length} parents, {references.length} linked references</Typography>
         </div>
         <div>
@@ -142,8 +150,6 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
     const textref = React.useRef<any>();
     /** Reference for HTML Element for list of children */
     const childrenref = React.useRef<any>();
-    /** Reference for the box of this element. Used for positioning only */
-    const boxRef = React.useRef<any>();
     const inputDebounced = React.useRef(_.debounce(inputter, 333))
     const setCurrentText = (text: string) => { textInput.current.textContent = text };
     const edited = React.useRef(false);
@@ -191,7 +197,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
     React.useEffect(commandFn, [command])
 
     return <NoteViewPageWrapper isRoot={!isChildren}>
-        <div style={{ width: "100%", ...(!isChildren ? {overflow: "hidden"} : {}) }} ref={boxRef} >
+        <div style={{ width: "100%", ...(!isChildren ? {overflow: "hidden"} : {}) }} >
             <NoteViewTextWrapper 
                 isRoot={!isChildren} onContextMenu={(event: any) => onUnigraphContextMenu(event, data, undefined, callbacks)} 
                 semanticChildren={buildGraph(otherChildren).filter((el: any) => el.type).map((el: any) => <AutoDynamicView object={el.type?.['unigraph.id'] === "$/schema/note_block" ? el : {uid: el.uid, type: el.type}} inline/>)}
@@ -238,7 +244,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                             // Check if inside a reference block
 
                             let hasMatch = false;
-                            hasMatch = inlineTextSearch(textInput.current.textContent, boxRef, caret, async (match: any, newName: string, newUid: string) => {
+                            hasMatch = inlineTextSearch(textInput.current.textContent, textInput, caret, async (match: any, newName: string, newUid: string) => {
                                 const parents = getParentsAndReferences(data['~_value'], (data['unigraph.origin'] || []))[0].map((el: any) => {return {uid: el.uid}});
                                 if (!data._hide) parents.push({uid: data.uid});
                                 const newStr = newContent?.slice?.(0, match.index) + '[[' + newName + ']]' + newContent?.slice?.(match.index + match[0].length);
@@ -275,7 +281,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                                 }, true, false, callbacks.subsId, parents);
                                 window.unigraph.getState('global/searchPopup').setValue({ show: false });
                             }, setInSearch) || hasMatch;
-                            hasMatch = inlineObjectSearch(textInput.current.textContent, boxRef, caret, async (match: any, newName: string, newUid: string) => {
+                            hasMatch = inlineObjectSearch(textInput.current.textContent, textInput, caret, async (match: any, newName: string, newUid: string) => {
                                 callbacks['replace-child-with-uid'](newUid);
                                 await callbacks['add-child']();
                                 window.unigraph.getState('global/searchPopup').setValue({ show: false });

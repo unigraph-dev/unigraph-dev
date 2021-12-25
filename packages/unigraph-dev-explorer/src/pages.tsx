@@ -32,6 +32,7 @@ import { EmailSettings } from './examples/email/EmailSettings';
 import { BacklinkView } from './components/ObjectView/BacklinkView';
 import ExplorerDashboard from './pages/ExplorerDashboard';
 import { SearchOverlayPopover } from './pages/SearchOverlay';
+import { SubscriptionsView } from './pages/SubscriptionsView';
 
 const pages: Record<string, any> = {
     'datamodel-playground': {
@@ -130,6 +131,10 @@ const pages: Record<string, any> = {
       'constructor': (props: any) => <CodeEditor {...props} />,
       'name': "Code Editor",
       'maximize': true
+    },
+    'subscriptions-view': {
+      'constructor': (props: any) => <SubscriptionsView {...props} />,
+      'name': "Subscriptions view"
     },
     'app-library': {
       'constructor': (props: any) => <AppLibrary {...props}/>,

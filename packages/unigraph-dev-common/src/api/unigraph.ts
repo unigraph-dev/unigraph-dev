@@ -456,7 +456,15 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
         }),
         addPackage: (manifest, update = false) => {
             sendEvent(connection, "add_unigraph_package", {package: manifest, update})
-        }
+        },
+        getSubscriptions: () => new Promise((resolve, reject) => {
+            const id = getRandomInt();
+            callbacks[id] = (response: any) => {
+                if (response.success && response.result) resolve(response.result);
+                else reject(response);
+            };
+            sendEvent(connection, "get_subscriptions", {}, id);
+        }),
     }
 
     return api;

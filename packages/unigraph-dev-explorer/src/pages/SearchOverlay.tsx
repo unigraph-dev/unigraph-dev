@@ -140,12 +140,13 @@ export const SearchOverlay = ({open, setClose, callback, summonerTooltip, defaul
             onChange={(ev) => {
                 const newContent = ev.target.value;
                 const caret = ev.target.selectionStart || 0;
-                inlineTextSearch(ev.target.value, tf, caret, async (match: any, newName: string, newUid: string) => {
+                const hasMatch = inlineTextSearch(ev.target.value, tf, caret, async (match: any, newName: string, newUid: string) => {
                     const newStr = newContent?.slice?.(0, match.index) + '[[' + newName + ']]' + newContent?.slice?.(match.index + match[0].length);
                     setInput(newStr);
                     setAdderRefs([...adderRefs, {key: newName, value: newUid}]);
                     window.unigraph.getState('global/searchPopup').setValue({ show: false });
                 })
+                if (!hasMatch) window.unigraph.getState('global/searchPopup').setValue({ show: false });
                 setInput(ev.target.value);
             }}
             placeholder={"Enter: +<type shortname> to create; ?<search query> to search; <command> to execute command"}

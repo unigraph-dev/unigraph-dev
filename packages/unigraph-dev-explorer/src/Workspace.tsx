@@ -31,7 +31,7 @@ export function WorkspacePageComponent({ children, maximize, paddingTop, id }: a
     const [_maximize, setMaximize] = React.useState(maximize);
     React.useContext(TabContext).setMaximize = (val: boolean) => {setMaximize(val)};
 
-    return <div id={"workspaceContainer" + id} style={{ width: "100%", height: "100%", overflow: "auto" }}>
+    return <div id={"workspaceContainer" + id} style={{ width: "100%", height: "100%" }}>
         <Container maxWidth={_maximize ? false : "lg"} disableGutters style={{ paddingTop: (_maximize || !paddingTop) ? "0px" : "12px", height: "100%", display: "flex", flexDirection: "column" }}>
 
             <CssBaseline />

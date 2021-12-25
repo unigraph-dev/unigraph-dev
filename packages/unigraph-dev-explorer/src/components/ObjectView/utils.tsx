@@ -1,8 +1,8 @@
 import { useDrop} from 'react-dnd';
 
 export const isStub = (object: any) =>
-    (typeof object === "object" && object.uid && object.type && typeof object.type['unigraph.id'] === "string" && typeof object.type['unigraph.id'].startsWith('$/') 
-        && ((Object.keys(object).length === 3 && object['_stub']) || (Object.keys(object).filter(el => el.startsWith('_value')).length === 0)) )
+    object?.['_stub'] || (typeof object === "object" && object.uid && object.type && typeof object.type['unigraph.id'] === "string" && typeof object.type['unigraph.id'].startsWith('$/') 
+        && (Object.keys(object).length === 3 || (Object.keys(object).filter(el => el.startsWith('_value')).length === 0)) )
 
 export const SubentityDropAcceptor = ({ uid }: any) => {
     const [{ isOver, canDrop }, dropSub] = useDrop(() => ({

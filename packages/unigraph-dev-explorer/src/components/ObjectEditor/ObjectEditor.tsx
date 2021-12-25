@@ -4,10 +4,11 @@ import _ from 'lodash';
 import React from 'react';
 import { useEffectOnce } from 'react-use';
 import { SchemaDgraph } from 'unigraph-dev-common/lib/types/json-ts';
+import { typeMapUnigraph } from 'unigraph-dev-common/lib/types/consts';
 import { KeyboardDateTimePicker } from "@material-ui/pickers";
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { ReferenceableSelectorControlled } from '../ObjectView/ReferenceableSelector';
-import { Delete, Menu, Save } from '@material-ui/icons';
+import { Add, Delete, Menu, Save } from '@material-ui/icons';
 import { isJsonString, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { BacklinkView } from '../ObjectView/BacklinkView';
 import { onUnigraphContextMenu } from '../ObjectView/DefaultObjectContextMenu';
@@ -16,7 +17,9 @@ import { getDynamicViews } from '../../unigraph-react';
 
 const useStyles = makeStyles({
     editorFrame: {
-        padding: "16px"
+        padding: "12px",
+        margin: "8px",
+        borderRadius: "12px",
     },
     editorColumn: {}
 });
@@ -27,6 +30,7 @@ const defaultNewValues: any = {
     "$/primitive/string": "",
     "$/primitive/datetime": (new Date()).toISOString(),
     "$/primitive/boolean": false,
+    "$/composer/Array": [],
     "schemaRef": {}
 }
 
@@ -52,8 +56,6 @@ const TypedObjectPartEditor: any = {
         const [currentInputValue, setCurrentInputValue] = React.useState<any>();
         const [currentInputObjValue, setCurrentInputObjValue] = React.useState<any>();
         const [viewOrEdit, setViewOrEdit] = React.useState<any>(getDynamicViews().includes(localObject['type']?.['unigraph.id']) ? "view" : "edit")
-        React.useEffect(() => {if (JSON.stringify(currentInputObjValue) !== currentInputValue) setCurrentInputValue(JSON.stringify(currentInputObjValue))}, [currentInputObjValue, currentInputValue]);
-        React.useEffect(() => {if (isJsonString(currentInputValue)) setCurrentInputObjValue(JSON.parse(currentInputValue))}, [currentInputValue])
         return <React.Fragment>
             <Paper variant="outlined" className={classes.editorFrame}>
                 <div style={editorHeader}>
@@ -86,7 +88,7 @@ const TypedObjectPartEditor: any = {
                                 //console.log(schemaMap[propType])
                                 if (propType.startsWith?.('$/schema') && Object.keys(defaultNewValues).includes(schemaMap[propType]?.['_definition']?.type?.['unigraph.id'])) 
                                     deft = defaultNewValues[schemaMap[propType]?.['_definition']?.type?.['unigraph.id']]
-                                setCurrentInputObjValue(deft);
+                                setCurrentInputObjValue(JSON.stringify(deft));
                             }}
                             style={{width: "240px"}}
                         >
@@ -96,9 +98,10 @@ const TypedObjectPartEditor: any = {
                             {(localSchema['_properties'].map((el: any) => el['_key'])).map((el: string) => <MenuItem value={el}>{el}</MenuItem>)}
                         </Select>
                     </FormControl>
-                    <TextField onChange={(e) => {setCurrentInputValue(e.target.value)}} value={currentInputValue} style={{opacity: currentInputObjValue === undefined ? 0 : 1}}></TextField>
-                    {JSON.stringify(currentInputObjValue)}
-                    <Button onClick={() => window.unigraph.updateObject(localObject.uid, {[selectedNewProp]: currentInputObjValue})} style={{opacity: currentInputObjValue === undefined ? 0 : 1}}>Add</Button>
+                    <TextField onChange={(e) => {setCurrentInputObjValue(e.target.value)}} value={currentInputObjValue} style={{opacity: currentInputObjValue === undefined ? 0 : 1}}></TextField>
+                    {currentInputObjValue}
+                    {!currentInputObjValue || isJsonString(currentInputObjValue) ? "" : " (not valid)"}
+                    <Button onClick={() => window.unigraph.updateObject(localObject.uid, {[selectedNewProp]: JSON.parse(currentInputObjValue)})} style={{opacity: currentInputObjValue === undefined ? 0 : 1}}>Add</Button>
                 </div>
             </Paper>
         </React.Fragment>
@@ -120,14 +123,20 @@ const TypedObjectPartEditor: any = {
     "$/composer/Array": ({localSchema, localObject, setLocalObject, schemaMap}: any) => {
         const classes = useStyles();
         const metadata = getMetadata(localObject);
-        console.log(JSON.stringify(localSchema))
+        const elementSchema = localSchema['_parameters']['_element'];
         return <Paper variant="outlined" className={classes.editorFrame}>
-            <Typography>Array type</Typography>
+            <div style={{display: "flex"}}>
+                <Typography>Array type</Typography>
+                <Add onClick={() => {if (Object.keys(typeMapUnigraph).includes(elementSchema?.['type']?.['unigraph.id'])) window.unigraph.updateObject(localObject.uid, {"_value[": {
+                    [typeMapUnigraph[elementSchema['type']['unigraph.id']]]: defaultNewValues[elementSchema['type']['unigraph.id']],
+                    _index: {"_value.#i": localObject['_value[']?.length}
+                }}, true, false)}} />
+            </div>
             <MetadataDisplay metadata={metadata} />
             {localObject['_value[']?.map((el: any) => <div style={{display: "flex", alignItems: "baseline", paddingTop: "8px"}}>
                 <ObjectPartEditor
-                            localSchema={schemaMap[el?.['_value']?.['type']?.['unigraph.id']]?.['_definition'] || localSchema['_parameters']['element']}
-                            localObject={el['_value']} schemaMap={schemaMap}
+                            localSchema={elementSchema}
+                            localObject={el} schemaMap={schemaMap}
                             setLocalObject={() => {}}
                 />
                 <Delete onClick={() => {window.unigraph.deleteItemFromArray(localObject.uid, el.uid)}} className="showOnHover"/>
