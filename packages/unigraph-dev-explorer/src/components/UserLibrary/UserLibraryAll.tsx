@@ -1,12 +1,9 @@
-import { Card, Divider, ListItem, Typography } from '@material-ui/core';
+import { Card, Typography } from '@material-ui/core';
 import _ from 'lodash';
 import React from 'react';
-import InfiniteScroll from 'react-infinite-scroll-component';
 import { useEffectOnce } from 'react-use';
-import { buildGraph, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
-import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
+import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { DynamicObjectListView, TabButton } from '../ObjectView/DynamicObjectListView';
-import { setupInfiniteScrolling } from '../ObjectView/infiniteScrolling';
 import { getStatsQuery } from '../UnigraphCore/ConnectionWidget';
 
 const MultiTypeDescriptor = ({itemGroups, currentType, setCurrentType}: any) => {

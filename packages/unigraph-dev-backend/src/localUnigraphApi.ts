@@ -6,7 +6,7 @@ import DgraphClient, { queries } from "./dgraphClient";
 import { buildExecutable, ExecContext } from "./executableManager";
 import { callHooks } from "./hooks";
 import { addNotification } from "./notifications";
-import { Subscription, createSubscriptionLocal, createSubscriptionWS } from "./subscriptions";
+import { Subscription, createSubscriptionLocal, createSubscriptionWS, resolveSubscriptionUpdate } from "./subscriptions";
 import { insertsToUpsert } from "unigraph-dev-common/lib/utils/txnWrapper";
 import { Cache } from './caches';
 import dgraph from "dgraph-js";
@@ -17,7 +17,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
     const messages: any[] = [];
     const eventTarget: any = {};
 
-    return {
+    const api: Unigraph = {
         backendConnection: {current: false},
         backendMessages: messages,
         eventTarget: eventTarget,
@@ -36,47 +36,26 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         ensureSchema: async (name, fallback) => {return Error('Not implemented')},
         // latertodo
         ensurePackage: async (packageName, fallback) => {return Error('Not implemented')},
-        subscribeToType: async (name, callback: any, eventId = undefined, {all, showHidden, uidsOnly, first, metadataOnly, depth, queryAs}: any) => {
-            eventId = eventId || getRandomInt();
-            const queryAny = queries.queryAny(eventId.toString(), uidsOnly)
-            const queryAnyAll = queries.queryAnyAll(eventId.toString(), uidsOnly)
-            const query = name === "any" ? ((all || uidsOnly) ? queryAnyAll : queryAny) : `(func: uid(par${eventId})${first ? ", first: "+first : ""}) 
-                @filter((type(Entity)) AND (NOT eq(<_propertyType>, "inheritance")) 
-                ${ showHidden ? "" : "AND (NOT eq(<_hide>, true))" } AND (NOT type(Deleted)))
-            ${uidsOnly ? "{ uid }" : (all ? "@recurse { uid <unigraph.id> expand(_userpredicate_) } " : (metadataOnly ? " { uid <dgraph.type> type { <unigraph.id> } } " : makeQueryFragmentFromType(name, states.caches["schemas"].data, depth)))}
-            var(func: eq(<unigraph.id>, "${name}")) {
-            <~type> {
-            par${eventId} as uid
-            }}`;
-            const newSub = typeof callback === "function" ? 
-                createSubscriptionLocal(eventId, callback, query) : 
-                createSubscriptionWS(eventId, callback.ws, query, callback.connId, states.getClientId(callback.connId));
-            states.subscriptions.push(newSub);
-            callHooks(states.hooks, "after_subscription_added", {subscriptions: states.subscriptions, ids: [eventId]});
+        subscribeToType: async (name, callback: any, eventId = undefined, options: any) => {
+            return api.subscribe({type: "type", name, options}, callback, eventId)
         },
         subscribeToObject: async (uid, callback: any, eventId = undefined, options: any) => {
-            eventId = eventId || getRandomInt();
-            if (typeof uid === "string" && uid.startsWith('$/')) {
-                // Is named entity
-                uid = states.namespaceMap[uid].uid;
-            }
-            const frag = options.queryFn ? options.queryFn.replace('QUERYFN_TEMPLATE', (Array.isArray(uid) ? uid.join(', ') : uid)) :`(func: uid(${Array.isArray(uid) ? uid.join(', ') : uid })) 
-                ${options?.queryAsType ? makeQueryFragmentFromType(options.queryAsType, states.caches["schemas"].data, options?.depth) : "@recurse { uid unigraph.id expand(_userpredicate_) }"}`
-            const newSub = typeof callback === "function" ? 
-                createSubscriptionLocal(eventId, callback, frag) :
-                createSubscriptionWS(eventId, callback.ws, frag, callback.connId, states.getClientId(callback.connId));
-            states.subscriptions.push(newSub);
-            callHooks(states.hooks, "after_subscription_added", {subscriptions: states.subscriptions, ids: [eventId]});
+            return api.subscribe({type: "object", uid, options}, callback, eventId)
         },
-        subscribeToQuery: async (fragment, callback: any, eventId = undefined, {noExpand} = {}) => {
+        subscribeToQuery: async (fragment, callback: any, eventId = undefined, options: any) => {
+            return api.subscribe({type: "query", fragment, options}, callback, eventId)
+        },
+        subscribe: async (query, callback: any, eventId = undefined, update) => {
             eventId = eventId || getRandomInt();
-            const query = (noExpand || fragment.startsWith('$/executable/')) ? fragment : `(func: uid(par${eventId})) @recurse {uid unigraph.id expand(_userpredicate_)}
-            par${eventId} as var${fragment}`
-            const newSub = typeof callback === "function" ? 
+            if (update) {
+                resolveSubscriptionUpdate(eventId, query, states);
+            } else {
+                const newSub = typeof callback === "function" ? 
                 createSubscriptionLocal(eventId, callback, query) :
                 createSubscriptionWS(eventId, callback.ws, query, callback.connId, states.getClientId(callback.connId));
-            states.subscriptions.push(newSub);
-            callHooks(states.hooks, "after_subscription_added", {subscriptions: states.subscriptions, ids: [eventId]});
+                states.subscriptions.push(newSub);
+                callHooks(states.hooks, "after_subscription_added", {subscriptions: states.subscriptions, ids: [eventId]});
+            }
         },
         unsubscribe: async (id) => {
             states.subscriptions = states.subscriptions.reduce((prev: Subscription[], curr: Subscription) => {
@@ -371,7 +350,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         getSubscriptions: () => {
             return states?.subscriptions?.map(el => ({
                 data: (el.data || []).map?.((ell: any) => ({uid: ell.uid, type: {"unigraph.id": ell.type?.['unigraph.id']}})),
-                queryFragment: el.queryFragment,
+                query: el.query,
                 subType: el.subType,
                 callbackType: el.callbackType,
                 id: el.id,
@@ -383,5 +362,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
                 queryTime: el.queryTime,
             })) || []
         }
-    }
+    };
+
+    return api;
 }

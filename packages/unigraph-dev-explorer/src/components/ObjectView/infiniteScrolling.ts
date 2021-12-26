@@ -12,40 +12,59 @@ import { buildGraph } from "unigraph-dev-common/lib/utils/utils";
 export const setupInfiniteScrolling = (uids: string[], chunk = 50, stateCallback: (loadedItems: any[]) => void, subscribeOptions?: any) => {
 
     const states = {
-        subs: [] as any[],
+        results: [] as any[],
+        currentSubs: [] as string[],
         chunks: _.chunk(uids, chunk),
+        subsId: getRandomInt(),
     }
 
     const onStateUpdated = () => {
-        const items = states.subs.reduce((prev: any[], curr: any) => [...prev, ...curr.result], []);
-        stateCallback(items);
+        stateCallback(states.results);
     }
 
     const onUserNext = () => {
-        const [subsHead, chunksHead] = [states.subs.length, states.chunks.length];
+        console.log("Next")
+        const [subsHead, chunksHead] = [states.currentSubs.length / chunk, states.chunks.length];
         if (subsHead < chunksHead) {
             const toSub = states.chunks[subsHead];
-            const subsId = getRandomInt();
-            states.subs.push({id: subsId, result: []});
-            window.unigraph.subscribeToObject(toSub, (results: any[] | any) => {
-                let uidsMap: any = {};
-                buildGraph(results);
-                results.forEach ? results.forEach((el: any) => {uidsMap[el.uid] = el}) : uidsMap[results.uid] = results;
-                states.subs[subsHead].result = toSub.map(el => uidsMap[el]);
-                onStateUpdated();
-            }, subsId, subscribeOptions);
+            states.currentSubs = [...states.results.map((el: any) => el.uid), ...toSub];
+            window.unigraph.subscribe({
+                type: "object",
+                uid: states.currentSubs,
+                options: subscribeOptions
+            }, () => {}, states.subsId, true);
         }
     }
 
+    const onUpdate = (newUids: string[]) => {
+        if (_.isEqual(uids, newUids)) return;
+        uids = newUids;
+        states.chunks = _.chunk(uids, chunk);
+        states.results = []; states.currentSubs = [];
+        onUserNext();
+    }
+
     const onCleanup = () => {
-        states.subs.forEach(el => window.unigraph.unsubscribe(el.id));
+        window.unigraph.unsubscribe(states.subsId);
         stateCallback = () => {};
     }
+    
 
     const returns = {
         next: onUserNext,
-        cleanup: onCleanup
+        cleanup: onCleanup,
+        onUpdate: onUpdate,
     }
+
+    const toSub = states.chunks[0] || []; states.currentSubs = toSub;
+    console.log("Subscribe")
+    window.unigraph.subscribeToObject(toSub, (results: any[] | any) => {
+        let uidsMap: any = {};
+        buildGraph(results);
+        results.forEach ? results.forEach((el: any) => {uidsMap[el.uid] = el}) : uidsMap[results.uid] = results;
+        states.results = states.currentSubs.map((el: any) => uidsMap[el]);
+        onStateUpdated();
+    }, states.subsId, subscribeOptions);
 
     return returns;
 }

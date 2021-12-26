@@ -304,7 +304,16 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             };
             subscriptions[id] = (result: any[]) => callback(result.map((el: any) => new UnigraphObject(el)));
             sendEvent(connection, "subscribe_to_query", {queryFragment: fragment, options}, id);
-        }), 
+        }),
+        subscribe: (query, callback, eventId = undefined, update) => new Promise((resolve, reject) => {
+            const id = typeof eventId === "number" ? eventId : getRandomInt();
+            callbacks[id] = (response: any) => {
+                if (response.success) resolve(id);
+                else reject(response);
+            };
+            if (!update) subscriptions[id] = (result: any[] | any) => callback(Array.isArray(result) ? result.map((el: any) => new UnigraphObject(el)) : new UnigraphObject(result));
+            sendEvent(connection, "subscribe", {query, update}, id);
+        }),
         unsubscribe: (id) => {
             sendEvent(connection, "unsubscribe_by_id", {}, id);
         },

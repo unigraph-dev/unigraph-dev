@@ -63,7 +63,9 @@ export type QueryObject = {
     type: "object",
     uid: UnigraphUid<string> | UnigraphUid<string>[] | string | string[],
     options?: {
-        queryAsType?: SchemaShorthandName<string> | SchemaFullName<string, string, string> | string
+        queryAsType?: SchemaShorthandName<string> | SchemaFullName<string, string, string> | string,
+        queryFn?: string,
+        depth?: number,
     }
 }
 
@@ -179,6 +181,7 @@ export interface Unigraph<TT = WebSocket | false> {
         eventId?: number | undefined, 
         options?: QueryRaw["options"]
     ): Promise<any>;
+    subscribe(query: Query, callback: (results: any[] | any) => void, eventId?: number, update?: boolean): Promise<any>;
     /** Unsubscribes using the subscription ID. */
     unsubscribe(id: number): any;
     /**
