@@ -184,7 +184,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
     React.useEffect(() => {
         dataref.current = data;
         const dataText = data.get('text').as('primitive')
-        if (dataText && options?.viewId) window.layoutModel.doAction(Actions.renameTab(options.viewId, `Note: ${dataText}`))
+        if (dataText && options?.viewId && !callbacks.isEmbed) window.layoutModel.doAction(Actions.renameTab(options.viewId, `Note: ${dataText}`))
         if (isEditing && textref.current !== dataText && !edited.current) { setCurrentText(dataText); textInput.current.textContent = dataText; }
         if (textref.current !== dataText && !edited.current) { textref.current = dataText; }
         else if ((textref.current === dataText && edited.current) || textref.current === undefined) resetEdited();
@@ -230,7 +230,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                 onBlur={(ev) => { setIsEditing(false); inputDebounced.current.flush(); }} style={{ width: "100%" }}>
 
                     {(isEditing) ? <Typography
-                        variant={isChildren ? "body1" : "h4"}
+                        variant={(isChildren || callbacks.isEmbed) ? "body1" : "h4"}
                         onContextMenu={isChildren ? undefined : (event) => onUnigraphContextMenu(event, data, undefined, callbacks)}
                         contentEditable={true}
                         style={{outline: "0px solid transparent"}}
@@ -374,7 +374,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                     >
                     </Typography> : <AutoDynamicView
                         object={data.get('text')['_value']['_value']}
-                        attributes={{ isHeading: !isChildren }}
+                        attributes={{ isHeading: !(isChildren || callbacks.isEmbed) }}
                         noDrag noContextMenu
                         callbacks={{
                             'get-semantic-properties': () => {
