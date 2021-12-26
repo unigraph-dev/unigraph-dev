@@ -5,9 +5,25 @@
     "unigraph": {
         "schemas": [
             {"id": "note_block", "src": "schemas/note_block.json"}, 
+            {"id": "journal", "src": "schemas/journal.json"}, 
             {"id": "interface/semantic", "src": "schemas/semantic.json"},
             {"id": "interface/textual", "src": "schemas/textual.json"}
         ],
-        "package_name": "unigraph.notes"
+        "package_name": "unigraph.notes",
+        "entities": [
+            {"id": "section_daily_notes", "src": "entities/daily_notes.json"}
+        ],
+        "executables": [
+            {
+                "name": "Daily Notes",
+                "env": "component/react-jsx",
+                "id": "daily-notes",
+                "src": "executables/dailyNotes.jsx",
+                "imports": [
+                    {"env": "npm", "package": "@material-ui/core", "import": "Typography", "as": "Typography"}
+                ],
+                "editable": true
+            }
+        ]
     }
 }
