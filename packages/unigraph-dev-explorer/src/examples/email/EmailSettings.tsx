@@ -36,7 +36,7 @@ export const EmailSettings = ({}) => {
                 <~type> { parAcc as uid }
             }`, (res: any[]) => {
                 setAccount(res[0])
-            }, id, true);
+            }, id, {noExpand: true});
             return function cleanup() {
                 window.unigraph.unsubscribe(id);
             }

@@ -95,7 +95,7 @@ declare type EventSubscribeQuery = {
   id: number | string,
   queryFragment: string,
   connId: string,
-  noExpand?: boolean,
+  options?: { noExpand?: boolean },
 }
 
 declare type EventGetQueries = {

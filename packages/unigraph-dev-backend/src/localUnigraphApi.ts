@@ -68,7 +68,7 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
             states.subscriptions.push(newSub);
             callHooks(states.hooks, "after_subscription_added", {subscriptions: states.subscriptions, ids: [eventId]});
         },
-        subscribeToQuery: async (fragment, callback: any, eventId = undefined, noExpand) => {
+        subscribeToQuery: async (fragment, callback: any, eventId = undefined, {noExpand} = {}) => {
             eventId = eventId || getRandomInt();
             const query = (noExpand || fragment.startsWith('$/executable/')) ? fragment : `(func: uid(par${eventId})) @recurse {uid unigraph.id expand(_userpredicate_)}
             par${eventId} as var${fragment}`

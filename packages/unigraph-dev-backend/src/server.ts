@@ -224,7 +224,7 @@ export default async function startServer(client: DgraphClient) {
     },
 
     "subscribe_to_query": async function (event: EventSubscribeQuery, ws: IWebsocket) {
-      serverStates.localApi.subscribeToQuery(event.queryFragment, {ws: ws, connId: event.connId}, event.id, event.noExpand)
+      serverStates.localApi.subscribeToQuery(event.queryFragment, {ws: ws, connId: event.connId}, event.id, event.options)
         .then((res: any) => ws.send(makeResponse(event, true)));
     },
 
