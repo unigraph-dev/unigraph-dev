@@ -20,7 +20,8 @@
                 "id": "daily-notes",
                 "src": "executables/dailyNotes.jsx",
                 "imports": [
-                    {"env": "npm", "package": "@material-ui/core", "import": "Typography", "as": "Typography"}
+                    {"env": "npm", "package": "@material-ui/core", "import": "Typography", "as": "Typography"},
+                    {"env": "npm", "package": "@material-ui/core", "import": "Button", "as": "Button"}
                 ],
                 "editable": true
             }

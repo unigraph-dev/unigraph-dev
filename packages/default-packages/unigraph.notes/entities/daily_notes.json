@@ -1,7 +1,7 @@
 {
     "type": {"unigraph.id": "$/schema/home_section"},
     "view": {
-        "name": "Daily Notes",
+        "name": "Journal",
         "env": "react-explorer",
         "view": {"unigraph.id": "$/package/unigraph.notes/0.0.1/executable/daily-notes"}
     },

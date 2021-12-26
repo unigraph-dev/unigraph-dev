@@ -104,7 +104,7 @@ export function initExecutables(executables: [string, Executable][], context: Pa
         }
         if (key.startsWith("0x") && el.on_hook) {
             newHooks = addHook(newHooks, el.on_hook, async (params: any) => {
-                return (buildExecutable(el, {...context, definition: el, params}, unigraph, states))();
+                return (buildExecutable(el, {...context, definition: el, params}, unigraph, states))?.();
             })
         }
     })

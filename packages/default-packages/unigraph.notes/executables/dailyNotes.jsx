@@ -1,18 +1,19 @@
+const d = new Date();
+const utcTime = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 0, 0, 0)).toISOString();
+const dateStr = d.getUTCFullYear() + '-' + (d.getUTCMonth()+1) + '-' + d.getUTCDate()
+
 const [note, setNote] = React.useState({});
-// window.unigraph.addObject({date:{datetime:utcTime, all_day:true, timezone:'local'}, note:{text: {_value: '', type: {'unigraph.id': "$/schema/markdown"}}}},'$/schema/journal')
 React.useEffect(() => {
     const subsId = getRandomInt();
-    const d = new Date()
-    const utcTime = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 0, 0, 0)).getTime()
+    
     window.unigraph.subscribeToQuery(
-        `(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted)) AND (NOT eq(<_hide>, true))) @recurse {
+        `(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted)) AND (NOT eq(<_hide>, true))) {
             uid
-            <unigraph.id>
-            expand(_userpredicate_)
+            type { <unigraph.id> }
         }
         point as var(func: uid(partf)) @cascade {
             _value {
-                datetime @filter(eq(<_value.%dt>, ${utcTime})) {
+                datetime @filter(eq(<_value.%dt>, "${utcTime}")) {
                     <_value.%dt>
                 }
             }
@@ -22,15 +23,17 @@ React.useEffect(() => {
                 partf as uid
             }
         }
-        var(func: uid(point)) {
+        var(func: uid(point)) @cascade {
             <unigraph.origin> {
-                res as uid
+                type @filter(eq(<unigraph.id>, "$/schema/journal")) {
+                    <~type> {res as uid}
+                }
             }
         }`
 ,
     (results) => {
         console.log('',{results})
-        setNote(results?.[0]?.[0])
+        setNote(results?.[0])
     }, subsId, true);
 
     return function cleanup () {
@@ -38,4 +41,16 @@ React.useEffect(() => {
     }
 }, []);
 
-return (note ? JSON.stringify(note) : 'no note yet')
+return ((note && note?.['type']?.['unigraph.id'] === "$/schema/journal") ? <AutoDynamicViewDetailed object={note} /> : <div>
+    <Button style={{textTransform: "none", marginTop: "8px"}} variant="outlined" onClick={() => {
+        window.unigraph.addObject({ 
+            "date": {
+                "datetime": utcTime,
+                "all_day": true,
+                "timezone": "local"
+            }, "note": {
+                "text": {"_value": dateStr, "type": {"unigraph.id":"$/schema/markdown"}}
+            }
+        }, "$/schema/journal")
+    }}>+ Add daily note</Button>
+</div>)

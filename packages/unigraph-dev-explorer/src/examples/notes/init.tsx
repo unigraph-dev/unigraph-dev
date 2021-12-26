@@ -1,4 +1,5 @@
 import { MenuItem, Typography } from "@material-ui/core";
+import { UnigraphObject } from "unigraph-dev-common/lib/utils/utils";
 import { inlineRefsToChildren } from "../../components/UnigraphCore/InlineSearchPopup";
 import { registerDynamicViews, registerDetailedDynamicViews, registerContextMenuItems, registerQuickAdder } from "../../unigraph-react";
 import { NoteBlock, DetailedNoteBlock } from "./NoteBlock";
@@ -55,12 +56,26 @@ const getQuery: ((depth: number) => string) = (depth: number) => {
 }
 
 export const noteQueryDetailed = (uid: string, depth = 0) => `(func: uid(${uid})) ${getQuery(depth + 1)}` 
+export const journalQueryDetailed = (uid: string, depth = 0) => `(func: uid(${uid})) {
+    _updatedAt
+    uid
+    _hide
+    type {
+        <unigraph.id>
+    }
+    _value {
+        note {
+            _value ${getQuery(depth + 1)}
+        }
+    }
+}` 
 
 export const noteQuery = (uid: string) => `(func: uid(${uid})) ${getQuery(7)}`
 
 export const init = () => {
     registerDynamicViews({ "$/schema/note_block": { view: NoteBlock, query: noteQuery} })
     registerDetailedDynamicViews({ "$/schema/note_block": { view: DetailedNoteBlock, query: noteQueryDetailed } })
+    registerDetailedDynamicViews({ "$/schema/journal": { view: (props: any) => DetailedNoteBlock({...props, data: new UnigraphObject(props.data['_value']['note']['_value']), callbacks: {...props.callbacks, isEmbed: true}}), query: journalQueryDetailed } })
 
     const quickAdder = async (inputStr: string, preview = true, callback: any, refs?: any) => {
         if (!preview) {
