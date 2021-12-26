@@ -1,4 +1,4 @@
-import { SchemaDgraph } from "./json-ts"
+import { SchemaAny, SchemaDgraph, SchemaFullName, SchemaShorthandName, UnigraphUid } from "./json-ts"
 import { PackageDeclaration } from "./packages"
 
 /** Unigraph interface */ // Don't remove this line - needed for Monaco to work
@@ -42,10 +42,52 @@ export type UnigraphNotification = {
     actions?: any[]
 }
 
+// Begin subscriptions definition
+export type Query = QueryType | QueryObject | QueryRaw | QueryGroup
+
+export type QueryType = {
+    type: "type",
+    name: SchemaShorthandName<string> | SchemaFullName<string, string, string> | SchemaAny | string,
+    options?: {
+        all?: boolean, 
+        showHidden?: boolean,
+        uidsOnly?: boolean,
+        metadataOnly?: boolean,
+        first?: number,
+        depth?: number,
+        queryAs?: string,
+    }
+}
+
+export type QueryObject = {
+    type: "object",
+    uid: UnigraphUid<string> | UnigraphUid<string>[] | string | string[],
+    options?: {
+        queryAsType?: SchemaShorthandName<string> | SchemaFullName<string, string, string> | string,
+        queryFn?: string,
+        depth?: number,
+    }
+}
+
+export type QueryRaw = {
+    type: "query",
+    fragment: string,
+    options?: {
+        noExpand?: boolean
+    }
+}
+
+export type QueryGroup = {
+    type: "group",
+    queries: Query[]
+}
+
+// End subscriptions definition
+
 /**
  * Prototype of Unigraph objects, which extends on raw objects but with helpful functions.
  */
-export interface UnigraphObject {
+export type UnigraphObject<T = Record<string, any>> = T & {
     get: (path: string | string[]) => any,
     getMetadata: () => any,
     getType: () => string,
@@ -105,16 +147,12 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param eventId can be left empty - in this case, we will generate one for you, 
      * but you cannot get the subscription elsewhere other than from callback.
      */
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    subscribeToType(name: string, callback: Function, eventId?: number | undefined, options?: {
-        all?: boolean | undefined, 
-        showHidden?: boolean | undefined,
-        uidsOnly?: boolean | undefined,
-        metadataOnly?: boolean | undefined,
-        first?: number | undefined,
-        depth?: number | undefined,
-        queryAs?: string | undefined,
-    }): Promise<any>;
+    subscribeToType(
+        name: QueryType["name"], 
+        callback: (results: any[]) => void, 
+        eventId?: number | undefined, 
+        options?: QueryType["options"]
+    ): Promise<any>;
     /**
      * Subscribe to a Unigraph object with a given UID or name, and call the callback function evry time the subscription is updated.
      * 
@@ -123,10 +161,12 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param eventId can be left empty - in this case, we will generate one for you, 
      * but you cannot get the subscription elsewhere other than from callback.
      */
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    subscribeToObject(uid: string | string[], callback: Function, eventId?: number | undefined, options?: {
-        queryAsType?: string | undefined
-    }): Promise<any>;
+    subscribeToObject(
+        uid: QueryObject['uid'], 
+        callback: (results: any[] | any) => void, 
+        eventId?: number | undefined, 
+        options?: QueryObject['options']
+    ): Promise<any>;
     /**
      * Subscribe to a Unigraph query and call the callback function evry time the subscription is updated.
      * 
@@ -135,8 +175,13 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param eventId can be left empty - in this case, we will generate one for you, 
      * but you cannot get the subscription elsewhere other than from callback.
      */
-    // eslint-disable-next-line @typescript-eslint/ban-types
-    subscribeToQuery(fragment: string, callback: Function, eventId?: number | undefined, noExpand?: boolean): Promise<any>;
+    subscribeToQuery(
+        fragment: QueryRaw["fragment"], 
+        callback: (results: any[]) => void, 
+        eventId?: number | undefined, 
+        options?: QueryRaw["options"]
+    ): Promise<any>;
+    subscribe(query: Query, callback: (results: any[] | any) => void, eventId?: number, update?: boolean): Promise<any>;
     /** Unsubscribes using the subscription ID. */
     unsubscribe(id: number): any;
     /**

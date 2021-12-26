@@ -53,5 +53,5 @@ var(func: eq(<unigraph.id>, "$/schema/list")) {
     <~type> {
         lists${id} as uid
     }
-}`, (result: any) => {setData(result)}, subsId, true)
+}`, (result: any) => {setData(result)}, subsId, {noExpand: true})
 }})

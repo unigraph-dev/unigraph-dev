@@ -44,7 +44,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
               }`
             window.unigraph.subscribeToQuery(query, (objects: any[]) => {
                 setLoadedObj(buildGraph(objects)[0]); 
-            }, newSubs, true);
+            }, newSubs, {noExpand: true});
             setSubsId(newSubs);
             callbacks = {...callbacks, subsId: newSubs}
             return function cleanup () { window.unigraph.unsubscribe(newSubs); }

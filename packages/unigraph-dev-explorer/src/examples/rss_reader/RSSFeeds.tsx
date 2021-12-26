@@ -150,7 +150,7 @@ export const RSSFeedsList = withUnigraphSubscription(
 const RSSItemsListBody: React.FC<any> = ({data, viewId}) => {
 
     const [loadedItems, setLoadedItems] = React.useState<UnigraphObject[]>([]);
-    const [setupProps, setSetupProps] = React.useState<{next: any, cleanup: any} | null>(null);
+    const [setupProps, setSetupProps] = React.useState<{next: any, cleanup: any, onUpdate: any} | null>(null);
 
     React.useEffect(() => {
         if (setupProps?.cleanup) setupProps.cleanup();
@@ -160,11 +160,14 @@ const RSSItemsListBody: React.FC<any> = ({data, viewId}) => {
                 setLoadedItems(items);
             });
             setSetupProps(newProps);
-            newProps.next();
         }
 
         return function cleanup () { newProps?.cleanup() }
-    }, [data])
+    }, [data.length === 0])
+
+    React.useEffect(() => {
+        setupProps?.onUpdate(data.map((el: any) => el.uid))
+    }, [data.map((el: any) => el.uid)])
 
     return <div>
         <InfiniteScroll

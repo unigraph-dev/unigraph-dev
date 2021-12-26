@@ -27,7 +27,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, 
             const query = DynamicViewsDetailed[object.type['unigraph.id']].query(object.uid)
             window.unigraph.subscribeToQuery(query, (objects: any[]) => {
                 setLoadedObj(objects[0]);
-            }, newSubs, true);
+            }, newSubs, {noExpand: true});
             setSubsId(newSubs);
         }
 

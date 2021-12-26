@@ -121,7 +121,7 @@ const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, it
 
     const tabContext = React.useContext(TabContext);
     const [loadedItems, setLoadedItems] = React.useState<any[]>([]);
-    const [setupProps, setSetupProps] = React.useState<{ next: any, cleanup: any } | null>(null);
+    const [setupProps, setSetupProps] = React.useState<{ next: any, cleanup: any, onUpdate: any } | null>(null);
 
     React.useEffect(() => {
         if (setupProps?.cleanup) setupProps.cleanup();
@@ -131,10 +131,14 @@ const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, it
                 setLoadedItems(buildGraph ? buildGraphFn(items) : items);
             }, subscribeOptions);
             setSetupProps(newProps);
-            newProps.next();
         } else { setLoadedItems([]) };
         return function cleanup() { newProps?.cleanup() }
-    }, [items])
+    }, [items.length === 0]);
+
+    React.useEffect(() => {
+        console.log("UPDATE...", items)
+        setupProps?.onUpdate(items.map((el: any) => itemGetter(el).uid))
+    }, [items.map((el: any) => itemGetter(el).uid)])
 
     return <InfiniteScroll
         dataLength={loadedItems.length}
