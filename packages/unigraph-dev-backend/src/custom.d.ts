@@ -1,6 +1,6 @@
 import DgraphClient from './dgraphClient';
 import { PackageDeclaration } from 'unigraph-dev-common/lib/types/packages';
-import { UnigraphNotification } from 'unigraph-dev-common/lib/types/unigraph';
+import { Query, UnigraphNotification } from 'unigraph-dev-common/lib/types/unigraph';
 
 declare global {
   namespace Express {
@@ -95,7 +95,16 @@ declare type EventSubscribeQuery = {
   id: number | string,
   queryFragment: string,
   connId: string,
-  noExpand?: boolean,
+  options?: { noExpand?: boolean },
+}
+
+declare type EventSubscribe = {
+  type: "event",
+  event: "subscribe",
+  id: number | string,
+  query: Query,
+  connId: string,
+  update?: boolean,
 }
 
 declare type EventGetQueries = {

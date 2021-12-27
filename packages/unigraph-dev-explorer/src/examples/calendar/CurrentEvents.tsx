@@ -13,7 +13,7 @@ export const CurrentEvents = () => {
 
         window.unigraph.subscribeToQuery("$/executable/get-next-events", (res: any) => {
             setCurrentEvents(buildGraph(res as any[]));
-        }, id, true);
+        }, id, {noExpand: true});
 
         return function cleanup() { window.unigraph.unsubscribe(id); }
 

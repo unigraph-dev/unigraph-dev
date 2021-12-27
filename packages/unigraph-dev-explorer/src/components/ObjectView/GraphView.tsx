@@ -36,7 +36,7 @@ export const GraphView = ({uid}: any) => {
             <~unigraph.origin> ${queryNameIndex}
         }`, (res: any) => {
             setRefs(res);
-        }, id, true);
+        }, id, {noExpand: true});
 
         return function cleanup () { window.unigraph.unsubscribe(id); }
     }, [])

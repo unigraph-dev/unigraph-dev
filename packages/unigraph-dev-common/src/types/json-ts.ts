@@ -80,7 +80,7 @@ export type Definition = Types
 
 export type Entity<T extends string> = {
     "uid"?: string,
-    type?: UnigraphIdType<`$/schema/${T}`>,
+    type?: UnigraphIdType<SchemaShorthandName<T>>,
     "_value": any,
     "_createdAt": any,
     "_updatedAt": any
@@ -89,3 +89,8 @@ export type Entity<T extends string> = {
 
 export type EntityDgraph<T extends string> = Entity<T> | {"dgraph.type": "Entity"}
 
+export type SchemaShorthandName<T extends string> = `$/schema/${T}`
+export type SchemaFullName<P extends string, V extends string, T extends string> = `$/package/${P}/${V}/schema/${T}`
+export type SchemaAny = 'any'
+
+export type UnigraphUid<T extends string> = `0x${T}`

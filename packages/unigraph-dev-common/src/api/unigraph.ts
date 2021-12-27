@@ -68,7 +68,7 @@ export class UnigraphObject extends Object {
         return (this as any).type['unigraph.id'];
     }
     getRefType = () => {
-        return undefined;
+        return (this as any)['dgraph.type'] ? "ref" : "value";
     }
     as = (type: string) => getObjectAs(this, type as any)
 }
@@ -296,15 +296,24 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             if (typeof options?.queryFn === "function") options.queryFn = options.queryFn("QUERYFN_TEMPLATE")
             sendEvent(connection, "subscribe_to_object", {uid, options}, id);
         }), 
-        subscribeToQuery: (fragment, callback, eventId = undefined, noExpand = false) => new Promise((resolve, reject) => {
+        subscribeToQuery: (fragment, callback, eventId = undefined, options) => new Promise((resolve, reject) => {
             const id = typeof eventId === "number" ? eventId : getRandomInt();
             callbacks[id] = (response: any) => {
                 if (response.success) resolve(id);
                 else reject(response);
             };
             subscriptions[id] = (result: any[]) => callback(result.map((el: any) => new UnigraphObject(el)));
-            sendEvent(connection, "subscribe_to_query", {queryFragment: fragment, noExpand}, id);
-        }), 
+            sendEvent(connection, "subscribe_to_query", {queryFragment: fragment, options}, id);
+        }),
+        subscribe: (query, callback, eventId = undefined, update) => new Promise((resolve, reject) => {
+            const id = typeof eventId === "number" ? eventId : getRandomInt();
+            callbacks[id] = (response: any) => {
+                if (response.success) resolve(id);
+                else reject(response);
+            };
+            if (!update) subscriptions[id] = (result: any[] | any) => callback(Array.isArray(result) ? result.map((el: any) => new UnigraphObject(el)) : new UnigraphObject(result));
+            sendEvent(connection, "subscribe", {query, update}, id);
+        }),
         unsubscribe: (id) => {
             sendEvent(connection, "unsubscribe_by_id", {}, id);
         },

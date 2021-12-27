@@ -15,7 +15,7 @@ React.useEffect(() => {
             "$/entity/inbox": ibx?.items || 0,
             "$/entity/read_later": rlt?.items || 0
         })
-    }, subsId, true);
+    }, subsId, {noExpand: true});
 
     return function cleanup () {
         window.unigraph.unsubscribe(subsId);

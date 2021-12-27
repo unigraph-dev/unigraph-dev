@@ -4,7 +4,7 @@ import WebSocket from 'ws';
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import DgraphClient from './dgraphClient';
 import { insertsToUpsert } from 'unigraph-dev-common/lib/utils/txnWrapper';
-import { EventAddNotification, EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteItemFromArray, EventDeleteRelation, EventDeleteUnigraphObject, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventExportObjects, EventGetPackages, EventGetQueries, EventGetSchemas, EventGetSearchResults, EventGetSubscriptions, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventReorderItemInArray, EventResponser, EventRunExecutable, EventSetDgraphSchema, EventSubscribeObject, EventSubscribeQuery, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
+import { EventAddNotification, EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteItemFromArray, EventDeleteRelation, EventDeleteUnigraphObject, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventExportObjects, EventGetPackages, EventGetQueries, EventGetSchemas, EventGetSearchResults, EventGetSubscriptions, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventReorderItemInArray, EventResponser, EventRunExecutable, EventSetDgraphSchema, EventSubscribe, EventSubscribeObject, EventSubscribeQuery, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert } from './custom';
 import { buildUnigraphEntity, processAutoref, dectxObjects, processAutorefUnigraphId } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { addUnigraphPackage, checkOrCreateDefaultDataModel, createPackageCache, createSchemaCache } from './datamodelManager';
 import { Cache } from './caches';
@@ -98,6 +98,7 @@ export default async function startServer(client: DgraphClient) {
   Object.assign(serverStates, {
     caches: caches,
     subscriptions: _subscriptions,
+    dgraphClient: dgraphClient,
     hooks: hooks,
     defaultHooks: hooks,
     namespaceMap: namespaceMap,
@@ -132,6 +133,7 @@ export default async function startServer(client: DgraphClient) {
       }, 250)
     },
     entityHeadByType: {},
+    pollCallback: pollCallback,
   })
 
   const namespaceSub = createSubscriptionLocal(getRandomInt(), (data) => {
@@ -144,7 +146,7 @@ export default async function startServer(client: DgraphClient) {
         result: data[0]
       }))
     })
-  }, `(func: eq(<unigraph.id>, "$/meta/namespace_map")) {
+  }, {type: "query", fragment: `(func: eq(<unigraph.id>, "$/meta/namespace_map")) {
     uid
     <unigraph.id>
     _name
@@ -161,7 +163,7 @@ export default async function startServer(client: DgraphClient) {
         _icon
       }
     }
-  }`);
+  }`});
 
   serverStates.subscriptions.push(namespaceSub);
   await pollSubscriptions(serverStates.subscriptions, dgraphClient, pollCallback, undefined, serverStates);
@@ -224,7 +226,12 @@ export default async function startServer(client: DgraphClient) {
     },
 
     "subscribe_to_query": async function (event: EventSubscribeQuery, ws: IWebsocket) {
-      serverStates.localApi.subscribeToQuery(event.queryFragment, {ws: ws, connId: event.connId}, event.id, event.noExpand)
+      serverStates.localApi.subscribeToQuery(event.queryFragment, {ws: ws, connId: event.connId}, event.id, event.options)
+        .then((res: any) => ws.send(makeResponse(event, true)));
+    },
+
+    "subscribe": async function (event: EventSubscribe, ws: IWebsocket) {
+      serverStates.localApi.subscribe(event.query, {ws: ws, connId: event.connId}, event.id, event.update)
         .then((res: any) => ws.send(makeResponse(event, true)));
     },
 
