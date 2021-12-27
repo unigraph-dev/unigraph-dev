@@ -7,9 +7,9 @@ React.useEffect(() => {
     const subsId = getRandomInt();
     
     window.unigraph.subscribeToQuery(
-        `(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted)) AND (NOT eq(<_hide>, true))) {
+        `(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted)) AND (NOT eq(<_hide>, true))) @cascade {
             uid
-            type { <unigraph.id> }
+            type @filter(eq(<unigraph.id>, "$/schema/journal")) { <unigraph.id> }
         }
         point as var(func: uid(partf)) @cascade {
             _value {
@@ -25,9 +25,7 @@ React.useEffect(() => {
         }
         var(func: uid(point)) @cascade {
             <unigraph.origin> {
-                type @filter(eq(<unigraph.id>, "$/schema/journal")) {
-                    <~type> {res as uid}
-                }
+                res as uid
             }
         }`
 ,
