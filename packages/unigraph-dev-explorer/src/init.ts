@@ -17,9 +17,12 @@ import { init as rss_init } from './examples/rss_reader/RSSFeeds';
 import { pb_init } from './components/UnigraphCore/Pinboard';
 
 import { ListObjectQuery, ListObjectView } from "./components/UnigraphCore/ListObjectView";
-import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
+import { getRandomInt } from "unigraph-dev-common/lib/utils/utils";
 import { SubentityView } from "./components/UnigraphCore/SubentityView";
 import { ViewItem } from "./components/ObjectView/ViewObjectView";
+import _ from "lodash";
+import { backlinkQuery } from "./components/ObjectView/backlinksUtils";
+import stringify from "json-stable-stringify";
 
 window.reloadCommands = () => {
     const commandsState = window.unigraph.getState("registry/commands");
@@ -90,6 +93,7 @@ export function init(hostname?: string) {
 
     initContextMenu();
     initRegistry();
+    initBacklinkManager();
     initPackages();
 
     if (window.localStorage.getItem('enableAnalytics') === "true") initAnalyticsIfOptedIn();
@@ -150,6 +154,33 @@ function initRegistry() {
     window.unigraph.addState('registry/components', {});
     window.unigraph.addState('registry/contextMenu', {});
     window.unigraph.addState('registry/commands', {});
+    window.unigraph.addState('registry/backlinks', {});
+    window.unigraph.addState('registry/backlinksCallbacks', {});
+}
+
+function initBacklinkManager () {
+    const subsId = getRandomInt();
+    let currentObjects: string[] = [];
+    let currentResults: any = {};
+
+    window.unigraph.subscribe({type: "object", uid: [], options: {
+        queryFn: backlinkQuery
+    }}, (newBacklinks: any[]) => {
+        const newVal = Object.fromEntries(JSON.parse(JSON.stringify(newBacklinks)).map((el: any) => [el.uid, el]));
+        newBacklinks.map(el => el.uid).map(el => {
+            const subs = window.unigraph.getState('registry/backlinksCallbacks').value[el]
+            if (Array.isArray(subs)) subs.forEach(sub => sub(newVal[el]));
+        })
+        currentResults = newVal;
+    }, subsId);
+
+    window.unigraph.getState('registry/backlinks').subscribe(_.debounce((newVal: Record<string, any>) => {
+        currentObjects = _.uniq([...currentObjects, ...Object.keys(newVal)])
+        window.unigraph.subscribe({type: "object", uid: Object.keys(newVal), options: {
+            queryFn: backlinkQuery
+        }}, () => false, subsId, true);
+        currentResults = Object.fromEntries(Object.entries(currentResults).filter(el => currentObjects.includes(el[0])));
+    }, 20))
 }
 
 function initAnalyticsIfOptedIn () {

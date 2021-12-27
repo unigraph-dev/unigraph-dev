@@ -48,7 +48,8 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         subscribe: async (query, callback: any, eventId = undefined, update) => {
             eventId = eventId || getRandomInt();
             if (update) {
-                resolveSubscriptionUpdate(eventId, query, states);
+                const ret = resolveSubscriptionUpdate(eventId, query, states);
+                if (ret === false) throw new Error("Not a valid subscription update!")
             } else {
                 const newSub = typeof callback === "function" ? 
                 createSubscriptionLocal(eventId, callback, query) :

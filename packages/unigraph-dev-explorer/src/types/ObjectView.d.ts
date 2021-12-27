@@ -18,6 +18,9 @@ export type AutoDynamicViewProps = {
     noDrag?: boolean,
     noDrop?: boolean,
     noContextMenu?: boolean,
+    noBacklinks?: boolean,
+    noParents?: boolean,
+    withParent?: boolean,
     subentityExpandByDefault?: boolean,
 }
 

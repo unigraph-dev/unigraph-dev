@@ -65,7 +65,7 @@ const DynamicListItem = ({ reverse, listUid, item, index, context, callbacks, it
                 <ListItemIcon onClick={() => {
                     itemRemover([item['uid']])
                 }} style={{ display: (itemRemover === _.noop || isMobile() || noRemover) ? "none" : "" }}><ClearAll /></ListItemIcon>
-                <AutoDynamicView object={new UnigraphObject(item)} callbacks={{
+                <AutoDynamicView object={new UnigraphObject(item)} withParent={listUid ? true : false} callbacks={{
                     ...callbacks,
                     context: context,
                     removeOnEnter,
@@ -108,6 +108,7 @@ export type DynamicObjectListViewProps = {
     titleBar?: any,
     loadAll?: boolean,
     removeOnEnter?: boolean,
+    style?: any,
 }
 
 const DynamicListBasic = ({ reverse, items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true, noRemover, compact, removeOnEnter }: any) => {
@@ -138,7 +139,6 @@ const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, it
     }, [items.length === 0]);
 
     React.useEffect(() => {
-        console.log("UPDATE...", items)
         setupProps?.onUpdate(items.map((el: any) => itemGetter(el).uid))
     }, [items.map((el: any) => itemGetter(el).uid)])
 
@@ -202,7 +202,7 @@ export const TabButton = ({children, isSelected, onClick}: any) => {
  * @param param0 
  * @returns 
  */
-export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ titleBar, items, groupers, groupBy, listUid, context, callbacks, itemGetter = _.identity, itemRemover = _.noop, filters = [], defaultFilter, reverse, virtualized, buildGraph, noBar, noRemover, noDrop, compact, subscribeOptions, loadAll, removeOnEnter }) => {
+export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ style, titleBar, items, groupers, groupBy, listUid, context, callbacks, itemGetter = _.identity, itemRemover = _.noop, filters = [], defaultFilter, reverse, virtualized, buildGraph, noBar, noRemover, noDrop, compact, subscribeOptions, loadAll, removeOnEnter }) => {
 
     const classes = useStyles();
 
@@ -267,7 +267,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ ti
     return <div style={{
         height: "100%", width: "100%",
         display: "flex", flexDirection: "column", overflowY: "hidden",
-        minHeight: (canDrop && !noDrop) ? "200px" : "",
+        minHeight: (canDrop && !noDrop) ? "200px" : "", ...(style ? style : {})
     }} ref={drop}>
         <DataContext.Provider value={{ rootUid: context?.uid || "0x0" }}>
             <div style={{ display: "flex" }}>

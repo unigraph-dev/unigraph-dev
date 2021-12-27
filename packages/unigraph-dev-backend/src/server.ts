@@ -191,20 +191,20 @@ export default async function startServer(client: DgraphClient) {
     "query_by_string_with_vars": function (event: EventQueryByStringWithVars, ws: IWebsocket) {
       dgraphClient.queryData<any[]>(event.query, event.vars).then(res => {
         ws.send(makeResponse(event, true, {"result": res}));
-      }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
+      }).catch(e => ws.send(makeResponse(event, false, {"error": e.toString()})));
     },
 
     "set_dgraph_schema": function (event: EventSetDgraphSchema, ws: IWebsocket) {
       dgraphClient.setSchema(event.schema).then(_ => {
         ws.send(makeResponse(event, true));
-      }).catch(e => ws.send(makeResponse(event, false, {"error": e})))
+      }).catch(e => ws.send(makeResponse(event, false, {"error": e.toString()})))
     },
 
     "create_data_by_json": function (event: EventCreateDataByJson, ws: IWebsocket) {
       dgraphClient.createData(event.data).then(_ => {
         callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
         ws.send(makeResponse(event, true));
-      }).catch(e => ws.send(makeResponse(event, false, {"error": e})))
+      }).catch(e => ws.send(makeResponse(event, false, {"error": e.toString()})))
     },
 
     "subscribe_to_object": function (event: EventSubscribeObject, ws: IWebsocket) {
@@ -221,18 +221,21 @@ export default async function startServer(client: DgraphClient) {
       lock.acquire('caches/schema', function(done: (any)) {
         done(false);
         serverStates.localApi.subscribeToType(event.schema, {ws: ws, connId: event.connId}, event.id, event.options || {})
-          .then((res: any) => ws.send(makeResponse(event, true)));
+          .then((res: any) => ws.send(makeResponse(event, true)))
+          .catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
       });
     },
 
     "subscribe_to_query": async function (event: EventSubscribeQuery, ws: IWebsocket) {
       serverStates.localApi.subscribeToQuery(event.queryFragment, {ws: ws, connId: event.connId}, event.id, event.options)
-        .then((res: any) => ws.send(makeResponse(event, true)));
+        .then((res: any) => ws.send(makeResponse(event, true)))
+        .catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
     },
 
     "subscribe": async function (event: EventSubscribe, ws: IWebsocket) {
       serverStates.localApi.subscribe(event.query, {ws: ws, connId: event.connId}, event.id, event.update)
-        .then((res: any) => ws.send(makeResponse(event, true)));
+        .then((res: any) => ws.send(makeResponse(event, true)))
+        .catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
     },
 
     "get_queries": async function (event: EventGetQueries, ws: IWebsocket) {
@@ -271,7 +274,7 @@ export default async function startServer(client: DgraphClient) {
           await callHooks(serverStates.hooks, "after_schema_updated", {caches: caches});
           ws.send(makeResponse(event, true));
           done(false, null)
-        }).catch(e => {ws.send(makeResponse(event, false, {"error": e})); done(true, null)});
+        }).catch(e => {ws.send(makeResponse(event, false, {"error": e.toString()})); done(true, null)});
       })
       
     },
@@ -290,7 +293,7 @@ export default async function startServer(client: DgraphClient) {
             done(false, null)
             //console.log("Hooks called")
             ws.send(makeResponse(eventb, true));
-          }).catch(e => {ws.send(makeResponse(eventb, false, {"error": e})); done(true, null)});
+          }).catch(e => {ws.send(makeResponse(eventb, false, {"error": e.toString()})); done(true, null)});
         }
       })
     },
@@ -302,7 +305,7 @@ export default async function startServer(client: DgraphClient) {
           done(false, null)
           //console.log("Hooks called")
           ws.send(makeResponse(event, true));
-        }).catch(e => {ws.send(makeResponse(event, false, {"error": e})); console.error(e); done(true, null)});
+        }).catch(e => {ws.send(makeResponse(event, false, {"error": e.toString()})); console.error(e); done(true, null)});
       })
     },
 
@@ -323,14 +326,14 @@ export default async function startServer(client: DgraphClient) {
       if (!event.schema) { ws.send(makeResponse(event, false, {"error": "Cannot add Unigraph object without a schema!"})); return false; }
       localApi.addObject(event.object, event.schema, event.padding).then((uids: any[]) => {
         ws.send(makeResponse(event, true, {results: uids}))
-      }).catch((e: any) => ws.send(makeResponse(event, false, {"error": e})));
+      }).catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
     },
 
     "update_spo": function (event: EventUpdateSPO, ws: IWebsocket) {
       localApi.updateTriplets(event.objects).then((_: any) => {
         callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
         ws.send(makeResponse(event, true))
-      }).catch((e: any) => ws.send(makeResponse(event, false, {"error": e})));
+      }).catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
     },
 
     /**
@@ -366,7 +369,7 @@ export default async function startServer(client: DgraphClient) {
             perfLogAfterDbTransaction();
             callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches, subIds: event.subIds})
             ws.send(makeResponse(event, true))
-          }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
+          }).catch(e => ws.send(makeResponse(event, false, {"error": e.toString()})));
         }
       } else { // upsert mode
         let finalUpdater: any;
@@ -386,26 +389,26 @@ export default async function startServer(client: DgraphClient) {
         dgraphClient.createUnigraphUpsert(finalUpsert).then(_ => {
           callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches, subIds: event.subIds})
           ws.send(makeResponse(event, true))
-        }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
+        }).catch(e => ws.send(makeResponse(event, false, {"error": e.toString()})));
       }
     },
 
     "delete_relation": async function (event: EventDeleteRelation, ws: IWebsocket) {
       localApi.deleteRelation(event.uid, event.relation).then(() => {
         ws.send(makeResponse(event, true))
-      }).catch((e: any) => ws.send(makeResponse(event, false, {"error": e})));
+      }).catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
     },
 
     "reorder_item_in_array": async function (event: EventReorderItemInArray, ws: IWebsocket) {
       (localApi as any).reorderItemInArray(event.uid, event.item, event.relUid, event.subIds).then((_: any) => {
         ws.send(makeResponse(event, true))
-      }).catch((e: any) => ws.send(makeResponse(event, false, {"error": e})));
+      }).catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
     },
 
     "delete_item_from_array": async function (event: EventDeleteItemFromArray, ws: IWebsocket) {
       localApi.deleteItemFromArray(event.uid, event.item, event.relUid, event.subIds).then((_: any) => {
         ws.send(makeResponse(event, true))
-      }).catch((e: any) => ws.send(makeResponse(event, false, {"error": e})));
+      }).catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
     },
 
     "get_status": async function (event: any, ws: IWebsocket) {
@@ -467,7 +470,7 @@ export default async function startServer(client: DgraphClient) {
       dgraphClient.createUnigraphUpsert(upsert).then(_ => {
           callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
           ws.send(makeResponse(event, true))
-        }).catch(e => ws.send(makeResponse(event, false, {"error": e})));
+        }).catch(e => ws.send(makeResponse(event, false, {"error": e.toString()})));
     },
 
     "run_executable": async function (event: EventRunExecutable, ws: IWebsocket) {
@@ -485,13 +488,13 @@ export default async function startServer(client: DgraphClient) {
 
     "get_search_results": async function (event: EventGetSearchResults, ws: IWebsocket) {
       const res = await serverStates.localApi.getSearchResults(event.query, event.display, event.hops, event.searchOptions)
-        .catch((e: any) => ws.send(makeResponse(event, false, {"error": e})));
+        .catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
       ws.send(makeResponse(event, true, {results: res}));
     },
 
     "export_objects": async function (event: EventExportObjects, ws: IWebsocket) {
       const res = await serverStates.localApi.exportObjects(event.uids, event.options)
-        .catch((e: any) => ws.send(makeResponse(event, false, {"error": e})));
+        .catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
       ws.send(makeResponse(event, true, {result: res}))
     },
 

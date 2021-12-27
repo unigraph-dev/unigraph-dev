@@ -17,6 +17,8 @@ import { mdiViewDashboardOutline, mdiBookOpenOutline, mdiPencilBoxMultipleOutlin
 const useStyles = makeStyles(theme => ({
   drawer: {
     width: "100%",
+    height: "100%",
+    overflow: "auto",
     flexShrink: 0,
   },
   drawerPaper: {

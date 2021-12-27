@@ -1,3 +1,4 @@
+import { EditAttributesSharp } from "@material-ui/icons"
 import { DynamicObjectListView } from "../ObjectView/DynamicObjectListView"
 
 /** Dependent on the specific definition of object!! */
@@ -22,11 +23,12 @@ export const ListObjectQuery = (uid: string) => `(func: uid(${uid})) {
     type { <unigraph.id> }
 }`
 
-export const ListObjectView = ({data, callbacks}: any) => {
+export const ListObjectView = ({data, callbacks, ...attributes}: any) => {
     const listValue = data?.['_value']?.children
 
     return <DynamicObjectListView
-        items={listValue['_value['] || []} context={data} listUid={listValue.uid} callbacks={{...callbacks}}
+        {...attributes}
+        items={listValue['_value['] || []} context={data} listUid={listValue.uid} callbacks={{...(attributes?.callbacks || {}), ...callbacks}}
         itemGetter={(el: any) => el['_value']['_value']}
         itemRemover={(uids) => {
             window.unigraph.deleteItemFromArray(listValue.uid, uids, data['uid'], callbacks?.subsId || undefined)
@@ -42,5 +44,6 @@ export const ListObjectView = ({data, callbacks}: any) => {
                 })
             }
         }}
+        
     />
 }

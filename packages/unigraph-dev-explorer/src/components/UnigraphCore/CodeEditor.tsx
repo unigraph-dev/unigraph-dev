@@ -48,7 +48,7 @@ export const CodeEditor = ({id}: any) => {
 
     const [currentTab, setCurrentTab]: any = React.useState(0);
 
-    const currentView = <DetailedObjectView uid={currentUid} id={id} component={{"$/schema/executable": {view: ExecutableCodeEditor}}} />
+    const currentView = <DetailedObjectView uid={currentUid} id={id} component={{"$/schema/executable": {view: ExecutableCodeEditor}}} callbacks={{isEmbed: true}} />
 
     const [isUserCollapseOpen, setIsUserCollapseOpen] = React.useState(false);
     const [currentPackage, setCurrentPackage] = React.useState('');
