@@ -12,6 +12,7 @@ export type AppState<T = any> = {
     value: T,
     subscribers: ((newValue: T) => any)[],
     subscribe: (fn: (newValue: T) => any) => any,
+    unsubscribe: (fn: (newValue: T) => any) => any,
     setValue: (newValue: T) => any,
 }
 

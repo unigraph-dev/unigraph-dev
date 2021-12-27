@@ -19,7 +19,7 @@ export const CalendarEvent = ({data, callbacks}: any) => {
                 <Typography variant="body1" style={{marginRight: "8px"}}><strong>{data.get('name').as("primitive")}</strong></Typography>
                 <Typography variant="body2" style={{color: "gray"}}>{data.get('location').as("primitive")}</Typography>
             </div>
-            <AutoDynamicView object={new UnigraphObject(data.get('time_frame')['_value'])} callbacks={callbacks} noDrag noDrop />
+            <AutoDynamicView object={new UnigraphObject(data.get('time_frame')['_value'])} callbacks={callbacks} noDrag noDrop inline />
         </div>
     </div>
 }

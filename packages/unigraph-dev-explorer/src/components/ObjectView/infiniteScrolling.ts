@@ -23,7 +23,6 @@ export const setupInfiniteScrolling = (uids: string[], chunk = 50, stateCallback
     }
 
     const onUserNext = () => {
-        console.log("Next")
         const [subsHead, chunksHead] = [states.currentSubs.length / chunk, states.chunks.length];
         if (subsHead < chunksHead) {
             const toSub = states.chunks[subsHead];
@@ -57,7 +56,6 @@ export const setupInfiniteScrolling = (uids: string[], chunk = 50, stateCallback
     }
 
     const toSub = states.chunks[0] || []; states.currentSubs = toSub;
-    console.log("Subscribe")
     window.unigraph.subscribeToObject(toSub, (results: any[] | any) => {
         let uidsMap: any = {};
         buildGraph(results);
