@@ -151,16 +151,16 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
 
     const addState = (name: string, initialValue: any) => {
         if (!states[name]) {
-            const subs: ((newValue: any) => any)[] = [];
-            const state = {
+            const state: AppState = {
                 value: initialValue,
-                subscribers: subs,
-                subscribe: (subscriber: (newValue: any) => any) => subs.push(subscriber),
+                subscribers: [],
+                subscribe: (subscriber: (newValue: any) => any) => state.subscribers.push(subscriber),
+                unsubscribe: (cb: (newValue: any) => any) => state.subscribers = state.subscribers.filter(el => el !== cb),
                 setValue: undefined as any
             }
             state.setValue = (newValue: any) => {
                 state.value = newValue;
-                subs.forEach(sub => sub(state.value));
+                state.subscribers.forEach(sub => sub(state.value));
             }
             states[name] = state;
             return state;

@@ -52,7 +52,7 @@ export const NoteBlock = ({ data }: any) => {
             <Typography variant="body2" color="textSecondary">{subentities.length} immediate children, {parents.length} parents, {references.length} linked references</Typography>
         </div>
         <div>
-            {otherChildren.map((el: any) => <AutoDynamicView object={el} />)}
+            {otherChildren.map((el: any) => <AutoDynamicView object={el} inline />)}
         </div>
     </div>
 }

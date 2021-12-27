@@ -34,7 +34,15 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
 
     const [showSubentities, setShowSubentities] = React.useState(!!subentityExpandByDefault);
 
-    const DynamicViews = {...window.unigraph.getState('registry/dynamicView').value, ...(component ? component : {})}
+    const [DynamicViews, setDynamicViews] = React.useState({...window.unigraph.getState('registry/dynamicView').value, ...(component || {})});
+
+    React.useEffect(() => {
+        const cb = (newIts: any) => setDynamicViews(newIts);
+        window.unigraph.getState('registry/dynamicView').subscribe(cb);
+        return function cleanup () {
+            window.unigraph.getState('registry/dynamicView').unsubscribe(cb);
+        }
+    }, [])
 
     if (getSubentities(object)?.length > 0) {
         callbacks!.showSubentities = (show?: boolean) => { setShowSubentities(show === undefined ? !showSubentities : show) }
@@ -52,7 +60,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
                 subscribeToBacklinks(object.uid, cb, true);
             }
         }
-    }, [object?.uid, shouldGetBacklinks])
+    }, [object?.uid, shouldGetBacklinks, DynamicViews])
 
     React.useEffect(() => {
         const newSubs = getRandomInt();
@@ -146,6 +154,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
             padding: "2px 6px", 
             borderRadius: "6px",
             whiteSpace: "nowrap",
+            cursor: "pointer",
         }}
         onClick={() => {window.wsnavigator(`/library/backlink?uid=${object?.uid}`);}}
     >

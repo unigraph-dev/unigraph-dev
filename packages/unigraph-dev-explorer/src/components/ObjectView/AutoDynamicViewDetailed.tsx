@@ -31,7 +31,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({ object, options, 
             setSubsId(newSubs);
         }
 
-        if (Object.keys(DynamicViewsDetailed).includes(object?.type?.['unigraph.id'])) {
+        if (Object.keys(DynamicViewsDetailed).includes(object?.type?.['unigraph.id']) && !callbacks?.isEmbed) {
             tabContext.setMaximize(DynamicViewsDetailed[object.type['unigraph.id']].maximize)
         }
 

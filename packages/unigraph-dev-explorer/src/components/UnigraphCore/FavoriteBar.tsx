@@ -31,6 +31,7 @@ export const FavoriteBar = () => {
     return <React.Fragment>
         <DynamicObjectListView 
             items={fav}
+            style={{height: ""}}
             context={favEntity}
             listUid={favEntity?.['_value']?.children?.uid}
             itemGetter={(el: any) => el['_value']['_value']}
