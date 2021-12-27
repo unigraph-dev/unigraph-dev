@@ -37,7 +37,7 @@ export const Tweet: DynamicViewRenderer = ({data, callbacks}) => {
       >
         <Avatar src={data.get('from_user/profile_image').as('primitive')} onClick={() => {
           openUrl(`https://twitter.com/${data.get("from_user/username").as("primitive")}/status/${data.get('twitter_id').as("primitive")}`); 
-          if (callbacks?.removeFromContext) callbacks.removeFromContext();
+          if (callbacks?.removeFromContext && callbacks?.removeOnEnter) callbacks.removeFromContext();
         }}></Avatar>
       </Badge>
         </div>

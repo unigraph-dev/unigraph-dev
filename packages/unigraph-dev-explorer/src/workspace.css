@@ -74,6 +74,10 @@
     -webkit-app-region: no-drag;
 }
 
+.flexlayout__tab {
+    overflow: hidden;
+}
+
 .topleft_bar_with_electron {
     padding-left: 50px;
 }
