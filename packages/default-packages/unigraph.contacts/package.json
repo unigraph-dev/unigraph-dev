@@ -13,8 +13,7 @@
             "src": "executables/mergePersonWithContacts.js",
             "editable": true,
             "name": "Merge a person object with existing contacts",
-            "on_hook": "after_object_created/person",
-            "concurrency": 1
+            "on_hook": "after_object_created/person"
         },
         {
             "id": "add-person-as-contact",
