@@ -92,6 +92,7 @@ export function buildExecutable(exec: Executable, context: ExecContext, unigraph
         // @ts-expect-error: already checked for environment runner inclusion
         return wrapExecutable(environmentRunners[exec.env](exec.src, context, unigraph));
     }
+    console.log("not a good executable - ", exec);
     return undefined;
 }
 
@@ -104,7 +105,7 @@ export function initExecutables(executables: [string, Executable][], context: Pa
         }
         if (key.startsWith("0x") && el.on_hook) {
             newHooks = addHook(newHooks, el.on_hook, async (params: any) => {
-                return (buildExecutable(el, {...context, definition: el, params}, unigraph, states))?.();
+                return (buildExecutable(el, {...context, definition: el, params}, unigraph, states))();
             })
         }
     })

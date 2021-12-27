@@ -84,7 +84,7 @@ const RSSItem: DynamicViewRenderer = ({data, callbacks}) => {
                 }}/><Link onClick={() => {
                     const htmlUid = data?.get('content/text')?.['_value']?.['_value']?.['uid'];
                     if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', {uid: htmlUid, context: data.uid, type: data?.type?.['unigraph.id']}));
-                    if (callbacks?.removeFromContext) callbacks.removeFromContext();
+                    if (callbacks?.removeFromContext && callbacks?.removeOnEnter) callbacks.removeFromContext();
                 }}/>
                 {unpadded.item_data?.creative_work?.text ? <Description onClick={() => {
                     const htmlUid = data?.get('item_data/creative_work/text')?.['_value']?.['_value']?.['uid'];

@@ -106,7 +106,7 @@ export const BookmarkItem: DynamicViewRenderer = ({ data, callbacks }) => {
                 {typeof unpadded.creative_work?.text === "string" ? <Description onClick={() => {
                     const htmlUid = data?.get('creative_work/text')?.['_value']?.['_value']?.['uid'];
                     if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', { uid: htmlUid, context: data.uid, type: data?.type?.['unigraph.id'] }));
-                    if (callbacks?.removeFromContext) callbacks.removeFromContext();
+                    if (callbacks?.removeFromContext && callbacks?.removeOnEnter) callbacks.removeFromContext();
                 }} style={{ verticalAlign: "middle" }} /> : []}
                 {data?.['_value']?.['children']?.['_value[']?.map ?
                     data['_value']['children']['_value['].map((it: any) => <AutoDynamicView object={new UnigraphObject(it['_value'])} callbacks={callbacks} inline style={{verticalAlign: "middle"}}/>) : []}
