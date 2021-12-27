@@ -191,7 +191,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     
     return <ErrorBoundary onError={(error: Error, info: {componentStack: string}) => {
         console.error(error);
-      }} FallbackComponent={({error}) => <div style={{backgroundColor: "floralwhite", borderRadius: "8px"}}>
+      }} FallbackComponent={({error}) => <div style={{backgroundColor: "floralwhite", borderRadius: "8px"}} onContextMenu={noContextMenu ? () => {} : (event) => onUnigraphContextMenu(event, getObject(), contextEntity, callbacks)}>
         <Typography>Error in AutoDynamicView: (for object {object?.uid})</Typography>
         <p>{error.message}</p>
     </div>}>
