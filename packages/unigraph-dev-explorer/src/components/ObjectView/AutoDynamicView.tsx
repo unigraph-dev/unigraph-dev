@@ -35,6 +35,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     const [showSubentities, setShowSubentities] = React.useState(!!subentityExpandByDefault);
 
     const [isSelected, setIsSelected] = React.useState(false);
+    const [isFocused, setIsFocused] = React.useState(false);
 
     const [DynamicViews, setDynamicViews] = React.useState({...window.unigraph.getState('registry/dynamicView').value, ...(component || {})});
 
@@ -43,11 +44,15 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
         window.unigraph.getState('registry/dynamicView').subscribe(cb);
 
         const cbsel = (sel: any) => {if (sel?.includes?.(object?.uid)) setIsSelected(true); else setIsSelected(false);};
-        window.unigraph.getState('global/selected').subscribe(cbsel)
+        window.unigraph.getState('global/selected').subscribe(cbsel);
+
+        const cbfoc = (foc: any) => {if (foc === object?.uid && tabContext.isVisible()) setIsFocused(true); else setIsFocused(false);};
+        window.unigraph.getState('global/focused').subscribe(cbfoc);
 
         return function cleanup () {
             window.unigraph.getState('registry/dynamicView').unsubscribe(cb);
             window.unigraph.getState('global/selected').unsubscribe(cbsel);
+            window.unigraph.getState('global/focused').unsubscribe(cbfoc);
         }
     }, [])
 
@@ -176,7 +181,8 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
                     ...(callbacks ? callbacks : {})
                 }, 
                 ...(attributes ? attributes : {}),
-                inline: inline
+                inline: inline,
+                focused: isFocused,
             });
         } else if (isRecursion === false && object && getObject()) {
             return <StringObjectViewer object={getObject()}/>
@@ -187,7 +193,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
         } else {
             return <React.Fragment />
         }
-    }, [isRecursion, object, object.uid, callbacks, attributes, DynamicViews, isObjectStub, loadedObj]);
+    }, [isRecursion, object, object.uid, callbacks, attributes, DynamicViews, isObjectStub, loadedObj, isFocused]);
     
     return <ErrorBoundary onError={(error: Error, info: {componentStack: string}) => {
         console.error(error);
