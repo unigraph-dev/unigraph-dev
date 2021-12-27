@@ -44,6 +44,7 @@ export const BacklinkView = ({data, hideHeader, forward, callbacks, uid}: any) =
                         .forEach((el: any) => window.unigraph.deleteRelation(el, {"unigraph.origin": {uid: data?.uid || uid}}))
                 }
             }}
+            noRemover
         />
     </React.Fragment>
 }
