@@ -34,13 +34,20 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
 
     const [showSubentities, setShowSubentities] = React.useState(!!subentityExpandByDefault);
 
+    const [isSelected, setIsSelected] = React.useState(false);
+
     const [DynamicViews, setDynamicViews] = React.useState({...window.unigraph.getState('registry/dynamicView').value, ...(component || {})});
 
     React.useEffect(() => {
         const cb = (newIts: any) => setDynamicViews(newIts);
         window.unigraph.getState('registry/dynamicView').subscribe(cb);
+
+        const cbsel = (sel: any) => {if (sel?.includes?.(object?.uid)) setIsSelected(true); else setIsSelected(false);};
+        window.unigraph.getState('global/selected').subscribe(cbsel)
+
         return function cleanup () {
             window.unigraph.getState('registry/dynamicView').unsubscribe(cb);
+            window.unigraph.getState('global/selected').unsubscribe(cbsel);
         }
     }, [])
 
@@ -117,9 +124,6 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
       });
 
     const contextEntity = typeof callbacks?.context === "object" ? callbacks.context : null; 
-    const [isSelected, setIsSelected] = React.useState(false);
-    const selectedState = window.unigraph.getState('global/selected');
-    selectedState.subscribe((sel: any) => {if (sel?.includes?.(object?.uid)) setIsSelected(true); else setIsSelected(false);})
 
     function getParents(elem: any) {
         var parents = [];
