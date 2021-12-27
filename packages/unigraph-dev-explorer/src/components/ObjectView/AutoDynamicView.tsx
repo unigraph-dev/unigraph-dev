@@ -183,7 +183,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
         } else {
             return <React.Fragment />
         }
-    }, [isRecursion, object, object.uid, callbacks, attributes, DynamicViews, isObjectStub]);
+    }, [isRecursion, object, object.uid, callbacks, attributes, DynamicViews, isObjectStub, loadedObj]);
     
     return <ErrorBoundary onError={(error: Error, info: {componentStack: string}) => {
         console.error(error);
