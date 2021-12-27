@@ -40,7 +40,7 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     const [DynamicViews, setDynamicViews] = React.useState({...window.unigraph.getState('registry/dynamicView').value, ...(component || {})});
 
     React.useEffect(() => {
-        const cb = (newIts: any) => setDynamicViews(newIts);
+        const cb = (newIts: any) => setDynamicViews({...window.unigraph.getState('registry/dynamicView').value, ...(component || {})});
         window.unigraph.getState('registry/dynamicView').subscribe(cb);
 
         const cbsel = (sel: any) => {if (sel?.includes?.(object?.uid)) setIsSelected(true); else setIsSelected(false);};
