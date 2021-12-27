@@ -222,7 +222,7 @@ export default async function startServer(client: DgraphClient) {
         done(false);
         serverStates.localApi.subscribeToType(event.schema, {ws: ws, connId: event.connId}, event.id, event.options || {})
           .then((res: any) => ws.send(makeResponse(event, true)))
-          .catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));;
+          .catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
       });
     },
 
@@ -235,7 +235,7 @@ export default async function startServer(client: DgraphClient) {
     "subscribe": async function (event: EventSubscribe, ws: IWebsocket) {
       serverStates.localApi.subscribe(event.query, {ws: ws, connId: event.connId}, event.id, event.update)
         .then((res: any) => ws.send(makeResponse(event, true)))
-        .catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));;
+        .catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
     },
 
     "get_queries": async function (event: EventGetQueries, ws: IWebsocket) {
