@@ -3,7 +3,7 @@ import { buildUnigraphEntity, byElementIndex } from "unigraph-dev-common/lib/uti
 import { dfs, removeAllPropsFromObj } from "../../utils";
 import { parseTodoObject } from "../todo/parseTodoObject";
 import { NoteEditorContext } from "./types";
-import { getParentsAndReferences } from "./utils";
+import { getParentsAndReferences } from "../../components/ObjectView/backlinksUtils";
 
 export const focusUid = (uid: string) => {
     //console.log("UID " + uid);

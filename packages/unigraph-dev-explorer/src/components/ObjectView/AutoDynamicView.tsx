@@ -6,14 +6,22 @@ import { useSwipeable } from 'react-swipeable';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { buildGraph, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { AutoDynamicViewProps } from '../../types/ObjectView';
+import { subscribeToBacklinks } from '../../unigraph-react';
 import { DataContext, isMobile, isMultiSelectKeyPressed, selectUid, TabContext } from '../../utils';
+import { getParentsAndReferences } from './backlinksUtils';
 import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import { StringObjectViewer } from './DefaultObjectView';
+import { excludableTypes } from './GraphView';
 import { getSubentities, isStub, SubentityDropAcceptor } from './utils';
 
-export const AutoDynamicView = ({ object, callbacks, component, attributes, inline, allowSubentity, allowSemantic = true, style, noDrag, noDrop, noContextMenu, subentityExpandByDefault }: AutoDynamicViewProps) => {
+
+
+export const AutoDynamicView = ({ object, callbacks, component, attributes, inline, allowSubentity, allowSemantic = true, style, noDrag, noDrop, noContextMenu, subentityExpandByDefault, noBacklinks, noParents, withParent }: AutoDynamicViewProps) => {
     if (!callbacks) callbacks = {};
     allowSubentity = allowSubentity === true;
+
+    const shouldGetBacklinks = !excludableTypes.includes(object?.type?.['unigraph.id']) && !inline;
+    const [backlinks, setBacklinks] = React.useState<any>([]);
 
     const dataContext = React.useContext(DataContext);
     const tabContext = React.useContext(TabContext);
@@ -31,6 +39,20 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
     if (getSubentities(object)?.length > 0) {
         callbacks!.showSubentities = (show?: boolean) => { setShowSubentities(show === undefined ? !showSubentities : show) }
     }
+
+    React.useEffect(() => {
+        if (object?.uid?.startsWith('0x') && shouldGetBacklinks) {
+            const cb = (backlinks: any) => {
+                //console.log(object.uid, " - Backlinks: ", backlinks)
+                const [pars, refs] = getParentsAndReferences(backlinks['~_value'], backlinks['unigraph.origin'], object.uid)
+                setBacklinks([pars, refs].map(it => it.filter(el => Object.keys(DynamicViews).includes(el?.['type']?.['unigraph.id']))));
+            };
+            subscribeToBacklinks(object.uid, cb);
+            return function cleanup () { 
+                subscribeToBacklinks(object.uid, cb, true);
+            }
+        }
+    }, [object?.uid, shouldGetBacklinks])
 
     React.useEffect(() => {
         const newSubs = getRandomInt();
@@ -116,10 +138,31 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
         if (isMobile()) handlers.ref(domElement);
     }, [isDragging, drag, callbacks])
 
+    const BacklinkComponent = <div 
+        style={{
+            display: (shouldGetBacklinks && (backlinks?.[1]?.length || (!noParents && backlinks?.[0]?.length - (withParent ? 1 : 0) > 0))) ? "": "none", 
+            marginLeft: "auto", 
+            background: "lightgray", 
+            padding: "2px 6px", 
+            borderRadius: "6px",
+            whiteSpace: "nowrap",
+        }}
+        onClick={() => {window.wsnavigator(`/library/backlink?uid=${object?.uid}`);}}
+    >
+        {noParents ? "" : backlinks?.[0]?.length + " / "} {backlinks?.[1]?.length}
+    </div>;
+
     const getEl = React.useCallback((viewId, setTitle) => {
         if (isRecursion === false && object?.type && object.type['unigraph.id'] && Object.keys(DynamicViews).includes(object.type['unigraph.id']) && getObject()) {
             return React.createElement(DynamicViews[object.type['unigraph.id']].view, {
-                data: getObject(), callbacks: {viewId, setTitle, ...(callbacks ? callbacks : {})}, ...(attributes ? attributes : {}),
+                data: getObject(), 
+                callbacks: {
+                    viewId, 
+                    setTitle,
+                    ...(noBacklinks ? {BacklinkComponent: BacklinkComponent} : {}),
+                    ...(callbacks ? callbacks : {})
+                }, 
+                ...(attributes ? attributes : {}),
                 inline: inline
             });
         } else if (isRecursion === false && object && getObject()) {
@@ -132,7 +175,6 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
             return <React.Fragment />
         }
     }, [isRecursion, object, object.uid, callbacks, attributes, DynamicViews, isObjectStub]);
-    
     
     return <ErrorBoundary onError={(error: Error, info: {componentStack: string}) => {
         console.error(error);
@@ -157,8 +199,10 @@ export const AutoDynamicView = ({ object, callbacks, component, attributes, inli
             {...(attributes ? attributes : {})}
             ref={attach} 
         >
-                {getEl(tabContext.viewId, tabContext.setTitle)}   
+                {getEl(tabContext.viewId, tabContext.setTitle)}
+                {noBacklinks ? [] : BacklinkComponent}
         </div>
+        
         {showSubentities && getSubentities(object)?.length > 0 ? <div style={{width: "100%", paddingLeft: "24px"}}>
                 <ul>{getSubentities(object).map((el: any) => <li><AutoDynamicView object={new UnigraphObject(el['_value'])} callbacks={callbacks} /></li>)}</ul>
             </div> : []}

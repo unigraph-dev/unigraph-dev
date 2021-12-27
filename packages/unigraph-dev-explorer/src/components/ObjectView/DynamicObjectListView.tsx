@@ -65,7 +65,7 @@ const DynamicListItem = ({ reverse, listUid, item, index, context, callbacks, it
                 <ListItemIcon onClick={() => {
                     itemRemover([item['uid']])
                 }} style={{ display: (itemRemover === _.noop || isMobile() || noRemover) ? "none" : "" }}><ClearAll /></ListItemIcon>
-                <AutoDynamicView object={new UnigraphObject(item)} callbacks={{
+                <AutoDynamicView object={new UnigraphObject(item)} withParent={listUid ? true : false} callbacks={{
                     ...callbacks,
                     context: context,
                     removeOnEnter,
@@ -138,7 +138,6 @@ const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, it
     }, [items.length === 0]);
 
     React.useEffect(() => {
-        console.log("UPDATE...", items)
         setupProps?.onUpdate(items.map((el: any) => itemGetter(el).uid))
     }, [items.map((el: any) => itemGetter(el).uid)])
 

@@ -176,7 +176,7 @@ const resolvers = {
             if (addUids.length !== 0) {
                 const query = `{ sub${getFragment({...newQuery, uid: addUids}, states)} }`;
                 let results: any[] = await states.dgraphClient.queryDgraph(query).catch((e: any) => {console.log(e, query); return []});
-                const addData = results[0];
+                const addData = results[0] || [];
                 newData = _.uniqBy([...sub.data, ...addData], "uid");
             }
             sub.data = newData.filter((el: any) => newUid?.includes(el?.['uid']));
@@ -189,6 +189,7 @@ const resolvers = {
 export function resolveSubscriptionUpdate(subsId: number | string, newQuery: Query, states: any) {
     const sub = states.subscriptions.filter((el: Subscription) => el.id === subsId)?.[0]
     const oldQuery = sub?.query;
+    console.log(oldQuery.options, (newQuery as any).options)
     if (!oldQuery) return false;
     const hasMatch = resolvers[newQuery.type].match(oldQuery, newQuery as any);
     if (!hasMatch) return false;

@@ -18,7 +18,7 @@ const queryNameIndex = `@filter(type(Entity) AND (NOT eq(<_propertyType>, "inher
     <type> { <unigraph.id> }
 }`
 
-const excludableTypes = ['$/schema/subentity', '$/schema/interface/textual', '$/schema/markdown']
+export const excludableTypes = ['$/schema/subentity', '$/schema/interface/textual', '$/schema/markdown']
 const getExcluded = (id: number) => excludableTypes.reduce((prev, curr, idx) => (!!((id >> idx) % 2)) ? [...prev, curr] : prev, [] as string[])
 
 export const GraphView = ({uid}: any) => {

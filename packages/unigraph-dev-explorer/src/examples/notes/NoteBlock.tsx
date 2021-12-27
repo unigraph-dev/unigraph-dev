@@ -12,7 +12,7 @@ import { onUnigraphContextMenu } from "../../components/ObjectView/DefaultObject
 import { FiberManualRecord, MoreVert } from "@material-ui/icons";
 import { setSearchPopup } from "./searchPopup";
 import { noteQuery } from "./init";
-import { getParentsAndReferences } from "./utils";
+import { getParentsAndReferences } from "../../components/ObjectView/backlinksUtils";
 import { DynamicObjectListView } from "../../components/ObjectView/DynamicObjectListView";
 import { setCaret, TabContext } from "../../utils";
 import { DragandDrop } from "../../components/ObjectView/DragandDrop";
@@ -117,11 +117,12 @@ const NoteViewPageWrapper = ({ children, isRoot }: any) => {
     </div>
 }
 
-const NoteViewTextWrapper = ({ children, semanticChildren, isRoot, onContextMenu }: any) => {
+const NoteViewTextWrapper = ({ children, semanticChildren, isRoot, onContextMenu, callbacks }: any) => {
     return <div style={{ display: "flex", alignItems: "center" }}>
         {children}
         {semanticChildren}
         {isRoot ? <MoreVert onClick={onContextMenu} style={{marginLeft: "8px"}}/> : []}
+        {callbacks.BacklinkComponent ? callbacks.BacklinkComponent : []}
     </div>
 }
 
@@ -200,6 +201,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
         <div style={{ width: "100%", ...(!isChildren ? {overflow: "hidden"} : {}) }} >
             <NoteViewTextWrapper 
                 isRoot={!isChildren} onContextMenu={(event: any) => onUnigraphContextMenu(event, data, undefined, callbacks)} 
+                callbacks={callbacks}
                 semanticChildren={buildGraph(otherChildren).filter((el: any) => el.type).map((el: any) => <AutoDynamicView object={el.type?.['unigraph.id'] === "$/schema/note_block" ? el : {uid: el.uid, type: el.type}} inline/>)}
             >
                 <div onPointerUp={(ev) => {
@@ -375,7 +377,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                     </Typography> : <AutoDynamicView
                         object={data.get('text')['_value']['_value']}
                         attributes={{ isHeading: !(isChildren || callbacks.isEmbed) }}
-                        noDrag noContextMenu
+                        noDrag noContextMenu inline
                         callbacks={{
                             'get-semantic-properties': () => {
                                 return data;
@@ -393,7 +395,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                         createBelow={() => { addChild(dataref.current, editorContext) }}
                     >
                         <AutoDynamicView
-                            noDrag allowSubentity
+                            noDrag withParent allowSubentity noBacklinks={el.type?.['unigraph.id'] === "$/schema/note_block"}
                             subentityExpandByDefault={!(el.type?.['unigraph.id'] === "$/schema/note_block")}
                             object={el.type?.['unigraph.id'] === "$/schema/note_block" ? el : {uid: el.uid, type: el.type}}
                             callbacks={{
