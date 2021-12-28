@@ -1,3 +1,3 @@
-import { RSSFeeds } from './RSSFeeds'
+import { RSSFeeds } from './RSSFeeds';
 
 export default RSSFeeds;

@@ -22,9 +22,8 @@ module.exports = {
         '**/*.config.js',
     ],
     rules: {
-        indent: [
-            'error', 4,
-        ],
+        indent: ['error', 4, { ignoredNodes: ['JSXElement *'] }],
+        'react/jsx-indent': ['error', 4],
         'max-len': [
             'error', { code: 120, tabWidth: 4, ignoreComments: true },
         ],

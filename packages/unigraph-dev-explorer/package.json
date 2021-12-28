@@ -118,9 +118,6 @@
     "test": "node scripts/test.js",
     "prepare": "node scripts/build.js --lib"
   },
-  "eslintConfig": {
-    "extends": "react-app"
-  },
   "browserslist": {
     "production": [
       ">0.2%",

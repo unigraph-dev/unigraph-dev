@@ -1,18 +1,22 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 
 import { pkg as bookmarkPackage } from 'unigraph-dev-common/lib/data/unigraph.bookmark.pkg';
 
-import { DynamicViewRenderer } from "../../global";
-import { ListItemText, ListItemIcon, Avatar, Typography } from "@material-ui/core";
-import { Delete, Description, Link, Public } from "@material-ui/icons";
-import { registerDynamicViews, registerQuickAdder, withUnigraphSubscription } from '../../unigraph-react'
-import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
-import { getExecutableId } from "unigraph-dev-common/lib/api/unigraph";
-import { AutoDynamicView } from "../../components/ObjectView/AutoDynamicView";
-import { getComponentFromPage } from "../../Workspace";
-import { openUrl } from "../../utils";
-import { DynamicObjectListView } from "../../components/ObjectView/DynamicObjectListView";
-import { UnigraphObject } from "unigraph-dev-common/lib/utils/utils";
+import {
+    ListItemText, ListItemIcon, Avatar, Typography,
+} from '@material-ui/core';
+import {
+    Delete, Description, Link, Public,
+} from '@material-ui/icons';
+import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { getExecutableId } from 'unigraph-dev-common/lib/api/unigraph';
+import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
+import { DynamicViewRenderer } from '../../global';
+import { registerDynamicViews, registerQuickAdder, withUnigraphSubscription } from '../../unigraph-react';
+import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
+import { getComponentFromPage } from '../../Workspace';
+import { openUrl } from '../../utils';
+import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
 
 type ABookmark = {
     uid?: string,
@@ -27,10 +31,10 @@ type ABookmark = {
     }
 }
 
-export const createBookmark: (t: string, a?: boolean) => Promise<any> = (text: string, add: boolean = true) => {
-    let tags_regex = /#[a-zA-Z0-9]*\b ?/gm;
+export const createBookmark: (t: string, a?: boolean) => Promise<any> = (text: string, add = true) => {
+    const tags_regex = /#[a-zA-Z0-9]*\b ?/gm;
     let tags = text.match(tags_regex) || [];
-    tags = tags.map(tag => tag.slice(1).trim());
+    tags = tags.map((tag) => tag.slice(1).trim());
     text = text.replace(tags_regex, '');
 
     let url: any;
@@ -39,39 +43,37 @@ export const createBookmark: (t: string, a?: boolean) => Promise<any> = (text: s
         url = new URL(text.trim());
         name = url.toString();
     } catch (e) {
-        name = "Invalid url"
+        name = 'Invalid url';
     }
     if (add) {
-        window.unigraph.runExecutable(getExecutableId(bookmarkPackage, "add-bookmark"), { url: url, tags: tags })
-        return new Promise((res, rej) => { res(undefined as any) });
-    } else return new Promise((res, rej) => {
+        window.unigraph.runExecutable(getExecutableId(bookmarkPackage, 'add-bookmark'), { url, tags });
+        return new Promise((res, rej) => { res(undefined as any); });
+    } return new Promise((res, rej) => {
         res({
             name,
-            children: tags.map(tagName => {
-                return {
-                    "type": { "unigraph.id": "$/schema/subentity" },
-                    "_value": {
-                        "type": { "unigraph.id": "$/schema/tag" },
-                        name: tagName
-                    }
-                }
-            })
-        })
-    })
-
-}
+            children: tags.map((tagName) => ({
+                type: { 'unigraph.id': '$/schema/subentity' },
+                _value: {
+                    type: { 'unigraph.id': '$/schema/tag' },
+                    name: tagName,
+                },
+            })),
+        });
+    });
+};
 
 function BookmarksBody({ data }: { data: ABookmark[] }) {
-
     const bookmarks = data;
-    const [newName, setNewName] = useState("");
+    const [newName, setNewName] = useState('');
 
-    return <React.Fragment>
+    return (
         <DynamicObjectListView
-            items={bookmarks}
-            context={null} reverse defaultFilter={"no-filter"}
+          items={bookmarks}
+          context={null}
+          reverse
+          defaultFilter="no-filter"
         />
-    </React.Fragment>
+    );
 }
 
 export const Bookmarks = withUnigraphSubscription(
@@ -80,53 +82,68 @@ export const Bookmarks = withUnigraphSubscription(
     { defaultData: [], schemas: [], packages: [bookmarkPackage] },
     {
         afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
-            window.unigraph.subscribeToType("$/schema/web_bookmark", (result: ABookmark[]) => { setData(result) }, subsId, { uidsOnly: true });
-        }
-    }
-)
+            window.unigraph.subscribeToType('$/schema/web_bookmark', (result: ABookmark[]) => { setData(result); }, subsId, { uidsOnly: true });
+        },
+    },
+);
 
 export const BookmarkItem: DynamicViewRenderer = ({ data, callbacks }) => {
-    let unpadded: ABookmark = unpad(data);
-    let name = data.get('name').as('primitive');
-    let totalCallbacks = callbacks || {
-        'onUpdate': (data: Record<string, any>) => {
-            throw new Error("not implemented")
-            //window.unigraph.updateObject(data.uid, {"done": unpad(data).done});
-        }
+    const unpadded: ABookmark = unpad(data);
+    const name = data.get('name').as('primitive');
+    const totalCallbacks = callbacks || {
+        onUpdate: (data: Record<string, any>) => {
+            throw new Error('not implemented');
+            // window.unigraph.updateObject(data.uid, {"done": unpad(data).done});
+        },
     };
 
-    return <React.Fragment>
-        <ListItemIcon><Avatar alt={"favicon of " + unpadded.name} src={unpadded.favicon}><Public /></Avatar></ListItemIcon>
-        <ListItemText>
-            <Typography>{name && name !== "No title" ? name : data.get('url').as('primitive')}</Typography>
-            <div style={{ display: "inline", alignItems: "center", overflowWrap: "break-word", color: "gray" }}>
-                <Link onClick={() => {
-                    openUrl(unpadded.url)
-                }} style={{ verticalAlign: "middle" }} />
-                {typeof unpadded.creative_work?.text === "string" ? <Description onClick={() => {
-                    const htmlUid = data?.get('creative_work/text')?.['_value']?.['_value']?.['uid'];
-                    if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', { uid: htmlUid, context: data.uid, type: data?.type?.['unigraph.id'] }));
-                    if (callbacks?.removeFromContext && callbacks?.removeOnEnter) callbacks.removeFromContext();
-                }} style={{ verticalAlign: "middle" }} /> : []}
-                {data?.['_value']?.['children']?.['_value[']?.map ?
-                    data['_value']['children']['_value['].map((it: any) => <AutoDynamicView object={new UnigraphObject(it['_value'])} callbacks={callbacks} inline style={{verticalAlign: "middle"}}/>) : []}
-                <p style={{ fontSize: "0.875rem", display: "contents" }}>{typeof unpadded.creative_work?.abstract === "string" ? unpadded.creative_work?.abstract : []}</p>
-            </div>
-        </ListItemText>
-    </React.Fragment>
-}
+    return (
+        <>
+            <ListItemIcon><Avatar alt={`favicon of ${unpadded.name}`} src={unpadded.favicon}><Public /></Avatar></ListItemIcon>
+            <ListItemText>
+                <Typography>{name && name !== 'No title' ? name : data.get('url').as('primitive')}</Typography>
+                <div style={{
+                    display: 'inline', alignItems: 'center', overflowWrap: 'break-word', color: 'gray',
+                }}
+                >
+                    <Link
+                      onClick={() => {
+                            openUrl(unpadded.url);
+                        }}
+                      style={{ verticalAlign: 'middle' }}
+                    />
+                    {typeof unpadded.creative_work?.text === 'string' ? (
+                        <Description
+                          onClick={() => {
+                                const htmlUid = data?.get('creative_work/text')?._value?._value?.uid;
+                                if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', { uid: htmlUid, context: data.uid, type: data?.type?.['unigraph.id'] }));
+                                if (callbacks?.removeFromContext && callbacks?.removeOnEnter) callbacks.removeFromContext();
+                            }}
+                          style={{ verticalAlign: 'middle' }}
+                        />
+                    ) : []}
+                    {data?._value?.children?.['_value[']?.map
+                        ? data._value.children['_value['].map((it: any) => <AutoDynamicView object={new UnigraphObject(it._value)} callbacks={callbacks} inline style={{ verticalAlign: 'middle' }} />) : []}
+                    <p style={{ fontSize: '0.875rem', display: 'contents' }}>{typeof unpadded.creative_work?.abstract === 'string' ? unpadded.creative_work?.abstract : []}</p>
+                </div>
+            </ListItemText>
+        </>
+    );
+};
 
 const quickAdder = async (inputStr: string, preview = true) => {
     if (!preview) return await createBookmark(inputStr);
-    else return [await createBookmark(inputStr, false), '$/schema/web_bookmark']
-}
+    return [await createBookmark(inputStr, false), '$/schema/web_bookmark'];
+};
 
 export const init = () => {
-    const tt = () => <div>
-        For example, enter #tag1 https://example.com
-    </div>
+    const tt = () => (
+        <div>
+            For example, enter #tag1 https://example.com
+        </div>
+    );
 
-    registerQuickAdder({ 'bookmark': { adder: quickAdder, tooltip: tt }, 'bm': { adder: quickAdder, tooltip: tt } })
+    registerQuickAdder({ bookmark: { adder: quickAdder, tooltip: tt }, bm: { adder: quickAdder, tooltip: tt } });
 
-    registerDynamicViews({ "$/schema/web_bookmark": BookmarkItem })
-}
+    registerDynamicViews({ '$/schema/web_bookmark': BookmarkItem });
+};

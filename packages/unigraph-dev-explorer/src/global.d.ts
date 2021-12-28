@@ -1,6 +1,6 @@
-import { Model } from "flexlayout-react";
-import { ReactElement } from "react";
-import { Unigraph } from "unigraph-dev-common/lib/types/unigraph";
+import { Model } from 'flexlayout-react';
+import { ReactElement } from 'react';
+import { Unigraph } from 'unigraph-dev-common/lib/types/unigraph';
 
 declare global {
     interface Window {
@@ -16,17 +16,17 @@ declare global {
         reloadCommands: () => any,
         mixpanel?: any,
     }
-};
+}
 
 declare type DynamicViewCallbacks = {
-    "onUpdate": (data: Record<string, any>) => any,
+    'onUpdate': (data: Record<string, any>) => any,
 }
 
 declare type DynamicViewRenderer = (data: Record<string, any>, callbacks: DynamicViewCallbacks) => ReactElement
 
 declare type UserSettings = {
     serverLocation: string,
-    newWindow: "new-tab" | "new-pane" | "new-popout",
+    newWindow: 'new-tab' | 'new-pane' | 'new-popout',
     nativeNotifications: boolean,
     developerMode: boolean,
     browserId: string
