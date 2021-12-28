@@ -52,6 +52,7 @@ module.exports = {
         'react/function-component-definition': 'off',
         'react/prop-types': 'off', // for now, maybe we'll enforce this later
         'no-param-reassign': 'warn', // also, for now
+        'import/no-unresolved': 'off', // temporarily disable unresolved check
         'react/react-in-jsx-scope': 'off', // unnecessary for new jsx transpilation
         'jsx-a11y/no-static-element-interactions': 'off', // disable for now
         'jsx-a11y/click-events-have-key-events': 'off', // disable for now
