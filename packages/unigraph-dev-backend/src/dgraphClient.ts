@@ -1,30 +1,45 @@
 import AsyncLock from 'async-lock';
-import dgraph, { DgraphClient as ActualDgraphClient, DgraphClientStub, Operation, Mutation, Check } from 'dgraph-js';
+import dgraph, {
+    DgraphClient as ActualDgraphClient, DgraphClientStub, Operation, Mutation, Check,
+} from 'dgraph-js';
 import { getAsyncLock, withLock } from './asyncManager';
-import { UnigraphUpsert } from './custom';
 import { perfLogStartDbTransaction, perfLogAfterDbTransaction } from './logging';
 import { makeSearchQuery } from './search';
+
+export type UnigraphUpsert = {
+  queries: string[],
+  mutations: any[],
+  appends: any[]
+}
 
 /**
  * Example client, adapted from:
  *   https://github.com/dgraph-io/dgraph-js/blob/master/examples/simple/index.js
  */
 export default class DgraphClient {
-  private dgraphClient: ActualDgraphClient;
-  private dgraphClientStub: DgraphClientStub;
-  private txnlock: AsyncLock
+    private dgraphClient: ActualDgraphClient;
 
-  constructor(connectionUri: string) {
-    this.dgraphClientStub = new DgraphClientStub(connectionUri, undefined, {'grpc.max_receive_message_length': 1024 * 1024 * 1024});
-    this.dgraphClientStub.checkVersion(new Check()).catch(e => {if (e.code === 14) {
-      throw new Error("Could not establish connection to Dgraph client, exiting...");
-    }})
-    this.dgraphClient = new ActualDgraphClient(this.dgraphClientStub);
-    this.txnlock = getAsyncLock();
-  }
+    private dgraphClientStub: DgraphClientStub;
 
-  async getStatus() {
-    const count: any[][] = await this.queryDgraph(`{
+    private txnlock: AsyncLock;
+
+    constructor(connectionUri: string) {
+        this.dgraphClientStub = new DgraphClientStub(
+            connectionUri,
+            undefined,
+            { 'grpc.max_receive_message_length': 1024 * 1024 * 1024 },
+        );
+        this.dgraphClientStub.checkVersion(new Check()).catch((e) => {
+            if (e.code === 14) {
+                throw new Error('Could not establish connection to Dgraph client, exiting...');
+            }
+        });
+        this.dgraphClient = new ActualDgraphClient(this.dgraphClientStub);
+        this.txnlock = getAsyncLock();
+    }
+
+    async getStatus() {
+        const count: any[][] = await this.queryDgraph(`{
       objects(func: type(Entity)) {
         totalObjects : count(uid)
       }
@@ -32,75 +47,74 @@ export default class DgraphClient {
         totalSchemas : count(uid)
       }
     }`, {});
-    return {
-      "version": (await this.dgraphClientStub.checkVersion(new Check())).toString(),
-      "objects": count[0][0].totalObjects,
-      "schemas": count[1][0].totalSchemas
+        return {
+            version: (await this.dgraphClientStub.checkVersion(new Check())).toString(),
+            objects: count[0][0].totalObjects,
+            schemas: count[1][0].totalSchemas,
+        };
     }
-  }
 
-  async setSchema(schema: string) {
-    const op = new Operation();
-    op.setSchema(schema);
-    await this.dgraphClient.alter(op);
-  }
-
-  async createData(data: Record<string, any>, test = false) {
-    const txn = this.dgraphClient.newTxn();
-    try {
-
-      const mu = new Mutation();
-      mu.setSetJson(data);
-      const response = await txn.mutate(mu);
-
-      await txn.commit();
-
-      if (test) {
-        const resolvedUid = response
-          .getUidsMap()
-          .get(data.uid.slice(2));
-
-        console.log(
-          `Created node named '${data.name}' with uid = ${resolvedUid}\n`,
-        );
-
-        console.log('All created nodes:');
-        const uids = response.getUidsMap();
-        uids.forEach((uid, key) => console.log(`${key} => ${uid}`));
-        console.log();
-      }
-    } catch (e) {
-      console.error('Error:', e);
-    } finally {
-      await txn.discard();
+    async setSchema(schema: string) {
+        const op = new Operation();
+        op.setSchema(schema);
+        await this.dgraphClient.alter(op);
     }
-  }
 
-  async createMutation(data: any[]) {
-    const txn = this.dgraphClient.newTxn();
-    try {
-      const mutations: Mutation[] = data.map((obj: any) => {
-        const mu = new dgraph.Mutation();
-        mu.setSetJson(obj);
-        return mu;
-      });
-      const req = new dgraph.Request();
-      req.setMutationsList(mutations);
-      req.setCommitNow(true);
+    async createData(data: Record<string, any>, test = false) {
+        const txn = this.dgraphClient.newTxn();
+        try {
+            const mu = new Mutation();
+            mu.setSetJson(data);
+            const response = await txn.mutate(mu);
 
-      await withLock(this.txnlock, 'txn', () => txn.doRequest(req));
-    } catch (e) {
-      console.error('Error: ', e);
-    } finally {
-      await txn.discard();
+            await txn.commit();
+
+            if (test) {
+                const resolvedUid = response
+                    .getUidsMap()
+                    .get(data.uid.slice(2));
+
+                console.log(
+                    `Created node named '${data.name}' with uid = ${resolvedUid}\n`,
+                );
+
+                console.log('All created nodes:');
+                const uids = response.getUidsMap();
+                uids.forEach((uid, key) => console.log(`${key} => ${uid}`));
+                console.log();
+            }
+        } catch (e) {
+            console.error('Error:', e);
+        } finally {
+            await txn.discard();
+        }
     }
-  }
 
-  /**
+    async createMutation(data: any[]) {
+        const txn = this.dgraphClient.newTxn();
+        try {
+            const mutations: Mutation[] = data.map((obj: any) => {
+                const mu = new dgraph.Mutation();
+                mu.setSetJson(obj);
+                return mu;
+            });
+            const req = new dgraph.Request();
+            req.setMutationsList(mutations);
+            req.setCommitNow(true);
+
+            await withLock(this.txnlock, 'txn', () => txn.doRequest(req));
+        } catch (e) {
+            console.error('Error: ', e);
+        } finally {
+            await txn.discard();
+        }
+    }
+
+    /**
    * Creates data from a upsert request (i.e. query for data then use the result to mutate).
-   * @param {UnigraphUpsert} data 
+   * @param {UnigraphUpsert} data
    */
-  async createUnigraphUpsert(data: UnigraphUpsert, test = false) {
+    async createUnigraphUpsert(data: UnigraphUpsert, test = false) {
     /* eslint-disable */
     !test ? true : console.log("Trying to create upsert....============================================")
     const txn = this.dgraphClient.newTxn();

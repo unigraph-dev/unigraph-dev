@@ -1,9 +1,9 @@
-import React from "react";
-import { UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
+import React from 'react';
+import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 
 export type AutoDynamicViewCallbacks = {
     context?: any,
-    removeFromContext?: (where: "left" | "right" | undefined) => any,
+    removeFromContext?: (where: 'left' | 'right' | undefined) => any,
 } & Record<string, any>
 
 export type AutoDynamicViewProps = {
@@ -24,4 +24,10 @@ export type AutoDynamicViewProps = {
     subentityExpandByDefault?: boolean,
 }
 
-export type ContextMenuGenerator = (uid: string, object: any, handleClose: () => any, callbacks?: any, contextUid?: string) => React.ReactElement<any>
+export type ContextMenuGenerator = (
+    uid: string,
+    object: any,
+    handleClose: () => any,
+    callbacks?: any,
+    contextUid?: string
+) => React.ReactElement<any>
