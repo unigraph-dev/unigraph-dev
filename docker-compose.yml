@@ -1,0 +1,41 @@
+version: '3.3'
+services:
+  backend:
+    build: .
+    command: /app/wait-for dgraph-alpha:9080 -- yarn backend-start dgraph-alpha:9080
+    volumes:
+      - ./secrets.env.json:/app/secrets.env.json
+    depends_on:
+      - dgraph-zero
+      - dgraph-alpha
+    ports:
+      - 3001:3001
+  frontend:
+    build: .
+    entrypoint: yarn explorer-start
+    depends_on:
+      - backend
+    ports:
+      - 3000:3000
+  dgraph-zero:
+    ports:
+      - '5080:5080'
+      - '6080:6080'
+    restart: unless-stopped
+    image: ebdm/unigraph-dgraph
+    command: dgraph zero --my=dgraph-zero:5080
+  dgraph-alpha:
+    ports:
+      - '9080:9080'
+      - '8080:8080'
+    restart: unless-stopped
+    image: ebdm/unigraph-dgraph
+    command: dgraph alpha --my=dgraph-alpha:7080 --zero=dgraph-zero:5080 --whitelist="172.22.0.0/24"
+networks:
+  default:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.22.0.0/24"
+          gateway: "172.22.0.1"
