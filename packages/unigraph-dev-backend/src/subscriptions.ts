@@ -1,18 +1,18 @@
-import _ from "lodash";
-import { resourceLimits } from "worker_threads";
-import { IWebsocket } from "./custom";
-import DgraphClient, { queries } from "./dgraphClient";
+import _ from 'lodash';
+import { resourceLimits } from 'worker_threads';
 import stringify from 'json-stable-stringify';
-import {buildExecutable} from "./executableManager";
-import {Query, QueryObject, QueryType} from 'unigraph-dev-common/lib/types/unigraph';
-import { getRandomInt } from "unigraph-dev-common/lib/utils/utils";
-import { makeQueryFragmentFromType } from "unigraph-dev-common/lib/utils/entityUtils";
+import { Query, QueryObject, QueryType } from 'unigraph-dev-common/lib/types/unigraph';
+import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import { makeQueryFragmentFromType } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { buildExecutable } from './executableManager';
+import DgraphClient, { queries } from './dgraphClient';
+import { IWebsocket } from './custom';
 
 export type Subscription = {
     data: any,
     query: Query, // something like () { uid }
-    subType: "polling" | "pushing",
-    callbackType: "function" | "messageid",
+    subType: 'polling' | 'pushing',
+    callbackType: 'function' | 'messageid',
     id: number | string, // must be provided, regardless of using function or messageid
     /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
     function?: Function,
