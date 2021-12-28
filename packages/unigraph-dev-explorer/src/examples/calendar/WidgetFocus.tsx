@@ -1,5 +1,5 @@
-import { Focus } from "../../components/UnigraphCore/Focus"
+import { Focus } from '../../components/UnigraphCore/Focus';
 
-export const WidgetFocus = () => {
-    return <Focus/>
+export function WidgetFocus() {
+    return <Focus />;
 }

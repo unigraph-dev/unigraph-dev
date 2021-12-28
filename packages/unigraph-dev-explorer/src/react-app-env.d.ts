@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/triple-slash-reference */
 /// <reference types="node" />
 /// <reference types="react" />
 /// <reference types="react-dom" />
@@ -70,7 +71,7 @@ declare module '*.module.sass' {
   export default classes;
 }
 
-declare module "react/jsx-runtime" {
+declare module 'react/jsx-runtime' {
     export default any;
 } // TODO: Versioning chores, this is a workaround until better typescript declaration are released.
 // See: https://github.com/facebook/create-react-app/issues/10109

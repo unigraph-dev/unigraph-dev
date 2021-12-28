@@ -1,6 +1,6 @@
-import DgraphClient from './dgraphClient';
 import { PackageDeclaration } from 'unigraph-dev-common/lib/types/packages';
 import { Query, UnigraphNotification } from 'unigraph-dev-common/lib/types/unigraph';
+import DgraphClient from './dgraphClient';
 
 declare global {
   namespace Express {
@@ -16,24 +16,42 @@ declare type UnigraphUpsert = {
   appends: any[]
 }
 
+declare type Subscription = {
+  data: any,
+  query: Query, // something like () { uid }
+  subType: 'polling' | 'pushing',
+  callbackType: 'function' | 'messageid',
+  id: number | string, // must be provided, regardless of using function or messageid
+  /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
+  function?: Function,
+  msgPort?: IWebsocket,
+  regTime: number, // time of registration, can be used to manually terminate subscription going too long
+  connId?: string,
+  clientId?: string,
+  hibernated?: boolean,
+  queryNow?: any,
+  finalQuery?: any,
+  queryTime?: number,
+};
+
 declare type EventCreateUnigraphSchema = {
-  "type": "event",
-  "event": "create_unigraph_schema",
+  'type': 'event',
+  'event': 'create_unigraph_schema',
   schema: Record<string, unknown> | Record<string, unknown>[],
   id: number
 }
 
 declare type EventAddUnigraphPackage = {
-  "type": "event",
-  "event": "add_unigraph_package",
+  'type': 'event',
+  'event': 'add_unigraph_package',
   id: number,
   package: PackageDeclaration,
   update: boolean
 }
 
 declare type EventCreateUnigraphObject = {
-  "type": "event",
-  "event": "create_unigraph_object",
+  'type': 'event',
+  'event': 'create_unigraph_object',
   object: Record<string, unknown>,
   id: number,
   schema: string | undefined,
@@ -41,45 +59,45 @@ declare type EventCreateUnigraphObject = {
 }
 
 declare type EventUpdateSPO = {
-  type: "event",
-  event: "update_spo",
+  type: 'event',
+  event: 'update_spo',
   objects: string[]
   id: number
 }
 
 declare type EventDeleteUnigraphObject = {
-  type: "event",
-  event: "delete_unigraph_object",
+  type: 'event',
+  event: 'delete_unigraph_object',
   id: number,
   uid: string,
   permanent?: boolean
 }
 
 declare type EventCreateDataByJson = {
-  type: "event",
-  event: "create_data_by_json",
+  type: 'event',
+  event: 'create_data_by_json',
   id: number,
   data: Record<string, unknown>
 }
 
 declare type EventSetDgraphSchema = {
-  type: "event",
-  event: "set_dgraph_schema",
+  type: 'event',
+  event: 'set_dgraph_schema',
   id: number,
   schema: string
 }
 
 declare type EventQueryByStringWithVars = {
-  type: "event",
-  event: "query_by_string_with_vars",
+  type: 'event',
+  event: 'query_by_string_with_vars',
   vars: Record<string, unknown>,
   query: string,
   id: number
 }
 
 declare type EventSubscribeObject = {
-  type: "event",
-  event: "subscribe_to_object",
+  type: 'event',
+  event: 'subscribe_to_object',
   id: number | string,
   uid: string,
   connId: string,
@@ -90,8 +108,8 @@ declare type EventSubscribeObject = {
 }
 
 declare type EventSubscribeQuery = {
-  type: "event",
-  event: "subscribe_to_query",
+  type: 'event',
+  event: 'subscribe_to_query',
   id: number | string,
   queryFragment: string,
   connId: string,
@@ -99,8 +117,8 @@ declare type EventSubscribeQuery = {
 }
 
 declare type EventSubscribe = {
-  type: "event",
-  event: "subscribe",
+  type: 'event',
+  event: 'subscribe',
   id: number | string,
   query: Query,
   connId: string,
@@ -108,15 +126,15 @@ declare type EventSubscribe = {
 }
 
 declare type EventGetQueries = {
-  type: "event",
-  event: "get_queries",
+  type: 'event',
+  event: 'get_queries',
   id: number | string
   fragments: any[]
 }
 
 declare type EventSubscribeType = {
-  type: "event",
-  event: "subscribe_to_type",
+  type: 'event',
+  event: 'subscribe_to_type',
   id: number | string,
   schema: string,
   connId: string,
@@ -128,8 +146,8 @@ declare type EventSubscribeType = {
 }
 
 declare type EventUnsubscribeById = {
-  type: "event",
-  event: "unsubscribe_by_id",
+  type: 'event',
+  event: 'unsubscribe_by_id',
   id: number | string
 }
 

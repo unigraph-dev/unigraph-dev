@@ -1,4 +1,4 @@
-import { Schema, SchemaDgraph } from "./json-ts";
+import { Schema, SchemaDgraph } from './json-ts';
 
 export type PackageManifest = {
     /** Display name for your package that the users would see. */

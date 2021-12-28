@@ -1,19 +1,23 @@
-import { Accordion, AccordionSummary, Typography, AccordionDetails, List, ListItem, Select, MenuItem, IconButton, ListItemIcon, ListSubheader, FormControlLabel, Switch, Button, TextField, Slide, Divider, makeStyles } from "@material-ui/core";
-import { ExpandMore, ClearAll, InboxOutlined } from "@material-ui/icons";
-import { Autocomplete } from "@material-ui/lab";
-import _ from "lodash";
-import React from "react";
-import { useDrop } from "react-dnd";
-import { UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
-import { getDynamicViews } from "../../unigraph-react";
-import { AutoDynamicView } from "./AutoDynamicView";
-import { DataContext, isMobile, TabContext } from "../../utils";
-import { buildGraph as buildGraphFn, getRandomInt } from "unigraph-dev-common/lib/utils/utils";
-import InfiniteScroll from "react-infinite-scroll-component";
-import { setupInfiniteScrolling } from "./infiniteScrolling";
-import { byElementIndex } from "unigraph-dev-common/lib/utils/entityUtils";
-import { DragandDrop } from "./DragandDrop";
+import {
+    Accordion, AccordionSummary, Typography, AccordionDetails, List, ListItem,
+    Select, MenuItem, IconButton, ListItemIcon, ListSubheader, FormControlLabel,
+    Switch, Button, TextField, Slide, Divider, makeStyles,
+} from '@material-ui/core';
+import { ExpandMore, ClearAll, InboxOutlined } from '@material-ui/icons';
+import { Autocomplete } from '@material-ui/lab';
+import _ from 'lodash';
+import React from 'react';
+import { useDrop } from 'react-dnd';
+import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
+import { buildGraph as buildGraphFn, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { TransitionGroup } from 'react-transition-group';
+import { getDynamicViews } from '../../unigraph-react';
+import { AutoDynamicView } from './AutoDynamicView';
+import { DataContext, isMobile, TabContext } from '../../utils';
+import { setupInfiniteScrolling } from './infiniteScrolling';
+import { DragandDrop } from './DragandDrop';
 
 type Group = {
     name: string,
@@ -23,68 +27,83 @@ type Group = {
 type Grouper = (el: any[]) => Group[];
 
 const groupersDefault: Record<string, Grouper> = {
-    'date': (el: any[]) => {
-        let groupsMap: any = { "Today": [], "Last week": [], "Last month": [], "Earlier": [] };
-        el.forEach(it => {
+    date: (el: any[]) => {
+        const groupsMap: any = {
+            Today: [], 'Last week': [], 'Last month': [], Earlier: [],
+        };
+        el.forEach((it) => {
             if (it && it._updatedAt) {
-                let day = new Date(it._updatedAt);
-                let now = new Date();
+                const day = new Date(it._updatedAt);
+                const now = new Date();
                 if (now.getTime() - day.getTime() <= 1000 * 60 * 60 * 24) {
-                    groupsMap['Today'].push(it);
+                    groupsMap.Today.push(it);
                 } else if (now.getTime() - day.getTime() <= 1000 * 60 * 60 * 24 * 7) {
                     groupsMap['Last week'].push(it);
                 } else if (now.getTime() - day.getTime() <= 1000 * 60 * 60 * 24 * 31) {
                     groupsMap['Last month'].push(it);
                 } else {
-                    groupsMap['Earlier'].push(it);
+                    groupsMap.Earlier.push(it);
                 }
             } else {
-                groupsMap['Earlier'].push(it)
+                groupsMap.Earlier.push(it);
             }
         });
-        return Object.entries(groupsMap).map(([k, v]) => { return { name: k, items: v as any[] } })
+        return Object.entries(groupsMap).map(([k, v]) => ({ name: k, items: v as any[] }));
     },
-    'type': (el: any[]) => {
-        let groupsMap: any = {};
-        el.forEach(it => {
-            let type = it?.type?.['unigraph.id'] || 'Other'
+    type: (el: any[]) => {
+        const groupsMap: any = {};
+        el.forEach((it) => {
+            const type = it?.type?.['unigraph.id'] || 'Other';
             if (groupsMap[type]) {
-                groupsMap[type].push(it)
+                groupsMap[type].push(it);
             } else {
-                groupsMap[type] = [it]
+                groupsMap[type] = [it];
             }
-        })
-        return Object.entries(groupsMap).map(([k, v]) => { return { name: k, items: v as any[] } }).sort((a, b) => a.name > b.name ? 1 : -1)
+        });
+        return Object.entries(groupsMap).map(
+            ([k, v]) => ({ name: k, items: v as any[] }),
+        ).sort((a, b) => (a.name > b.name ? 1 : -1));
     },
-}
+};
 
-const DynamicListItem = ({ reverse, listUid, item, index, context, callbacks, itemUids, itemRemover, noRemover, removeOnEnter, compact }: any) => {
-    return <React.Fragment>
-        <Slide direction={reverse ? "down" : "up"} in key={item?.uid}>
-            <ListItem style={{ ...(compact ? { paddingTop: "2px", paddingBottom: "2px" } : {}) }}>
-                <ListItemIcon onClick={() => {
-                    itemRemover([item['uid']])
-                }} style={{ display: (itemRemover === _.noop || isMobile() || noRemover) ? "none" : "" }}><ClearAll /></ListItemIcon>
-                <AutoDynamicView object={new UnigraphObject(item)} withParent={listUid ? true : false} callbacks={{
-                    ...callbacks,
-                    context: context,
-                    removeOnEnter,
-                    removeFromContext: (where: undefined | "left" | "right") => {
-                        let uids = {
-                            "left": itemUids.slice(0, index),
-                            "right": undefined,
-                            "": undefined
-                        }[where || ""] || [item['uid']]
-                        itemRemover(uids)
-                    }
-                }} />
+function DynamicListItem({
+    reverse, listUid, item, index, context, callbacks, itemUids, itemRemover, noRemover, removeOnEnter, compact,
+}: any) {
+    return (
+        <Slide direction={reverse ? 'down' : 'up'} in key={item?.uid}>
+            <ListItem style={{ ...(compact ? { paddingTop: '2px', paddingBottom: '2px' } : {}) }}>
+                <ListItemIcon
+                    onClick={() => {
+                            itemRemover([item.uid]);
+                        }}
+                    style={{ display: (itemRemover === _.noop || isMobile() || noRemover) ? 'none' : '' }}
+                >
+                    <ClearAll />
+                </ListItemIcon>
+                <AutoDynamicView
+                    object={new UnigraphObject(item)}
+                    withParent={!!listUid}
+                    callbacks={{
+                            ...callbacks,
+                            context,
+                            removeOnEnter,
+                            removeFromContext: (where: undefined | 'left' | 'right') => {
+                                const uids = {
+                                    left: itemUids.slice(0, index),
+                                    right: undefined,
+                                    '': undefined,
+                                }[where || ''] || [item.uid];
+                                itemRemover(uids);
+                            },
+                        }}
+                />
             </ListItem>
         </Slide>
-    </React.Fragment>
+    );
 }
 
 export type ItemRemover = (uids: string[]) => void;
-export type Filter = { id: string, fn: (_: any) => boolean }
+export type Filter = { id: string, fn: (it: any) => boolean }
 
 export type DynamicObjectListViewProps = {
     items: any[],
@@ -111,120 +130,182 @@ export type DynamicObjectListViewProps = {
     style?: any,
 }
 
-const DynamicListBasic = ({ reverse, items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true, noRemover, compact, removeOnEnter }: any) => {
+function DynamicListBasic({
+    reverse, items, context, listUid, callbacks, itemUids,
+    itemRemover, itemGetter, infinite = true, noRemover,
+    compact, removeOnEnter,
+}: any) {
     const tabContext = React.useContext(TabContext);
-    return <TransitionGroup><DragandDrop dndContext={tabContext.viewId} listId={context?.uid} isReverse={reverse} arrayId={listUid}>
-        {items.map((el: any, index: number) => <DynamicListItem
-            item={itemGetter(el)} index={index} context={context} listUid={listUid} compact={compact}
-            callbacks={callbacks} itemUids={items.map((el: any) => itemGetter(el).uid)} itemRemover={itemRemover} reverse={reverse} noRemover={noRemover} removeOnEnter={removeOnEnter}
-        />)}</DragandDrop></TransitionGroup>;
+    return (
+        <TransitionGroup>
+            <DragandDrop dndContext={tabContext.viewId} listId={context?.uid} isReverse={reverse} arrayId={listUid}>
+                {items.map((el: any, index: number) => (
+                    <DynamicListItem
+                        item={itemGetter(el)}
+                        index={index}
+                        context={context}
+                        listUid={listUid}
+                        compact={compact}
+                        callbacks={callbacks}
+                        itemUids={items.map((ell: any) => itemGetter(ell).uid)}
+                        itemRemover={itemRemover}
+                        reverse={reverse}
+                        noRemover={noRemover}
+                        removeOnEnter={removeOnEnter}
+                    />
+                ))}
+            </DragandDrop>
+        </TransitionGroup>
+    );
 }
 
-const DynamicList = ({ reverse, items, context, listUid, callbacks, itemUids, itemRemover, itemGetter, infinite = true, buildGraph, parId, noRemover, compact, subscribeOptions, removeOnEnter }: any) => {
-
+function DynamicList({
+    reverse, items, context, listUid, callbacks, itemUids,
+    itemRemover, itemGetter, infinite = true, buildGraph,
+    parId, noRemover, compact, subscribeOptions, removeOnEnter,
+}: any) {
     const tabContext = React.useContext(TabContext);
     const [loadedItems, setLoadedItems] = React.useState<any[]>([]);
     const [setupProps, setSetupProps] = React.useState<{ next: any, cleanup: any, onUpdate: any } | null>(null);
 
     React.useEffect(() => {
         if (setupProps?.cleanup) setupProps.cleanup();
-        let newProps: any = undefined;
+        let newProps: any;
         if (items.length) {
-            newProps = setupInfiniteScrolling(items.map((el: any) => itemGetter(el).uid), infinite ? 25 : items.length, (items: any[]) => {
-                setLoadedItems(buildGraph ? buildGraphFn(items) : items);
-            }, subscribeOptions);
+            newProps = setupInfiniteScrolling(
+                items.map((el: any) => itemGetter(el).uid),
+                infinite ? 25 : items.length,
+                (its: any[]) => {
+                    setLoadedItems(buildGraph ? buildGraphFn(its) : its);
+                },
+                subscribeOptions,
+            );
             setSetupProps(newProps);
-        } else { setLoadedItems([]) };
-        return function cleanup() { newProps?.cleanup() }
+        } else { setLoadedItems([]); }
+        return function cleanup() { newProps?.cleanup(); };
     }, [items.length === 0]);
 
     React.useEffect(() => {
-        setupProps?.onUpdate(items.map((el: any) => itemGetter(el).uid))
-    }, [items.map((el: any) => itemGetter(el).uid)])
+        setupProps?.onUpdate(items.map((el: any) => itemGetter(el).uid));
+    }, [items.map((el: any) => itemGetter(el).uid)]);
 
-    return <InfiniteScroll
-        dataLength={loadedItems.length}
-        next={setupProps?.next || (() => { })}
-        hasMore={loadedItems.length < items.length}
-        loader={<React.Fragment />}
-        scrollableTarget={"scrollableDiv" + parId}
-        endMessage={
-            <React.Fragment />
-        }
-    >
-        <TransitionGroup>
-        <DragandDrop dndContext={tabContext.viewId} listId={context?.uid} isReverse={reverse}  arrayId={listUid}>
-            {loadedItems.map((el: any, index: number) => <DynamicListItem key={el?.uid || index}
-                item={el} index={index} context={context} listUid={listUid} reverse={reverse} compact={compact}
-                callbacks={callbacks} itemUids={items.map((el: any) => itemGetter(el).uid)} itemRemover={itemRemover} noRemover={noRemover} removeOnEnter={removeOnEnter}
-            />)}
-        </DragandDrop>
-        </TransitionGroup>
-    </InfiniteScroll>
+    return (
+        <InfiniteScroll
+            dataLength={loadedItems.length}
+            next={setupProps?.next || (() => undefined)}
+            hasMore={loadedItems.length < items.length}
+            loader=""
+            scrollableTarget={`scrollableDiv${parId}`}
+            endMessage=""
+        >
+            <TransitionGroup>
+                <DragandDrop dndContext={tabContext.viewId} listId={context?.uid} isReverse={reverse} arrayId={listUid}>
+                    {loadedItems.map((el: any, index: number) => (
+                        <DynamicListItem
+                            key={el?.uid || index}
+                            item={el}
+                            index={index}
+                            context={context}
+                            listUid={listUid}
+                            reverse={reverse}
+                            compact={compact}
+                            callbacks={callbacks}
+                            itemUids={items.map((ell: any) => itemGetter(ell).uid)}
+                            itemRemover={itemRemover}
+                            noRemover={noRemover}
+                            removeOnEnter={removeOnEnter}
+                        />
+                    ))}
+                </DragandDrop>
+            </TransitionGroup>
+        </InfiniteScroll>
+    );
 }
 
-const MultiTypeDescriptor = ({items, selectedTab, setSelectedTab}: {items: any[], selectedTab: string, setSelectedTab: any}) => {
+function MultiTypeDescriptor(
+    { items, selectedTab, setSelectedTab }: {items: any[], selectedTab: string, setSelectedTab: any},
+) {
+    const itemGroups = groupersDefault.type(items);
 
-    const itemGroups = groupersDefault['type'](items);
-
-    return itemGroups.length > 1 ? <React.Fragment>
-        <Divider variant="middle" orientation="vertical" style={{height: "auto"}} />
-        <div style={{whiteSpace: "nowrap", display: "flex"}}>
-        {itemGroups.map((el, index) => {
-            return <TabButton isSelected={selectedTab === el.name} onClick={() => setSelectedTab(el.name)}>
-                <div style={{minHeight: "18px", minWidth: "18px", height: "18px", width: "18px", alignSelf: "center", marginRight: "3px", opacity: 0.54, backgroundImage: `url("data:image/svg+xml,${(window.unigraph.getNamespaceMap)?.()?.[el.name]?._icon}")`}}/>
-                <Typography style={{color: "grey", marginRight: "4px"}}>{(window.unigraph.getNamespaceMap)?.()?.[el.name]?._name}:</Typography>
-                <Typography style={{marginRight: "8px"}}>{el.items.length}</Typography>
-            </TabButton>
-        })}
-    </div> </React.Fragment>: <React.Fragment />
+    return itemGroups.length > 1 ? (
+        <>
+            <Divider variant="middle" orientation="vertical" style={{ height: 'auto' }} />
+            <div style={{ whiteSpace: 'nowrap', display: 'flex' }}>
+                {itemGroups.map((el, index) => (
+                    <TabButton isSelected={selectedTab === el.name} onClick={() => setSelectedTab(el.name)}>
+                        <div style={{
+                            minHeight: '18px', minWidth: '18px', height: '18px', width: '18px', alignSelf: 'center', marginRight: '3px', opacity: 0.54, backgroundImage: `url("data:image/svg+xml,${(window.unigraph.getNamespaceMap)?.()?.[el.name]?._icon}")`,
+                        }}
+                        />
+                        <Typography style={{ color: 'grey', marginRight: '4px' }}>
+                            {(window.unigraph.getNamespaceMap)?.()?.[el.name]?._name}
+                            :
+                        </Typography>
+                        <Typography style={{ marginRight: '8px' }}>{el.items.length}</Typography>
+                    </TabButton>
+                ))}
+            </div>
+        </>
+    ) : <span />;
 }
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme) => ({
     content: {
-      width: "100%",
-      overflow: "auto",
+        width: '100%',
+        overflow: 'auto',
     },
-  }));
+}));
 
-export const TabButton = ({children, isSelected, onClick}: any) => {
-    return <div style={{cursor: "pointer", display: "flex", padding: "4px", paddingTop: "2px", paddingBottom: "2px", borderRadius: "8px", ...(isSelected ? {backgroundColor: "#E9E9E9", borderRadius: "8px"} : {})}} onClick={onClick}>
-        {children}
-    </div>
+export function TabButton({ children, isSelected, onClick }: any) {
+    return (
+        <div
+            style={{
+                cursor: 'pointer', display: 'flex', padding: '4px', paddingTop: '2px', paddingBottom: '2px', borderRadius: '8px', ...(isSelected ? { backgroundColor: '#E9E9E9', borderRadius: '8px' } : {}),
+            }}
+            onClick={onClick}
+        >
+            {children}
+        </div>
+    );
 }
 
 /**
  * Component for a list of objects with various functionalities.
- * 
+ *
  * items: UnigraphObject[] The list of items to display
  * listUid: the UID of the list object (optional), used for deleting items from list
- * 
- * @param param0 
- * @returns 
+ *
+ * @param param0
+ * @returns
  */
-export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ style, titleBar, items, groupers, groupBy, listUid, context, callbacks, itemGetter = _.identity, itemRemover = _.noop, filters = [], defaultFilter, reverse, virtualized, buildGraph, noBar, noRemover, noDrop, compact, subscribeOptions, loadAll, removeOnEnter }) => {
-
+export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
+    style, titleBar, items, groupers, groupBy, listUid, context,
+    callbacks, itemGetter = _.identity, itemRemover = _.noop, filters = [],
+    defaultFilter, reverse, virtualized, buildGraph, noBar, noRemover, noDrop,
+    compact, subscribeOptions, loadAll, removeOnEnter,
+}) => {
     const classes = useStyles();
 
     const tabContext = React.useContext(TabContext);
-    
+
     const [optionsOpen, setOptionsOpen] = React.useState(false);
     let setGroupBy: any;
     [groupBy, setGroupBy] = React.useState(groupBy || '');
-    groupers = { ...groupers, ...groupersDefault }
+    groupers = { ...groupers, ...groupersDefault };
     const [reverseOrder, setReverseOrder] = React.useState(reverse || false);
-    const [currentTab, setCurrentTab] = React.useState("");
+    const [currentTab, setCurrentTab] = React.useState('');
 
-    const isStub = !items[0] || Object.keys(itemGetter(items[0])).filter(el => el.startsWith('_value')).length < 1 || items[0]._stub;
+    const isStub = !items[0] || Object.keys(itemGetter(items[0])).filter((el) => el.startsWith('_value')).length < 1 || items[0]._stub;
 
     const totalFilters: Filter[] = [
-        { id: "no-filter", fn: () => true },
-        { id: "no-deleted", fn: (obj) => (obj?.['dgraph.type']?.includes?.('Deleted')) ? null : obj },
-        { id: "no-noview", fn: (obj) => getDynamicViews().includes(obj?.['type']?.['unigraph.id']) ? obj : null },
-        { id: "no-trivial", fn: (obj) => ["$/schema/markdown", "$/schema/subentity"].includes(obj?.['type']?.['unigraph.id']) ? null : obj },
-        { id: "no-hidden", fn: (obj) => obj['_hide'] !== true },
+        { id: 'no-filter', fn: () => true },
+        { id: 'no-deleted', fn: (obj) => ((obj?.['dgraph.type']?.includes?.('Deleted')) ? null : obj) },
+        { id: 'no-noview', fn: (obj) => (getDynamicViews().includes(obj?.type?.['unigraph.id']) ? obj : null) },
+        { id: 'no-trivial', fn: (obj) => (['$/schema/markdown', '$/schema/subentity'].includes(obj?.type?.['unigraph.id']) ? null : obj) },
+        { id: 'no-hidden', fn: (obj) => obj._hide !== true },
         ...filters];
-    const [filtersUsed, setFiltersUsed] = React.useState([...(defaultFilter ? (Array.isArray(defaultFilter) ? defaultFilter : [defaultFilter]) : ["no-noview", "no-deleted", "no-trivial", "no-hidden"])]);
+    // eslint-disable-next-line no-nested-ternary
+    const [filtersUsed, setFiltersUsed] = React.useState([...(defaultFilter ? (Array.isArray(defaultFilter) ? defaultFilter : [defaultFilter]) : ['no-noview', 'no-deleted', 'no-trivial', 'no-hidden'])]);
 
     const [totalItems, setTotalItems] = React.useState<any[]>([]);
     const [procItems, setProcItems] = React.useState<any[]>([]);
@@ -233,17 +314,18 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ st
         const currItems = [...items].sort(byElementIndex);
         if (reverseOrder) allItems = [...currItems].reverse();
         else allItems = [...currItems];
-        filtersUsed.forEach(el => {
+        filtersUsed.forEach((el) => {
             const filter = totalFilters.find((flt) => flt.id === el);
             allItems = allItems.filter((it: any) => (filter?.fn || (() => true))(itemGetter(it)));
-        })
+        });
         setTotalItems([...allItems]);
-        if (currentTab.length >= 1) allItems = allItems.filter((it: any) => itemGetter(it).type['unigraph.id'] === currentTab)
+        if (currentTab.length >= 1) allItems = allItems.filter((it: any) => itemGetter(it).type['unigraph.id'] === currentTab);
         setProcItems(allItems);
-        if (allItems.length === 0) setCurrentTab("");
-    }, [reverseOrder, items, filtersUsed, currentTab])
+        if (allItems.length === 0) setCurrentTab('');
+    }, [reverseOrder, items, filtersUsed, currentTab]);
 
     const contextRef = React.useRef(context);
+    // eslint-disable-next-line no-return-assign
     React.useEffect(() => contextRef.current = context, [context]);
     const [parId] = React.useState(getRandomInt());
     const [dndContext] = React.useState(tabContext.viewId || parId);
@@ -253,97 +335,155 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({ st
         accept: Object.keys(window.unigraph.getNamespaceMap() || {}),
         drop: (item: { uid: string, dndContext: any, removeFromContext?: any }, monitor) => {
             if (!monitor.didDrop() && !noDrop && contextRef.current) {
-                window.unigraph.runExecutable('$/executable/add-item-to-list', { where: contextRef.current.uid, item: item.uid })
-                if (tabContext.viewId === item.dndContext) {item?.removeFromContext()};
-                //console.log(tabContext, item.dndContext)
+                window.unigraph.runExecutable('$/executable/add-item-to-list', { where: contextRef.current.uid, item: item.uid });
+                if (tabContext.viewId === item.dndContext) { item?.removeFromContext(); }
+                // console.log(tabContext, item.dndContext)
             }
         },
         collect: (monitor) => ({
             isOver: !!monitor.isOver(),
             canDrop: !!monitor.canDrop(),
-        })
-    }))
+        }),
+    }));
 
-    return <div style={{
-        height: "100%", width: "100%",
-        display: "flex", flexDirection: "column", overflowY: "hidden",
-        minHeight: (canDrop && !noDrop) ? "200px" : "", ...(style ? style : {})
-    }} ref={drop}>
-        <DataContext.Provider value={{ rootUid: context?.uid || "0x0" }}>
-            <div style={{ display: "flex" }}>
-                {noBar ? [] : <React.Fragment>
-                    <Accordion expanded={optionsOpen} variant={"outlined"} style={{ flexGrow: 1, minWidth: 0, margin: "8px" }}>
-                        <AccordionSummary
-                            expandIcon={<ExpandMore onClick={() => setOptionsOpen(!optionsOpen)}/>}
-                            aria-controls="panel1bh-content"
-                            id="panel1bh-header"
-                            classes={{content: classes.content}}
-                            style={{cursor: "initial"}}
-                        >
-                            <TabButton isSelected={currentTab === "" && groupersDefault['type']?.(totalItems.map(itemGetter))?.length > 1} onClick={() => {setCurrentTab("")}}>
-                                <Typography style={{whiteSpace: "nowrap"}}>{totalItems.length}{titleBar || " items"}</Typography>
-                            </TabButton>
-                            <MultiTypeDescriptor items={totalItems.map(itemGetter)} selectedTab={currentTab} setSelectedTab={setCurrentTab} />
-                        </AccordionSummary>
-                        <AccordionDetails>
-                            <List>
-                                <ListItem>
-                                    <Typography>Group items by</Typography>
-                                    <Select
-                                        value={groupBy}
-                                        onChange={(ev) => { setGroupBy(ev.target.value as string) }}
-                                        style={{ marginLeft: "24px" }}
-                                        displayEmpty
-                                    >
-                                        <MenuItem value={''}>None</MenuItem>
-                                        {Object.keys(groupers).map(el => <MenuItem value={el}>{el}</MenuItem>)}
-                                    </Select>
-                                </ListItem>
-                                <ListItem>
-                                    <FormControlLabel
-                                        control={<Switch checked={reverseOrder} onChange={() => setReverseOrder(!reverseOrder)} name={"moveToInbox"} />}
-                                        label={"Latest items on top"}
+    return (
+        <div
+            style={{
+                height: '100%',
+                width: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                overflowY: 'hidden',
+                minHeight: (canDrop && !noDrop) ? '200px' : '',
+                ...(style || {}),
+            }}
+            ref={drop}
+        >
+            <DataContext.Provider
+                // eslint-disable-next-line react/jsx-no-constructed-context-values
+                value={{ rootUid: context?.uid || '0x0' }}
+            >
+                <div style={{ display: 'flex' }}>
+                    {noBar ? [] : (
+                        <>
+                            <Accordion expanded={optionsOpen} variant="outlined" style={{ flexGrow: 1, minWidth: 0, margin: '8px' }}>
+                                <AccordionSummary
+                                    expandIcon={<ExpandMore onClick={() => setOptionsOpen(!optionsOpen)} />}
+                                    aria-controls="panel1bh-content"
+                                    id="panel1bh-header"
+                                    classes={{ content: classes.content }}
+                                    style={{ cursor: 'initial' }}
+                                >
+                                    <TabButton isSelected={currentTab === '' && groupersDefault.type?.(totalItems.map(itemGetter))?.length > 1} onClick={() => { setCurrentTab(''); }}>
+                                        <Typography style={{ whiteSpace: 'nowrap' }}>
+                                            {totalItems.length}
+                                            {titleBar || ' items'}
+                                        </Typography>
+                                    </TabButton>
+                                    <MultiTypeDescriptor
+                                        items={totalItems.map(itemGetter)}
+                                        selectedTab={currentTab}
+                                        setSelectedTab={setCurrentTab}
                                     />
-                                </ListItem>
-                                <ListItem>
-                                    <Autocomplete
-                                        multiple
-                                        value={filtersUsed}
-                                        onChange={(event, newValue) => {
-                                            setFiltersUsed(newValue)
-                                        }}
-                                        id="filter-selector"
-                                        options={totalFilters.map(el => el.id)}
-                                        style={{ width: 300 }}
-                                        renderInput={(params) => <TextField {...params} label="Filter presets" variant="outlined" />}
-                                    />
-                                </ListItem>
-                                <ListItem style={{ display: (context?.uid && !noRemover) ? "" : "none" }}>
-                                    <Button onClick={() => { window.wsnavigator(`/graph?uid=${context.uid}`) }}>Show Graph view</Button>
-                                </ListItem>
-                            </List>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                    <List>
+                                        <ListItem>
+                                            <Typography>Group items by</Typography>
+                                            <Select
+                                                value={groupBy}
+                                                onChange={(ev) => { setGroupBy(ev.target.value as string); }}
+                                                style={{ marginLeft: '24px' }}
+                                                displayEmpty
+                                            >
+                                                <MenuItem value="">None</MenuItem>
+                                                {Object.keys(groupers)
+                                                    .map((el) => <MenuItem value={el}>{el}</MenuItem>)}
+                                            </Select>
+                                        </ListItem>
+                                        <ListItem>
+                                            <FormControlLabel
+                                                control={<Switch checked={reverseOrder} onChange={() => setReverseOrder(!reverseOrder)} name="moveToInbox" />}
+                                                label="Latest items on top"
+                                            />
+                                        </ListItem>
+                                        <ListItem>
+                                            <Autocomplete
+                                                multiple
+                                                value={filtersUsed}
+                                                onChange={(event, newValue) => {
+                                                    setFiltersUsed(newValue);
+                                                }}
+                                                id="filter-selector"
+                                                options={totalFilters.map((el) => el.id)}
+                                                style={{ width: 300 }}
+                                                renderInput={(params) => <TextField {...params} label="Filter presets" variant="outlined" />}
+                                            />
+                                        </ListItem>
+                                        <ListItem style={{ display: (context?.uid && !noRemover) ? '' : 'none' }}>
+                                            <Button onClick={() => { window.wsnavigator(`/graph?uid=${context.uid}`); }}>Show Graph view</Button>
+                                        </ListItem>
+                                    </List>
 
-                        </AccordionDetails>
-                    </Accordion>
-                    <IconButton
-                        onClick={() => itemRemover(procItems.map((el, idx) => itemGetter(el).uid))}
-                        style={{ display: itemRemover === _.noop ? "none" : "" }}
-                    ><ClearAll /></IconButton>
-                    <IconButton
-                        style={{ display: (canDrop && !noDrop && contextRef.current) ? "" : "none" }}
-                    ><InboxOutlined /></IconButton>
-                </React.Fragment>}
-            </div>
-            <div style={{ flexGrow: 1, overflowY: "auto" }} id={"scrollableDiv" + parId} >
-                {!groupBy.length ?
+                                </AccordionDetails>
+                            </Accordion>
+                            <IconButton
+                                onClick={() => itemRemover(procItems.map((el, idx) => itemGetter(el).uid))}
+                                style={{ display: itemRemover === _.noop ? 'none' : '' }}
+                            >
+                                <ClearAll />
+                            </IconButton>
+                            <IconButton
+                                style={{ display: (canDrop && !noDrop && contextRef.current) ? '' : 'none' }}
+                            >
+                                <InboxOutlined />
+                            </IconButton>
+                        </>
+                    )}
+                </div>
+                <div style={{ flexGrow: 1, overflowY: 'auto' }} id={`scrollableDiv${parId}`}>
+                    {!groupBy.length
 
-                    React.createElement((isStub && !loadAll) ? DynamicList : DynamicListBasic, { reverse: reverseOrder, items: procItems, context, listUid, callbacks, itemRemover, itemUids: procItems.map(el => el.uid), itemGetter, buildGraph, parId, noRemover, compact, subscribeOptions, removeOnEnter }) :
-                    groupers[groupBy](procItems.map(itemGetter)).map((el: Group) => <React.Fragment>
-                        <ListSubheader>{el.name}</ListSubheader>
-                        {React.createElement((isStub && !loadAll) ? DynamicList : DynamicListBasic, { reverse: reverseOrder, items: el.items, context, listUid, callbacks, itemRemover, itemUids: el.items.map(ell => ell.uid), itemGetter: _.identity, infinite: false, buildGraph, parId, noRemover, compact, subscribeOptions, removeOnEnter })}
-                    </React.Fragment>)
-                }
-            </div>
-        </DataContext.Provider>
-    </div>
-}
+                        ? React.createElement((isStub && !loadAll) ? DynamicList : DynamicListBasic, {
+                            reverse: reverseOrder,
+                            items: procItems,
+                            context,
+                            listUid,
+                            callbacks,
+                            itemRemover,
+                            itemUids: procItems.map((el) => el.uid),
+                            itemGetter,
+                            buildGraph,
+                            parId,
+                            noRemover,
+                            compact,
+                            subscribeOptions,
+                            removeOnEnter,
+                        })
+                        : groupers[groupBy](procItems.map(itemGetter)).map((el: Group) => (
+                            <>
+                                <ListSubheader>{el.name}</ListSubheader>
+                                {React.createElement((isStub && !loadAll) ? DynamicList : DynamicListBasic, {
+                                    reverse: reverseOrder,
+                                    items: el.items,
+                                    context,
+                                    listUid,
+                                    callbacks,
+                                    itemRemover,
+                                    itemUids: el.items.map((ell) => ell.uid),
+                                    itemGetter: _.identity,
+                                    infinite: false,
+                                    buildGraph,
+                                    parId,
+                                    noRemover,
+                                    compact,
+                                    subscribeOptions,
+                                    removeOnEnter,
+                                })}
+                            </>
+                        ))}
+                </div>
+            </DataContext.Provider>
+        </div>
+    );
+};
