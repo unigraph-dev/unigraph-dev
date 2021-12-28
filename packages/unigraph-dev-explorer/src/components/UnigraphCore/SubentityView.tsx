@@ -18,11 +18,11 @@ export function SubentityView({ data, callbacks }: any) {
 
     return isMain ? (
         <Chip
-          size="small"
-          icon={<Icon path={mdiPlayOutline} size={0.75} />}
-          variant="outlined"
-          label={`Expand ${subEntities} subentities`}
-          onClick={() => {
+            size="small"
+            icon={<Icon path={mdiPlayOutline} size={0.75} />}
+            variant="outlined"
+            label={`Expand ${subEntities} subentities`}
+            onClick={() => {
                 callbacks?.showSubentities?.();
             }}
         />

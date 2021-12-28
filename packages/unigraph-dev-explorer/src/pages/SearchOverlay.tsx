@@ -76,10 +76,10 @@ export function SearchOverlay({
                 setEntities([]);
             }
         } else if (input.startsWith('?')) {
-            const query = input.slice(1);
+            const newQuery = input.slice(1);
             setParsed({
                 type: 'query',
-                value: query,
+                value: newQuery,
             });
             setEntries([]);
             setEntities([]);
@@ -105,9 +105,11 @@ export function SearchOverlay({
                 window.unigraph.getSchemas().then((schemas: any) => {
                     try {
                         const padded = buildUnigraphEntity(JSON.parse(JSON.stringify(object)), type, schemas);
-                        setEntries([<div onClickCapture={(ev) => { ev.stopPropagation(); }}>
-                            <AutoDynamicView object={new UnigraphObject(padded)} noDrag noDrop />
-                                    </div>]);
+                        setEntries([
+                            <div onClickCapture={(ev) => { ev.stopPropagation(); }}>
+                                <AutoDynamicView object={new UnigraphObject(padded)} noDrag noDrop />
+                            </div>,
+                        ]);
                     } catch (e) {
                         console.log(e);
                     }
@@ -117,15 +119,16 @@ export function SearchOverlay({
             setQuery(parseQuery(parsed?.value));
         } else if (parsed?.type === 'command') {
             // list all commands
-            const commands = window.unigraph.getState('registry/commands').value;
-            setCommands(commands.filter((el: any) => (el.name as string).toLowerCase().includes(parsed.value.toLowerCase()) !== false));
+            const commandsVal = window.unigraph.getState('registry/commands').value;
+            setCommands(commandsVal.filter((el: any) => (el.name as string)
+                .toLowerCase().includes(parsed.value.toLowerCase()) !== false));
         }
     }, [parsed]);
 
-    const search = React.useMemo(() => _.debounce((query: any[]) => {
+    const search = React.useMemo(() => _.debounce((newQuery: any[]) => {
         setResponse(false);
-        if (query.length) {
-            window.unigraph.getSearchResults(query, 'metadata', 3, { noPrimitives: true }).then((res) => {
+        if (newQuery.length) {
+            window.unigraph.getSearchResults(newQuery, 'metadata', 3, { noPrimitives: true }).then((res) => {
                 // setResults(res.results.reverse());
                 setEntities(res.entities.reverse());
                 setResponse(true);
@@ -143,23 +146,28 @@ export function SearchOverlay({
     return (
         <div>
             <InputBase
-              style={{ width: '100%' }}
-              inputRef={tf}
-              value={input}
-              onChange={(ev) => {
+                style={{ width: '100%' }}
+                inputRef={tf}
+                value={input}
+                onChange={(ev) => {
                     const newContent = ev.target.value;
                     const caret = ev.target.selectionStart || 0;
-                    const hasMatch = inlineTextSearch(ev.target.value, tf, caret, async (match: any, newName: string, newUid: string) => {
-                        const newStr = `${newContent?.slice?.(0, match.index)}[[${newName}]]${newContent?.slice?.(match.index + match[0].length)}`;
-                        setInput(newStr);
-                        setAdderRefs([...adderRefs, { key: newName, value: newUid }]);
-                        window.unigraph.getState('global/searchPopup').setValue({ show: false });
-                    });
+                    const hasMatch = inlineTextSearch(
+                        ev.target.value,
+                        tf,
+                        caret,
+                        async (match: any, newName: string, newUid: string) => {
+                            const newStr = `${newContent?.slice?.(0, match.index)}[[${newName}]]${newContent?.slice?.(match.index + match[0].length)}`;
+                            setInput(newStr);
+                            setAdderRefs([...adderRefs, { key: newName, value: newUid }]);
+                            window.unigraph.getState('global/searchPopup').setValue({ show: false });
+                        },
+                    );
                     if (!hasMatch) window.unigraph.getState('global/searchPopup').setValue({ show: false });
                     setInput(ev.target.value);
                 }}
-              placeholder="Enter: +<type shortname> to create; ?<search query> to search; <command> to execute command"
-              onKeyPress={async (ev) => {
+                placeholder="Enter: +<type shortname> to create; ?<search query> to search; <command> to execute command"
+                onKeyPress={async (ev) => {
                     if (ev.key === 'Enter' && parsed?.type === 'quickAdder' && window.unigraph.getState('registry/quickAdder').value[parsed?.key]) {
                         window.unigraph.getState('registry/quickAdder').value[parsed?.key]?.adder(JSON.parse(JSON.stringify(parsed?.value)), false, callback, adderRefs).then((uids: any[]) => {
                             if (callback && uids[0]) callback(uids[0]);
@@ -179,20 +187,20 @@ export function SearchOverlay({
                 {entries}
                 {entities.length > 0 ? (
                     <DynamicObjectListView
-                      items={entities}
-                      context={null}
-                      buildGraph
-                      noBar
+                        items={entities}
+                        context={null}
+                        buildGraph
+                        noBar
                     />
                 ) : []}
                 {entries.length + entities.length === 0 && parsed?.type !== 'command' ? <SearchOverlayTooltip /> : []}
                 {(parsed?.type === 'command' || parsed?.type === '') ? commands.map((el: any) => (
                     <div
-                      onClick={() => {
+                        onClick={() => {
                             el.onClick();
                             setInput(''); setClose();
                         }}
-                      style={{
+                        style={{
                             display: 'flex', marginTop: '8px', marginBottom: '8px', cursor: 'pointer',
                         }}
                     >
@@ -275,8 +283,9 @@ export function SearchOverlayPopover({ open, setClose, noShadow }: any) {
 
     return (
         <Card
-          elevation={noShadow ? 0 : 12}
-          style={{
+            elevation={noShadow ? 0 : 12}
+            ref={overlay}
+            style={{
                 zIndex: 99,
                 position: 'absolute',
                 width: 'calc(100% - 128px)',
@@ -289,14 +298,13 @@ export function SearchOverlayPopover({ open, setClose, noShadow }: any) {
                 borderRadius: '16px',
                 display: (searchEnabled) ? 'block' : 'none',
             }}
-          ref={overlay}
-            >
+        >
             <SearchOverlay
-              open={searchEnabled}
-              callback={summonerState.callback}
-              summonerTooltip={summonerState.tooltip}
-              defaultValue={summonerState.defaultValue}
-              setClose={(() => { setSearchEnabled(false); })}
+                open={searchEnabled}
+                callback={summonerState.callback}
+                summonerTooltip={summonerState.tooltip}
+                defaultValue={summonerState.defaultValue}
+                setClose={(() => { setSearchEnabled(false); })}
             />
         </Card>
     );

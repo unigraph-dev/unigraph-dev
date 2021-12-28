@@ -1,12 +1,12 @@
 import React from 'react';
 
 import {
-    List, ListItem, ListItemSecondaryAction, ListItemText, ListSubheader, MenuItem, Popover, Select, Switch, TextField, Typography,
+    List, ListItem, ListItemSecondaryAction, ListItemText, ListSubheader,
+    MenuItem, Popover, Select, Switch, TextField, Typography,
 } from '@material-ui/core';
 
 export default function Settings() {
-    // @ts-ignore: When loading the app we've already ensured userSettings is going to be JSON
-    const [settings, setSettings] = React.useState(JSON.parse(window.localStorage.getItem('userSettings')));
+    const [settings, setSettings] = React.useState(JSON.parse(window.localStorage.getItem('userSettings') || ''));
 
     const [anchorEl, setAnchorEl]: [any[], any] = React.useState([null]);
     const [activePopover, setActivePopover] = React.useState(-1);
@@ -53,15 +53,15 @@ export default function Settings() {
                 <ListSubheader component="div" id="nested-list-subheader" key="window">
                     Window Management
                 </ListSubheader>
-                <ListItem button onClick={(e) => {}} key="newwindow">
+                <ListItem button onClick={(e) => false} key="newwindow">
                     <ListItemText id="switch-list-label-new-window" primary="New window options" secondary="Choose the behavior when a new window is opened." />
                     <ListItemSecondaryAction>
                         <Select
-                          labelId="demo-simple-select-outlined-label"
-                          id="demo-simple-select-outlined"
-                          value={settings.newWindow ? settings.newWindow : 'new-tab'}
-                          onChange={(event) => handleWindowSelection(event.target.value as string)}
-                          label="new-window"
+                            labelId="demo-simple-select-outlined-label"
+                            id="demo-simple-select-outlined"
+                            value={settings.newWindow ? settings.newWindow : 'new-tab'}
+                            onChange={(event) => handleWindowSelection(event.target.value as string)}
+                            label="new-window"
                         >
                             <MenuItem value="new-tab">Open in new tab</MenuItem>
                             <MenuItem value="new-pane">Open in new pane side by side</MenuItem>
@@ -69,28 +69,28 @@ export default function Settings() {
                         </Select>
                     </ListItemSecondaryAction>
                 </ListItem>
-                <ListItem button onClick={(e) => {}} key="analytics">
+                <ListItem button onClick={(e) => false} key="analytics">
                     <ListItemText id="switch-list-label-analytics-mode" primary="Enable analytics" secondary="Opt-in to analytics with mixpanel" />
                     <ListItemSecondaryAction>
                         <Switch
-                          edge="end"
-                          onChange={(e) => { analyticsState.setValue(!analyticsMode); }}
-                          checked={analyticsMode}
-                          inputProps={{ 'aria-labelledby': 'switch-list-label-developer-mode' }}
+                            edge="end"
+                            onChange={(e) => { analyticsState.setValue(!analyticsMode); }}
+                            checked={analyticsMode}
+                            inputProps={{ 'aria-labelledby': 'switch-list-label-developer-mode' }}
                         />
                     </ListItemSecondaryAction>
                 </ListItem>
                 <ListSubheader component="div" id="nested-list-subheader" key="developers">
                     Developers
                 </ListSubheader>
-                <ListItem button onClick={(e) => {}} key="developermode">
+                <ListItem button onClick={(e) => false} key="developermode">
                     <ListItemText id="switch-list-label-developer-mode" primary="Developer mode" secondary="Enable utilities about Unigraph for developers." />
                     <ListItemSecondaryAction>
                         <Switch
-                          edge="end"
-                          onChange={(e) => { devState.setValue(!devMode); }}
-                          checked={devMode}
-                          inputProps={{ 'aria-labelledby': 'switch-list-label-developer-mode' }}
+                            edge="end"
+                            onChange={(e) => { devState.setValue(!devMode); }}
+                            checked={devMode}
+                            inputProps={{ 'aria-labelledby': 'switch-list-label-developer-mode' }}
                         />
                     </ListItemSecondaryAction>
                 </ListItem>
@@ -108,17 +108,17 @@ export default function Settings() {
                 </ListItem>
             </List>
             <Popover
-              id={JSON.stringify(activePopover)}
-              open={activePopover === 0}
-              anchorEl={anchorEl[0]}
-              onClose={handleClose}
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-              transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+                id={JSON.stringify(activePopover)}
+                open={activePopover === 0}
+                anchorEl={anchorEl[0]}
+                onClose={handleClose}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'left' }}
             >
                 <TextField
-                  label="New server address:"
-                  value={settings.serverLocation}
-                  onChange={(event) => {
+                    label="New server address:"
+                    value={settings.serverLocation}
+                    onChange={(event) => {
                         const newSettings = { ...settings };
                         newSettings.serverLocation = event.target.value;
                         setSettings(newSettings);

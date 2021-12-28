@@ -32,6 +32,52 @@ declare type UserSettings = {
     browserId: string
 }
 
+declare type ContextMenuState = {
+    anchorPosition: {top: number, left: number},
+    menuContent: ((
+        uid: string,
+        object: any,
+        onfire: () => any,
+        callbacks?: any,
+        contextUid?: string
+    ) => React.ReactElement)[],
+    contextObject: any,
+    contextUid: string,
+    schemaMenuContent: ((
+        uid: string,
+        object: any,
+        onfire: () => any,
+        callbacks?: any,
+        contextUid?: string
+    ) => React.ReactElement)[],
+    menuContextContent: ((
+        uid: string,
+        object: any,
+        onfire: () => any,
+        callbacks?: any,
+        contextUid?: string
+    ) => React.ReactElement)[],
+    contextContextObject?: any,
+    contextContextUid?: string,
+    removeFromContext?: string,
+    callbacks?: any,
+    extraContent: any,
+    windowName?: string,
+    show: boolean
+}
+
+declare type SearchPopupState = {
+    anchorPosition?: {top: number, left: number},
+    anchorEl?: any,
+    show: boolean,
+    search?: string,
+    hideHidden?: boolean,
+    onSelected?: (newName: string, newUid: string) => any;
+    default: {
+        label: (search: string) => string;
+        onSelected: (search: string) => Promise<string>;
+    }[]
+}
 declare module '*.d.ts' {
     const content: string;
     export default content;

@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 function getPath(obj: any, path: string | string[]): any {
     if (path.length === 0) return new UnigraphObject(obj);
     if (!Array.isArray(path)) path = path.split('/').filter((e) => e.length);

@@ -1,5 +1,5 @@
 /* eslint-disable default-param-last */
-/* eslint-disable no-param-reassign */
+
 // FIXME: This file is ambiguous in purpose! Move utils to utils folder and keep this a small interface with a window object.
 
 import React from 'react';

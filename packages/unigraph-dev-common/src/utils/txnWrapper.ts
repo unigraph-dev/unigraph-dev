@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import _, { has, uniqueId } from 'lodash';
 import stringify from 'json-stable-stringify';
 import { UnigraphUpsert } from '../types/unigraph';

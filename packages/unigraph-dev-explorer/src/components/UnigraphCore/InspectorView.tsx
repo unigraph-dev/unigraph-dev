@@ -31,7 +31,9 @@ export function InspectorView() {
         });
         const cleanup = () => {
             Object.keys(subIdMapRef.current).forEach((uid) => {
-                if (!selected.includes(uid) && subIdMapRef.current[uid] !== undefined) window.unigraph.unsubscribe(subIdMapRef.current[uid]);
+                if (!selected.includes(uid) && subIdMapRef.current[uid] !== undefined) {
+                    window.unigraph.unsubscribe(subIdMapRef.current[uid]);
+                }
             });
         };
         cleanup();

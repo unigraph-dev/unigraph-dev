@@ -1,25 +1,24 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import { unigraph } from 'unigraph-dev-common';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
-import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
-import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import { isJsonString, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import _ from 'lodash';
-import stringify from 'json-stable-stringify';
-import {
-    BasicPersonView, CodeOrComponentView, DefaultSkeleton, Executable, ViewViewDetailed,
-} from './components/ObjectView/DefaultObjectView';
+import { ViewViewDetailed } from './components/ObjectView/DefaultObjectView';
+import { BasicPersonView, DefaultSkeleton } from './components/ObjectView/BasicObjectViews';
+import { CodeOrComponentView, Executable } from './components/ObjectView/ExecutableView';
 import { ANotification, Notification as CNotification } from './components/UnigraphCore/Notification';
-import { UserSettings } from './global';
+import { UserSettings } from './global.d';
 
-import { init as nb_init } from './examples/notes/init';
-import { init as sm_init } from './examples/semantic/init';
-import { init as cl_init } from './examples/calendar/init';
-import { init as tw_init } from './examples/twitter/Tweet';
-import { init as re_init } from './examples/reddit/RedditPost';
-import { init as bm_init } from './examples/bookmarks/Bookmarks';
-import { init as em_init } from './examples/email/Email';
-import { init as td_init } from './examples/todo/TodoList';
-import { init as rss_init } from './examples/rss_reader/RSSFeeds';
-import { pb_init } from './components/UnigraphCore/Pinboard';
+import { init as nbInit } from './examples/notes/init';
+import { init as smInit } from './examples/semantic/init';
+import { init as clInit } from './examples/calendar/init';
+import { init as twInit } from './examples/twitter/Tweet';
+import { init as reInit } from './examples/reddit/RedditPost';
+import { init as bmInit } from './examples/bookmarks/Bookmarks';
+import { init as emInit } from './examples/email/Email';
+import { init as tdInit } from './examples/todo/TodoList';
+import { init as rssInit } from './examples/rss_reader/RSSFeeds';
+import { init as pbInit } from './components/UnigraphCore/Pinboard';
 
 import { ListObjectQuery, ListObjectView } from './components/UnigraphCore/ListObjectView';
 import { SubentityView } from './components/UnigraphCore/SubentityView';
@@ -60,8 +59,8 @@ export function init(hostname?: string) {
 
     if (!isJsonString(window.localStorage.getItem('userSettings'))) {
         window.localStorage.setItem('userSettings', JSON.stringify(defaultSettings));
-    } else { // @ts-ignore: checked type already
-        userSettings = JSON.parse(window.localStorage.getItem('userSettings'));
+    } else {
+        userSettings = JSON.parse(window.localStorage.getItem('userSettings') || '');
     }
 
     // Connect to Unigraph
@@ -74,7 +73,11 @@ export function init(hostname?: string) {
         const updated = new Date(unpadded?._updatedAt);
         const current = new Date();
         if (current.valueOf() - updated.valueOf() < 5000 && Notification) {
-            new Notification(unpadded.name, { body: `${unpadded.from}: ${unpadded.content}` });
+            // eslint-disable-next-line no-new
+            new Notification(
+                unpadded.name,
+                { body: `${unpadded.from}: ${unpadded.content}` },
+            );
         }
     });
 
@@ -98,35 +101,6 @@ export function init(hostname?: string) {
     initPackages();
 
     if (window.localStorage.getItem('enableAnalytics') === 'true') initAnalyticsIfOptedIn();
-}
-
-export type ContextMenuState = {
-    anchorPosition: {top: number, left: number},
-    menuContent: ((uid: string, object: any, onfire: () => any, callbacks?: any, contextUid?: string) => React.ReactElement)[],
-    contextObject: any,
-    contextUid: string,
-    schemaMenuContent: ((uid: string, object: any, onfire: () => any, callbacks?: any, contextUid?: string) => React.ReactElement)[],
-    menuContextContent: ((uid: string, object: any, onfire: () => any, callbacks?: any, contextUid?: string) => React.ReactElement)[],
-    contextContextObject?: any,
-    contextContextUid?: string,
-    removeFromContext?: string,
-    callbacks?: any,
-    extraContent: any,
-    windowName?: string,
-    show: boolean
-}
-
-export type SearchPopupState = {
-    anchorPosition?: {top: number, left: number},
-    anchorEl?: any,
-    show: boolean,
-    search?: string,
-    hideHidden?: boolean,
-    onSelected?: (newName: string, newUid: string) => any;
-    default: {
-        label: (search: string) => string;
-        onSelected: (search: string) => Promise<string>;
-    }[]
 }
 
 function initContextMenu() {
@@ -188,11 +162,16 @@ function initBacklinkManager() {
                 queryFn: backlinkQuery,
             },
         }, () => false, subsId, true);
-        currentResults = Object.fromEntries(Object.entries(currentResults).filter((el) => currentObjects.includes(el[0])));
+        currentResults = Object.fromEntries(
+            Object.entries(currentResults).filter(
+                (el) => currentObjects.includes(el[0]),
+            ),
+        );
     }, 20));
 }
 
 function initAnalyticsIfOptedIn() {
+    // eslint-disable-next-line global-require
     const mixpanel = require('mixpanel-browser');
     window.mixpanel = mixpanel;
 
@@ -205,5 +184,5 @@ function initAnalyticsIfOptedIn() {
 }
 
 function initPackages() {
-    bm_init(); em_init(); td_init(); rss_init(); nb_init(); sm_init(); tw_init(); re_init(); cl_init(); pb_init();
+    bmInit(); emInit(); tdInit(); rssInit(); nbInit(); smInit(); twInit(); reInit(); clInit(); pbInit();
 }

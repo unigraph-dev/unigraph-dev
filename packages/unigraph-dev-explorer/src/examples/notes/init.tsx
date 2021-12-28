@@ -5,80 +5,14 @@ import {
     registerDynamicViews, registerDetailedDynamicViews, registerContextMenuItems, registerQuickAdder,
 } from '../../unigraph-react';
 import { NoteBlock, DetailedNoteBlock } from './NoteBlock';
-
-const getQuery: ((depth: number) => string) = (depth: number) => {
-    if (depth >= 8) return '{ uid _hide type {<unigraph.id>} }';
-    return `{
-        _updatedAt
-        uid
-        _hide
-        <~_value> {
-            type { <unigraph.id> }
-            <unigraph.origin> @filter(NOT eq(_hide, true)) {
-                type { <unigraph.id> }
-                uid
-            }
-        }
-        <unigraph.origin> @filter(NOT eq(_hide, true)) {
-            type { <unigraph.id> }
-            uid
-        }
-        type {
-            <unigraph.id>
-        }
-        _value {
-            uid
-            text {
-                uid
-                _value {
-                    _value {
-                        <dgraph.type>
-                        uid type { <unigraph.id> }
-                        <_value.%>
-                    }
-                    uid type { <unigraph.id> }
-                }
-            }
-            children {
-                uid
-                <_value[> {
-                    uid
-                    <_index> { uid <_value.#i> }
-                    <_key>
-                    <_value> {
-                        _hide
-                        _value ${getQuery(depth + 1)}
-                        uid
-                        type { <unigraph.id> }
-                    }
-                }
-            }
-        }
-    }`;
-};
-
-export const noteQueryDetailed = (uid: string, depth = 0) => `(func: uid(${uid})) ${getQuery(depth + 1)}`;
-export const journalQueryDetailed = (uid: string, depth = 0) => `(func: uid(${uid})) {
-    _updatedAt
-    uid
-    _hide
-    type {
-        <unigraph.id>
-    }
-    _value {
-        note {
-            _value ${getQuery(depth + 1)}
-        }
-    }
-}`;
-
-export const noteQuery = (uid: string) => `(func: uid(${uid})) ${getQuery(7)}`;
+import { noteQuery, noteQueryDetailed, journalQueryDetailed } from './noteQuery';
 
 export const init = () => {
     registerDynamicViews({ '$/schema/note_block': { view: NoteBlock, query: noteQuery } });
     registerDetailedDynamicViews({ '$/schema/note_block': { view: DetailedNoteBlock, query: noteQueryDetailed } });
     registerDetailedDynamicViews({ '$/schema/journal': { view: (props: any) => DetailedNoteBlock({ ...props, data: new UnigraphObject(props.data._value.note._value), callbacks: { ...props.callbacks, isEmbed: true } }), query: journalQueryDetailed } });
 
+    // eslint-disable-next-line default-param-last
     const quickAdder = async (inputStr: string, preview = true, callback: any, refs?: any) => {
         if (!preview) {
             const uids = await window.unigraph.addObject({ text: { _value: inputStr, type: { 'unigraph.id': '$/schema/markdown' } }, children: inlineRefsToChildren(refs) }, '$/schema/note_block');
@@ -90,7 +24,7 @@ export const init = () => {
 
     const tt = () => (
         <div>
-            <Typography>Enter the note's title, then press Enter to go</Typography>
+            <Typography>Enter the note&apos;s title, then press Enter to go</Typography>
         </div>
     );
 

@@ -21,10 +21,12 @@ export function MiniListView({ data }: any) {
     return (
         <Grid item xs={12} sm={6} ref={dropSub}>
             <Card
-              onContextMenu={(event) => onUnigraphContextMenu(event, data)}
-              variant="outlined"
-              style={{ padding: '8px', display: 'flex' }}
-              onClick={() => { window.wsnavigator(`/library/object?uid=${data.uid}&isStub=true&type=$/schema/list`); }}
+                onContextMenu={(event) => onUnigraphContextMenu(event, data)}
+                variant="outlined"
+                style={{ padding: '8px', display: 'flex' }}
+                onClick={() => {
+                    window.wsnavigator(`/library/object?uid=${data.uid}&isStub=true&type=$/schema/list`);
+                }}
             >
                 <List style={{ marginRight: '8px' }} />
                 <Typography>
@@ -51,8 +53,8 @@ export const ListsList = withUnigraphSubscription(({ data }: any) => (
         window.unigraph.subscribeToQuery(`(func: uid(lists${id})) @filter((NOT type(Deleted)) AND (NOT eq(<_hide>, true))) {
         uid
         _value {
-			name {
-				<_value.%>
+            name {
+                <_value.%>
             }
             children {
                 items: count(<_value[>)

@@ -12,10 +12,10 @@ import Icon from '@mdi/react';
 import { mdiRssBox } from '@mdi/js';
 import { registerDynamicViews, registerDetailedDynamicViews, withUnigraphSubscription } from '../../unigraph-react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
-import { DynamicViewRenderer } from '../../global';
-import { download, openUrl, upload } from '../../utils';
-import { getComponentFromPage } from '../../Workspace';
-// import _ from "lodash";
+import { DynamicViewRenderer } from '../../global.d';
+import {
+    download, openUrl, upload, getComponentFromPage,
+} from '../../utils';
 import { Html } from '../semantic/Html';
 import { setupInfiniteScrolling } from '../../components/ObjectView/infiniteScrolling';
 
@@ -67,49 +67,52 @@ const RSSItem: DynamicViewRenderer = ({ data, callbacks }) => {
         <>
             <ListItemIcon>
                 <Badge
-                  overlap="circle"
-                  anchorOrigin={{
+                    overlap="circle"
+                    anchorOrigin={{
                         vertical: 'bottom',
                         horizontal: 'right',
                     }}
-                  badgeContent={<Icon path={mdiRssBox} size={0.75} style={{ opacity: 1 }} />}
+                    badgeContent={<Icon path={mdiRssBox} size={0.75} style={{ opacity: 1 }} />}
                 >
                     <Avatar alt={`favicon of ${unpadded.feed?.site_info?.name}`} src={unpadded.item_data?.favicon}>{unpadded.feed?.site_info?.name}</Avatar>
                 </Badge>
             </ListItemIcon>
             <ListItemText
-              primary={unpadded.item_data?.name}
-              secondary={(
-                  <div>
-                      <div style={{ display: 'flex', alignItems: 'center' }}>
-                          <OpenInBrowserOutlined onClick={() => {
+                primary={unpadded.item_data?.name}
+                secondary={(
+                    <div>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <OpenInBrowserOutlined onClick={() => {
                                 openUrl(unpadded.item_data?.url);
                                 if (callbacks?.removeFromContext) callbacks.removeFromContext();
                             }}
-                          />
-                          <Link onClick={() => {
+                            />
+                            <Link onClick={() => {
                                 const htmlUid = data?.get('content/text')?._value?._value?.uid;
                                 if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', { uid: htmlUid, context: data.uid, type: data?.type?.['unigraph.id'] }));
-                                if (callbacks?.removeFromContext && callbacks?.removeOnEnter) callbacks.removeFromContext();
+                                if (
+                                    callbacks?.removeFromContext
+                                    && callbacks?.removeOnEnter
+                                ) callbacks.removeFromContext();
                             }}
-                          />
-                          {unpadded.item_data?.creative_work?.text ? (
-                              <Description onClick={() => {
+                            />
+                            {unpadded.item_data?.creative_work?.text ? (
+                                <Description onClick={() => {
                                     const htmlUid = data?.get('item_data/creative_work/text')?._value?._value?.uid;
                                     if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', { uid: htmlUid, context: data.uid, type: data?.type?.['unigraph.id'] }));
                                     if (callbacks?.removeFromContext) callbacks.removeFromContext();
                                 }}
-                              />
+                                />
                             ) : []}
-                          <div>
-                              Added:
-                              {(() => { try { return Sugar.Date.relative(new Date(unpadded?.item_data?.date_created)); } catch (e) { return 'unknown'; } })()}
-                              , updated:
-                              {(() => { try { return Sugar.Date.relative(new Date(unpadded?._updatedAt)); } catch (e) { return 'unknown'; } })()}
-                          </div>
-                      </div>
-                      {unpadded?.content?.abstract ? <div style={{ color: 'black' }}>{`${unpadded.content.abstract}...`}</div> : ''}
-                  </div>
+                            <div>
+                                Added:
+                                {(() => { try { return Sugar.Date.relative(new Date(unpadded?.item_data?.date_created)); } catch (e) { return 'unknown'; } })()}
+                                , updated:
+                                {(() => { try { return Sugar.Date.relative(new Date(unpadded?._updatedAt)); } catch (e) { return 'unknown'; } })()}
+                            </div>
+                        </div>
+                        {unpadded?.content?.abstract ? <div style={{ color: 'black' }}>{`${unpadded.content.abstract}...`}</div> : ''}
+                    </div>
                 )}
             />
         </>
@@ -120,7 +123,12 @@ function RSSItemDetailed({ data, callbacks }: any) {
     return <Html context={data} data={data?.get('content/text')?._value?._value} />;
 }
 
-const RSSFeed: DynamicViewRenderer = ({ data, callbacks }) => <AutoDynamicView object={new UnigraphObject(data?._value?.site_info?._value)} noContextMenu />;
+const RSSFeed: DynamicViewRenderer = ({ data, callbacks }) => (
+    <AutoDynamicView
+        object={new UnigraphObject(data?._value?.site_info?._value)}
+        noContextMenu
+    />
+);
 
 export const init = () => {
     const dynamicComponents = {
@@ -194,13 +202,13 @@ const RSSItemsListBody: React.FC<any> = ({ data, viewId }) => {
     return (
         <div>
             <InfiniteScroll
-              dataLength={loadedItems.length} // This is important field to render the next data
-              next={setupProps?.next || (() => {})}
-              scrollableTarget={`workspaceContainer${viewId}`}
-              hasMore={loadedItems.length < data.length}
-              loader={<h4>Loading...</h4>}
-              endMessage={
-                  <></>
+                dataLength={loadedItems.length} // This is important field to render the next data
+                next={setupProps?.next || (() => false)}
+                scrollableTarget={`workspaceContainer${viewId}`}
+                hasMore={loadedItems.length < data.length}
+                loader={<h4>Loading...</h4>}
+                endMessage={
+                    []
                 }
             >
                 {(loadedItems || []).map((it: any) => (

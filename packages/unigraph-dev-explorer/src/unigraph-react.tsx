@@ -1,3 +1,4 @@
+/* eslint-disable global-require */
 /**
  * This file specifies related common abstractions when developing front-end apps using React.
  * Users can import this file and use its helper libraries for their own React apps without
@@ -21,8 +22,12 @@ export function withUnigraphSubscription(
 
         const init = async () => {
             Promise.all([
-                ...unigraphContext.schemas.map((el) => (window as any).unigraph.ensureSchema(el.name, el.schema)),
-                ...unigraphContext.packages.map((el) => (window as any).unigraph.ensurePackage(el.pkgManifest.package_name, el)),
+                ...unigraphContext.schemas.map(
+                    (el) => (window as any).unigraph.ensureSchema(el.name, el.schema),
+                ),
+                ...unigraphContext.packages.map(
+                    (el) => (window as any).unigraph.ensurePackage(el.pkgManifest.package_name, el),
+                ),
             ]).then(unigraphHooks.afterSchemasLoaded(subsId, data, setData));
         };
 
@@ -40,23 +45,40 @@ export function withUnigraphSubscription(
 }
 
 const addViewToRegistry = (state: any, views: Record<string, any>): void => {
-    const finalViews = Object.fromEntries(Object.entries(views).map((entry) => (entry[1].view ? entry : [entry[0], { view: entry[1] }])));
+    const finalViews = Object.fromEntries(
+        Object.entries(views).map(
+            (entry) => (entry[1].view ? entry : [entry[0], { view: entry[1] }]),
+        ),
+    );
     state.setValue({ ...state.value, ...finalViews });
 };
 
 export const subscribeToBacklinks = (uid: string[] | string, callback?: any, remove?: boolean) => {
     const uids = (Array.isArray(uid)) ? uid : [uid];
     const linksState = window.unigraph.getState('registry/backlinks');
-    const newKeys = remove ? _.difference(Object.keys(linksState.value), uids) : _.uniq([...uids, ...Object.keys(linksState.value)]);
+    const newKeys = remove
+        ? _.difference(Object.keys(linksState.value), uids)
+        : _.uniq([...uids, ...Object.keys(linksState.value)]);
     linksState.setValue(
         Object.fromEntries(newKeys.map((el) => [el, linksState.value[el]])),
     );
     const cbState = window.unigraph.getState('registry/backlinksCallbacks');
     const newCbs = _.uniq([...uids, ...Object.keys(cbState.value)]);
-    cbState.setValue(Object.fromEntries(newCbs.map((el) => [el, !uids.includes(el) ? cbState.value[el] : Array.isArray(cbState.value[el])
-        ? (remove ? cbState.value[el].filter((cb: any) => cb !== callback) : [...cbState.value[el], callback])
-        : (remove ? undefined : [callback]),
-    ])));
+    cbState.setValue(
+        Object.fromEntries(
+            // eslint-disable-next-line no-nested-ternary
+            newCbs.map((el) => [el, !uids.includes(el)
+                ? cbState.value[el]
+                // eslint-disable-next-line no-nested-ternary
+                : Array.isArray(cbState.value[el])
+                    ? (remove
+                        ? cbState.value[el].filter((cb: any) => cb !== callback)
+                        : [...cbState.value[el], callback]
+                    )
+                    : (remove ? undefined : [callback]),
+            ]),
+        ),
+    );
 };
 
 export const registerDynamicViews = (views: Record<string, any>): void => {

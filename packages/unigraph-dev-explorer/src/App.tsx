@@ -39,18 +39,20 @@ function App() {
     document.body.style.backgroundColor = 'unset';
 
     return (
-        <NavigationContext.Provider value={(location: string) => { history.push(location); }}>
-            <div className={classes.root}>
-                <DndProvider backend={HTML5Backend}>
-                    <div id="global-elements">
-                        <SearchOverlayPopover />
-                        <ContextMenu />
-                        <InlineSearch />
-                    </div>
-                    {componentPathName ? window.unigraph.getState('registry/pages').value[componentPathName].constructor(config) : []}
-                </DndProvider>
-            </div>
-        </NavigationContext.Provider>
+        <div className={classes.root}>
+            <DndProvider backend={HTML5Backend}>
+                <div id="global-elements">
+                    <SearchOverlayPopover />
+                    <ContextMenu />
+                    <InlineSearch />
+                </div>
+                {
+                    componentPathName
+                        ? window.unigraph.getState('registry/pages').value[componentPathName].constructor(config)
+                        : []
+                }
+            </DndProvider>
+        </div>
     );
 }
 

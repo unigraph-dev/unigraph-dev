@@ -7,7 +7,7 @@ import _ from 'lodash';
 import React from 'react';
 import { getObjectContextMenuQuery, onDynamicContextMenu, onUnigraphContextMenu } from '../../components/ObjectView/DefaultObjectContextMenu';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
-import { DynamicViewRenderer } from '../../global';
+import { DynamicViewRenderer } from '../../global.d';
 
 const makeCSS = (style: Style) => `body {
         line-height: ${style.text.lineHeight};
@@ -40,8 +40,8 @@ export function HtmlStyleChooser({
                 <ButtonGroup variant="outlined">
                     {shortcuts.map((it) => (
                         <Button
-                          variant="outlined"
-                          onClick={() => {
+                            variant="outlined"
+                            onClick={() => {
                                 console.log(callbacks);
                                 onDynamicContextMenu(it, data.uid, data, callbacks, context.uid);
                             }}
@@ -51,12 +51,20 @@ export function HtmlStyleChooser({
                     ))}
                 </ButtonGroup>
             )}
-            <ToggleButtonGroup value={style?.text?.lineHeight} onChange={(ev, newStyle) => { onStyleChange(_.merge({}, style, { text: { lineHeight: newStyle } })); }} exclusive>
+            <ToggleButtonGroup
+                value={style?.text?.lineHeight}
+                onChange={(ev, newStyle) => { onStyleChange(_.merge({}, style, { text: { lineHeight: newStyle } })); }}
+                exclusive
+            >
                 <ToggleButton value="1.2"><FormatLineSpacing style={{ transform: 'scaleY(0.7)' }} /></ToggleButton>
                 <ToggleButton value="1.5"><FormatLineSpacing /></ToggleButton>
                 <ToggleButton value="1.8"><FormatLineSpacing style={{ transform: 'scaleY(1.3)' }} /></ToggleButton>
             </ToggleButtonGroup>
-            <ToggleButtonGroup value={style?.text?.fontFamily} onChange={(ev, newStyle) => { onStyleChange(_.merge({}, style, { text: { fontFamily: newStyle } })); }} exclusive>
+            <ToggleButtonGroup
+                value={style?.text?.fontFamily}
+                onChange={(ev, newStyle) => { onStyleChange(_.merge({}, style, { text: { fontFamily: newStyle } })); }}
+                exclusive
+            >
                 <ToggleButton value="Georgia"><span style={{ fontFamily: 'Georgia', textTransform: 'none' }}>Georgia</span></ToggleButton>
                 <ToggleButton value="Times New Roman"><span style={{ fontFamily: 'Times New Roman', textTransform: 'none' }}>Times NR</span></ToggleButton>
                 <ToggleButton value="Consolas"><span style={{ fontFamily: 'Consolas', textTransform: 'none' }}>Consolas</span></ToggleButton>
@@ -80,9 +88,7 @@ export const Html: DynamicViewRenderer = ({ data, context, callbacks }) => {
         },
     });
     React.useEffect(() => {
-        // console.log(userStyle.current)
-        // @ts-expect-error: already checked for nullity
-        if (userStyle.current) (userStyle.current as HTMLElement).innerHTML = makeCSS(style);
+        if (userStyle.current) (userStyle.current as any).innerHTML = makeCSS(style);
     }, [style]);
 
     return (
@@ -97,31 +103,31 @@ export const Html: DynamicViewRenderer = ({ data, context, callbacks }) => {
                 </>
             ) : []}
             <iframe
-              srcDoc={data['_value.%']}
-              style={{ flexGrow: 1, width: '100%' }}
-              ref={frm}
-              onLoad={() => {
+                srcDoc={data['_value.%']}
+                style={{ flexGrow: 1, width: '100%' }}
+                ref={frm}
+                onLoad={() => {
                     (frm.current as any).contentDocument.head.insertAdjacentHTML('beforeend', '<style>img{ max-width: 100%; height: auto } video{ max-width: 100%; height: auto } body{margin-bottom: 64px}</style>');
                     userStyle.current = (frm.current as any).contentDocument.head.insertAdjacentElement('beforeend', (frm.current as any).contentDocument.createElement('style'));
                     // @ts-expect-error: already checked for nullity
                     (userStyle.current as HTMLElement).innerHTML = makeCSS(style);
                     if (callbacks?.onLoad) callbacks.onLoad(frm);
                 }}
-              title={`object-view-${data.uid}`}
-              frameBorder="0"
-              role="article"
-              aria-describedby={`HTML View for object ${data.uid}`}
+                title={`object-view-${data.uid}`}
+                frameBorder="0"
+                role="article"
+                aria-describedby={`HTML View for object ${data.uid}`}
             />
             <div style={{
                 display: 'flex', height: '48px', width: '100%', overflow: 'auto',
             }}
             >
                 <HtmlStyleChooser
-                  style={style}
-                  onStyleChange={setStyle}
-                  data={data}
-                  context={context}
-                  callbacks={{
+                    style={style}
+                    onStyleChange={setStyle}
+                    data={data}
+                    context={context}
+                    callbacks={{
                         getDocument: () => frm,
                         closeTab: () => {
                             window.closeTab(callbacks.viewId);

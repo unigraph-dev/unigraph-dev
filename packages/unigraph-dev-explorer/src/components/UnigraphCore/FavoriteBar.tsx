@@ -12,14 +12,21 @@ export function FavoriteBar() {
     useEffectOnce(() => {
         const id = getRandomInt();
 
-        window.unigraph.subscribeToObject('$/entity/favorite_bar', (fav: any) => {
-            const children = fav?._value?.children?.['_value['];
+        window.unigraph.subscribeToObject('$/entity/favorite_bar', (newFav: any) => {
+            const children = newFav?._value?.children?.['_value['];
             if (children) {
                 children.sort(byElementIndex);
                 setFav(children);
-                favState.setValue(children.map((el: any) => { const unpadded = unpad(el); return { name: unpadded.name, component: unpadded.view, config: JSON.parse(unpadded.props).config }; }));
+                favState.setValue(children.map((el: any) => {
+                    const unpadded = unpad(el);
+                    return {
+                        name: unpadded.name,
+                        component: unpadded.view,
+                        config: JSON.parse(unpadded.props).config,
+                    };
+                }));
             }
-            setFavEntity(fav);
+            setFavEntity(newFav);
         }, id);
 
         return function cleanup() {
@@ -29,15 +36,17 @@ export function FavoriteBar() {
 
     return (
         <DynamicObjectListView
-          items={fav}
-          style={{ height: '' }}
-          context={favEntity}
-          listUid={favEntity?._value?.children?.uid}
-          itemGetter={(el: any) => el._value._value}
-          noBar
-          noRemover
-          defaultFilter={['no-deleted', 'no-noview']}
-          itemRemover={(uids) => { window.unigraph.deleteItemFromArray(favEntity?._value?.children?.uid, uids, favEntity.uid); }}
+            items={fav}
+            style={{ height: '' }}
+            context={favEntity}
+            listUid={favEntity?._value?.children?.uid}
+            itemGetter={(el: any) => el._value._value}
+            noBar
+            noRemover
+            defaultFilter={['no-deleted', 'no-noview']}
+            itemRemover={(uids) => {
+                window.unigraph.deleteItemFromArray(favEntity?._value?.children?.uid, uids, favEntity.uid);
+            }}
         />
     );
 }

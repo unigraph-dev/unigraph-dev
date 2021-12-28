@@ -1,18 +1,20 @@
+/* eslint-disable no-shadow */
 import {
     ListItemIcon, ListItemText, Menu, MenuItem,
 } from '@material-ui/core';
 import _ from 'lodash';
 import React from 'react';
-import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
+import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 import Icon from '@mdi/react';
 import {
-    mdiCubeOutline, mdiDatabaseOutline, mdiCloseBoxOutline, mdiCloseBoxMultipleOutline, mdiViewDayOutline, mdiFileTreeOutline, mdiVectorPolylineEdit, mdiInboxArrowDownOutline, mdiLinkBoxVariantOutline, mdiDeleteOutline, mdiGraphOutline, mdiBookOutline,
+    mdiCloseBoxOutline, mdiCloseBoxMultipleOutline, mdiViewDayOutline,
+    mdiFileTreeOutline, mdiVectorPolylineEdit, mdiInboxArrowDownOutline,
+    mdiLinkBoxVariantOutline, mdiDeleteOutline, mdiGraphOutline, mdiBookOutline,
 } from '@mdi/js';
-import { AutoDynamicViewCallbacks, ContextMenuGenerator } from '../../types/ObjectView';
+import { AutoDynamicViewCallbacks, ContextMenuGenerator } from '../../types/ObjectView.d';
 import {
-    isMultiSelectKeyPressed, NavigationContext, runClientExecutable, selectUid,
+    isMultiSelectKeyPressed, runClientExecutable, selectUid,
 } from '../../utils';
-import { getComponentAsView } from './DynamicComponentView';
 
 export const defaultContextMenu: Array<ContextMenuGenerator> = [
     (uid, object, handleClose, callbacks) => (
@@ -96,11 +98,11 @@ export function DefaultObjectContextMenu({
     {uid: string, object: any, anchorEl: null|HTMLElement, handleClose: any}) {
     return (
         <Menu
-          id={`context-menu-${uid}`}
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleClose}
-            >
+            id={`context-menu-${uid}`}
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleClose}
+        >
             <>
 
                 {defaultContextMenu.map((el) => el(uid, object, handleClose))}
@@ -165,7 +167,13 @@ export const onDynamicContextMenu = (data: any, uid: string, object: any, callba
  * @param callbacks
  * @param extra UI-specific context menu items. These are not stored in the database and instead fixed with particular UIs because they are subject to individual views.
  */
-export const onUnigraphContextMenu = (event: React.MouseEvent, object: UnigraphObject | any, context?: UnigraphObject | any, callbacks?: AutoDynamicViewCallbacks, extra?: any) => {
+export const onUnigraphContextMenu = (
+    event: React.MouseEvent,
+    object: UnigraphObject | any,
+    context?: UnigraphObject | any,
+    callbacks?: AutoDynamicViewCallbacks,
+    extra?: any,
+) => {
     event.preventDefault?.();
     event.stopPropagation?.();
 
@@ -197,7 +205,13 @@ export const onUnigraphContextMenu = (event: React.MouseEvent, object: UnigraphO
             console.log(items);
             window.unigraph.getState('global/contextMenu').setValue({
                 ...window.unigraph.getState('global/contextMenu').value,
-                schemaMenuContent: items.map((el: any) => function (uid: string, object: any, onfire: () => any, callbacks?: any, contextUid?: string) {
+                schemaMenuContent: items.map((el: any) => function (
+                    uid: string,
+                    object: any,
+                    onfire: () => any,
+                    callbacks?: any,
+                    contextUid?: string,
+                ) {
                     return (
                         <MenuItem onClick={() => {
                             onfire();

@@ -5,11 +5,12 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkBreaks from 'remark-breaks';
 import remarkWikilink from './wikilink';
-import { DynamicViewRenderer } from '../../global';
+import { DynamicViewRenderer } from '../../global.d';
 import 'katex/dist/katex.min.css';
 
 const compFactory = (name: string, {
     node, inline, className, children, ...props
+// eslint-disable-next-line react/no-children-prop
 }: any) => React.createElement(name, {
     className,
     children,
@@ -27,14 +28,15 @@ const compFactory = (name: string, {
 
 export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) => (
     <Typography
-      variant={!isHeading ? 'body1' : 'h4'}
-      style={{ opacity: data['_value.%'] ? 'unset' : '0' }}
-        >
+        variant={!isHeading ? 'body1' : 'h4'}
+        style={{ opacity: data['_value.%'] ? 'unset' : '0' }}
+    >
         <ReactMarkdown
-          children={data['_value.%'] || 'a'}
-          remarkPlugins={[remarkMath, remarkWikilink, remarkBreaks]}
-          rehypePlugins={[rehypeKatex]}
-          components={{
+            // eslint-disable-next-line react/no-children-prop
+            children={data['_value.%'] || 'a'}
+            remarkPlugins={[remarkMath, remarkWikilink, remarkBreaks]}
+            rehypePlugins={[rehypeKatex]}
+            components={{
                 p: compFactory.bind(this, 'p'),
                 strong: compFactory.bind(this, 'strong'),
                 em: compFactory.bind(this, 'em'),
@@ -43,6 +45,8 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                 a: (props) => compFactory('a', {
                     ...props, onPointerUp: (ev: any) => { console.log(ev); ev.preventDefault(); ev.stopPropagation(); }, target: '_blank', style: { cursor: 'pointer' },
                 }),
+                // TODO: optimize this
+                // eslint-disable-next-line react/no-unstable-nested-components
                 span: ({
                     node, inline, className, children, ...props
                 }: any) => {
@@ -59,8 +63,8 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                                     }}
                                     />
                                 ) : []}
-                                {/* callbacks?.namespaceLink ? <Public style={{height: "16px"}}/> : [] */}
-                                {React.createElement('span', {
+                                {// eslint-disable-next-line react/no-children-prop
+                                React.createElement('span', {
                                     className,
                                     children,
                                     contentEditable: true,
@@ -80,10 +84,12 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                                         },
                                         cursor: 'pointer',
                                     },
-                                })}
+                                })
+}
                                 <span style={{ color: 'darkgray' }}>]]</span>
                             </>
                         );
+                    // eslint-disable-next-line react/no-children-prop
                     } return React.createElement('span', {
                         className,
                         children,
@@ -93,7 +99,7 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                     });
                 },
             }}
-          rawSourcePos
+            rawSourcePos
         />
     </Typography>
 );

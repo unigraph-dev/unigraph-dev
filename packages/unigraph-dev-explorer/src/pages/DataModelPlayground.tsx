@@ -12,7 +12,7 @@ export default function DataModelPlayground() {
     const [processedData, setProcessedData] = React.useState('{}');
 
     const [referenceables, setReferenceables] = React.useState([]);
-    const [name, setName]: [any, Function] = React.useState(false);
+    const [name, setName]: [any, (_: any) => void] = React.useState(false);
 
     useEffectOnce(() => {
         window.unigraph.getReferenceables().then((refs: any) => setReferenceables(refs));
@@ -29,13 +29,13 @@ export default function DataModelPlayground() {
                     transformed = processAutoref(unigraphObject, schemaName, schemas);
                     // console.log(transformed);
                     setProcessedData(JSON.stringify(transformed, null, 4));
-                } catch (e) {
+                } catch (e: any) {
                     console.error(e);
                     transformed = `Processing error: \n${e.toString()}`;
                     setProcessedData(transformed);
                 }
             });
-        } catch (e) {
+        } catch (e: any) {
             transformed = `Invalid data entered: \n${e.toString()}`;
         }
         setProcessedData(transformed);
@@ -47,21 +47,21 @@ export default function DataModelPlayground() {
             <Typography variant="h4">DataModel Playground</Typography>
             <p>Try composing an object here and see what happens!</p>
             <ReferenceableSelectorControlled
-              referenceables={referenceables}
-              onChange={setName}
-              value={name}
+                referenceables={referenceables}
+                onChange={setName}
+                value={name}
             />
             <CodeMirror
-              value={origData}
-              onBeforeChange={(editor: any, data: any, value: string) => { setOrigData(value); }}
-              onChange={(editor: any, data: any, value: string) => {}}
-              options={{ lineNumbers: true, mode: 'javascript' }}
+                value={origData}
+                onBeforeChange={(editor: any, data: any, value: string) => { setOrigData(value); }}
+                onChange={(editor: any, data: any, value: string) => false}
+                options={{ lineNumbers: true, mode: 'javascript' }}
             />
             <CodeMirror
-              value={processedData}
-              onBeforeChange={(editor: any, data: any, value: string) => { setProcessedData(value); }}
-              onChange={(editor: any, data: any, value: string) => {}}
-              options={{ lineNumbers: true, mode: 'javascript' }}
+                value={processedData}
+                onBeforeChange={(editor: any, data: any, value: string) => { setProcessedData(value); }}
+                onChange={(editor: any, data: any, value: string) => false}
+                options={{ lineNumbers: true, mode: 'javascript' }}
             />
         </div>
     );

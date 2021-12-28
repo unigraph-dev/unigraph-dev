@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 /* eslint-disable no-await-in-loop */
 /**
  * This manager file defines relevant logic and criterions to ensure data model, package and schema consistency.

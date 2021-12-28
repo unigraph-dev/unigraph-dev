@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable no-bitwise */
+/* eslint-disable no-plusplus */
 import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 import React from 'react';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 
-export const NavigationContext = React.createContext((location: string) => {});
+export const NavigationContext = React.createContext<(location: string) => any>((location: string) => ({}));
 
 export const TabContext = React.createContext({
     viewId: 0,
@@ -14,6 +17,18 @@ export const TabContext = React.createContext({
 export const DataContext = React.createContext({
     rootUid: '0x0',
 });
+
+export const getComponentFromPage = (location: string, params: any = {}) => {
+    const pages = window.unigraph.getState('registry/pages');
+    if (location.startsWith('/$/')) location = `/${(window.unigraph.getNamespaceMap as any)()[location.substring(1)].uid}`;
+    return {
+        type: 'tab',
+        config: params,
+        name: pages.value[location.slice(1)].name,
+        component: (location.startsWith('/') ? '/pages' : '/pages/') + location,
+        enableFloat: 'true',
+    };
+};
 
 export const setCaret = (document: Document, element: any, pos: number, length?: number) => {
     const range = document.createRange();
@@ -29,8 +44,12 @@ export const removeAllPropsFromObj = function (obj: any, propsToRemove: any, max
     if (typeof maxLevel !== 'number') maxLevel = 20;
     for (const prop in obj) {
         if (typeof propsToRemove === 'string' && prop === propsToRemove) delete obj[prop];
-        else if (propsToRemove.indexOf(prop) >= 0) // it must be an array
-        { delete obj[prop]; } else if (typeof obj[prop] === 'object' && maxLevel > 0) removeAllPropsFromObj(obj[prop], propsToRemove, maxLevel - 1);
+        else if (propsToRemove.indexOf(prop) >= 0) {
+            // it must be an array
+            delete obj[prop];
+        } else if (typeof obj[prop] === 'object' && maxLevel > 0) {
+            removeAllPropsFromObj(obj[prop], propsToRemove, maxLevel - 1);
+        }
     }
     return obj;
 };
@@ -112,12 +131,6 @@ export function upload(callback: any) {
     document.body.removeChild(element);
 }
 
-export function isTouchDevice() {
-    return (('ontouchstart' in window)
-       || (navigator.maxTouchPoints > 0)
-       || (navigator.msMaxTouchPoints > 0));
-}
-
 const makeCRCTable = function () {
     let c;
     const crcTable = [];
@@ -193,7 +206,7 @@ export const isElectron = () => {
  */
 export const isMobile = () => (('ontouchstart' in window)
      || (navigator.maxTouchPoints > 0)
-     || (navigator.msMaxTouchPoints > 0));
+     || ((navigator as any).msMaxTouchPoints > 0));
 
 /**
  * Whether the window is a small screen for layouting.
@@ -211,7 +224,14 @@ export const openUrl = (url: string) => {
 
 export const selectUid = (uid: string, exclusive = true) => {
     const selected = window.unigraph.getState('global/selected');
-    selected.setValue(exclusive ? [uid] : selected.value?.includes?.(uid) ? selected.value.filter((el: string) => el !== uid) : _.union(selected.value, [uid]));
+    const newUid = selected.value?.includes?.(uid)
+        ? selected.value.filter((el: string) => el !== uid)
+        : _.union(selected.value, [uid]);
+    selected.setValue(
+        exclusive
+            ? [uid]
+            : newUid,
+    );
 };
 
 export const deselectUid = (uid?: string) => {
@@ -223,7 +243,7 @@ export const isMultiSelectKeyPressed = (event: React.MouseEvent) => event.altKey
 
 export const runClientExecutable = (src: string, params: any) => {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
+    const AsyncFunction = Object.getPrototypeOf(async () => false).constructor;
     const fn = new AsyncFunction('require', 'unpad', 'context', 'unigraph', `try {${src}
     } catch (e) {
             unigraph.addNotification({

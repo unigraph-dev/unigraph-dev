@@ -35,29 +35,29 @@ export function HomeSection({ data }: any) {
 
     return shouldDisplay ? (
         <Card
-          style={{ padding: '24px', margin: '12px' }}
-          variant="outlined"
-          onClick={() => {
+            style={{ padding: '24px', margin: '12px' }}
+            variant="outlined"
+            onClick={() => {
                 setTimeout(() => { setFlushCondition(true); }, 500);
             }}
-            >
+        >
             <Typography variant="h5">{data.get('view/name').as('primitive')}</Typography>
             <AutoDynamicViewDetailed object={new UnigraphObject(data.get('view')._value)} />
         </Card>
-    ) : <></>;
+    ) : <span />;
 }
 
 export default function ExplorerHome({ id }: any) {
     const [sections, setSections] = React.useState<Partial<any>[]>([]);
 
     React.useEffect(() => {
-        const id = getRandomInt();
+        const subsId = getRandomInt();
 
         window.unigraph.subscribeToType('$/schema/home_section', (its: any[]) => {
             setSections(its);
-        }, id);
+        }, subsId);
 
-        return function cleanup() { window.unigraph.unsubscribe(id); };
+        return function cleanup() { window.unigraph.unsubscribe(subsId); };
     }, []);
 
     return (

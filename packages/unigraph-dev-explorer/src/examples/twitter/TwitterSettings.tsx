@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import { Button, Typography } from '@material-ui/core';
 import React, { useEffect } from 'react';
 import { useEffectOnce } from 'react-use';
@@ -21,8 +22,8 @@ export function TwitterSettings() {
     }, [account]);
 
     useEffect(() => {
+        const id = getRandomInt();
         if (loaded) {
-            const id = getRandomInt();
             window.unigraph.subscribeToQuery(`(func: uid(parTwitter)) {
                 uid
                 _value {
@@ -73,17 +74,21 @@ export function TwitterSettings() {
             }`, (res: any[]) => {
                 setAccount(res[0]);
             }, id, { noExpand: true });
-            return function cleanup() {
-                window.unigraph.unsubscribe(id);
-            };
         }
+        return function cleanup() {
+            window.unigraph.unsubscribe(id);
+        };
     }, [loaded]);
 
     return loaded ? (
         <div>
             <Typography variant="h4">Twitter settings</Typography>
             <Button onClick={() => window.unigraph.runExecutable('$/executable/add-twitter-account', {})}>Sign in with Twitter</Button>
-            <Typography>Note: for now, in order to sync with Twitter, you need to create a twitter list nameed 'Subscription' (exactly) and add any accounts you want to sync to unigraph there.</Typography>
+            <Typography>
+                Note: for now, in order to sync with Twitter, you need to
+                create a twitter list nameed 'Subscription' (exactly) and
+                add any accounts you want to sync to unigraph there.
+            </Typography>
             <Typography variant="body1">Account info</Typography>
             <p>
                 <strong>Name: </strong>

@@ -13,8 +13,8 @@ export function EmailSettings({}) {
     });
 
     useEffect(() => {
+        const id = getRandomInt();
         if (loaded) {
-            const id = getRandomInt();
             window.unigraph.subscribeToQuery(`(func: uid(parAcc)) @cascade {
                 uid
                 type @filter(eq(<unigraph.id>, "$/schema/internet_account")) {<unigraph.id>}
@@ -36,10 +36,10 @@ export function EmailSettings({}) {
             }`, (res: any[]) => {
                 setAccount(res[0]);
             }, id, { noExpand: true });
-            return function cleanup() {
-                window.unigraph.unsubscribe(id);
-            };
         }
+        return function cleanup() {
+            window.unigraph.unsubscribe(id);
+        };
     }, [loaded]);
 
     return loaded ? (

@@ -28,11 +28,11 @@ export function SubentityDropAcceptor({ uid }: any) {
 
     return (
         <div
-          ref={dropSub}
-          style={{
+            ref={dropSub}
+            style={{
                 opacity: (canDrop && isOver) ? 1 : 0, width: '100%', height: '6px', marginTop: '-3px',
             }}
-            >
+        >
             <div style={{
                 height: '100%', backgroundColor: 'gray', margin: '0px', marginLeft: '48px', borderRadius: '4px',
             }}

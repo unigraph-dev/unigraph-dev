@@ -5,7 +5,7 @@ import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 import { buildGraph } from 'unigraph-dev-common/lib/utils/utils';
 import { registerDynamicViews } from '../../unigraph-react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
-import { DynamicViewRenderer } from '../../global';
+import { DynamicViewRenderer } from '../../global.d';
 import { externalNamespaces } from '../../externalNamespaceStub';
 import { openUrl } from '../../utils';
 
@@ -28,16 +28,16 @@ export const Tweet: DynamicViewRenderer = ({ data, callbacks }) => {
         <div style={{ display: 'flex' }}>
             <div style={{ alignSelf: 'baseline', marginRight: '16px', marginTop: '16px' }}>
                 <Badge
-                  overlap="circle"
-                  anchorOrigin={{
+                    overlap="circle"
+                    anchorOrigin={{
                         vertical: 'bottom',
                         horizontal: 'right',
                     }}
-                  badgeContent={<Avatar style={{ height: '16px', width: '16px' }} alt="Twitter" src="https://abs.twimg.com/responsive-web/client-web/icon-ios.b1fc7275.png" />}
+                    badgeContent={<Avatar style={{ height: '16px', width: '16px' }} alt="Twitter" src="https://abs.twimg.com/responsive-web/client-web/icon-ios.b1fc7275.png" />}
                 >
                     <Avatar
-                      src={data.get('from_user/profile_image').as('primitive')}
-                      onClick={() => {
+                        src={data.get('from_user/profile_image').as('primitive')}
+                        onClick={() => {
                             openUrl(`https://twitter.com/${data.get('from_user/username').as('primitive')}/status/${data.get('twitter_id').as('primitive')}`);
                             if (callbacks?.removeFromContext && callbacks?.removeOnEnter) callbacks.removeFromContext();
                         }}

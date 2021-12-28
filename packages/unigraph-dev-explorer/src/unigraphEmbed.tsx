@@ -35,9 +35,12 @@ function UnigraphComponent({ uid }: any) {
 }
 
 export const mountComponentWithUid = (uid: string, elementId: string) => {
-    ReactDOM.render(<React.StrictMode>
-        <UnigraphComponent uid={uid} />
-    </React.StrictMode>, document.getElementById(elementId));
+    ReactDOM.render(
+        <React.StrictMode>
+            <UnigraphComponent uid={uid} />
+        </React.StrictMode>,
+        document.getElementById(elementId),
+    );
 };
 
 export const initUnigraphEmbed = (location?: string) => {

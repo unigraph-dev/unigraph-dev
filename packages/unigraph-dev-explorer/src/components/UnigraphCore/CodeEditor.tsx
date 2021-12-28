@@ -1,7 +1,6 @@
 import {
     Button, Collapse, FormControl, InputLabel, List, ListItem, ListItemText, MenuItem, Select, Tab, Tabs, TextField,
 } from '@material-ui/core';
-import { TabPanel } from './TabPanel';
 import React from 'react';
 import SplitterLayout from 'react-splitter-layout';
 import 'react-splitter-layout/lib/index.css';
@@ -60,7 +59,7 @@ export function CodeEditor({ id }: any) {
     const [currentPackage, setCurrentPackage] = React.useState('');
 
     useEffectOnce(() => {
-        const id = getRandomInt();
+        const subsId = getRandomInt();
 
         window.unigraph.subscribeToType('$/schema/executable', (execs: any[]) => {
             const namedEx: any[] = []; const
@@ -73,10 +72,10 @@ export function CodeEditor({ id }: any) {
             setUserExecContent(userEx);
             const packages = _.uniq(namedEx.map((el) => el['unigraph.id'].split('/').slice(0, 3).join('/'))).sort();
             setExecPackages(packages);
-        }, id);
+        }, subsId);
 
         return function cleanup() {
-            window.unigraph.unsubscribe(id);
+            window.unigraph.unsubscribe(subsId);
         };
     });
 
@@ -92,7 +91,11 @@ export function CodeEditor({ id }: any) {
                     <NewUserCode />
                     <List style={{ overflow: 'auto' }}>
                         {userExecContent.map((it: any) => (
-                            <ListItem key={it.uid} selected={currentUid === it.uid} onClick={() => { setCurrentUid(it.uid); }}>
+                            <ListItem
+                                key={it.uid}
+                                selected={currentUid === it.uid}
+                                onClick={() => { setCurrentUid(it.uid); }}
+                            >
                                 <AutoDynamicView object={it} />
                             </ListItem>
                         ))}
@@ -108,7 +111,11 @@ export function CodeEditor({ id }: any) {
                         <Collapse in={currentPackage === el}>
                             <List style={{ overflow: 'auto' }}>
                                 {execcontent.filter((it: any) => it['unigraph.id']?.startsWith(el)).map((it: any) => (
-                                    <ListItem key={it.uid} selected={currentUid === it.uid} onClick={() => { setCurrentUid(it.uid); }}>
+                                    <ListItem
+                                        key={it.uid}
+                                        selected={currentUid === it.uid}
+                                        onClick={() => { setCurrentUid(it.uid); }}
+                                    >
                                         <AutoDynamicView object={it} />
                                     </ListItem>
                                 ))}

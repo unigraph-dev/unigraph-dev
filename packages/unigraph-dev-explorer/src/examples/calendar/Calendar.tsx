@@ -1,5 +1,4 @@
-import { Avatar, Badge, Typography } from '@material-ui/core';
-import { CalendarToday } from '@material-ui/icons';
+import { Avatar, Typography } from '@material-ui/core';
 import React from 'react';
 import { buildGraph, getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import Sugar from 'sugar';
@@ -11,7 +10,7 @@ export function CalendarEvent({ data, callbacks }: any) {
         <div style={{ display: 'flex' }}>
             <div style={{ alignSelf: 'center', marginRight: '16px' }}>
                 <Avatar
-                  style={{ width: 16, height: 16, backgroundColor: data.get('calendar/color')?.as?.('primitive') }}
+                    style={{ width: 16, height: 16, backgroundColor: data.get('calendar/color')?.as?.('primitive') }}
                 >
                     {' '}
                 </Avatar>
@@ -53,8 +52,8 @@ export function Calendar() {
 
     return (
         <DynamicObjectListView
-          items={currentEvents}
-          context={null}
+            items={currentEvents}
+            context={null}
         />
     );
 }

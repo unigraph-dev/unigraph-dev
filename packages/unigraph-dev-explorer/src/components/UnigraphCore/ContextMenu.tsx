@@ -1,11 +1,11 @@
 import {
-    Divider, ListItemText, ListItemIcon, MenuItem, Popover, Typography, MenuList,
+    Divider, ListItemText, ListItemIcon, MenuItem, Popover,
 } from '@material-ui/core';
 import React from 'react';
 import { AppState } from 'unigraph-dev-common/lib/types/unigraph';
 import Icon from '@mdi/react';
-import { mdiCubeOutline, mdiDatabaseOutline, mdiRelationManyToMany } from '@mdi/js';
-import { ContextMenuState } from '../../init';
+import { mdiCubeOutline, mdiDatabaseOutline } from '@mdi/js';
+import { ContextMenuState } from '../../global.d';
 import { deselectUid } from '../../utils';
 
 export function ContextMenu() {
@@ -28,17 +28,17 @@ export function ContextMenu() {
     return (
         <div ref={thisRef}>
             <Popover
-              id="context-menu"
-              anchorReference="anchorPosition"
-              open={state.show! && window.name === state.windowName}
-              anchorPosition={state.anchorPosition}
-              onClose={handleClose}
-              container={thisRef.current}
-              anchorOrigin={{
+                id="context-menu"
+                anchorReference="anchorPosition"
+                open={state.show! && window.name === state.windowName}
+                anchorPosition={state.anchorPosition}
+                onClose={handleClose}
+                container={thisRef.current}
+                anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'center',
                 }}
-              transformOrigin={{
+                transformOrigin={{
                     vertical: 'top',
                     horizontal: 'center',
                 }}
@@ -57,11 +57,23 @@ export function ContextMenu() {
                         <ListItemText>{objDef?._name || state.contextObject?.type?.['unigraph.id']}</ListItemText>
                     </MenuItem>
                     <Divider />
-                    {state.menuContent?.map((el) => el(state.contextUid!, state.contextObject, handleClose, state.callbacks, state.contextContextUid))}
+                    {state.menuContent?.map((el: any) => el(
+                        state.contextUid!,
+                        state.contextObject,
+                        handleClose,
+                        state.callbacks,
+                        state.contextContextUid,
+                    ))}
                     {schemaMenuConstructors.length > 0 ? (
                         <>
                             <Divider />
-                            {schemaMenuConstructors.map((el: any) => el(state.contextUid!, state.contextObject, handleClose, { ...state.callbacks, removeFromContext: state.removeFromContext }, state.contextContextUid))}
+                            {schemaMenuConstructors.map((el: any) => el(
+                                state.contextUid!,
+                                state.contextObject,
+                                handleClose,
+                                { ...state.callbacks, removeFromContext: state.removeFromContext },
+                                state.contextContextUid,
+                            ))}
                         </>
                     ) : []}
                     {state.contextContextUid ? (
@@ -81,10 +93,21 @@ export function ContextMenu() {
                                 <ListItemText>{objCtxDef?._name || state.contextContextObject?.type?.['unigraph.id']}</ListItemText>
                             </MenuItem>
                             <Divider />
-                            {state.menuContextContent?.map((el) => el(state.contextUid!, state.contextObject, handleClose, { ...state.callbacks, removeFromContext: state.removeFromContext }, state.contextContextUid))}
+                            {state.menuContextContent?.map((el: any) => el(
+                                state.contextUid!,
+                                state.contextObject,
+                                handleClose,
+                                { ...state.callbacks, removeFromContext: state.removeFromContext },
+                                state.contextContextUid,
+                            ))}
                         </>
                     ) : []}
-                    {state.extraContent ? state.extraContent(state.contextUid!, state.contextObject, handleClose, { ...state.callbacks, removeFromContext: state.removeFromContext }) : []}
+                    {state.extraContent ? state.extraContent(
+                        state.contextUid!,
+                        state.contextObject,
+                        handleClose,
+                        { ...state.callbacks, removeFromContext: state.removeFromContext },
+                    ) : []}
                 </div>
             </Popover>
         </div>

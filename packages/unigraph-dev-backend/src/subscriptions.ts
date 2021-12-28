@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 /* eslint-disable no-nested-ternary */
 import _ from 'lodash';
 import { resourceLimits } from 'worker_threads';

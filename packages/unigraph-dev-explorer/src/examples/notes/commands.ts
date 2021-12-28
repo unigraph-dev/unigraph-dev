@@ -1,3 +1,4 @@
+/* eslint-disable no-plusplus */
 import _ from 'lodash';
 import { buildUnigraphEntity, byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { dfs, removeAllPropsFromObj } from '../../utils';
@@ -117,7 +118,12 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
         } return prev;
     }, 0);
     if (typeof children[delAt]?._value?._value?._value?.text?._value?._value?.['_value.%'] === 'string') {
-        window.unigraph.deleteItemFromArray(getSemanticChildren(data).uid, children[delAt].uid, data.uid, context.callbacks.subsId);
+        window.unigraph.deleteItemFromArray(
+            getSemanticChildren(data).uid,
+            children[delAt].uid,
+            data.uid,
+            context.callbacks.subsId,
+        );
         setTimeout(() => {
             window.unigraph.deleteObject(([
                 children[delAt].uid,
@@ -136,8 +142,8 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
 };
 
 export const setFocus = (data: any, context: NoteEditorContext, index: number) => {
-    console.log(data, index, context.childrenref.current?.children);
-    console.log(context.childrenref.current?.children[index]?.children?.slice?.(-1)[0]?.children[0]?.children[0]?.children[0]?.click());
+    context.childrenref.current?.children[index]?.children
+        ?.slice?.(-1)[0]?.children[0]?.children[0]?.children[0]?.click();
 };
 
 /**
@@ -263,23 +269,23 @@ export const unindentChild = async (data: any, context: NoteEditorContext, paren
     context.setCommand(() => () => focusUid(newChildren[parent + 1]._value._value.uid));
 };
 
-export const focusLastDFSNode = (data: any, context: NoteEditorContext, _: number) => {
-    focusUid(getLastDFSNode(data, context, _));
+export const focusLastDFSNode = (data: any, context: NoteEditorContext, index: number) => {
+    focusUid(getLastDFSNode(data, context, index));
 };
 
-export const focusNextDFSNode = (data: any, context: NoteEditorContext, _: number) => {
-    console.log(getNextDFSNode(data, context, _));
-    focusUid(getNextDFSNode(data, context, _));
+export const focusNextDFSNode = (data: any, context: NoteEditorContext, index: number) => {
+    console.log(getNextDFSNode(data, context, index));
+    focusUid(getNextDFSNode(data, context, index));
 };
 
-export const getLastDFSNode = (data: any, context: NoteEditorContext, _: number) => {
+export const getLastDFSNode = (data: any, context: NoteEditorContext, index: number) => {
     const orderedNodes = dfs(context.nodesState.value);
     const newIndex = orderedNodes.findIndex((el) => el.uid === data.uid) - 1;
     if (orderedNodes[newIndex] && !orderedNodes[newIndex].root) return orderedNodes[newIndex].uid;
     return '';
 };
 
-export const getNextDFSNode = (data: any, context: NoteEditorContext, _: number) => {
+export const getNextDFSNode = (data: any, context: NoteEditorContext, index: number) => {
     const orderedNodes = dfs(context.nodesState.value);
     console.log(orderedNodes);
     const newIndex = orderedNodes.findIndex((el) => el.uid === data.uid) + 1;
@@ -310,13 +316,14 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
                 },
             };
             textIt = el._value._value._value.text._value._value['_value.%'];
-            refs = el._value._value._value?.children?.['_value[']?.filter?.((el: any) => el._key).map((el: any) => ({ key: el._key.slice(2, -2), value: el._value._value.uid })) || [];
+            refs = el._value._value._value?.children?.['_value[']?.filter?.((it: any) => it._key).map((ell: any) => ({ key: ell._key.slice(2, -2), value: ell._value._value.uid })) || [];
             return [...prev, newel];
         }
         return [...prev, { uid: el.uid }];
     }, []);
     // console.log(textIt, newChildren, )
     const newUid = await window.unigraph.addObject(parseTodoObject(textIt, refs), '$/schema/todo');
+    // eslint-disable-next-line prefer-destructuring
     stubConverted.uid = newUid[0];
     await window.unigraph.updateObject(data?._value?.uid, { ...data._value, children: { '_value[': newChildren } }, false, false, context.callbacks.subsId, parents);
 };

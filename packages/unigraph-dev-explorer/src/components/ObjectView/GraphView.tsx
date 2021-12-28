@@ -1,3 +1,4 @@
+/* eslint-disable no-bitwise */
 import React from 'react';
 import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 import ForceGraph2D from 'react-force-graph-2d';
@@ -21,7 +22,10 @@ const queryNameIndex = `@filter(type(Entity) AND (NOT eq(<_propertyType>, "inher
 }`;
 
 export const excludableTypes = ['$/schema/subentity', '$/schema/interface/textual', '$/schema/markdown'];
-const getExcluded = (id: number) => excludableTypes.reduce((prev, curr, idx) => (((id >> idx) % 2) ? [...prev, curr] : prev), [] as string[]);
+const getExcluded = (id: number) => excludableTypes.reduce((prev, curr, idx) => (
+    ((id >> idx) % 2)
+        ? [...prev, curr]
+        : prev), [] as string[]);
 
 export function GraphView({ uid }: any) {
     const [entities, setEntities] = React.useState<any>([]);
@@ -48,14 +52,14 @@ export function GraphView({ uid }: any) {
             console.log(refs);
             const llinks: any[] = [];
             const [entitiesInto, entitiesOutof] = ([refs[0]['unigraph.origin'], refs[0]['~unigraph.origin']])
-                .map((el, idx: number) => el?.filter((el: any) => (el.type !== undefined && el.type['unigraph.id'].startsWith('$/schema') && !getExcluded(typesExcluded).includes(el.type['unigraph.id'])))
-                    .map((el: any) => {
-                        if (idx === 0) llinks.push({ source: uid, target: el.uid });
-                        else llinks.push({ source: el.uid, target: uid });
+                .map((el, idx: number) => el?.filter((it: any) => (it.type !== undefined && it.type['unigraph.id'].startsWith('$/schema') && !getExcluded(typesExcluded).includes(it.type['unigraph.id'])))
+                    .map((it: any) => {
+                        if (idx === 0) llinks.push({ source: uid, target: it.uid });
+                        else llinks.push({ source: it.uid, target: uid });
                         return {
-                            id: el.uid,
-                            type: el.type?.['unigraph.id'],
-                            name: (new UnigraphObject(el?.['unigraph.indexes']?.name)).as('primitive') || 'No name',
+                            id: it.uid,
+                            type: it.type?.['unigraph.id'],
+                            name: (new UnigraphObject(it?.['unigraph.indexes']?.name)).as('primitive') || 'No name',
                         };
                     }));
             setEntities(_.uniqBy([...(entitiesInto || []), ...(entitiesOutof || [])], (el) => el.id));
@@ -72,7 +76,12 @@ export function GraphView({ uid }: any) {
             <List style={{ position: 'absolute' }}>
                 {excludableTypes.map((el, index) => (
                     <ListItem>
-                        <Checkbox checked={!!((typesExcluded >> index) % 2)} onClick={() => ((typesExcluded >> index) % 2 ? setTypesExcluded(typesExcluded - (1 << index)) : setTypesExcluded(typesExcluded + (1 << index)))} />
+                        <Checkbox
+                            checked={!!((typesExcluded >> index) % 2)}
+                            onClick={() => ((typesExcluded >> index) % 2
+                                ? setTypesExcluded(typesExcluded - (1 << index))
+                                : setTypesExcluded(typesExcluded + (1 << index)))}
+                        />
                         <Typography>{el}</Typography>
                     </ListItem>
                 ))}
@@ -80,11 +89,11 @@ export function GraphView({ uid }: any) {
             <ReactResizeDetector handleWidth handleHeight>
                 {(size) => (
                     <ForceGraph2D
-                      width={size.width || undefined}
-                      height={size.height || undefined}
-                      nodeAutoColorBy={(node) => (node as any).type}
-                      nodeLabel={(node: any) => `Name: ${node.name}\n Type: ${node.type}`}
-                      nodeCanvasObject={(node, ctx, globalScale) => {
+                        width={size.width || undefined}
+                        height={size.height || undefined}
+                        nodeAutoColorBy={(node) => (node as any).type}
+                        nodeLabel={(node: any) => `Name: ${node.name}\n Type: ${node.type}`}
+                        nodeCanvasObject={(node, ctx, globalScale) => {
                             const label = (node as any).name;
                             const fontSize = 12 / globalScale;
                             ctx.font = `${fontSize}px Sans-Serif`;
@@ -101,11 +110,11 @@ export function GraphView({ uid }: any) {
 
                             (node as any).__bckgDimensions = [w, h]; // to re-use in nodePointerAreaPaint
                         }}
-                      linkDirectionalArrowLength={3.5}
-                      linkDirectionalArrowRelPos={1}
-                      linkCurvature={0.1}
-                      graphData={{ nodes: entities, links }}
-                      onNodeClick={(node) => {
+                        linkDirectionalArrowLength={3.5}
+                        linkDirectionalArrowRelPos={1}
+                        linkCurvature={0.1}
+                        graphData={{ nodes: entities, links }}
+                        onNodeClick={(node) => {
                             window.wsnavigator(`/object-editor?uid=${node.id}`);
                         }}
                     />

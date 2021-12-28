@@ -14,13 +14,11 @@ function TagList({ data }: any) {
     );
 }
 
-export const TagListSubscription = withUnigraphSubscription(
-    // @ts-ignore
-    TagList, { schemas: [], defaultData: [], packages: [] }, {
-        afterSchemasLoaded: (subsId, data, setData) => {
-            window.unigraph.subscribeToType('$/schema/tag', (result: any) => { setData(result); });
-        },
-    });
+export const TagListSubscription = withUnigraphSubscription(TagList, { schemas: [], defaultData: [], packages: [] }, {
+    afterSchemasLoaded: (subsId, data, setData) => {
+        window.unigraph.subscribeToType('$/schema/tag', (result: any) => { setData(result); });
+    },
+});
 
 export const TagWidget: React.FC = () => (
     <div>

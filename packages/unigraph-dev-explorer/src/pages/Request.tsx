@@ -26,16 +26,16 @@ const templateRequests = {
 };
 
 export default function Request() {
-    const [code, setCode]: [string, Function] = React.useState('// Your request here...');
+    const [code, setCode]: [string, any] = React.useState('// Your request here...');
 
     return (
         <div>
             <Typography variant="h4">Do a request!</Typography>
             <CodeMirror
-              value={code}
-              onBeforeChange={(editor: any, data: any, value: string) => { setCode(value); }}
-              onChange={(editor: any, data: any, value: string) => {}}
-              options={{ lineNumbers: true, mode: 'javascript' }}
+                value={code}
+                onBeforeChange={(editor: any, data: any, value: string) => { setCode(value); }}
+                onChange={(editor: any, data: any, value: string) => false}
+                options={{ lineNumbers: true, mode: 'javascript' }}
             />
             <Button onClick={() => {
                 window.unigraph.backendConnection.current?.send(code);

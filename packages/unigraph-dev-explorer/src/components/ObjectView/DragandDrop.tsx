@@ -5,7 +5,7 @@ export function BelowDropAcceptor({ onDrop, isReverse, style }: any) {
     const [{ shouldShow }, dropSub] = useDrop(() => ({
         // @ts-expect-error: already checked for namespace map
         accept: Object.keys(window.unigraph.getNamespaceMap() || {}),
-        drop: isReverse ? () => {} : onDrop,
+        drop: isReverse ? () => false : onDrop,
         collect: (monitor) => ({
             shouldShow: !!monitor.isOver() && !isReverse,
         }),
@@ -13,11 +13,11 @@ export function BelowDropAcceptor({ onDrop, isReverse, style }: any) {
 
     return (
         <div
-          ref={dropSub}
-          style={{
+            ref={dropSub}
+            style={{
                 opacity: shouldShow ? 1 : 0, width: '100%', height: '10px', marginTop: '-5px', ...style,
             }}
-            >
+        >
             <div style={{
                 height: '80%', marginTop: '10%', backgroundColor: 'gray', margin: '0px', borderRadius: '4px',
             }}
@@ -59,8 +59,27 @@ export function DragandDrop({
 }: any) {
     return (
         <div>
-            <BelowDropAcceptor onDrop={onDrop.bind(this, dndContext, listId, arrayId, -1)} isReverse={isReverse} style={style} />
-            {children.map((child: any, index: number) => <WithDropBelow index={index} style={style} children={child} onDrop={(props: any) => { console.log(dndContext, listId, arrayId, index, props); onDrop(dndContext, listId, arrayId, index, props); }} isReverse={isReverse} key={`${index}_dnd`} />)}
+            <BelowDropAcceptor
+                // eslint-disable-next-line react/jsx-no-bind
+                onDrop={onDrop.bind(null, dndContext, listId, arrayId, -1)}
+                isReverse={isReverse}
+                style={style}
+            />
+            {children.map((child: any, index: number) => (
+                <WithDropBelow
+                    index={index}
+                    style={style}
+                    // eslint-disable-next-line react/no-children-prop
+                    children={child}
+                    onDrop={(props: any) => {
+                        console.log(dndContext, listId, arrayId, index, props);
+                        onDrop(dndContext, listId, arrayId, index, props);
+                    }}
+                    isReverse={isReverse}
+                    // eslint-disable-next-line react/no-array-index-key
+                    key={`${index}_dnd`}
+                />
+            ))}
         </div>
     );
 }

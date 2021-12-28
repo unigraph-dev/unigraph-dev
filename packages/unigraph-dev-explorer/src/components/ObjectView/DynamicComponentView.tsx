@@ -1,9 +1,8 @@
 import React from 'react';
-import { useEffectOnce } from 'react-use';
 import { buildGraph, getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { byElementIndex, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import Sugar from 'sugar';
-import { DynamicViewRenderer } from '../../global';
+import { DynamicViewRenderer } from '../../global.d';
 import { getComponentFromExecutable } from '../../unigraph-react';
 import { AutoDynamicView } from './AutoDynamicView';
 import { AutoDynamicViewDetailed } from './AutoDynamicViewDetailed';
@@ -42,4 +41,5 @@ export const getComponentAsView = async (view: any, params: any) => {
     if (typeof ret === 'function') {
         return ret;
     }
+    return () => undefined;
 };

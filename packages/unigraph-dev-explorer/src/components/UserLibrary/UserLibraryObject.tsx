@@ -11,7 +11,7 @@ export default function DetailedObjectView({
 
     const viewerId = viewer || 'dynamic-view-detailed';
 
-    const [object, setObject]: [any, Function] = React.useState(undefined);
+    const [object, setObject]: [any, any] = React.useState(undefined);
     const [contextObj, setContextObj] = React.useState<any>(undefined);
     const [myid, setId] = React.useState<any>();
 
@@ -23,11 +23,12 @@ export default function DetailedObjectView({
         window.unigraph.getState('registry/dynamicViewDetailed').subscribe((newIts) => setDynamicViewsDetailed(newIts));
     }, []);
 
+    // eslint-disable-next-line consistent-return
     React.useEffect(() => {
         if (myid !== undefined) {
             if (!isStub && (viewerId !== 'dynamic-view-detailed' || !Object.keys(DynamicViewsDetailed).includes(type) || !DynamicViewsDetailed[type].query)) {
-                window.unigraph.subscribeToObject(objectId, (object: any) => {
-                    setObject(object);
+                window.unigraph.subscribeToObject(objectId, (newObjs: any) => {
+                    setObject(newObjs);
                 }, myid);
 
                 if (context?.startsWith?.('0x')) {
@@ -52,26 +53,26 @@ export default function DetailedObjectView({
     return (viewerId !== 'dynamic-view-detailed' ? (
         <React.Fragment key={object?.uid}>
             <DefaultObjectView
-              object={object}
-              options={{
+                object={object}
+                options={{
                     viewer: viewerId,
                     canEdit: true,
                     unpad: !showPadded,
                     viewId: id,
                 }}
-              callbacks={{ subsId: myid }}
+                callbacks={{ subsId: myid }}
             />
         </React.Fragment>
     ) : (
         <React.Fragment key={object?.uid}>
             <AutoDynamicViewDetailed
-              object={object}
-              options={{
+                object={object}
+                options={{
                     viewId: id,
                 }}
-              callbacks={{ ...callbacks, subsId: myid, viewId: id }}
-              context={contextObj}
-              component={component}
+                callbacks={{ ...callbacks, subsId: myid, viewId: id }}
+                context={contextObj}
+                component={component}
             />
         </React.Fragment>
     ));

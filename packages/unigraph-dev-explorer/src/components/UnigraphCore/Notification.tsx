@@ -4,7 +4,7 @@ import {
 import React from 'react';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import * as timeago from 'timeago.js';
-import { DynamicViewRenderer } from '../../global';
+import { DynamicViewRenderer } from '../../global.d';
 
 export type ANotification = {
     uid?: string,
@@ -20,22 +20,22 @@ export const Notification: DynamicViewRenderer = ({ data, callbacks }) => {
 
     return (
         <ListItemText
-          primary={unpadded.name}
-          secondary={(
-              <>
-                  <Typography
-                    component="span"
-                    variant="body2"
-                    color="textPrimary"
-                    style={{ paddingRight: '4px' }}
-                  >
-                      <span style={{ color: 'gray' }}>From: </span>
-                      {unpadded.from}
-                      <span style={{ color: 'gray' }}>, updated: </span>
-                      {timeago.format(new Date(unpadded?._updatedAt))}
-                  </Typography>
-                  <Typography variant="body2" style={{ whiteSpace: 'pre' }}>{unpadded.content}</Typography>
-              </>
+            primary={unpadded.name}
+            secondary={(
+                <>
+                    <Typography
+                        component="span"
+                        variant="body2"
+                        color="textPrimary"
+                        style={{ paddingRight: '4px' }}
+                    >
+                        <span style={{ color: 'gray' }}>From: </span>
+                        {unpadded.from}
+                        <span style={{ color: 'gray' }}>, updated: </span>
+                        {timeago.format(new Date(unpadded?._updatedAt))}
+                    </Typography>
+                    <Typography variant="body2" style={{ whiteSpace: 'pre' }}>{unpadded.content}</Typography>
+                </>
                 )}
         />
     );

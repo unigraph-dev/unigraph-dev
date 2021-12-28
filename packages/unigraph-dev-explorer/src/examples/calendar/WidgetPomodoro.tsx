@@ -46,7 +46,9 @@ export function WidgetPomodoro() {
     const [moveToInbox, setMoveToInbox] = React.useState(false);
     const [_rs0, _rs1] = React.useState(false);
     const reset = () => _rs1(!_rs0);
-    const next = (currSchedulePos: any, currSchedules: string) => (schedules[currSchedules].length - 1 === currSchedulePos ? setCurrSchedulePos(0) : setCurrSchedulePos(currSchedulePos + 1));
+    const next = (pos: any, sched: any) => (schedules[sched].length - 1 === pos
+        ? setCurrSchedulePos(0)
+        : setCurrSchedulePos(pos + 1));
 
     const stateRef = React.useRef({
         currSchedulePos, currSchedules, timerActive, timeLeft, moveToInbox,
@@ -60,6 +62,7 @@ export function WidgetPomodoro() {
     useEffectOnce(() => {
         const onTick = setInterval(() => {
             const {
+                // eslint-disable-next-line no-shadow
                 currSchedulePos, currSchedules, timerActive, timeLeft, moveToInbox,
             } = stateRef.current;
             if (timeLeft > 0 && timerActive) {
@@ -78,7 +81,10 @@ export function WidgetPomodoro() {
 
     React.useEffect(() => {
         if (!timerActive && el.current) (el as any).current.parentElement.style.backgroundColor = '';
-        else if (el.current) (el as any).current.parentElement.style.backgroundColor = scheduleData[schedules[currSchedules][currSchedulePos]].color;
+        else if (el.current) {
+            const newColor = scheduleData[schedules[currSchedules][currSchedulePos]].color;
+            (el as any).current.parentElement.style.backgroundColor = newColor;
+        }
     });
 
     const el = React.useRef(null);
@@ -102,8 +108,8 @@ export function WidgetPomodoro() {
                 <Button onClick={() => next(currSchedulePos, currSchedules)}>Next</Button>
             </div>
             <FormControlLabel
-              control={<Switch checked={moveToInbox} onChange={() => setMoveToInbox(!moveToInbox)} name="moveToInbox" />}
-              label={'Move Focus to Inbox after "Work" timer complete'}
+                control={<Switch checked={moveToInbox} onChange={() => setMoveToInbox(!moveToInbox)} name="moveToInbox" />}
+                label={'Move Focus to Inbox after "Work" timer complete'}
             />
         </div>
     );

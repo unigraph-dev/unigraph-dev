@@ -1,14 +1,14 @@
 import { ListItemText } from '@material-ui/core';
 import React from 'react';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
-import { DynamicViewRenderer } from '../../global';
+import { DynamicViewRenderer } from '../../global.d';
 
 export const ViewItem: DynamicViewRenderer = ({ data, callbacks }) => {
     const unpadded: any = unpad(data);
 
     return (
         <div
-          onClick={() => window.newTab(window.layoutModel, {
+            onClick={() => window.newTab(window.layoutModel, {
                     type: 'tab',
                     config: {
                         uid: data?.uid,
@@ -19,8 +19,8 @@ export const ViewItem: DynamicViewRenderer = ({ data, callbacks }) => {
                     component: '/pages/library/object',
                     enableFloat: 'true',
                 })}
-          style={{ display: 'contents' }}
-            >
+            style={{ display: 'contents' }}
+        >
             <ListItemText primary={unpadded.name} />
         </div>
     );

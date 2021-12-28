@@ -3,10 +3,9 @@ import React from 'react';
 import { AppState } from 'unigraph-dev-common/lib/types/unigraph';
 import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 import _ from 'lodash';
-import { SearchPopupState } from '../../init';
 import { parseQuery } from './UnigraphSearch';
-import { setCaret } from '../../utils';
 import { setSearchPopup } from '../../examples/notes/searchPopup';
+import { SearchPopupState } from '../../global.d';
 
 export function InlineSearch() {
     const ctxMenuState: AppState<Partial<SearchPopupState>> = window.unigraph.getState('global/searchPopup');
@@ -40,12 +39,16 @@ export function InlineSearch() {
     React.useEffect(() => ctxMenuState.subscribe((v) => setState(v)), []);
 
     const [searchResults, setSearchResults] = React.useState<any[]>([]);
-    React.useEffect(() => { if (!state.show) setSearchResults([]); else setCurrentAction(0); search.current(state.search as string); }, [state]);
+    React.useEffect(() => {
+        if (!state.show) setSearchResults([]);
+        else setCurrentAction(0);
+        search.current(state.search as string);
+    }, [state]);
 
     const [actionItems, setActionItems] = React.useState<any[]>([]);
     React.useEffect(() => {
         setActionItems([
-            ...(state.default || []).map((el, index) => [<Typography variant="body1">{el.label(state.search!)}</Typography>, (ev: any) => {
+            ...(state.default || []).map((el: any, index: number) => [<Typography variant="body1">{el.label(state.search!)}</Typography>, (ev: any) => {
                 console.log('Yo');
                 ev.preventDefault();
                 ev.stopPropagation();
@@ -53,15 +56,23 @@ export function InlineSearch() {
                     state.onSelected?.(state.search!, newUid);
                 });
             }]),
-            ...searchResults.map((el: any) => [<div style={{ display: 'inline-flex' }}>
-                <div style={{
-                    minHeight: '18px', minWidth: '18px', height: '18px', width: '18px', alignSelf: 'center', marginRight: '3px', opacity: 0.54, backgroundImage: `url("data:image/svg+xml,${(window.unigraph.getNamespaceMap)?.()?.[el.type]?._icon}")`,
-                }}
-                />
-                <Typography style={{ color: 'grey', marginLeft: '2px' }}>{(window.unigraph.getNamespaceMap)?.()?.[el.type]?._name}</Typography>
-                <Divider variant="middle" orientation="vertical" style={{ height: '16px', alignSelf: 'center' }} />
-                <Typography variant="body1">{el.name}</Typography>
-                                               </div>, (ev: any) => { console.log('Yo'); ev.preventDefault(); ev.stopPropagation(); state.onSelected?.(el.name, el.uid); }]),
+            ...searchResults.map((el: any) => [
+                <div style={{ display: 'inline-flex' }}>
+                    <div style={{
+                        minHeight: '18px', minWidth: '18px', height: '18px', width: '18px', alignSelf: 'center', marginRight: '3px', opacity: 0.54, backgroundImage: `url("data:image/svg+xml,${(window.unigraph.getNamespaceMap)?.()?.[el.type]?._icon}")`,
+                    }}
+                    />
+                    <Typography style={{ color: 'grey', marginLeft: '2px' }}>{(window.unigraph.getNamespaceMap)?.()?.[el.type]?._name}</Typography>
+                    <Divider variant="middle" orientation="vertical" style={{ height: '16px', alignSelf: 'center' }} />
+                    <Typography variant="body1">{el.name}</Typography>
+                </div>,
+                (ev: any) => {
+                    console.log('Yo');
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    state.onSelected?.(el.name, el.uid);
+                },
+            ]),
         ]);
     }, [searchResults, state]);
 
@@ -71,11 +82,11 @@ export function InlineSearch() {
                 console.log('D');
                 ev.preventDefault();
                 ev.stopPropagation();
-                setCurrentAction((currentAction) => currentAction + 1);
+                setCurrentAction((ca) => ca + 1);
             } else if (ctxMenuState.value.show && ev.key === 'ArrowUp') {
                 ev.preventDefault();
                 ev.stopPropagation();
-                setCurrentAction((currentAction) => currentAction - 1);
+                setCurrentAction((ca) => ca - 1);
             } else if (ctxMenuState.value.show && ev.key === 'Enter') {
                 ev.preventDefault();
                 ev.stopPropagation();
@@ -92,22 +103,22 @@ export function InlineSearch() {
     return (
         <div>
             <Popover
-              id="context-menu-search"
-              anchorReference="anchorEl"
-              open={state.show!}
-              anchorEl={state.anchorEl}
-              onClose={handleClose}
-              disableAutoFocus
-              disableEnforceFocus
-              anchorOrigin={{
+                id="context-menu-search"
+                anchorReference="anchorEl"
+                open={state.show!}
+                anchorEl={state.anchorEl}
+                onClose={handleClose}
+                disableAutoFocus
+                disableEnforceFocus
+                anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'left',
                 }}
-              transformOrigin={{
+                transformOrigin={{
                     vertical: 'top',
                     horizontal: 'left',
                 }}
-              PaperProps={{
+                PaperProps={{
                     style: { maxHeight: '320px', padding: '8px', borderRadius: '8px' },
                 }}
             >

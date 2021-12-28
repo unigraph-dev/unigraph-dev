@@ -1,6 +1,8 @@
+/* eslint-disable no-nested-ternary */
 /* eslint-disable react-hooks/rules-of-hooks */ // Using maps as React functional components
 import {
-    Button, Checkbox, Divider, FormControl, Grid, InputLabel, makeStyles, MenuItem, Paper, Select, Switch, TextField, Typography,
+    Button, Checkbox, Divider, FormControl, Grid, InputLabel, makeStyles,
+    MenuItem, Paper, Select, Switch, TextField, Typography,
 } from '@material-ui/core';
 import _ from 'lodash';
 import React from 'react';
@@ -49,20 +51,22 @@ function MetadataDisplay({ metadata }: any) {
                 </div>
             ))}
         </div>
-    ) : <></>;
+    ) : <span />;
 }
 
 const editorHeader = { display: 'flex', alignItems: 'baseline', paddingTop: '8px' };
 
 const TypedObjectPartEditor: any = {
     '$/composer/Object': ({
-        localSchema, localObject, setLocalObject, schemaMap,
+        localSchema, localObject, schemaMap,
     }: any) => {
-        const fields = _.intersection(Object.keys(localObject._value), localSchema._properties.map((el: any) => el._key));
+        const fields = _.intersection(
+            Object.keys(localObject._value),
+            localSchema._properties.map((el: any) => el._key),
+        );
         const metadata = getMetadata(localObject);
         const classes = useStyles();
         const [selectedNewProp, setSelectedNewProp] = React.useState<any>();
-        const [currentInputValue, setCurrentInputValue] = React.useState<any>();
         const [currentInputObjValue, setCurrentInputObjValue] = React.useState<any>();
         const [viewOrEdit, setViewOrEdit] = React.useState<any>(getDynamicViews().includes(localObject.type?.['unigraph.id']) ? 'view' : 'edit');
         return (
@@ -86,10 +90,15 @@ const TypedObjectPartEditor: any = {
                             :
                         </Typography>
                         <ObjectPartEditor
-                          localSchema={(localSchema._properties).filter((el: any) => el._key === key)[0]._definition}
-                          localObject={localObject._value[key]}
-                          schemaMap={schemaMap}
-                          setLocalObject={(newVal: any) => window.unigraph.updateObject(localObject._value[key].uid, newVal, false, false)}
+                            localSchema={(localSchema._properties).filter((el: any) => el._key === key)[0]._definition}
+                            localObject={localObject._value[key]}
+                            schemaMap={schemaMap}
+                            setLocalObject={(newVal: any) => window.unigraph.updateObject(
+                                localObject._value[key].uid,
+                                newVal,
+                                false,
+                                false,
+                            )}
                         />
                         <Delete onClick={() => { window.unigraph.deleteRelation(localObject._value.uid, { [key]: null }); }} className="showOnHover" style={{ alignSelf: 'baseline' }} />
                     </div>
@@ -98,8 +107,8 @@ const TypedObjectPartEditor: any = {
                     <FormControl>
                         <InputLabel>New property</InputLabel>
                         <Select
-                          value={selectedNewProp}
-                          onChange={(e: any) => {
+                            value={selectedNewProp}
+                            onChange={(e: any) => {
                                     setSelectedNewProp(e.target.value);
                                     const propType = (localSchema._properties).filter((el: any) => el._key === e.target.value)[0]._definition.type['unigraph.id'];
                                     let deft;
@@ -109,18 +118,32 @@ const TypedObjectPartEditor: any = {
                                     if (propType.startsWith?.('$/schema') && Object.keys(defaultNewValues).includes(schemaMap[propType]?._definition?.type?.['unigraph.id'])) deft = defaultNewValues[schemaMap[propType]?._definition?.type?.['unigraph.id']];
                                     setCurrentInputObjValue(JSON.stringify(deft));
                                 }}
-                          style={{ width: '240px' }}
+                            style={{ width: '240px' }}
                         >
                             <MenuItem>
                                 <em>Select property</em>
                             </MenuItem>
-                            {(localSchema._properties.map((el: any) => el._key)).map((el: string) => <MenuItem value={el}>{el}</MenuItem>)}
+                            {(localSchema._properties
+                                .map((el: any) => el._key))
+                                .map((el: string) => <MenuItem value={el}>{el}</MenuItem>)}
                         </Select>
                     </FormControl>
-                    <TextField onChange={(e) => { setCurrentInputObjValue(e.target.value); }} value={currentInputObjValue} style={{ opacity: currentInputObjValue === undefined ? 0 : 1 }} />
+                    <TextField
+                        onChange={(e) => { setCurrentInputObjValue(e.target.value); }}
+                        value={currentInputObjValue}
+                        style={{ opacity: currentInputObjValue === undefined ? 0 : 1 }}
+                    />
                     {currentInputObjValue}
                     {!currentInputObjValue || isJsonString(currentInputObjValue) ? '' : ' (not valid)'}
-                    <Button onClick={() => window.unigraph.updateObject(localObject.uid, { [selectedNewProp]: JSON.parse(currentInputObjValue) })} style={{ opacity: currentInputObjValue === undefined ? 0 : 1 }}>Add</Button>
+                    <Button
+                        onClick={() => window.unigraph.updateObject(
+                            localObject.uid,
+                            { [selectedNewProp]: JSON.parse(currentInputObjValue) },
+                        )}
+                        style={{ opacity: currentInputObjValue === undefined ? 0 : 1 }}
+                    >
+                        Add
+                    </Button>
                 </div>
             </Paper>
         );
@@ -141,10 +164,10 @@ const TypedObjectPartEditor: any = {
                     {currentUnionType}
                 </Typography>
                 <ObjectPartEditor
-                  localSchema={schemaMap[currentUnionType]?._definition || localSchema._parameters?._definitions?.filter((el: any) => el?.type?.['unigraph.id'].startsWith('$/primitive'))[0]}
-                  localObject={currentUnionType === 'Primitive' ? localObject : localObject._value}
-                  schemaMap={schemaMap}
-                  setLocalObject={() => {}}
+                    localSchema={schemaMap[currentUnionType]?._definition || localSchema._parameters?._definitions?.filter((el: any) => el?.type?.['unigraph.id'].startsWith('$/primitive'))[0]}
+                    localObject={currentUnionType === 'Primitive' ? localObject : localObject._value}
+                    schemaMap={schemaMap}
+                    setLocalObject={() => false}
                 />
             </Paper>
         );
@@ -175,10 +198,10 @@ const TypedObjectPartEditor: any = {
                 {localObject['_value[']?.map((el: any) => (
                     <div style={{ display: 'flex', alignItems: 'baseline', paddingTop: '8px' }}>
                         <ObjectPartEditor
-                          localSchema={elementSchema}
-                          localObject={el}
-                          schemaMap={schemaMap}
-                          setLocalObject={() => {}}
+                            localSchema={elementSchema}
+                            localObject={el}
+                            schemaMap={schemaMap}
+                            setLocalObject={() => false}
                         />
                         <Delete onClick={() => { window.unigraph.deleteItemFromArray(localObject.uid, el.uid); }} className="showOnHover" />
                     </div>
@@ -213,7 +236,14 @@ const TypedObjectPartEditor: any = {
 
         return (
             <>
-                <TextField onChange={(e) => { setCurrentInputValue(e.target.value); }} value={currentInputValue} multiline fullWidth />
+                <TextField
+                    onChange={(e) => {
+                        setCurrentInputValue(e.target.value);
+                    }}
+                    value={currentInputValue}
+                    multiline
+                    fullWidth
+                />
                 <Save onClick={() => window.unigraph.updateObject(localObject.uid, { '_value.%': currentInputValue }, false, false)} opacity={currentInputValue === localObject['_value.%'] ? 0 : 1} />
             </>
         );
@@ -278,10 +308,10 @@ const TypedObjectPartEditor: any = {
                 </div>
                 {viewOrEdit === 'view' ? <AutoDynamicView object={localObject} /> : (
                     <ObjectPartEditor
-                      localSchema={definition}
-                      localObject={localObject[Object.keys(localObject).filter((s: string) => s.startsWith('_value'))[0]]}
-                      schemaMap={schemaMap}
-                      setLocalObject={() => {}}
+                        localSchema={definition}
+                        localObject={localObject[Object.keys(localObject).filter((s: string) => s.startsWith('_value'))[0]]}
+                        schemaMap={schemaMap}
+                        setLocalObject={() => false}
                     />
                 )}
             </Paper>
@@ -290,7 +320,8 @@ const TypedObjectPartEditor: any = {
 };
 
 function getPartEditor(type: string, localSchema: any) {
-    return Object.keys(TypedObjectPartEditor).includes(type) ? TypedObjectPartEditor[type]
+    return Object.keys(TypedObjectPartEditor).includes(type)
+        ? TypedObjectPartEditor[type]
         : (type?.startsWith('$/schema/') ? TypedObjectPartEditor.schemaRef : TypedObjectPartEditor.default);
 }
 
@@ -309,7 +340,7 @@ export function ObjectPartEditor({
 }
 
 export function ObjectEditorSelector({ currentUid, setCurrentUid, style }: any) {
-    const [currentSchema, setCurrentSchema]: [any, Function] = React.useState(null);
+    const [currentSchema, setCurrentSchema]: [any, any] = React.useState(null);
     const [currentSchemaSHName, setCurrentSchemaSHName]: any = React.useState(null);
     const [referenceables, setReferenceables] = React.useState([]);
 
@@ -326,16 +357,19 @@ export function ObjectEditorSelector({ currentUid, setCurrentUid, style }: any) 
             Schema name:
             {' '}
             <ReferenceableSelectorControlled
-              referenceables={referenceables}
-              onChange={(schema: string) => window.unigraph.getSchemas()
-                    .then((schemas: Record<string, SchemaDgraph>) => { setCurrentSchema(schemas[schema]); setCurrentSchemaSHName(schema); })}
-              value={currentSchema?._definition?.type['unigraph.id']}
+                referenceables={referenceables}
+                onChange={(schema: string) => window.unigraph.getSchemas()
+                    .then((schemas: Record<string, SchemaDgraph>) => {
+                        setCurrentSchema(schemas[schema]);
+                        setCurrentSchemaSHName(schema);
+                    })}
+                value={currentSchema?._definition?.type['unigraph.id']}
             />
             <Button onClick={async () => {
                 const returnUid = await window.unigraph.addObject({}, currentSchemaSHName);
                 setCurrentUid(returnUid);
             }}
-                >
+            >
                 Create with schema
             </Button>
         </>
@@ -349,7 +383,12 @@ function ObjectEditorBody({ currentObject, setCurrentObject, schemaMap }: any) {
         <div style={{ display: 'flex' }}>
             <Grid container spacing={2}>
                 <Grid item xs={12} lg={8} style={{ overflow: 'auto' }}>
-                    <ObjectPartEditor localSchema={currentSchema} localObject={currentObject} setLocalObject={setCurrentObject} schemaMap={schemaMap} />
+                    <ObjectPartEditor
+                        localSchema={currentSchema}
+                        localObject={currentObject}
+                        setLocalObject={setCurrentObject}
+                        schemaMap={schemaMap}
+                    />
                 </Grid>
                 <Grid item xs={12} lg={4}>
                     <Typography>Backlinks</Typography>
@@ -387,7 +426,15 @@ export function ObjectEditor({ uid }: any) {
             <ObjectEditorSelector setCurrentUid={setCurrentUid} currentUid={currentUid} />
             <Divider />
             {
-                (currentUid.length && currentObject && allSchemas) ? <ObjectEditorBody currentObject={currentObject} setCurrentObject={setCurrentObject} schemaMap={allSchemas} /> : 'No object selected'
+                (currentUid.length && currentObject && allSchemas)
+                    ? (
+                        <ObjectEditorBody
+                            currentObject={currentObject}
+                            setCurrentObject={setCurrentObject}
+                            schemaMap={allSchemas}
+                        />
+                    )
+                    : 'No object selected'
             }
         </div>
     );

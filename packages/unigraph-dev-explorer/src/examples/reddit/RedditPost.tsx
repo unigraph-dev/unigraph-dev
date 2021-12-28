@@ -6,7 +6,7 @@ import {
 import React from 'react';
 import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
-import { DynamicViewRenderer } from '../../global';
+import { DynamicViewRenderer } from '../../global.d';
 import { registerDynamicViews } from '../../unigraph-react';
 import { openUrl } from '../../utils';
 
@@ -23,7 +23,9 @@ const getThumbnail = (url: string) => {
 
 export function Expand({ expanded, toggleExpanded }: any) {
     const style = { alignSelf: 'center', marginRight: '8px' };
-    return expanded ? <RemoveCircle onClick={() => { toggleExpanded(!expanded); }} style={style} /> : <AddCircle onClick={() => { toggleExpanded(!expanded); }} style={style} />;
+    return expanded
+        ? <RemoveCircle onClick={() => { toggleExpanded(!expanded); }} style={style} />
+        : <AddCircle onClick={() => { toggleExpanded(!expanded); }} style={style} />;
 }
 
 export const RedditPost: DynamicViewRenderer = ({ data, callbacks }) => {
@@ -38,12 +40,12 @@ export const RedditPost: DynamicViewRenderer = ({ data, callbacks }) => {
             </div>
             <div style={{ alignSelf: 'baseline', marginRight: '16px', marginTop: '8px' }}>
                 <Badge
-                  overlap="circle"
-                  anchorOrigin={{
+                    overlap="circle"
+                    anchorOrigin={{
                         vertical: 'bottom',
                         horizontal: 'right',
                     }}
-                  badgeContent={<Avatar style={{ height: '16px', width: '16px' }} alt="Reddit" src="https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-57x57.png" />}
+                    badgeContent={<Avatar style={{ height: '16px', width: '16px' }} alt="Reddit" src="https://www.redditstatic.com/desktop2x/img/favicon/apple-icon-57x57.png" />}
                 >
                     {getThumbnail(data.get('thumbnail').as('primitive'))}
                 </Badge>

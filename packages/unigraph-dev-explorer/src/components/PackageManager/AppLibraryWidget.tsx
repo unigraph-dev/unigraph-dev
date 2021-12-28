@@ -1,11 +1,10 @@
-import { Avatar, Grid, Typography } from '@material-ui/core';
-import {
-    Apps, Bookmarks, CalendarToday, CodeRounded, Email, Inbox, Note, PlaylistAddCheck, RssFeed, Search, Timer,
-} from '@material-ui/icons';
-
+import { Grid, Typography } from '@material-ui/core';
 import Icon from '@mdi/react';
 import {
-    mdiViewDashboardOutline, mdiFeatureSearchOutline, mdiRss, mdiAppsBox, mdiEmailOpenMultipleOutline, mdiCalendarOutline, mdiCalendarClockOutline, mdiInboxOutline, mdiBookmarkMultipleOutline, mdiCheckboxMarkedCirclePlusOutline, mdiNoteMultipleOutline, mdiTrello,
+    mdiViewDashboardOutline, mdiFeatureSearchOutline, mdiRss, mdiAppsBox,
+    mdiEmailOpenMultipleOutline, mdiCalendarOutline, mdiCalendarClockOutline,
+    mdiInboxOutline, mdiBookmarkMultipleOutline, mdiCheckboxMarkedCirclePlusOutline,
+    mdiNoteMultipleOutline, mdiTrello,
 } from '@mdi/js';
 import { NavigationContext } from '../../utils';
 
@@ -14,11 +13,11 @@ type AppShortcutProps = {avatar: React.ReactElement<any>, address: string, text:
 export function AppShortcut({ avatar, address, text }: AppShortcutProps) {
     return (
         <div
-          style={{
+            style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '16px',
             }}
-          onClick={() => window.wsnavigator(address)}
-            >
+            onClick={() => window.wsnavigator(address)}
+        >
             {avatar}
             {text}
         </div>

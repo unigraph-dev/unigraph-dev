@@ -6,16 +6,15 @@ import {
     ListItemText, ListItemIcon, Avatar, Typography,
 } from '@material-ui/core';
 import {
-    Delete, Description, Link, Public,
+    Description, Link, Public,
 } from '@material-ui/icons';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { getExecutableId } from 'unigraph-dev-common/lib/api/unigraph';
 import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
-import { DynamicViewRenderer } from '../../global';
+import { DynamicViewRenderer } from '../../global.d';
 import { registerDynamicViews, registerQuickAdder, withUnigraphSubscription } from '../../unigraph-react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
-import { getComponentFromPage } from '../../Workspace';
-import { openUrl } from '../../utils';
+import { openUrl, getComponentFromPage } from '../../utils';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
 
 type ABookmark = {
@@ -32,10 +31,10 @@ type ABookmark = {
 }
 
 export const createBookmark: (t: string, a?: boolean) => Promise<any> = (text: string, add = true) => {
-    const tags_regex = /#[a-zA-Z0-9]*\b ?/gm;
-    let tags = text.match(tags_regex) || [];
+    const tagsRegex = /#[a-zA-Z0-9]*\b ?/gm;
+    let tags = text.match(tagsRegex) || [];
     tags = tags.map((tag) => tag.slice(1).trim());
-    text = text.replace(tags_regex, '');
+    text = text.replace(tagsRegex, '');
 
     let url: any;
     let name: any;
@@ -68,16 +67,15 @@ function BookmarksBody({ data }: { data: ABookmark[] }) {
 
     return (
         <DynamicObjectListView
-          items={bookmarks}
-          context={null}
-          reverse
-          defaultFilter="no-filter"
+            items={bookmarks}
+            context={null}
+            reverse
+            defaultFilter="no-filter"
         />
     );
 }
 
 export const Bookmarks = withUnigraphSubscription(
-    // @ts-ignore
     BookmarksBody,
     { defaultData: [], schemas: [], packages: [bookmarkPackage] },
     {
@@ -90,12 +88,7 @@ export const Bookmarks = withUnigraphSubscription(
 export const BookmarkItem: DynamicViewRenderer = ({ data, callbacks }) => {
     const unpadded: ABookmark = unpad(data);
     const name = data.get('name').as('primitive');
-    const totalCallbacks = callbacks || {
-        onUpdate: (data: Record<string, any>) => {
-            throw new Error('not implemented');
-            // window.unigraph.updateObject(data.uid, {"done": unpad(data).done});
-        },
-    };
+    const totalCallbacks = callbacks;
 
     return (
         <>
@@ -107,19 +100,22 @@ export const BookmarkItem: DynamicViewRenderer = ({ data, callbacks }) => {
                 }}
                 >
                     <Link
-                      onClick={() => {
+                        onClick={() => {
                             openUrl(unpadded.url);
                         }}
-                      style={{ verticalAlign: 'middle' }}
+                        style={{ verticalAlign: 'middle' }}
                     />
                     {typeof unpadded.creative_work?.text === 'string' ? (
                         <Description
-                          onClick={() => {
+                            onClick={() => {
                                 const htmlUid = data?.get('creative_work/text')?._value?._value?.uid;
                                 if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', { uid: htmlUid, context: data.uid, type: data?.type?.['unigraph.id'] }));
-                                if (callbacks?.removeFromContext && callbacks?.removeOnEnter) callbacks.removeFromContext();
+                                if (
+                                    callbacks?.removeFromContext
+                                    && callbacks?.removeOnEnter
+                                ) callbacks.removeFromContext();
                             }}
-                          style={{ verticalAlign: 'middle' }}
+                            style={{ verticalAlign: 'middle' }}
                         />
                     ) : []}
                     {data?._value?.children?.['_value[']?.map
@@ -132,6 +128,7 @@ export const BookmarkItem: DynamicViewRenderer = ({ data, callbacks }) => {
 };
 
 const quickAdder = async (inputStr: string, preview = true) => {
+    // eslint-disable-next-line no-return-await
     if (!preview) return await createBookmark(inputStr);
     return [await createBookmark(inputStr, false), '$/schema/web_bookmark'];
 };

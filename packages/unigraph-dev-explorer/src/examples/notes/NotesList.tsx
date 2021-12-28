@@ -1,12 +1,8 @@
-import {
-    TextField, Button, List, ListItem, Divider,
-} from '@material-ui/core';
 import React from 'react';
 import { byUpdatedAt } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { withUnigraphSubscription } from '../../unigraph-react';
-import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
-import { noteQuery } from './init';
+import { noteQuery } from './noteQuery';
 
 export function NotesListBody({ data }: any) {
     return <DynamicObjectListView context={null} items={data} subscribeOptions={{ queryAsType: '$/schema/note_block', depth: 9, queryFn: noteQuery }} />;
@@ -23,8 +19,6 @@ export const NotesListAll = withUnigraphSubscription(
 );
 
 export function NotesList() {
-    const [newName, setNewName] = React.useState('');
-
     return (
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <NotesListAll />

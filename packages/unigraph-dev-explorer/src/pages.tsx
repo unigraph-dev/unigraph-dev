@@ -166,7 +166,14 @@ const pages: Record<string, any> = {
         name: 'Today View',
     },
     omnibar: { // only used in electron
-        constructor: (props: any) => <SearchOverlayPopover {...props} open setClose={() => (window as any).setClose()} noShadow />,
+        constructor: (props: any) => (
+            <SearchOverlayPopover
+                {...props}
+                open
+                setClose={() => (window as any).setClose()}
+                noShadow
+            />
+        ),
         maximize: true,
         name: 'Omnibar',
     },

@@ -1,5 +1,5 @@
 /* eslint-disable global-require */
-/* eslint-disable no-param-reassign */
+
 /**
  * This module contains functions that handle executables and their functionalities.
  */
@@ -161,7 +161,7 @@ export type ExecRunner = (src: string, context: ExecContext, unigraph: Unigraph)
 export const runEnvRoutineJs: ExecRunner = (src, context, unigraph) => {
     // const fn = () => eval(src);
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
+    const AsyncFunction = Object.getPrototypeOf(async () => false).constructor;
     const fn = new AsyncFunction('require', 'unpad', 'context', 'unigraph', `try {${src}
 } catch (e) {
         unigraph.addNotification({
@@ -177,7 +177,7 @@ export const runEnvRoutineJs: ExecRunner = (src, context, unigraph) => {
 export const runEnvLambdaJs: ExecRunner = (src, context, unigraph) => {
     // const fn = () => eval(src);
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    const AsyncFunction = Object.getPrototypeOf(async () => {}).constructor;
+    const AsyncFunction = Object.getPrototypeOf(async () => false).constructor;
     const fn = new AsyncFunction('require', 'unpad', 'context', 'unigraph', `try {
         return ${src}
 } catch (e) {

@@ -10,7 +10,8 @@ import { Comment, CompareArrows } from '@material-ui/icons';
 import { ListSubheader } from '@material-ui/core';
 import Icon from '@mdi/react';
 import {
-    mdiViewDashboardOutline, mdiBookOpenOutline, mdiPencilBoxMultipleOutline, mdiXml, mdiPackageVariantClosed, mdiDeleteOutline, mdiCogOutline, mdiBellOutline, mdiHomeOutline,
+    mdiViewDashboardOutline, mdiBookOpenOutline, mdiPencilBoxMultipleOutline,
+    mdiXml, mdiPackageVariantClosed, mdiDeleteOutline, mdiCogOutline, mdiBellOutline, mdiHomeOutline,
 } from '@mdi/js';
 import { NavigationContext } from '../utils';
 import { FavoriteBar } from './UnigraphCore/FavoriteBar';
@@ -39,12 +40,12 @@ export default function DrawerRouter() {
         <NavigationContext.Consumer>
             { (navigator: any) => (
                 <Drawer
-                  className={classes.drawer}
-                  variant="permanent"
-                  classes={{
+                    className={classes.drawer}
+                    variant="permanent"
+                    classes={{
                         paper: classes.drawerPaper,
                     }}
-                  anchor="left"
+                    anchor="left"
                 >
                     <List>
                         <ListSubheader component="div" id="subheader-home"> Home </ListSubheader>

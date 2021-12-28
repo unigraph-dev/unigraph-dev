@@ -6,8 +6,8 @@ import { download, upload } from '../../utils';
 
 export const getStatsQuery = (name: string) => `(func: eq(<unigraph.id>, "${name}")) {
     uid
-		objects: count(~type) @filter(type(Entity))
-  }`;
+    objects: count(~type) @filter(type(Entity))
+}`;
 
 export const ConnectionWidget: React.FC = ({}) => {
     const [content, setContent]: any = React.useState({});
@@ -59,7 +59,12 @@ export const ConnectionWidget: React.FC = ({}) => {
                 >
                     Refresh
                 </Button>
-                <Button onClick={() => upload((f: File) => { f.text().then((txt) => window.unigraph.importObjects(txt)); })}>Import objects</Button>
+                <Button onClick={() => upload((f: File) => {
+                    f.text().then((txt) => window.unigraph.importObjects(txt));
+                })}
+                >
+                    Import objects
+                </Button>
                 <Button onClick={() => window.unigraph.subscribeToType('any', (data: any) => { download('unigraph_export_all.json', JSON.stringify(data)); }, getRandomInt(), { all: true })}>Export all objects</Button>
             </div>
             <b>Objects count</b>

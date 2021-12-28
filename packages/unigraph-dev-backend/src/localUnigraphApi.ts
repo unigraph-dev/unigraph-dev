@@ -1,6 +1,6 @@
 /* eslint-disable global-require */
 /* eslint-disable import/no-dynamic-require */
-/* eslint-disable no-param-reassign */
+
 /* eslint-disable default-param-last */
 /* eslint-disable max-len */
 import { buildGraph, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';

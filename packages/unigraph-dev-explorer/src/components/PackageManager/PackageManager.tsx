@@ -39,7 +39,7 @@ export const PackageManager: React.FC = ({}) => {
                 </Button>
             </div>
             <DataGrid
-              columns={[
+                columns={[
                     { field: 'package_name', headerName: 'Package Name', width: 200 },
                     { field: 'name', headerName: 'Name', width: 150 },
                     { field: 'description', headerName: 'Description', width: 250 },
@@ -51,10 +51,20 @@ export const PackageManager: React.FC = ({}) => {
                         field: 'execLen', headerName: 'Executables', width: 135, type: 'number',
                     },
                 ]}
-              rows={packages.map((pkg: any) => ({ ...pkg.pkgManifest, schemaLen: pkg.pkgSchemas ? Object.keys(pkg.pkgSchemas).length - 1 : 0, execLen: pkg.pkgExecutables ? Object.keys(pkg.pkgExecutables).length - 1 : 0 }))}
-              getRowId={(row) => row.package_name}
-              pageSize={15}
-              onRowSelected={(param) => {
+                rows={packages.map(
+                    (pkg: any) => ({
+                        ...pkg.pkgManifest,
+                        schemaLen: pkg.pkgSchemas
+                            ? Object.keys(pkg.pkgSchemas).length - 1
+                            : 0,
+                        execLen: pkg.pkgExecutables
+                            ? Object.keys(pkg.pkgExecutables).length - 1
+                            : 0,
+                    }),
+                )}
+                getRowId={(row) => row.package_name}
+                pageSize={15}
+                onRowSelected={(param) => {
                     deselectUid();
                     selectUid(param.data.uid);
                 }}

@@ -14,16 +14,16 @@ export function ReferenceableSelectorControlled({ referenceables, value, onChang
 
     return (
         <Autocomplete
-          className={classes.selector}
-          options={referenceables}
-          onChange={(e, v: any) => onChange(v)}
-          renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Type"
-                variant="filled"
-                value={value || ''}
-              />
+            className={classes.selector}
+            options={referenceables}
+            onChange={(e, v: any) => onChange(v)}
+            renderInput={(params) => (
+                <TextField
+                    {...params}
+                    label="Type"
+                    variant="filled"
+                    value={value || ''}
+                />
             )}
         />
     );

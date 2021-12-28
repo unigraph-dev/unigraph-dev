@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-
 import { jsonToGraphQLQuery } from 'json-to-graphql-query';
 import _ from 'lodash';
 import { buildGraph } from './utils';

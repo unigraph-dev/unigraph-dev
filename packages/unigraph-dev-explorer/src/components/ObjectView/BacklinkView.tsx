@@ -18,12 +18,20 @@ var(func: uid(${uid})) {
 export function BacklinkView({
     data, hideHeader, forward, callbacks, uid,
 }: any) {
-    const [objects, setObjects]: [any[], Function] = React.useState([]);
+    const [objects, setObjects]: [any[], any] = React.useState([]);
     const [id, setId] = React.useState(Date.now());
     if (callbacks?.isEmbed) hideHeader = true;
 
     useEffectOnce(() => {
-        window.unigraph.subscribeToQuery(getQuery(data?.uid || uid, forward), (objects: any[]) => { setObjects(buildGraph(objects).filter((el: any) => (el.uid !== (data?.uid || uid)))); }, id, { noExpand: true });
+        window.unigraph.subscribeToQuery(
+            getQuery(data?.uid || uid, forward),
+            (newObjs: any[]) => {
+                setObjects(buildGraph(newObjs)
+                    .filter((el: any) => (el.uid !== (data?.uid || uid))));
+            },
+            id,
+            { noExpand: true },
+        );
 
         return function cleanup() {
             window.unigraph.unsubscribe(id);
@@ -38,9 +46,9 @@ export function BacklinkView({
                 {hideHeader || data?.get?.('name').as('primitive') || data?.uid || uid}
             </Typography>
             <DynamicObjectListView
-              items={objects}
-              context={data || null}
-              itemRemover={(uids: any) => {
+                items={objects}
+                context={data || null}
+                itemRemover={(uids: any) => {
                     if (!forward) {
                         window.unigraph.deleteRelation(data?.uid || uid, { 'unigraph.origin': uids.map((el: string) => ({ uid: el })) });
                     } else {
@@ -49,7 +57,7 @@ export function BacklinkView({
                             .forEach((el: any) => window.unigraph.deleteRelation(el, { 'unigraph.origin': { uid: data?.uid || uid } }));
                     }
                 }}
-              noRemover
+                noRemover
             />
         </>
     );

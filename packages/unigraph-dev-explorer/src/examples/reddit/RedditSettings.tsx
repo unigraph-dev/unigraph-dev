@@ -14,8 +14,8 @@ export function RedditSettings() {
     });
 
     useEffect(() => {
+        const id = getRandomInt();
         if (loaded) {
-            const id = getRandomInt();
             window.unigraph.subscribeToQuery(`(func: uid(parReddit)) {
                 uid
                 _value {
@@ -65,10 +65,10 @@ export function RedditSettings() {
             }`, (res: any[]) => {
                 setAccount(res[0]);
             }, id, { noExpand: true });
-            return function cleanup() {
-                window.unigraph.unsubscribe(id);
-            };
         }
+        return function cleanup() {
+            window.unigraph.unsubscribe(id);
+        };
     }, [loaded]);
 
     return loaded ? (

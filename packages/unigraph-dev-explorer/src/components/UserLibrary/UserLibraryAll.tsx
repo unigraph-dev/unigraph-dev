@@ -9,11 +9,11 @@ import { getStatsQuery } from '../UnigraphCore/ConnectionWidget';
 function MultiTypeDescriptor({ itemGroups, currentType, setCurrentType }: any) {
     return (
         <Card
-          variant="outlined"
-          style={{
+            variant="outlined"
+            style={{
                 padding: '12px', margin: '12px', whiteSpace: 'nowrap', display: 'flex', flexWrap: 'wrap', maxHeight: '20%', overflow: 'auto',
             }}
-            >
+        >
             {itemGroups.map((el: any, index: any) => (
                 <TabButton isSelected={currentType === el.name} onClick={() => setCurrentType(el.name)}>
                     <div style={{
@@ -39,7 +39,12 @@ function UserLibraryAll({ id }: any) {
     React.useEffect(() => {
         const subsId = getRandomInt();
         if (currentType.length) {
-            window.unigraph.subscribeToType(currentType, (result: any[]) => { setData(result.reverse()); }, subsId, { metadataOnly: true, first: -500 });
+            window.unigraph.subscribeToType(
+                currentType,
+                (result: any[]) => { setData(result.reverse()); },
+                subsId,
+                { metadataOnly: true, first: -500 },
+            );
         }
         return function cleanup() { window.unigraph.unsubscribe(subsId); };
     }, [currentType]);
@@ -56,11 +61,11 @@ function UserLibraryAll({ id }: any) {
             <MultiTypeDescriptor itemGroups={itemGroups} currentType={currentType} setCurrentType={setCurrentType} />
             {currentType.length ? (
                 <DynamicObjectListView
-                  items={data}
-                  context={null}
-                  defaultFilter={[]}
-                  compact
-                  noBar
+                    items={data}
+                    context={null}
+                    defaultFilter={[]}
+                    compact
+                    noBar
                 />
             ) : (
                 <div>

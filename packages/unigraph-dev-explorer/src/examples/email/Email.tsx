@@ -7,8 +7,8 @@ import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import Sugar from 'sugar';
 import { Link } from '@material-ui/icons';
 import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
-import { DynamicViewRenderer } from '../../global';
-import { getComponentFromPage } from '../../Workspace';
+import { DynamicViewRenderer } from '../../global.d';
+import { getComponentFromPage } from '../../utils';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
 import { registerDynamicViews, withUnigraphSubscription } from '../../unigraph-react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
@@ -29,8 +29,8 @@ type AEmail = {
 
 const EmailListBody: React.FC<{data: any[]}> = ({ data }) => (
     <DynamicObjectListView
-      items={data}
-      context={null}
+        items={data}
+        context={null}
     />
 );
 
@@ -42,17 +42,27 @@ const EmailMessage: DynamicViewRenderer = ({ data, callbacks }) => {
         <ListItem>
             <ListItemAvatar><Avatar src={fromPerson?.get('profile_image')?.as('primitive') || ''}>{unpadded.message?.sender?.[0]?.[0]}</Avatar></ListItemAvatar>
             <ListItemText
-              primary={[<strong><AutoDynamicView object={fromPerson} callbacks={{ identifier: ider }} inline /></strong>, <br />, data?.get('name')?.as('primitive')]}
-              secondary={[Sugar.Date.relative(new Date(unpadded?.message?.date_received)), <div style={{ display: 'flex', alignItems: 'center' }}>
-
-                  <Link onClick={() => {
-                        const htmlUid = data?.get('content/text')?._value?._value?.uid;
-                        if (htmlUid) window.newTab(window.layoutModel, getComponentFromPage('/library/object', { uid: htmlUid, context: data.uid, type: data?.type?.['unigraph.id'] }));
-                        if (callbacks?.removeFromContext && callbacks?.removeOnEnter) callbacks.removeFromContext();
-                    }}
-                  />
-                  {`${unpadded.content?.abstract}...`}
-              </div>]}
+                primary={[<strong><AutoDynamicView object={fromPerson} callbacks={{ identifier: ider }} inline /></strong>, <br />, data?.get('name')?.as('primitive')]}
+                secondary={[
+                    Sugar.Date.relative(new Date(unpadded?.message?.date_received)),
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <Link onClick={() => {
+                            const htmlUid = data?.get('content/text')?._value?._value?.uid;
+                            if (htmlUid) {
+                                window.newTab(
+                                    window.layoutModel,
+                                    getComponentFromPage(
+                                        '/library/object',
+                                        { uid: htmlUid, context: data.uid, type: data?.type?.['unigraph.id'] },
+                                    ),
+                                );
+                            }
+                            if (callbacks?.removeFromContext && callbacks?.removeOnEnter) callbacks.removeFromContext();
+                        }}
+                        />
+                        {`${unpadded.content?.abstract}...`}
+                    </div>,
+                ]}
             />
         </ListItem>
     );

@@ -20,8 +20,8 @@ export function CurrentEvents() {
 
     return (
         <DynamicObjectListView
-          groupBy="time_frame"
-          groupers={{
+            groupBy="time_frame"
+            groupers={{
                 time_frame: (els: any[]) => {
                     // Group all current events into an agenda view
                     // 1. Find all timeframes and group them
@@ -35,7 +35,9 @@ export function CurrentEvents() {
                     });
                     // 2. Go through groups and find all entities associated with these timeframes
                     const finalGroups: any = [];
-                    Object.entries(groups).sort((a, b) => Sugar.Date.create(a[0]).getTime() - Sugar.Date.create(b[0]).getTime()).map(([key, value]: any) => {
+                    Object.entries(groups).sort(
+                        (a, b) => Sugar.Date.create(a[0]).getTime() - Sugar.Date.create(b[0]).getTime(),
+                    ).map(([key, value]: any) => {
                         const insert: any = { name: key, items: [] };
                         value.sort((a: any, b: any) => Sugar.Date.create(new Date((new UnigraphObject(a)).get('start/datetime').as('primitive'))).getTime() - Sugar.Date.create(new Date((new UnigraphObject(b)).get('start/datetime').as('primitive'))).getTime()).map((val: any) => {
                             els.filter((el) => el.type['unigraph.id'] !== '$/schema/time_frame').forEach((el) => {
@@ -48,9 +50,9 @@ export function CurrentEvents() {
                     return finalGroups;
                 },
             }}
-          items={currentEvents}
-          context={null}
-          callbacks={{ noDate: true }}
+            items={currentEvents}
+            context={null}
+            callbacks={{ noDate: true }}
         />
     );
 }

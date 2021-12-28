@@ -2,7 +2,7 @@ import { Typography } from '@material-ui/core';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
-import { DynamicViewRenderer } from '../../global';
+import { DynamicViewRenderer } from '../../global.d';
 import { TabContext } from '../../utils';
 import { ObjectEditor } from '../ObjectEditor/ObjectEditor';
 import { isStub } from './utils';
@@ -43,6 +43,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
 
     if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViewsDetailed).includes(object.type['unigraph.id']) && ((isObjectStub && loadedObj) || !isObjectStub)) {
         return (
+            // eslint-disable-next-line react/no-unstable-nested-components
             <ErrorBoundary FallbackComponent={(error) => (
                 <div>
                     <Typography>Error in detailed AutoDynamicView: </Typography>
@@ -52,12 +53,20 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
             >
                 <TabContext.Consumer>
                     {({ viewId, setTitle }) => React.createElement(DynamicViewsDetailed[object.type['unigraph.id']].view, {
-                        data: isObjectStub ? loadedObj : object, callbacks: { viewId, setTitle, ...(callbacks || {}) }, options: { viewId, setTitle, ...options || {} }, context, ...(attributes || {}),
+                        data: isObjectStub
+                            ? loadedObj
+                            : object,
+                        callbacks: { viewId, setTitle, ...(callbacks || {}) },
+                        options: { viewId, setTitle, ...options || {} },
+                        context,
+                        ...(attributes || {}),
                     })}
                 </TabContext.Consumer>
             </ErrorBoundary>
         );
     } if (useFallback) {
-        return (object && ((isObjectStub && loadedObj) || !isObjectStub)) ? <ObjectEditor uid={object?.uid} /> : <></>;
-    } return <></>;
+        return (object && ((isObjectStub && loadedObj) || !isObjectStub))
+            ? <ObjectEditor uid={object?.uid} />
+            : <span />;
+    } return <span />;
 };

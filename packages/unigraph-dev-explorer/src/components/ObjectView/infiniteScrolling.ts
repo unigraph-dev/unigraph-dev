@@ -9,7 +9,13 @@ import { buildGraph } from 'unigraph-dev-common/lib/utils/utils';
  * @param chunk Number, default to 50, meaning how much objects to get in a given subscription.
  * @param stateCallback A callback that would be called every time loaded items are updated.
  */
-export const setupInfiniteScrolling = (uids: string[], chunk = 50, stateCallback: (loadedItems: any[]) => void, subscribeOptions?: any) => {
+export const setupInfiniteScrolling = (
+    uids: string[],
+    // eslint-disable-next-line default-param-last
+    chunk = 50,
+    stateCallback: (loadedItems: any[]) => void,
+    subscribeOptions?: any,
+) => {
     const states = {
         results: [] as any[],
         currentSubs: [] as string[],
@@ -30,7 +36,7 @@ export const setupInfiniteScrolling = (uids: string[], chunk = 50, stateCallback
                 type: 'object',
                 uid: states.currentSubs,
                 options: subscribeOptions,
-            }, () => {}, states.subsId, true);
+            }, () => false, states.subsId, true);
         }
     };
 
@@ -44,7 +50,7 @@ export const setupInfiniteScrolling = (uids: string[], chunk = 50, stateCallback
 
     const onCleanup = () => {
         window.unigraph.unsubscribe(states.subsId);
-        stateCallback = () => {};
+        stateCallback = () => false;
     };
 
     const returns = {

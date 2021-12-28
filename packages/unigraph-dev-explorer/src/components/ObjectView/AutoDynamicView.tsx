@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { Typography } from '@material-ui/core';
 import React from 'react';
 import { useDrag, useDrop } from 'react-dnd';
@@ -5,19 +6,21 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { useSwipeable } from 'react-swipeable';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { buildGraph, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
-import { AutoDynamicViewProps } from '../../types/ObjectView';
+import { AutoDynamicViewProps } from '../../types/ObjectView.d';
 import { subscribeToBacklinks } from '../../unigraph-react';
 import {
     DataContext, isMobile, isMultiSelectKeyPressed, selectUid, TabContext,
 } from '../../utils';
 import { getParentsAndReferences } from './backlinksUtils';
 import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
-import { StringObjectViewer } from './DefaultObjectView';
+import { StringObjectViewer } from './BasicObjectViews';
 import { excludableTypes } from './GraphView';
 import { getSubentities, isStub, SubentityDropAcceptor } from './utils';
 
 export function AutoDynamicView({
-    object, callbacks, component, attributes, inline, allowSubentity, allowSemantic = true, style, noDrag, noDrop, noContextMenu, subentityExpandByDefault, noBacklinks, noParents, withParent,
+    object, callbacks, component, attributes, inline, allowSubentity,
+    allowSemantic = true, style, noDrag, noDrop, noContextMenu,
+    subentityExpandByDefault, noBacklinks, noParents, withParent,
 }: AutoDynamicViewProps) {
     if (!callbacks) callbacks = {};
     allowSubentity = allowSubentity === true;
@@ -45,10 +48,16 @@ export function AutoDynamicView({
         const cb = (newIts: any) => setDynamicViews({ ...window.unigraph.getState('registry/dynamicView').value, ...(component || {}) });
         window.unigraph.getState('registry/dynamicView').subscribe(cb);
 
-        const cbsel = (sel: any) => { if (sel?.includes?.(object?.uid)) setIsSelected(true); else setIsSelected(false); };
+        const cbsel = (sel: any) => {
+            if (sel?.includes?.(object?.uid)) setIsSelected(true);
+            else setIsSelected(false);
+        };
         window.unigraph.getState('global/selected').subscribe(cbsel);
 
-        const cbfoc = (foc: any) => { if (foc === object?.uid && tabContext.isVisible()) setIsFocused(true); else setIsFocused(false); };
+        const cbfoc = (foc: any) => {
+            if (foc === object?.uid && tabContext.isVisible()) setIsFocused(true);
+            else setIsFocused(false);
+        };
         window.unigraph.getState('global/focused').subscribe(cbfoc);
 
         return function cleanup() {
@@ -59,14 +68,16 @@ export function AutoDynamicView({
     }, []);
 
     if (getSubentities(object)?.length > 0) {
-        callbacks!.showSubentities = (show?: boolean) => { setShowSubentities(show === undefined ? !showSubentities : show); };
+        callbacks!.showSubentities = (show?: boolean) => {
+            setShowSubentities(show === undefined ? !showSubentities : show);
+        };
     }
 
     React.useEffect(() => {
         if (object?.uid?.startsWith('0x') && shouldGetBacklinks) {
-            const cb = (backlinks: any) => {
+            const cb = (newBacklinks: any) => {
                 // console.log(object.uid, " - Backlinks: ", backlinks)
-                const [pars, refs] = getParentsAndReferences(backlinks['~_value'], backlinks['unigraph.origin'], object.uid);
+                const [pars, refs] = getParentsAndReferences(newBacklinks['~_value'], newBacklinks['unigraph.origin'], object.uid);
                 setBacklinks([pars, refs].map((it) => it.filter((el) => Object.keys(DynamicViews).includes(el?.type?.['unigraph.id']))));
             };
             subscribeToBacklinks(object.uid, cb);
@@ -74,6 +85,7 @@ export function AutoDynamicView({
                 subscribeToBacklinks(object.uid, cb, true);
             };
         }
+        return () => {};
     }, [object?.uid, shouldGetBacklinks, DynamicViews]);
 
     React.useEffect(() => {
@@ -95,6 +107,7 @@ export function AutoDynamicView({
             callbacks = { ...callbacks, subsId: newSubs };
             return function cleanup() { window.unigraph.unsubscribe(newSubs); };
         }
+        return () => {};
     }, [object]);
 
     const [{ isDragging }, drag] = useDrag(() => ({
@@ -129,7 +142,12 @@ export function AutoDynamicView({
     }));
 
     const handlers = useSwipeable({
-        onSwipedRight: (eventData) => onUnigraphContextMenu(({ clientX: eventData.absX, clientY: eventData.absY } as any), getObject(), contextEntity, callbacks),
+        onSwipedRight: (eventData) => onUnigraphContextMenu(
+            ({ clientX: eventData.absX, clientY: eventData.absY } as any),
+            getObject(),
+            contextEntity,
+            callbacks,
+        ),
     });
 
     const contextEntity = typeof callbacks?.context === 'object' ? callbacks.context : null;
@@ -161,8 +179,8 @@ export function AutoDynamicView({
 
     const BacklinkComponent = (
         <div
-          style={{
-                display: (shouldGetBacklinks && (backlinks?.[1]?.length || (!noParents && backlinks?.[0]?.length - (withParent ? 1 : 0) > 0))) ? '' : 'none',
+            style={{
+                display: (shouldGetBacklinks && (backlinks?.[1]?.length || (!noParents && (backlinks?.[0]?.length || 0) - (withParent ? 1 : 0) > 0))) ? '' : 'none',
                 marginLeft: 'auto',
                 background: 'lightgray',
                 padding: '2px 6px',
@@ -170,8 +188,8 @@ export function AutoDynamicView({
                 whiteSpace: 'nowrap',
                 cursor: 'pointer',
             }}
-          onClick={() => { window.wsnavigator(`/library/backlink?uid=${object?.uid}`); }}
-            >
+            onClick={() => { window.wsnavigator(`/library/backlink?uid=${object?.uid}`); }}
+        >
             {noParents ? '' : `${backlinks?.[0]?.length} / `}
             {' '}
             {backlinks?.[1]?.length}
@@ -204,32 +222,33 @@ export function AutoDynamicView({
                 </Typography>
             );
         }
-        return <></>;
+        return '';
     }, [isRecursion, object, object.uid, callbacks, attributes, DynamicViews, isObjectStub, loadedObj, isFocused]);
 
     return (
         <ErrorBoundary
-          onError={(error: Error, info: {componentStack: string}) => {
+            onError={(error: Error, info: {componentStack: string}) => {
                 console.error(error);
             }}
-          FallbackComponent={({ error }) => (
-              <div style={{ backgroundColor: 'floralwhite', borderRadius: '8px' }} onContextMenu={noContextMenu ? () => {} : (event) => onUnigraphContextMenu(event, getObject(), contextEntity, callbacks)}>
-                  <Typography>
-                      Error in AutoDynamicView: (for object
-                      {object?.uid}
-                      )
-                  </Typography>
-                  <p>{error.message}</p>
-              </div>
+            // eslint-disable-next-line react/no-unstable-nested-components
+            FallbackComponent={({ error }) => (
+                <div style={{ backgroundColor: 'floralwhite', borderRadius: '8px' }} onContextMenu={noContextMenu ? () => false : (event) => onUnigraphContextMenu(event, getObject(), contextEntity, callbacks)}>
+                    <Typography>
+                        Error in AutoDynamicView: (for object
+                        {object?.uid}
+                        )
+                    </Typography>
+                    <p>{error.message}</p>
+                </div>
             )}
-            >
+        >
             <div style={{
                 display: inline ? 'inline' : 'block', ...(inline ? {} : { width: '100%' }), backgroundColor: (isSelected || isDragging) ? 'whitesmoke' : 'unset', borderRadius: (isSelected || isDragging) ? '12px' : '',
             }}
             >
                 <div
-                  id={`object-view-${object?.uid}`}
-                  style={{
+                    id={`object-view-${object?.uid}`}
+                    style={{
                         opacity: isDragging ? 0 : 1,
                         boxSizing: 'border-box',
                         display: 'inline-flex',
@@ -238,11 +257,15 @@ export function AutoDynamicView({
                         ...(isMobile() ? { touchAction: 'pan-y' } : {}),
                         ...style,
                     }}
-                  aria-label={`Object view for uid ${object?.uid}, of type ${object?.type?.['unigraph.id'] || 'unknown'}`}
-                  onContextMenu={noContextMenu ? () => {} : (event) => onUnigraphContextMenu(event, getObject(), contextEntity, callbacks)}
-                  onClickCapture={(ev) => { if (isMultiSelectKeyPressed(ev)) { ev.stopPropagation(); selectUid(object.uid, false); } }}
-                  {...(attributes || {})}
-                  ref={attach}
+                    aria-label={`Object view for uid ${object?.uid}, of type ${object?.type?.['unigraph.id'] || 'unknown'}`}
+                    onContextMenu={noContextMenu
+                        ? () => false
+                        : (event) => onUnigraphContextMenu(event, getObject(), contextEntity, callbacks)}
+                    onClickCapture={(ev) => {
+                        if (isMultiSelectKeyPressed(ev)) { ev.stopPropagation(); selectUid(object.uid, false); }
+                    }}
+                    {...(attributes || {})}
+                    ref={attach}
                 >
                     {getEl(tabContext.viewId, tabContext.setTitle)}
                     {noBacklinks ? [] : BacklinkComponent}
@@ -250,7 +273,17 @@ export function AutoDynamicView({
 
                 {showSubentities && getSubentities(object)?.length > 0 ? (
                     <div style={{ width: '100%', paddingLeft: '24px' }}>
-                        <ul>{getSubentities(object).map((el: any) => <li><AutoDynamicView object={new UnigraphObject(el._value)} callbacks={callbacks} /></li>)}</ul>
+                        <ul>
+                            {getSubentities(object)
+                            .map((el: any) => (
+                                <li>
+                                    <AutoDynamicView
+                                        object={new UnigraphObject(el._value)}
+                                        callbacks={callbacks}
+                                    />
+                                </li>
+                            ))}
+                        </ul>
                     </div>
                 ) : []}
                 {(allowSubentity && !noDrop) ? <SubentityDropAcceptor uid={object?.uid} /> : []}

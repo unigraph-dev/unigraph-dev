@@ -1,15 +1,16 @@
+/* eslint-disable import/no-unresolved */
+/* eslint-disable import/extensions */
+/* eslint-disable @typescript-eslint/no-var-requires */
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
-import { loader } from '@monaco-editor/react';
-import Editor from '@monaco-editor/react';
+import Editor, { loader } from '@monaco-editor/react';
 import React from 'react';
 import {
-    Accordion, AccordionDetails, AccordionSummary, Button, FormControl, IconButton, InputLabel, List, ListItem, MenuItem, Select, TextField, Typography,
+    Accordion, AccordionDetails, AccordionSummary, Button, FormControl, IconButton,
+    InputLabel, List, ListItem, MenuItem, Select, TextField, Typography,
 } from '@material-ui/core';
 import { ExpandMore, Save } from '@material-ui/icons';
 import { Actions } from 'flexlayout-react';
 import { useEffectOnce } from 'react-use';
-
-import ReactResizeDetector from 'react-resize-detector';
 
 loader.config({ paths: { vs: './vendor/monaco-editor_at_0.23.0/min/vs' } });
 
@@ -49,7 +50,7 @@ function AddImportComponent({ onAddImport }: any) {
             <Button onClick={() => {
                 onAddImport(env, pkgName, impt, imptas);
             }}
-                >
+            >
                 Create
             </Button>
         </>
@@ -106,13 +107,13 @@ export function ExecutableCodeEditor({ data, options }: any) {
         <div style={{
             width: '100%', display: 'flex', flexDirection: 'column', height: 'calc(100vh - 75px)',
         }}
-            >
+        >
             <div style={{ display: 'flex' }}>
                 <Accordion expanded={optionsOpen} onChange={() => setOptionsOpen(!optionsOpen)} variant="outlined" style={{ flexGrow: 1, marginBottom: '16px' }}>
                     <AccordionSummary
-                      expandIcon={<ExpandMore />}
-                      aria-controls="panel1bh-content"
-                      id="panel1bh-header"
+                        expandIcon={<ExpandMore />}
+                        aria-controls="panel1bh-content"
+                        id="panel1bh-header"
                     >
                         <Typography style={{ flexBasis: '50%', flexShrink: 0 }}>{unpadded.name}</Typography>
                         <Typography color="textSecondary">{unpadded.env}</Typography>
@@ -140,16 +141,17 @@ export function ExecutableCodeEditor({ data, options }: any) {
                                 <List>
                                     {(data?._value?.imports?.['_value['] || []).map((el: any) => <ListItem><ImportItem data={el._value} /></ListItem>)}
                                     <ListItem>
-                                        <AddImportComponent onAddImport={(env: string, pkg: string, impt: string, imptAs: string) => {
-                                            window.unigraph.updateObject(data.uid, {
-                                                imports: [{
-                                                    env,
-                                                    package: pkg,
-                                                    import: impt,
-                                                    as: imptAs,
-                                                }],
-                                            });
-                                        }}
+                                        <AddImportComponent
+                                            onAddImport={(env: string, pkg: string, impt: string, imptAs: string) => {
+                                                window.unigraph.updateObject(data.uid, {
+                                                    imports: [{
+                                                        env,
+                                                        package: pkg,
+                                                        import: impt,
+                                                        as: imptAs,
+                                                    }],
+                                                });
+                                            }}
                                         />
                                     </ListItem>
                                 </List>
@@ -162,8 +164,8 @@ export function ExecutableCodeEditor({ data, options }: any) {
             </div>
             <div style={{ flexGrow: 1 }}>
                 <Editor
-                  defaultLanguage="javascript"
-                  beforeMount={(monaco) => {
+                    defaultLanguage="javascript"
+                    beforeMount={(monaco) => {
                         monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
                             noSemanticValidation: false,
                             noSyntaxValidation: false,
@@ -183,9 +185,10 @@ export function ExecutableCodeEditor({ data, options }: any) {
                             }
                         });
                     }}
-                  path={`main${ext[unpadded.env]}`}
-                  defaultValue={currentCode}
-                  onChange={handleEditorChange}
+                    path={`main${ext[unpadded.env]}`}
+                    defaultValue={currentCode}
+                    // eslint-disable-next-line react/jsx-no-bind
+                    onChange={handleEditorChange}
                 />
             </div>
         </div>

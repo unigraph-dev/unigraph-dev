@@ -17,8 +17,8 @@ export function SubscriptionsView() {
 
     React.useEffect(() => {
         const fn = () => {
-            window.unigraph.getSubscriptions?.().then((subs: any[]) => {
-                setSubs(subs);
+            window.unigraph.getSubscriptions?.().then((newSubs: any[]) => {
+                setSubs(newSubs);
             });
         };
         const interval = setInterval(fn, 5000, {});
