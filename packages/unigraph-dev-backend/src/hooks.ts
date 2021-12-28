@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { Cache } from './caches';
 import DgraphClient from './dgraphClient';
-import { Subscription } from './subscriptions';
+import { Subscription } from './custom.d';
 import { mergeWithConcatArray } from './utils';
 
 /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later

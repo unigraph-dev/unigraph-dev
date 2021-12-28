@@ -1,3 +1,4 @@
+/* eslint-disable global-require */
 /**
  * This file specifies related common abstractions when developing front-end apps using React.
  * Users can import this file and use its helper libraries for their own React apps without
@@ -20,8 +21,12 @@ export function withUnigraphSubscription(
 
         const init = async () => {
             Promise.all([
-                ...unigraphContext.schemas.map((el) => (window as any).unigraph.ensureSchema(el.name, el.schema)),
-                ...unigraphContext.packages.map((el) => (window as any).unigraph.ensurePackage(el.pkgManifest.package_name, el)),
+                ...unigraphContext.schemas.map(
+                    (el) => (window as any).unigraph.ensureSchema(el.name, el.schema),
+                ),
+                ...unigraphContext.packages.map(
+                    (el) => (window as any).unigraph.ensurePackage(el.pkgManifest.package_name, el),
+                ),
             ]).then(unigraphHooks.afterSchemasLoaded(subsId, data, setData));
         };
 
@@ -39,7 +44,10 @@ export function withUnigraphSubscription(
 }
 
 const addViewToRegistry = (state: any, views: Record<string, any>): void => {
-    const finalViews = Object.fromEntries(Object.entries(views).map((entry) => (entry[1].view ? entry : [entry[0], { view: entry[1] }])));
+    const finalViews = Object.fromEntries(
+        Object.entries(views)
+            .map((entry) => (entry[1].view ? entry : [entry[0], { view: entry[1] }])),
+    );
     state.setValue({ ...state.value, ...finalViews });
 };
 

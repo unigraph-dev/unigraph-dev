@@ -16,6 +16,24 @@ declare type UnigraphUpsert = {
   appends: any[]
 }
 
+declare type Subscription = {
+  data: any,
+  query: Query, // something like () { uid }
+  subType: 'polling' | 'pushing',
+  callbackType: 'function' | 'messageid',
+  id: number | string, // must be provided, regardless of using function or messageid
+  /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
+  function?: Function,
+  msgPort?: IWebsocket,
+  regTime: number, // time of registration, can be used to manually terminate subscription going too long
+  connId?: string,
+  clientId?: string,
+  hibernated?: boolean,
+  queryNow?: any,
+  finalQuery?: any,
+  queryTime?: number,
+};
+
 declare type EventCreateUnigraphSchema = {
   'type': 'event',
   'event': 'create_unigraph_schema',

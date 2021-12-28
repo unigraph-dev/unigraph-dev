@@ -3,9 +3,14 @@ import dgraph, {
     DgraphClient as ActualDgraphClient, DgraphClientStub, Operation, Mutation, Check,
 } from 'dgraph-js';
 import { getAsyncLock, withLock } from './asyncManager';
-import { UnigraphUpsert } from './custom';
 import { perfLogStartDbTransaction, perfLogAfterDbTransaction } from './logging';
 import { makeSearchQuery } from './search';
+
+export type UnigraphUpsert = {
+  queries: string[],
+  mutations: any[],
+  appends: any[]
+}
 
 /**
  * Example client, adapted from:
@@ -19,7 +24,11 @@ export default class DgraphClient {
     private txnlock: AsyncLock;
 
     constructor(connectionUri: string) {
-        this.dgraphClientStub = new DgraphClientStub(connectionUri, undefined, { 'grpc.max_receive_message_length': 1024 * 1024 * 1024 });
+        this.dgraphClientStub = new DgraphClientStub(
+            connectionUri,
+            undefined,
+            { 'grpc.max_receive_message_length': 1024 * 1024 * 1024 },
+        );
         this.dgraphClientStub.checkVersion(new Check()).catch((e) => {
             if (e.code === 14) {
                 throw new Error('Could not establish connection to Dgraph client, exiting...');

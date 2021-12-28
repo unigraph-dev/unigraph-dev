@@ -45,7 +45,12 @@ export type ComposerUnionInstance = {
 
 export type UnigraphPrimitiveTypeString = '$/primitive/number' | '$/primitive/boolean'
 | '$/primitive/string' | '$/primitive/null' | '$/primitive/datetime'
-export type UnigraphTypeString = UnigraphPrimitiveTypeString | '$/composer/Array' | '$/composer/Object' | '$/composer/List' | '$/primitive/undefined'
+export type UnigraphTypeString =
+    UnigraphPrimitiveTypeString
+    | '$/composer/Array'
+    | '$/composer/Object'
+    | '$/composer/List'
+    | '$/primitive/undefined'
 
 export type Composers = ComposerObjectInstance<ComposerObjectIndexs> | ComposerArrayInstance | ComposerUnionInstance
 export type PrimitiveTypes = UnigraphIdType<UnigraphPrimitiveTypeString>

@@ -15,7 +15,9 @@ export function createNotificationsCache(client: DgraphClient): Cache<UnigraphNo
     cache.updateNow = async () => {
         const nsMap = (await client.queryUnigraphId<any[]>('$/meta/namespace_map'))[0];
         if (!Object.keys(nsMap).includes('$/entity/notification_center')) {
-            throw new ReferenceError("Cannot find notification center in database. Are you sure you've loaded core packages already?");
+            throw new ReferenceError(
+                "Cannot find notification center in database. Are you sure you've loaded core packages already?",
+            );
         }
         const ncObject = nsMap['$/entity/notification_center'];
         const items = Array.isArray(ncObject.children) ? nsMap.children : [];
@@ -28,7 +30,14 @@ export function createNotificationsCache(client: DgraphClient): Cache<UnigraphNo
 }
 
 export async function addNotification(item: UnigraphNotification, caches: any, client: DgraphClient) {
-    const obj = buildUnigraphEntity({ ...item, content: { _value: item.content, type: { 'unigraph.id': '$/schema/note' } } }, '$/schema/notification', caches.schemas.data);
+    const obj = buildUnigraphEntity(
+        {
+            ...item,
+            content: { _value: item.content, type: { 'unigraph.id': '$/schema/note' } },
+        },
+        '$/schema/notification',
+        caches.schemas.data,
+    );
     const autoRefObj = processAutoref(obj, '$/schema/notification', caches.schemas.data);
     await client.createUnigraphUpsert(insertsToUpsert([autoRefObj], undefined, caches.schemas.dataAlt![0]));
     // TODO: make use of the notification center object

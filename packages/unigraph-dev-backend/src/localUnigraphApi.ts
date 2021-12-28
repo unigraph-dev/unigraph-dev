@@ -1,23 +1,42 @@
+/* eslint-disable global-require */
+/* eslint-disable import/no-dynamic-require */
+/* eslint-disable no-param-reassign */
+/* eslint-disable default-param-last */
+/* eslint-disable max-len */
 import { buildGraph, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { Unigraph } from 'unigraph-dev-common/lib/types/unigraph';
 import {
-    processAutorefUnigraphId, makeQueryFragmentFromType, clearEmpties, buildUnigraphEntity, processAutoref, getUpsertFromUpdater, flatten, unflatten, unpad,
+    processAutorefUnigraphId, makeQueryFragmentFromType, clearEmpties,
+    buildUnigraphEntity, processAutoref, flatten, unflatten, unpad,
 } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { insertsToUpsert } from 'unigraph-dev-common/lib/utils/txnWrapper';
 import dgraph from 'dgraph-js';
 import path from 'path';
-import { UnigraphUpsert } from './custom';
-import DgraphClient, { queries } from './dgraphClient';
+import { Subscription } from './custom.d';
+import DgraphClient, { UnigraphUpsert } from './dgraphClient';
 import { buildExecutable, ExecContext } from './executableManager';
 import { callHooks } from './hooks';
 import { addNotification } from './notifications';
 import {
-    Subscription, createSubscriptionLocal, createSubscriptionWS, resolveSubscriptionUpdate,
+    createSubscriptionLocal, createSubscriptionWS, resolveSubscriptionUpdate,
 } from './subscriptions';
 import { Cache } from './caches';
 import { getQueryString } from './search';
 
-export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Record<string, Cache<any>>, subscriptions: Subscription[], hooks: any, namespaceMap: any, localApi: Unigraph, httpCallbacks: any, getClientId: any, lock: any}): Unigraph {
+// eslint-disable-next-line import/prefer-default-export
+export function getLocalUnigraphAPI(
+    client: DgraphClient,
+    states: {
+        caches: Record<string, Cache<any>>,
+        subscriptions: Subscription[],
+        hooks: any,
+        namespaceMap: any,
+        localApi: Unigraph,
+        httpCallbacks: any,
+        getClientId: any,
+        lock: any
+    },
+): Unigraph {
     const messages: any[] = [];
     const eventTarget: any = {};
 
@@ -30,7 +49,11 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         getStatus: () => { throw Error('Not implemented'); },
         createSchema: async (schemain) => {
             const autorefSchema = processAutorefUnigraphId(schemain);
-            const upsert: UnigraphUpsert = insertsToUpsert([autorefSchema], undefined, states.caches.schemas.dataAlt![0]);
+            const upsert: UnigraphUpsert = insertsToUpsert(
+                [autorefSchema],
+                undefined,
+                states.caches.schemas.dataAlt![0],
+            );
             await client.createUnigraphUpsert(upsert);
             await states.caches.schemas.updateNow();
             await states.caches.packages.updateNow();
@@ -120,8 +143,9 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
                 return resultArray;
             }, [] as any);
             const res: any[] = [];
-            for (let i = 0; i < batchedQueries.length; ++i) {
+            for (let i = 0; i < batchedQueries.length; i += 1) {
                 if (commonVars) batchedQueries[i].push(commonVars);
+                // eslint-disable-next-line no-await-in-loop
                 res.push(...(await client.queryDgraph(`query {${batchedQueries[i].join('\n')}}`)));
             }
             return res;
@@ -135,12 +159,12 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
         // latertodo
         updateTriplets: async (objects) => {
             if (Array.isArray(objects)) { // is triplet
-                const update_triplets = new dgraph.Mutation();
-                update_triplets.setSetNquads(objects.join('\n'));
+                const updateTriplets = new dgraph.Mutation();
+                updateTriplets.setSetNquads(objects.join('\n'));
                 const result = await client.createDgraphUpsert({
                     query: false,
                     mutations: [
-                        update_triplets,
+                        updateTriplets,
                     ],
                 });
                 callHooks(states.hooks, 'after_object_changed', { subscriptions: states.subscriptions, caches: states.caches });
@@ -222,12 +246,12 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
                 newObject = toInsert;
             });
             const quads = newObject.map((el, index) => `<${el}> <_value.#i> "${index}" .\n`);
-            const create_json = new dgraph.Mutation();
-            create_json.setSetNquads(quads.join(''));
+            const createJson = new dgraph.Mutation();
+            createJson.setSetNquads(quads.join(''));
             const result = await client.createDgraphUpsert({
                 query: false,
                 mutations: [
-                    create_json,
+                    createJson,
                 ],
             });
 
@@ -265,15 +289,15 @@ export function getLocalUnigraphAPI(client: DgraphClient, states: {caches: Recor
                     toDel += `<${uid}> <_value[> <${el.uid}> .\n`;
                 }
             });
-            const delete_array = new dgraph.Mutation();
-            delete_array.setDelNquads(toDel);
-            const create_json = new dgraph.Mutation();
-            create_json.setSetNquads(newValues.join('\n'));
+            const deleteArray = new dgraph.Mutation();
+            deleteArray.setDelNquads(toDel);
+            const createJson = new dgraph.Mutation();
+            createJson.setSetNquads(newValues.join('\n'));
             const result = await client.createDgraphUpsert({
                 query: false,
                 mutations: [
-                    delete_array,
-                    create_json,
+                    deleteArray,
+                    createJson,
                 ],
             });
             callHooks(states.hooks, 'after_object_changed', { subscriptions: states.subscriptions, caches: states.caches, subIds });

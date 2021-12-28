@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import _, { has, uniqueId } from 'lodash';
 import stringify from 'json-stable-stringify';
 import { UnigraphUpsert } from '../types/unigraph';
@@ -38,7 +39,7 @@ function buildDgraphFunctionFromRefQuery(query: {key: string, value: string}[]) 
     let fn = `var(func: ${string1}) @filter(${string.slice(4)})`;
     if (innerRefs.length) {
         fn += ' @cascade {\n';
-        innerRefs.forEach((str) => fn += `${str}\n`);
+        innerRefs.forEach((str) => { fn += `${str}\n`; });
         fn += '}';
     }
     if (typeSelector) fn = [fn, typeSelector] as any;
@@ -51,43 +52,50 @@ function buildDgraphFunctionFromRefQuery(query: {key: string, value: string}[]) 
  * @param object
  * @param string The first couple of characters passed in as uids
  */
-export function wrapUpsertFromUpdater(orig: any, queryHead: string, hasUid: string | false = false, blankUidsToRef: any): any {
+export function wrapUpsertFromUpdater(
+    orig: any,
+    queryHead: string,
+    blankUidsToRef: any,
+    hasUid: string | false = false,
+): any {
     const queries: string[] = [];
 
-    function buildQuery(parUid: string, key: string, hasUid: string | false = false) {
+    function buildQuery(parUid: string, key: string, hasUidHere: string | false = false) {
         const currentQuery = `${parUid}_${queries.length.toString()}`;
-        const getUidQuery = hasUid || parUid;
+        const getUidQuery = hasUidHere || parUid;
         const query = `var(func: uid(${getUidQuery})) { <${key}> { ${currentQuery} as uid }}`;
         queries.push(query);
         return currentQuery;
     }
 
-    function buildQueryCount(parUid: string, n: number, hasUid: string | false = false) {
+    function buildQueryCount(parUid: string, n: number, hasUidHere: string | false = false) {
         const currentQuery = `${parUid}_${queries.length.toString()}`;
-        const getUidQuery = hasUid || parUid;
+        const getUidQuery = hasUidHere || parUid;
         const query = `var(func: uid(${getUidQuery})) { ${currentQuery}_scoped as count(<_value[>) }`;
         const subqueries = [];
-        for (let i = 0; i < n; ++i) { subqueries.push(`${currentQuery}_${i} as math(${currentQuery}+${i})`); }
+        for (let i = 0; i < n; i += 1) { subqueries.push(`${currentQuery}_${i} as math(${currentQuery}+${i})`); }
         const query2 = `var() {${currentQuery} as sum(val(${currentQuery}_scoped)) ${subqueries.join(' ')} }`;
         queries.push(query, query2);
         return currentQuery;
     }
 
-    function recurse(origNow: any, thisUid: string, hasUid: string | false = false): any {
-        // console.log("recursing --- " + JSON.stringify(origNow, null, 2) + thisUid)
+    function recurse(origNow: any, thisUid: string, hasUidHere: string | false = false): any {
+    // console.log("recursing --- " + JSON.stringify(origNow, null, 2) + thisUid)
         if (['undefined', 'null', 'number', 'bigint', 'string', 'boolean', 'symbol'].includes(typeof origNow)) {
             // This means the updater is creating new things inside or changing primitive values: we don't need uid
             queries.pop();
             return origNow;
         }
-        if (hasUid && hasUid.startsWith('0x')) {
+        if (hasUidHere && hasUidHere.startsWith('0x')) {
             queries.pop();
         }
         if (typeof origNow === 'object' && Array.isArray(origNow)) {
             // TODO: document expected behavior: when upserting an array, elements are always appended.
             if (typeof origNow[0] === 'object') {
-                const currPos = buildQueryCount(thisUid, origNow.length, hasUid);
-                const newOrig = origNow.map((el, index) => ({ ...el, _index: { '_value.#i': `val(${currPos}_${index})` } }));
+                const currPos = buildQueryCount(thisUid, origNow.length, hasUidHere);
+                const newOrig = origNow.map(
+                    (el, index) => ({ ...el, _index: { '_value.#i': `val(${currPos}_${index})` } }),
+                );
                 return newOrig; // Appends it
             } if (origNow.length > 0) {
                 // No UID available for list of primitives
@@ -98,22 +106,34 @@ export function wrapUpsertFromUpdater(orig: any, queryHead: string, hasUid: stri
         } if (typeof origNow == 'object' && !Array.isArray(origNow)) {
             const res = Object.fromEntries([
                 ...Object.entries(origNow).map(([key, value]) => {
-                    if (key !== '_value[' && key !== '$ref' && key !== 'type') { // FIXME: This currently ignores subsequent UIDs if one is specified. Fix ASAP!
-                        const ret = [key, recurse(origNow[key], buildQuery(thisUid, key, hasUid), origNow[key]?.uid?.startsWith?.('0x') ? origNow[key].uid : false)];
+                    if (key !== '_value[' && key !== '$ref' && key !== 'type') {
+                        // FIXME: This currently ignores subsequent UIDs if one is specified. Fix ASAP!
+                        const ret = [
+                            key,
+                            recurse(
+                                origNow[key],
+                                buildQuery(thisUid, key, hasUidHere),
+                                origNow[key]?.uid?.startsWith?.('0x') ? origNow[key].uid : false,
+                            ),
+                        ];
                         return ret;
                     } if (key !== '$ref' && key !== 'type') {
                         return [key, recurse(origNow[key], thisUid)];
                     } // Don't process `$ref` because we need it later or `type` because it's overwritten
-                    if (key === '$ref') { queries.pop(); } // Have ref, will be overwritten, so no use keeping a duplicate variable
+                    if (key === '$ref') {
+                        queries.pop();
+                    } // Have ref, will be overwritten, so no use keeping a duplicate variable
                     return [key, value];
 
                     // TODO: These matches are of lowest priority - so we should allow the upsert even if these objects are not used
                 }),
-                ['uid', hasUid || `uid(${thisUid})`], // Must have UID to do anything with it
+                ['uid', hasUidHere || `uid(${thisUid})`], // Must have UID to do anything with it
             ]);
+            // eslint-disable-next-line no-param-reassign
             if (origNow.uid?.startsWith?.('_:')) blankUidsToRef[origNow.uid] = res.uid;
             return res;
         }
+        return origNow;
     }
 
     const upsertObject = recurse(orig, queryHead, hasUid);
@@ -126,7 +146,7 @@ function* nextUid() {
 
     while (true) {
         yield `_:${index}`;
-        index++;
+        index += 1;
     }
 }
 
@@ -135,14 +155,23 @@ function* nextUid() {
  * This function will ensure that the field `unigraph.id` is unique and all references to be resolved.
  * @param inserts An array of objects or schemas to insert, containing the `$ref` field
  */
-export function insertsToUpsert(inserts: any[], upsert = true, schemasMap?: Record<string, any>): UnigraphUpsert {
+export function insertsToUpsert(
+    inserts: any[],
+    upsert = true,
+    schemasMap: Record<string, any> | undefined = undefined,
+): UnigraphUpsert {
     const refUids: string[] = [];
     const refQueries: Record<string, string> = {};
     const genUid = nextUid();
     const blankUids: any[] = [];
     const blankUidsToRef: Record<string, string> = {};
 
-    function insertsToUpsertRecursive(inserts: any[], appends: any[], queries: string[], currentObject: any, currentOrigin: any[]) {
+    function insertsToUpsertRecursive(
+        appends: any[],
+        queries: string[],
+        currentObject: any,
+        currentOrigin: any[],
+    ) {
         let isBlankUid = false;
         // If this is a reference object
         if (currentObject) {
@@ -159,7 +188,12 @@ export function insertsToUpsert(inserts: any[], upsert = true, schemasMap?: Reco
                 delete currentObject.$ref;
                 if (upsert) {
                     const refUid = `unigraphquery${queries.length + 1}`;
-                    const [upsertObject, upsertQueries] = wrapUpsertFromUpdater({ _value: currentObject._value, ...(currentObject['unigraph.indexes'] ? { 'unigraph.indexes': currentObject['unigraph.indexes'] } : {}) }, refUid, currentObject.uid, blankUidsToRef);
+                    const [upsertObject, upsertQueries] = wrapUpsertFromUpdater({
+                        _value: currentObject._value,
+                        ...(currentObject['unigraph.indexes']
+                            ? { 'unigraph.indexes': currentObject['unigraph.indexes'] }
+                            : {}),
+                    }, refUid, blankUidsToRef, currentObject.uid);
                     queries.push(...upsertQueries);
                     currentObject = Object.assign(currentObject, upsertObject);
                 }
@@ -178,16 +212,22 @@ export function insertsToUpsert(inserts: any[], upsert = true, schemasMap?: Reco
                 const { query } = currentObject.$ref;
                 delete currentObject.$ref;
                 // FIXME: Some objects (e.g. with standoff properties or type aliases) doesn't use `_value`
-                const [upsertObject, upsertQueries] = wrapUpsertFromUpdater({ _value: currentObject._value, ...(currentObject['unigraph.indexes'] ? { 'unigraph.indexes': currentObject['unigraph.indexes'] } : {}) }, refUid, false, blankUidsToRef);
+                const [upsertObject, upsertQueries] = wrapUpsertFromUpdater({
+                    _value: currentObject._value,
+                    ...(currentObject['unigraph.indexes']
+                        ? { 'unigraph.indexes': currentObject['unigraph.indexes'] }
+                        : {}),
+                }, refUid, blankUidsToRef, false);
 
                 if (!refUids.includes(refUid)) {
                     refUids.push(refUid);
-                    let dgraphFunction = buildDgraphFunctionFromRefQuery(query);
+                    const dgraphFunction = buildDgraphFunctionFromRefQuery(query);
+                    let ret = dgraphFunction;
                     if (Array.isArray(dgraphFunction)) {
                         queries.push(dgraphFunction[1]);
-                        dgraphFunction = dgraphFunction[0];
+                        [ret] = dgraphFunction;
                     }
-                    queries.push(`${refUid} as ${dgraphFunction}\n`);
+                    queries.push(`${refUid} as ${ret}\n`);
                     // currentObject["uid"] = refUid;
                     // currentObject = {"uid": `uid(${refUid})`}
                     queries.push(...upsertQueries);
@@ -207,18 +247,22 @@ export function insertsToUpsert(inserts: any[], upsert = true, schemasMap?: Reco
             currentOrigin = currentOrigin ? JSON.parse(JSON.stringify(currentOrigin)) : undefined;
             if (!currentObject.uid) currentObject.uid = genUid.next().value;
             if (!currentObject['unigraph.origin']) currentObject['unigraph.origin'] = { uid: currentObject.uid };
-            if (currentObject['unigraph.origin'] && !Array.isArray(currentObject['unigraph.origin'])) currentObject['unigraph.origin'] = [currentObject['unigraph.origin']];
+            if (currentObject['unigraph.origin'] && !Array.isArray(currentObject['unigraph.origin'])) {
+                currentObject['unigraph.origin'] = [currentObject['unigraph.origin']];
+            }
             if (!currentOrigin) currentOrigin = [];
             currentOrigin.push(...currentObject['unigraph.origin']);
         }
 
         const objectValues = Object.values(currentObject);
-        for (let i = 0; i < objectValues.length; ++i) {
+        for (let i = 0; i < objectValues.length; i += 1) {
             if (typeof objectValues[i] === 'object' && !Array.isArray(objectValues[i])) {
-                insertsToUpsertRecursive(inserts, appends, queries, objectValues[i], currentOrigin);
+                insertsToUpsertRecursive(appends, queries, objectValues[i], currentOrigin);
             } else if (typeof objectValues[i] === 'object' && Array.isArray(objectValues[i])) {
-                for (let j = 0; j < (objectValues[i] as any[]).length; ++j) {
-                    if (!Object.keys(currentObject).includes('unigraph.origin')) insertsToUpsertRecursive(inserts, appends, queries, (objectValues[i] as any[])[j], currentOrigin);
+                for (let j = 0; j < (objectValues[i] as any[]).length; j += 1) {
+                    if (!Object.keys(currentObject).includes('unigraph.origin')) {
+                        insertsToUpsertRecursive(appends, queries, (objectValues[i] as any[])[j], currentOrigin);
+                    }
                 }
             }
         }
@@ -229,51 +273,26 @@ export function insertsToUpsert(inserts: any[], upsert = true, schemasMap?: Reco
             }
         });
 
-        if (typeof currentObject === 'object' && !Array.isArray(currentObject) && currentOrigin) currentObject['unigraph.origin'] = currentOrigin;
+        if (typeof currentObject === 'object' && !Array.isArray(currentObject) && currentOrigin) {
+            currentObject['unigraph.origin'] = currentOrigin;
+        }
 
-        // console.log("-----------------------2", currentObject)
+    // console.log("-----------------------2", currentObject)
     }
 
     const insertsCopy = JSON.parse(JSON.stringify(inserts));
     const queries: any[] = [];
     const appends: any[] = [];
-    for (let i = 0; i < insertsCopy.length; ++i) {
+    for (let i = 0; i < insertsCopy.length; i += 1) {
         const curr = insertsCopy[i];
         if (!curr.uid) curr.uid = genUid.next().value;
         let origin = curr['unigraph.origin'];
         if (!origin && (!curr['dgraph.type'] || curr['dgraph.type'].includes.Entity)) origin = { uid: curr.uid };
         if (origin && !Array.isArray(origin)) origin = [origin];
-        insertsToUpsertRecursive(insertsCopy, appends, queries, curr, origin);
+        insertsToUpsertRecursive(appends, queries, curr, origin);
     }
     // console.log("Upsert processed!")
     // const util = require('util')
     // console.log(util.inspect({queries: queries, mutations: insertsCopy, appends: appends}, false, null, true /* enable colors */))
     return { queries, mutations: insertsCopy, appends };
-}
-
-// TODO: add the functionality to delete duplicate queries in upsert
-export function anchorBatchUpsert(upsert: UnigraphUpsert): UnigraphUpsert {
-    const { queries } = upsert;
-    const { appends } = upsert;
-    // 1. Use regex to make queries into a deduplicated array
-    const re = /unigraphquery[0-9_]*/g;
-    const extracted_queries = queries.map((query) => ({
-        orig: query,
-        pattern: query.replace(re, 'unigraphquery'),
-        elements: query.match(re),
-    }));
-    // 2. Establish duplicacy
-    const aliases: any = {};
-    // somehow
-
-    const unique_extracted = _.uniqBy(extracted_queries, 'pattern');
-    const appendsMap: any = {};
-    appends.forEach((it) => { appendsMap[it.uid] = it; });
-    const ids = _.flatten(unique_extracted.map((it) => it.elements));
-    const unique_appends = ids.map((el) => appendsMap[`uid(${el})`]);
-    return {
-        queries: unique_extracted.map((it) => it.orig),
-        mutations: [],
-        appends: unique_appends,
-    };
 }

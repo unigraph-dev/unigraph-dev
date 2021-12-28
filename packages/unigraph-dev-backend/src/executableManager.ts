@@ -1,3 +1,5 @@
+/* eslint-disable global-require */
+/* eslint-disable no-param-reassign */
 /**
  * This module contains functions that handle executables and their functionalities.
  */
@@ -29,7 +31,12 @@ export type Executable = {
     concurrency?: number,
 }
 
-export function createExecutableCache(client: DgraphClient, context: Partial<ExecContext>, unigraph: Unigraph, states: any): Cache<any> {
+export function createExecutableCache(
+    client: DgraphClient,
+    context: Partial<ExecContext>,
+    unigraph: Unigraph,
+    states: any,
+): Cache<any> {
     const schedule: Record<string, cron.ScheduledTask> = {};
 
     const cache: Cache<any> = {
@@ -87,23 +94,45 @@ export function buildExecutable(exec: Executable, context: ExecContext, unigraph
         } return fn;
     }
 
-    if (Object.keys(environmentRunners).includes(exec.env) && (!exec.concurrency || states.runningExecutables.filter((el: any) => el.slug === exec['unigraph.id']).length < exec.concurrency)) {
-        // @ts-expect-error: already checked for environment runner inclusion
+    if (Object.keys(environmentRunners).includes(exec.env)
+        && (!exec.concurrency
+            || states.runningExecutables.filter((el: any) => el.slug === exec['unigraph.id']).length < exec.concurrency)
+    ) {
+    // @ts-expect-error: already checked for environment runner inclusion
         return wrapExecutable(environmentRunners[exec.env](exec.src, context, unigraph));
     }
     console.log('not a good executable - ', exec);
     return undefined;
 }
 
-export function initExecutables(executables: [string, Executable][], context: Partial<ExecContext>, unigraph: Unigraph, schedule: Record<string, cron.ScheduledTask>, states: any) {
+export function initExecutables(
+    executables: [string, Executable][],
+    context: Partial<ExecContext>,
+    unigraph: Unigraph,
+    schedule: Record<string, cron.ScheduledTask>,
+    states: any,
+) {
     let newHooks = {};
     executables.forEach(([key, el]) => {
         if (key.startsWith('0x') && el.periodic) {
             schedule[el['unigraph.id']]?.stop();
-            schedule[el['unigraph.id']] = cron.schedule(el.periodic, () => buildExecutable(el, { ...context, definition: el, params: {} }, unigraph, states)());
+            schedule[el['unigraph.id']] = cron.schedule(
+                el.periodic,
+                () => buildExecutable(el, { ...context, definition: el, params: {} }, unigraph, states)(),
+            );
         }
         if (key.startsWith('0x') && el.on_hook) {
-            newHooks = addHook(newHooks, el.on_hook, async (params: any) => (buildExecutable(el, { ...context, definition: el, params }, unigraph, states))());
+            newHooks = addHook(
+                newHooks,
+                el.on_hook,
+                async (params: any) => (
+                    buildExecutable(
+                        el,
+                        { ...context, definition: el, params },
+                        unigraph,
+                        states,
+                    ))(),
+            );
         }
     });
     states.hooks = _.mergeWith({}, states.defaultHooks, newHooks, mergeWithConcatArray);
@@ -165,11 +194,11 @@ export const runEnvLambdaJs: ExecRunner = (src, context, unigraph) => {
 export const runEnvReactJSX: ExecRunner = (src, context, unigraph) => {
     let transpiled: any;
     try {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
         transpiled = (require('@babel/core').transformSync(`function comp (params) {
 ${src}
 }`, { presets: [require('@babel/preset-react')] }) as any).code;
-    } catch (e) {
+    } catch (e: any) {
         unigraph.addNotification({
             from: 'Executable manager',
             name: `Failed to compile executable ${context.definition['unigraph.id']}`,

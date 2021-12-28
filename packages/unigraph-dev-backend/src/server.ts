@@ -1,7 +1,8 @@
+/* eslint-disable prefer-destructuring */
 import { Application } from 'express-ws';
 import express from 'express';
 import WebSocket from 'ws';
-import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
+import { isJsonString, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { insertsToUpsert } from 'unigraph-dev-common/lib/utils/txnWrapper';
 import {
     buildUnigraphEntity, processAutoref, dectxObjects, processAutorefUnigraphId,
@@ -9,22 +10,30 @@ import {
 import repl from 'repl';
 import fetch from 'node-fetch';
 import { uniqueId } from 'lodash';
-import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { Unigraph } from 'unigraph-dev-common/lib/types/unigraph';
 import stringify from 'json-stable-stringify';
 import DgraphClient from './dgraphClient';
 import {
-    EventAddNotification, EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject, EventCreateUnigraphSchema, EventDeleteItemFromArray, EventDeleteRelation, EventDeleteUnigraphObject, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema, EventExportObjects, EventGetPackages, EventGetQueries, EventGetSchemas, EventGetSearchResults, EventGetSubscriptions, EventImportObjects, EventProxyFetch, EventQueryByStringWithVars, EventReorderItemInArray, EventResponser, EventRunExecutable, EventSetDgraphSchema, EventSubscribe, EventSubscribeObject, EventSubscribeQuery, EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO, IWebsocket, UnigraphUpsert,
-} from './custom';
+    EventAddNotification, EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject,
+    EventCreateUnigraphSchema, EventDeleteItemFromArray, EventDeleteRelation,
+    EventDeleteUnigraphObject, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema,
+    EventExportObjects, EventGetPackages, EventGetQueries, EventGetSchemas,
+    EventGetSearchResults, EventGetSubscriptions, EventImportObjects, EventProxyFetch,
+    EventQueryByStringWithVars, EventReorderItemInArray, EventResponser, EventRunExecutable,
+    EventSetDgraphSchema, EventSubscribe, EventSubscribeObject, EventSubscribeQuery,
+    EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO,
+    IWebsocket, Subscription, UnigraphUpsert,
+} from './custom.d';
 import {
     addUnigraphPackage, checkOrCreateDefaultDataModel, createPackageCache, createSchemaCache,
 } from './datamodelManager';
 import { Cache } from './caches';
 import {
-    createSubscriptionLocal, MsgCallbackFn, pollSubscriptions, removeOrHibernateSubscriptionsById, Subscription,
+    createSubscriptionLocal, MsgCallbackFn, pollSubscriptions, removeOrHibernateSubscriptionsById,
 } from './subscriptions';
 import {
-    afterObjectCreatedHooks, callHooks, HookAfterObjectChangedParams, HookAfterSchemaUpdatedParams, HookAfterSubscriptionAddedParams, Hooks, initEntityHeads,
+    afterObjectCreatedHooks, callHooks, HookAfterObjectChangedParams,
+    HookAfterSchemaUpdatedParams, HookAfterSubscriptionAddedParams, Hooks, initEntityHeads,
 } from './hooks';
 import { getAsyncLock } from './asyncManager';
 import { createExecutableCache } from './executableManager';
@@ -189,16 +198,24 @@ export default async function startServer(client: DgraphClient) {
     serverStates.localApi = localApi;
     caches.executables = createExecutableCache(client, { hello: 'world' }, localApi, serverStates);
 
-    setInterval(() => pollSubscriptions(serverStates.subscriptions, dgraphClient, pollCallback, undefined, serverStates), pollInterval);
+    setInterval(() => pollSubscriptions(
+        serverStates.subscriptions,
+        dgraphClient,
+        pollCallback,
+        undefined,
+        serverStates,
+    ), pollInterval);
 
-    const makeResponse = (event: {id: number | string}, success: boolean, body: Record<string, unknown> = {}) =>
-    // console.log(event, success, body)
-        stringify({
-            type: 'response',
-            success,
-            id: event.id,
-            ...body,
-        });
+    const makeResponse = (
+        event: {id: number | string},
+        success: boolean,
+        body: Record<string, unknown> = {},
+    ) => stringify({
+        type: 'response',
+        success,
+        id: event.id,
+        ...body,
+    });
 
     const eventRouter: Record<string, EventResponser> = {
         query_by_string_with_vars(event: EventQueryByStringWithVars, ws: IWebsocket) {
@@ -215,13 +232,22 @@ export default async function startServer(client: DgraphClient) {
 
         create_data_by_json(event: EventCreateDataByJson, ws: IWebsocket) {
             dgraphClient.createData(event.data).then((_) => {
-                callHooks(serverStates.hooks, 'after_object_changed', { subscriptions: serverStates.subscriptions, caches });
+                callHooks(
+                    serverStates.hooks,
+                    'after_object_changed',
+                    { subscriptions: serverStates.subscriptions, caches },
+                );
                 ws.send(makeResponse(event, true));
             }).catch((e) => ws.send(makeResponse(event, false, { error: e.toString() })));
         },
 
         subscribe_to_object(event: EventSubscribeObject, ws: IWebsocket) {
-            serverStates.localApi.subscribeToObject(event.uid, { ws, connId: event.connId }, event.id, event.options || {})
+            serverStates.localApi.subscribeToObject(
+                event.uid,
+                { ws, connId: event.connId },
+                event.id,
+                event.options || {},
+            )
                 .then((res: any) => ws.send(makeResponse(event, true)));
         },
 
@@ -233,14 +259,24 @@ export default async function startServer(client: DgraphClient) {
         subscribe_to_type(event: EventSubscribeType, ws: IWebsocket) {
             lock.acquire('caches/schema', (done: (any)) => {
                 done(false);
-                serverStates.localApi.subscribeToType(event.schema, { ws, connId: event.connId }, event.id, event.options || {})
+                serverStates.localApi.subscribeToType(
+                    event.schema,
+                    { ws, connId: event.connId },
+                    event.id,
+                    event.options || {},
+                )
                     .then((res: any) => ws.send(makeResponse(event, true)))
                     .catch((e: any) => ws.send(makeResponse(event, false, { error: e.toString() })));
             });
         },
 
         async subscribe_to_query(event: EventSubscribeQuery, ws: IWebsocket) {
-            serverStates.localApi.subscribeToQuery(event.queryFragment, { ws, connId: event.connId }, event.id, event.options)
+            serverStates.localApi.subscribeToQuery(
+                event.queryFragment,
+                { ws, connId: event.connId },
+                event.id,
+                event.options,
+            )
                 .then((res: any) => ws.send(makeResponse(event, true)))
                 .catch((e: any) => ws.send(makeResponse(event, false, { error: e.toString() })));
         },

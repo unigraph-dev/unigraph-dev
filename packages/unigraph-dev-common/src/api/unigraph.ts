@@ -1,3 +1,5 @@
+/* eslint-disable default-param-last */
+/* eslint-disable no-param-reassign */
 // FIXME: This file is ambiguous in purpose! Move utils to utils folder and keep this a small interface with a window object.
 
 import React from 'react';
@@ -21,7 +23,7 @@ function getPath(obj: any, path: string | string[]): any {
         return getPath(obj[path[0]], path.slice(1));
     } else {
         return undefined;
-        // throw new RangeError('Requested path doesn\'t exist')
+    // throw new RangeError('Requested path doesn\'t exist')
     }
 }
 
@@ -42,6 +44,7 @@ export const getObjectAs = (object: any, type: 'primitive') => {
     if (type === 'primitive') {
         return getObjectAsRecursivePrimitive(object);
     }
+    return object;
 };
 
 // TODO: Switch to prototype-based, faster helper functions
@@ -62,6 +65,7 @@ export class UnigraphObject extends Object {
         }
     };
 
+    // eslint-disable-next-line class-methods-use-this
     getMetadata = () => undefined;
 
     getType = () => (this as any).type['unigraph.id'];
@@ -129,8 +133,10 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
     const subscriptions: Record<string, Function> = {};
     const states: Record<string, AppState> = {};
     const caches: Record<string, any> = {
-        // @ts-expect-error: already checked if not JSON
-        namespaceMap: isJsonString(window.localStorage.getItem('caches/namespaceMap')) ? JSON.parse(window.localStorage.getItem('caches/namespaceMap')) : false,
+        namespaceMap: isJsonString(window.localStorage.getItem('caches/namespaceMap'))
+            // @ts-expect-error: already checked if not JSON
+            ? JSON.parse(window.localStorage.getItem('caches/namespaceMap'))
+            : false,
     };
     const cacheCallbacks: Record<string, any[]> = {};
     let retries: any = false;
@@ -151,7 +157,9 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 value: initialValue,
                 subscribers: [],
                 subscribe: (subscriber: (newValue: any) => any) => state.subscribers.push(subscriber),
-                unsubscribe: (cb: (newValue: any) => any) => state.subscribers = state.subscribers.filter((el) => el !== cb),
+                unsubscribe: (cb: (newValue: any) => any) => {
+                    state.subscribers = state.subscribers.filter((el) => el !== cb);
+                },
                 setValue: undefined as any,
             };
             state.setValue = (newValue: any) => {
@@ -203,8 +211,11 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 window.localStorage.setItem(`caches/${parsed.name}`, JSON.stringify(parsed.result));
                 cacheCallbacks[parsed.name]?.forEach((el) => el(parsed.result));
             }
-            if (parsed.type === 'subscription' && parsed.id && subscriptions[parsed.id] && parsed.result) subscriptions[parsed.id](parsed.result);
+            if (parsed.type === 'subscription' && parsed.id && subscriptions[parsed.id] && parsed.result) {
+                subscriptions[parsed.id](parsed.result);
+            }
             if (parsed.type === 'open_url' && window) window.open(parsed.url, '_blank');
+            return ev;
         };
     }
 
@@ -277,20 +288,27 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 if (response.success) resolve(id);
                 else reject(response);
             };
-            subscriptions[id] = (result: any[]) => callback(buildGraph(result.map((el: any) => new UnigraphObject(el))));
+            subscriptions[id] = (result: any[]) => {
+                callback(buildGraph(result.map((el: any) => new UnigraphObject(el))));
+            };
             sendEvent(connection, 'subscribe_to_type', { schema: name, options }, id);
         }),
         // eslint-disable-next-line no-async-promise-executor
-        subscribeToObject: (uid, callback, eventId = undefined, options: any) => new Promise(async (resolve, reject) => {
-            const id = typeof eventId === 'number' ? eventId : getRandomInt();
-            callbacks[id] = (response: any) => {
-                if (response.success) resolve(id);
-                else reject(response);
-            };
-            subscriptions[id] = (result: any) => (result.length === 1 ? callback(new UnigraphObject(result[0])) : callback(result.map((el: any) => new UnigraphObject(el))));
-            if (typeof options?.queryFn === 'function') options.queryFn = options.queryFn('QUERYFN_TEMPLATE');
-            sendEvent(connection, 'subscribe_to_object', { uid, options }, id);
-        }),
+        subscribeToObject: (uid, callback, eventId = undefined, options: any) => new Promise(
+            (resolve, reject) => {
+                const id = typeof eventId === 'number' ? eventId : getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success) resolve(id);
+                    else reject(response);
+                };
+                subscriptions[id] = (result: any) => (
+                    result.length === 1
+                        ? callback(new UnigraphObject(result[0]))
+                        : callback(result.map((el: any) => new UnigraphObject(el))));
+                if (typeof options?.queryFn === 'function') options.queryFn = options.queryFn('QUERYFN_TEMPLATE');
+                sendEvent(connection, 'subscribe_to_object', { uid, options }, id);
+            },
+        ),
         subscribeToQuery: (fragment, callback, eventId = undefined, options) => new Promise((resolve, reject) => {
             const id = typeof eventId === 'number' ? eventId : getRandomInt();
             callbacks[id] = (response: any) => {
@@ -306,7 +324,13 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 if (response.success) resolve(id);
                 else reject(response);
             };
-            if (!update) subscriptions[id] = (result: any[] | any) => callback(Array.isArray(result) ? result.map((el: any) => new UnigraphObject(el)) : new UnigraphObject(result));
+            if (!update) {
+                subscriptions[id] = (result: any[] | any) => {
+                    callback(Array.isArray(result)
+                        ? result.map((el: any) => new UnigraphObject(el))
+                        : new UnigraphObject(result));
+                };
+            }
             sendEvent(connection, 'subscribe', { query, update }, id);
         }),
         unsubscribe: (id) => {
@@ -392,17 +416,17 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
          * Accepts exactly parameters of fetch. Returns a promise containing the blob content
          * (you can use blobToJson to convert to JSON if that's what's returned)
          *
-         * @param url
+         * @param fetchUrl
          * @param options
          */
-        proxyFetch: (url, options?) => new Promise((resolve, reject) => {
+        proxyFetch: (fetchUrl, options?) => new Promise((resolve, reject) => {
             const id = getRandomInt();
             callbacks[id] = (responseBlob: {success: boolean, blob: string}) => {
                 if (responseBlob.success && responseBlob.blob) resolve(base64ToBlob(responseBlob.blob));
                 else reject(responseBlob);
             };
             sendEvent(connection, 'proxy_fetch', {
-                url,
+                fetchUrl,
                 options,
             }, id);
         }),
@@ -417,7 +441,10 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 if (response.success) {
                     if (response.returns?.return_function_component !== undefined && !fnString) {
                         // eslint-disable-next-line no-new-func
-                        const retFn = new Function('React', `return ${response.returns?.return_function_component}`)(React);
+                        const retFn = new Function(
+                            'React',
+                            `return ${response.returns?.return_function_component}`,
+                        )(React);
                         console.log(retFn);
                         resolve(retFn);
                     } else {

@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 function getPath(obj: any, path: string | string[]): any {
     if (path.length === 0) return new UnigraphObject(obj);
     if (!Array.isArray(path)) path = path.split('/').filter((e) => e.length);
@@ -10,7 +11,7 @@ function getPath(obj: any, path: string | string[]): any {
         return getPath(obj[path[0]], path.slice(1));
     } else {
         return undefined;
-        // throw new RangeError('Requested path doesn\'t exist')
+    // throw new RangeError('Requested path doesn\'t exist')
     }
 }
 
@@ -31,6 +32,7 @@ export const getObjectAs = (object: any, type: 'primitive') => {
     if (type === 'primitive') {
         return getObjectAsRecursivePrimitive(object);
     }
+    return object;
 };
 
 // TODO: Switch to prototype-based, faster helper functions
@@ -51,10 +53,12 @@ export class UnigraphObject extends Object {
         }
     };
 
+    // eslint-disable-next-line class-methods-use-this
     getMetadata = () => undefined;
 
     getType = () => (this as any).type['unigraph.id'];
 
+    // eslint-disable-next-line class-methods-use-this
     getRefType = () => undefined;
 
     as = (type: string) => getObjectAs(this, type as any);
@@ -75,12 +79,18 @@ export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
     function buildDictRecurse(obj: any, pastUids: any[] = []) {
         if (obj && typeof obj === 'object' && Array.isArray(obj)) {
             obj.forEach((val, index) => {
-                if (val?.uid && !dict[val.uid] && Object.keys(val).filter((el) => el.startsWith('_value')).length > 0) dict[val.uid] = obj[index];
+                if (
+                    val?.uid && !dict[val.uid]
+                    && Object.keys(val).filter((el) => el.startsWith('_value')).length > 0
+                ) dict[val.uid] = obj[index];
                 if (!pastUids.includes(val?.uid)) buildDictRecurse(val, [...pastUids, val?.uid]);
             });
         } else if (obj && typeof obj === 'object') {
             Object.entries(obj).forEach(([key, value]: [key: string, value: any]) => {
-                if (value?.uid && !dict[value.uid] && Object.keys(value).filter((el) => el.startsWith('_value')).length > 0) dict[value.uid] = obj[key];
+                if (
+                    value?.uid && !dict[value.uid]
+                    && Object.keys(value).filter((el) => el.startsWith('_value')).length > 0
+                ) dict[value.uid] = obj[key];
                 if (!pastUids.includes(value?.uid)) buildDictRecurse(value, [...pastUids, value?.uid]);
             });
         }
@@ -134,7 +144,7 @@ export function blobToBase64(blob: Blob): Promise<string> {
         const reader = new FileReader();
         reader.readAsDataURL(blob);
         reader.onloadend = function () {
-            typeof reader.result === 'string' ? resolve(reader.result) : reject('blob not a string');
+            typeof reader.result === 'string' ? resolve(reader.result) : reject(new Error('blob not a string'));
         };
     });
 }
@@ -149,7 +159,7 @@ export function base64ToBlob(base64: string): Blob {
     const uInt8Array = new Uint8Array(decodedData.length);
 
     // Insert all character code into uInt8Array
-    for (let i = 0; i < decodedData.length; ++i) {
+    for (let i = 0; i < decodedData.length; i += 1) {
         uInt8Array[i] = decodedData.charCodeAt(i);
     }
 
@@ -159,7 +169,9 @@ export function base64ToBlob(base64: string): Blob {
 
 export function blobToJson(blob: Blob): Promise<any> {
     return new Promise((resolve, reject) => {
-        blob.text().then((text) => (isJsonString(text) ? resolve(JSON.stringify(text)) : reject('blob not a json')));
+        blob.text().then(
+            (text) => (isJsonString(text) ? resolve(JSON.stringify(text)) : reject(new Error('blob not a json'))),
+        );
     });
 }
 

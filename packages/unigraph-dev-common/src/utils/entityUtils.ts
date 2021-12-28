@@ -1,15 +1,26 @@
-// FIXME: This file is too large! Either break it up or add synopsis here.
+/* eslint-disable no-param-reassign */
 
 import { jsonToGraphQLQuery } from 'json-to-graphql-query';
 import _ from 'lodash';
 import { buildGraph } from './utils';
 import {
-    ComposerUnionInstance, Definition, EntityDgraph, Field, RefUnigraphIdType, Schema, UnigraphIdType, UnigraphTypeString,
+    ComposerUnionInstance,
+    Definition,
+    EntityDgraph,
+    Field,
+    RefUnigraphIdType,
+    Schema,
+    UnigraphIdType,
+    UnigraphTypeString,
 } from '../types/json-ts';
 
 // function uid<IdType extends string>(id: IdType): UidType<IdType> {return {"uid": id}}
-export function makeUnigraphId<IdType extends string>(id: IdType): UnigraphIdType<IdType> { return { 'unigraph.id': id }; }
-export function makeRefUnigraphId<IdType extends string>(id: IdType): RefUnigraphIdType<IdType> { return { $ref: { query: [{ key: 'unigraph.id', value: id }] } }; }
+export function makeUnigraphId<IdType extends string>(id: IdType): UnigraphIdType<IdType> {
+    return { 'unigraph.id': id };
+}
+export function makeRefUnigraphId<IdType extends string>(id: IdType): RefUnigraphIdType<IdType> {
+    return { $ref: { query: [{ key: 'unigraph.id', value: id }] } };
+}
 
 function isDate(dateStr: string) {
     return !isNaN(new Date(dateStr).getDate());
@@ -57,17 +68,26 @@ type PropertyDescription = Partial<Field<any>>
  */
 
 export function isTypeAlias(localSchema: Record<string, any>, rawPartUnigraphType: UnigraphTypeString): boolean {
-    return (localSchema?.type['unigraph.id'] === rawPartUnigraphType) && (!rawPartUnigraphType.startsWith('$/composer/'));
+    return (
+        localSchema?.type['unigraph.id'] === rawPartUnigraphType)
+        && (!rawPartUnigraphType.startsWith('$/composer/')
+        );
 }
 
 function isUnion(schemaString: string, schemaMap: Record<string, any>): boolean {
     if (!schemaString) return false;
-    return schemaString.startsWith('$/schema/interface') || schemaString === '$/composer/Union' || isUnion(schemaMap[schemaString]?.type?.['unigraph.id'], schemaMap);
+    return (schemaString.startsWith('$/schema/interface')
+        || schemaString === '$/composer/Union'
+        || isUnion(schemaMap[schemaString]?.type?.['unigraph.id'], schemaMap));
 }
 
 function isRef(rawPart: any) {
-    return (Object.keys(rawPart).length === 1 && typeof rawPart.uid === 'string' && rawPart.uid.startsWith('0x'))
-        || (Object.keys(rawPart).length === 1 && typeof rawPart['unigraph.id'] === 'string' && rawPart['unigraph.id'].startsWith('$/'));
+    return (Object.keys(rawPart).length === 1
+            && typeof rawPart.uid === 'string'
+            && rawPart.uid.startsWith('0x'))
+        || (Object.keys(rawPart).length === 1
+            && typeof rawPart['unigraph.id'] === 'string'
+            && rawPart['unigraph.id'].startsWith('$/'));
 }
 
 /**
@@ -83,7 +103,13 @@ function isRef(rawPart: any) {
  * @param schemaMap A map of all schemas indexed by schema unigraph.id starting with $/package/.../schema or $/schema
  * @param localSchema A definition, usually the value corresponding to the "definition" key in schemas.
  */
-function buildUnigraphEntityPart(rawPart: any, options: BuildEntityOptions, schemaMap: Record<string, Schema>, localSchema: Definition | any, propDesc: PropertyDescription | Record<string, never> = {}): {'_value': any} {
+function buildUnigraphEntityPart(
+    rawPart: any,
+    options: BuildEntityOptions,
+    schemaMap: Record<string, Schema>,
+    localSchema: Definition | any,
+    propDesc: PropertyDescription | Record<string, never> = {},
+): {'_value': any} {
     let unigraphPartValue: any;
     let predicate = '_value';
     let noPredicate = false;
@@ -91,8 +117,8 @@ function buildUnigraphEntityPart(rawPart: any, options: BuildEntityOptions, sche
     // console.log(localSchema, rawPart)
 
     if (localSchema.type?.['unigraph.id'] === '$/schema/any' && typeof rawPart?.type?.['unigraph.id'] === 'string') {
-        // If schema is any object and the object has a type (that we can check),
-        // we allow any rawPart by setting localSchema type to that of object.
+    // If schema is any object and the object has a type (that we can check),
+    // we allow any rawPart by setting localSchema type to that of object.
         localSchema = JSON.parse(JSON.stringify(localSchema));
         localSchema.type['unigraph.id'] = rawPart.type['unigraph.id'];
     } else if (localSchema.type?.['unigraph.id'] === '$/schema/any' && !(isRef(rawPart))) {
@@ -100,18 +126,22 @@ function buildUnigraphEntityPart(rawPart: any, options: BuildEntityOptions, sche
     }
 
     if (rawPart?.type?.['unigraph.id'] && schemaMap[rawPart.type['unigraph.id']]?._definition
-        && (rawPart?.type?.['unigraph.id'] === localSchema.type?.['unigraph.id'] || localSchema.type?.['unigraph.id'] === '$/schema/any')) {
+        && (
+            rawPart?.type?.['unigraph.id'] === localSchema.type?.['unigraph.id']
+            || localSchema.type?.['unigraph.id'] === '$/schema/any')) {
         const userType = rawPart.type;
         delete rawPart.type;
-        unigraphPartValue = buildUnigraphEntity((rawPart._value || rawPart._value === '') ? rawPart._value : rawPart, userType['unigraph.id'], schemaMap, true, options, propDesc);
+        unigraphPartValue = buildUnigraphEntity((rawPart._value || rawPart._value === '')
+            ? rawPart._value
+            : rawPart, userType['unigraph.id'], schemaMap, true, options, propDesc);
     } else {
         try {
-        // Check for localSchema accordance
+            // Check for localSchema accordance
             if (rawPart && isRef(rawPart)) {
-            // Is UID reference, don't check for accordance
+                // Is UID reference, don't check for accordance
                 unigraphPartValue = rawPart;
             } else if (localSchema.type?.['unigraph.id'] === rawPartUnigraphType) {
-            // Case 1: Entity type == schema type. This is straightforward
+                // Case 1: Entity type == schema type. This is straightforward
                 switch (rawPartUnigraphType) {
                 case '$/composer/Array':
                     predicate = '_value[';
@@ -216,10 +246,14 @@ function buildUnigraphEntityPart(rawPart: any, options: BuildEntityOptions, sche
             let choicesResults = (_.uniqBy(definitions, "uid")).map(defn => {
                 try {
                     return [defn, buildUnigraphEntityPart(rawPart, options, schemaMap, defn)]
-                } catch (e) {console.log(e.message || e); return undefined};
+                } catch (e: any) {console.log(e.message || e); return undefined};
             }).filter(x => x !== undefined);
             if (choicesResults.length !== 1 && rawPartUnigraphType !== "$/primitive/undefined") {
-                throw new TypeError("Union type does not allow ambiguous or nonexistent selections!" + JSON.stringify(rawPart) + JSON.stringify(localSchema) + rawPartUnigraphType + "\navailable types: " + definitions.map((el: any) => el?.type?.['unigraph.id'] + " ") + "\n\n")
+                throw new TypeError(
+                    "Union type does not allow ambiguous or nonexistent selections!" 
+                        + JSON.stringify(rawPart) + JSON.stringify(localSchema) 
+                        + rawPartUnigraphType + "\navailable types: " 
+                        + definitions.map((el: any) => el?.type?.['unigraph.id'] + " ") + "\n\n")
             } else {
                 unigraphPartValue = choicesResults[0]?.[1];
             }

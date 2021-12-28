@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 const getQueryHead = (qual: string, filter: string, showHidden: boolean) => `result(${qual}) @filter(${filter} type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) ${showHidden ? '' : 'AND (NOT eq(<_hide>, true))'})`;
 
 const resQueries = {
@@ -32,7 +33,7 @@ const resQueries = {
 
 const getQualUids = (h: number) => {
     const quals: string[] = [];
-    for (let i = 0; i < h; ++i) {
+    for (let i = 0; i < h; i += 1) {
         quals.push(`uhops${i}`);
     }
     return quals.join(', ');
@@ -57,7 +58,7 @@ export const makeSearchQuery = (
     searchOptions: any = {},
 ): string => {
     const qhops: string[] = [];
-    for (let i = 0; i < hops; ++i) {
+    for (let i = 0; i < hops; i += 1) {
         qhops.push(`qhops${(i + 1).toString()}(func: uid(uhops${i.toString()})) {
             <unigraph.origin> {
                 ${i === hops - 1 ? '' : `uhops${(i + 1).toString()} as `}uid
@@ -91,6 +92,7 @@ export const getQueryString = (query: {method: 'fulltext' | 'type' | 'uid', valu
         }
         if (el.method === 'type') { entityQueries.push(`queryresult${index.toString()}`); return `var(func: eq(<unigraph.id>, "${el.value}")) { <~type> { queryresult${index.toString()} as uid } }`; }
         if (el.method === 'uid') { resultQueries.push(`queryresult${index.toString()}`); return `queryresult${index.toString()} as var(func: uid(${el.value}))`; }
+        return '';
     });
     return [queries.join('\n'), `(func: uid(${resultQueries.join(', ')}))`, entityQueries.length ? `uid(${entityQueries.join(', ')}) AND ` : ''];
 };
