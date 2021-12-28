@@ -126,7 +126,7 @@ const NoteViewTextWrapper = ({ children, semanticChildren, isRoot, onContextMenu
     </div>
 }
 
-export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isCollapsed }: any) => {
+export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isCollapsed, focused }: any) => {
     if (!callbacks?.viewId) callbacks = {...(callbacks ? callbacks : {}), viewId: getRandomInt()};
     const [subentities, otherChildren] = getSubentities(data);
     const [command, setCommand] = React.useState<() => any | undefined>();
@@ -150,6 +150,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
     /** Reference for text content as a string */
     const textref = React.useRef<any>();
     /** Reference for HTML Element for list of children */
+    const editorRef = React.useRef<any>();
     const childrenref = React.useRef<any>();
     const inputDebounced = React.useRef(_.debounce(inputter, 333))
     const setCurrentText = (text: string) => { textInput.current.textContent = text };
@@ -169,8 +170,6 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
         }
     }
     const resetEdited = () => {edited.current = false; setTimeout(() => {commandFn()});}
-
-    //console.log(data);
 
     const [isChildrenCollapsed, setIsChildrenCollapsed] = React.useState<any>({});
 
@@ -195,6 +194,12 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
         if (isEditing && textInput.current?.textContent === "" && data.get('text').as('primitive')) { textInput.current.textContent = textref.current }
     }, [isEditing])
 
+    React.useEffect(() => {
+        if (focused) {
+            editorRef.current?.click?.();
+        }
+    }, [focused])
+
     React.useEffect(commandFn, [command])
 
     return <NoteViewPageWrapper isRoot={!isChildren}>
@@ -204,7 +209,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                 callbacks={callbacks}
                 semanticChildren={buildGraph(otherChildren).filter((el: any) => el.type).map((el: any) => <AutoDynamicView object={el.type?.['unigraph.id'] === "$/schema/note_block" ? el : {uid: el.uid, type: el.type}} inline/>)}
             >
-                <div onPointerUp={(ev) => {
+                <div ref={editorRef} onPointerUp={(ev) => {
                     if (!isEditing) {
                         setIsEditing(true);
                         const caretPos = Number((ev.target as HTMLElement).getAttribute("markdownPos") || 0);
@@ -217,6 +222,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                         }, 0)
                     }
                 }} onClick={(ev) => {
+                    window.unigraph.getState('global/focused').value = data?.uid;
                     if (!isEditing) {
                         setIsEditing(true);
                         const caretPos = Number((ev.target as HTMLElement).getAttribute("markdownPos") || 0);
@@ -229,8 +235,7 @@ export const DetailedNoteBlock = ({ data, isChildren, callbacks, options, isColl
                         }, 0)
                     }
                 }}
-                onBlur={(ev) => { setIsEditing(false); inputDebounced.current.flush(); }} style={{ width: "100%" }}>
-
+                onBlur={(ev) => { setIsEditing(false); inputDebounced.current.flush(); if (focused) window.unigraph.getState('global/focused').setValue("");}} style={{ width: "100%" }}>
                     {(isEditing) ? <Typography
                         variant={(isChildren || callbacks.isEmbed) ? "body1" : "h4"}
                         onContextMenu={isChildren ? undefined : (event) => onUnigraphContextMenu(event, data, undefined, callbacks)}

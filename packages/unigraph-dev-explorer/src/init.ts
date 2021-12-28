@@ -90,6 +90,7 @@ export function init(hostname?: string) {
     });
 
     window.unigraph.addState('global/selected', []);
+    window.unigraph.addState('global/focused', "");
 
     initContextMenu();
     initRegistry();
