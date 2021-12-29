@@ -184,7 +184,20 @@ export interface Unigraph<TT = WebSocket | false> {
         eventId?: number | undefined,
         options?: QueryRaw['options']
     ): Promise<any>;
+    /**
+     * Subscribe to or update a Unigraph query (with the Query type).
+     * @param query the query to subscribe to. Must follow the Query type (note this is different from a GraphQL query)
+     * @param callback a callback function. Can leave empty if updating existing one, since the previous one will be called.
+     * @param eventId subscription ID (if update, must be the same)
+     * @param update whether we're updating the query (delta query).
+     */
     subscribe(query: Query, callback: (results: any[] | any) => void, eventId?: number, update?: boolean): Promise<any>;
+    /**
+     * Hibernates (or revives) a Unigraph subscription.
+     * @param eventId the subscription ID to (un)hibernate.
+     * @param revival whether this is a revival or hibernation.
+     */
+    hibernateOrReviveSubscription(eventId?: number, revival?: boolean): Promise<any>;
     /** Unsubscribes using the subscription ID. */
     unsubscribe(id: number): any;
     /**
@@ -257,10 +270,17 @@ export interface Unigraph<TT = WebSocket | false> {
      * Deletes relationships by supplying the origin UID and JSONs to delete.
      *
      * For example, if we have an array `0x1`, we can put uid as `0x1` and relation as `{
-     *   "_value[": [{ "uid": "0x2" }] (note: for list elements, the second UID is the master UID with metadata.)
+     *   "_value[": [{ "uid": "0x2" }] (note: for list elements, the second UID is the main UID with metadata.)
      * }`
      */
     deleteRelation(uid: string, relation: any): any;
+    /**
+     * Reorders items in an array (ordered list).
+     * @param uid The uid of the target list - must be of type `$/composer/Array`
+     * @param item an array of an array of 2 items, first being the original index(es) or uid, second being the desired index(es).
+     * @param relationUid Optional. Specifies the uid of the entity this array belongs to. If present, entity relation to it will also be deleted.
+     * @param subIds Optional, either an ID or an array of ID with relevant subscriptions.
+     */
     reorderItemInArray?(
         uid: string,
         item: [(number | string), number] | [(number | string), number][],

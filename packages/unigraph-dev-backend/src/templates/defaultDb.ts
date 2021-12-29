@@ -53,7 +53,7 @@ type <Named> {
     _updatedAt
 }
 type <Type> {
-    definition
+    _definition
 }
 type <Package> {
     pkgManifest
