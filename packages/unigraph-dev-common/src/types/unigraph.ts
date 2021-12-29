@@ -270,7 +270,7 @@ export interface Unigraph<TT = WebSocket | false> {
      * Deletes relationships by supplying the origin UID and JSONs to delete.
      *
      * For example, if we have an array `0x1`, we can put uid as `0x1` and relation as `{
-     *   "_value[": [{ "uid": "0x2" }] (note: for list elements, the second UID is the master UID with metadata.)
+     *   "_value[": [{ "uid": "0x2" }] (note: for list elements, the second UID is the main UID with metadata.)
      * }`
      */
     deleteRelation(uid: string, relation: any): any;

@@ -3,6 +3,7 @@ module.exports = {
     parser: '@typescript-eslint/parser',
     plugins: [
         '@typescript-eslint',
+        'inclusive-language',
     ],
     extends: [
         'airbnb', 'airbnb/hooks',
@@ -22,6 +23,7 @@ module.exports = {
         '**/*.config.js',
     ],
     rules: {
+        'inclusive-language/use-inclusive-words': 'error',
         indent: ['error', 4, { ignoredNodes: ['JSXElement *', 'JSXElement'] }],
         'react/jsx-indent': ['error', 4],
         'react/jsx-indent-props': ['error', 4],

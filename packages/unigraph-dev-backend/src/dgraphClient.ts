@@ -12,6 +12,7 @@ export type UnigraphUpsert = {
   appends: any[]
 }
 
+// eslint-disable-next-line inclusive-language/use-inclusive-words
 /**
  * Example client, adapted from:
  *   https://github.com/dgraph-io/dgraph-js/blob/master/examples/simple/index.js
