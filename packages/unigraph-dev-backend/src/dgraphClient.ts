@@ -325,6 +325,7 @@ export default class DgraphClient {
 
   async getSearchResults(query: string[], display: any, hops = 2, searchOptions: any) {
     const finalQuery = makeSearchQuery(query, display, hops, searchOptions)
+    console.log(finalQuery)
     perfLogStartDbTransaction ()
     const res = (await this.queryDgraph(finalQuery));
     perfLogAfterDbTransaction ()

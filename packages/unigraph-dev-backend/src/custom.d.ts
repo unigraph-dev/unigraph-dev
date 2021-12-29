@@ -275,7 +275,9 @@ declare type EventGetSearchResults = {
     method: string,
     display?: string,
     hops?: number,
-    searchOptions: any
+    searchOptions: any,
+    limit?: number,
+    noPrimitives?: boolean,
 }
 
 declare type EventExportObjects = {

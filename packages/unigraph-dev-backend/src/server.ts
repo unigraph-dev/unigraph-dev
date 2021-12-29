@@ -542,9 +542,20 @@ export default async function startServer(client: DgraphClient) {
         },
 
         "get_search_results": async function (event: EventGetSearchResults, ws: IWebsocket) {
-            const res = await serverStates.localApi.getSearchResults(event.query, event.display, event.hops, event.searchOptions)
-                .catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
-            ws.send(makeResponse(event, true, {results: res}));
+            let searchQuery: any = event.query;
+            let searchOptions: any = event.searchOptions;
+            if (event.method === "fulltext") {
+                // using compatibility mode for full text query
+                searchQuery = [{method: 'fulltext', value: event.query}];
+                searchOptions = {
+                    ...searchOptions,
+                    limit: event.limit ? "-" + event.limit : undefined,
+                    noPrimitives: event.noPrimitives
+                }
+            }
+            serverStates.localApi.getSearchResults(searchQuery, event.display, event.hops, searchOptions)
+                .then((res: any) => ws.send(makeResponse(event, true, { results: res })))
+                .catch((e: any) => ws.send(makeResponse(event, false, { "error": e.toString() })));
         },
 
         "export_objects": async function (event: EventExportObjects, ws: IWebsocket) {
