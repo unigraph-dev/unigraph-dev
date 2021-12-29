@@ -2,7 +2,7 @@
 const getQueryHead = (qual: string, filter: string, showHidden: boolean) => `result(${qual}) @filter(${filter} type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) ${showHidden ? '' : 'AND (NOT eq(<_hide>, true))'})`;
 
 const resQueries = {
-    indexes: (qual: string, filter: string, showHidden: boolean, _: string) => `${getQueryHead(qual, filter, showHidden)} {
+    indexes: (qual: string, filter: string, showHidden: boolean, _: string) => `${getQueryHead(qual, `${filter} AND has(<unigraph.indexes>)`, showHidden)} {
         uid
         type {
           unigraph.id

@@ -333,6 +333,9 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             }
             sendEvent(connection, 'subscribe', { query, update }, id);
         }),
+        hibernateOrReviveSubscription: (eventId = undefined, revival) => new Promise((resolve, reject) => {
+            sendEvent(connection, 'hibernate_or_revive_subscription', { revival }, eventId);
+        }),
         unsubscribe: (id) => {
             sendEvent(connection, 'unsubscribe_by_id', {}, id);
         },

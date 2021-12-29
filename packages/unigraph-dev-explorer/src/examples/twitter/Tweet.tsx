@@ -51,7 +51,7 @@ export const Tweet: DynamicViewRenderer = ({ data, callbacks }) => {
                     <Typography variant="body2" style={{ color: 'gray' }}>
                         @
                         {data.get('from_user/username').as('primitive')}
-                        ,
+                        {', '}
                         {Sugar.Date.relative(new Date(data._updatedAt || data._timestamp._updatedAt))}
                     </Typography>
                 </div>
