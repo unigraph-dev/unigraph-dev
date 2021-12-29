@@ -125,6 +125,13 @@ declare type EventSubscribe = {
     update?: boolean,
 }
 
+declare type EventHibernateSubscription = {
+    type: 'event',
+    event: 'hibernate_or_revive_subscription',
+    id: number | string,
+    revival?: boolean,
+}
+
 declare type EventGetQueries = {
     type: 'event',
     event: 'get_queries',

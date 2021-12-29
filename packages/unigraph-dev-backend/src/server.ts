@@ -18,7 +18,7 @@ import {
     EventCreateUnigraphSchema, EventDeleteItemFromArray, EventDeleteRelation,
     EventDeleteUnigraphObject, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema,
     EventExportObjects, EventGetPackages, EventGetQueries, EventGetSchemas,
-    EventGetSearchResults, EventGetSubscriptions, EventImportObjects, EventProxyFetch,
+    EventGetSearchResults, EventGetSubscriptions, EventHibernateSubscription, EventImportObjects, EventProxyFetch,
     EventQueryByStringWithVars, EventReorderItemInArray, EventResponser, EventRunExecutable,
     EventSetDgraphSchema, EventSubscribe, EventSubscribeObject, EventSubscribeQuery,
     EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO,
@@ -495,6 +495,12 @@ export default async function startServer(client: DgraphClient) {
                 .then(res => res.buffer())
                 .then(buffer => ws.send(makeResponse(event, true, {"blob": buffer.toString('base64')})))
                 .catch(err => ws.send(makeResponse(event, false, {error: err})))
+        },
+
+        "hibernate_or_revive_subscription": async function (event: EventHibernateSubscription, ws: IWebsocket) {
+            const res = await serverStates.localApi.hibernateOrReviveSubscription(event.id, event.revival)
+                .catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
+            ws.send(makeResponse(event, true, {result: res}))
         },
 
         "import_objects": async function (event: EventImportObjects, ws: IWebsocket) {
