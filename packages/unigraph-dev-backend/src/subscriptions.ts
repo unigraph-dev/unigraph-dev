@@ -230,7 +230,7 @@ const resolvers = {
                 const results: any[] = await states.dgraphClient.queryDgraph(query)
                     .catch((e: any) => { console.log(e, query); return []; });
                 const addData = results[0] || [];
-                newData = _.uniqBy([...sub.data, ...addData], 'uid');
+                newData = _.uniqBy([...(sub.data || []), ...addData], 'uid');
             }
             sub.data = newData.filter((el: any) => newUid?.includes(el?.uid));
             sub.query = newQuery;

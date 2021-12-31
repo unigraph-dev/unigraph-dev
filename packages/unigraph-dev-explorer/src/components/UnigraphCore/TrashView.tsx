@@ -4,19 +4,21 @@ import {
 import { Delete } from '@material-ui/icons';
 import React from 'react';
 import { buildGraph, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import { TabContext } from '../../utils';
 import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
 
 export function TrashView() {
     const [totalDeleted, setTotalDeleted] = React.useState<any[]>([]);
+    const tabContext = React.useContext(TabContext);
 
     React.useEffect(() => {
         const subsId = getRandomInt();
-        window.unigraph.subscribeToQuery('(func: type(Deleted)) @recurse {uid expand(_userpredicate_) <unigraph.id>}', (res: any[]) => {
+        tabContext.subscribeToQuery('(func: type(Deleted)) @recurse {uid expand(_userpredicate_) <unigraph.id>}', (res: any[]) => {
             setTotalDeleted(buildGraph(res));
         }, subsId, { noExpand: true });
 
         return function cleanup() {
-            window.unigraph.unsubscribe(subsId);
+            tabContext.unsubscribe(subsId);
         };
     }, []);
 

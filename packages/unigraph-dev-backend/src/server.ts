@@ -498,7 +498,7 @@ export default async function startServer(client: DgraphClient) {
         },
 
         "hibernate_or_revive_subscription": async function (event: EventHibernateSubscription, ws: IWebsocket) {
-            const res = await serverStates.localApi.hibernateOrReviveSubscription(event.id, event.revival)
+            const res = await serverStates.localApi.hibernateOrReviveSubscription(event.ids || event.id, event.revival)
                 .catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
             ws.send(makeResponse(event, true, {result: res}))
         },

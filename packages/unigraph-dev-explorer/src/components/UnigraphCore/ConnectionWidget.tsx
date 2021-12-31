@@ -65,7 +65,6 @@ export const ConnectionWidget: React.FC = ({}) => {
                 >
                     Import objects
                 </Button>
-                <Button onClick={() => window.unigraph.subscribeToType('any', (data: any) => { download('unigraph_export_all.json', JSON.stringify(data)); }, getRandomInt(), { all: true })}>Export all objects</Button>
             </div>
             <b>Objects count</b>
             {' '}

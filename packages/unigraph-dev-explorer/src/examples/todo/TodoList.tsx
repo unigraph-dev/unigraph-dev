@@ -136,8 +136,8 @@ export const TodoList = withUnigraphSubscription(
     TodoListBody,
     { schemas: [], defaultData: [], packages: [todoPackage] },
     {
-        afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
-            window.unigraph.subscribeToType('$/schema/todo', (result: ATodoList[]) => { setData(result); }, subsId, { all: undefined });
+        afterSchemasLoaded: (subsId: number, tabContext: any, data: any, setData: any) => {
+            tabContext.subscribeToType('$/schema/todo', (result: ATodoList[]) => { setData(result); }, subsId, { all: undefined });
         },
     },
 );

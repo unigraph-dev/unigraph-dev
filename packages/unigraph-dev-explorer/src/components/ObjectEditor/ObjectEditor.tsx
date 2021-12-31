@@ -20,6 +20,7 @@ import { BacklinkView } from '../ObjectView/BacklinkView';
 import { onUnigraphContextMenu } from '../ObjectView/DefaultObjectContextMenu';
 import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
 import { getDynamicViews } from '../../unigraph-react';
+import { TabContext } from '../../utils';
 
 const useStyles = makeStyles({
     editorFrame: {
@@ -409,6 +410,8 @@ export function ObjectEditor({ uid }: any) {
 
     const [allSchemas, setAllSchemas] = React.useState(null);
 
+    const tabContext = React.useContext(TabContext);
+
     useEffectOnce(() => {
         window.unigraph.getSchemas().then((schemas: any) => setAllSchemas(schemas));
     });
@@ -416,9 +419,9 @@ export function ObjectEditor({ uid }: any) {
     React.useEffect(() => {
         if (subsId) window.unigraph.unsubscribe(subsId);
         const newSubs = getRandomInt();
-        if (currentUid) window.unigraph.subscribeToObject(currentUid, setCurrentObject, subsId);
+        if (currentUid) tabContext.subscribeToObject(currentUid, setCurrentObject, subsId);
         setSubsId(newSubs);
-        return function cleanup() { window.unigraph.unsubscribe(subsId); };
+        return function cleanup() { tabContext.unsubscribe(subsId); };
     }, [currentUid]);
 
     return (

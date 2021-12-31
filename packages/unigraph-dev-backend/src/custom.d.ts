@@ -130,6 +130,7 @@ declare type EventHibernateSubscription = {
     event: 'hibernate_or_revive_subscription',
     id: number | string,
     revival?: boolean,
+    ids?: any,
 }
 
 declare type EventGetQueries = {

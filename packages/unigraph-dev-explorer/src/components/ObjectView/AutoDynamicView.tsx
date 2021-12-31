@@ -91,7 +91,7 @@ export function AutoDynamicView({
     React.useEffect(() => {
         const newSubs = getRandomInt();
         if (isObjectStub) {
-            if (subsId) window.unigraph.unsubscribe(subsId);
+            if (subsId) tabContext.unsubscribe(subsId);
             let query = DynamicViews[object.type?.['unigraph.id']]?.query?.(object.uid);
             if (!query) {
                 query = `(func: uid(${object.uid})) @recurse {
@@ -100,12 +100,12 @@ export function AutoDynamicView({
                 expand(_userpredicate_)
               }`;
             }
-            window.unigraph.subscribeToQuery(query, (objects: any[]) => {
+            tabContext.subscribeToQuery(query, (objects: any[]) => {
                 setLoadedObj(buildGraph(objects)[0]);
             }, newSubs, { noExpand: true });
             setSubsId(newSubs);
             callbacks = { ...callbacks, subsId: newSubs };
-            return function cleanup() { window.unigraph.unsubscribe(newSubs); };
+            return function cleanup() { tabContext.unsubscribe(newSubs); };
         }
         return () => {};
     }, [object]);

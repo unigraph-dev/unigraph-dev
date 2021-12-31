@@ -1,4 +1,5 @@
 import React from 'react';
+import { TabContext } from '../../utils';
 
 import { AutoDynamicViewDetailed } from '../ObjectView/AutoDynamicViewDetailed';
 import { DefaultObjectView } from '../ObjectView/DefaultObjectView';
@@ -19,6 +20,8 @@ export default function DetailedObjectView({
 
     const [DynamicViewsDetailed, setDynamicViewsDetailed] = React.useState({ ...window.unigraph.getState('registry/dynamicViewDetailed').value, ...(component || {}) });
 
+    const tabContext = React.useContext(TabContext);
+
     React.useEffect(() => {
         window.unigraph.getState('registry/dynamicViewDetailed').subscribe((newIts) => setDynamicViewsDetailed(newIts));
     }, []);
@@ -27,18 +30,18 @@ export default function DetailedObjectView({
     React.useEffect(() => {
         if (myid !== undefined) {
             if (!isStub && (viewerId !== 'dynamic-view-detailed' || !Object.keys(DynamicViewsDetailed).includes(type) || !DynamicViewsDetailed[type].query)) {
-                window.unigraph.subscribeToObject(objectId, (newObjs: any) => {
+                tabContext.subscribeToObject(objectId, (newObjs: any) => {
                     setObject(newObjs);
                 }, myid);
 
                 if (context?.startsWith?.('0x')) {
                     setContextObj({ type: { 'unigraph.id': '$/skeleton/default' }, uid: '0x0' });
-                    window.unigraph.subscribeToObject(context, (obj: any) => setContextObj(obj), myid! + 1);
+                    tabContext.subscribeToObject(context, (obj: any) => setContextObj(obj), myid! + 1);
                 }
 
                 return function cleanup() {
-                    window.unigraph.unsubscribe(myid as any);
-                    window.unigraph.unsubscribe(myid! + 1);
+                    tabContext.unsubscribe(myid as any);
+                    tabContext.unsubscribe(myid! + 1);
                 };
             } setObject({
                 uid,

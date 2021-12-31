@@ -2,6 +2,7 @@ import { Typography } from '@material-ui/core';
 import React from 'react';
 import { useEffectOnce } from 'react-use';
 import { buildGraph } from 'unigraph-dev-common/lib/utils/utils';
+import { TabContext } from '../../utils';
 import { DynamicObjectListView } from './DynamicObjectListView';
 
 const getQuery = (uid: string, forward?: boolean) => `(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted))) {
@@ -22,8 +23,10 @@ export function BacklinkView({
     const [id, setId] = React.useState(Date.now());
     if (callbacks?.isEmbed) hideHeader = true;
 
+    const tabContext = React.useContext(TabContext);
+
     useEffectOnce(() => {
-        window.unigraph.subscribeToQuery(
+        tabContext.subscribeToQuery(
             getQuery(data?.uid || uid, forward),
             (newObjs: any[]) => {
                 setObjects(buildGraph(newObjs)
@@ -34,7 +37,7 @@ export function BacklinkView({
         );
 
         return function cleanup() {
-            window.unigraph.unsubscribe(id);
+            tabContext.unsubscribe(id);
         };
     });
 

@@ -162,9 +162,10 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 },
                 setValue: undefined as any,
             };
-            state.setValue = (newValue: any) => {
+            state.setValue = (newValue: any, flush?: boolean) => {
+                const changed = newValue !== state.value;
                 state.value = newValue;
-                state.subscribers.forEach((sub) => sub(state.value));
+                if (changed || flush) state.subscribers.forEach((sub) => sub(state.value));
             };
             states[name] = state;
             return state;
@@ -335,7 +336,8 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             sendEvent(connection, 'subscribe', { query, update }, id);
         }),
         hibernateOrReviveSubscription: (eventId = undefined, revival) => new Promise((resolve, reject) => {
-            sendEvent(connection, 'hibernate_or_revive_subscription', { revival }, eventId);
+            const id = typeof eventId === 'number' ? eventId : getRandomInt();
+            sendEvent(connection, 'hibernate_or_revive_subscription', { revival, ids: eventId }, id);
         }),
         unsubscribe: (id) => {
             sendEvent(connection, 'unsubscribe_by_id', {}, id);
