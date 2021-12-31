@@ -52,6 +52,6 @@ export const parseTodoObject: (arg0: string, refs?: any[]) => ATodoList = (todoS
                 name: tagName,
             },
         })), ...inlineRefsToChildren(refs)],
-        timeFrame,
+        time_frame: timeFrame,
     };
 };

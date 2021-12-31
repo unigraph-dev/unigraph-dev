@@ -98,7 +98,15 @@ export const registerDetailedDynamicViews = (views: Record<string, any>): void =
 
 export const registerQuickAdder = (adders: Record<string, any>): void => {
     const state = (window as any).unigraph.getState('registry/quickAdder');
-    state.setValue({ ...state.value, ...adders });
+    state.setValue({
+        ...state.value,
+        ...adders,
+        ...Object.fromEntries(
+            Object.values(adders).map(
+                (el: any) => (el.alias || []).map((alias: string) => [alias, el]),
+            ).flat(),
+        ),
+    });
 };
 
 export const registerContextMenuItems = (schema: string, items: any[]): void => {

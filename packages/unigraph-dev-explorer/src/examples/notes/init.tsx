@@ -28,7 +28,12 @@ export const init = () => {
         </div>
     );
 
-    registerQuickAdder({ n: { adder: quickAdder, tooltip: tt }, note: { adder: quickAdder, tooltip: tt } });
+    const description = 'Add a note';
+    registerQuickAdder({
+        note: {
+            adder: quickAdder, tooltip: tt, description, alias: ['n'],
+        },
+    });
 
     registerContextMenuItems('$/schema/note_block', [(uid: any, object: any, handleClose: any, callbacks: any) => (
         <MenuItem onClick={() => {
