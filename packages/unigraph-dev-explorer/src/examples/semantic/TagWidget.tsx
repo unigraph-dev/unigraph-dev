@@ -7,9 +7,7 @@ import { NavigationContext } from '../../utils';
 function TagList({ data }: any) {
     return (
         <div>
-            <NavigationContext.Consumer>
-                {(navigator: any) => data.map((el: any) => <AutoDynamicView inline object={el} />)}
-            </NavigationContext.Consumer>
+            {data.map((el: any) => <AutoDynamicView inline object={el} />)}
         </div>
     );
 }
