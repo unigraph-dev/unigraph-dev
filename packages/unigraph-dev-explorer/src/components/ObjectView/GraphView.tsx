@@ -7,6 +7,7 @@ import _ from 'lodash';
 import {
     Checkbox, List, ListItem, Typography,
 } from '@material-ui/core';
+import { TabContext } from '../../utils';
 
 const queryNameIndex = `@filter(type(Entity) AND (NOT eq(<_propertyType>, "inheritance"))) {
     uid 
@@ -32,19 +33,19 @@ export function GraphView({ uid }: any) {
     const [links, setLinks] = React.useState<any>([]);
     const [refs, setRefs] = React.useState<any>();
     const [typesExcluded, setTypesExcluded] = React.useState(7); // Bitmapped, types[0] => +-1, etc
-
+    const tabContext = React.useContext(TabContext);
     React.useEffect(() => {
         const id = getRandomInt();
 
         // name can be either plain or interface
-        window.unigraph.subscribeToQuery(`(func: uid(${uid})) {
+        tabContext.subscribeToQuery(`(func: uid(${uid})) {
             <unigraph.origin> ${queryNameIndex}
             <~unigraph.origin> ${queryNameIndex}
         }`, (res: any) => {
             setRefs(res);
         }, id, { noExpand: true });
 
-        return function cleanup() { window.unigraph.unsubscribe(id); };
+        return function cleanup() { tabContext.unsubscribe(id); };
     }, []);
 
     React.useEffect(() => {

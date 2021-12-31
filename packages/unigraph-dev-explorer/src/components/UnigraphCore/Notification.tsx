@@ -56,17 +56,6 @@ export const NotificationCenterBody: React.FC<{data: ANotification[]}> = ({ data
     );
 };
 
-/*
-export const NotificationCenter = withUnigraphSubscription(
-    NotificationCenterBody, { schemas: [], defaultData: [], packages: [] },
-    {
-        afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
-            window.unigraph.subscribeToType("$/schema/notification", (result: ANotification[]) => {setData(result.reverse())}, subsId);
-        }
-    }
-)
-*/
-
 export function NotificationCenter() {
     const nfState = window.unigraph.getState('notification-center/notifications');
 

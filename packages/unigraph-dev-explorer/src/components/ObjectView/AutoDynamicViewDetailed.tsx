@@ -26,7 +26,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
         const newSubs = getRandomInt();
         if (isObjectStub && Object.keys(DynamicViewsDetailed).includes(object.type?.['unigraph.id'])) {
             const query = DynamicViewsDetailed[object.type['unigraph.id']].query(object.uid);
-            window.unigraph.subscribeToQuery(query, (objects: any[]) => {
+            tabContext.subscribeToQuery(query, (objects: any[]) => {
                 setLoadedObj(objects[0]);
             }, newSubs, { noExpand: true });
             setSubsId(newSubs);
@@ -36,7 +36,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
             tabContext.setMaximize(DynamicViewsDetailed[object.type['unigraph.id']].maximize);
         }
 
-        return function cleanup() { window.unigraph.unsubscribe(newSubs); };
+        return function cleanup() { tabContext.unsubscribe(newSubs); };
     }, [object]);
 
     if (isObjectStub) callbacks = { ...callbacks, subsId };

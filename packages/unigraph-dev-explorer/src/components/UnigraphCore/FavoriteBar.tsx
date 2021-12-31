@@ -2,17 +2,19 @@ import React from 'react';
 import { useEffectOnce } from 'react-use';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { byElementIndex, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { TabContext } from '../../utils';
 import { DynamicObjectListView } from '../ObjectView/DynamicObjectListView';
 
 export function FavoriteBar() {
     const [fav, setFav] = React.useState<any[]>([]);
     const [favEntity, setFavEntity] = React.useState<any>({});
     const favState = window.unigraph.addState('favorites', []);
+    const tabContext = React.useContext(TabContext);
 
     useEffectOnce(() => {
         const id = getRandomInt();
 
-        window.unigraph.subscribeToObject('$/entity/favorite_bar', (newFav: any) => {
+        tabContext.subscribeToObject('$/entity/favorite_bar', (newFav: any) => {
             const children = newFav?._value?.children?.['_value['];
             if (children) {
                 children.sort(byElementIndex);
@@ -30,7 +32,7 @@ export function FavoriteBar() {
         }, id);
 
         return function cleanup() {
-            window.unigraph.unsubscribe(id);
+            tabContext.unsubscribe(id);
         };
     });
 

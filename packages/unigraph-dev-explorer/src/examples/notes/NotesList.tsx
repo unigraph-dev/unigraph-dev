@@ -12,8 +12,8 @@ export const NotesListAll = withUnigraphSubscription(
     NotesListBody,
     { schemas: [], defaultData: [], packages: [] },
     {
-        afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
-            window.unigraph.subscribeToType('$/schema/note_block', (result: any[]) => { setData(result.sort(byUpdatedAt).reverse()); }, subsId, { metadataOnly: true });
+        afterSchemasLoaded: (subsId: number, tabContext: any, data: any, setData: any) => {
+            tabContext.subscribeToType('$/schema/note_block', (result: any[]) => { setData(result.sort(byUpdatedAt).reverse()); }, subsId, { metadataOnly: true });
         },
     },
 );

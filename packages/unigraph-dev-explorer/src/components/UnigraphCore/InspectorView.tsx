@@ -1,6 +1,7 @@
 import { Divider, Typography } from '@material-ui/core';
 import React from 'react';
 import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
+import { TabContext } from '../../utils';
 import { ObjectOverview } from '../ObjectView/ObjectOverview';
 
 export function InspectorView() {
@@ -8,7 +9,7 @@ export function InspectorView() {
     const [objectsMap, _setObjectsMap] = React.useState<any>({});
     const objectsMapRef = React.useRef<any>({});
     const subIdMapRef = React.useRef<Record<string, any>>({});
-
+    const tabContext = React.useContext(TabContext);
     React.useEffect(() => {
         setSelected(window.unigraph.getState('global/selected').value);
         window.unigraph.getState('global/selected').subscribe((newVal: string[]) => { setSelected(newVal); });
@@ -24,7 +25,7 @@ export function InspectorView() {
             if (subIdMapRef.current[uid] === undefined) {
                 const newSub = getRandomInt();
                 subIdMapRef.current[uid] = newSub;
-                window.unigraph.subscribeToObject(uid, (obj: any) => {
+                tabContext.subscribeToObject(uid, (obj: any) => {
                     setObjectsMap({ ...objectsMapRef.current, [uid]: obj });
                 }, newSub);
             }
@@ -32,7 +33,7 @@ export function InspectorView() {
         const cleanup = () => {
             Object.keys(subIdMapRef.current).forEach((uid) => {
                 if (!selected.includes(uid) && subIdMapRef.current[uid] !== undefined) {
-                    window.unigraph.unsubscribe(subIdMapRef.current[uid]);
+                    tabContext.unsubscribe(subIdMapRef.current[uid]);
                 }
             });
         };

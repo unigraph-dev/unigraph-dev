@@ -49,15 +49,15 @@ export function HomeSection({ data }: any) {
 
 export default function ExplorerHome({ id }: any) {
     const [sections, setSections] = React.useState<Partial<any>[]>([]);
-
+    const tabContext = React.useContext(TabContext);
     React.useEffect(() => {
         const subsId = getRandomInt();
 
-        window.unigraph.subscribeToType('$/schema/home_section', (its: any[]) => {
+        tabContext.subscribeToType('$/schema/home_section', (its: any[]) => {
             setSections(its);
         }, subsId);
 
-        return function cleanup() { window.unigraph.unsubscribe(subsId); };
+        return function cleanup() { tabContext.unsubscribe(subsId); };
     }, []);
 
     return (

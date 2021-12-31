@@ -4,18 +4,19 @@ import { buildGraph, getRandomInt, UnigraphObject } from 'unigraph-dev-common/li
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import Sugar from 'sugar';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
+import { TabContext } from '../../utils';
 
 export function CurrentEvents() {
     const [currentEvents, setCurrentEvents] = React.useState<any>([]);
-
+    const tabContext = React.useContext(TabContext);
     React.useEffect(() => {
         const id = getRandomInt();
 
-        window.unigraph.subscribeToQuery('$/executable/get-next-events', (res: any) => {
+        tabContext.subscribeToQuery('$/executable/get-next-events', (res: any) => {
             setCurrentEvents(buildGraph(res as any[]));
         }, id, { noExpand: true });
 
-        return function cleanup() { window.unigraph.unsubscribe(id); };
+        return function cleanup() { tabContext.unsubscribe(id); };
     }, []);
 
     return (

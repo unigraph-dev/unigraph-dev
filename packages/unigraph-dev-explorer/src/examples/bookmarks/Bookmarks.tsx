@@ -79,8 +79,8 @@ export const Bookmarks = withUnigraphSubscription(
     BookmarksBody,
     { defaultData: [], schemas: [], packages: [bookmarkPackage] },
     {
-        afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
-            window.unigraph.subscribeToType('$/schema/web_bookmark', (result: ABookmark[]) => { setData(result); }, subsId, { uidsOnly: true });
+        afterSchemasLoaded: (subsId: number, tabContext: any, data: any, setData: any) => {
+            tabContext.subscribeToType('$/schema/web_bookmark', (result: ABookmark[]) => { setData(result); }, subsId, { uidsOnly: true });
         },
     },
 );
