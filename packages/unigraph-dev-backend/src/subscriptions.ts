@@ -188,6 +188,21 @@ export function removeOrHibernateSubscriptionsById(
     }));
 }
 
+export function reviveSubscriptions(
+    subscriptions: Subscription[],
+    connId: string,
+    clientId: string,
+    newMsgPort: any,
+) {
+    const newData = {
+        msgPort: newMsgPort,
+        connId,
+        clientId,
+        hibernated: false,
+    };
+    return subscriptions.map((el) => (el.connId === connId ? ({ ...el, ...newData }) : el));
+}
+
 const resolvers = {
     type: {
         match: () => false,

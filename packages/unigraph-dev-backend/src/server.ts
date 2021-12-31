@@ -29,7 +29,7 @@ import {
 } from './datamodelManager';
 import { Cache } from './caches';
 import {
-    createSubscriptionLocal, MsgCallbackFn, pollSubscriptions, removeOrHibernateSubscriptionsById,
+    createSubscriptionLocal, MsgCallbackFn, pollSubscriptions, removeOrHibernateSubscriptionsById, reviveSubscriptions,
 } from './subscriptions';
 import {
     afterObjectCreatedHooks, callHooks, HookAfterObjectChangedParams,
@@ -634,6 +634,7 @@ export default async function startServer(client: DgraphClient) {
         console.log('opened socket connection');
 
         if (revival) {
+            serverStates.subscriptions = reviveSubscriptions(serverStates.subscriptions, historialClients[clientBrowserId], clientBrowserId, ws)
             pollSubscriptions(serverStates.subscriptions.filter((el: any) => el.clientId === clientBrowserId),
                 dgraphClient, pollCallback, undefined, serverStates);
         }

@@ -175,6 +175,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
     function connect() {
         const urlString = new URL(url);
         urlString.searchParams.append('browserId', browserId);
+        const isRevival = getState('unigraph/connected').value !== undefined;
         if (getState('unigraph/connected').value !== undefined) urlString.searchParams.append('revival', 'true');
         if (connection.current?.readyState !== 3 /* CLOSED */ && connection.current) return;
         connection.current = new WebSocket(urlString.toString());
@@ -182,7 +183,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
         connection.current.onopen = () => {
             getState('unigraph/connected').setValue(true);
             if (retries) clearInterval(retries);
-            if (getState('unigraph/connected').value !== undefined && readyCallback) readyCallback();
+            if (!isRevival && readyCallback) readyCallback();
             msgQueue.forEach((el) => connection.current?.send(el));
             msgQueue.length = 0;
         };

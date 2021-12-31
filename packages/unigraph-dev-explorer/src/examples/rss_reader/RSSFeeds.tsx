@@ -127,6 +127,7 @@ const RSSFeed: DynamicViewRenderer = ({ data, callbacks }) => (
     <AutoDynamicView
         object={new UnigraphObject(data?._value?.site_info?._value)}
         noContextMenu
+        inline
     />
 );
 
