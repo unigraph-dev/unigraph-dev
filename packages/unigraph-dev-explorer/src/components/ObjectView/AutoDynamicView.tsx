@@ -206,7 +206,6 @@ export function AutoDynamicView({
 
     const getEl = React.useCallback((viewId, setTitle) => {
         if (isRecursion === false && object?.type && object.type['unigraph.id'] && Object.keys(DynamicViews).includes(object.type['unigraph.id']) && getObject()) {
-            console.log(object.uid, backlinks, noBacklinks, BacklinkComponent);
             return React.createElement(DynamicViews[object.type['unigraph.id']].view, {
                 data: getObject(),
                 callbacks: {
@@ -252,9 +251,11 @@ export function AutoDynamicView({
                 </div>
             )}
         >
-            <div style={{
-                display: inline ? 'inline' : 'block', ...(inline ? {} : { width: '100%' }), backgroundColor: (isSelected || isDragging) ? 'whitesmoke' : 'unset', borderRadius: (isSelected || isDragging) ? '12px' : '',
-            }}
+            <div
+                style={{
+                    display: inline ? 'inline' : 'block', ...(inline ? {} : { width: '100%' }), backgroundColor: (isSelected || isDragging) ? 'whitesmoke' : 'unset', borderRadius: (isSelected || isDragging) ? '12px' : '',
+                }}
+                key={`object-view-${object?.uid}`}
             >
                 <div
                     id={`object-view-${object?.uid}`}

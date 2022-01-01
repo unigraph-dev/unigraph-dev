@@ -202,7 +202,7 @@ export function DetailedNoteBlock({
     const inputDebounced = React.useRef(_.debounce(inputter, 333));
     const setCurrentText = (text: string) => { textInput.current.textContent = text; };
     const edited = React.useRef(false);
-    const [isEditing, setIsEditing] = React.useState(false);
+    const [isEditing, setIsEditing] = React.useState(window.unigraph.getState('global/focused').value?.uid === data.uid);
     const textInput: any = React.useRef();
     const nodesState = window.unigraph.addState(`${options?.viewId || callbacks?.viewId || callbacks['get-view-id']()}/nodes`, []);
     const editorContext = {
@@ -253,13 +253,25 @@ export function DetailedNoteBlock({
     React.useEffect(() => {
         if (focused) {
             setIsEditing(true);
+            console.log(isEditing);
+            if (isEditing) editorRef.current.click();
             setTimeout(() => {
                 let tail; const focusedState = window.unigraph.getState('global/focused').value;
                 const el = textInput.current.firstChild || textInput.current;
+                el?.click?.();
                 if (focusedState.tail) tail = el.textContent.length;
                 setCaret(document, el, tail || focusedState.caret);
             }, 0);
-            window.unigraph.getState('global/focused/actions').setValue(callbacks);
+
+            window.unigraph.getState('global/focused/actions').setValue({
+                splitChild: () => {
+                    const sel = document.getSelection();
+                    const caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
+                    callbacks['split-child'](textref.current || data.get('text').as('primitive'), caret);
+                },
+                indentChild: callbacks['indent-child'],
+                unindentChild: callbacks['unindent-child-in-parent'],
+            });
         }
     }, [focused]);
 
@@ -282,7 +294,7 @@ export function DetailedNoteBlock({
                                 const caretPos = Number((ev.target as HTMLElement).getAttribute('markdownPos') || 0);
                                 setTimeout(() => {
                                     const finalCaretPos = caretPos || textInput.current?.textContent?.length;
-                                    window.unigraph.getState('global/focused').value = { uid: data?.uid, caret: finalCaretPos, type: '$/schema/note_block' };
+                                    window.unigraph.getState('global/focused').setValue({ uid: data?.uid, caret: finalCaretPos, type: '$/schema/note_block' });
                                     if (textInput.current.firstChild) {
                                         setCaret(document, textInput.current.firstChild, finalCaretPos);
                                     } else {
@@ -293,6 +305,7 @@ export function DetailedNoteBlock({
                         }}
                         onBlur={(ev) => {
                             setIsEditing(false);
+                            console.log('onBlur');
                             inputDebounced.current.flush();
                             if (focused) {
                                 window.unigraph.getState('global/focused').setValue({ uid: '', caret: 0, type: '' });
@@ -389,6 +402,8 @@ export function DetailedNoteBlock({
                                 onKeyDown={async (ev) => {
                                     const sel = document.getSelection();
                                     const caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
+                                    const state = window.unigraph.getState('global/focused');
+                                    state.setValue({ ...state.value, caret });
                                     switch (ev.keyCode) {
                                     case 13: // enter
                                         ev.preventDefault();
@@ -508,6 +523,7 @@ export function DetailedNoteBlock({
                                                 createBelow={() => { addChild(dataref.current, editorContext); }}
                                             >
                                                 <AutoDynamicView
+                                                    key={el.uid}
                                                     noDrag
                                                     allowSubentity
                                                     noBacklinks={el.type?.['unigraph.id'] === '$/schema/note_block'}
