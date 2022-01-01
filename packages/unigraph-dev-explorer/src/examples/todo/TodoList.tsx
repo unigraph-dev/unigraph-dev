@@ -128,8 +128,13 @@ const tt = () => (
 );
 
 export const init = () => {
+    const description = 'Add a new Todo object';
     registerDynamicViews({ '$/schema/todo': TodoItem });
-    registerQuickAdder({ todo: { adder: quickAdder, tooltip: tt }, td: { adder: quickAdder, tooltip: tt } });
+    registerQuickAdder({
+        todo: {
+            adder: quickAdder, tooltip: tt, description, alias: ['td'],
+        },
+    });
 };
 
 export const TodoList = withUnigraphSubscription(

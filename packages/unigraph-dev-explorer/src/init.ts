@@ -24,6 +24,7 @@ import { ListObjectQuery, ListObjectView } from './components/UnigraphCore/ListO
 import { SubentityView } from './components/UnigraphCore/SubentityView';
 import { ViewItem } from './components/ObjectView/ViewObjectView';
 import { backlinkQuery } from './components/ObjectView/backlinksUtils';
+import { MiniListView } from './components/UnigraphCore/ListsList';
 
 window.reloadCommands = () => {
     const commandsState = window.unigraph.getState('registry/commands');
@@ -31,12 +32,39 @@ window.reloadCommands = () => {
     const pageCommands = Object.entries(window.unigraph.getState('registry/pages').value).map(([k, v]: any) => ({
         name: `Open: ${v.name}`,
         about: `Open the page ${v.name}`,
-        onClick: () => {
+        onClick: (ev: any, setInput: any, setClose: any) => {
             window.wsnavigator(`/${k}`);
+            setInput(''); setClose();
         },
     }));
 
-    commandsState.setValue(pageCommands);
+    const adderCommands = Object.entries(window.unigraph.getState('registry/quickAdder').value).map(([k, v]: any) => {
+        if ((v.alias || []).includes(k)) return false;
+        const matches = [k, ...(v.alias || [])].map((el: string) => `+${el}`).join(' / ');
+        return {
+            name: `${matches}: ${v.description}`,
+            about: 'Add a Unigraph object',
+            onClick: (ev: any, setInput: any) => {
+                ev.stopPropagation();
+                ev.preventDefault();
+                setInput(`+${k} `);
+            },
+            group: 'adder',
+        };
+    }).filter(Boolean);
+
+    const searchCommand = {
+        name: '?<search query> : search Unigraph',
+        about: 'Search Unigraph',
+        onClick: (ev: any, setInput: any) => {
+            ev.stopPropagation();
+            ev.preventDefault();
+            setInput('?');
+        },
+        group: 'search',
+    };
+
+    commandsState.setValue([...adderCommands, searchCommand, ...pageCommands]);
 };
 
 /**
@@ -117,6 +145,7 @@ function initRegistry() {
         '$/schema/person': { view: BasicPersonView },
         '$/schema/subentity': { view: SubentityView },
         '$/schema/view': { view: ViewItem },
+        '$/schema/list': { view: MiniListView },
     });
     window.unigraph.addState('registry/dynamicViewDetailed', {
         '$/schema/executable': { view: CodeOrComponentView },

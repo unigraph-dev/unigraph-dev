@@ -44,6 +44,8 @@ export function AutoDynamicView({
 
     const [DynamicViews, setDynamicViews] = React.useState({ ...window.unigraph.getState('registry/dynamicView').value, ...(component || {}) });
 
+    const viewEl = React.useRef(null);
+
     React.useEffect(() => {
         const cb = (newIts: any) => setDynamicViews({ ...window.unigraph.getState('registry/dynamicView').value, ...(component || {}) });
         window.unigraph.getState('registry/dynamicView').subscribe(cb);
@@ -76,9 +78,12 @@ export function AutoDynamicView({
     React.useEffect(() => {
         if (object?.uid?.startsWith('0x') && shouldGetBacklinks) {
             const cb = (newBacklinks: any) => {
-                // console.log(object.uid, " - Backlinks: ", backlinks)
                 const [pars, refs] = getParentsAndReferences(newBacklinks['~_value'], newBacklinks['unigraph.origin'], object.uid);
-                setBacklinks([pars, refs].map((it) => it.filter((el) => Object.keys(DynamicViews).includes(el?.type?.['unigraph.id']))));
+                // console.log(object.uid, getParents(viewEl.current));
+                setBacklinks([pars, refs].map((it) => it.filter((el) => (
+                    Object.keys(DynamicViews).includes(el?.type?.['unigraph.id'])
+                    && !([...getParents(viewEl.current), callbacks?.context?.uid].includes(el.uid))
+                ))));
             };
             subscribeToBacklinks(object.uid, cb);
             return function cleanup() {
@@ -153,10 +158,12 @@ export function AutoDynamicView({
     const contextEntity = typeof callbacks?.context === 'object' ? callbacks.context : null;
 
     function getParents(elem: any) {
-        const parents = [];
+        const parents: any[] = [];
+        if (!elem) return parents;
         while (elem.parentNode && elem.parentNode.nodeName.toLowerCase() != 'body') {
             elem = elem.parentNode;
-            if (elem.id) parents.push(elem.id);
+            if (!elem) return parents;
+            if (elem.id?.startsWith?.('object-view-')) parents.push(elem.id.slice(12));
         }
         return parents;
     }
@@ -164,7 +171,7 @@ export function AutoDynamicView({
     const attach = React.useCallback((domElement) => {
         if (domElement && object.uid) {
             const ids = getParents(domElement);
-            if (ids.includes(`object-view-${object?.uid}`)) {
+            if (ids.includes(object?.uid)) {
                 // recursive - deal with it somehow
                 setIsRecursion(true);
             } else setIsRecursion(false);
@@ -175,12 +182,13 @@ export function AutoDynamicView({
         if (!noDrag) drag(domElement);
         if (!noDrop) drop(domElement);
         if (isMobile()) handlers.ref(domElement);
+        viewEl.current = domElement;
     }, [isDragging, drag, callbacks]);
 
     const BacklinkComponent = (
         <div
             style={{
-                display: (shouldGetBacklinks && (backlinks?.[1]?.length || (!noParents && (backlinks?.[0]?.length || 0) - (withParent ? 1 : 0) > 0))) ? '' : 'none',
+                display: (shouldGetBacklinks && (backlinks?.[1]?.length || (!noParents && backlinks?.[0]?.length > 0))) ? '' : 'none',
                 marginLeft: 'auto',
                 background: 'lightgray',
                 padding: '2px 6px',
@@ -198,13 +206,14 @@ export function AutoDynamicView({
 
     const getEl = React.useCallback((viewId, setTitle) => {
         if (isRecursion === false && object?.type && object.type['unigraph.id'] && Object.keys(DynamicViews).includes(object.type['unigraph.id']) && getObject()) {
+            console.log(object.uid, backlinks, noBacklinks, BacklinkComponent);
             return React.createElement(DynamicViews[object.type['unigraph.id']].view, {
                 data: getObject(),
                 callbacks: {
                     viewId,
                     setTitle,
-                    ...(noBacklinks ? { BacklinkComponent } : {}),
                     ...(callbacks || {}),
+                    ...(noBacklinks ? { BacklinkComponent } : {}),
                 },
                 ...(attributes || {}),
                 inline,
@@ -223,7 +232,8 @@ export function AutoDynamicView({
             );
         }
         return '';
-    }, [isRecursion, object, object.uid, callbacks, attributes, DynamicViews, isObjectStub, loadedObj, isFocused]);
+    }, [isRecursion, object, object?.uid, callbacks, attributes,
+        DynamicViews, isObjectStub, loadedObj, isFocused, backlinks]);
 
     return (
         <ErrorBoundary

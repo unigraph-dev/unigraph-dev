@@ -51,8 +51,9 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
                 </div>
             )}
             >
-                <TabContext.Consumer>
-                    {({ viewId, setTitle }) => React.createElement(DynamicViewsDetailed[object.type['unigraph.id']].view, {
+                <div style={{ display: 'contents' }} id={`object-view-${object.uid}`}>
+                    <TabContext.Consumer>
+                        {({ viewId, setTitle }) => React.createElement(DynamicViewsDetailed[object.type['unigraph.id']].view, {
                         data: isObjectStub
                             ? loadedObj
                             : object,
@@ -61,7 +62,8 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
                         context,
                         ...(attributes || {}),
                     })}
-                </TabContext.Consumer>
+                    </TabContext.Consumer>
+                </div>
             </ErrorBoundary>
         );
     } if (useFallback) {
