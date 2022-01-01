@@ -6,11 +6,16 @@ import { parseTodoObject } from '../todo/parseTodoObject';
 import { NoteEditorContext } from './types';
 import { getParentsAndReferences } from '../../components/ObjectView/backlinksUtils';
 
-export const focusUid = (uid: string) => {
+export const focusUid = (uid: string, tail?: boolean) => {
     // console.log("UID " + uid);
     // console.log(document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]);
     // (document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]?.children[0] as any)?.click();
-    window.unigraph.getState('global/focused').setValue(uid, true);
+    window.unigraph.getState('global/focused').setValue({
+        uid,
+        caret: window.unigraph.getState('global/focused').value?.caret || 0,
+        type: '$/schema/note_block',
+        tail,
+    });
 };
 
 export const getSemanticChildren = (data: any) => data?._value?.children;
@@ -137,7 +142,7 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
         }, 1000);
 
         context.edited.current = true;
-        focusLastDFSNode({ uid: children[delAt]._value._value.uid }, context, index);
+        focusLastDFSNode({ uid: children[delAt]._value._value.uid }, context, index, true);
     }
 };
 
@@ -269,13 +274,13 @@ export const unindentChild = async (data: any, context: NoteEditorContext, paren
     context.setCommand(() => () => focusUid(newChildren[parent + 1]._value._value.uid));
 };
 
-export const focusLastDFSNode = (data: any, context: NoteEditorContext, index: number) => {
-    focusUid(getLastDFSNode(data, context, index));
+export const focusLastDFSNode = (data: any, context: NoteEditorContext, index: number, tail?: boolean) => {
+    focusUid(getLastDFSNode(data, context, index), tail);
 };
 
-export const focusNextDFSNode = (data: any, context: NoteEditorContext, index: number) => {
+export const focusNextDFSNode = (data: any, context: NoteEditorContext, index: number, tail?: boolean) => {
     console.log(getNextDFSNode(data, context, index));
-    focusUid(getNextDFSNode(data, context, index));
+    focusUid(getNextDFSNode(data, context, index), tail);
 };
 
 export const getLastDFSNode = (data: any, context: NoteEditorContext, index: number) => {

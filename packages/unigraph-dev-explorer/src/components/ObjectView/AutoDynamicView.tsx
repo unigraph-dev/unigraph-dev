@@ -57,7 +57,7 @@ export function AutoDynamicView({
         window.unigraph.getState('global/selected').subscribe(cbsel);
 
         const cbfoc = (foc: any) => {
-            if (foc === object?.uid && tabContext.isVisible()) setIsFocused(true);
+            if (foc.uid === object?.uid && tabContext.isVisible()) setIsFocused(true);
             else setIsFocused(false);
         };
         window.unigraph.getState('global/focused').subscribe(cbfoc);

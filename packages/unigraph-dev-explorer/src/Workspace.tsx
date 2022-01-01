@@ -35,6 +35,7 @@ import {
     getParameters, isElectron, isSmallScreen, TabContext,
 } from './utils';
 import { SearchOverlayPopover } from './pages/SearchOverlay';
+import { MobileBar } from './components/UnigraphCore/MobileBar';
 
 export function WorkspacePageComponent({
     children, maximize, paddingTop, id,
@@ -372,6 +373,7 @@ export function WorkSpace(this: any) {
                             <SearchOverlayPopover />
                             <ContextMenu />
                             <InlineSearch />
+                            <MobileBar />
                         </div>
                     ) : []}
                     <WorkspaceInnerEl config={{ id: config.id, ...(config.viewConfig || {}) }} component={component} />
@@ -413,6 +415,7 @@ export function WorkSpace(this: any) {
                     <SearchOverlayPopover />
                     <ContextMenu />
                     <InlineSearch />
+                    <MobileBar />
                 </div>
 
                 <FlexLayout.Layout
