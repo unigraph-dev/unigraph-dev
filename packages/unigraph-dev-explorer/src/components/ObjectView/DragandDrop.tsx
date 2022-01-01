@@ -1,3 +1,4 @@
+import { Slide } from '@material-ui/core';
 import React from 'react';
 import { useDrop } from 'react-dnd';
 
@@ -26,17 +27,6 @@ export function BelowDropAcceptor({ onDrop, isReverse, style }: any) {
     );
 }
 
-export function WithDropBelow({
-    children, onDrop, isReverse, style, index,
-}: any) {
-    return (
-        <>
-            {children}
-            <BelowDropAcceptor onDrop={onDrop} isReverse={isReverse} key={`${index}_dropacceptor`} style={style} />
-        </>
-    );
-}
-
 const onDrop = (dndContext: any, listId: any, arrayId: any, index: any, dropperProps: any) => {
     console.log(dropperProps, listId, 'a', dndContext, index);
     console.log(index);
@@ -55,31 +45,26 @@ const onDrop = (dndContext: any, listId: any, arrayId: any, index: any, dropperP
 };
 
 export function DragandDrop({
-    children, style = {}, dndContext, listId, arrayId, isReverse,
+    children, style = {}, dndContext, listId, arrayId, isReverse, Comp = React.Fragment, ChildrenComp = React.Fragment,
 }: any) {
     return (
-        <div>
-            <BelowDropAcceptor
-                // eslint-disable-next-line react/jsx-no-bind
-                onDrop={onDrop.bind(null, dndContext, listId, arrayId, -1)}
-                isReverse={isReverse}
-                style={style}
-            />
+        <Comp>
             {children.map((child: any, index: number) => (
-                <WithDropBelow
-                    index={index}
-                    style={style}
-                    // eslint-disable-next-line react/no-children-prop
-                    children={child}
-                    onDrop={(props: any) => {
-                        console.log(dndContext, listId, arrayId, index, props);
-                        onDrop(dndContext, listId, arrayId, index, props);
-                    }}
-                    isReverse={isReverse}
-                    // eslint-disable-next-line react/no-array-index-key
-                    key={`${index}_dnd`}
-                />
+                <ChildrenComp key={`${child.key || index}`}>
+                    <div key={`${child.key || index}_dropper`}>
+                        {child}
+                        <BelowDropAcceptor
+                            onDrop={(props: any) => {
+                            console.log(dndContext, listId, arrayId, index, props);
+                            onDrop(dndContext, listId, arrayId, index, props);
+                        }}
+                            isReverse={isReverse}
+                            key={`${child.key || index}_dropacceptor`}
+                            style={style}
+                        />
+                    </div>
+                </ChildrenComp>
             ))}
-        </div>
+        </Comp>
     );
 }
