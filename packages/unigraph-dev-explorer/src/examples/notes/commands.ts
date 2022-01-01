@@ -10,7 +10,7 @@ export const focusUid = (uid: string) => {
     // console.log("UID " + uid);
     // console.log(document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]);
     // (document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]?.children[0] as any)?.click();
-    window.unigraph.getState('global/focused').setValue(uid);
+    window.unigraph.getState('global/focused').setValue(uid, true);
 };
 
 export const getSemanticChildren = (data: any) => data?._value?.children;

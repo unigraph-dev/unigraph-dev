@@ -13,6 +13,20 @@ export const TabContext = React.createContext({
     setTitle: (title: string) => {},
     setMaximize: (val: boolean) => {},
     isVisible: () => true as boolean,
+
+    subscribeToType(name: any, callback: any, eventId?: any, options?: any) {
+        return window.unigraph.subscribeToType(name, callback, eventId, options);
+    },
+    subscribeToObject(uid: any, callback: any, eventId?: any, options?: any) {
+        window.unigraph.subscribeToObject(uid, callback, eventId, options);
+    },
+    subscribeToQuery(fragment: any, callback: any, eventId?: any, options?: any) {
+        window.unigraph.subscribeToQuery(fragment, callback, eventId, options);
+    },
+    subscribe(query: any, callback: any, eventId?: any, update?: any) {
+        window.unigraph.subscribe(query, callback, eventId, update);
+    },
+    unsubscribe(id: any) { window.unigraph.unsubscribe(id); },
 });
 export const DataContext = React.createContext({
     rootUid: '0x0',
@@ -231,6 +245,7 @@ export const selectUid = (uid: string, exclusive = true) => {
         exclusive
             ? [uid]
             : newUid,
+        true,
     );
 };
 

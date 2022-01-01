@@ -15,7 +15,7 @@ export type AppState<T = any> = {
     subscribers: ((newValue: T) => any)[],
     subscribe: (fn: (newValue: T) => any) => any,
     unsubscribe: (fn: (newValue: T) => any) => any,
-    setValue: (newValue: T) => any,
+    setValue: (newValue: T, flush?: boolean) => any,
 }
 
 export type UnigraphSchemaDeclaration = {
@@ -197,7 +197,7 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param eventId the subscription ID to (un)hibernate.
      * @param revival whether this is a revival or hibernation.
      */
-    hibernateOrReviveSubscription(eventId?: number, revival?: boolean): Promise<any>;
+    hibernateOrReviveSubscription(eventId?: number | number[], revival?: boolean): Promise<any>;
     /** Unsubscribes using the subscription ID. */
     unsubscribe(id: number): any;
     /**

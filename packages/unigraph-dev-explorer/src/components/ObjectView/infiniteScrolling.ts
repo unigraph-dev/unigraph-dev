@@ -14,6 +14,7 @@ export const setupInfiniteScrolling = (
     // eslint-disable-next-line default-param-last
     chunk = 50,
     stateCallback: (loadedItems: any[]) => void,
+    tabContext: any,
     subscribeOptions?: any,
 ) => {
     const states = {
@@ -32,7 +33,7 @@ export const setupInfiniteScrolling = (
         if (subsHead < chunksHead) {
             const toSub = states.chunks[subsHead];
             states.currentSubs = [...states.results.map((el: any) => el.uid), ...toSub];
-            window.unigraph.subscribe({
+            tabContext.subscribe({
                 type: 'object',
                 uid: states.currentSubs,
                 options: subscribeOptions,
@@ -49,7 +50,7 @@ export const setupInfiniteScrolling = (
     };
 
     const onCleanup = () => {
-        window.unigraph.unsubscribe(states.subsId);
+        tabContext.unsubscribe(states.subsId);
         stateCallback = () => false;
     };
 
@@ -60,7 +61,7 @@ export const setupInfiniteScrolling = (
     };
 
     const toSub = states.chunks[0] || []; states.currentSubs = toSub;
-    window.unigraph.subscribeToObject(toSub, (results: any[] | any) => {
+    tabContext.subscribeToObject(toSub, (results: any[] | any) => {
         const uidsMap: any = {};
         buildGraph(results);
         results.forEach ? results.forEach((el: any) => { uidsMap[el.uid] = el; }) : uidsMap[results.uid] = results;

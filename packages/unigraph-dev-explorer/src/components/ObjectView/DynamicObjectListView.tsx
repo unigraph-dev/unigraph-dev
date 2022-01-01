@@ -178,6 +178,7 @@ function DynamicList({
                 (its: any[]) => {
                     setLoadedItems(buildGraph ? buildGraphFn(its) : its);
                 },
+                tabContext,
                 subscribeOptions,
             );
             setSetupProps(newProps);

@@ -7,16 +7,14 @@ import { NavigationContext } from '../../utils';
 function TagList({ data }: any) {
     return (
         <div>
-            <NavigationContext.Consumer>
-                {(navigator: any) => data.map((el: any) => <AutoDynamicView inline object={el} />)}
-            </NavigationContext.Consumer>
+            {data.map((el: any) => <AutoDynamicView inline object={el} />)}
         </div>
     );
 }
 
 export const TagListSubscription = withUnigraphSubscription(TagList, { schemas: [], defaultData: [], packages: [] }, {
-    afterSchemasLoaded: (subsId, data, setData) => {
-        window.unigraph.subscribeToType('$/schema/tag', (result: any) => { setData(result); });
+    afterSchemasLoaded: (subsId: any, tabContext: any, data: any, setData: any) => {
+        tabContext.subscribeToType('$/schema/tag', (result: any) => { setData(result); });
     },
 });
 

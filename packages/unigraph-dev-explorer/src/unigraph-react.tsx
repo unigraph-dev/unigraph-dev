@@ -10,16 +10,17 @@ import _ from 'lodash';
 import React from 'react';
 import { UnigraphContext, UnigraphHooks } from 'unigraph-dev-common/lib/types/unigraph';
 import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import { TabContext } from './utils';
 
 export function withUnigraphSubscription(
     WrappedComponent: React.FC<{data: any}>,
     unigraphContext: UnigraphContext,
-    unigraphHooks: UnigraphHooks,
+    unigraphHooks: any,
 ): React.FC {
     return function (props) {
         const [subsId, setSubsId] = React.useState(getRandomInt());
         const [data, setData] = React.useState(unigraphContext.defaultData);
-
+        const tabContext = React.useContext(TabContext);
         const init = async () => {
             Promise.all([
                 ...unigraphContext.schemas.map(
@@ -28,7 +29,7 @@ export function withUnigraphSubscription(
                 ...unigraphContext.packages.map(
                     (el) => (window as any).unigraph.ensurePackage(el.pkgManifest.package_name, el),
                 ),
-            ]).then(unigraphHooks.afterSchemasLoaded(subsId, data, setData));
+            ]).then(unigraphHooks.afterSchemasLoaded(subsId, tabContext, data, setData));
         };
 
         React.useEffect(() => {
@@ -36,7 +37,7 @@ export function withUnigraphSubscription(
             init();
 
             return function cleanup() {
-                (window as any).unigraph.unsubscribe(subsId);
+                tabContext.unsubscribe(subsId);
             };
         }, []);
 
@@ -61,6 +62,7 @@ export const subscribeToBacklinks = (uid: string[] | string, callback?: any, rem
         : _.uniq([...uids, ...Object.keys(linksState.value)]);
     linksState.setValue(
         Object.fromEntries(newKeys.map((el) => [el, linksState.value[el]])),
+        true,
     );
     const cbState = window.unigraph.getState('registry/backlinksCallbacks');
     const newCbs = _.uniq([...uids, ...Object.keys(cbState.value)]);
@@ -78,6 +80,7 @@ export const subscribeToBacklinks = (uid: string[] | string, callback?: any, rem
                     : (remove ? undefined : [callback]),
             ]),
         ),
+        true,
     );
 };
 
@@ -97,7 +100,15 @@ export const registerDetailedDynamicViews = (views: Record<string, any>): void =
 
 export const registerQuickAdder = (adders: Record<string, any>): void => {
     const state = (window as any).unigraph.getState('registry/quickAdder');
-    state.setValue({ ...state.value, ...adders });
+    state.setValue({
+        ...state.value,
+        ...adders,
+        ...Object.fromEntries(
+            Object.values(adders).map(
+                (el: any) => (el.alias || []).map((alias: string) => [alias, el]),
+            ).flat(),
+        ),
+    });
 };
 
 export const registerContextMenuItems = (schema: string, items: any[]): void => {

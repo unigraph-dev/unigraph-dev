@@ -79,8 +79,8 @@ export const Bookmarks = withUnigraphSubscription(
     BookmarksBody,
     { defaultData: [], schemas: [], packages: [bookmarkPackage] },
     {
-        afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
-            window.unigraph.subscribeToType('$/schema/web_bookmark', (result: ABookmark[]) => { setData(result); }, subsId, { uidsOnly: true });
+        afterSchemasLoaded: (subsId: number, tabContext: any, data: any, setData: any) => {
+            tabContext.subscribeToType('$/schema/web_bookmark', (result: ABookmark[]) => { setData(result); }, subsId, { uidsOnly: true });
         },
     },
 );
@@ -134,13 +134,18 @@ const quickAdder = async (inputStr: string, preview = true) => {
 };
 
 export const init = () => {
+    const description = 'Add a bookmark';
     const tt = () => (
         <div>
             For example, enter #tag1 https://example.com
         </div>
     );
 
-    registerQuickAdder({ bookmark: { adder: quickAdder, tooltip: tt }, bm: { adder: quickAdder, tooltip: tt } });
+    registerQuickAdder({
+        bookmark: {
+            adder: quickAdder, tooltip: tt, description, alias: ['bm'],
+        },
+    });
 
     registerDynamicViews({ '$/schema/web_bookmark': BookmarkItem });
 };

@@ -162,9 +162,10 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 },
                 setValue: undefined as any,
             };
-            state.setValue = (newValue: any) => {
+            state.setValue = (newValue: any, flush?: boolean) => {
+                const changed = newValue !== state.value;
                 state.value = newValue;
-                state.subscribers.forEach((sub) => sub(state.value));
+                if (changed || flush) state.subscribers.forEach((sub) => sub(state.value));
             };
             states[name] = state;
             return state;
@@ -175,6 +176,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
     function connect() {
         const urlString = new URL(url);
         urlString.searchParams.append('browserId', browserId);
+        const isRevival = getState('unigraph/connected').value !== undefined;
         if (getState('unigraph/connected').value !== undefined) urlString.searchParams.append('revival', 'true');
         if (connection.current?.readyState !== 3 /* CLOSED */ && connection.current) return;
         connection.current = new WebSocket(urlString.toString());
@@ -182,7 +184,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
         connection.current.onopen = () => {
             getState('unigraph/connected').setValue(true);
             if (retries) clearInterval(retries);
-            if (getState('unigraph/connected').value !== undefined && readyCallback) readyCallback();
+            if (!isRevival && readyCallback) readyCallback();
             msgQueue.forEach((el) => connection.current?.send(el));
             msgQueue.length = 0;
         };
@@ -334,7 +336,8 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             sendEvent(connection, 'subscribe', { query, update }, id);
         }),
         hibernateOrReviveSubscription: (eventId = undefined, revival) => new Promise((resolve, reject) => {
-            sendEvent(connection, 'hibernate_or_revive_subscription', { revival }, eventId);
+            const id = typeof eventId === 'number' ? eventId : getRandomInt();
+            sendEvent(connection, 'hibernate_or_revive_subscription', { revival, ids: eventId }, id);
         }),
         unsubscribe: (id) => {
             sendEvent(connection, 'unsubscribe_by_id', {}, id);

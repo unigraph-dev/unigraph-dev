@@ -11,6 +11,7 @@ import _ from 'lodash';
 import { ExecutableCodeEditor } from '../ObjectView/DefaultCodeEditor';
 import DetailedObjectView from '../UserLibrary/UserLibraryObject';
 import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
+import { TabContext } from '../../utils';
 
 export function NewUserCode({}) {
     const [displayName, setDisplayName] = React.useState('');
@@ -58,10 +59,12 @@ export function CodeEditor({ id }: any) {
     const [isUserCollapseOpen, setIsUserCollapseOpen] = React.useState(false);
     const [currentPackage, setCurrentPackage] = React.useState('');
 
+    const tabContext = React.useContext(TabContext);
+
     useEffectOnce(() => {
         const subsId = getRandomInt();
 
-        window.unigraph.subscribeToType('$/schema/executable', (execs: any[]) => {
+        tabContext.subscribeToType('$/schema/executable', (execs: any[]) => {
             const namedEx: any[] = []; const
                 userEx: any[] = [];
             execs.forEach((el) => {
@@ -75,7 +78,7 @@ export function CodeEditor({ id }: any) {
         }, subsId);
 
         return function cleanup() {
-            window.unigraph.unsubscribe(subsId);
+            tabContext.unsubscribe(subsId);
         };
     });
 

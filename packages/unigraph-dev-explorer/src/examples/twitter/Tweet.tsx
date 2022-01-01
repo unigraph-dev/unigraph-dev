@@ -63,7 +63,13 @@ export const Tweet: DynamicViewRenderer = ({ data, callbacks }) => {
                         if (elObj.type['unigraph.id'] === '$/schema/icon_url') {
                             return <img src={elObj['_value.%']} style={{ maxWidth: '240px', borderRadius: '8px' }} alt="" />;
                         }
-                        return <AutoDynamicView object={new UnigraphObject(elObj)} withParent />;
+                        return (
+                            <AutoDynamicView
+                                object={new UnigraphObject(elObj)}
+                                withParent
+                                callbacks={{ context: data }}
+                            />
+                        );
                     })}
                 </div>
             </div>

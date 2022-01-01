@@ -128,16 +128,21 @@ const tt = () => (
 );
 
 export const init = () => {
+    const description = 'Add a new Todo object';
     registerDynamicViews({ '$/schema/todo': TodoItem });
-    registerQuickAdder({ todo: { adder: quickAdder, tooltip: tt }, td: { adder: quickAdder, tooltip: tt } });
+    registerQuickAdder({
+        todo: {
+            adder: quickAdder, tooltip: tt, description, alias: ['td'],
+        },
+    });
 };
 
 export const TodoList = withUnigraphSubscription(
     TodoListBody,
     { schemas: [], defaultData: [], packages: [todoPackage] },
     {
-        afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
-            window.unigraph.subscribeToType('$/schema/todo', (result: ATodoList[]) => { setData(result); }, subsId, { all: undefined });
+        afterSchemasLoaded: (subsId: number, tabContext: any, data: any, setData: any) => {
+            tabContext.subscribeToType('$/schema/todo', (result: ATodoList[]) => { setData(result); }, subsId, { all: undefined });
         },
     },
 );
