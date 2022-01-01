@@ -24,6 +24,7 @@ import { ListObjectQuery, ListObjectView } from './components/UnigraphCore/ListO
 import { SubentityView } from './components/UnigraphCore/SubentityView';
 import { ViewItem } from './components/ObjectView/ViewObjectView';
 import { backlinkQuery } from './components/ObjectView/backlinksUtils';
+import { MiniListView } from './components/UnigraphCore/ListsList';
 
 window.reloadCommands = () => {
     const commandsState = window.unigraph.getState('registry/commands');
@@ -144,6 +145,7 @@ function initRegistry() {
         '$/schema/person': { view: BasicPersonView },
         '$/schema/subentity': { view: SubentityView },
         '$/schema/view': { view: ViewItem },
+        '$/schema/list': { view: MiniListView },
     });
     window.unigraph.addState('registry/dynamicViewDetailed', {
         '$/schema/executable': { view: CodeOrComponentView },

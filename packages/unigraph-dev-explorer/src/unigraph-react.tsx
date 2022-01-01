@@ -62,6 +62,7 @@ export const subscribeToBacklinks = (uid: string[] | string, callback?: any, rem
         : _.uniq([...uids, ...Object.keys(linksState.value)]);
     linksState.setValue(
         Object.fromEntries(newKeys.map((el) => [el, linksState.value[el]])),
+        true,
     );
     const cbState = window.unigraph.getState('registry/backlinksCallbacks');
     const newCbs = _.uniq([...uids, ...Object.keys(cbState.value)]);
@@ -79,6 +80,7 @@ export const subscribeToBacklinks = (uid: string[] | string, callback?: any, rem
                     : (remove ? undefined : [callback]),
             ]),
         ),
+        true,
     );
 };
 

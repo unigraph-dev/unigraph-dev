@@ -1,5 +1,6 @@
 import { MenuItem, Typography } from '@material-ui/core';
 import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
+import { AutoDynamicViewDetailed } from '../../components/ObjectView/AutoDynamicViewDetailed';
 import { inlineRefsToChildren } from '../../components/UnigraphCore/InlineSearchPopup';
 import {
     registerDynamicViews, registerDetailedDynamicViews, registerContextMenuItems, registerQuickAdder,
@@ -10,7 +11,7 @@ import { noteQuery, noteQueryDetailed, journalQueryDetailed } from './noteQuery'
 export const init = () => {
     registerDynamicViews({ '$/schema/note_block': { view: NoteBlock, query: noteQuery } });
     registerDetailedDynamicViews({ '$/schema/note_block': { view: DetailedNoteBlock, query: noteQueryDetailed } });
-    registerDetailedDynamicViews({ '$/schema/journal': { view: (props: any) => DetailedNoteBlock({ ...props, data: new UnigraphObject(props.data._value.note._value), callbacks: { ...props.callbacks, isEmbed: true } }), query: journalQueryDetailed } });
+    registerDetailedDynamicViews({ '$/schema/journal': { view: (props: any) => <AutoDynamicViewDetailed {...props} object={new UnigraphObject(props.data._value.note._value)} callbacks={{ ...props.callbacks, isEmbed: true }} />, query: journalQueryDetailed } });
 
     // eslint-disable-next-line default-param-last
     const quickAdder = async (inputStr: string, preview = true, callback: any, refs?: any) => {

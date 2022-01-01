@@ -161,6 +161,7 @@ function NoteViewPageWrapper({ children, isRoot }: any) {
 function NoteViewTextWrapper({
     children, semanticChildren, isRoot, onContextMenu, callbacks,
 }: any) {
+    // console.log(callbacks.BacklinkComponent);
     return (
         <div style={{ display: 'flex', alignItems: 'center' }}>
             {children}
@@ -508,7 +509,6 @@ export function DetailedNoteBlock({
                                             >
                                                 <AutoDynamicView
                                                     noDrag
-                                                    withParent
                                                     allowSubentity
                                                     noBacklinks={el.type?.['unigraph.id'] === '$/schema/note_block'}
                                                     subentityExpandByDefault={!(el.type?.['unigraph.id'] === '$/schema/note_block')}
@@ -533,6 +533,7 @@ export function DetailedNoteBlock({
                                                         'focus-last-dfs-node': focusLastDFSNode,
                                                         'focus-next-dfs-node': focusNextDFSNode,
                                                         dataref,
+                                                        context: data,
                                                         isEmbed: true,
                                                     }}
                                                     component={{ '$/schema/note_block': { view: DetailedNoteBlock, query: noteQuery }, '$/schema/view': { view: ViewViewDetailed } }}
