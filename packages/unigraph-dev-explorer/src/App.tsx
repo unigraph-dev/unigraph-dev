@@ -43,7 +43,6 @@ function App() {
         <div className={classes.root}>
             <DndProvider backend={HTML5Backend}>
                 <div id="global-elements">
-                    <SearchOverlayPopover />
                     <ContextMenu />
                     <InlineSearch />
                     <MobileBar />
