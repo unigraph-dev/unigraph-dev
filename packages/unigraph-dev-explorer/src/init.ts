@@ -121,7 +121,12 @@ export function init(hostname?: string) {
     });
 
     window.unigraph.addState('global/selected', []);
-    window.unigraph.addState('global/focused', '');
+    window.unigraph.addState('global/focused', {
+        uid: '',
+        caret: 0,
+        type: '',
+    });
+    window.unigraph.addState('global/focused/actions', {});
 
     initContextMenu();
     initRegistry();

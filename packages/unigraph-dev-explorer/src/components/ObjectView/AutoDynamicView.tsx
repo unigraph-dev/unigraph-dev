@@ -40,7 +40,7 @@ export function AutoDynamicView({
     const [showSubentities, setShowSubentities] = React.useState(!!subentityExpandByDefault);
 
     const [isSelected, setIsSelected] = React.useState(false);
-    const [isFocused, setIsFocused] = React.useState(false);
+    const [isFocused, setIsFocused] = React.useState(window.unigraph.getState('global/focused').value.uid === object?.uid && tabContext.isVisible());
 
     const [DynamicViews, setDynamicViews] = React.useState({ ...window.unigraph.getState('registry/dynamicView').value, ...(component || {}) });
 
@@ -57,7 +57,7 @@ export function AutoDynamicView({
         window.unigraph.getState('global/selected').subscribe(cbsel);
 
         const cbfoc = (foc: any) => {
-            if (foc === object?.uid && tabContext.isVisible()) setIsFocused(true);
+            if (foc.uid === object?.uid && tabContext.isVisible()) setIsFocused(true);
             else setIsFocused(false);
         };
         window.unigraph.getState('global/focused').subscribe(cbfoc);
@@ -198,15 +198,12 @@ export function AutoDynamicView({
             }}
             onClick={() => { window.wsnavigator(`/library/backlink?uid=${object?.uid}`); }}
         >
-            {noParents ? '' : `${backlinks?.[0]?.length} / `}
-            {' '}
-            {backlinks?.[1]?.length}
+            {(noParents ? 0 : backlinks?.[0]?.length || 0) + (backlinks?.[1]?.length || 0)}
         </div>
     );
 
     const getEl = React.useCallback((viewId, setTitle) => {
         if (isRecursion === false && object?.type && object.type['unigraph.id'] && Object.keys(DynamicViews).includes(object.type['unigraph.id']) && getObject()) {
-            console.log(object.uid, backlinks, noBacklinks, BacklinkComponent);
             return React.createElement(DynamicViews[object.type['unigraph.id']].view, {
                 data: getObject(),
                 callbacks: {
@@ -252,9 +249,11 @@ export function AutoDynamicView({
                 </div>
             )}
         >
-            <div style={{
-                display: inline ? 'inline' : 'block', ...(inline ? {} : { width: '100%' }), backgroundColor: (isSelected || isDragging) ? 'whitesmoke' : 'unset', borderRadius: (isSelected || isDragging) ? '12px' : '',
-            }}
+            <div
+                style={{
+                    display: inline ? 'inline' : 'block', ...(inline ? {} : { width: '100%' }), backgroundColor: (isSelected || isDragging) ? 'whitesmoke' : 'unset', borderRadius: (isSelected || isDragging) ? '12px' : '',
+                }}
+                key={`object-view-${object?.uid}`}
             >
                 <div
                     id={`object-view-${object?.uid}`}

@@ -146,6 +146,7 @@ export function SearchOverlay({
     }, defaultValue);
 
     React.useEffect(() => {
+        console.log(input);
         if (input.startsWith('?')) {
             const newQuery = input.slice(1);
             setParsed({
@@ -191,7 +192,6 @@ export function SearchOverlay({
                 }
             )),
         ]).flat();
-        console.log(displayCommands);
         displayCommands.filter((el) => el.type === 'command').forEach((el, index) => { Object.assign(el, { index }); });
         setFinalCommands(displayCommands);
     }, [commands]);
@@ -243,7 +243,7 @@ export function SearchOverlay({
                     } else if (ev.key === 'ArrowUp') {
                         setSelectedIndex((idx) => idx - 1);
                     } else if (ev.key === 'Enter') {
-                        console.log('Hi');
+                        console.log((document.getElementById('omnibarItem_current') as any));
                         (document.getElementById('omnibarItem_current')?.children[0] as any)?.click();
                     } else return;
                     ev.preventDefault();
@@ -278,6 +278,7 @@ export function SearchOverlay({
             </div>
         </div>
     );
+    console.log(window.unigraph.getState('registry/quickAdder').value[input.substr(1, input.indexOf(' ') - 1)]);
     return (input.startsWith?.('+')
         && window.unigraph.getState('registry/quickAdder').value[input.substr(1, input.indexOf(' ') - 1)]) ? (
             <AdderComponent

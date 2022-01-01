@@ -12,7 +12,9 @@ import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 import { buildGraph as buildGraphFn, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
-import { TransitionGroup } from 'react-transition-group';
+import {
+    TransitionGroup,
+} from 'react-transition-group';
 import { getDynamicViews } from '../../unigraph-react';
 import { AutoDynamicView } from './AutoDynamicView';
 import { DataContext, isMobile, TabContext } from '../../utils';
@@ -70,20 +72,19 @@ function DynamicListItem({
     reverse, listUid, item, index, context, callbacks, itemUids, itemRemover, noRemover, removeOnEnter, compact,
 }: any) {
     return (
-        <Slide direction={reverse ? 'down' : 'up'} in key={item?.uid}>
-            <ListItem style={{ ...(compact ? { paddingTop: '2px', paddingBottom: '2px' } : {}) }}>
-                <ListItemIcon
-                    onClick={() => {
+        <ListItem style={{ ...(compact ? { paddingTop: '2px', paddingBottom: '2px' } : {}) }}>
+            <ListItemIcon
+                onClick={() => {
                             itemRemover([item.uid]);
                         }}
-                    style={{ display: (itemRemover === _.noop || isMobile() || noRemover) ? 'none' : '' }}
-                >
-                    <ClearAll />
-                </ListItemIcon>
-                <AutoDynamicView
-                    object={new UnigraphObject(item)}
-                    withParent={!!listUid}
-                    callbacks={{
+                style={{ display: (itemRemover === _.noop || isMobile() || noRemover) ? 'none' : '' }}
+            >
+                <ClearAll />
+            </ListItemIcon>
+            <AutoDynamicView
+                object={new UnigraphObject(item)}
+                withParent={!!listUid}
+                callbacks={{
                             ...callbacks,
                             context,
                             removeOnEnter,
@@ -96,9 +97,8 @@ function DynamicListItem({
                                 itemRemover(uids);
                             },
                         }}
-                />
-            </ListItem>
-        </Slide>
+            />
+        </ListItem>
     );
 }
 
@@ -137,25 +137,31 @@ function DynamicListBasic({
 }: any) {
     const tabContext = React.useContext(TabContext);
     return (
-        <TransitionGroup>
-            <DragandDrop dndContext={tabContext.viewId} listId={context?.uid} isReverse={reverse} arrayId={listUid}>
-                {items.map((el: any, index: number) => (
-                    <DynamicListItem
-                        item={itemGetter(el)}
-                        index={index}
-                        context={context}
-                        listUid={listUid}
-                        compact={compact}
-                        callbacks={callbacks}
-                        itemUids={items.map((ell: any) => itemGetter(ell).uid)}
-                        itemRemover={itemRemover}
-                        reverse={reverse}
-                        noRemover={noRemover}
-                        removeOnEnter={removeOnEnter}
-                    />
-                ))}
-            </DragandDrop>
-        </TransitionGroup>
+        <DragandDrop
+            dndContext={tabContext.viewId}
+            listId={context?.uid}
+            isReverse={reverse}
+            arrayId={listUid}
+            Comp={TransitionGroup}
+            ChildrenComp={Slide}
+        >
+            {items.map((el: any, index: number) => (
+                <DynamicListItem
+                    key={itemGetter(el)?.uid}
+                    item={itemGetter(el)}
+                    index={index}
+                    context={context}
+                    listUid={listUid}
+                    compact={compact}
+                    callbacks={callbacks}
+                    itemUids={items.map((ell: any) => itemGetter(ell).uid)}
+                    itemRemover={itemRemover}
+                    reverse={reverse}
+                    noRemover={noRemover}
+                    removeOnEnter={removeOnEnter}
+                />
+            ))}
+        </DragandDrop>
     );
 }
 
@@ -199,26 +205,32 @@ function DynamicList({
             scrollableTarget={`scrollableDiv${parId}`}
             endMessage=""
         >
-            <TransitionGroup>
-                <DragandDrop dndContext={tabContext.viewId} listId={context?.uid} isReverse={reverse} arrayId={listUid}>
-                    {loadedItems.map((el: any, index: number) => (
-                        <DynamicListItem
-                            key={el?.uid || index}
-                            item={el}
-                            index={index}
-                            context={context}
-                            listUid={listUid}
-                            reverse={reverse}
-                            compact={compact}
-                            callbacks={callbacks}
-                            itemUids={items.map((ell: any) => itemGetter(ell).uid)}
-                            itemRemover={itemRemover}
-                            noRemover={noRemover}
-                            removeOnEnter={removeOnEnter}
-                        />
+
+            <DragandDrop
+                Comp={TransitionGroup}
+                dndContext={tabContext.viewId}
+                listId={context?.uid}
+                isReverse={reverse}
+                arrayId={listUid}
+                ChildrenComp={Slide}
+            >
+                {loadedItems.map((el: any, index: number) => (
+                    <DynamicListItem
+                        key={el?.uid || index}
+                        item={el}
+                        index={index}
+                        context={context}
+                        listUid={listUid}
+                        reverse={reverse}
+                        compact={compact}
+                        callbacks={callbacks}
+                        itemUids={items.map((ell: any) => itemGetter(ell).uid)}
+                        itemRemover={itemRemover}
+                        noRemover={noRemover}
+                        removeOnEnter={removeOnEnter}
+                    />
                     ))}
-                </DragandDrop>
-            </TransitionGroup>
+            </DragandDrop>
         </InfiniteScroll>
     );
 }
