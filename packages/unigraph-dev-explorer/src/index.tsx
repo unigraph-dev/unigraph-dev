@@ -49,6 +49,7 @@ function initDynamicObjectViews() {
         }]));
         const currPages = window.unigraph.getState('registry/pages');
         currPages.setValue({ ...currPages.value, ...Object.fromEntries(resolvedViews) });
+        window.reloadCommands();
     }, undefined, { all: false });
 }
 

@@ -23,7 +23,7 @@ export default function DetailedObjectView({
     const tabContext = React.useContext(TabContext);
 
     React.useEffect(() => {
-        window.unigraph.getState('registry/dynamicViewDetailed').subscribe((newIts) => setDynamicViewsDetailed(newIts));
+        window.unigraph.getState('registry/dynamicViewDetailed').subscribe((newIts) => setDynamicViewsDetailed({ ...newIts, ...(component || {}) }));
     }, []);
 
     // eslint-disable-next-line consistent-return
