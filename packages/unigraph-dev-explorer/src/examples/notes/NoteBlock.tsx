@@ -253,16 +253,18 @@ export function DetailedNoteBlock({
     React.useEffect(() => {
         if (focused) {
             setIsEditing(true);
-            console.log(isEditing);
-            if (isEditing) editorRef.current.click();
+            if (isEditing) textInput.current.focus();
             setTimeout(() => {
                 let tail; const focusedState = window.unigraph.getState('global/focused').value;
                 const el = textInput.current.firstChild || textInput.current;
-                el?.click?.();
                 if (focusedState.tail) tail = el.textContent.length;
                 setCaret(document, el, tail || focusedState.caret);
             }, 0);
+        }
+    }, [focused]);
 
+    React.useEffect(() => {
+        if (focused) {
             window.unigraph.getState('global/focused/actions').setValue({
                 splitChild: () => {
                     const sel = document.getSelection();
@@ -273,7 +275,7 @@ export function DetailedNoteBlock({
                 unindentChild: callbacks['unindent-child-in-parent'],
             });
         }
-    }, [focused]);
+    }, [data, focused]);
 
     React.useEffect(commandFn, [command]);
 
@@ -305,7 +307,6 @@ export function DetailedNoteBlock({
                         }}
                         onBlur={(ev) => {
                             setIsEditing(false);
-                            console.log('onBlur');
                             inputDebounced.current.flush();
                             if (focused) {
                                 window.unigraph.getState('global/focused').setValue({ uid: '', caret: 0, type: '' });
@@ -523,7 +524,6 @@ export function DetailedNoteBlock({
                                                 createBelow={() => { addChild(dataref.current, editorContext); }}
                                             >
                                                 <AutoDynamicView
-                                                    key={el.uid}
                                                     noDrag
                                                     allowSubentity
                                                     noBacklinks={el.type?.['unigraph.id'] === '$/schema/note_block'}

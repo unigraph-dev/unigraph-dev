@@ -108,7 +108,6 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
     // console.log(newChildren)
     window.unigraph.updateObject(data?._value?.uid, { children: { '_value[': newChildren } }, false, false, context.callbacks.subsId, parents);
     context.edited.current = true;
-    context.setCommand(() => () => focusUid(targetUid));
 };
 
 export const unsplitChild = async (data: any, context: NoteEditorContext, index: number) => {
@@ -216,7 +215,7 @@ export const indentChild = (data: any, context: NoteEditorContext, index: number
     window.unigraph.updateObject(data?._value?.uid, { children: { '_value[': finalChildren } }, false, false, context.callbacks.subsId, parents);
     context.edited.current = true;
 
-    context.setCommand(() => () => focusUid(newUid._value.uid));
+    // context.setCommand(() => () => focusUid(newUid._value.uid));
     // context.setCommand(() => noteBlockCommands['set-focus'].bind(this, data, {...context, childrenref: {current: context.childrenref.current.children[parent as number].children[0].children[0].children[1]}}, -1))
 };
 
@@ -271,7 +270,7 @@ export const unindentChild = async (data: any, context: NoteEditorContext, paren
     await window.unigraph.updateObject(data?._value?.uid, { ...data._value, children: { '_value[': newChildren } }, false, false, [], parents);
     await window.unigraph.deleteItemFromArray(delUidPar, delUidChild);
     context.edited.current = true;
-    context.setCommand(() => () => focusUid(newChildren[parent + 1]._value._value.uid));
+    // context.setCommand(() => () => focusUid(newChildren[parent + 1]._value._value.uid));
 };
 
 export const focusLastDFSNode = (data: any, context: NoteEditorContext, index: number, tail?: boolean) => {

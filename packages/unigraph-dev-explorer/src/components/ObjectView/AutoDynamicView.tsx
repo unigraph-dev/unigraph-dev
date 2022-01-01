@@ -40,7 +40,7 @@ export function AutoDynamicView({
     const [showSubentities, setShowSubentities] = React.useState(!!subentityExpandByDefault);
 
     const [isSelected, setIsSelected] = React.useState(false);
-    const [isFocused, setIsFocused] = React.useState(false);
+    const [isFocused, setIsFocused] = React.useState(window.unigraph.getState('global/focused').value.uid === object?.uid && tabContext.isVisible());
 
     const [DynamicViews, setDynamicViews] = React.useState({ ...window.unigraph.getState('registry/dynamicView').value, ...(component || {}) });
 
@@ -198,9 +198,7 @@ export function AutoDynamicView({
             }}
             onClick={() => { window.wsnavigator(`/library/backlink?uid=${object?.uid}`); }}
         >
-            {noParents ? '' : `${backlinks?.[0]?.length} / `}
-            {' '}
-            {backlinks?.[1]?.length}
+            {(noParents ? 0 : backlinks?.[0]?.length || 0) + (backlinks?.[1]?.length || 0)}
         </div>
     );
 
