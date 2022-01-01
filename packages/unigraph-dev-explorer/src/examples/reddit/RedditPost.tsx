@@ -21,8 +21,8 @@ const getThumbnail = (url: string) => {
     return <Avatar variant="rounded" src={url} />;
 };
 
-export function Expand({ expanded, toggleExpanded }: any) {
-    const style = { alignSelf: 'center', marginRight: '8px' };
+export function Expand({ expanded, toggleExpanded, hide }: any) {
+    const style = { alignSelf: 'center', marginRight: '8px', display: hide ? 'none' : '' };
     return expanded
         ? <RemoveCircle onClick={() => { toggleExpanded(!expanded); }} style={style} />
         : <AddCircle onClick={() => { toggleExpanded(!expanded); }} style={style} />;
@@ -55,7 +55,7 @@ export const RedditPost: DynamicViewRenderer = ({ data, callbacks }) => {
 
                 <Typography variant="body1" style={{ marginRight: '8px' }}>{data.get('name').as('primitive')}</Typography>
                 <div style={{ display: 'flex', color: 'gray' }}>
-                    <Expand expanded={innerExpanded} toggleExpanded={setInnerExpanded} />
+                    <Expand expanded={innerExpanded} toggleExpanded={setInnerExpanded} hide={data.get('thumbnail').as('primitive') === 'self' && data.get('selftext').as('primitive') === ''} />
                     <div>
 
                         <Typography variant="body2">

@@ -24,7 +24,7 @@ export function HomeSection({ data }: any) {
                 });
             }
         };
-        const int = setInterval(shouldRender, 5000);
+        const int = setInterval(shouldRender, 180000);
         if (flushCondition) {
             shouldRender();
             setFlushCondition(false);

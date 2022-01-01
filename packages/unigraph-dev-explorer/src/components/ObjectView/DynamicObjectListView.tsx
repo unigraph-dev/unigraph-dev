@@ -112,6 +112,7 @@ export type DynamicObjectListViewProps = {
     callbacks?: any,
     itemGetter?: any,
     itemRemover?: ItemRemover,
+    itemAdder?: (uid: string) => void,
     filters?: Filter[],
     defaultFilter?: string | string[],
     reverse?: boolean,
@@ -295,7 +296,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
     style, titleBar, items, groupers, groupBy, listUid, context,
     callbacks, itemGetter = _.identity, itemRemover = _.noop, filters = [],
     defaultFilter, reverse, virtualized, buildGraph, noBar, noRemover, noDrop,
-    compact, subscribeOptions, loadAll, removeOnEnter,
+    compact, subscribeOptions, loadAll, removeOnEnter, itemAdder,
 }) => {
     const classes = useStyles();
 
@@ -348,7 +349,11 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
         accept: Object.keys(window.unigraph.getNamespaceMap() || {}),
         drop: (item: { uid: string, dndContext: any, removeFromContext?: any }, monitor) => {
             if (!monitor.didDrop() && !noDrop && contextRef.current) {
-                window.unigraph.runExecutable('$/executable/add-item-to-list', { where: contextRef.current.uid, item: item.uid });
+                if (itemAdder) {
+                    itemAdder(item.uid);
+                } else {
+                    window.unigraph.runExecutable('$/executable/add-item-to-list', { where: contextRef.current.uid, item: item.uid });
+                }
                 if (tabContext.viewId === item.dndContext) { item?.removeFromContext(); }
                 // console.log(tabContext, item.dndContext)
             }
