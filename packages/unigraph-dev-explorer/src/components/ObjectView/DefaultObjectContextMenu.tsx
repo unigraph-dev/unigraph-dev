@@ -19,56 +19,56 @@ import {
 export const defaultContextMenu: Array<ContextMenuGenerator> = [
     (uid, object, handleClose, callbacks) => (
         <MenuItem style={{ paddingTop: '2px', paddingBottom: '2px' }} onClick={() => { handleClose(); window.wsnavigator(`/library/object?uid=${uid}&viewer=${'dynamic-view-detailed'}&type=${object?.type?.['unigraph.id']}`); }}>
-            <ListItemIcon style={{ minWidth: '36px' }}><Icon path={mdiViewDayOutline} size={1} /></ListItemIcon>
+            <ListItemIcon style={{ minWidth: '32px' }}><Icon path={mdiViewDayOutline} size={0.8} /></ListItemIcon>
             <ListItemText>View object with its default</ListItemText>
 
         </MenuItem>
     ),
     (uid, object, handleClose, callbacks) => (
         <MenuItem style={{ paddingTop: '2px', paddingBottom: '2px' }} onClick={() => { handleClose(); window.wsnavigator(`/library/object?uid=${uid}&viewer=${'json-tree'}`); }}>
-            <ListItemIcon style={{ minWidth: '36px' }}><Icon path={mdiFileTreeOutline} size={1} /></ListItemIcon>
+            <ListItemIcon style={{ minWidth: '32px' }}><Icon path={mdiFileTreeOutline} size={0.8} /></ListItemIcon>
             <ListItemText>View object with JSON tree viewer</ListItemText>
 
         </MenuItem>
     ),
     (uid, object, handleClose, callbacks) => (
         <MenuItem style={{ paddingTop: '2px', paddingBottom: '2px' }} onClick={() => { handleClose(); window.wsnavigator(`/object-editor?uid=${uid}`); }}>
-            <ListItemIcon style={{ minWidth: '36px' }}><Icon path={mdiVectorPolylineEdit} size={1} /></ListItemIcon>
+            <ListItemIcon style={{ minWidth: '32px' }}><Icon path={mdiVectorPolylineEdit} size={0.8} /></ListItemIcon>
             <ListItemText>View object with rich object editor</ListItemText>
 
         </MenuItem>
     ),
     (uid, object, handleClose, callbacks) => (
         <MenuItem style={{ paddingTop: '2px', paddingBottom: '2px' }} onClick={() => { handleClose(); window.unigraph.runExecutable('$/executable/add-item-to-list', { where: '$/entity/inbox', item: uid }); }}>
-            <ListItemIcon style={{ minWidth: '36px' }}><Icon path={mdiInboxArrowDownOutline} size={1} /></ListItemIcon>
+            <ListItemIcon style={{ minWidth: '32px' }}><Icon path={mdiInboxArrowDownOutline} size={0.8} /></ListItemIcon>
             <ListItemText>Add item to inbox</ListItemText>
 
         </MenuItem>
     ),
     (uid, object, handleClose, callbacks) => (
         <MenuItem style={{ paddingTop: '2px', paddingBottom: '2px' }} onClick={() => { handleClose(); window.unigraph.runExecutable('$/executable/add-item-to-list', { where: '$/entity/read_later', item: uid }); }}>
-            <ListItemIcon style={{ minWidth: '36px' }}><Icon path={mdiBookOutline} size={1} /></ListItemIcon>
+            <ListItemIcon style={{ minWidth: '32px' }}><Icon path={mdiBookOutline} size={0.8} /></ListItemIcon>
             <ListItemText>Add item to read later</ListItemText>
 
         </MenuItem>
     ),
     (uid, object, handleClose, callbacks) => (
         <MenuItem style={{ paddingTop: '2px', paddingBottom: '2px' }} onClick={() => { handleClose(); window.wsnavigator(`/library/backlink?uid=${uid}`); }}>
-            <ListItemIcon style={{ minWidth: '36px' }}><Icon path={mdiLinkBoxVariantOutline} size={1} /></ListItemIcon>
+            <ListItemIcon style={{ minWidth: '32px' }}><Icon path={mdiLinkBoxVariantOutline} size={0.8} /></ListItemIcon>
             <ListItemText>View backlinks</ListItemText>
 
         </MenuItem>
     ),
     (uid, object, handleClose, callbacks) => (
         <MenuItem style={{ paddingTop: '2px', paddingBottom: '2px' }} onClick={() => { handleClose(); window.unigraph.deleteObject(uid); }}>
-            <ListItemIcon style={{ minWidth: '36px' }}><Icon path={mdiDeleteOutline} size={1} /></ListItemIcon>
+            <ListItemIcon style={{ minWidth: '32px' }}><Icon path={mdiDeleteOutline} size={0.8} /></ListItemIcon>
             <ListItemText>Delete item</ListItemText>
 
         </MenuItem>
     ),
     (uid, object, handleClose, callbacks) => (
         <MenuItem style={{ paddingTop: '2px', paddingBottom: '0px' }} onClick={() => { handleClose(); window.wsnavigator(`/graph?uid=${uid}`); }}>
-            <ListItemIcon style={{ minWidth: '36px' }}><Icon path={mdiGraphOutline} size={1} /></ListItemIcon>
+            <ListItemIcon style={{ minWidth: '32px' }}><Icon path={mdiGraphOutline} size={0.8} /></ListItemIcon>
             <ListItemText>Show Graph view</ListItemText>
 
         </MenuItem>
@@ -78,14 +78,14 @@ export const defaultContextMenu: Array<ContextMenuGenerator> = [
 export const defaultContextContextMenu: Array<ContextMenuGenerator> = [
     (uid, object, handleClose, callbacks) => (
         <MenuItem style={{ paddingTop: '2px', paddingBottom: '2px' }} onClick={() => { handleClose(); callbacks?.removeFromContext?.(); }}>
-            <ListItemIcon style={{ minWidth: '36px' }}><Icon path={mdiCloseBoxOutline} size={1} /></ListItemIcon>
+            <ListItemIcon style={{ minWidth: '32px' }}><Icon path={mdiCloseBoxOutline} size={0.8} /></ListItemIcon>
             <ListItemText>Remove item from context</ListItemText>
 
         </MenuItem>
     ),
     (uid, object, handleClose, callbacks) => (
         <MenuItem style={{ paddingTop: '2px', paddingBottom: '2px' }} onClick={() => { handleClose(); callbacks?.removeFromContext?.('left'); }}>
-            <ListItemIcon style={{ minWidth: '36px' }}><Icon path={mdiCloseBoxMultipleOutline} size={1} /></ListItemIcon>
+            <ListItemIcon style={{ minWidth: '32px' }}><Icon path={mdiCloseBoxMultipleOutline} size={0.8} /></ListItemIcon>
             <ListItemText>Remove all items above (on the left) from context</ListItemText>
 
         </MenuItem>
@@ -116,7 +116,7 @@ export const getObjectContextMenuQuery = (schema: string, onlyShortcuts = false)
 unigraph.id
 expand(_userpredicate_)
 }
-uids as var(func: uid(items)) @filter(uid(origins)) @cascade {
+uids as var(func: uid(items)) @filter(uid(origins, originsAny)) @cascade {
     uid
     ${onlyShortcuts === true ? `_value {
         is_shortcut @filter(eq(<_value.!>, true)) {
@@ -127,6 +127,12 @@ uids as var(func: uid(items)) @filter(uid(origins)) @cascade {
 var(func: eq(<unigraph.id>, "${schema}")) {
     <unigraph.origin> {
         origins as uid
+}
+}
+
+var(func: eq(<unigraph.id>, "$/schema/any")) {
+    <unigraph.origin> {
+        originsAny as uid
 }
 }
 

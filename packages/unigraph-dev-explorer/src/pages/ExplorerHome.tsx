@@ -35,13 +35,13 @@ export function HomeSection({ data }: any) {
 
     return shouldDisplay ? (
         <Card
-            style={{ padding: '24px', margin: '12px' }}
+            style={{ padding: '16px', margin: '12px' }}
             variant="outlined"
             onClick={() => {
                 setTimeout(() => { setFlushCondition(true); }, 500);
             }}
         >
-            <Typography variant="h5">{data.get('view/name').as('primitive')}</Typography>
+            <Typography variant="h6" gutterBottom>{data.get('view/name').as('primitive')}</Typography>
             <AutoDynamicViewDetailed object={new UnigraphObject(data.get('view')._value)} />
         </Card>
     ) : <span />;

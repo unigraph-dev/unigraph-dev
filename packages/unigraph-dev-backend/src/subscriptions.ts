@@ -41,7 +41,7 @@ export function getFragment(query: Query, states: any) {
                 ? '@recurse { uid <unigraph.id> expand(_userpredicate_) } '
                 : (metadataOnly
                     ? ' { uid <dgraph.type> type { <unigraph.id> } } '
-                    : makeQueryFragmentFromType(query.name, states.caches.schemas.data, depth)))
+                    : (queryAs || makeQueryFragmentFromType(query.name, states.caches.schemas.data, depth))))
     )}
         var(func: eq(<unigraph.id>, "${query.name}")) {
         <~type> {

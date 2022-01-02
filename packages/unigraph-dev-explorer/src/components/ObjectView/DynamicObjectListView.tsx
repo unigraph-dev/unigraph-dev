@@ -82,6 +82,7 @@ function DynamicListItem({
                 <ClearAll />
             </ListItemIcon>
             <AutoDynamicView
+                compact={compact}
                 object={new UnigraphObject(item)}
                 withParent={!!listUid}
                 callbacks={{
@@ -480,7 +481,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                         })
                         : groupers[groupBy](procItems.map(itemGetter)).map((el: Group) => (
                             <>
-                                <ListSubheader>{el.name}</ListSubheader>
+                                <ListSubheader style={{ padding: compact ? '2px' : '', lineHeight: compact ? '1.2em' : '' }}>{el.name}</ListSubheader>
                                 {React.createElement((isStub && !loadAll) ? DynamicList : DynamicListBasic, {
                                     reverse: reverseOrder,
                                     items: el.items,

@@ -22,6 +22,7 @@ export function MiniListView({ data }: any) {
     return (
         <Grid item xs={12} sm={6} ref={dropSub}>
             <Card
+                onContextMenu={(event) => onUnigraphContextMenu(event, data)}
                 variant="outlined"
                 style={{ padding: '8px', display: 'flex' }}
                 onClick={() => {

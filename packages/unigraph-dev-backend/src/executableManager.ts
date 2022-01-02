@@ -12,7 +12,7 @@ import cron from 'node-cron';
 import _ from 'lodash';
 import { PackageDeclaration } from 'unigraph-dev-common/lib/types/packages';
 import Babel from '@babel/core';
-import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { addHook } from './hooks';
 import { Cache } from './caches';
 import DgraphClient from './dgraphClient';
@@ -162,14 +162,14 @@ export const runEnvRoutineJs: ExecRunner = (src, context, unigraph) => {
     // const fn = () => eval(src);
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     const AsyncFunction = Object.getPrototypeOf(async () => false).constructor;
-    const fn = new AsyncFunction('require', 'unpad', 'context', 'unigraph', `try {${src}
+    const fn = new AsyncFunction('require', 'unpad', 'context', 'unigraph', 'UnigraphObject', `try {${src}
 } catch (e) {
         unigraph.addNotification({
             from: "Executable manager", 
             name: "Failed to run executable " + context.definition["unigraph.id"], 
             content: "Error was: " + e.toString() + e.stack }
         )
-    }`).bind(this, require, unpad, context, unigraph);
+    }`).bind(this, require, unpad, context, unigraph, UnigraphObject);
 
     return fn;
 };
