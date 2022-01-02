@@ -45,7 +45,7 @@ export function ContextMenu() {
                 PaperProps={{
                     elevation: 4,
                     style: {
-                        padding: '10px',
+                        padding: '6px 4px',
                         borderRadius: '16px',
                     },
                 }}

@@ -65,7 +65,7 @@ export const TodoItem: DynamicViewRenderer = ({
                 }}
             />
             <ListItemText
-                style={{ margin: compact ? '0px' : '' }}
+                style={{ margin: compact ? '0px' : '', alignSelf: 'center' }}
                 primary={(
                     <AutoDynamicView
                         object={data.get('name')._value._value}

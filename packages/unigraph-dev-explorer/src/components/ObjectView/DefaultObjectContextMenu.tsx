@@ -116,7 +116,7 @@ export const getObjectContextMenuQuery = (schema: string, onlyShortcuts = false)
 unigraph.id
 expand(_userpredicate_)
 }
-uids as var(func: uid(items)) @filter(uid(origins)) @cascade {
+uids as var(func: uid(items)) @filter(uid(origins, originsAny)) @cascade {
     uid
     ${onlyShortcuts === true ? `_value {
         is_shortcut @filter(eq(<_value.!>, true)) {
@@ -127,6 +127,12 @@ uids as var(func: uid(items)) @filter(uid(origins)) @cascade {
 var(func: eq(<unigraph.id>, "${schema}")) {
     <unigraph.origin> {
         origins as uid
+}
+}
+
+var(func: eq(<unigraph.id>, "$/schema/any")) {
+    <unigraph.origin> {
+        originsAny as uid
 }
 }
 
