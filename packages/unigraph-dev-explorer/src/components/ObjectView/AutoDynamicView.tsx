@@ -96,6 +96,7 @@ export function AutoDynamicView({
     React.useEffect(() => {
         const newSubs = getRandomInt();
         if (isObjectStub) {
+            console.log(tabContext);
             if (subsId) tabContext.unsubscribe(subsId);
             let query = DynamicViews[object.type?.['unigraph.id']]?.query?.(object.uid);
             if (!query) {
@@ -113,7 +114,7 @@ export function AutoDynamicView({
             return function cleanup() { tabContext.unsubscribe(newSubs); };
         }
         return () => {};
-    }, [object]);
+    }, [object.uid]);
 
     const [{ isDragging }, drag] = useDrag(() => ({
         type: object?.type?.['unigraph.id'] || '$/schema/any',

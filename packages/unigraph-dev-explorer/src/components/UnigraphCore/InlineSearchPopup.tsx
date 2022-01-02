@@ -119,7 +119,12 @@ export function InlineSearch() {
                     horizontal: 'left',
                 }}
                 PaperProps={{
-                    style: { maxHeight: '320px', padding: '8px', borderRadius: '8px' },
+                    elevation: 4,
+                    style: {
+                        maxHeight: '320px',
+                        padding: '10px',
+                        borderRadius: '16px',
+                    },
                 }}
             >
                 {actionItems.map((el: any, index: number) => (

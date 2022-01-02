@@ -25,7 +25,7 @@ function TodoListBody({ data }: { data: ATodoList[] }) {
     }, [todoList]);
 
     return (
-        <div>
+        <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
             <DynamicObjectListView
                 items={filteredItems}
                 context={null}
@@ -145,7 +145,10 @@ export const TodoList = withUnigraphSubscription(
     { schemas: [], defaultData: [], packages: [todoPackage] },
     {
         afterSchemasLoaded: (subsId: number, tabContext: any, data: any, setData: any) => {
-            tabContext.subscribeToType('$/schema/todo', (result: ATodoList[]) => { setData(result); }, subsId, { all: undefined });
+            tabContext.subscribeToType('$/schema/todo', (result: ATodoList[]) => { setData(result.map((el: any) => ({ ...el, _stub: true }))); }, subsId, {
+                showHidden: true,
+                queryAs: ' { uid type { <unigraph.id> } _hide _value { done { <_value.!> } } } ',
+            });
         },
     },
 );
