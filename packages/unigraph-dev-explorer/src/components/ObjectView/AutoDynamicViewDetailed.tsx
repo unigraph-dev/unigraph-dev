@@ -17,7 +17,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
     const [DynamicViewsDetailed, setDynamicViewsDetailed] = React.useState({ ...window.unigraph.getState('registry/dynamicViewDetailed').value, ...(component || {}) });
 
     React.useEffect(() => {
-        window.unigraph.getState('registry/dynamicViewDetailed').subscribe((newIts) => setDynamicViewsDetailed(newIts));
+        window.unigraph.getState('registry/dynamicViewDetailed').subscribe((newIts) => setDynamicViewsDetailed({ ...newIts, ...(component || {}) }));
     }, []);
 
     const tabContext = React.useContext(TabContext);

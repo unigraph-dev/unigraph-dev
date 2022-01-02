@@ -47,8 +47,9 @@ export const getComponentFromPage = (location: string, params: any = {}) => {
 export const setCaret = (document: Document, element: any, pos: number, length?: number) => {
     const range = document.createRange();
     const sel = document.getSelection();
-    range.setStart(element, pos);
-    if (length) { range.setEnd(element, length + pos); } else { range.collapse(true); }
+    const maxLen = element.textContent.length < pos ? element.textContent.length : pos;
+    range.setStart(element, maxLen);
+    if (length) { range.setEnd(element, length + maxLen); } else { range.collapse(true); }
 
     sel?.removeAllRanges();
     sel?.addRange(range);
