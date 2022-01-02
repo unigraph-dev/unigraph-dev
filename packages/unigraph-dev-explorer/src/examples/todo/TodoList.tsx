@@ -37,7 +37,9 @@ function TodoListBody({ data }: { data: ATodoList[] }) {
     );
 }
 
-export const TodoItem: DynamicViewRenderer = ({ data, callbacks }) => {
+export const TodoItem: DynamicViewRenderer = ({
+    data, callbacks, compact, inline,
+}) => {
     // console.log(data);
     const unpadded: ATodoList = unpad(data);
     // console.log(unpadded)
@@ -63,6 +65,7 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks }) => {
                 }}
             />
             <ListItemText
+                style={{ margin: compact ? '0px' : '' }}
                 primary={(
                     <AutoDynamicView
                         object={data.get('name')._value._value}

@@ -20,7 +20,7 @@ import { getSubentities, isStub, SubentityDropAcceptor } from './utils';
 export function AutoDynamicView({
     object, callbacks, component, attributes, inline, allowSubentity,
     allowSemantic = true, style, noDrag, noDrop, noContextMenu,
-    subentityExpandByDefault, noBacklinks, noParents, withParent,
+    subentityExpandByDefault, noBacklinks, noParents, withParent, compact,
 }: AutoDynamicViewProps) {
     if (!callbacks) callbacks = {};
     allowSubentity = allowSubentity === true;
@@ -214,6 +214,7 @@ export function AutoDynamicView({
                 },
                 ...(attributes || {}),
                 inline,
+                compact,
                 focused: isFocused,
             });
         } if (isRecursion === false && object && getObject()) {

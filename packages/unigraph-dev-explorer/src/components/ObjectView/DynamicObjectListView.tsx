@@ -82,6 +82,7 @@ function DynamicListItem({
                 <ClearAll />
             </ListItemIcon>
             <AutoDynamicView
+                compact={compact}
                 object={new UnigraphObject(item)}
                 withParent={!!listUid}
                 callbacks={{

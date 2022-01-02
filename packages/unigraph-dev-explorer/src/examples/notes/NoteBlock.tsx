@@ -525,6 +525,7 @@ export function DetailedNoteBlock({
                                             >
                                                 <AutoDynamicView
                                                     noDrag
+                                                    compact
                                                     allowSubentity
                                                     noBacklinks={el.type?.['unigraph.id'] === '$/schema/note_block'}
                                                     subentityExpandByDefault={!(el.type?.['unigraph.id'] === '$/schema/note_block')}
@@ -556,7 +557,7 @@ export function DetailedNoteBlock({
                                                     attributes={{ isChildren: true, isCollapsed: isCol }}
                                                     style={el.type?.['unigraph.id'] === '$/schema/note_block' ? {}
                                                         : {
-                                                            border: 'lightgray', borderStyle: 'solid', borderWidth: 'thin', margin: '4px', borderRadius: '8px', maxWidth: 'fit-content', padding: '4px',
+                                                            border: 'lightgray', borderStyle: 'solid', borderWidth: 'thin', margin: '2px', borderRadius: '8px', maxWidth: 'fit-content', padding: '4px',
                                                         }}
                                                 />
                                             </OutlineComponent>
