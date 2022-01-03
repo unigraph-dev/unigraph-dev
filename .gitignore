@@ -17,7 +17,13 @@ secrets.env.json
 
 # Etc
 packages/unigraph-dev-backend/exports.json
+.nvmrc
 
 # Obsidian for docs
 docs/.obsidian/workspace
 docs/.obsidian/plugins
+
+# Cypress
+cypress/screenshots
+cypress/videos
+cypress/downloads

@@ -20,6 +20,8 @@ module.exports = {
         '**/build/**/*.*',
         '**/vendor/**/*.*',
         '**/*.test.ts',
+        '**/cypress/**/*.*',
+        '**/exceutables/**/*.*',
         '**/*.config.js',
     ],
     rules: {

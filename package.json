@@ -21,7 +21,8 @@
     "dev": "bash scripts/start_server.sh",
     "lint": "yarn eslint . --ext .ts,.tsx",
     "electron-dist": "bash scripts/prepare_for_electron.sh && yarn workspace unigraph-dev-electron dist",
-    "electron-start": "yarn workspace unigraph-dev-electron start"
+    "electron-start": "yarn workspace unigraph-dev-electron start",
+    "cypress": "./node_modules/.bin/cypress open"
   },
   "engines": {
     "node": ">=16.0.0",
@@ -35,6 +36,7 @@
     "@typescript-eslint/eslint-plugin": "^5.8.1",
     "@typescript-eslint/parser": "^5.8.1",
     "babel-eslint": "^10.1.0",
+    "cypress": "^9.2.0",
     "eslint": "^8.2.0",
     "eslint-config-airbnb": "19.0.4",
     "eslint-config-react-app": "^7.0.0",
