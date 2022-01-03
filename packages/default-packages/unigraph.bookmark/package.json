@@ -6,14 +6,6 @@
         "package_name": "unigraph.bookmark",
         "schemas": [
             {
-                "id": "icon_url",
-                "src": "schemas/icon_url.json"
-            },
-            {
-                "id": "url",
-                "src": "schemas/url.json"
-            },
-            {
                 "id": "web_bookmark",
                 "src": "schemas/web_bookmark.json"
             },
