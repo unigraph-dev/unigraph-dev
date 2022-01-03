@@ -278,7 +278,6 @@ export const focusLastDFSNode = (data: any, context: NoteEditorContext, index: n
 };
 
 export const focusNextDFSNode = (data: any, context: NoteEditorContext, index: number, tail?: boolean) => {
-    console.log(getNextDFSNode(data, context, index));
     focusUid(getNextDFSNode(data, context, index), tail);
 };
 
@@ -291,7 +290,6 @@ export const getLastDFSNode = (data: any, context: NoteEditorContext, index: num
 
 export const getNextDFSNode = (data: any, context: NoteEditorContext, index: number) => {
     const orderedNodes = dfs(context.nodesState.value);
-    console.log(orderedNodes);
     const newIndex = orderedNodes.findIndex((el) => el.uid === data.uid) + 1;
     if (orderedNodes[newIndex] && !orderedNodes[newIndex].root) return orderedNodes[newIndex].uid;
     return '';

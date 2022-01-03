@@ -11,13 +11,13 @@
 .flexlayout__tab_button {
     transition: 0.3s;
     -webkit-app-region: no-drag;
+    border-radius: 8px;
+    margin: 4px;
 }
 
 .flexlayout__tab_button--selected {
     background-color: #e9e9e9;
     transition: background-color 0.3s linear;
-    border-radius: 8px;
-    margin: 4px;
 }
 
 .flexlayout__tab_button_content {
@@ -32,7 +32,7 @@
     background-color: unset;
 }
 
-.flexlayout__border_button--selected {
+.flexlayout__border_button {
     border-radius: 8px;
 }
 
