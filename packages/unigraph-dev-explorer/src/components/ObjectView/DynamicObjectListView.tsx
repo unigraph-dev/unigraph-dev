@@ -175,6 +175,7 @@ function DynamicList({
     const tabContext = React.useContext(TabContext);
     const [loadedItems, setLoadedItems] = React.useState<any[]>([]);
     const [setupProps, setSetupProps] = React.useState<{ next: any, cleanup: any, onUpdate: any } | null>(null);
+    const scrollerRef = React.useRef<any>(null);
 
     React.useEffect(() => {
         if (setupProps?.cleanup) setupProps.cleanup();
@@ -182,7 +183,7 @@ function DynamicList({
         if (items.length) {
             newProps = setupInfiniteScrolling(
                 items.map((el: any) => itemGetter(el).uid),
-                infinite ? 25 : items.length,
+                infinite ? 15 : items.length,
                 (its: any[]) => {
                     setLoadedItems(buildGraph ? buildGraphFn(its) : its);
                 },
@@ -193,6 +194,12 @@ function DynamicList({
         } else { setLoadedItems([]); }
         return function cleanup() { newProps?.cleanup(); };
     }, [items.length === 0]);
+
+    React.useEffect(() => {
+        if (scrollerRef.current?.el?.scrollHeight < scrollerRef.current?.el?.clientHeight) {
+            setupProps?.next();
+        }
+    }, [loadedItems.length]);
 
     React.useEffect(() => {
         setupProps?.onUpdate(items.map((el: any) => itemGetter(el).uid));
@@ -206,6 +213,7 @@ function DynamicList({
             loader=""
             scrollableTarget={`scrollableDiv${parId}`}
             endMessage=""
+            ref={scrollerRef}
         >
 
             <DragandDrop
