@@ -42,14 +42,21 @@ export function ContextMenu() {
                     vertical: 'top',
                     horizontal: 'center',
                 }}
+                PaperProps={{
+                    elevation: 4,
+                    style: {
+                        padding: '6px 4px',
+                        borderRadius: '16px',
+                    },
+                }}
             >
-                <div style={{ paddingTop: '4px', paddingBottom: '4px' }}>
+                <div>
                     <MenuItem style={{ paddingTop: '2px', paddingBottom: '2px' }}>
-                        <ListItemIcon style={{ minWidth: '36px' }}><Icon path={mdiCubeOutline} size={1} /></ListItemIcon>
+                        <ListItemIcon style={{ minWidth: '32px' }}><Icon path={mdiCubeOutline} size={0.8} /></ListItemIcon>
                         <ListItemText>{state.contextUid}</ListItemText>
                         {objDef?._icon ? (
                             <ListItemIcon style={{
-                                minWidth: '24px', minHeight: '24px', marginLeft: '12px', marginRight: '8px', backgroundImage: `url("data:image/svg+xml,${objDef?._icon}")`, opacity: 0.54,
+                                minWidth: '20px', minHeight: '20px', marginLeft: '12px', marginRight: '8px', backgroundImage: `url("data:image/svg+xml,${objDef?._icon}")`, opacity: 0.54,
                             }}
                             />
                         )
@@ -80,16 +87,16 @@ export function ContextMenu() {
                         <>
                             <Divider />
                             <MenuItem style={{ paddingTop: '2px', paddingBottom: '2px' }}>
-                                <ListItemIcon style={{ minWidth: '36px' }}><Icon path={mdiCubeOutline} size={1} /></ListItemIcon>
+                                <ListItemIcon style={{ minWidth: '32px' }}><Icon path={mdiCubeOutline} size={0.8} /></ListItemIcon>
                                 <ListItemText>{state.contextContextUid}</ListItemText>
                                 {objCtxDef?._icon
                                     ? (
                                         <ListItemIcon style={{
-                                            minWidth: '24px', minHeight: '24px', marginLeft: '12px', marginRight: '8px', backgroundImage: `url("data:image/svg+xml,${objCtxDef?._icon}")`, opacity: 0.54,
+                                            minWidth: '20px', minHeight: '20px', marginLeft: '12px', marginRight: '8px', backgroundImage: `url("data:image/svg+xml,${objCtxDef?._icon}")`, opacity: 0.54,
                                         }}
                                         />
                                     )
-                                    : <ListItemIcon style={{ minWidth: '36px', marginLeft: '12px' }}><Icon path={mdiDatabaseOutline} size={1} /></ListItemIcon>}
+                                    : <ListItemIcon style={{ minWidth: '32px', marginLeft: '12px' }}><Icon path={mdiDatabaseOutline} size={0.8} /></ListItemIcon>}
                                 <ListItemText>{objCtxDef?._name || state.contextContextObject?.type?.['unigraph.id']}</ListItemText>
                             </MenuItem>
                             <Divider />

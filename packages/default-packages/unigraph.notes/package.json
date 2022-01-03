@@ -11,7 +11,8 @@
         ],
         "package_name": "unigraph.notes",
         "entities": [
-            {"id": "section_daily_notes", "src": "entities/daily_notes.json"}
+            {"id": "section_daily_notes", "src": "entities/daily_notes.json"},
+            {"id": "add_note_context_menu", "src": "entities/add_note_context_menu.json"}
         ],
         "executables": [
             {
@@ -24,6 +25,13 @@
                     {"env": "npm", "package": "@material-ui/core", "import": "Button", "as": "Button"}
                 ],
                 "editable": true
+            },
+            {
+                "id": "attach-note",
+                "env": "client/js",
+                "src": "executables/attachNote.js",
+                "editable": true,
+                "name": "Attach note to an item"
             }
         ]
     }

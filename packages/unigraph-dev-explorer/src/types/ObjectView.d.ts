@@ -22,6 +22,7 @@ export type AutoDynamicViewProps = {
     noParents?: boolean,
     withParent?: boolean,
     subentityExpandByDefault?: boolean,
+    compact?: boolean,
 }
 
 export type ContextMenuGenerator = (

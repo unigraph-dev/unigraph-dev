@@ -23,6 +23,11 @@ export function CalendarEvent({ data, callbacks }: any) {
                     <Typography variant="body2" style={{ color: 'gray' }}>{data.get('location').as('primitive')}</Typography>
                 </div>
                 <AutoDynamicView object={new UnigraphObject(data.get('time_frame')._value)} callbacks={callbacks} noDrag noDrop inline />
+                <div style={{ display: data?._value?.children?.['_value[']?.map ? '' : 'none', marginTop: '4px' }}>
+                    {data?._value?.children?.['_value[']?.map
+                    ? data._value.children['_value['].map((it: any) => <AutoDynamicView object={new UnigraphObject(it._value)} callbacks={callbacks} inline style={{ verticalAlign: 'middle' }} />)
+                    : []}
+                </div>
             </div>
         </div>
     );

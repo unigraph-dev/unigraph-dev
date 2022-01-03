@@ -46,6 +46,7 @@ return (
                 context={null}
                 listUid={listUid}
                 noBar
+                noRemover
                 itemRemover={(uids) => { window.unigraph.deleteItemFromArray(listUid, uids, readLaterUid); }}
             />
 ) : []}

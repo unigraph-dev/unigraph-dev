@@ -2,6 +2,7 @@ import AsyncLock from 'async-lock';
 import dgraph, {
     DgraphClient as ActualDgraphClient, DgraphClientStub, Operation, Mutation, Check,
 } from 'dgraph-js';
+import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { getAsyncLock, withLock } from './asyncManager';
 import { perfLogStartDbTransaction, perfLogAfterDbTransaction } from './logging';
 import { makeSearchQuery } from './search';

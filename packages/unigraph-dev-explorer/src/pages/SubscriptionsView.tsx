@@ -31,11 +31,13 @@ export function SubscriptionsView() {
         <div>
             <Typography>
                 {subs.length}
-                {' '}
-                Subscriptions
+                {' Subscriptions, '}
+                {subs.filter((el: any) => el?.hibernated !== true).length}
+                {' active'}
             </Typography>
             {subs.map((el) => (
                 <Card style={{ margin: '12px', padding: '12px' }} variant="outlined">
+                    <Column name="ID"><Typography>{el.id}</Typography></Column>
                     <Column name="Results length"><Typography>{el.data.length}</Typography></Column>
                     <Column name="Query time (ms)"><Typography>{el.queryTime}</Typography></Column>
                     <Column name="Result type example"><Typography>{el.data[0]?.type?.['unigraph.id'] || 'No type'}</Typography></Column>

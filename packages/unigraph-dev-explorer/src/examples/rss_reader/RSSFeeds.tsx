@@ -14,7 +14,7 @@ import { registerDynamicViews, registerDetailedDynamicViews, withUnigraphSubscri
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { DynamicViewRenderer } from '../../global.d';
 import {
-    download, openUrl, upload, getComponentFromPage, TabContext,
+    download, openUrl, upload, getComponentFromPage, TabContext, timeSince,
 } from '../../utils';
 import { Html } from '../semantic/Html';
 import { setupInfiniteScrolling } from '../../components/ObjectView/infiniteScrolling';
@@ -105,9 +105,9 @@ const RSSItem: DynamicViewRenderer = ({ data, callbacks }) => {
                                 />
                             ) : []}
                             <div>
-                                Added:
+                                {'Added: '}
                                 {(() => { try { return Sugar.Date.relative(new Date(unpadded?.item_data?.date_created)); } catch (e) { return 'unknown'; } })()}
-                                , updated:
+                                {', updated: '}
                                 {(() => { try { return Sugar.Date.relative(new Date(unpadded?._updatedAt)); } catch (e) { return 'unknown'; } })()}
                             </div>
                         </div>
@@ -123,13 +123,29 @@ function RSSItemDetailed({ data, callbacks }: any) {
     return <Html context={data} data={data?.get('content/text')?._value?._value} />;
 }
 
-const RSSFeed: DynamicViewRenderer = ({ data, callbacks }) => (
-    <AutoDynamicView
-        object={new UnigraphObject(data?._value?.site_info?._value)}
-        noContextMenu
-        inline
-    />
-);
+const RSSFeed: DynamicViewRenderer = ({ data, callbacks }) => {
+    const updatedDate = data?._value?.last_updated?.['_value.%dt'] || 0;
+    return (
+        <div style={{ display: 'flex', width: '100%' }}>
+            <div style={{ flexGrow: 1 }}>
+                <AutoDynamicView
+                    object={new UnigraphObject(data?._value?.site_info?._value)}
+                    noContextMenu
+                    inline
+                />
+
+            </div>
+            <Typography
+                style={{
+ alignSelf: 'center', marginRight: '6px', marginLeft: '6px', color: 'gray',
+}}
+                variant="body2"
+            >
+                {updatedDate ? timeSince(new Date(updatedDate)) : 'never'}
+            </Typography>
+        </div>
+    );
+};
 
 export const init = () => {
     const dynamicComponents = {
