@@ -90,8 +90,7 @@ export function InlineSearch() {
             } else if (ctxMenuState.value.show && ev.key === 'Enter') {
                 ev.preventDefault();
                 ev.stopPropagation();
-                console.log(document.getElementById('globalSearchItem_current'));
-                document.getElementById('globalSearchItem_current')?.click();
+                actionItems[currentAction]?.[1]?.();
             } else if (ctxMenuState.value.show && ev.key === 'Escape') {
                 ev.preventDefault();
                 ev.stopPropagation();
@@ -128,7 +127,7 @@ export function InlineSearch() {
                 }}
             >
                 {actionItems.map((el: any, index: number) => (
-                    <div onMouseDown={el[1]} onClick={el[1]} style={index === currentAction ? { borderRadius: '6px', backgroundColor: 'gainsboro' } : {}} id={`globalSearchItem_${index === currentAction ? 'current' : ''}`}>
+                    <div onPointerDown={el[1]} style={index === currentAction ? { borderRadius: '6px', backgroundColor: 'gainsboro' } : {}} id={`globalSearchItem_${index === currentAction ? 'current' : ''}`}>
                         {el[0]}
                     </div>
                 ))}
