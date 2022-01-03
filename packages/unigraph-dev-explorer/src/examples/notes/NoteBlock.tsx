@@ -293,9 +293,11 @@ export function DetailedNoteBlock({
                         onPointerUp={(ev) => {
                             if (!isEditing) {
                                 setIsEditing(true);
-                                const caretPos = Number((ev.target as HTMLElement).getAttribute('markdownPos') || 0);
+                                const caretPos = Number((ev.target as HTMLElement).getAttribute('markdownPos') || -1);
                                 setTimeout(() => {
-                                    const finalCaretPos = caretPos || textInput.current?.textContent?.length;
+                                    const finalCaretPos = caretPos === -1
+                                        ? textInput.current?.textContent?.length
+                                        : caretPos;
                                     window.unigraph.getState('global/focused').setValue({ uid: data?.uid, caret: finalCaretPos, type: '$/schema/note_block' });
                                     if (textInput.current.firstChild) {
                                         setCaret(document, textInput.current.firstChild, finalCaretPos);
@@ -403,8 +405,6 @@ export function DetailedNoteBlock({
                                 onKeyDown={async (ev) => {
                                     const sel = document.getSelection();
                                     const caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
-                                    const state = window.unigraph.getState('global/focused');
-                                    state.setValue({ ...state.value, caret });
                                     switch (ev.keyCode) {
                                     case 13: // enter
                                         ev.preventDefault();
@@ -444,13 +444,13 @@ export function DetailedNoteBlock({
                                         ev.preventDefault();
                                         inputDebounced.current.flush();
                                         setCommand(() => callbacks['focus-last-dfs-node'].bind(null, data, editorContext, 0));
-                                        break;
+                                        return;
 
                                     case 40: // down arrow
                                         ev.preventDefault();
                                         inputDebounced.current.flush();
                                         setCommand(() => callbacks['focus-next-dfs-node'].bind(null, data, editorContext, 0));
-                                        break;
+                                        return;
 
                                     case 219: // left bracket
                                         if (!ev.shiftKey) {
@@ -482,6 +482,8 @@ export function DetailedNoteBlock({
                                     // console.log(ev);
                                         break;
                                     }
+                                    const state = window.unigraph.getState('global/focused');
+                                    state.setValue({ ...state.value, caret });
                                 }}
                             />
                         ) : (
