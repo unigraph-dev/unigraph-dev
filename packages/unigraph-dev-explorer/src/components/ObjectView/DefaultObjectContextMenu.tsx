@@ -219,12 +219,21 @@ export const onUnigraphContextMenu = (
                     contextUid?: string,
                 ) {
                     return (
-                        <MenuItem onClick={() => {
+                        <MenuItem
+                            style={{ paddingTop: '2px', paddingBottom: '2px' }}
+                            onClick={() => {
                             onfire();
                             onDynamicContextMenu(el, uid, object, callbacks, contextUid);
                         }}
                         >
-                            {(new UnigraphObject(el)).get('name').as('primitive') || ''}
+                            {(new UnigraphObject(el)).get('icon')?.as('primitive') ? (
+                                <ListItemIcon style={{
+                                minWidth: '19px', minHeight: '19px', marginRight: '12px', backgroundImage: `url("data:image/svg+xml,${(new UnigraphObject(el)).get('icon')?.as('primitive')}")`, opacity: 0.54,
+                            }}
+                                />
+                        )
+                            : []}
+                            <ListItemText>{(new UnigraphObject(el)).get('name').as('primitive') || ''}</ListItemText>
                         </MenuItem>
                     );
                 }),
