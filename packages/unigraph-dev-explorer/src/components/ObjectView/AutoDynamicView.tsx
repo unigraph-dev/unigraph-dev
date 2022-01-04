@@ -172,7 +172,7 @@ export function AutoDynamicView({
     const attach = React.useCallback((domElement) => {
         if (domElement && object.uid) {
             const ids = getParents(domElement);
-            if (ids.includes(object?.uid)) {
+            if (ids.includes(object?.uid) && !inline) {
                 // recursive - deal with it somehow
                 setIsRecursion(true);
             } else setIsRecursion(false);

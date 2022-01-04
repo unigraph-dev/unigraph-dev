@@ -155,7 +155,7 @@ export const onDynamicContextMenu = (data: any, uid: string, object: any, callba
             config: { object, contextUid },
         });
     } else if (onClick && onClick['dgraph.type']?.includes?.('Executable')) {
-        window.unigraph.runExecutable(onClick.uid, { uid, callbacks, contextUid }, undefined, true).then((ret: any) => {
+        window.unigraph.runExecutable(onClick.uid, { uid, contextUid }, undefined, true).then((ret: any) => {
             if (ret?.return_function_component !== undefined) {
                 // Not a component, but custom code to be run here
                 runClientExecutable(ret.return_function_component, { uid, callbacks, contextUid });
