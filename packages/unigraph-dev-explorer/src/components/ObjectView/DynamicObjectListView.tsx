@@ -196,7 +196,8 @@ function DynamicList({
     }, [items.length === 0]);
 
     React.useEffect(() => {
-        if (scrollerRef.current?.el?.scrollHeight < scrollerRef.current?.el?.clientHeight) {
+        // eslint-disable-next-line max-len
+        if (scrollerRef.current?.el?.scrollHeight < scrollerRef.current?.el?.clientHeight && loadedItems.length < items.length) {
             setupProps?.next();
         }
     }, [loadedItems.length]);
