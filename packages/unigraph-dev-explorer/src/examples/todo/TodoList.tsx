@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import { pkg as todoPackage } from 'unigraph-dev-common/lib/data/unigraph.todo.pkg';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import Sugar from 'sugar';
+import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { DynamicViewRenderer } from '../../global.d';
 
 import { registerDynamicViews, registerQuickAdder, withUnigraphSubscription } from '../../unigraph-react';
@@ -83,7 +84,13 @@ export const TodoItem: DynamicViewRenderer = ({
                             ? []
                             : data?._value?.children?.['_value[']
                                 ?.filter((it: any) => !it._key)
-                                .map((it: any) => <AutoDynamicView object={it._value?._value} inline />))}
+                                .map((it: any) => (
+                                    <AutoDynamicView
+                                        object={new UnigraphObject(it._value)}
+                                        callbacks={callbacks}
+                                        inline
+                                    />
+                                )))}
                         {(unpadded.priority > 0
                             ? [
                                 <Chip
