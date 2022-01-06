@@ -38,7 +38,8 @@ function syntax(opts = {}) {
         return start;
 
         function start(code) {
-            if (code !== startMarker.charCodeAt(startMarkerCursor)) return nok(code);
+            if (code !== startMarker.charCodeAt(startMarkerCursor))
+                return nok(code);
 
             effects.enter('wikiLink');
             effects.enter('wikiLinkMarker');
@@ -91,7 +92,8 @@ function syntax(opts = {}) {
                 effects.exit('wikiLinkData');
                 effects.enter('wikiLinkMarker');
                 return consumeEnd(code);
-            } if (code === endMarker.charCodeAt(0)) {
+            }
+            if (code === endMarker.charCodeAt(0)) {
                 endMarkerCursor = 0;
                 depth -= 1;
             }
@@ -227,10 +229,12 @@ function fromMarkdown(opts = {}) {
         wikiLink.data.hProperties = {
             className: 'wikilink',
         };
-        wikiLink.data.hChildren = [{
-            type: 'text',
-            value: displayName,
-        }];
+        wikiLink.data.hChildren = [
+            {
+                type: 'text',
+                value: displayName,
+            },
+        ];
     }
 
     return {
@@ -253,13 +257,15 @@ function wikiLinkPlugin(opts = {}) {
         else data[field] = [value];
     }
 
-    if (!warningIssued
-      && ((this.Parser
-        && this.Parser.prototype
-        && this.Parser.prototype.blockTokenizers)
-       || (this.Compiler
-        && this.Compiler.prototype
-        && this.Compiler.prototype.visitors))) {
+    if (
+        !warningIssued &&
+        ((this.Parser &&
+            this.Parser.prototype &&
+            this.Parser.prototype.blockTokenizers) ||
+            (this.Compiler &&
+                this.Compiler.prototype &&
+                this.Compiler.prototype.visitors))
+    ) {
         warningIssued = true;
         console.warn(
             '[remark-wiki-link] Warning: please upgrade to remark 13 to use this plugin',

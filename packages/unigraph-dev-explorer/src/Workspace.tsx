@@ -270,8 +270,8 @@ const newTab = (model: Model, initJson: any) => {
             new: true,
         });
     }
-    // @ts-expect-error: already checked for isJsonString
     const userSettings = JSON.parse(
+        // @ts-expect-error: already checked for isJsonString
         isJsonString(window.localStorage.getItem('userSettings'))
             ? window.localStorage.getItem('userSettings')
             : '{}',
@@ -312,8 +312,9 @@ const setTitleOnRenderTab = (model: Model) => {
     let selIndex = model.getActiveTabset()?._attributes?.selected;
     selIndex = selIndex || 0;
     let selName = 'Loading';
-    // @ts-expect-error: using private API
+
     if (model.getActiveTabset() === undefined) {
+        // @ts-expect-error: using private API
         model._setActiveTabset(model.getNodeById(mainTabsetId));
     }
     try {
@@ -428,8 +429,8 @@ export function WorkSpace(this: any) {
                 return false;
             },
             setMaximize: (val: boolean) => false,
-            // @ts-expect-error: using private API
             isVisible: () =>
+                // @ts-expect-error: using private API
                 window.layoutModel.getNodeById(node._attributes.id).isVisible(),
 
             subscribeToType: (
@@ -762,15 +763,16 @@ export function WorkSpace(this: any) {
                                             (el.parentElement || undefined)
                                                 ?.style?.top === '0px',
                                     )
-                                    // @ts-expect-error: already checked for nullness above
+
                                     .sort(
                                         (a, b) =>
                                             parseInt(
+                                                // @ts-expect-error: already checked for nullness above
                                                 a.parentElement.style.left,
                                                 10,
                                             ) -
-                                            // @ts-expect-error: already checked for nullness above
                                             parseInt(
+                                                // @ts-expect-error: already checked for nullness above
                                                 b.parentElement.style.left,
                                                 10,
                                             ),
