@@ -34,7 +34,9 @@ const useStyles = makeStyles((theme) => ({
 function App() {
     const classes = useStyles();
     const history = createBrowserHistory();
-    const componentPathName = (new URLSearchParams(window.location.search)).get('pageName');
+    const componentPathName = new URLSearchParams(window.location.search).get(
+        'pageName',
+    );
     const config = getParameters(window.location.search.replace('?', ''));
     // console.log(componentPathName)
     document.body.style.backgroundColor = 'unset';
@@ -47,11 +49,11 @@ function App() {
                     <InlineSearch />
                     <MobileBar />
                 </div>
-                {
-                    componentPathName
-                        ? window.unigraph.getState('registry/pages').value[componentPathName].constructor(config)
-                        : []
-                }
+                {componentPathName
+                    ? window.unigraph
+                          .getState('registry/pages')
+                          .value[componentPathName].constructor(config)
+                    : []}
             </DndProvider>
         </div>
     );

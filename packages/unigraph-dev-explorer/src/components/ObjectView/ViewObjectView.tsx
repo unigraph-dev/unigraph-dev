@@ -8,7 +8,8 @@ export const ViewItem: DynamicViewRenderer = ({ data, callbacks }) => {
 
     return (
         <div
-            onClick={() => window.newTab(window.layoutModel, {
+            onClick={() =>
+                window.newTab(window.layoutModel, {
                     type: 'tab',
                     config: {
                         uid: data?.uid,
@@ -18,7 +19,8 @@ export const ViewItem: DynamicViewRenderer = ({ data, callbacks }) => {
                     name: unpadded.name,
                     component: '/pages/library/object',
                     enableFloat: 'true',
-                })}
+                })
+            }
             style={{ display: 'contents' }}
         >
             <ListItemText primary={unpadded.name} />

@@ -6,7 +6,11 @@ import React from 'react';
 import { string } from 'yargs';
 import { typeMap } from '../types/consts';
 import { PackageDeclaration } from '../types/packages';
-import { Unigraph, AppState, UnigraphObject as IUnigraphObject } from '../types/unigraph';
+import {
+    Unigraph,
+    AppState,
+    UnigraphObject as IUnigraphObject,
+} from '../types/unigraph';
 import { base64ToBlob, isJsonString } from '../utils/utils';
 
 const RETRY_CONNECTION_INTERVAL = 5000;
@@ -23,7 +27,7 @@ function getPath(obj: any, path: string | string[]): any {
         return getPath(obj[path[0]], path.slice(1));
     } else {
         return undefined;
-    // throw new RangeError('Requested path doesn\'t exist')
+        // throw new RangeError('Requested path doesn\'t exist')
     }
 }
 
@@ -34,7 +38,8 @@ function getObjectAsRecursivePrimitive(object: any) {
             targetValue = object[el];
         } else if (el.startsWith('_value') && typeof object[el] === 'object') {
             const subObj = getObjectAsRecursivePrimitive(object[el]);
-            if (subObj || subObj === '' || subObj === 0 || subObj === false) targetValue = subObj;
+            if (subObj || subObj === '' || subObj === 0 || subObj === false)
+                targetValue = subObj;
         }
     });
     return targetValue;
@@ -83,21 +88,33 @@ export class UnigraphObject extends Object {
  * @param objects Objects with uid references
  */
 export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
-    const objs: any[] = JSON.parse(JSON.stringify(objects)).map((el: any) => new UnigraphObject(el));
+    const objs: any[] = JSON.parse(JSON.stringify(objects)).map(
+        (el: any) => new UnigraphObject(el),
+    );
     const dict: any = {};
-    objs.forEach((object) => { if (object?.uid) dict[object.uid] = object; });
+    objs.forEach((object) => {
+        if (object?.uid) dict[object.uid] = object;
+    });
 
     function buildDictRecurse(obj: any) {
         if (obj && typeof obj === 'object' && Array.isArray(obj)) {
             obj.forEach((val, index) => {
-                if (val?.uid && !dict[val.uid] && Object.keys(val).length !== 1) dict[val.uid] = obj[index];
+                if (val?.uid && !dict[val.uid] && Object.keys(val).length !== 1)
+                    dict[val.uid] = obj[index];
                 buildDictRecurse(val);
             });
         } else if (obj && typeof obj === 'object') {
-            Object.entries(obj).forEach(([key, value]: [key: string, value: any]) => {
-                if (value?.uid && !dict[value.uid] && Object.keys(value).length !== 1) dict[value.uid] = obj[key];
-                buildDictRecurse(value);
-            });
+            Object.entries(obj).forEach(
+                ([key, value]: [key: string, value: any]) => {
+                    if (
+                        value?.uid &&
+                        !dict[value.uid] &&
+                        Object.keys(value).length !== 1
+                    )
+                        dict[value.uid] = obj[key];
+                    buildDictRecurse(value);
+                },
+            );
         }
     }
 
@@ -108,10 +125,13 @@ export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
                 buildGraphRecurse(val);
             });
         } else if (obj && typeof obj === 'object') {
-            Object.entries(obj).forEach(([key, value]: [key: string, value: any]) => {
-                if (value?.uid && dict[value.uid]) obj[key] = dict[value.uid];
-                buildGraphRecurse(value);
-            });
+            Object.entries(obj).forEach(
+                ([key, value]: [key: string, value: any]) => {
+                    if (value?.uid && dict[value.uid])
+                        obj[key] = dict[value.uid];
+                    buildGraphRecurse(value);
+                },
+            );
         }
     }
 
@@ -121,10 +141,17 @@ export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
     return objs;
 }
 
-export function getRandomInt() { return Math.floor(Math.random() * Math.floor(1000000)); }
+export function getRandomInt() {
+    return Math.floor(Math.random() * Math.floor(1000000));
+}
 
-export default function unigraph(url: string, browserId: string): Unigraph<WebSocket | undefined> {
-    const connection: {current: WebSocket | undefined} = { current: undefined };
+export default function unigraph(
+    url: string,
+    browserId: string,
+): Unigraph<WebSocket | undefined> {
+    const connection: { current: WebSocket | undefined } = {
+        current: undefined,
+    };
     const messages: any[] = [];
     const eventTarget: EventTarget = new EventTarget();
     // eslint-disable-next-line @typescript-eslint/ban-types
@@ -133,9 +160,11 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
     const subscriptions: Record<string, Function> = {};
     const states: Record<string, AppState> = {};
     const caches: Record<string, any> = {
-        namespaceMap: isJsonString(window.localStorage.getItem('caches/namespaceMap'))
-            // @ts-expect-error: already checked if not JSON
-            ? JSON.parse(window.localStorage.getItem('caches/namespaceMap'))
+        namespaceMap: isJsonString(
+            window.localStorage.getItem('caches/namespaceMap'),
+        )
+            ? // @ts-expect-error: already checked if not JSON
+              JSON.parse(window.localStorage.getItem('caches/namespaceMap'))
             : false,
     };
     const cacheCallbacks: Record<string, any[]> = {};
@@ -146,9 +175,11 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
     const getState = (name: string) => {
         if (name && states[name]) {
             return states[name];
-        } if (!name) {
+        }
+        if (!name) {
             return states;
-        } return api.addState(name, undefined);
+        }
+        return api.addState(name, undefined);
     };
 
     const addState = (name: string, initialValue: any) => {
@@ -156,16 +187,20 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             const state: AppState = {
                 value: initialValue,
                 subscribers: [],
-                subscribe: (subscriber: (newValue: any) => any) => state.subscribers.push(subscriber),
+                subscribe: (subscriber: (newValue: any) => any) =>
+                    state.subscribers.push(subscriber),
                 unsubscribe: (cb: (newValue: any) => any) => {
-                    state.subscribers = state.subscribers.filter((el) => el !== cb);
+                    state.subscribers = state.subscribers.filter(
+                        (el) => el !== cb,
+                    );
                 },
                 setValue: undefined as any,
             };
             state.setValue = (newValue: any, flush?: boolean) => {
                 const changed = newValue !== state.value;
                 state.value = newValue;
-                if (changed || flush) state.subscribers.forEach((sub) => sub(state.value));
+                if (changed || flush)
+                    state.subscribers.forEach((sub) => sub(state.value));
             };
             states[name] = state;
             return state;
@@ -177,8 +212,13 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
         const urlString = new URL(url);
         urlString.searchParams.append('browserId', browserId);
         const isRevival = getState('unigraph/connected').value !== undefined;
-        if (getState('unigraph/connected').value !== undefined) urlString.searchParams.append('revival', 'true');
-        if (connection.current?.readyState !== 3 /* CLOSED */ && connection.current) return;
+        if (getState('unigraph/connected').value !== undefined)
+            urlString.searchParams.append('revival', 'true');
+        if (
+            connection.current?.readyState !== 3 /* CLOSED */ &&
+            connection.current
+        )
+            return;
         connection.current = new WebSocket(urlString.toString());
 
         connection.current.onopen = () => {
@@ -207,16 +247,26 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             }
             // messages.push(parsed);
             eventTarget.dispatchEvent(new Event('onmessage', parsed));
-            if (parsed.type === 'response' && parsed.id && callbacks[parsed.id]) callbacks[parsed.id](parsed);
+            if (parsed.type === 'response' && parsed.id && callbacks[parsed.id])
+                callbacks[parsed.id](parsed);
             if (parsed.type === 'cache_updated' && parsed.name) {
                 caches[parsed.name] = parsed.result;
-                window.localStorage.setItem(`caches/${parsed.name}`, JSON.stringify(parsed.result));
+                window.localStorage.setItem(
+                    `caches/${parsed.name}`,
+                    JSON.stringify(parsed.result),
+                );
                 cacheCallbacks[parsed.name]?.forEach((el) => el(parsed.result));
             }
-            if (parsed.type === 'subscription' && parsed.id && subscriptions[parsed.id] && parsed.result) {
+            if (
+                parsed.type === 'subscription' &&
+                parsed.id &&
+                subscriptions[parsed.id] &&
+                parsed.result
+            ) {
                 subscriptions[parsed.id](parsed.result);
             }
-            if (parsed.type === 'open_url' && window) window.open(parsed.url, '_blank');
+            if (parsed.type === 'open_url' && window)
+                window.open(parsed.url, '_blank');
             return ev;
         };
     }
@@ -225,7 +275,12 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
 
     connect();
 
-    function sendEvent(conn: {current: WebSocket | undefined}, name: string, params: any, id?: number | undefined) {
+    function sendEvent(
+        conn: { current: WebSocket | undefined },
+        name: string,
+        params: any,
+        id?: number | undefined,
+    ) {
         if ((window as any).onEventSend) (window as any).onEventSend(name);
         if (!id) id = getRandomInt();
         const msg = JSON.stringify({
@@ -234,8 +289,12 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             id,
             ...params,
         });
-        if (getState('unigraph/connected').value === true && conn.current) conn.current.send(msg);
-        else { msgQueue.push(msg); connect(); }
+        if (getState('unigraph/connected').value === true && conn.current)
+            conn.current.send(msg);
+        else {
+            msgQueue.push(msg);
+            connect();
+        }
     }
 
     const api: Unigraph<WebSocket | undefined> = {
@@ -246,175 +305,283 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
         backendMessages: messages,
         eventTarget,
         buildGraph,
-        onReady: (callback: any) => { readyCallback = callback; },
-        getStatus: () => new Promise((resolve, reject) => {
-            const id = getRandomInt();
-            callbacks[id] = (response: any) => {
-                if (response.success) resolve(response);
-                else reject(response);
-            };
-            sendEvent(connection, 'get_status', {}, id);
-        }),
+        onReady: (callback: any) => {
+            readyCallback = callback;
+        },
+        getStatus: () =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success) resolve(response);
+                    else reject(response);
+                };
+                sendEvent(connection, 'get_status', {}, id);
+            }),
         onCacheUpdated: (cache, callback) => {
             if (Array.isArray(cacheCallbacks[cache])) {
                 cacheCallbacks[cache].push(callback);
             } else cacheCallbacks[cache] = [callback];
         },
-        createSchema: (schema) => new Promise((resolve, reject) => {
-            const id = getRandomInt();
-            callbacks[id] = (response: any) => {
-                if (response.success) resolve(response);
-                else reject(response);
-            };
-            sendEvent(connection, 'create_unigraph_schema', { schema }, id);
-        }),
-        ensureSchema: (name, fallback) => new Promise((resolve, reject) => {
-            const id = getRandomInt();
-            callbacks[id] = (response: any) => {
-                if (response.success) resolve(response);
-                else reject(response);
-            };
-            sendEvent(connection, 'ensure_unigraph_schema', { name, fallback }, id);
-        }),
-        ensurePackage: (packageName, fallback) => new Promise((resolve, reject) => {
-            const id = getRandomInt();
-            callbacks[id] = (response: any) => {
-                if (response.success) resolve(response);
-                else reject(response);
-            };
-            sendEvent(connection, 'ensure_unigraph_package', { packageName, fallback }, id);
-        }),
-        subscribeToType: (name, callback, eventId = undefined, options: any) => new Promise((resolve, reject) => {
-            const id = typeof eventId === 'number' ? eventId : getRandomInt();
-            callbacks[id] = (response: any) => {
-                if (response.success) resolve(id);
-                else reject(response);
-            };
-            subscriptions[id] = (result: any[]) => {
-                callback(buildGraph(result.map((el: any) => new UnigraphObject(el))));
-            };
-            sendEvent(connection, 'subscribe_to_type', { schema: name, options }, id);
-        }),
-        // eslint-disable-next-line no-async-promise-executor
-        subscribeToObject: (uid, callback, eventId = undefined, options: any) => new Promise(
-            (resolve, reject) => {
-                const id = typeof eventId === 'number' ? eventId : getRandomInt();
+        createSchema: (schema) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success) resolve(response);
+                    else reject(response);
+                };
+                sendEvent(connection, 'create_unigraph_schema', { schema }, id);
+            }),
+        ensureSchema: (name, fallback) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success) resolve(response);
+                    else reject(response);
+                };
+                sendEvent(
+                    connection,
+                    'ensure_unigraph_schema',
+                    { name, fallback },
+                    id,
+                );
+            }),
+        ensurePackage: (packageName, fallback) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success) resolve(response);
+                    else reject(response);
+                };
+                sendEvent(
+                    connection,
+                    'ensure_unigraph_package',
+                    { packageName, fallback },
+                    id,
+                );
+            }),
+        subscribeToType: (name, callback, eventId = undefined, options: any) =>
+            new Promise((resolve, reject) => {
+                const id =
+                    typeof eventId === 'number' ? eventId : getRandomInt();
                 callbacks[id] = (response: any) => {
                     if (response.success) resolve(id);
                     else reject(response);
                 };
-                subscriptions[id] = (result: any) => (
+                subscriptions[id] = (result: any[]) => {
+                    callback(
+                        buildGraph(
+                            result.map((el: any) => new UnigraphObject(el)),
+                        ),
+                    );
+                };
+                sendEvent(
+                    connection,
+                    'subscribe_to_type',
+                    { schema: name, options },
+                    id,
+                );
+            }),
+        // eslint-disable-next-line no-async-promise-executor
+        subscribeToObject: (uid, callback, eventId = undefined, options: any) =>
+            new Promise((resolve, reject) => {
+                const id =
+                    typeof eventId === 'number' ? eventId : getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success) resolve(id);
+                    else reject(response);
+                };
+                subscriptions[id] = (result: any) =>
                     result.length === 1
                         ? callback(new UnigraphObject(result[0]))
-                        : callback(result.map((el: any) => new UnigraphObject(el))));
-                if (typeof options?.queryFn === 'function') options.queryFn = options.queryFn('QUERYFN_TEMPLATE');
-                sendEvent(connection, 'subscribe_to_object', { uid, options }, id);
-            },
-        ),
-        subscribeToQuery: (fragment, callback, eventId = undefined, options) => new Promise((resolve, reject) => {
-            const id = typeof eventId === 'number' ? eventId : getRandomInt();
-            callbacks[id] = (response: any) => {
-                if (response.success) resolve(id);
-                else reject(response);
-            };
-            subscriptions[id] = (result: any[]) => callback(result.map((el: any) => new UnigraphObject(el)));
-            sendEvent(connection, 'subscribe_to_query', { queryFragment: fragment, options }, id);
-        }),
-        subscribe: (query, callback, eventId = undefined, update) => new Promise((resolve, reject) => {
-            const id = typeof eventId === 'number' ? eventId : getRandomInt();
-            callbacks[id] = (response: any) => {
-                if (response.success) resolve(id);
-                else reject(response);
-            };
-            if (!update) {
-                subscriptions[id] = (result: any[] | any) => {
-                    callback(Array.isArray(result)
-                        ? result.map((el: any) => new UnigraphObject(el))
-                        : new UnigraphObject(result));
+                        : callback(
+                              result.map((el: any) => new UnigraphObject(el)),
+                          );
+                if (typeof options?.queryFn === 'function')
+                    options.queryFn = options.queryFn('QUERYFN_TEMPLATE');
+                sendEvent(
+                    connection,
+                    'subscribe_to_object',
+                    { uid, options },
+                    id,
+                );
+            }),
+        subscribeToQuery: (fragment, callback, eventId = undefined, options) =>
+            new Promise((resolve, reject) => {
+                const id =
+                    typeof eventId === 'number' ? eventId : getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success) resolve(id);
+                    else reject(response);
                 };
-            }
-            sendEvent(connection, 'subscribe', { query, update }, id);
-        }),
-        hibernateOrReviveSubscription: (eventId = undefined, revival) => new Promise((resolve, reject) => {
-            const id = typeof eventId === 'number' ? eventId : getRandomInt();
-            sendEvent(connection, 'hibernate_or_revive_subscription', { revival, ids: eventId }, id);
-        }),
+                subscriptions[id] = (result: any[]) =>
+                    callback(result.map((el: any) => new UnigraphObject(el)));
+                sendEvent(
+                    connection,
+                    'subscribe_to_query',
+                    { queryFragment: fragment, options },
+                    id,
+                );
+            }),
+        subscribe: (query, callback, eventId = undefined, update) =>
+            new Promise((resolve, reject) => {
+                const id =
+                    typeof eventId === 'number' ? eventId : getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success) resolve(id);
+                    else reject(response);
+                };
+                if (!update) {
+                    subscriptions[id] = (result: any[] | any) => {
+                        callback(
+                            Array.isArray(result)
+                                ? result.map(
+                                      (el: any) => new UnigraphObject(el),
+                                  )
+                                : new UnigraphObject(result),
+                        );
+                    };
+                }
+                sendEvent(connection, 'subscribe', { query, update }, id);
+            }),
+        hibernateOrReviveSubscription: (eventId = undefined, revival) =>
+            new Promise((resolve, reject) => {
+                const id =
+                    typeof eventId === 'number' ? eventId : getRandomInt();
+                sendEvent(
+                    connection,
+                    'hibernate_or_revive_subscription',
+                    { revival, ids: eventId },
+                    id,
+                );
+            }),
         unsubscribe: (id) => {
             sendEvent(connection, 'unsubscribe_by_id', {}, id);
         },
-        addObject: (object, schema) => new Promise((resolve, reject) => {
-            const id = getRandomInt();
-            callbacks[id] = (response: any) => {
-                if (response.success) resolve(response.results);
-                else reject(response);
-            };
-            sendEvent(connection, 'create_unigraph_object', { object, schema, id });
-        }),
+        addObject: (object, schema) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success) resolve(response.results);
+                    else reject(response);
+                };
+                sendEvent(connection, 'create_unigraph_object', {
+                    object,
+                    schema,
+                    id,
+                });
+            }),
         deleteObject: (uid, permanent?) => {
             sendEvent(connection, 'delete_unigraph_object', { uid, permanent });
         },
-        updateTriplets: (objects) => { // TODO: This is very useless, should be removed once we get something better
+        updateTriplets: (objects) => {
+            // TODO: This is very useless, should be removed once we get something better
             sendEvent(connection, 'update_spo', { objects });
         },
-        updateObject: (uid, newObject, upsert = true, pad = true, subIds, origin) => new Promise((resolve, reject) => {
-            const id = getRandomInt();
-            callbacks[id] = (response: any) => {
-                if (response.success) resolve(id);
-                else reject(response);
-            };
-            sendEvent(connection, 'update_object', {
-                uid, newObject, upsert, pad, id, subIds, origin,
-            });
-        }),
+        updateObject: (
+            uid,
+            newObject,
+            upsert = true,
+            pad = true,
+            subIds,
+            origin,
+        ) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success) resolve(id);
+                    else reject(response);
+                };
+                sendEvent(connection, 'update_object', {
+                    uid,
+                    newObject,
+                    upsert,
+                    pad,
+                    id,
+                    subIds,
+                    origin,
+                });
+            }),
         deleteRelation: (uid, relation) => {
             sendEvent(connection, 'delete_relation', { uid, relation });
         },
         reorderItemInArray: (uid, item, relUid, subIds) => {
             sendEvent(connection, 'reorder_item_in_array', {
-                uid, item, relUid, subIds,
+                uid,
+                item,
+                relUid,
+                subIds,
             });
         },
         deleteItemFromArray: (uid, item, relUid, subIds) => {
             sendEvent(connection, 'delete_item_from_array', {
-                uid, item, relUid, subIds,
+                uid,
+                item,
+                relUid,
+                subIds,
             });
         },
-        getReferenceables: (key = 'unigraph.id', asMapWithContent = false) => new Promise((resolve, reject) => {
-            const id = getRandomInt();
-            callbacks[id] = (response: any) => {
-                if (response.success) resolve(response.result.map((obj: { [x: string]: any; }) => obj['unigraph.id']));
-                else reject(response);
-            };
-            sendEvent(connection, 'query_by_string_with_vars', {
-                vars: {},
-                query: `{
+        getReferenceables: (key = 'unigraph.id', asMapWithContent = false) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success)
+                        resolve(
+                            response.result.map(
+                                (obj: { [x: string]: any }) =>
+                                    obj['unigraph.id'],
+                            ),
+                        );
+                    else reject(response);
+                };
+                sendEvent(
+                    connection,
+                    'query_by_string_with_vars',
+                    {
+                        vars: {},
+                        query: `{
                     q(func: has(unigraph.id)) {
                         unigraph.id
                     }
                 }`,
-            }, id);
-        }),
-        getSchemas: (schemas: string[] | undefined, resolve = false) => new Promise((resolver, reject) => {
-            const id = getRandomInt();
-            callbacks[id] = (response: any) => {
-                if (response.success && response.schemas) resolver(response.schemas);
-                else reject(response);
-            };
-            sendEvent(connection, 'get_schemas', {
-                schemas,
-                resolve,
-            }, id);
-        }),
-        getPackages: (packages) => new Promise((resolve, reject) => {
-            const id = getRandomInt();
-            callbacks[id] = (response: any) => {
-                if (response.success && response.packages) resolve(response.packages);
-                else reject(response);
-            };
-            sendEvent(connection, 'get_packages', {
-                packages: [],
-            }, id);
-        }),
+                    },
+                    id,
+                );
+            }),
+        getSchemas: (schemas: string[] | undefined, resolve = false) =>
+            new Promise((resolver, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success && response.schemas)
+                        resolver(response.schemas);
+                    else reject(response);
+                };
+                sendEvent(
+                    connection,
+                    'get_schemas',
+                    {
+                        schemas,
+                        resolve,
+                    },
+                    id,
+                );
+            }),
+        getPackages: (packages) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success && response.packages)
+                        resolve(response.packages);
+                    else reject(response);
+                };
+                sendEvent(
+                    connection,
+                    'get_packages',
+                    {
+                        packages: [],
+                    },
+                    id,
+                );
+            }),
         /**
          * Proxifies a fetch request through the server process. This is to ensure a similar experience
          * as using a browser (and NOT using an webapp).
@@ -425,90 +592,142 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
          * @param fetchUrl
          * @param options
          */
-        proxyFetch: (fetchUrl, options?) => new Promise((resolve, reject) => {
-            const id = getRandomInt();
-            callbacks[id] = (responseBlob: {success: boolean, blob: string}) => {
-                if (responseBlob.success && responseBlob.blob) resolve(base64ToBlob(responseBlob.blob));
-                else reject(responseBlob);
-            };
-            sendEvent(connection, 'proxy_fetch', {
-                fetchUrl,
-                options,
-            }, id);
-        }),
-        importObjects: (objects) => new Promise((resolve, reject) => {
-            if (typeof objects !== 'string') objects = JSON.stringify(objects);
-            const id = getRandomInt();
-            sendEvent(connection, 'import_objects', { objects }, id);
-        }),
-        runExecutable: (uid, params?, context?, fnString?) => new Promise((resolve, reject) => {
-            const id = getRandomInt();
-            callbacks[id] = (response: any) => {
-                if (response.success) {
-                    if (response.returns?.return_function_component !== undefined && !fnString) {
-                        // eslint-disable-next-line no-new-func
-                        const retFn = new Function(
-                            'React',
-                            `return ${response.returns?.return_function_component}`,
-                        )(React);
-                        console.log(retFn);
-                        resolve(retFn);
-                    } else {
-                        resolve(response.returns ? response.returns : {});
-                    }
-                } else reject(response);
-            };
-            sendEvent(connection, 'run_executable', { uid, params: params || {} }, id);
-        }),
-        getNamespaceMapUid: (name) => { throw Error('Not implemented'); },
-        getNamespaceMap: () => caches.namespaceMap,
-        getType: (name) => { throw Error('Not implemented'); },
-        getQueries: (queries: any[]) => new Promise((resolve, reject) => {
-            const id = getRandomInt();
-            callbacks[id] = (response: any) => {
-                if (response.success) resolve(response.results ? response.results : {});
-                else reject(response);
-            };
-            sendEvent(connection, 'get_queries', { fragments: queries }, id);
-        }),
-        addNotification: (item) => new Promise((resolve, reject) => {
-            const id = getRandomInt();
-            callbacks[id] = (response: any) => {
-                if (response.success && response.schemas) resolve(response.schemas);
-                else reject(response);
-            };
-            sendEvent(connection, 'add_notification', { item }, id);
-        }),
-        getSearchResults: (query, display, hops, searchOptions) => new Promise((resolve, reject) => {
-            const id = getRandomInt();
-            callbacks[id] = (response: any) => {
-                if (response.success && response.results) resolve(response.results);
-                else reject(response);
-            };
-            sendEvent(connection, 'get_search_results', {
-                query, display, hops, searchOptions,
-            }, id);
-        }),
-        getSchemaMap: () => caches.schemaMap,
-        exportObjects: (uids, options) => new Promise((resolve, reject) => {
-            const id = getRandomInt();
-            callbacks[id] = (response: any) => {
-                if (response.success && response.result) resolve(response.result);
-                else reject(response);
-            };
-            sendEvent(connection, 'export_objects', { uids, options }, id);
-        }),
-        addPackage: (manifest, update = false) => {
-            sendEvent(connection, 'add_unigraph_package', { package: manifest, update });
+        proxyFetch: (fetchUrl, options?) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (responseBlob: {
+                    success: boolean;
+                    blob: string;
+                }) => {
+                    if (responseBlob.success && responseBlob.blob)
+                        resolve(base64ToBlob(responseBlob.blob));
+                    else reject(responseBlob);
+                };
+                sendEvent(
+                    connection,
+                    'proxy_fetch',
+                    {
+                        fetchUrl,
+                        options,
+                    },
+                    id,
+                );
+            }),
+        importObjects: (objects) =>
+            new Promise((resolve, reject) => {
+                if (typeof objects !== 'string')
+                    objects = JSON.stringify(objects);
+                const id = getRandomInt();
+                sendEvent(connection, 'import_objects', { objects }, id);
+            }),
+        runExecutable: (uid, params?, context?, fnString?) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success) {
+                        if (
+                            response.returns?.return_function_component !==
+                                undefined &&
+                            !fnString
+                        ) {
+                            // eslint-disable-next-line no-new-func
+                            const retFn = new Function(
+                                'React',
+                                `return ${response.returns?.return_function_component}`,
+                            )(React);
+                            console.log(retFn);
+                            resolve(retFn);
+                        } else {
+                            resolve(response.returns ? response.returns : {});
+                        }
+                    } else reject(response);
+                };
+                sendEvent(
+                    connection,
+                    'run_executable',
+                    { uid, params: params || {} },
+                    id,
+                );
+            }),
+        getNamespaceMapUid: (name) => {
+            throw Error('Not implemented');
         },
-        getSubscriptions: () => new Promise((resolve, reject) => {
-            const id = getRandomInt();
-            callbacks[id] = (response: any) => {
-                if (response.success && response.result) resolve(response.result);
-                else reject(response);
-            };
-            sendEvent(connection, 'get_subscriptions', {}, id);
-        }),
+        getNamespaceMap: () => caches.namespaceMap,
+        getType: (name) => {
+            throw Error('Not implemented');
+        },
+        getQueries: (queries: any[]) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success)
+                        resolve(response.results ? response.results : {});
+                    else reject(response);
+                };
+                sendEvent(
+                    connection,
+                    'get_queries',
+                    { fragments: queries },
+                    id,
+                );
+            }),
+        addNotification: (item) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success && response.schemas)
+                        resolve(response.schemas);
+                    else reject(response);
+                };
+                sendEvent(connection, 'add_notification', { item }, id);
+            }),
+        getSearchResults: (query, display, hops, searchOptions) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success && response.results)
+                        resolve(response.results);
+                    else reject(response);
+                };
+                sendEvent(
+                    connection,
+                    'get_search_results',
+                    {
+                        query,
+                        display,
+                        hops,
+                        searchOptions,
+                    },
+                    id,
+                );
+            }),
+        getSchemaMap: () => caches.schemaMap,
+        exportObjects: (uids, options) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success && response.result)
+                        resolve(response.result);
+                    else reject(response);
+                };
+                sendEvent(connection, 'export_objects', { uids, options }, id);
+            }),
+        addPackage: (manifest, update = false) => {
+            sendEvent(connection, 'add_unigraph_package', {
+                package: manifest,
+                update,
+            });
+        },
+        getSubscriptions: () =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success && response.result)
+                        resolve(response.result);
+                    else reject(response);
+                };
+                sendEvent(connection, 'get_subscriptions', {}, id);
+            }),
     };
 
     return api;

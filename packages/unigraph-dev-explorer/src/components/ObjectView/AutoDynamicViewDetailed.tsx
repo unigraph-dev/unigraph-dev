@@ -8,67 +8,130 @@ import { ObjectEditor } from '../ObjectEditor/ObjectEditor';
 import { isStub } from './utils';
 
 export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
-    object, options, callbacks, context, component, attributes, useFallback = true,
+    object,
+    options,
+    callbacks,
+    context,
+    component,
+    attributes,
+    useFallback = true,
 }) => {
     const isObjectStub = isStub(object);
     const [loadedObj, setLoadedObj] = React.useState<any>(false);
     const [subsId, setSubsId] = React.useState(getRandomInt());
 
-    const [DynamicViewsDetailed, setDynamicViewsDetailed] = React.useState({ ...window.unigraph.getState('registry/dynamicViewDetailed').value, ...(component || {}) });
+    const [DynamicViewsDetailed, setDynamicViewsDetailed] = React.useState({
+        ...window.unigraph.getState('registry/dynamicViewDetailed').value,
+        ...(component || {}),
+    });
 
     React.useEffect(() => {
-        window.unigraph.getState('registry/dynamicViewDetailed').subscribe((newIts) => setDynamicViewsDetailed({ ...newIts, ...(component || {}) }));
+        window.unigraph
+            .getState('registry/dynamicViewDetailed')
+            .subscribe((newIts) =>
+                setDynamicViewsDetailed({ ...newIts, ...(component || {}) }),
+            );
     }, []);
 
     const tabContext = React.useContext(TabContext);
 
     React.useEffect(() => {
         const newSubs = getRandomInt();
-        if (isObjectStub && Object.keys(DynamicViewsDetailed).includes(object.type?.['unigraph.id'])) {
-            const query = DynamicViewsDetailed[object.type['unigraph.id']].query(object.uid);
-            tabContext.subscribeToQuery(query, (objects: any[]) => {
-                setLoadedObj(objects[0]);
-            }, newSubs, { noExpand: true });
+        if (
+            isObjectStub &&
+            Object.keys(DynamicViewsDetailed).includes(
+                object.type?.['unigraph.id'],
+            )
+        ) {
+            const query = DynamicViewsDetailed[
+                object.type['unigraph.id']
+            ].query(object.uid);
+            tabContext.subscribeToQuery(
+                query,
+                (objects: any[]) => {
+                    setLoadedObj(objects[0]);
+                },
+                newSubs,
+                { noExpand: true },
+            );
             setSubsId(newSubs);
         }
 
-        if (Object.keys(DynamicViewsDetailed).includes(object?.type?.['unigraph.id']) && !callbacks?.isEmbed) {
-            tabContext.setMaximize(DynamicViewsDetailed[object.type['unigraph.id']].maximize);
+        if (
+            Object.keys(DynamicViewsDetailed).includes(
+                object?.type?.['unigraph.id'],
+            ) &&
+            !callbacks?.isEmbed
+        ) {
+            tabContext.setMaximize(
+                DynamicViewsDetailed[object.type['unigraph.id']].maximize,
+            );
         }
 
-        return function cleanup() { tabContext.unsubscribe(newSubs); };
+        return function cleanup() {
+            tabContext.unsubscribe(newSubs);
+        };
     }, [object]);
 
     if (isObjectStub) callbacks = { ...callbacks, subsId };
 
-    if (object?.type && object.type['unigraph.id'] && Object.keys(DynamicViewsDetailed).includes(object.type['unigraph.id']) && ((isObjectStub && loadedObj) || !isObjectStub)) {
+    if (
+        object?.type &&
+        object.type['unigraph.id'] &&
+        Object.keys(DynamicViewsDetailed).includes(
+            object.type['unigraph.id'],
+        ) &&
+        ((isObjectStub && loadedObj) || !isObjectStub)
+    ) {
         return (
-            // eslint-disable-next-line react/no-unstable-nested-components
-            <ErrorBoundary FallbackComponent={(error) => (
-                <div>
-                    <Typography>Error in detailed AutoDynamicView: </Typography>
-                    <p>{JSON.stringify(error, null, 4)}</p>
-                </div>
-            )}
+            <ErrorBoundary
+                // eslint-disable-next-line react/no-unstable-nested-components
+                FallbackComponent={(error) => (
+                    <div>
+                        <Typography>
+                            Error in detailed AutoDynamicView:{' '}
+                        </Typography>
+                        <p>{JSON.stringify(error, null, 4)}</p>
+                    </div>
+                )}
             >
-                <div style={{ display: 'contents' }} id={`object-view-${object.uid}`}>
+                <div
+                    style={{ display: 'contents' }}
+                    id={`object-view-${object.uid}`}
+                >
                     <TabContext.Consumer>
-                        {({ viewId, setTitle }) => React.createElement(DynamicViewsDetailed[object.type['unigraph.id']].view, {
-                        data: isObjectStub
-                            ? loadedObj
-                            : object,
-                        callbacks: { viewId, setTitle, ...(callbacks || {}) },
-                        options: { viewId, setTitle, ...options || {} },
-                        context,
-                        ...(attributes || {}),
-                    })}
+                        {({ viewId, setTitle }) =>
+                            React.createElement(
+                                DynamicViewsDetailed[object.type['unigraph.id']]
+                                    .view,
+                                {
+                                    data: isObjectStub ? loadedObj : object,
+                                    callbacks: {
+                                        viewId,
+                                        setTitle,
+                                        ...(callbacks || {}),
+                                    },
+                                    options: {
+                                        viewId,
+                                        setTitle,
+                                        ...(options || {}),
+                                    },
+                                    context,
+                                    ...(attributes || {}),
+                                },
+                            )
+                        }
                     </TabContext.Consumer>
                 </div>
             </ErrorBoundary>
         );
-    } if (useFallback) {
-        return (object && ((isObjectStub && loadedObj) || !isObjectStub))
-            ? <ObjectEditor uid={object?.uid} />
-            : <span />;
-    } return <span />;
+    }
+    if (useFallback) {
+        return object && ((isObjectStub && loadedObj) || !isObjectStub) ? (
+            <ObjectEditor uid={object?.uid} />
+        ) : (
+            <span />
+        );
+    }
+    return <span />;
 };

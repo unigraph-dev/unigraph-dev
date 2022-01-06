@@ -23,9 +23,9 @@ module.exports = {
     ],
     rules: {
         'inclusive-language/use-inclusive-words': 'error',
-        indent: ['error', 4, { ignoredNodes: ['JSXElement *', 'JSXElement'] }],
-        'react/jsx-indent': ['error', 4],
-        'react/jsx-indent-props': ['error', 4],
+        // indent: ['error', 4, { ignoredNodes: ['JSXElement *', 'JSXElement'] }],
+        // 'react/jsx-indent': ['error', 4],
+        // 'react/jsx-indent-props': ['error', 4],
         'max-len': [
             'error',
             {

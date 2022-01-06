@@ -2,10 +2,16 @@
 import { Application } from 'express-ws';
 import express from 'express';
 import WebSocket from 'ws';
-import { isJsonString, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import {
+    isJsonString,
+    getRandomInt,
+} from 'unigraph-dev-common/lib/utils/utils';
 import { insertsToUpsert } from 'unigraph-dev-common/lib/utils/txnWrapper';
 import {
-    buildUnigraphEntity, processAutoref, dectxObjects, processAutorefUnigraphId,
+    buildUnigraphEntity,
+    processAutoref,
+    dectxObjects,
+    processAutorefUnigraphId,
 } from 'unigraph-dev-common/lib/utils/entityUtils';
 import repl from 'repl';
 import fetch from 'node-fetch';
@@ -14,32 +20,73 @@ import { Unigraph } from 'unigraph-dev-common/lib/types/unigraph';
 import stringify from 'json-stable-stringify';
 import DgraphClient from './dgraphClient';
 import {
-    EventAddNotification, EventAddUnigraphPackage, EventCreateDataByJson, EventCreateUnigraphObject,
-    EventCreateUnigraphSchema, EventDeleteItemFromArray, EventDeleteRelation,
-    EventDeleteUnigraphObject, EventEnsureUnigraphPackage, EventEnsureUnigraphSchema,
-    EventExportObjects, EventGetPackages, EventGetQueries, EventGetSchemas,
-    EventGetSearchResults, EventGetSubscriptions, EventHibernateSubscription, EventImportObjects, EventProxyFetch,
-    EventQueryByStringWithVars, EventReorderItemInArray, EventResponser, EventRunExecutable,
-    EventSetDgraphSchema, EventSubscribe, EventSubscribeObject, EventSubscribeQuery,
-    EventSubscribeType, EventUnsubscribeById, EventUpdateObject, EventUpdateSPO,
-    IWebsocket, Subscription, UnigraphUpsert,
+    EventAddNotification,
+    EventAddUnigraphPackage,
+    EventCreateDataByJson,
+    EventCreateUnigraphObject,
+    EventCreateUnigraphSchema,
+    EventDeleteItemFromArray,
+    EventDeleteRelation,
+    EventDeleteUnigraphObject,
+    EventEnsureUnigraphPackage,
+    EventEnsureUnigraphSchema,
+    EventExportObjects,
+    EventGetPackages,
+    EventGetQueries,
+    EventGetSchemas,
+    EventGetSearchResults,
+    EventGetSubscriptions,
+    EventHibernateSubscription,
+    EventImportObjects,
+    EventProxyFetch,
+    EventQueryByStringWithVars,
+    EventReorderItemInArray,
+    EventResponser,
+    EventRunExecutable,
+    EventSetDgraphSchema,
+    EventSubscribe,
+    EventSubscribeObject,
+    EventSubscribeQuery,
+    EventSubscribeType,
+    EventUnsubscribeById,
+    EventUpdateObject,
+    EventUpdateSPO,
+    IWebsocket,
+    Subscription,
+    UnigraphUpsert,
 } from './custom.d';
 import {
-    addUnigraphPackage, checkOrCreateDefaultDataModel, createPackageCache, createSchemaCache,
+    addUnigraphPackage,
+    checkOrCreateDefaultDataModel,
+    createPackageCache,
+    createSchemaCache,
 } from './datamodelManager';
 import { Cache } from './caches';
 import {
-    createSubscriptionLocal, MsgCallbackFn, pollSubscriptions, removeOrHibernateSubscriptionsById, reviveSubscriptions,
+    createSubscriptionLocal,
+    MsgCallbackFn,
+    pollSubscriptions,
+    removeOrHibernateSubscriptionsById,
+    reviveSubscriptions,
 } from './subscriptions';
 import {
-    afterObjectCreatedHooks, callHooks, HookAfterObjectChangedParams,
-    HookAfterSchemaUpdatedParams, HookAfterSubscriptionAddedParams, Hooks, initEntityHeads,
+    afterObjectCreatedHooks,
+    callHooks,
+    HookAfterObjectChangedParams,
+    HookAfterSchemaUpdatedParams,
+    HookAfterSubscriptionAddedParams,
+    Hooks,
+    initEntityHeads,
 } from './hooks';
 import { getAsyncLock } from './asyncManager';
 import { createExecutableCache } from './executableManager';
 import { getLocalUnigraphAPI } from './localUnigraphApi';
 import { addNotification } from './notifications';
-import { perfLogAfterDbTransaction, perfLogStartDbTransaction, perfLogStartPreprocessing } from './logging';
+import {
+    perfLogAfterDbTransaction,
+    perfLogStartDbTransaction,
+    perfLogStartPreprocessing,
+} from './logging';
 
 const PORT = 3001;
 const PORT_HTTP = 4001;
@@ -65,12 +112,14 @@ export default async function startServer(client: DgraphClient) {
     const pollCallback: MsgCallbackFn = (id, newdata, msgPort, sub) => {
         if (sub?.callbackType === 'messageid') {
             if (msgPort.readyState === 1) {
-                msgPort.send(stringify({
-                    type: 'subscription',
-                    updated: true,
-                    id,
-                    result: newdata,
-                }));
+                msgPort.send(
+                    stringify({
+                        type: 'subscription',
+                        updated: true,
+                        id,
+                        result: newdata,
+                    }),
+                );
             }
         } else if (sub?.callbackType === 'function' && sub.function) {
             sub.function(newdata);
@@ -80,37 +129,67 @@ export default async function startServer(client: DgraphClient) {
     const serverStates: any = {};
 
     const hooks: Hooks = {
-        after_subscription_added: [async (context: HookAfterSubscriptionAddedParams) => {
-            pollSubscriptions(context.subscriptions, dgraphClient, pollCallback, context.ids, serverStates);
-        }],
-        after_schema_updated: [async (context: HookAfterSchemaUpdatedParams) => {
-            await context.caches.schemas.updateNow();
-            await context.caches.packages.updateNow();
-            await context.caches.executables.updateNow();
-            Object.values(connections).forEach((el) => el.send(stringify({
-                type: 'cache_updated',
-                name: 'schemaMap',
-                result: serverStates.caches.schemas.data,
-            })));
-        }],
-        after_object_changed: [async (context: HookAfterObjectChangedParams) => {
-            if (context.subIds && !Array.isArray(context.subIds)) context.subIds = [context.subIds];
-            pollSubscriptions(context.subscriptions, dgraphClient, pollCallback, context.subIds, serverStates);
-            await context.caches.executables.updateNow();
+        after_subscription_added: [
+            async (context: HookAfterSubscriptionAddedParams) => {
+                pollSubscriptions(
+                    context.subscriptions,
+                    dgraphClient,
+                    pollCallback,
+                    context.ids,
+                    serverStates,
+                );
+            },
+        ],
+        after_schema_updated: [
+            async (context: HookAfterSchemaUpdatedParams) => {
+                await context.caches.schemas.updateNow();
+                await context.caches.packages.updateNow();
+                await context.caches.executables.updateNow();
+                Object.values(connections).forEach((el) =>
+                    el.send(
+                        stringify({
+                            type: 'cache_updated',
+                            name: 'schemaMap',
+                            result: serverStates.caches.schemas.data,
+                        }),
+                    ),
+                );
+            },
+        ],
+        after_object_changed: [
+            async (context: HookAfterObjectChangedParams) => {
+                if (context.subIds && !Array.isArray(context.subIds))
+                    context.subIds = [context.subIds];
+                pollSubscriptions(
+                    context.subscriptions,
+                    dgraphClient,
+                    pollCallback,
+                    context.subIds,
+                    serverStates,
+                );
+                await context.caches.executables.updateNow();
 
-            // Call after_object_created hooks with uids cached
-            const objectCreatedHooks: any = {};
-            Object.keys(serverStates.hooks).forEach((el) => {
-                if (el.startsWith('after_object_created/')) {
-                    const schemaName = el.replace('after_object_created/', '$/schema/');
-                    objectCreatedHooks[schemaName] = serverStates.hooks[el];
-                }
-            });
-            lock.acquire('caches/head', async (done: any) => {
-                await afterObjectCreatedHooks(serverStates, objectCreatedHooks, client);
-                done(false, null);
-            });
-        }],
+                // Call after_object_created hooks with uids cached
+                const objectCreatedHooks: any = {};
+                Object.keys(serverStates.hooks).forEach((el) => {
+                    if (el.startsWith('after_object_created/')) {
+                        const schemaName = el.replace(
+                            'after_object_created/',
+                            '$/schema/',
+                        );
+                        objectCreatedHooks[schemaName] = serverStates.hooks[el];
+                    }
+                });
+                lock.acquire('caches/head', async (done: any) => {
+                    await afterObjectCreatedHooks(
+                        serverStates,
+                        objectCreatedHooks,
+                        client,
+                    );
+                    done(false, null);
+                });
+            },
+        ],
     };
 
     let namespaceMap: any = {};
@@ -132,24 +211,31 @@ export default async function startServer(client: DgraphClient) {
             clearTimeout(debounceId);
             debounceId = setTimeout(() => {
                 Object.values(connections).forEach((el) => {
-                    el.send(stringify({
-                        type: 'cache_updated',
-                        name: 'runningExecutables',
-                        result: serverStates.runningExecutables,
-                    }));
+                    el.send(
+                        stringify({
+                            type: 'cache_updated',
+                            name: 'runningExecutables',
+                            result: serverStates.runningExecutables,
+                        }),
+                    );
                 });
             }, 250);
         },
         removeRunningExecutable: (id: any) => {
-            serverStates.runningExecutables = serverStates.runningExecutables.filter((el: any) => el.id !== id);
+            serverStates.runningExecutables =
+                serverStates.runningExecutables.filter(
+                    (el: any) => el.id !== id,
+                );
             clearTimeout(debounceId);
             debounceId = setTimeout(() => {
                 Object.values(connections).forEach((el) => {
-                    el.send(stringify({
-                        type: 'cache_updated',
-                        name: 'runningExecutables',
-                        result: serverStates.runningExecutables,
-                    }));
+                    el.send(
+                        stringify({
+                            type: 'cache_updated',
+                            name: 'runningExecutables',
+                            result: serverStates.runningExecutables,
+                        }),
+                    );
                 });
             }, 250);
         },
@@ -157,19 +243,24 @@ export default async function startServer(client: DgraphClient) {
         pollCallback,
     });
 
-    const namespaceSub = createSubscriptionLocal(getRandomInt(), (data) => {
-        namespaceMap = data[0];
-        serverStates.namespaceMap = data[0];
-        Object.values(connections).forEach((el) => {
-            el.send(stringify({
-                type: 'cache_updated',
-                name: 'namespaceMap',
-                result: data[0],
-            }));
-        });
-    }, {
-        type: 'query',
-        fragment: `(func: eq(<unigraph.id>, "$/meta/namespace_map")) {
+    const namespaceSub = createSubscriptionLocal(
+        getRandomInt(),
+        (data) => {
+            namespaceMap = data[0];
+            serverStates.namespaceMap = data[0];
+            Object.values(connections).forEach((el) => {
+                el.send(
+                    stringify({
+                        type: 'cache_updated',
+                        name: 'namespaceMap',
+                        result: data[0],
+                    }),
+                );
+            });
+        },
+        {
+            type: 'query',
+            fragment: `(func: eq(<unigraph.id>, "$/meta/namespace_map")) {
             uid
             <unigraph.id>
             _name
@@ -187,110 +278,182 @@ export default async function startServer(client: DgraphClient) {
             }
             }
         }`,
-    });
+        },
+    );
 
     serverStates.subscriptions.push(namespaceSub);
-    await pollSubscriptions(serverStates.subscriptions, dgraphClient, pollCallback, undefined, serverStates);
+    await pollSubscriptions(
+        serverStates.subscriptions,
+        dgraphClient,
+        pollCallback,
+        undefined,
+        serverStates,
+    );
 
     // Initialize caches
     caches.schemas = createSchemaCache(client);
     caches.packages = createPackageCache(client);
     const localApi = getLocalUnigraphAPI(client, serverStates);
     serverStates.localApi = localApi;
-    caches.executables = createExecutableCache(client, { hello: 'world' }, localApi, serverStates);
-
-    setInterval(() => pollSubscriptions(
-        serverStates.subscriptions,
-        dgraphClient,
-        pollCallback,
-        undefined,
+    caches.executables = createExecutableCache(
+        client,
+        { hello: 'world' },
+        localApi,
         serverStates,
-    ), pollInterval);
+    );
+
+    setInterval(
+        () =>
+            pollSubscriptions(
+                serverStates.subscriptions,
+                dgraphClient,
+                pollCallback,
+                undefined,
+                serverStates,
+            ),
+        pollInterval,
+    );
 
     const makeResponse = (
-        event: {id: number | string},
+        event: { id: number | string },
         success: boolean,
         body: Record<string, unknown> = {},
-    ) => stringify({
-        type: 'response',
-        success,
-        id: event.id,
-        ...body,
-    });
+    ) =>
+        stringify({
+            type: 'response',
+            success,
+            id: event.id,
+            ...body,
+        });
 
     const eventRouter: Record<string, EventResponser> = {
-        query_by_string_with_vars(event: EventQueryByStringWithVars, ws: IWebsocket) {
-            dgraphClient.queryData<any[]>(event.query, event.vars).then((res) => {
-                ws.send(makeResponse(event, true, { result: res }));
-            }).catch((e) => ws.send(makeResponse(event, false, { error: e.toString() })));
+        query_by_string_with_vars(
+            event: EventQueryByStringWithVars,
+            ws: IWebsocket,
+        ) {
+            dgraphClient
+                .queryData<any[]>(event.query, event.vars)
+                .then((res) => {
+                    ws.send(makeResponse(event, true, { result: res }));
+                })
+                .catch((e) =>
+                    ws.send(
+                        makeResponse(event, false, { error: e.toString() }),
+                    ),
+                );
         },
 
         set_dgraph_schema(event: EventSetDgraphSchema, ws: IWebsocket) {
-            dgraphClient.setSchema(event.schema).then((_) => {
-                ws.send(makeResponse(event, true));
-            }).catch((e) => ws.send(makeResponse(event, false, { error: e.toString() })));
+            dgraphClient
+                .setSchema(event.schema)
+                .then((_) => {
+                    ws.send(makeResponse(event, true));
+                })
+                .catch((e) =>
+                    ws.send(
+                        makeResponse(event, false, { error: e.toString() }),
+                    ),
+                );
         },
 
         create_data_by_json(event: EventCreateDataByJson, ws: IWebsocket) {
-            dgraphClient.createData(event.data).then((_) => {
-                callHooks(
-                    serverStates.hooks,
-                    'after_object_changed',
-                    { subscriptions: serverStates.subscriptions, caches },
+            dgraphClient
+                .createData(event.data)
+                .then((_) => {
+                    callHooks(serverStates.hooks, 'after_object_changed', {
+                        subscriptions: serverStates.subscriptions,
+                        caches,
+                    });
+                    ws.send(makeResponse(event, true));
+                })
+                .catch((e) =>
+                    ws.send(
+                        makeResponse(event, false, { error: e.toString() }),
+                    ),
                 );
-                ws.send(makeResponse(event, true));
-            }).catch((e) => ws.send(makeResponse(event, false, { error: e.toString() })));
         },
 
         subscribe_to_object(event: EventSubscribeObject, ws: IWebsocket) {
-            serverStates.localApi.subscribeToObject(
-                event.uid,
-                { ws, connId: event.connId },
-                event.id,
-                event.options || {},
-            )
-                .then((res: any) => ws.send(makeResponse(event, true)));
-        },
-
-        get_object(event: EventSubscribeObject, ws: IWebsocket) {
-            serverStates.localApi.getObject(event.uid, { ws, connId: event.connId }, event.id, event.options || {})
-                .then((res: any) => ws.send(makeResponse(event, true, { result: res })));
-        },
-
-        subscribe_to_type(event: EventSubscribeType, ws: IWebsocket) {
-            lock.acquire('caches/schema', (done: (any)) => {
-                done(false);
-                serverStates.localApi.subscribeToType(
-                    event.schema,
+            serverStates.localApi
+                .subscribeToObject(
+                    event.uid,
                     { ws, connId: event.connId },
                     event.id,
                     event.options || {},
                 )
+                .then((res: any) => ws.send(makeResponse(event, true)));
+        },
+
+        get_object(event: EventSubscribeObject, ws: IWebsocket) {
+            serverStates.localApi
+                .getObject(
+                    event.uid,
+                    { ws, connId: event.connId },
+                    event.id,
+                    event.options || {},
+                )
+                .then((res: any) =>
+                    ws.send(makeResponse(event, true, { result: res })),
+                );
+        },
+
+        subscribe_to_type(event: EventSubscribeType, ws: IWebsocket) {
+            lock.acquire('caches/schema', (done: any) => {
+                done(false);
+                serverStates.localApi
+                    .subscribeToType(
+                        event.schema,
+                        { ws, connId: event.connId },
+                        event.id,
+                        event.options || {},
+                    )
                     .then((res: any) => ws.send(makeResponse(event, true)))
-                    .catch((e: any) => ws.send(makeResponse(event, false, { error: e.toString() })));
+                    .catch((e: any) =>
+                        ws.send(
+                            makeResponse(event, false, { error: e.toString() }),
+                        ),
+                    );
             });
         },
 
         async subscribe_to_query(event: EventSubscribeQuery, ws: IWebsocket) {
-            serverStates.localApi.subscribeToQuery(
-                event.queryFragment,
-                { ws, connId: event.connId },
-                event.id,
-                event.options,
-            )
+            serverStates.localApi
+                .subscribeToQuery(
+                    event.queryFragment,
+                    { ws, connId: event.connId },
+                    event.id,
+                    event.options,
+                )
                 .then((res: any) => ws.send(makeResponse(event, true)))
-                .catch((e: any) => ws.send(makeResponse(event, false, { error: e.toString() })));
+                .catch((e: any) =>
+                    ws.send(
+                        makeResponse(event, false, { error: e.toString() }),
+                    ),
+                );
         },
 
         async subscribe(event: EventSubscribe, ws: IWebsocket) {
-            serverStates.localApi.subscribe(event.query, { ws, connId: event.connId }, event.id, event.update)
+            serverStates.localApi
+                .subscribe(
+                    event.query,
+                    { ws, connId: event.connId },
+                    event.id,
+                    event.update,
+                )
                 .then((res: any) => ws.send(makeResponse(event, true)))
-                .catch((e: any) => ws.send(makeResponse(event, false, { error: e.toString() })));
+                .catch((e: any) =>
+                    ws.send(
+                        makeResponse(event, false, { error: e.toString() }),
+                    ),
+                );
         },
 
         async get_queries(event: EventGetQueries, ws: IWebsocket) {
-            const results = await localApi.getQueries(event.fragments)
-                .catch((e: any) => ws.send(makeResponse(event, false, { error: e })));
+            const results = await localApi
+                .getQueries(event.fragments)
+                .catch((e: any) =>
+                    ws.send(makeResponse(event, false, { error: e })),
+                );
             ws.send(makeResponse(event, true, { results }));
         },
 
@@ -299,13 +462,19 @@ export default async function startServer(client: DgraphClient) {
             ws.send(makeResponse(event, true));
         },
 
-        ensure_unigraph_schema(event: EventEnsureUnigraphSchema, ws: IWebsocket) {
+        ensure_unigraph_schema(
+            event: EventEnsureUnigraphSchema,
+            ws: IWebsocket,
+        ) {
             const names = Object.keys(caches.schemas.data);
             if (names.includes(event.name)) {
                 ws.send(makeResponse(event, true));
             } else {
                 // Falls back to create nonexistent schema
-                eventRouter.create_unigraph_schema({ ...event, schema: event.fallback }, ws);
+                eventRouter.create_unigraph_schema(
+                    { ...event, schema: event.fallback },
+                    ws,
+                );
             }
         },
 
@@ -314,7 +483,10 @@ export default async function startServer(client: DgraphClient) {
          * @param event The event for creating the schema
          * @param ws Websocket connection
          */
-        create_unigraph_schema(event: EventCreateUnigraphSchema, ws: IWebsocket) {
+        create_unigraph_schema(
+            event: EventCreateUnigraphSchema,
+            ws: IWebsocket,
+        ) {
             /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
             lock.acquire('caches/schema', function (done: Function) {
                 const schema = event.schema;

@@ -27,7 +27,10 @@ import { InspectorView } from './components/UnigraphCore/InspectorView';
 import { RedditSettings } from './examples/reddit/RedditSettings';
 import { AppDrawer } from './components';
 import { ConnectionWidget } from './components/UnigraphCore/ConnectionWidget';
-import { AllApps, AppLibraryWidget } from './components/PackageManager/AppLibraryWidget';
+import {
+    AllApps,
+    AppLibraryWidget,
+} from './components/PackageManager/AppLibraryWidget';
 import { EmailSettings } from './examples/email/EmailSettings';
 import { BacklinkView } from './components/ObjectView/BacklinkView';
 import ExplorerDashboard from './pages/ExplorerDashboard';
@@ -165,7 +168,8 @@ const pages: Record<string, any> = {
         maximize: true,
         name: 'Today View',
     },
-    omnibar: { // only used in electron
+    omnibar: {
+        // only used in electron
         constructor: (props: any) => (
             <SearchOverlayPopover
                 {...props}
@@ -183,7 +187,6 @@ export const components: Record<string, any> = {
     appdrawer: {
         constructor: (props: any) => <AppDrawer {...props} />,
     },
-
 };
 
 export const widgets: Record<string, any> = {
