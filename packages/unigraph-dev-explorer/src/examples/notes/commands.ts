@@ -6,11 +6,16 @@ import { parseTodoObject } from '../todo/parseTodoObject';
 import { NoteEditorContext } from './types';
 import { getParentsAndReferences } from '../../components/ObjectView/backlinksUtils';
 
-export const focusUid = (uid: string) => {
+export const focusUid = (uid: string, tail?: boolean) => {
     // console.log("UID " + uid);
     // console.log(document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]);
     // (document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]?.children[0] as any)?.click();
-    window.unigraph.getState('global/focused').setValue(uid);
+    window.unigraph.getState('global/focused').setValue({
+        uid,
+        caret: window.unigraph.getState('global/focused').value?.caret || 0,
+        type: '$/schema/note_block',
+        tail,
+    });
 };
 
 export const getSemanticChildren = (data: any) => data?._value?.children;
@@ -103,7 +108,6 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
     // console.log(newChildren)
     window.unigraph.updateObject(data?._value?.uid, { children: { '_value[': newChildren } }, false, false, context.callbacks.subsId, parents);
     context.edited.current = true;
-    context.setCommand(() => () => focusUid(targetUid));
 };
 
 export const unsplitChild = async (data: any, context: NoteEditorContext, index: number) => {
@@ -137,7 +141,7 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
         }, 1000);
 
         context.edited.current = true;
-        focusLastDFSNode({ uid: children[delAt]._value._value.uid }, context, index);
+        focusLastDFSNode({ uid: children[delAt]._value._value.uid }, context, index, true);
     }
 };
 
@@ -211,7 +215,7 @@ export const indentChild = (data: any, context: NoteEditorContext, index: number
     window.unigraph.updateObject(data?._value?.uid, { children: { '_value[': finalChildren } }, false, false, context.callbacks.subsId, parents);
     context.edited.current = true;
 
-    context.setCommand(() => () => focusUid(newUid._value.uid));
+    // context.setCommand(() => () => focusUid(newUid._value.uid));
     // context.setCommand(() => noteBlockCommands['set-focus'].bind(this, data, {...context, childrenref: {current: context.childrenref.current.children[parent as number].children[0].children[0].children[1]}}, -1))
 };
 
@@ -266,16 +270,15 @@ export const unindentChild = async (data: any, context: NoteEditorContext, paren
     await window.unigraph.updateObject(data?._value?.uid, { ...data._value, children: { '_value[': newChildren } }, false, false, [], parents);
     await window.unigraph.deleteItemFromArray(delUidPar, delUidChild);
     context.edited.current = true;
-    context.setCommand(() => () => focusUid(newChildren[parent + 1]._value._value.uid));
+    // context.setCommand(() => () => focusUid(newChildren[parent + 1]._value._value.uid));
 };
 
-export const focusLastDFSNode = (data: any, context: NoteEditorContext, index: number) => {
-    focusUid(getLastDFSNode(data, context, index));
+export const focusLastDFSNode = (data: any, context: NoteEditorContext, index: number, tail?: boolean) => {
+    focusUid(getLastDFSNode(data, context, index), tail);
 };
 
-export const focusNextDFSNode = (data: any, context: NoteEditorContext, index: number) => {
-    console.log(getNextDFSNode(data, context, index));
-    focusUid(getNextDFSNode(data, context, index));
+export const focusNextDFSNode = (data: any, context: NoteEditorContext, index: number, tail?: boolean) => {
+    focusUid(getNextDFSNode(data, context, index), tail);
 };
 
 export const getLastDFSNode = (data: any, context: NoteEditorContext, index: number) => {
@@ -287,7 +290,6 @@ export const getLastDFSNode = (data: any, context: NoteEditorContext, index: num
 
 export const getNextDFSNode = (data: any, context: NoteEditorContext, index: number) => {
     const orderedNodes = dfs(context.nodesState.value);
-    console.log(orderedNodes);
     const newIndex = orderedNodes.findIndex((el) => el.uid === data.uid) + 1;
     if (orderedNodes[newIndex] && !orderedNodes[newIndex].root) return orderedNodes[newIndex].uid;
     return '';

@@ -29,7 +29,7 @@ import {
 } from './datamodelManager';
 import { Cache } from './caches';
 import {
-    createSubscriptionLocal, MsgCallbackFn, pollSubscriptions, removeOrHibernateSubscriptionsById,
+    createSubscriptionLocal, MsgCallbackFn, pollSubscriptions, removeOrHibernateSubscriptionsById, reviveSubscriptions,
 } from './subscriptions';
 import {
     afterObjectCreatedHooks, callHooks, HookAfterObjectChangedParams,
@@ -498,7 +498,7 @@ export default async function startServer(client: DgraphClient) {
         },
 
         "hibernate_or_revive_subscription": async function (event: EventHibernateSubscription, ws: IWebsocket) {
-            const res = await serverStates.localApi.hibernateOrReviveSubscription(event.id, event.revival)
+            const res = await serverStates.localApi.hibernateOrReviveSubscription(event.ids || event.id, event.revival)
                 .catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
             ws.send(makeResponse(event, true, {result: res}))
         },
@@ -634,6 +634,7 @@ export default async function startServer(client: DgraphClient) {
         console.log('opened socket connection');
 
         if (revival) {
+            serverStates.subscriptions = reviveSubscriptions(serverStates.subscriptions, historialClients[clientBrowserId], clientBrowserId, ws)
             pollSubscriptions(serverStates.subscriptions.filter((el: any) => el.clientId === clientBrowserId),
                 dgraphClient, pollCallback, undefined, serverStates);
         }

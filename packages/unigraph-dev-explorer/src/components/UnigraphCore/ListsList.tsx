@@ -4,6 +4,7 @@ import { List } from '@material-ui/icons';
 import { useDrop } from 'react-dnd';
 import { onUnigraphContextMenu } from '../ObjectView/DefaultObjectContextMenu';
 import { withUnigraphSubscription } from '../../unigraph-react';
+import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
 
 export function MiniListView({ data }: any) {
     const [{ isOver, canDrop }, dropSub] = useDrop(() => ({
@@ -33,7 +34,7 @@ export function MiniListView({ data }: any) {
                     {data?._value?.name?.['_value.%']}
                     {' '}
                     (
-                    {(data?._value?.children?.items || 0).toString()}
+                    {(data?._value?.children?.items || data?._value?.children?.['_value[']?.length || 0).toString()}
                     )
                 </Typography>
             </Card>
@@ -44,13 +45,13 @@ export function MiniListView({ data }: any) {
 export const ListsList = withUnigraphSubscription(({ data }: any) => (
     <div>
         <Grid container spacing={1}>
-            {(data || []).map((el: any) => <MiniListView data={el} />)}
+            {(data || []).map((el: any) => <MiniListView data={el} inline />)}
         </Grid>
     </div>
 ), { schemas: [], defaultData: [], packages: [] }, {
-    afterSchemasLoaded: (subsId, data, setData) => {
+    afterSchemasLoaded: (subsId: any, tabContext: any, data: any, setData: any) => {
         const id = getRandomInt().toString();
-        window.unigraph.subscribeToQuery(`(func: uid(lists${id})) @filter((NOT type(Deleted)) AND (NOT eq(<_hide>, true))) {
+        tabContext.subscribeToQuery(`(func: uid(lists${id})) @filter((NOT type(Deleted)) AND (NOT eq(<_hide>, true))) {
         uid
         _value {
             name {
@@ -60,6 +61,7 @@ export const ListsList = withUnigraphSubscription(({ data }: any) => (
                 items: count(<_value[>)
             }
         }
+        type { <unigraph.id> }
     }
 var(func: eq(<unigraph.id>, "$/schema/list")) {
     <~type> {

@@ -3,11 +3,12 @@ import React, { useEffect } from 'react';
 import { useEffectOnce } from 'react-use';
 import { pkg } from 'unigraph-dev-common/lib/data/unigraph.email.pkg';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
+import { TabContext } from '../../utils';
 
 export function EmailSettings({}) {
     const [loaded, setLoaded] = React.useState(false);
     const [account, setAccount] = React.useState<any>({});
-
+    const tabContext = React.useContext(TabContext);
     useEffectOnce(() => {
         window.unigraph.ensurePackage('unigraph.email', pkg).then(() => setLoaded(true));
     });
@@ -15,7 +16,7 @@ export function EmailSettings({}) {
     useEffect(() => {
         const id = getRandomInt();
         if (loaded) {
-            window.unigraph.subscribeToQuery(`(func: uid(parAcc)) @cascade {
+            tabContext.subscribeToQuery(`(func: uid(parAcc)) @cascade {
                 uid
                 type @filter(eq(<unigraph.id>, "$/schema/internet_account")) {<unigraph.id>}
                 _value {
@@ -38,7 +39,7 @@ export function EmailSettings({}) {
             }, id, { noExpand: true });
         }
         return function cleanup() {
-            window.unigraph.unsubscribe(id);
+            tabContext.unsubscribe(id);
         };
     }, [loaded]);
 

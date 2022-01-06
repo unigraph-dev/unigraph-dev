@@ -63,7 +63,13 @@ export const Tweet: DynamicViewRenderer = ({ data, callbacks }) => {
                         if (elObj.type['unigraph.id'] === '$/schema/icon_url') {
                             return <img src={elObj['_value.%']} style={{ maxWidth: '240px', borderRadius: '8px' }} alt="" />;
                         }
-                        return <AutoDynamicView object={new UnigraphObject(elObj)} withParent />;
+                        return (
+                            <AutoDynamicView
+                                object={new UnigraphObject(elObj)}
+                                withParent
+                                callbacks={{ context: data }}
+                            />
+                        );
                     })}
                 </div>
             </div>
@@ -71,6 +77,39 @@ export const Tweet: DynamicViewRenderer = ({ data, callbacks }) => {
     );
 };
 
+const TwitterUser = ({ data, callbacks }: any) => (
+    <div style={{ display: 'flex' }}>
+        <div style={{ alignSelf: 'center', marginRight: '16px' }}>
+            <Badge
+                overlap="circle"
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'right',
+                }}
+                badgeContent={<Avatar style={{ height: '16px', width: '16px' }} alt="Twitter" src="https://abs.twimg.com/responsive-web/client-web/icon-ios.b1fc7275.png" />}
+            >
+                <Avatar
+                    src={data.get('profile_image').as('primitive')}
+                    onClick={() => {
+                        openUrl(`https://twitter.com/${data.get('username').as('primitive')}}`);
+                    }}
+                />
+            </Badge>
+        </div>
+        <div style={{ alignSelf: 'center', marginRight: '16px' }}>
+            <Typography variant="body1" style={{ marginRight: '8px' }}><strong>{data.get('name').as('primitive')}</strong></Typography>
+            <Typography variant="body2" style={{ color: 'gray' }}>
+                @
+                {data.get('username').as('primitive')}
+            </Typography>
+        </div>
+        <div style={{ alignSelf: 'center' }}>
+            <Typography variant="body1">{data.get('description').as('primitive')}</Typography>
+        </div>
+    </div>
+);
+
 export const init = () => {
     registerDynamicViews({ '$/schema/tweet': Tweet });
+    registerDynamicViews({ '$/schema/twitter_user': TwitterUser });
 };

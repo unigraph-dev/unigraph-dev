@@ -2,6 +2,7 @@ import React from 'react';
 import { useEffectOnce } from 'react-use';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { TabContext } from '../../utils';
 import { DynamicObjectListView } from '../ObjectView/DynamicObjectListView';
 
 export function Focus() {
@@ -9,7 +10,7 @@ export function Focus() {
     const [focusEntity, setFocusEntity] = React.useState<any>({});
     const [listUid, setListUid] = React.useState('');
     const [subsId] = React.useState(getRandomInt);
-
+    const tabContext = React.useContext(TabContext);
     React.useEffect(() => {
         if (window.unigraph.getState('calendar/focusItems')) {
             window.unigraph.getState('calendar/focusItems').setValue({ items: focus.map((el) => el._value.uid), listUid, contextUid: focusEntity.uid });
@@ -17,7 +18,7 @@ export function Focus() {
     }, [focus, listUid, focusEntity]);
 
     useEffectOnce(() => {
-        window.unigraph.subscribeToObject('$/entity/focus', (entity: any) => {
+        tabContext.subscribeToObject('$/entity/focus', (entity: any) => {
             const children = entity?._value?.children?.['_value['];
             if (children) {
                 setListUid(entity?._value?.children?.uid);
@@ -30,7 +31,7 @@ export function Focus() {
         }, subsId);
 
         return function cleanup() {
-            window.unigraph.unsubscribe(subsId);
+            tabContext.unsubscribe(subsId);
         };
     });
 

@@ -81,8 +81,10 @@ export function getLocalUnigraphAPI(
         },
         hibernateOrReviveSubscription: async (eventId = undefined, revival) => {
             const shouldHibernated = !revival;
-            states.subscriptions = states.subscriptions.map((el) => ({ ...el, hibernated: el.id === eventId ? shouldHibernated : el.hibernated }));
-            if (revival) callHooks(states.hooks, 'after_subscription_added', { subscriptions: states.subscriptions, ids: [eventId] });
+            let eventIds: any = eventId;
+            if (!Array.isArray(eventId)) eventIds = [eventId];
+            states.subscriptions = states.subscriptions.map((el) => (Object.assign(el, { hibernated: eventIds.includes(el.id) ? shouldHibernated : el.hibernated })));
+            if (revival) callHooks(states.hooks, 'after_subscription_added', { subscriptions: states.subscriptions, ids: eventIds });
         },
         unsubscribe: async (id) => {
             states.subscriptions = states.subscriptions.reduce((prev: Subscription[], curr: Subscription) => {

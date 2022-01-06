@@ -6,6 +6,7 @@ import React, { useState } from 'react';
 import { pkg as todoPackage } from 'unigraph-dev-common/lib/data/unigraph.todo.pkg';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import Sugar from 'sugar';
+import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { DynamicViewRenderer } from '../../global.d';
 
 import { registerDynamicViews, registerQuickAdder, withUnigraphSubscription } from '../../unigraph-react';
@@ -25,7 +26,7 @@ function TodoListBody({ data }: { data: ATodoList[] }) {
     }, [todoList]);
 
     return (
-        <div>
+        <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
             <DynamicObjectListView
                 items={filteredItems}
                 context={null}
@@ -37,7 +38,9 @@ function TodoListBody({ data }: { data: ATodoList[] }) {
     );
 }
 
-export const TodoItem: DynamicViewRenderer = ({ data, callbacks }) => {
+export const TodoItem: DynamicViewRenderer = ({
+    data, callbacks, compact, inline,
+}) => {
     // console.log(data);
     const unpadded: ATodoList = unpad(data);
     // console.log(unpadded)
@@ -63,6 +66,7 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks }) => {
                 }}
             />
             <ListItemText
+                style={{ margin: compact ? '0px' : '', alignSelf: 'center' }}
                 primary={(
                     <AutoDynamicView
                         object={data.get('name')._value._value}
@@ -80,7 +84,13 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks }) => {
                             ? []
                             : data?._value?.children?.['_value[']
                                 ?.filter((it: any) => !it._key)
-                                .map((it: any) => <AutoDynamicView object={it._value?._value} inline />))}
+                                .map((it: any) => (
+                                    <AutoDynamicView
+                                        object={new UnigraphObject(it._value)}
+                                        callbacks={callbacks}
+                                        inline
+                                    />
+                                )))}
                         {(unpadded.priority > 0
                             ? [
                                 <Chip
@@ -128,16 +138,24 @@ const tt = () => (
 );
 
 export const init = () => {
+    const description = 'Add a new Todo object';
     registerDynamicViews({ '$/schema/todo': TodoItem });
-    registerQuickAdder({ todo: { adder: quickAdder, tooltip: tt }, td: { adder: quickAdder, tooltip: tt } });
+    registerQuickAdder({
+        todo: {
+            adder: quickAdder, tooltip: tt, description, alias: ['td'],
+        },
+    });
 };
 
 export const TodoList = withUnigraphSubscription(
     TodoListBody,
     { schemas: [], defaultData: [], packages: [todoPackage] },
     {
-        afterSchemasLoaded: (subsId: number, data: any, setData: any) => {
-            window.unigraph.subscribeToType('$/schema/todo', (result: ATodoList[]) => { setData(result); }, subsId, { all: undefined });
+        afterSchemasLoaded: (subsId: number, tabContext: any, data: any, setData: any) => {
+            tabContext.subscribeToType('$/schema/todo', (result: ATodoList[]) => { setData(result.map((el: any) => ({ ...el, _stub: true }))); }, subsId, {
+                showHidden: true,
+                queryAs: ' { uid type { <unigraph.id> } _hide _value { done { <_value.!> } } } ',
+            });
         },
     },
 );

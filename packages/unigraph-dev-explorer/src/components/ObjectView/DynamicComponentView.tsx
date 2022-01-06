@@ -9,6 +9,7 @@ import { AutoDynamicViewDetailed } from './AutoDynamicViewDetailed';
 import { DynamicObjectListView } from './DynamicObjectListView';
 import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import { BacklinkView } from './BacklinkView';
+import { TabContext } from '../../utils';
 
 export const globalImports = {
     HelloWorld: () => <p>Hello world!!!</p>,
@@ -23,6 +24,7 @@ export const globalImports = {
     onUnigraphContextMenu,
     BacklinkView,
     Sugar,
+    TabContext,
 };
 
 export const DynamicComponentView: DynamicViewRenderer = ({ data, callbacks }) => {
@@ -30,7 +32,9 @@ export const DynamicComponentView: DynamicViewRenderer = ({ data, callbacks }) =
 
     React.useEffect(() => {
         getComponentFromExecutable(data, callbacks?.props || {}, globalImports)
-            .then((comp: any) => setPreviewComponent(React.createElement(comp, callbacks?.props || {}, [])));
+            .then((comp: any) => {
+                if (comp) setPreviewComponent(React.createElement(comp, callbacks?.props || {}, []));
+            });
     }, [data]);
 
     return previewComponent;
@@ -41,5 +45,5 @@ export const getComponentAsView = async (view: any, params: any) => {
     if (typeof ret === 'function') {
         return ret;
     }
-    return () => undefined;
+    return undefined;
 };

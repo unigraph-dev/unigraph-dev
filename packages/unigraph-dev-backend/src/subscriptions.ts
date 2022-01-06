@@ -41,7 +41,7 @@ export function getFragment(query: Query, states: any) {
                 ? '@recurse { uid <unigraph.id> expand(_userpredicate_) } '
                 : (metadataOnly
                     ? ' { uid <dgraph.type> type { <unigraph.id> } } '
-                    : makeQueryFragmentFromType(query.name, states.caches.schemas.data, depth)))
+                    : (queryAs || makeQueryFragmentFromType(query.name, states.caches.schemas.data, depth))))
     )}
         var(func: eq(<unigraph.id>, "${query.name}")) {
         <~type> {
@@ -57,7 +57,7 @@ export function getFragment(query: Query, states: any) {
         }
         const queryBody = options?.queryAsType
             ? makeQueryFragmentFromType(options.queryAsType, states.caches.schemas.data, options?.depth)
-            : '@recurse { uid unigraph.id expand(_userpredicate_) }';
+            : `@recurse${options?.depth ? `(depth: ${options?.depth})` : ''} { uid unigraph.id expand(_userpredicate_) }`;
         const frag = options.queryFn
             ? options.queryFn.replace('QUERYFN_TEMPLATE', (Array.isArray(uid) ? uid.join(', ') : uid))
             : `(func: uid(${Array.isArray(uid) ? uid.join(', ') : uid})) 
@@ -188,6 +188,21 @@ export function removeOrHibernateSubscriptionsById(
     }));
 }
 
+export function reviveSubscriptions(
+    subscriptions: Subscription[],
+    connId: string,
+    clientId: string,
+    newMsgPort: any,
+) {
+    const newData = {
+        msgPort: newMsgPort,
+        connId,
+        clientId,
+        hibernated: false,
+    };
+    return subscriptions.map((el) => (el.connId === connId ? ({ ...el, ...newData }) : el));
+}
+
 const resolvers = {
     type: {
         match: () => false,
@@ -215,7 +230,7 @@ const resolvers = {
                 const results: any[] = await states.dgraphClient.queryDgraph(query)
                     .catch((e: any) => { console.log(e, query); return []; });
                 const addData = results[0] || [];
-                newData = _.uniqBy([...sub.data, ...addData], 'uid');
+                newData = _.uniqBy([...(sub.data || []), ...addData], 'uid');
             }
             sub.data = newData.filter((el: any) => newUid?.includes(el?.uid));
             sub.query = newQuery;

@@ -24,7 +24,7 @@ export function HomeSection({ data }: any) {
                 });
             }
         };
-        const int = setInterval(shouldRender, 5000);
+        const int = setInterval(shouldRender, 180000);
         if (flushCondition) {
             shouldRender();
             setFlushCondition(false);
@@ -35,13 +35,13 @@ export function HomeSection({ data }: any) {
 
     return shouldDisplay ? (
         <Card
-            style={{ padding: '24px', margin: '12px' }}
+            style={{ padding: '16px', margin: '12px' }}
             variant="outlined"
             onClick={() => {
                 setTimeout(() => { setFlushCondition(true); }, 500);
             }}
         >
-            <Typography variant="h5">{data.get('view/name').as('primitive')}</Typography>
+            <Typography variant="h6" gutterBottom>{data.get('view/name').as('primitive')}</Typography>
             <AutoDynamicViewDetailed object={new UnigraphObject(data.get('view')._value)} />
         </Card>
     ) : <span />;
@@ -49,15 +49,15 @@ export function HomeSection({ data }: any) {
 
 export default function ExplorerHome({ id }: any) {
     const [sections, setSections] = React.useState<Partial<any>[]>([]);
-
+    const tabContext = React.useContext(TabContext);
     React.useEffect(() => {
         const subsId = getRandomInt();
 
-        window.unigraph.subscribeToType('$/schema/home_section', (its: any[]) => {
+        tabContext.subscribeToType('$/schema/home_section', (its: any[]) => {
             setSections(its);
         }, subsId);
 
-        return function cleanup() { window.unigraph.unsubscribe(subsId); };
+        return function cleanup() { tabContext.unsubscribe(subsId); };
     }, []);
 
     return (

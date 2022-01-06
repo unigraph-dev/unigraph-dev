@@ -17,7 +17,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
     const [DynamicViewsDetailed, setDynamicViewsDetailed] = React.useState({ ...window.unigraph.getState('registry/dynamicViewDetailed').value, ...(component || {}) });
 
     React.useEffect(() => {
-        window.unigraph.getState('registry/dynamicViewDetailed').subscribe((newIts) => setDynamicViewsDetailed(newIts));
+        window.unigraph.getState('registry/dynamicViewDetailed').subscribe((newIts) => setDynamicViewsDetailed({ ...newIts, ...(component || {}) }));
     }, []);
 
     const tabContext = React.useContext(TabContext);
@@ -26,7 +26,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
         const newSubs = getRandomInt();
         if (isObjectStub && Object.keys(DynamicViewsDetailed).includes(object.type?.['unigraph.id'])) {
             const query = DynamicViewsDetailed[object.type['unigraph.id']].query(object.uid);
-            window.unigraph.subscribeToQuery(query, (objects: any[]) => {
+            tabContext.subscribeToQuery(query, (objects: any[]) => {
                 setLoadedObj(objects[0]);
             }, newSubs, { noExpand: true });
             setSubsId(newSubs);
@@ -36,7 +36,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
             tabContext.setMaximize(DynamicViewsDetailed[object.type['unigraph.id']].maximize);
         }
 
-        return function cleanup() { window.unigraph.unsubscribe(newSubs); };
+        return function cleanup() { tabContext.unsubscribe(newSubs); };
     }, [object]);
 
     if (isObjectStub) callbacks = { ...callbacks, subsId };
@@ -51,8 +51,9 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
                 </div>
             )}
             >
-                <TabContext.Consumer>
-                    {({ viewId, setTitle }) => React.createElement(DynamicViewsDetailed[object.type['unigraph.id']].view, {
+                <div style={{ display: 'contents' }} id={`object-view-${object.uid}`}>
+                    <TabContext.Consumer>
+                        {({ viewId, setTitle }) => React.createElement(DynamicViewsDetailed[object.type['unigraph.id']].view, {
                         data: isObjectStub
                             ? loadedObj
                             : object,
@@ -61,7 +62,8 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
                         context,
                         ...(attributes || {}),
                     })}
-                </TabContext.Consumer>
+                    </TabContext.Consumer>
+                </div>
             </ErrorBoundary>
         );
     } if (useFallback) {

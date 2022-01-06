@@ -26,6 +26,7 @@ import Icon from '@mdi/react';
 import {
     mdiFormTextarea, mdiStarPlusOutline, mdiSync, mdiTagMultipleOutline,
 } from '@mdi/js';
+import _ from 'lodash';
 import { components } from './pages';
 import { InlineSearch } from './components/UnigraphCore/InlineSearchPopup';
 import { ContextMenu } from './components/UnigraphCore/ContextMenu';
@@ -34,6 +35,7 @@ import {
     getParameters, isElectron, isSmallScreen, TabContext,
 } from './utils';
 import { SearchOverlayPopover } from './pages/SearchOverlay';
+import { MobileBar } from './components/UnigraphCore/MobileBar';
 
 export function WorkspacePageComponent({
     children, maximize, paddingTop, id,
@@ -323,12 +325,45 @@ export function WorkSpace(this: any) {
         setMaximize: (val: boolean) => false,
         // @ts-expect-error: using private API
         isVisible: () => window.layoutModel.getNodeById(node._attributes.id).isVisible(),
+
+        subscribeToType: (name: any, callback: any, eventId?: any, options?: any) => {
+            const subsState = window.unigraph.getState(`tabs/${(node as any)._attributes.id}/subscriptions`);
+            subsState.setValue([...(subsState.value || []), eventId]);
+            return window.unigraph.subscribeToType(name, callback, eventId, options);
+        },
+        subscribeToObject: (uid: any, callback: any, eventId?: any, options?: any) => {
+            const subsState = window.unigraph.getState(`tabs/${(node as any)._attributes.id}/subscriptions`);
+            subsState.setValue([...(subsState.value || []), eventId]);
+            return window.unigraph.subscribeToObject(uid, callback, eventId, options);
+        },
+        subscribeToQuery: (fragment: any, callback: any, eventId?: any, options?: any) => {
+            const subsState = window.unigraph.getState(`tabs/${(node as any)._attributes.id}/subscriptions`);
+            subsState.setValue([...(subsState.value || []), eventId]);
+            return window.unigraph.subscribeToQuery(fragment, callback, eventId, options);
+        },
+        subscribe: (query: any, callback: any, eventId?: any, update?: any) => {
+            const subsState = window.unigraph.getState(`tabs/${(node as any)._attributes.id}/subscriptions`);
+            subsState.setValue([...(subsState.value || []), eventId]);
+            return window.unigraph.subscribe(query, callback, eventId, update);
+        },
+        unsubscribe: (id: any) => {
+            const subsState = window.unigraph.getState(`tabs/${(node as any)._attributes.id}/subscriptions`);
+            subsState.setValue(_.difference(subsState.value || [], [id]));
+            return window.unigraph.unsubscribe(id);
+        },
     }), []);
 
     const factory = (node: any) => {
         const component = node.getComponent();
         const config = node.getConfig() || {};
         const page = pages.value[(component.replace('/pages/', '') as string)];
+
+        const subber = (isVisible: boolean) => {
+            // console.log(`Tab id ${node._attributes.id}'s visibility status is ${isVisible}`)
+            const subs = (window.unigraph.getState(`tabs/${(node as any)._attributes.id}/subscriptions`).value || []);
+            window.unigraph.hibernateOrReviveSubscription(subs, isVisible);
+        };
+        window.unigraph.getState(`tabs/${(node as any)._attributes.id}/isVisible`).subscribers = [subber];
 
         return (component.startsWith('/pages/')) ? (
             <TabContext.Provider value={tabCtx(node, config)}>
@@ -338,6 +373,7 @@ export function WorkSpace(this: any) {
                             <SearchOverlayPopover />
                             <ContextMenu />
                             <InlineSearch />
+                            <MobileBar />
                         </div>
                     ) : []}
                     <WorkspaceInnerEl config={{ id: config.id, ...(config.viewConfig || {}) }} component={component} />
@@ -379,6 +415,7 @@ export function WorkSpace(this: any) {
                     <SearchOverlayPopover />
                     <ContextMenu />
                     <InlineSearch />
+                    <MobileBar />
                 </div>
 
                 <FlexLayout.Layout
@@ -386,34 +423,35 @@ export function WorkSpace(this: any) {
                     factory={factory}
                     popoutURL="./popout_page.html"
                     onAction={(action: Action) => {
-                            if (action.type === 'FlexLayout_SelectTab' && window.localStorage.getItem('enableAnalytics') === 'true') {
-                                window.mixpanel?.track('selectTab', { component: (window.layoutModel.getNodeById(action.data.tabNode) as any)?._attributes?.component });
-                            }
-                            return action;
-                        }}
+                        if (action.type === 'FlexLayout_SelectTab' && window.localStorage.getItem('enableAnalytics') === 'true') {
+                            window.mixpanel?.track('selectTab', { component: (window.layoutModel.getNodeById(action.data.tabNode) as any)?._attributes?.component });
+                        }
+                        return action;
+                    }}
                     onRenderTab={(node: TabNode, renderValues: any) => {
-                            setTitleOnRenderTab(model);
-                            const nodeId = node.getId();
-                            if (nodeId === 'app-drawer') {
-                                renderValues.content = <Menu style={{ verticalAlign: 'middle', transform: 'rotate(90deg)' }} key="icon" />;
-                            }
-                            if (nodeId === 'inspector-pane') {
-                                renderValues.content = <Details style={{ verticalAlign: 'middle', transform: 'rotate(270deg)' }} key="icon" />;
-                            }
-                            if (nodeId === 'category-pane') {
-                                renderValues.content = [<Icon path={mdiTagMultipleOutline} size={1} style={{ verticalAlign: 'middle' }} key="icon" />, <Typography style={{ marginLeft: '4px', display: 'inline' }}>{renderValues.content}</Typography>];
-                            }
-                            renderValues.buttons.push(<div id={`tabId${nodeId}`} key={`tabId${nodeId}`} />);
-                            setTimeout(() => {
-                                const el = document.getElementById(`tabId${nodeId}`);
+                        window.unigraph.getState(`tabs/${(node as any)._attributes.id}/isVisible`).setValue(node.isVisible());
+                        setTitleOnRenderTab(model);
+                        const nodeId = node.getId();
+                        if (nodeId === 'app-drawer') {
+                            renderValues.content = <Menu style={{ verticalAlign: 'middle', transform: 'rotate(90deg)' }} key="icon" />;
+                        }
+                        if (nodeId === 'inspector-pane') {
+                            renderValues.content = <Details style={{ verticalAlign: 'middle', transform: 'rotate(270deg)' }} key="icon" />;
+                        }
+                        if (nodeId === 'category-pane') {
+                            renderValues.content = [<Icon path={mdiTagMultipleOutline} size={1} style={{ verticalAlign: 'middle' }} key="icon" />, <Typography style={{ marginLeft: '4px', display: 'inline' }}>{renderValues.content}</Typography>];
+                        }
+                        renderValues.buttons.push(<div id={`tabId${nodeId}`} key={`tabId${nodeId}`} />);
+                        setTimeout(() => {
+                            const el = document.getElementById(`tabId${nodeId}`);
 
-                                if (el && el.parentElement && node.isEnableClose()) {
-                                    const fn = getMouseDownFn(nodeId);
-                                    el.parentElement.removeEventListener('mousedown', fn);
-                                    el.parentElement.addEventListener('mousedown', fn);
-                                }
-                            }, 0);
-                        }}
+                            if (el && el.parentElement && node.isEnableClose()) {
+                                const fn = getMouseDownFn(nodeId);
+                                el.parentElement.removeEventListener('mousedown', fn);
+                                el.parentElement.addEventListener('mousedown', fn);
+                            }
+                        }, 0);
+                    }}
                     onRenderTabSet={(tabSetNode, renderValues) => {
                             if (tabSetNode.getType() === 'tabset') {
                                 renderValues.buttons.push(

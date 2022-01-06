@@ -12,7 +12,9 @@ import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 import { buildGraph as buildGraphFn, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
-import { TransitionGroup } from 'react-transition-group';
+import {
+    TransitionGroup,
+} from 'react-transition-group';
 import { getDynamicViews } from '../../unigraph-react';
 import { AutoDynamicView } from './AutoDynamicView';
 import { DataContext, isMobile, TabContext } from '../../utils';
@@ -70,20 +72,20 @@ function DynamicListItem({
     reverse, listUid, item, index, context, callbacks, itemUids, itemRemover, noRemover, removeOnEnter, compact,
 }: any) {
     return (
-        <Slide direction={reverse ? 'down' : 'up'} in key={item?.uid}>
-            <ListItem style={{ ...(compact ? { paddingTop: '2px', paddingBottom: '2px' } : {}) }}>
-                <ListItemIcon
-                    onClick={() => {
+        <ListItem style={{ ...(compact ? { paddingTop: '2px', paddingBottom: '2px' } : {}) }}>
+            <ListItemIcon
+                onClick={() => {
                             itemRemover([item.uid]);
                         }}
-                    style={{ display: (itemRemover === _.noop || isMobile() || noRemover) ? 'none' : '' }}
-                >
-                    <ClearAll />
-                </ListItemIcon>
-                <AutoDynamicView
-                    object={new UnigraphObject(item)}
-                    withParent={!!listUid}
-                    callbacks={{
+                style={{ display: (itemRemover === _.noop || isMobile() || noRemover) ? 'none' : '' }}
+            >
+                <ClearAll />
+            </ListItemIcon>
+            <AutoDynamicView
+                compact={compact}
+                object={new UnigraphObject(item)}
+                withParent={!!listUid}
+                callbacks={{
                             ...callbacks,
                             context,
                             removeOnEnter,
@@ -96,9 +98,8 @@ function DynamicListItem({
                                 itemRemover(uids);
                             },
                         }}
-                />
-            </ListItem>
-        </Slide>
+            />
+        </ListItem>
     );
 }
 
@@ -112,6 +113,7 @@ export type DynamicObjectListViewProps = {
     callbacks?: any,
     itemGetter?: any,
     itemRemover?: ItemRemover,
+    itemAdder?: (uid: string) => void,
     filters?: Filter[],
     defaultFilter?: string | string[],
     reverse?: boolean,
@@ -137,25 +139,31 @@ function DynamicListBasic({
 }: any) {
     const tabContext = React.useContext(TabContext);
     return (
-        <TransitionGroup>
-            <DragandDrop dndContext={tabContext.viewId} listId={context?.uid} isReverse={reverse} arrayId={listUid}>
-                {items.map((el: any, index: number) => (
-                    <DynamicListItem
-                        item={itemGetter(el)}
-                        index={index}
-                        context={context}
-                        listUid={listUid}
-                        compact={compact}
-                        callbacks={callbacks}
-                        itemUids={items.map((ell: any) => itemGetter(ell).uid)}
-                        itemRemover={itemRemover}
-                        reverse={reverse}
-                        noRemover={noRemover}
-                        removeOnEnter={removeOnEnter}
-                    />
-                ))}
-            </DragandDrop>
-        </TransitionGroup>
+        <DragandDrop
+            dndContext={tabContext.viewId}
+            listId={context?.uid}
+            isReverse={reverse}
+            arrayId={listUid}
+            Comp={TransitionGroup}
+            ChildrenComp={Slide}
+        >
+            {items.map((el: any, index: number) => (
+                <DynamicListItem
+                    key={itemGetter(el)?.uid}
+                    item={itemGetter(el)}
+                    index={index}
+                    context={context}
+                    listUid={listUid}
+                    compact={compact}
+                    callbacks={callbacks}
+                    itemUids={items.map((ell: any) => itemGetter(ell).uid)}
+                    itemRemover={itemRemover}
+                    reverse={reverse}
+                    noRemover={noRemover}
+                    removeOnEnter={removeOnEnter}
+                />
+            ))}
+        </DragandDrop>
     );
 }
 
@@ -167,6 +175,7 @@ function DynamicList({
     const tabContext = React.useContext(TabContext);
     const [loadedItems, setLoadedItems] = React.useState<any[]>([]);
     const [setupProps, setSetupProps] = React.useState<{ next: any, cleanup: any, onUpdate: any } | null>(null);
+    const scrollerRef = React.useRef<any>(null);
 
     React.useEffect(() => {
         if (setupProps?.cleanup) setupProps.cleanup();
@@ -174,16 +183,24 @@ function DynamicList({
         if (items.length) {
             newProps = setupInfiniteScrolling(
                 items.map((el: any) => itemGetter(el).uid),
-                infinite ? 25 : items.length,
+                infinite ? 15 : items.length,
                 (its: any[]) => {
                     setLoadedItems(buildGraph ? buildGraphFn(its) : its);
                 },
+                tabContext,
                 subscribeOptions,
             );
             setSetupProps(newProps);
         } else { setLoadedItems([]); }
         return function cleanup() { newProps?.cleanup(); };
     }, [items.length === 0]);
+
+    React.useEffect(() => {
+        // eslint-disable-next-line max-len
+        if (scrollerRef.current?.el?.scrollHeight < scrollerRef.current?.el?.clientHeight && loadedItems.length < items.length) {
+            setupProps?.next();
+        }
+    }, [loadedItems.length]);
 
     React.useEffect(() => {
         setupProps?.onUpdate(items.map((el: any) => itemGetter(el).uid));
@@ -197,27 +214,34 @@ function DynamicList({
             loader=""
             scrollableTarget={`scrollableDiv${parId}`}
             endMessage=""
+            ref={scrollerRef}
         >
-            <TransitionGroup>
-                <DragandDrop dndContext={tabContext.viewId} listId={context?.uid} isReverse={reverse} arrayId={listUid}>
-                    {loadedItems.map((el: any, index: number) => (
-                        <DynamicListItem
-                            key={el?.uid || index}
-                            item={el}
-                            index={index}
-                            context={context}
-                            listUid={listUid}
-                            reverse={reverse}
-                            compact={compact}
-                            callbacks={callbacks}
-                            itemUids={items.map((ell: any) => itemGetter(ell).uid)}
-                            itemRemover={itemRemover}
-                            noRemover={noRemover}
-                            removeOnEnter={removeOnEnter}
-                        />
+
+            <DragandDrop
+                Comp={TransitionGroup}
+                dndContext={tabContext.viewId}
+                listId={context?.uid}
+                isReverse={reverse}
+                arrayId={listUid}
+                ChildrenComp={Slide}
+            >
+                {loadedItems.map((el: any, index: number) => (
+                    <DynamicListItem
+                        key={el?.uid || index}
+                        item={el}
+                        index={index}
+                        context={context}
+                        listUid={listUid}
+                        reverse={reverse}
+                        compact={compact}
+                        callbacks={callbacks}
+                        itemUids={items.map((ell: any) => itemGetter(ell).uid)}
+                        itemRemover={itemRemover}
+                        noRemover={noRemover}
+                        removeOnEnter={removeOnEnter}
+                    />
                     ))}
-                </DragandDrop>
-            </TransitionGroup>
+            </DragandDrop>
         </InfiniteScroll>
     );
 }
@@ -282,7 +306,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
     style, titleBar, items, groupers, groupBy, listUid, context,
     callbacks, itemGetter = _.identity, itemRemover = _.noop, filters = [],
     defaultFilter, reverse, virtualized, buildGraph, noBar, noRemover, noDrop,
-    compact, subscribeOptions, loadAll, removeOnEnter,
+    compact, subscribeOptions, loadAll, removeOnEnter, itemAdder,
 }) => {
     const classes = useStyles();
 
@@ -335,7 +359,11 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
         accept: Object.keys(window.unigraph.getNamespaceMap() || {}),
         drop: (item: { uid: string, dndContext: any, removeFromContext?: any }, monitor) => {
             if (!monitor.didDrop() && !noDrop && contextRef.current) {
-                window.unigraph.runExecutable('$/executable/add-item-to-list', { where: contextRef.current.uid, item: item.uid });
+                if (itemAdder) {
+                    itemAdder(item.uid);
+                } else {
+                    window.unigraph.runExecutable('$/executable/add-item-to-list', { where: contextRef.current.uid, item: item.uid });
+                }
                 if (tabContext.viewId === item.dndContext) { item?.removeFromContext(); }
                 // console.log(tabContext, item.dndContext)
             }
@@ -462,7 +490,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                         })
                         : groupers[groupBy](procItems.map(itemGetter)).map((el: Group) => (
                             <>
-                                <ListSubheader>{el.name}</ListSubheader>
+                                <ListSubheader style={{ padding: compact ? '2px' : '', lineHeight: compact ? '1.2em' : '' }}>{el.name}</ListSubheader>
                                 {React.createElement((isStub && !loadAll) ? DynamicList : DynamicListBasic, {
                                     reverse: reverseOrder,
                                     items: el.items,

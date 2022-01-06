@@ -9,6 +9,12 @@
         },
         "_properties": [
             {
+                "_key": "last_updated",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/datetime" }
+                }
+            },
+            {
                 "_key": "feed_url",
                 "_definition": {
                     "type": { "unigraph.id": "$/schema/url" }

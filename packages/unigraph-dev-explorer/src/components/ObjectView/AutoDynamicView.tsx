@@ -20,7 +20,7 @@ import { getSubentities, isStub, SubentityDropAcceptor } from './utils';
 export function AutoDynamicView({
     object, callbacks, component, attributes, inline, allowSubentity,
     allowSemantic = true, style, noDrag, noDrop, noContextMenu,
-    subentityExpandByDefault, noBacklinks, noParents, withParent,
+    subentityExpandByDefault, noBacklinks, noParents, withParent, compact,
 }: AutoDynamicViewProps) {
     if (!callbacks) callbacks = {};
     allowSubentity = allowSubentity === true;
@@ -40,9 +40,11 @@ export function AutoDynamicView({
     const [showSubentities, setShowSubentities] = React.useState(!!subentityExpandByDefault);
 
     const [isSelected, setIsSelected] = React.useState(false);
-    const [isFocused, setIsFocused] = React.useState(false);
+    const [isFocused, setIsFocused] = React.useState(window.unigraph.getState('global/focused').value.uid === object?.uid && tabContext.isVisible());
 
     const [DynamicViews, setDynamicViews] = React.useState({ ...window.unigraph.getState('registry/dynamicView').value, ...(component || {}) });
+
+    const viewEl = React.useRef(null);
 
     React.useEffect(() => {
         const cb = (newIts: any) => setDynamicViews({ ...window.unigraph.getState('registry/dynamicView').value, ...(component || {}) });
@@ -55,7 +57,7 @@ export function AutoDynamicView({
         window.unigraph.getState('global/selected').subscribe(cbsel);
 
         const cbfoc = (foc: any) => {
-            if (foc === object?.uid && tabContext.isVisible()) setIsFocused(true);
+            if (foc.uid === object?.uid && tabContext.isVisible()) setIsFocused(true);
             else setIsFocused(false);
         };
         window.unigraph.getState('global/focused').subscribe(cbfoc);
@@ -76,9 +78,12 @@ export function AutoDynamicView({
     React.useEffect(() => {
         if (object?.uid?.startsWith('0x') && shouldGetBacklinks) {
             const cb = (newBacklinks: any) => {
-                // console.log(object.uid, " - Backlinks: ", backlinks)
                 const [pars, refs] = getParentsAndReferences(newBacklinks['~_value'], newBacklinks['unigraph.origin'], object.uid);
-                setBacklinks([pars, refs].map((it) => it.filter((el) => Object.keys(DynamicViews).includes(el?.type?.['unigraph.id']))));
+                // console.log(object.uid, getParents(viewEl.current));
+                setBacklinks([pars, refs].map((it) => it.filter((el) => (
+                    Object.keys(DynamicViews).includes(el?.type?.['unigraph.id'])
+                    && !([...getParents(viewEl.current), callbacks?.context?.uid].includes(el.uid))
+                ))));
             };
             subscribeToBacklinks(object.uid, cb);
             return function cleanup() {
@@ -91,7 +96,8 @@ export function AutoDynamicView({
     React.useEffect(() => {
         const newSubs = getRandomInt();
         if (isObjectStub) {
-            if (subsId) window.unigraph.unsubscribe(subsId);
+            console.log(tabContext);
+            if (subsId) tabContext.unsubscribe(subsId);
             let query = DynamicViews[object.type?.['unigraph.id']]?.query?.(object.uid);
             if (!query) {
                 query = `(func: uid(${object.uid})) @recurse {
@@ -100,15 +106,15 @@ export function AutoDynamicView({
                 expand(_userpredicate_)
               }`;
             }
-            window.unigraph.subscribeToQuery(query, (objects: any[]) => {
+            tabContext.subscribeToQuery(query, (objects: any[]) => {
                 setLoadedObj(buildGraph(objects)[0]);
             }, newSubs, { noExpand: true });
             setSubsId(newSubs);
             callbacks = { ...callbacks, subsId: newSubs };
-            return function cleanup() { window.unigraph.unsubscribe(newSubs); };
+            return function cleanup() { tabContext.unsubscribe(newSubs); };
         }
         return () => {};
-    }, [object]);
+    }, [object.uid]);
 
     const [{ isDragging }, drag] = useDrag(() => ({
         type: object?.type?.['unigraph.id'] || '$/schema/any',
@@ -153,10 +159,12 @@ export function AutoDynamicView({
     const contextEntity = typeof callbacks?.context === 'object' ? callbacks.context : null;
 
     function getParents(elem: any) {
-        const parents = [];
+        const parents: any[] = [];
+        if (!elem) return parents;
         while (elem.parentNode && elem.parentNode.nodeName.toLowerCase() != 'body') {
             elem = elem.parentNode;
-            if (elem.id) parents.push(elem.id);
+            if (!elem) return parents;
+            if (elem.id?.startsWith?.('object-view-')) parents.push(elem.id.slice(12));
         }
         return parents;
     }
@@ -164,7 +172,7 @@ export function AutoDynamicView({
     const attach = React.useCallback((domElement) => {
         if (domElement && object.uid) {
             const ids = getParents(domElement);
-            if (ids.includes(`object-view-${object?.uid}`)) {
+            if (ids.includes(object?.uid) && !inline) {
                 // recursive - deal with it somehow
                 setIsRecursion(true);
             } else setIsRecursion(false);
@@ -175,12 +183,13 @@ export function AutoDynamicView({
         if (!noDrag) drag(domElement);
         if (!noDrop) drop(domElement);
         if (isMobile()) handlers.ref(domElement);
+        viewEl.current = domElement;
     }, [isDragging, drag, callbacks]);
 
     const BacklinkComponent = (
         <div
             style={{
-                display: (shouldGetBacklinks && (backlinks?.[1]?.length || (!noParents && (backlinks?.[0]?.length || 0) - (withParent ? 1 : 0) > 0))) ? '' : 'none',
+                display: (shouldGetBacklinks && (backlinks?.[1]?.length || (!noParents && backlinks?.[0]?.length > 0))) ? '' : 'none',
                 marginLeft: 'auto',
                 background: 'lightgray',
                 padding: '2px 6px',
@@ -190,9 +199,7 @@ export function AutoDynamicView({
             }}
             onClick={() => { window.wsnavigator(`/library/backlink?uid=${object?.uid}`); }}
         >
-            {noParents ? '' : `${backlinks?.[0]?.length} / `}
-            {' '}
-            {backlinks?.[1]?.length}
+            {(noParents ? 0 : backlinks?.[0]?.length || 0) + (backlinks?.[1]?.length || 0)}
         </div>
     );
 
@@ -203,11 +210,12 @@ export function AutoDynamicView({
                 callbacks: {
                     viewId,
                     setTitle,
-                    ...(noBacklinks ? { BacklinkComponent } : {}),
                     ...(callbacks || {}),
+                    ...(noBacklinks ? { BacklinkComponent } : {}),
                 },
                 ...(attributes || {}),
                 inline,
+                compact,
                 focused: isFocused,
             });
         } if (isRecursion === false && object && getObject()) {
@@ -223,7 +231,8 @@ export function AutoDynamicView({
             );
         }
         return '';
-    }, [isRecursion, object, object.uid, callbacks, attributes, DynamicViews, isObjectStub, loadedObj, isFocused]);
+    }, [isRecursion, object, object?.uid, callbacks, attributes,
+        DynamicViews, isObjectStub, loadedObj, isFocused, backlinks]);
 
     return (
         <ErrorBoundary
@@ -242,9 +251,11 @@ export function AutoDynamicView({
                 </div>
             )}
         >
-            <div style={{
-                display: inline ? 'inline' : 'block', ...(inline ? {} : { width: '100%' }), backgroundColor: (isSelected || isDragging) ? 'whitesmoke' : 'unset', borderRadius: (isSelected || isDragging) ? '12px' : '',
-            }}
+            <div
+                style={{
+                    display: inline ? 'inline' : 'block', ...(inline ? {} : { width: '100%' }), backgroundColor: (isSelected || isDragging) ? 'whitesmoke' : 'unset', borderRadius: (isSelected || isDragging) ? '12px' : '',
+                }}
+                key={`object-view-${object?.uid}`}
             >
                 <div
                     id={`object-view-${object?.uid}`}

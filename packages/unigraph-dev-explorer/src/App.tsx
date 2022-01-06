@@ -8,6 +8,7 @@ import { getParameters, isElectron, NavigationContext } from './utils';
 import { ContextMenu } from './components/UnigraphCore/ContextMenu';
 import { InlineSearch } from './components/UnigraphCore/InlineSearchPopup';
 import { SearchOverlayPopover } from './pages/SearchOverlay';
+import { MobileBar } from './components/UnigraphCore/MobileBar';
 
 // TODO: custom theme
 const useStyles = makeStyles((theme) => ({
@@ -42,9 +43,9 @@ function App() {
         <div className={classes.root}>
             <DndProvider backend={HTML5Backend}>
                 <div id="global-elements">
-                    <SearchOverlayPopover />
                     <ContextMenu />
                     <InlineSearch />
+                    <MobileBar />
                 </div>
                 {
                     componentPathName

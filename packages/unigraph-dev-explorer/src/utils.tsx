@@ -13,6 +13,20 @@ export const TabContext = React.createContext({
     setTitle: (title: string) => {},
     setMaximize: (val: boolean) => {},
     isVisible: () => true as boolean,
+
+    subscribeToType(name: any, callback: any, eventId?: any, options?: any) {
+        return window.unigraph.subscribeToType(name, callback, eventId, options);
+    },
+    subscribeToObject(uid: any, callback: any, eventId?: any, options?: any) {
+        window.unigraph.subscribeToObject(uid, callback, eventId, options);
+    },
+    subscribeToQuery(fragment: any, callback: any, eventId?: any, options?: any) {
+        window.unigraph.subscribeToQuery(fragment, callback, eventId, options);
+    },
+    subscribe(query: any, callback: any, eventId?: any, update?: any) {
+        window.unigraph.subscribe(query, callback, eventId, update);
+    },
+    unsubscribe(id: any) { window.unigraph.unsubscribe(id); },
 });
 export const DataContext = React.createContext({
     rootUid: '0x0',
@@ -33,8 +47,9 @@ export const getComponentFromPage = (location: string, params: any = {}) => {
 export const setCaret = (document: Document, element: any, pos: number, length?: number) => {
     const range = document.createRange();
     const sel = document.getSelection();
-    range.setStart(element, pos);
-    if (length) { range.setEnd(element, length + pos); } else { range.collapse(true); }
+    const maxLen = element.textContent.length < pos ? element.textContent.length : pos;
+    range.setStart(element, maxLen);
+    if (length) { range.setEnd(element, length + maxLen); } else { range.collapse(true); }
 
     sel?.removeAllRanges();
     sel?.addRange(range);
@@ -53,6 +68,40 @@ export const removeAllPropsFromObj = function (obj: any, propsToRemove: any, max
     }
     return obj;
 };
+
+export function timeSince(ts: number | Date) {
+    const current = new Date().getTime();
+    const previous = typeof ts === 'number' ? ts : new Date(ts).getTime();
+    const msPerMinute = 60 * 1000;
+    const msPerHour = msPerMinute * 60;
+    const msPerDay = msPerHour * 24;
+    const msPerMonth = msPerDay * 30;
+    const msPerYear = msPerDay * 365;
+
+    const elapsed = current - previous;
+
+    if (elapsed < msPerMinute) {
+        return `${Math.round(elapsed / 1000)}s`;
+    }
+
+    if (elapsed < msPerHour) {
+        return `${Math.round(elapsed / msPerMinute)}m`;
+    }
+
+    if (elapsed < msPerDay) {
+        return `${Math.round(elapsed / msPerHour)}h`;
+    }
+
+    if (elapsed < msPerMonth) {
+        return `${Math.round(elapsed / msPerDay)}d`;
+    }
+
+    if (elapsed < msPerYear) {
+        return `${Math.round(elapsed / msPerMonth)}mo`;
+    }
+
+    return `${Math.round(elapsed / msPerYear)}y`;
+}
 
 export function getParameters(search: string) {
     // Params obj
@@ -231,6 +280,7 @@ export const selectUid = (uid: string, exclusive = true) => {
         exclusive
             ? [uid]
             : newUid,
+        true,
     );
 };
 

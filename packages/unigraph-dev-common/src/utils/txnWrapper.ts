@@ -58,6 +58,7 @@ export function wrapUpsertFromUpdater(
     hasUid: string | false = false,
 ): any {
     const queries: string[] = [];
+    const appends: any[] = [];
 
     function buildQuery(parUid: string, key: string, hasUidHere: string | false = false) {
         const currentQuery = `${parUid}_${queries.length.toString()}`;
@@ -130,6 +131,10 @@ export function wrapUpsertFromUpdater(
             ]);
             // eslint-disable-next-line no-param-reassign
             if (origNow.uid?.startsWith?.('_:')) blankUidsToRef[origNow.uid] = res.uid;
+            if (origNow.uid?.startsWith?.('_:link')) {
+                appends.push({ uid: res.uid, 'unigraph.origin': [{ uid: res.uid }] });
+                res.uid = origNow.uid;
+            }
             return res;
         }
         return origNow;
@@ -137,7 +142,7 @@ export function wrapUpsertFromUpdater(
 
     const upsertObject = recurse(orig, queryHead, hasUid);
 
-    return [upsertObject, queries];
+    return [upsertObject, queries, appends];
 }
 
 function* nextUid() {
@@ -187,13 +192,14 @@ export function insertsToUpsert(
                 delete currentObject.$ref;
                 if (upsert) {
                     const refUid = `unigraphquery${queries.length + 1}`;
-                    const [upsertObject, upsertQueries] = wrapUpsertFromUpdater({
+                    const [upsertObject, upsertQueries, upsertAppends] = wrapUpsertFromUpdater({
                         _value: currentObject._value,
                         ...(currentObject['unigraph.indexes']
                             ? { 'unigraph.indexes': currentObject['unigraph.indexes'] }
                             : {}),
                     }, refUid, blankUidsToRef, currentObject.uid);
                     queries.push(...upsertQueries);
+                    appends.push(...upsertAppends);
                     currentObject = Object.assign(currentObject, upsertObject);
                 }
             } else if (currentObject.$ref && currentObject.$ref.query) {
@@ -211,13 +217,13 @@ export function insertsToUpsert(
                 const { query } = currentObject.$ref;
                 delete currentObject.$ref;
                 // FIXME: Some objects (e.g. with standoff properties or type aliases) doesn't use `_value`
-                const [upsertObject, upsertQueries] = wrapUpsertFromUpdater({
+                const [upsertObject, upsertQueries, upsertAppends] = wrapUpsertFromUpdater({
                     _value: currentObject._value,
                     ...(currentObject['unigraph.indexes']
                         ? { 'unigraph.indexes': currentObject['unigraph.indexes'] }
                         : {}),
                 }, refUid, blankUidsToRef, false);
-
+                appends.push(...upsertAppends);
                 if (!refUids.includes(refUid)) {
                     refUids.push(refUid);
                     const dgraphFunction = buildDgraphFunctionFromRefQuery(query);

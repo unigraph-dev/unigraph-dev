@@ -161,6 +161,7 @@ function NoteViewPageWrapper({ children, isRoot }: any) {
 function NoteViewTextWrapper({
     children, semanticChildren, isRoot, onContextMenu, callbacks,
 }: any) {
+    // console.log(callbacks.BacklinkComponent);
     return (
         <div style={{ display: 'flex', alignItems: 'center' }}>
             {children}
@@ -201,7 +202,7 @@ export function DetailedNoteBlock({
     const inputDebounced = React.useRef(_.debounce(inputter, 333));
     const setCurrentText = (text: string) => { textInput.current.textContent = text; };
     const edited = React.useRef(false);
-    const [isEditing, setIsEditing] = React.useState(false);
+    const [isEditing, setIsEditing] = React.useState(window.unigraph.getState('global/focused').value?.uid === data.uid);
     const textInput: any = React.useRef();
     const nodesState = window.unigraph.addState(`${options?.viewId || callbacks?.viewId || callbacks['get-view-id']()}/nodes`, []);
     const editorContext = {
@@ -251,9 +252,30 @@ export function DetailedNoteBlock({
 
     React.useEffect(() => {
         if (focused) {
-            editorRef.current?.click?.();
+            setIsEditing(true);
+            if (isEditing) textInput.current.focus();
+            setTimeout(() => {
+                let tail; const focusedState = window.unigraph.getState('global/focused').value;
+                const el = textInput.current.firstChild || textInput.current;
+                if (focusedState.tail) tail = el.textContent.length;
+                setCaret(document, el, tail || focusedState.caret);
+            }, 0);
         }
     }, [focused]);
+
+    React.useEffect(() => {
+        if (focused) {
+            window.unigraph.getState('global/focused/actions').setValue({
+                splitChild: () => {
+                    const sel = document.getSelection();
+                    const caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
+                    callbacks['split-child'](textref.current || data.get('text').as('primitive'), caret);
+                },
+                indentChild: callbacks['indent-child'],
+                unindentChild: callbacks['unindent-child-in-parent'],
+            });
+        }
+    }, [data, focused]);
 
     React.useEffect(commandFn, [command]);
 
@@ -271,39 +293,27 @@ export function DetailedNoteBlock({
                         onPointerUp={(ev) => {
                             if (!isEditing) {
                                 setIsEditing(true);
-                                const caretPos = Number((ev.target as HTMLElement).getAttribute('markdownPos') || 0);
+                                const caretPos = Number((ev.target as HTMLElement).getAttribute('markdownPos') || -1);
                                 setTimeout(() => {
+                                    const finalCaretPos = caretPos === -1
+                                        ? textInput.current?.textContent?.length
+                                        : caretPos;
+                                    window.unigraph.getState('global/focused').setValue({ uid: data?.uid, caret: finalCaretPos, type: '$/schema/note_block' });
                                     if (textInput.current.firstChild) {
-                                        setCaret(
-                                            document,
-                                            textInput.current.firstChild,
-                                            caretPos || textInput.current?.textContent?.length,
-                                        );
+                                        setCaret(document, textInput.current.firstChild, finalCaretPos);
                                     } else {
                                         setCaret(document, textInput.current, 0);
                                     }
                                 }, 0);
                             }
                         }}
-                        onClick={(ev) => {
-                            window.unigraph.getState('global/focused').value = data?.uid;
-                            if (!isEditing) {
-                                setIsEditing(true);
-                                const caretPos = Number((ev.target as HTMLElement).getAttribute('markdownPos') || 0);
-                                setTimeout(() => {
-                                    if (textInput.current.firstChild) {
-                                        setCaret(
-                                            document,
-                                            textInput.current.firstChild,
-                                            caretPos || textInput.current?.textContent?.length,
-                                        );
-                                    } else {
-                                        setCaret(document, textInput.current, 0);
-                                    }
-                                }, 0);
+                        onBlur={(ev) => {
+                            setIsEditing(false);
+                            inputDebounced.current.flush();
+                            if (focused) {
+                                window.unigraph.getState('global/focused').setValue({ uid: '', caret: 0, type: '' });
                             }
                         }}
-                        onBlur={(ev) => { setIsEditing(false); inputDebounced.current.flush(); if (focused) window.unigraph.getState('global/focused').setValue(''); }}
                         style={{ width: '100%' }}
                     >
                         {(isEditing) ? (
@@ -420,6 +430,13 @@ export function DetailedNoteBlock({
                                             // inputDebounced.cancel();
                                             edited.current = false;
                                             setCommand(() => callbacks['unsplit-child'].bind(null));
+                                        } else if (textref.current[caret - 1] === '[' && textref.current[caret] === ']') {
+                                            ev.preventDefault();
+                                            const tc = textref.current;
+                                            const el = textInput.current.firstChild;
+                                            el.textContent = tc.slice(0, caret - 1) + tc.slice(caret + 1);
+                                            textref.current = el.textContent;
+                                            setCaret(document, el, caret - 1);
                                         }
                                         break;
 
@@ -427,13 +444,13 @@ export function DetailedNoteBlock({
                                         ev.preventDefault();
                                         inputDebounced.current.flush();
                                         setCommand(() => callbacks['focus-last-dfs-node'].bind(null, data, editorContext, 0));
-                                        break;
+                                        return;
 
                                     case 40: // down arrow
                                         ev.preventDefault();
                                         inputDebounced.current.flush();
                                         setCommand(() => callbacks['focus-next-dfs-node'].bind(null, data, editorContext, 0));
-                                        break;
+                                        return;
 
                                     case 219: // left bracket
                                         if (!ev.shiftKey) {
@@ -465,6 +482,8 @@ export function DetailedNoteBlock({
                                     // console.log(ev);
                                         break;
                                     }
+                                    const state = window.unigraph.getState('global/focused');
+                                    state.setValue({ ...state.value, caret });
                                 }}
                             />
                         ) : (
@@ -508,7 +527,7 @@ export function DetailedNoteBlock({
                                             >
                                                 <AutoDynamicView
                                                     noDrag
-                                                    withParent
+                                                    compact
                                                     allowSubentity
                                                     noBacklinks={el.type?.['unigraph.id'] === '$/schema/note_block'}
                                                     subentityExpandByDefault={!(el.type?.['unigraph.id'] === '$/schema/note_block')}
@@ -533,13 +552,14 @@ export function DetailedNoteBlock({
                                                         'focus-last-dfs-node': focusLastDFSNode,
                                                         'focus-next-dfs-node': focusNextDFSNode,
                                                         dataref,
+                                                        context: data,
                                                         isEmbed: true,
                                                     }}
                                                     component={{ '$/schema/note_block': { view: DetailedNoteBlock, query: noteQuery }, '$/schema/view': { view: ViewViewDetailed } }}
                                                     attributes={{ isChildren: true, isCollapsed: isCol }}
                                                     style={el.type?.['unigraph.id'] === '$/schema/note_block' ? {}
                                                         : {
-                                                            border: 'lightgray', borderStyle: 'solid', borderWidth: 'thin', margin: '4px', borderRadius: '8px', maxWidth: 'fit-content', padding: '4px',
+                                                            border: 'lightgray', borderStyle: 'solid', borderWidth: 'thin', margin: '2px', borderRadius: '8px', maxWidth: 'fit-content', padding: '4px',
                                                         }}
                                                 />
                                             </OutlineComponent>

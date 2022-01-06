@@ -3,12 +3,13 @@ import React, { useEffect } from 'react';
 import { useEffectOnce } from 'react-use';
 import { pkg as redditPacakge } from 'unigraph-dev-common/lib/data/unigraph.reddit.pkg';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
+import { TabContext } from '../../utils';
 
 export function RedditSettings() {
     const [loaded, setLoaded] = React.useState(false);
     const [account, setAccount] = React.useState<any>({});
     const subscriptions = account?._value?.subscriptions['_value['].map((it: any) => ({ uid: it._value.uid, name: it._value._value.name['_value.%'], last_id_fetched: it._value._value.last_id_fetched['_value.%'] }));
-
+    const tabContext = React.useContext(TabContext);
     useEffectOnce(() => {
         window.unigraph.ensurePackage('unigraph.reddit', redditPacakge).then(() => setLoaded(true));
     });
@@ -16,7 +17,7 @@ export function RedditSettings() {
     useEffect(() => {
         const id = getRandomInt();
         if (loaded) {
-            window.unigraph.subscribeToQuery(`(func: uid(parReddit)) {
+            tabContext.subscribeToQuery(`(func: uid(parReddit)) {
                 uid
                 _value {
                     site {
@@ -67,7 +68,7 @@ export function RedditSettings() {
             }, id, { noExpand: true });
         }
         return function cleanup() {
-            window.unigraph.unsubscribe(id);
+            tabContext.unsubscribe(id);
         };
     }, [loaded]);
 

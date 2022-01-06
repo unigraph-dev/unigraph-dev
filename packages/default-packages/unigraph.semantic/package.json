@@ -17,7 +17,9 @@
             {"id": "interface/semantic", "src": "schemas/semantic.json"},
             {"id": "semantic_property", "src": "schemas/semantic_property.json"},
             {"id": "creative_work", "src": "schemas/creative_work.json"},
-            {"id": "message", "src": "schemas/message.json"}
+            {"id": "message", "src": "schemas/message.json"},
+            {"id": "icon_url", "src": "schemas/icon_url.json"},
+            {"id": "url", "src": "schemas/url.json"}
         ],
         "executables": [
             { 
