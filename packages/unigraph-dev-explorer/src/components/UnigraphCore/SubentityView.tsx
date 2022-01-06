@@ -26,5 +26,7 @@ export function SubentityView({ data, callbacks }: any) {
                 callbacks?.showSubentities?.();
             }}
         />
-    ) : [];
+    ) : (
+        []
+    );
 }

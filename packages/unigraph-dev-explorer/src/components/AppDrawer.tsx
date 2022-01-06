@@ -10,8 +10,14 @@ import { Comment, CompareArrows } from '@material-ui/icons';
 import { ListSubheader } from '@material-ui/core';
 import Icon from '@mdi/react';
 import {
-    mdiBookOpenOutline, mdiPencilBoxMultipleOutline, mdiXml,
-    mdiPackageVariantClosed, mdiDeleteOutline, mdiCogOutline, mdiBellOutline, mdiHomeOutline,
+    mdiBookOpenOutline,
+    mdiPencilBoxMultipleOutline,
+    mdiXml,
+    mdiPackageVariantClosed,
+    mdiDeleteOutline,
+    mdiCogOutline,
+    mdiBellOutline,
+    mdiHomeOutline,
 } from '@mdi/js';
 import { FavoriteBar } from './UnigraphCore/FavoriteBar';
 
@@ -36,66 +42,123 @@ export default function DrawerRouter() {
     devState.subscribe((newState: boolean) => setDevMode(newState));
 
     return (
-
         <Drawer
             className={classes.drawer}
             variant="permanent"
             classes={{
-                        paper: classes.drawerPaper,
-                    }}
+                paper: classes.drawerPaper,
+            }}
             anchor="left"
         >
             <List>
-                <ListSubheader component="div" id="subheader-home"> Home </ListSubheader>
+                <ListSubheader component="div" id="subheader-home">
+                    {' '}
+                    Home{' '}
+                </ListSubheader>
 
                 <ListItem button onClick={() => window.wsnavigator('/home')}>
-                    <ListItemIcon><Icon path={mdiHomeOutline} size={1} /></ListItemIcon>
+                    <ListItemIcon>
+                        <Icon path={mdiHomeOutline} size={1} />
+                    </ListItemIcon>
                     <ListItemText primary="Home" />
                 </ListItem>
 
                 <ListItem button onClick={() => window.wsnavigator('/library')}>
-                    <ListItemIcon><Icon path={mdiBookOpenOutline} size={1} /></ListItemIcon>
+                    <ListItemIcon>
+                        <Icon path={mdiBookOpenOutline} size={1} />
+                    </ListItemIcon>
                     <ListItemText primary="Library" />
                 </ListItem>
 
-                <ListItem button onClick={() => window.wsnavigator('/object-editor')}>
-                    <ListItemIcon><Icon path={mdiPencilBoxMultipleOutline} size={1} /></ListItemIcon>
+                <ListItem
+                    button
+                    onClick={() => window.wsnavigator('/object-editor')}
+                >
+                    <ListItemIcon>
+                        <Icon path={mdiPencilBoxMultipleOutline} size={1} />
+                    </ListItemIcon>
                     <ListItemText primary="Object Editor" />
                 </ListItem>
 
                 <ListItem button onClick={() => window.wsnavigator('/trash')}>
-                    <ListItemIcon><Icon path={mdiDeleteOutline} size={1} /></ListItemIcon>
+                    <ListItemIcon>
+                        <Icon path={mdiDeleteOutline} size={1} />
+                    </ListItemIcon>
                     <ListItemText primary="Trash bin" />
                 </ListItem>
-                <ListSubheader component="div" id="subheader-unigraph"> Unigraph </ListSubheader>
-                <ListItem button onClick={() => window.wsnavigator('/settings')}>
-                    <ListItemIcon><Icon path={mdiCogOutline} size={1} /></ListItemIcon>
+                <ListSubheader component="div" id="subheader-unigraph">
+                    {' '}
+                    Unigraph{' '}
+                </ListSubheader>
+                <ListItem
+                    button
+                    onClick={() => window.wsnavigator('/settings')}
+                >
+                    <ListItemIcon>
+                        <Icon path={mdiCogOutline} size={1} />
+                    </ListItemIcon>
                     <ListItemText primary="Settings" />
                 </ListItem>
-                <ListItem button onClick={() => window.wsnavigator('/notification-center')}>
-                    <ListItemIcon><Icon path={mdiBellOutline} size={1} /></ListItemIcon>
+                <ListItem
+                    button
+                    onClick={() => window.wsnavigator('/notification-center')}
+                >
+                    <ListItemIcon>
+                        <Icon path={mdiBellOutline} size={1} />
+                    </ListItemIcon>
                     <ListItemText primary="Notifications" />
                 </ListItem>
-                <ListItem button onClick={() => window.wsnavigator('/package-manager')}>
-                    <ListItemIcon><Icon path={mdiPackageVariantClosed} size={1} /></ListItemIcon>
+                <ListItem
+                    button
+                    onClick={() => window.wsnavigator('/package-manager')}
+                >
+                    <ListItemIcon>
+                        <Icon path={mdiPackageVariantClosed} size={1} />
+                    </ListItemIcon>
                     <ListItemText primary="Packages" />
                 </ListItem>
                 <div style={{ display: devMode ? 'inherit' : 'none' }}>
-                    <ListSubheader component="div" id="subheader-developer-tools"> Developer Tools </ListSubheader>
-                    <ListItem button onClick={() => window.wsnavigator('/code-editor')}>
-                        <ListItemIcon><Icon path={mdiXml} size={1} /></ListItemIcon>
+                    <ListSubheader
+                        component="div"
+                        id="subheader-developer-tools"
+                    >
+                        {' '}
+                        Developer Tools{' '}
+                    </ListSubheader>
+                    <ListItem
+                        button
+                        onClick={() => window.wsnavigator('/code-editor')}
+                    >
+                        <ListItemIcon>
+                            <Icon path={mdiXml} size={1} />
+                        </ListItemIcon>
                         <ListItemText primary="Code Editor" />
                     </ListItem>
-                    <ListItem button onClick={() => window.wsnavigator('/request')}>
-                        <ListItemIcon><Comment /></ListItemIcon>
+                    <ListItem
+                        button
+                        onClick={() => window.wsnavigator('/request')}
+                    >
+                        <ListItemIcon>
+                            <Comment />
+                        </ListItemIcon>
                         <ListItemText primary="Request" />
                     </ListItem>
-                    <ListItem button onClick={() => window.wsnavigator('/datamodel-playground')}>
-                        <ListItemIcon><CompareArrows /></ListItemIcon>
+                    <ListItem
+                        button
+                        onClick={() =>
+                            window.wsnavigator('/datamodel-playground')
+                        }
+                    >
+                        <ListItemIcon>
+                            <CompareArrows />
+                        </ListItemIcon>
                         <ListItemText primary="DataModel Playground" />
                     </ListItem>
                 </div>
-                <ListSubheader component="div" id="subheader-developer-tools"> Favorites </ListSubheader>
+                <ListSubheader component="div" id="subheader-developer-tools">
+                    {' '}
+                    Favorites{' '}
+                </ListSubheader>
                 <FavoriteBar />
             </List>
         </Drawer>

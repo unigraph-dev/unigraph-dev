@@ -12,26 +12,44 @@ export const Tag: DynamicViewRenderer = ({ data, callbacks }) => {
     let tag = data;
     const { uid } = data;
     if (data._value) tag = unpad(data);
-    const bgc = (tag?.color?.startsWith && tag.color.startsWith('#')) ? tag.color : 'unset';
+    const bgc =
+        tag?.color?.startsWith && tag.color.startsWith('#')
+            ? tag.color
+            : 'unset';
     return (
         <Chip
             size="small"
-            icon={<Icon path={mdiTagOutline} size={0.75} style={{ filter: (bgc === 'unset' || getContrast(bgc) === 'black') ? 'unset' : 'invert(1)' }} />}
-            style={{
-                        backgroundColor: bgc,
-                        color: bgc.startsWith('#') ? getContrast(bgc) : 'unset',
+            icon={
+                <Icon
+                    path={mdiTagOutline}
+                    size={0.75}
+                    style={{
+                        filter:
+                            bgc === 'unset' || getContrast(bgc) === 'black'
+                                ? 'unset'
+                                : 'invert(1)',
                     }}
+                />
+            }
+            style={{
+                backgroundColor: bgc,
+                color: bgc.startsWith('#') ? getContrast(bgc) : 'unset',
+            }}
             variant="outlined"
             label={tag.name}
             onClick={() => {
-                        console.log(data);
-                        window.wsnavigator(`/library/object?uid=${uid}&type=${data?.type?.['unigraph.id']}`);
-                    }}
+                console.log(data);
+                window.wsnavigator(
+                    `/library/object?uid=${uid}&type=${data?.type?.['unigraph.id']}`,
+                );
+            }}
         />
-
     );
 };
 
-export const SemanticProperties = ({ data }: any) => ((data?._value?.children?.['_value['])
-    ? (data?._value?.children?.['_value['].map((el: any) => <AutoDynamicView object={unpad(el._value)} />))
-    : []);
+export const SemanticProperties = ({ data }: any) =>
+    data?._value?.children?.['_value[']
+        ? data?._value?.children?.['_value['].map((el: any) => (
+              <AutoDynamicView object={unpad(el._value)} />
+          ))
+        : [];

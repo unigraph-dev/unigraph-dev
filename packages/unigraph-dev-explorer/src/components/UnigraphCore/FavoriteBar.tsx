@@ -1,7 +1,10 @@
 import React from 'react';
 import { useEffectOnce } from 'react-use';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
-import { byElementIndex, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
+import {
+    byElementIndex,
+    unpad,
+} from 'unigraph-dev-common/lib/utils/entityUtils';
 import { TabContext } from '../../utils';
 import { DynamicObjectListView } from '../ObjectView/DynamicObjectListView';
 
@@ -14,22 +17,28 @@ export function FavoriteBar() {
     useEffectOnce(() => {
         const id = getRandomInt();
 
-        tabContext.subscribeToObject('$/entity/favorite_bar', (newFav: any) => {
-            const children = newFav?._value?.children?.['_value['];
-            if (children) {
-                children.sort(byElementIndex);
-                setFav(children);
-                favState.setValue(children.map((el: any) => {
-                    const unpadded = unpad(el);
-                    return {
-                        name: unpadded.name,
-                        component: unpadded.view,
-                        config: JSON.parse(unpadded.props).config,
-                    };
-                }));
-            }
-            setFavEntity(newFav);
-        }, id);
+        tabContext.subscribeToObject(
+            '$/entity/favorite_bar',
+            (newFav: any) => {
+                const children = newFav?._value?.children?.['_value['];
+                if (children) {
+                    children.sort(byElementIndex);
+                    setFav(children);
+                    favState.setValue(
+                        children.map((el: any) => {
+                            const unpadded = unpad(el);
+                            return {
+                                name: unpadded.name,
+                                component: unpadded.view,
+                                config: JSON.parse(unpadded.props).config,
+                            };
+                        }),
+                    );
+                }
+                setFavEntity(newFav);
+            },
+            id,
+        );
 
         return function cleanup() {
             tabContext.unsubscribe(id);
@@ -47,7 +56,11 @@ export function FavoriteBar() {
             noRemover
             defaultFilter={['no-deleted', 'no-noview']}
             itemRemover={(uids) => {
-                window.unigraph.deleteItemFromArray(favEntity?._value?.children?.uid, uids, favEntity.uid);
+                window.unigraph.deleteItemFromArray(
+                    favEntity?._value?.children?.uid,
+                    uids,
+                    favEntity.uid,
+                );
             }}
         />
     );

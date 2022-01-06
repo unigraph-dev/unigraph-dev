@@ -1,5 +1,8 @@
 import { PackageDeclaration } from 'unigraph-dev-common/lib/types/packages';
-import { Query, UnigraphNotification } from 'unigraph-dev-common/lib/types/unigraph';
+import {
+    Query,
+    UnigraphNotification,
+} from 'unigraph-dev-common/lib/types/unigraph';
 import DgraphClient from './dgraphClient';
 
 declare global {
@@ -11,17 +14,17 @@ declare global {
 }
 
 declare type UnigraphUpsert = {
-    queries: string[],
-    mutations: any[],
-    appends: any[]
-}
+    queries: string[];
+    mutations: any[];
+    appends: any[];
+};
 
 declare type Subscription = {
-    data: any,
-    query: Query, // something like () { uid }
-    subType: 'polling' | 'pushing',
-    callbackType: 'function' | 'messageid',
-    id: number | string, // must be provided, regardless of using function or messageid
+    data: any;
+    query: Query; // something like () { uid }
+    subType: 'polling' | 'pushing';
+    callbackType: 'function' | 'messageid';
+    id: number | string; // must be provided, regardless of using function or messageid
     /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
     function?: Function,
     msgPort?: IWebsocket,

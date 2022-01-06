@@ -14,7 +14,11 @@ import { onUnigraphContextMenu } from '../ObjectView/DefaultObjectContextMenu';
 const parseLayout = (it: any) => {
     const [x, y, w, h] = (it._pos || '0:0:6:8').split(':');
     return {
-        i: it._value._value.uid, x: parseInt(x, 10), y: parseInt(y, 10), w: parseInt(w, 10), h: parseInt(h, 10),
+        i: it._value._value.uid,
+        x: parseInt(x, 10),
+        y: parseInt(y, 10),
+        w: parseInt(w, 10),
+        h: parseInt(h, 10),
     };
 };
 
@@ -31,34 +35,43 @@ export function Pinboard({ data, callbacks }: any) {
             {({ width }) => (
                 <div
                     ref={divRef}
-                    onContextMenu={(event) => onUnigraphContextMenu(
-                    event,
-                    data,
-                    undefined,
-                    undefined,
-                    // eslint-disable-next-line react/no-unstable-nested-components
-                    (a: any, b: any, handleClose: any) => (
-                        <MenuItem
-                            onClick={() => {
-                            handleClose();
-                            setLayoutLocked(!layoutLocked);
-                        }}
-                        >
-                            {layoutLocked ? 'Unlock' : 'Lock'}
-                            {' '}
-                            pinboard layout
-                        </MenuItem>
-                    ),
-                    )}
+                    onContextMenu={(event) =>
+                        onUnigraphContextMenu(
+                            event,
+                            data,
+                            undefined,
+                            undefined,
+                            // eslint-disable-next-line react/no-unstable-nested-components
+                            (a: any, b: any, handleClose: any) => (
+                                <MenuItem
+                                    onClick={() => {
+                                        handleClose();
+                                        setLayoutLocked(!layoutLocked);
+                                    }}
+                                >
+                                    {layoutLocked ? 'Unlock' : 'Lock'} pinboard
+                                    layout
+                                </MenuItem>
+                            ),
+                        )
+                    }
                 >
                     <ResponsiveGridLayout
                         className="layout"
                         layouts={{ lg: layout }}
                         breakpoints={{
-                            lg: 900, md: 750, sm: 600, xs: 480, xxs: 0,
+                            lg: 900,
+                            md: 750,
+                            sm: 600,
+                            xs: 480,
+                            xxs: 0,
                         }}
                         cols={{
-                            lg: 12, md: 10, sm: 6, xs: 4, xxs: 2,
+                            lg: 12,
+                            md: 10,
+                            sm: 6,
+                            xs: 4,
+                            xxs: 2,
                         }}
                         rowHeight={30}
                         width={width || 1200}
@@ -72,16 +85,22 @@ export function Pinboard({ data, callbacks }: any) {
                             );
                         }}
                     >
-                        {data._value._value.children['_value['].map((el: any) => (
-                            <div key={el._value._value.uid}>
-                                <UnigraphWidget>
-                                    <AutoDynamicViewDetailed
-                                        object={new UnigraphObject(el._value._value)}
-                                        callbacks={callbacks}
-                                    />
-                                </UnigraphWidget>
-                            </div>
-                        ))}
+                        {data._value._value.children['_value['].map(
+                            (el: any) => (
+                                <div key={el._value._value.uid}>
+                                    <UnigraphWidget>
+                                        <AutoDynamicViewDetailed
+                                            object={
+                                                new UnigraphObject(
+                                                    el._value._value,
+                                                )
+                                            }
+                                            callbacks={callbacks}
+                                        />
+                                    </UnigraphWidget>
+                                </div>
+                            ),
+                        )}
                     </ResponsiveGridLayout>
                 </div>
             )}
