@@ -1,17 +1,24 @@
 import AsyncLock from 'async-lock';
 import dgraph, {
-    DgraphClient as ActualDgraphClient, DgraphClientStub, Operation, Mutation, Check,
+    DgraphClient as ActualDgraphClient,
+    DgraphClientStub,
+    Operation,
+    Mutation,
+    Check,
 } from 'dgraph-js';
 import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { getAsyncLock, withLock } from './asyncManager';
-import { perfLogStartDbTransaction, perfLogAfterDbTransaction } from './logging';
+import {
+    perfLogStartDbTransaction,
+    perfLogAfterDbTransaction,
+} from './logging';
 import { makeSearchQuery } from './search';
 
 export type UnigraphUpsert = {
-  queries: string[],
-  mutations: any[],
-  appends: any[]
-}
+    queries: string[];
+    mutations: any[];
+    appends: any[];
+};
 
 // eslint-disable-next-line inclusive-language/use-inclusive-words
 /**
@@ -26,14 +33,14 @@ export default class DgraphClient {
     private txnlock: AsyncLock;
 
     constructor(connectionUri: string) {
-        this.dgraphClientStub = new DgraphClientStub(
-            connectionUri,
-            undefined,
-            { 'grpc.max_receive_message_length': 1024 * 1024 * 1024 },
-        );
+        this.dgraphClientStub = new DgraphClientStub(connectionUri, undefined, {
+            'grpc.max_receive_message_length': 1024 * 1024 * 1024,
+        });
         this.dgraphClientStub.checkVersion(new Check()).catch((e) => {
             if (e.code === 14) {
-                throw new Error('Could not establish connection to Dgraph client, exiting...');
+                throw new Error(
+                    'Could not establish connection to Dgraph client, exiting...',
+                );
             }
         });
         this.dgraphClient = new ActualDgraphClient(this.dgraphClientStub);
@@ -41,16 +48,21 @@ export default class DgraphClient {
     }
 
     async getStatus() {
-        const count: any[][] = await this.queryDgraph(`{
+        const count: any[][] = await this.queryDgraph(
+            `{
       objects(func: type(Entity)) {
         totalObjects : count(uid)
       }
       schemas(func: type(Type)) {
         totalSchemas : count(uid)
       }
-    }`, {});
+    }`,
+            {},
+        );
         return {
-            version: (await this.dgraphClientStub.checkVersion(new Check())).toString(),
+            version: (
+                await this.dgraphClientStub.checkVersion(new Check())
+            ).toString(),
             objects: count[0][0].totalObjects,
             schemas: count[1][0].totalSchemas,
         };
@@ -113,9 +125,9 @@ export default class DgraphClient {
     }
 
     /**
-   * Creates data from a upsert request (i.e. query for data then use the result to mutate).
-   * @param {UnigraphUpsert} data
-   */
+     * Creates data from a upsert request (i.e. query for data then use the result to mutate).
+     * @param {UnigraphUpsert} data
+     */
     async createUnigraphUpsert(data: UnigraphUpsert, test = false) {
     /* eslint-disable */
     !test ? true : console.log("Trying to create upsert....============================================")

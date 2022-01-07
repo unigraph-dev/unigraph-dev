@@ -1,8 +1,6 @@
 import { Box, Typography } from '@material-ui/core';
 
-export function TabPanel({
-    children, value, index, ...other
-}: any) {
+export function TabPanel({ children, value, index, ...other }: any) {
     return (
         <div
             role="tabpanel"
@@ -12,9 +10,9 @@ export function TabPanel({
             {...other}
         >
             {value === index && (
-            <Box>
-                <Typography>{children}</Typography>
-            </Box>
+                <Box>
+                    <Typography>{children}</Typography>
+                </Box>
             )}
         </div>
     );

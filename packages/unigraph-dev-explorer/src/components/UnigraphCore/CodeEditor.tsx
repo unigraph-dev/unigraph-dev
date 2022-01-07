@@ -1,5 +1,16 @@
 import {
-    Button, Collapse, FormControl, InputLabel, List, ListItem, ListItemText, MenuItem, Select, Tab, Tabs, TextField,
+    Button,
+    Collapse,
+    FormControl,
+    InputLabel,
+    List,
+    ListItem,
+    ListItemText,
+    MenuItem,
+    Select,
+    Tab,
+    Tabs,
+    TextField,
 } from '@material-ui/core';
 import React from 'react';
 import SplitterLayout from 'react-splitter-layout';
@@ -19,26 +30,42 @@ export function NewUserCode({}) {
 
     return (
         <div style={{ display: 'flex', alignItems: 'baseline' }}>
-            <TextField label="Display name" value={displayName} onChange={(ev) => setDisplayName(ev.target.value)}>Display Name</TextField>
+            <TextField
+                label="Display name"
+                value={displayName}
+                onChange={(ev) => setDisplayName(ev.target.value)}
+            >
+                Display Name
+            </TextField>
             <FormControl>
                 <InputLabel>Select env</InputLabel>
-                <Select label="Env" value={env} onChange={(ev) => setEnv(ev.target.value as string)}>
+                <Select
+                    label="Env"
+                    value={env}
+                    onChange={(ev) => setEnv(ev.target.value as string)}
+                >
                     <MenuItem value="">Select environment</MenuItem>
                     <MenuItem value="routine/js">routine/js</MenuItem>
-                    <MenuItem value="component/react-jsx">component/react-jsx</MenuItem>
+                    <MenuItem value="component/react-jsx">
+                        component/react-jsx
+                    </MenuItem>
                     <MenuItem value="lambda/js">lambda/js</MenuItem>
                     <MenuItem value="client/js">client/js</MenuItem>
                 </Select>
             </FormControl>
 
-            <Button onClick={() => {
-                window.unigraph.addObject({
-                    editable: true,
-                    env,
-                    name: displayName,
-                    src: '',
-                }, '$/schema/executable');
-            }}
+            <Button
+                onClick={() => {
+                    window.unigraph.addObject(
+                        {
+                            editable: true,
+                            env,
+                            name: displayName,
+                            src: '',
+                        },
+                        '$/schema/executable',
+                    );
+                }}
             >
                 Create
             </Button>
@@ -54,7 +81,16 @@ export function CodeEditor({ id }: any) {
 
     const [currentTab, setCurrentTab]: any = React.useState(0);
 
-    const currentView = <DetailedObjectView uid={currentUid} id={id} component={{ '$/schema/executable': { view: ExecutableCodeEditor } }} callbacks={{ isEmbed: true }} />;
+    const currentView = (
+        <DetailedObjectView
+            uid={currentUid}
+            id={id}
+            component={{
+                '$/schema/executable': { view: ExecutableCodeEditor },
+            }}
+            callbacks={{ isEmbed: true }}
+        />
+    );
 
     const [isUserCollapseOpen, setIsUserCollapseOpen] = React.useState(false);
     const [currentPackage, setCurrentPackage] = React.useState('');
@@ -64,18 +100,26 @@ export function CodeEditor({ id }: any) {
     useEffectOnce(() => {
         const subsId = getRandomInt();
 
-        tabContext.subscribeToType('$/schema/executable', (execs: any[]) => {
-            const namedEx: any[] = []; const
-                userEx: any[] = [];
-            execs.forEach((el) => {
-                if (typeof el['unigraph.id'] === 'string') namedEx.push(el);
-                else userEx.push(el);
-            });
-            setexecContent(namedEx);
-            setUserExecContent(userEx);
-            const packages = _.uniq(namedEx.map((el) => el['unigraph.id'].split('/').slice(0, 3).join('/'))).sort();
-            setExecPackages(packages);
-        }, subsId);
+        tabContext.subscribeToType(
+            '$/schema/executable',
+            (execs: any[]) => {
+                const namedEx: any[] = [];
+                const userEx: any[] = [];
+                execs.forEach((el) => {
+                    if (typeof el['unigraph.id'] === 'string') namedEx.push(el);
+                    else userEx.push(el);
+                });
+                setexecContent(namedEx);
+                setUserExecContent(userEx);
+                const packages = _.uniq(
+                    namedEx.map((el) =>
+                        el['unigraph.id'].split('/').slice(0, 3).join('/'),
+                    ),
+                ).sort();
+                setExecPackages(packages);
+            },
+            subsId,
+        );
 
         return function cleanup() {
             tabContext.unsubscribe(subsId);
@@ -86,7 +130,12 @@ export function CodeEditor({ id }: any) {
         <SplitterLayout primaryIndex={1} secondaryInitialSize={360}>
             <div>
                 {/* User code */}
-                <ListItem onClick={() => { setIsUserCollapseOpen(!isUserCollapseOpen); }} style={{ cursor: 'pointer' }}>
+                <ListItem
+                    onClick={() => {
+                        setIsUserCollapseOpen(!isUserCollapseOpen);
+                    }}
+                    style={{ cursor: 'pointer' }}
+                >
                     <ListItemText primary="User code" />
                     {isUserCollapseOpen ? <ExpandLess /> : <ExpandMore />}
                 </ListItem>
@@ -97,7 +146,9 @@ export function CodeEditor({ id }: any) {
                             <ListItem
                                 key={it.uid}
                                 selected={currentUid === it.uid}
-                                onClick={() => { setCurrentUid(it.uid); }}
+                                onClick={() => {
+                                    setCurrentUid(it.uid);
+                                }}
                             >
                                 <AutoDynamicView object={it} />
                             </ListItem>
@@ -107,21 +158,38 @@ export function CodeEditor({ id }: any) {
 
                 {execPackages.map((el: string) => (
                     <>
-                        <ListItem onClick={() => { setCurrentPackage(currentPackage === el ? '' : el); }} style={{ cursor: 'pointer' }}>
+                        <ListItem
+                            onClick={() => {
+                                setCurrentPackage(
+                                    currentPackage === el ? '' : el,
+                                );
+                            }}
+                            style={{ cursor: 'pointer' }}
+                        >
                             <ListItemText primary={el} />
-                            {currentPackage === el ? <ExpandLess /> : <ExpandMore />}
+                            {currentPackage === el ? (
+                                <ExpandLess />
+                            ) : (
+                                <ExpandMore />
+                            )}
                         </ListItem>
                         <Collapse in={currentPackage === el}>
                             <List style={{ overflow: 'auto' }}>
-                                {execcontent.filter((it: any) => it['unigraph.id']?.startsWith(el)).map((it: any) => (
-                                    <ListItem
-                                        key={it.uid}
-                                        selected={currentUid === it.uid}
-                                        onClick={() => { setCurrentUid(it.uid); }}
-                                    >
-                                        <AutoDynamicView object={it} />
-                                    </ListItem>
-                                ))}
+                                {execcontent
+                                    .filter((it: any) =>
+                                        it['unigraph.id']?.startsWith(el),
+                                    )
+                                    .map((it: any) => (
+                                        <ListItem
+                                            key={it.uid}
+                                            selected={currentUid === it.uid}
+                                            onClick={() => {
+                                                setCurrentUid(it.uid);
+                                            }}
+                                        >
+                                            <AutoDynamicView object={it} />
+                                        </ListItem>
+                                    ))}
                             </List>
                         </Collapse>
                     </>

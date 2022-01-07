@@ -172,13 +172,24 @@ export const packageExecutableSchema = {
                                 {
                                     _key: 'import',
                                     _definition: {
-                                        type: { 'unigraph.id': '$/composer/Union' },
+                                        type: {
+                                            'unigraph.id': '$/composer/Union',
+                                        },
                                         _parameters: {
-                                            _definitions: [{
-                                                type: { 'unigraph.id': '$/schema/executable' },
-                                            }, {
-                                                type: { 'unigraph.id': '$/primitive/string' },
-                                            }],
+                                            _definitions: [
+                                                {
+                                                    type: {
+                                                        'unigraph.id':
+                                                            '$/schema/executable',
+                                                    },
+                                                },
+                                                {
+                                                    type: {
+                                                        'unigraph.id':
+                                                            '$/primitive/string',
+                                                    },
+                                                },
+                                            ],
                                         },
                                     },
                                 },
@@ -261,11 +272,19 @@ export const packageExecutableSchema = {
                         _element: {
                             type: { 'unigraph.id': '$/composer/Union' },
                             _parameters: {
-                                _definitions: [{
-                                    type: { 'unigraph.id': '$/schema/subentity' },
-                                }, {
-                                    type: { 'unigraph.id': '$/schema/interface/semantic' },
-                                }],
+                                _definitions: [
+                                    {
+                                        type: {
+                                            'unigraph.id': '$/schema/subentity',
+                                        },
+                                    },
+                                    {
+                                        type: {
+                                            'unigraph.id':
+                                                '$/schema/interface/semantic',
+                                        },
+                                    },
+                                ],
                             },
                         },
                     },
@@ -325,6 +344,22 @@ export const defaultUserlandSchemas = [
 ];
 
 export const defaultPackages = [
-    semantic, core, execexample, coreuser, home, calendar, notes, contacts,
-    onboarding, todo, bookmark, rss_reader, email, reddit, twitter, nlp, openai, kanban,
+    semantic,
+    core,
+    execexample,
+    coreuser,
+    home,
+    calendar,
+    notes,
+    contacts,
+    onboarding,
+    todo,
+    bookmark,
+    rss_reader,
+    email,
+    reddit,
+    twitter,
+    nlp,
+    openai,
+    kanban,
 ];

@@ -1,19 +1,17 @@
-import {
-    List, ListItem, ListItemText, Typography,
-} from '@material-ui/core';
+import { List, ListItem, ListItemText, Typography } from '@material-ui/core';
 import React from 'react';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import * as timeago from 'timeago.js';
 import { DynamicViewRenderer } from '../../global.d';
 
 export type ANotification = {
-    uid?: string,
-    name: string,
-    from: string,
-    content: string,
-    actions?: any,
-    _updatedAt: any
-}
+    uid?: string;
+    name: string;
+    from: string;
+    content: string;
+    actions?: any;
+    _updatedAt: any;
+};
 
 export const Notification: DynamicViewRenderer = ({ data, callbacks }) => {
     const unpadded: ANotification = unpad(data);
@@ -21,7 +19,7 @@ export const Notification: DynamicViewRenderer = ({ data, callbacks }) => {
     return (
         <ListItemText
             primary={unpadded.name}
-            secondary={(
+            secondary={
                 <>
                     <Typography
                         component="span"
@@ -34,14 +32,18 @@ export const Notification: DynamicViewRenderer = ({ data, callbacks }) => {
                         <span style={{ color: 'gray' }}>, updated: </span>
                         {timeago.format(new Date(unpadded?._updatedAt))}
                     </Typography>
-                    <Typography variant="body2" style={{ whiteSpace: 'pre' }}>{unpadded.content}</Typography>
+                    <Typography variant="body2" style={{ whiteSpace: 'pre' }}>
+                        {unpadded.content}
+                    </Typography>
                 </>
-                )}
+            }
         />
     );
 };
 
-export const NotificationCenterBody: React.FC<{data: ANotification[]}> = ({ data }) => {
+export const NotificationCenterBody: React.FC<{ data: ANotification[] }> = ({
+    data,
+}) => {
     data = [...data].reverse();
     return (
         <div>
@@ -57,7 +59,9 @@ export const NotificationCenterBody: React.FC<{data: ANotification[]}> = ({ data
 };
 
 export function NotificationCenter() {
-    const nfState = window.unigraph.getState('notification-center/notifications');
+    const nfState = window.unigraph.getState(
+        'notification-center/notifications',
+    );
 
     const [data, setData] = React.useState(nfState.value);
 

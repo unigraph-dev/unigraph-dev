@@ -9,7 +9,11 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-export function ReferenceableSelectorControlled({ referenceables, value, onChange }: any) {
+export function ReferenceableSelectorControlled({
+    referenceables,
+    value,
+    onChange,
+}: any) {
     const classes = useStyles();
 
     return (

@@ -15,7 +15,12 @@ export const Executable: DynamicViewRenderer = ({ data, callbacks }) => {
         'lambda/js': <TrendingFlat />,
     };
     const actions: any = {
-        'routine/js': () => { window.unigraph.runExecutable(unpadded['unigraph.id'] || data.uid, {}); },
+        'routine/js': () => {
+            window.unigraph.runExecutable(
+                unpadded['unigraph.id'] || data.uid,
+                {},
+            );
+        },
         'component/react-jsx': () => {
             // Open in new
             window.newTab(window.layoutModel, {
@@ -27,22 +32,35 @@ export const Executable: DynamicViewRenderer = ({ data, callbacks }) => {
             });
         },
         'lambda/js': async () => {
-            const res = await window.unigraph.runExecutable(unpadded['unigraph.id'] || data.uid, {});
+            const res = await window.unigraph.runExecutable(
+                unpadded['unigraph.id'] || data.uid,
+                {},
+            );
             console.log(res);
         },
     };
 
     return (
         <>
-            <ListItemIcon style={{ paddingLeft: '8px' }} onClick={actions[unpadded.env]}>{icons[unpadded.env]}</ListItemIcon>
-            <ListItemText primary={`Run code: ${unpadded.name}`} secondary={`Environment: ${unpadded.env}`} />
+            <ListItemIcon
+                style={{ paddingLeft: '8px' }}
+                onClick={actions[unpadded.env]}
+            >
+                {icons[unpadded.env]}
+            </ListItemIcon>
+            <ListItemText
+                primary={`Run code: ${unpadded.name}`}
+                secondary={`Environment: ${unpadded.env}`}
+            />
         </>
     );
 };
 
 export function CodeOrComponentView(props: any) {
-    // eslint-disable-next-line react/destructuring-assignment
-    if ((props.data as any).get('env').as('primitive') === 'component/react-jsx') {
+    if (
+        // eslint-disable-next-line react/destructuring-assignment
+        (props.data as any).get('env').as('primitive') === 'component/react-jsx'
+    ) {
         return <DynamicComponentView {...props} />;
     }
     return <ExecutableCodeEditor {...props} />;

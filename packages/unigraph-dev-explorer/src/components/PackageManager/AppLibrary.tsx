@@ -9,16 +9,24 @@ export function AppLibrary() {
     React.useEffect(() => {
         const viewId = getRandomInt();
 
-        tabContext.subscribeToType('$/schema/view', (views: any) => {
-            setTotalViews(views);
-        }, viewId);
+        tabContext.subscribeToType(
+            '$/schema/view',
+            (views: any) => {
+                setTotalViews(views);
+            },
+            viewId,
+        );
 
-        return function cleanup() { tabContext.unsubscribe(viewId); };
+        return function cleanup() {
+            tabContext.unsubscribe(viewId);
+        };
     }, []);
 
     return (
         <div>
-            {totalViews.map((el: any) => <AutoDynamicView object={el} />)}
+            {totalViews.map((el: any) => (
+                <AutoDynamicView object={el} />
+            ))}
         </div>
     );
 }

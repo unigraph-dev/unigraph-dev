@@ -29,15 +29,26 @@ export const setupInfiniteScrolling = (
     };
 
     const onUserNext = () => {
-        const [subsHead, chunksHead] = [states.currentSubs.length / chunk, states.chunks.length];
+        const [subsHead, chunksHead] = [
+            states.currentSubs.length / chunk,
+            states.chunks.length,
+        ];
         if (subsHead < chunksHead) {
             const toSub = states.chunks[subsHead];
-            states.currentSubs = [...states.results.map((el: any) => el.uid), ...toSub];
-            tabContext.subscribe({
-                type: 'object',
-                uid: states.currentSubs,
-                options: subscribeOptions,
-            }, () => false, states.subsId, true);
+            states.currentSubs = [
+                ...states.results.map((el: any) => el.uid),
+                ...toSub,
+            ];
+            tabContext.subscribe(
+                {
+                    type: 'object',
+                    uid: states.currentSubs,
+                    options: subscribeOptions,
+                },
+                () => false,
+                states.subsId,
+                true,
+            );
         }
     };
 
@@ -45,7 +56,8 @@ export const setupInfiniteScrolling = (
         if (_.isEqual(uids, newUids)) return;
         uids = newUids;
         states.chunks = _.chunk(uids, chunk);
-        states.results = []; states.currentSubs = [];
+        states.results = [];
+        states.currentSubs = [];
         onUserNext();
     };
 
@@ -60,14 +72,24 @@ export const setupInfiniteScrolling = (
         onUpdate,
     };
 
-    const toSub = states.chunks[0] || []; states.currentSubs = toSub;
-    tabContext.subscribeToObject(toSub, (results: any[] | any) => {
-        const uidsMap: any = {};
-        buildGraph(results);
-        results.forEach ? results.forEach((el: any) => { uidsMap[el.uid] = el; }) : uidsMap[results.uid] = results;
-        states.results = states.currentSubs.map((el: any) => uidsMap[el]);
-        onStateUpdated();
-    }, states.subsId, subscribeOptions);
+    const toSub = states.chunks[0] || [];
+    states.currentSubs = toSub;
+    tabContext.subscribeToObject(
+        toSub,
+        (results: any[] | any) => {
+            const uidsMap: any = {};
+            buildGraph(results);
+            results.forEach
+                ? results.forEach((el: any) => {
+                      uidsMap[el.uid] = el;
+                  })
+                : (uidsMap[results.uid] = results);
+            states.results = states.currentSubs.map((el: any) => uidsMap[el]);
+            onStateUpdated();
+        },
+        states.subsId,
+        subscribeOptions,
+    );
 
     return returns;
 };

@@ -1,5 +1,9 @@
 import {
-    Divider, ListItemText, ListItemIcon, MenuItem, Popover,
+    Divider,
+    ListItemText,
+    ListItemIcon,
+    MenuItem,
+    Popover,
 } from '@material-ui/core';
 import React from 'react';
 import { AppState } from 'unigraph-dev-common/lib/types/unigraph';
@@ -9,7 +13,8 @@ import { ContextMenuState } from '../../global.d';
 import { deselectUid } from '../../utils';
 
 export function ContextMenu() {
-    const ctxMenuState: AppState<Partial<ContextMenuState>> = window.unigraph.getState('global/contextMenu');
+    const ctxMenuState: AppState<Partial<ContextMenuState>> =
+        window.unigraph.getState('global/contextMenu');
 
     const [state, setState] = React.useState(ctxMenuState.value);
     const thisRef = React.useRef(null);
@@ -18,12 +23,23 @@ export function ContextMenu() {
         deselectUid();
         ctxMenuState.setValue({ show: false });
     };
-    const schemaMenuConstructors = [...(window.unigraph.getState('registry/contextMenu').value[state.contextObject?.type?.['unigraph.id']] || []), ...(state.schemaMenuContent || [])];
+    const schemaMenuConstructors = [
+        ...(window.unigraph.getState('registry/contextMenu').value[
+            state.contextObject?.type?.['unigraph.id']
+        ] || []),
+        ...(state.schemaMenuContent || []),
+    ];
 
     React.useMemo(() => ctxMenuState.subscribe((v) => setState(v)), []);
 
-    const objDef = (window.unigraph.getNamespaceMap)?.()?.[state.contextObject?.type?.['unigraph.id']];
-    const objCtxDef = (window.unigraph.getNamespaceMap)?.()?.[state.contextContextObject?.type?.['unigraph.id']];
+    const objDef =
+        window.unigraph.getNamespaceMap?.()?.[
+            state.contextObject?.type?.['unigraph.id']
+        ];
+    const objCtxDef =
+        window.unigraph.getNamespaceMap?.()?.[
+            state.contextContextObject?.type?.['unigraph.id']
+        ];
 
     return (
         <div ref={thisRef}>
@@ -51,70 +67,141 @@ export function ContextMenu() {
                 }}
             >
                 <div>
-                    <MenuItem style={{ paddingTop: '2px', paddingBottom: '2px' }}>
-                        <ListItemIcon style={{ minWidth: '32px' }}><Icon path={mdiCubeOutline} size={0.8} /></ListItemIcon>
+                    <MenuItem
+                        style={{ paddingTop: '2px', paddingBottom: '2px' }}
+                    >
+                        <ListItemIcon style={{ minWidth: '32px' }}>
+                            <Icon path={mdiCubeOutline} size={0.8} />
+                        </ListItemIcon>
                         <ListItemText>{state.contextUid}</ListItemText>
                         {objDef?._icon ? (
-                            <ListItemIcon style={{
-                                minWidth: '20px', minHeight: '20px', marginLeft: '12px', marginRight: '8px', backgroundImage: `url("data:image/svg+xml,${objDef?._icon}")`, opacity: 0.54,
-                            }}
+                            <ListItemIcon
+                                style={{
+                                    minWidth: '20px',
+                                    minHeight: '20px',
+                                    marginLeft: '12px',
+                                    marginRight: '8px',
+                                    backgroundImage: `url("data:image/svg+xml,${objDef?._icon}")`,
+                                    opacity: 0.54,
+                                }}
                             />
-                        )
-                            : <ListItemIcon style={{ minWidth: '36px', marginLeft: '12px' }}><Icon path={mdiDatabaseOutline} size={1} /></ListItemIcon>}
-                        <ListItemText>{objDef?._name || state.contextObject?.type?.['unigraph.id']}</ListItemText>
+                        ) : (
+                            <ListItemIcon
+                                style={{ minWidth: '36px', marginLeft: '12px' }}
+                            >
+                                <Icon path={mdiDatabaseOutline} size={1} />
+                            </ListItemIcon>
+                        )}
+                        <ListItemText>
+                            {objDef?._name ||
+                                state.contextObject?.type?.['unigraph.id']}
+                        </ListItemText>
                     </MenuItem>
                     <Divider />
-                    {state.menuContent?.map((el: any) => el(
-                        state.contextUid!,
-                        state.contextObject,
-                        handleClose,
-                        state.callbacks,
-                        state.contextContextUid,
-                    ))}
+                    {state.menuContent?.map((el: any) =>
+                        el(
+                            state.contextUid!,
+                            state.contextObject,
+                            handleClose,
+                            state.callbacks,
+                            state.contextContextUid,
+                        ),
+                    )}
                     {schemaMenuConstructors.length > 0 ? (
                         <>
                             <Divider />
-                            {schemaMenuConstructors.map((el: any) => el(
-                                state.contextUid!,
-                                state.contextObject,
-                                handleClose,
-                                { ...state.callbacks, removeFromContext: state.removeFromContext },
-                                state.contextContextUid,
-                            ))}
+                            {schemaMenuConstructors.map((el: any) =>
+                                el(
+                                    state.contextUid!,
+                                    state.contextObject,
+                                    handleClose,
+                                    {
+                                        ...state.callbacks,
+                                        removeFromContext:
+                                            state.removeFromContext,
+                                    },
+                                    state.contextContextUid,
+                                ),
+                            )}
                         </>
-                    ) : []}
+                    ) : (
+                        []
+                    )}
                     {state.contextContextUid ? (
                         <>
                             <Divider />
-                            <MenuItem style={{ paddingTop: '2px', paddingBottom: '2px' }}>
-                                <ListItemIcon style={{ minWidth: '32px' }}><Icon path={mdiCubeOutline} size={0.8} /></ListItemIcon>
-                                <ListItemText>{state.contextContextUid}</ListItemText>
-                                {objCtxDef?._icon
-                                    ? (
-                                        <ListItemIcon style={{
-                                            minWidth: '20px', minHeight: '20px', marginLeft: '12px', marginRight: '8px', backgroundImage: `url("data:image/svg+xml,${objCtxDef?._icon}")`, opacity: 0.54,
+                            <MenuItem
+                                style={{
+                                    paddingTop: '2px',
+                                    paddingBottom: '2px',
+                                }}
+                            >
+                                <ListItemIcon style={{ minWidth: '32px' }}>
+                                    <Icon path={mdiCubeOutline} size={0.8} />
+                                </ListItemIcon>
+                                <ListItemText>
+                                    {state.contextContextUid}
+                                </ListItemText>
+                                {objCtxDef?._icon ? (
+                                    <ListItemIcon
+                                        style={{
+                                            minWidth: '20px',
+                                            minHeight: '20px',
+                                            marginLeft: '12px',
+                                            marginRight: '8px',
+                                            backgroundImage: `url("data:image/svg+xml,${objCtxDef?._icon}")`,
+                                            opacity: 0.54,
                                         }}
+                                    />
+                                ) : (
+                                    <ListItemIcon
+                                        style={{
+                                            minWidth: '32px',
+                                            marginLeft: '12px',
+                                        }}
+                                    >
+                                        <Icon
+                                            path={mdiDatabaseOutline}
+                                            size={0.8}
                                         />
-                                    )
-                                    : <ListItemIcon style={{ minWidth: '32px', marginLeft: '12px' }}><Icon path={mdiDatabaseOutline} size={0.8} /></ListItemIcon>}
-                                <ListItemText>{objCtxDef?._name || state.contextContextObject?.type?.['unigraph.id']}</ListItemText>
+                                    </ListItemIcon>
+                                )}
+                                <ListItemText>
+                                    {objCtxDef?._name ||
+                                        state.contextContextObject?.type?.[
+                                            'unigraph.id'
+                                        ]}
+                                </ListItemText>
                             </MenuItem>
                             <Divider />
-                            {state.menuContextContent?.map((el: any) => el(
-                                state.contextUid!,
-                                state.contextObject,
-                                handleClose,
-                                { ...state.callbacks, removeFromContext: state.removeFromContext },
-                                state.contextContextUid,
-                            ))}
+                            {state.menuContextContent?.map((el: any) =>
+                                el(
+                                    state.contextUid!,
+                                    state.contextObject,
+                                    handleClose,
+                                    {
+                                        ...state.callbacks,
+                                        removeFromContext:
+                                            state.removeFromContext,
+                                    },
+                                    state.contextContextUid,
+                                ),
+                            )}
                         </>
-                    ) : []}
-                    {state.extraContent ? state.extraContent(
-                        state.contextUid!,
-                        state.contextObject,
-                        handleClose,
-                        { ...state.callbacks, removeFromContext: state.removeFromContext },
-                    ) : []}
+                    ) : (
+                        []
+                    )}
+                    {state.extraContent
+                        ? state.extraContent(
+                              state.contextUid!,
+                              state.contextObject,
+                              handleClose,
+                              {
+                                  ...state.callbacks,
+                                  removeFromContext: state.removeFromContext,
+                              },
+                          )
+                        : []}
                 </div>
             </Popover>
         </div>
