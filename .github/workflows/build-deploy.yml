@@ -8,6 +8,10 @@ on:
 jobs:
     build-dgraph:
         runs-on: ubuntu-18.04
+        env:
+            DGRAPH_PATH: /opt/unigraph
+            LINUX_BUILD_PATH: ./packages/unigraph-dev-electron/dist/Unigraph-0.1.0.AppImage
+            LINUX_BIN_NAME: dgraph_linux_amd64
         steps:
             - name: Checkout code
               uses: actions/checkout@v2
@@ -29,6 +33,15 @@ jobs:
                       ${{ runner.os }}-build-
                       ${{ runner.os }}-
 
+            - run: mkdir -p $DGRAPH_PATH
+            - uses: robinraju/release-downloader@v1.3
+              with:
+                  repository: 'TheExGenesis/dgraph'
+                  latest: true
+                  fileName: 'dgraph_linux_amd64'
+                  out-file-path: ${{env.DGRAPH_PATH}}
+            - run: mv ${{env.DGRAPH_PATH}}/dgraph_linux_amd64 ${{env.DGRAPH_PATH}}/dgraph
+
             - run: yarn install
             - run: yarn build-deps
             # - run: yarn backend-build
@@ -45,12 +58,12 @@ jobs:
               uses: actions/upload-artifact@v2
               with:
                   name: unigraph_frontend
-                  path: ./packages/unigraph-dev-electron/dist/Unigraph-0.1.0.AppImage
+                  path: ${{LINUX_BUILD_PATH}}
                   if-no-files-found: error
 
             - name: Release
               uses: softprops/action-gh-release@v1
               with:
                   files: |
-                      ./packages/unigraph-dev-electron/dist/Unigraph-0.1.0.AppImage
+                      ${{LINUX_BUILD_PATH}}
                   fail_on_unmatched_files: true
