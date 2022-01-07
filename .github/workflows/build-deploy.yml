@@ -58,12 +58,12 @@ jobs:
               uses: actions/upload-artifact@v2
               with:
                   name: unigraph_frontend
-                  path: ${{LINUX_BUILD_PATH}}
+                  path: ${{env.LINUX_BUILD_PATH}}
                   if-no-files-found: error
 
             - name: Release
               uses: softprops/action-gh-release@v1
               with:
                   files: |
-                      ${{LINUX_BUILD_PATH}}
+                      ${{env.LINUX_BUILD_PATH}}
                   fail_on_unmatched_files: true
