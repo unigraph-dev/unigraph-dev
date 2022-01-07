@@ -274,9 +274,16 @@ function DynamicList({
     }, [items.length === 0]);
 
     React.useEffect(() => {
+        // console.log(
+        //    scrollerRef.current?._infScroll?.scrollHeight,
+        //    scrollerRef.current?.el?.clientHeight,
+        //    loadedItems.length,
+        //    items.length,
+        // );
+        // console.log(scrollerRef.current);
         // eslint-disable-next-line max-len
         if (
-            scrollerRef.current?.el?.scrollHeight <
+            scrollerRef.current?._infScroll?.scrollHeight <
                 scrollerRef.current?.el?.clientHeight &&
             loadedItems.length < items.length
         ) {
