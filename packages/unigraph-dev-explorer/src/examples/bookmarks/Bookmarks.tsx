@@ -113,7 +113,7 @@ export const Bookmarks = withUnigraphSubscription(
 
 export const BookmarkItem: DynamicViewRenderer = ({ data, callbacks }) => {
     const unpadded: ABookmark = unpad(data);
-    const name = data.get('name').as('primitive');
+    const name = data.get('name')?.as('primitive') || '';
     const totalCallbacks = callbacks;
 
     return (

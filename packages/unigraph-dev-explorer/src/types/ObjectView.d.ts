@@ -21,6 +21,7 @@ export type AutoDynamicViewProps = {
     noDrag?: boolean;
     noDrop?: boolean;
     noContextMenu?: boolean;
+    noSubentities?: boolean;
     noBacklinks?: boolean;
     noParents?: boolean;
     withParent?: boolean;
