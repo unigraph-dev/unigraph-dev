@@ -1,4 +1,5 @@
 import { useDrop } from 'react-dnd';
+import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
 
 export const isStub = (object: any) =>
     object?._stub ||
@@ -61,5 +62,6 @@ export function SubentityDropAcceptor({ uid }: any) {
 
 export const getSubentities = (data: any) =>
     data?._value?.children?.['_value[']
+        ?.sort(byElementIndex)
         ?.map?.((el: any) => el._value)
         .filter((el: any) => el?.type['unigraph.id'] === '$/schema/subentity');
