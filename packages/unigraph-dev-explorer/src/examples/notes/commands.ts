@@ -481,7 +481,9 @@ export const getLastDFSNode = (
     context: NoteEditorContext,
     index: number,
 ) => {
-    const orderedNodes = dfs(context.nodesState.value);
+    const orderedNodes = dfs(context.nodesState.value).filter(
+        (el) => el.type === '$/schema/note_block',
+    );
     const newIndex = orderedNodes.findIndex((el) => el.uid === data.uid) - 1;
     if (orderedNodes[newIndex] && !orderedNodes[newIndex].root)
         return orderedNodes[newIndex].uid;
@@ -493,7 +495,9 @@ export const getNextDFSNode = (
     context: NoteEditorContext,
     index: number,
 ) => {
-    const orderedNodes = dfs(context.nodesState.value);
+    const orderedNodes = dfs(context.nodesState.value).filter(
+        (el) => el.type === '$/schema/note_block',
+    );
     const newIndex = orderedNodes.findIndex((el) => el.uid === data.uid) + 1;
     if (orderedNodes[newIndex] && !orderedNodes[newIndex].root)
         return orderedNodes[newIndex].uid;

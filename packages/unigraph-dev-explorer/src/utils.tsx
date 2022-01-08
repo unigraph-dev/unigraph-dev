@@ -266,7 +266,12 @@ export const debounce = (func: any, wait: number) => {
     };
 };
 
-type TreeNode = { uid: string; children: string[]; root?: boolean };
+type TreeNode = {
+    uid: string;
+    children: string[];
+    root?: boolean;
+    type?: string;
+};
 export const dfs = (nodes: TreeNode[]) => {
     const root = nodes.filter((el) => el.root)[0];
     const nmap: Record<string, TreeNode> = Object.fromEntries(
