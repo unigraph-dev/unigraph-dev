@@ -52,14 +52,16 @@ jobs:
                       ${{ runner.os }}-build-
                       ${{ runner.os }}-
 
-            - run: mkdir -p $DGRAPH_PATH
+            - run: mkdir -p ${{env.DGRAPH_PATH}}
+            - run: mkdir ./dgraph-download
             - uses: robinraju/release-downloader@v1.3
               with:
                   repository: 'TheExGenesis/dgraph'
                   latest: true
                   fileName: 'dgraph_linux_amd64'
-                  out-file-path: ${{env.DGRAPH_PATH}}
-            - run: mv ${{env.DGRAPH_PATH}}/dgraph_linux_amd64 ${{env.DGRAPH_PATH}}/dgraph
+                  out-file-path: ./dgraph-download
+            - run: mv ./dgraph-download/dgraph_linux_amd64 ${{env.DGRAPH_PATH}}/dgraph
+            # - run: mv ${{env.DGRAPH_PATH}}/dgraph_linux_amd64 ${{env.DGRAPH_PATH}}/dgraph
 
             - run: yarn install
             - run: yarn build-deps
