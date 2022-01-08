@@ -27,6 +27,8 @@ jobs:
             DGRAPH_PATH: /opt/unigraph
             LINUX_BUILD_PATH: ./packages/unigraph-dev-electron/dist/Unigraph-0.1.0.AppImage
             LINUX_BIN_NAME: dgraph_linux_amd64
+        run:
+            shell: bash
         steps:
             - name: Checkout code
               uses: actions/checkout@v2
