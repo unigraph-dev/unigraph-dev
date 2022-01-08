@@ -55,7 +55,6 @@
         "typescript": "^4.2.2"
     },
     "dependencies": {
-        "electron-builder": "22.14",
         "eslint-plugin-inclusive-language": "^2.2.0",
         "json-stable-stringify": "^1.0.1",
         "react": "^17.0.1",
