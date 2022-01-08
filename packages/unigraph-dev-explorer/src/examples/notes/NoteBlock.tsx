@@ -73,14 +73,7 @@ export function NoteBlock({ data }: any) {
     const unpadded = unpad(data);
 
     return (
-        <div
-            onClick={() => {
-                window.wsnavigator(
-                    `/library/object?uid=${data.uid}&isStub=true&type=$/schema/note_block`,
-                );
-            }}
-            style={{ display: 'flex', alignItems: 'center', width: '100%' }}
-        >
+        <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
             <div style={{ flexGrow: 1 }}>
                 <Typography variant="body1">
                     <AutoDynamicView
@@ -930,6 +923,7 @@ export function DetailedNoteBlock({
                                 noDrag
                                 noContextMenu
                                 inline
+                                noClickthrough
                                 callbacks={{
                                     'get-semantic-properties': () => data,
                                 }}
@@ -981,6 +975,7 @@ export function DetailedNoteBlock({
                                                     noDrag
                                                     compact
                                                     allowSubentity
+                                                    noClickthrough
                                                     noSubentities={
                                                         el.type?.[
                                                             'unigraph.id'
@@ -1068,6 +1063,7 @@ export function DetailedNoteBlock({
                                                         isChildren: true,
                                                         isCollapsed: isCol,
                                                     }}
+                                                    recursive
                                                     style={
                                                         el.type?.[
                                                             'unigraph.id'

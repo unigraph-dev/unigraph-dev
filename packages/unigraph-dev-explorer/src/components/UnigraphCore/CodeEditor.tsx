@@ -146,11 +146,13 @@ export function CodeEditor({ id }: any) {
                             <ListItem
                                 key={it.uid}
                                 selected={currentUid === it.uid}
-                                onClick={() => {
-                                    setCurrentUid(it.uid);
-                                }}
                             >
-                                <AutoDynamicView object={it} />
+                                <AutoDynamicView
+                                    object={it}
+                                    onClick={() => {
+                                        setCurrentUid(it.uid);
+                                    }}
+                                />
                             </ListItem>
                         ))}
                     </List>
@@ -183,11 +185,13 @@ export function CodeEditor({ id }: any) {
                                         <ListItem
                                             key={it.uid}
                                             selected={currentUid === it.uid}
-                                            onClick={() => {
-                                                setCurrentUid(it.uid);
-                                            }}
                                         >
-                                            <AutoDynamicView object={it} />
+                                            <AutoDynamicView
+                                                object={it}
+                                                onClick={() => {
+                                                    setCurrentUid(it.uid);
+                                                }}
+                                            />
                                         </ListItem>
                                     ))}
                             </List>

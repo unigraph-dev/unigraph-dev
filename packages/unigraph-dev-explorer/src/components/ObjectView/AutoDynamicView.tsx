@@ -43,6 +43,9 @@ export function AutoDynamicView({
     noParents,
     withParent,
     compact,
+    noClickthrough,
+    onClick,
+    recursive,
     ...props
 }: AutoDynamicViewProps) {
     if (!callbacks) callbacks = {};
@@ -58,7 +61,7 @@ export function AutoDynamicView({
     const isObjectStub = isStub(object);
     const [loadedObj, setLoadedObj] = React.useState<any>(false);
     const [subsId, setSubsId] = React.useState(0);
-    const [isRecursion, setIsRecursion] = React.useState<any>(undefined);
+    const [isRecursion, setIsRecursion] = React.useState<any>(false);
     const getObject = () => (isObjectStub ? loadedObj : object);
 
     const [showSubentities, setShowSubentities] = React.useState(
@@ -75,6 +78,11 @@ export function AutoDynamicView({
         ...window.unigraph.getState('registry/dynamicView').value,
         ...(component || {}),
     });
+    const [canClickthrough, setCanClickthrough] = React.useState(
+        Object.keys(
+            window.unigraph.getState('registry/dynamicViewDetailed').value,
+        ).includes(getObject()?.type?.['unigraph.id']),
+    );
 
     const viewEl = React.useRef(null);
 
@@ -85,6 +93,15 @@ export function AutoDynamicView({
                 ...(component || {}),
             });
         window.unigraph.getState('registry/dynamicView').subscribe(cb);
+
+        const cb2 = (newIts: any) =>
+            setCanClickthrough(
+                Object.keys(
+                    window.unigraph.getState('registry/dynamicViewDetailed')
+                        .value,
+                ).includes(getObject()?.type?.['unigraph.id']),
+            );
+        window.unigraph.getState('registry/dynamicViewDetailed').subscribe(cb2);
 
         const cbsel = (sel: any) => {
             if (sel?.includes?.(object?.uid)) setIsSelected(true);
@@ -101,6 +118,9 @@ export function AutoDynamicView({
 
         return function cleanup() {
             window.unigraph.getState('registry/dynamicView').unsubscribe(cb);
+            window.unigraph
+                .getState('registry/dynamicViewDetailed')
+                .unsubscribe(cb2);
             window.unigraph.getState('global/selected').unsubscribe(cbsel);
             window.unigraph.getState('global/focused').unsubscribe(cbfoc);
         };
@@ -246,7 +266,7 @@ export function AutoDynamicView({
 
     const attach = React.useCallback(
         (domElement) => {
-            if (domElement && object.uid) {
+            if (domElement && object.uid && recursive) {
                 const ids = getParents(domElement);
                 if (ids.includes(object?.uid) && !inline) {
                     // recursive - deal with it somehow
@@ -391,6 +411,8 @@ export function AutoDynamicView({
                         boxSizing: 'border-box',
                         display: 'inline-flex',
                         alignItems: 'center',
+                        cursor:
+                            noClickthrough || !canClickthrough ? '' : 'pointer',
                         ...(inline ? {} : { width: '100%' }),
                         ...(isMobile() ? { touchAction: 'pan-y' } : {}),
                         ...style,
@@ -413,6 +435,23 @@ export function AutoDynamicView({
                         if (isMultiSelectKeyPressed(ev)) {
                             ev.stopPropagation();
                             selectUid(object.uid, false);
+                        }
+                    }}
+                    onClick={(ev) => {
+                        if (!noClickthrough && canClickthrough) {
+                            typeof onClick === 'function'
+                                ? onClick(ev)
+                                : (() => {
+                                      ev.stopPropagation();
+                                      ev.preventDefault();
+                                      window.wsnavigator(
+                                          `/library/object?uid=${
+                                              object?.uid
+                                          }&viewer=${'dynamic-view-detailed'}&type=${
+                                              object?.type?.['unigraph.id']
+                                          }`,
+                                      );
+                                  })();
                         }
                     }}
                     {...(attributes || {})}
@@ -458,6 +497,7 @@ export function AutoDynamicView({
                                                 }}
                                                 index={index}
                                                 noSubentities
+                                                noClickthrough={noClickthrough}
                                             />
                                         </li>
                                     ),
