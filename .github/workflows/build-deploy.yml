@@ -45,21 +45,14 @@ jobs:
             - run: yarn install
             - run: yarn build-deps
             # - run: yarn backend-build
-            - run: USE_HARD_LINKS=true; CI=false; yarn electron-dist
+            - run: CI=false; yarn electron-dist
 
-            # - name: Upload backend as artifact
+            # - name: Upload app as artifact
             #   uses: actions/upload-artifact@v2
             #   with:
-            #       name: unigraph_backend
-            #       path: ./dist/dgraph_linux_amd64
+            #       name: unigraph
+            #       path: ${{env.LINUX_BUILD_PATH}}
             #       if-no-files-found: error
-
-            - name: Upload frontend as artifact
-              uses: actions/upload-artifact@v2
-              with:
-                  name: unigraph_frontend
-                  path: ${{env.LINUX_BUILD_PATH}}
-                  if-no-files-found: error
 
             - name: Release
               uses: softprops/action-gh-release@v1
