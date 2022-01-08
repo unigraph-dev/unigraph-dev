@@ -71,6 +71,15 @@ function AdderComponent({
                                     object={new UnigraphObject(padded)}
                                     noDrag
                                     noDrop
+                                    noClickthrough
+                                    style={{
+                                        border: 'gray',
+                                        borderStyle: 'dashed',
+                                        borderWidth: 'thin',
+                                        margin: '2px',
+                                        borderRadius: '8px',
+                                        padding: '4px',
+                                    }}
                                 />
                             </div>,
                         );

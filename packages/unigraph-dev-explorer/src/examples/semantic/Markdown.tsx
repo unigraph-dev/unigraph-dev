@@ -44,11 +44,15 @@ export const Markdown: DynamicViewRenderer = ({
         return (
             <Typography
                 variant={!isHeading ? 'body1' : 'h4'}
-                style={{ opacity: data['_value.%'] ? 'unset' : '0' }}
+                style={{
+                    opacity: data['_value.%'] || isHeading ? 'unset' : '0',
+                }}
             >
                 <ReactMarkdown
                     // eslint-disable-next-line react/no-children-prop
-                    children={data['_value.%'] || 'a'}
+                    children={
+                        data['_value.%'] || (isHeading ? '_no title_' : '|')
+                    }
                     remarkPlugins={[remarkMath, remarkWikilink, remarkBreaks]}
                     rehypePlugins={[rehypeKatex]}
                     components={{

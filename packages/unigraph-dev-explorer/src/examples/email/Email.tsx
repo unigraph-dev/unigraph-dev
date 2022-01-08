@@ -1,6 +1,6 @@
 import {
     Avatar,
-    ListItem,
+    ListItem as div,
     ListItemAvatar,
     ListItemText,
 } from '@material-ui/core';
@@ -14,10 +14,12 @@ import { DynamicViewRenderer } from '../../global.d';
 import { getComponentFromPage } from '../../utils';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
 import {
+    registerDetailedDynamicViews,
     registerDynamicViews,
     withUnigraphSubscription,
 } from '../../unigraph-react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
+import { AutoDynamicViewDetailed } from '../../components/ObjectView/AutoDynamicViewDetailed';
 
 type AEmail = {
     name: string;
@@ -34,8 +36,18 @@ type AEmail = {
 };
 
 const EmailListBody: React.FC<{ data: any[] }> = ({ data }) => (
-    <DynamicObjectListView items={data} context={null} />
+    <DynamicObjectListView items={data} context={null} compact />
 );
+
+const EmailMessageDetailed: DynamicViewRenderer = ({ data, callbacks }) => {
+    return (
+        <AutoDynamicViewDetailed
+            callbacks={{ ...callbacks, context: data }}
+            object={data?.get('content/text')?._value?._value}
+            context={data}
+        />
+    );
+};
 
 const EmailMessage: DynamicViewRenderer = ({ data, callbacks }) => {
     const unpadded: AEmail = unpad(data);
@@ -49,7 +61,22 @@ const EmailMessage: DynamicViewRenderer = ({ data, callbacks }) => {
             '_value.%'
         ];
     return (
-        <ListItem>
+        <div
+            style={{ display: 'contents' }}
+            onClick={(ev) => {
+                ev.stopPropagation();
+                ev.preventDefault();
+                window.newTab(
+                    window.layoutModel,
+                    getComponentFromPage('/library/object', {
+                        uid: data.uid,
+                        type: data?.type?.['unigraph.id'],
+                    }),
+                );
+                if (callbacks?.removeFromContext && callbacks?.removeOnEnter)
+                    callbacks.removeFromContext();
+            }}
+        >
             <ListItemAvatar>
                 <Avatar
                     src={
@@ -76,43 +103,20 @@ const EmailMessage: DynamicViewRenderer = ({ data, callbacks }) => {
                         new Date(unpadded?.message?.date_received),
                     ),
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <Link
-                            onClick={() => {
-                                const htmlUid =
-                                    data?.get('content/text')?._value?._value
-                                        ?.uid;
-                                if (htmlUid) {
-                                    window.newTab(
-                                        window.layoutModel,
-                                        getComponentFromPage(
-                                            '/library/object',
-                                            {
-                                                uid: htmlUid,
-                                                context: data.uid,
-                                                type: data?.type?.[
-                                                    'unigraph.id'
-                                                ],
-                                            },
-                                        ),
-                                    );
-                                }
-                                if (
-                                    callbacks?.removeFromContext &&
-                                    callbacks?.removeOnEnter
-                                )
-                                    callbacks.removeFromContext();
-                            }}
-                        />
+                        <Link />
                         {`${unpadded.content?.abstract}...`}
                     </div>,
                 ]}
             />
-        </ListItem>
+        </div>
     );
 };
 
 export const init = () => {
     registerDynamicViews({ '$/schema/email_message': EmailMessage });
+    registerDetailedDynamicViews({
+        '$/schema/email_message': EmailMessageDetailed,
+    });
 };
 
 export const EmailList = withUnigraphSubscription(

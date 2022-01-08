@@ -66,6 +66,6 @@
   },
   "version": "0.0.1",
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": "eslint --cache --fix"
+    "*.{ts,tsx}": "eslint --cache --fix"
   }
 }
