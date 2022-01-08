@@ -45,7 +45,7 @@ jobs:
             - run: yarn install
             - run: yarn build-deps
             # - run: yarn backend-build
-            - run: yarn electron-dist
+            - run: CI=false yarn electron-dist
 
             # - name: Upload backend as artifact
             #   uses: actions/upload-artifact@v2
