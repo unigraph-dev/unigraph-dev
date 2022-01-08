@@ -3,7 +3,7 @@ name: build-dgraph
 on:
     push:
         tags:
-            - 'v*.*.*'
+            - 'v1.*.*' # 1 just so it doesn't run during testing
 
 jobs:
     build-dgraph:
