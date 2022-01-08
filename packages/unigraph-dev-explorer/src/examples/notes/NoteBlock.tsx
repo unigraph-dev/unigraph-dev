@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import { setRef, Typography } from '@material-ui/core';
 import React, { FormEvent } from 'react';
 import {
@@ -280,6 +281,8 @@ export function DetailedNoteBlock({
     isCollapsed,
     focused,
 }: any) {
+    // eslint-disable-next-line no-bitwise
+    // isChildren |= callbacks?.isEmbed;
     if (!callbacks?.viewId)
         callbacks = { ...(callbacks || {}), viewId: getRandomInt() };
     const [subentities, otherChildren] = getSubentities(data);
@@ -962,6 +965,12 @@ export function DetailedNoteBlock({
                                                     noDrag
                                                     compact
                                                     allowSubentity
+                                                    noSubentities={
+                                                        el.type?.[
+                                                            'unigraph.id'
+                                                        ] ===
+                                                        '$/schema/note_block'
+                                                    }
                                                     noBacklinks={
                                                         el.type?.[
                                                             'unigraph.id'

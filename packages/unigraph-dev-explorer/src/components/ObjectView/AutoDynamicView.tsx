@@ -38,6 +38,7 @@ export function AutoDynamicView({
     noContextMenu,
     subentityExpandByDefault,
     noBacklinks,
+    noSubentities,
     noParents,
     withParent,
     compact,
@@ -422,18 +423,37 @@ export function AutoDynamicView({
                     {noBacklinks ? [] : BacklinkComponent}
                 </div>
 
-                {showSubentities && getSubentities(object)?.length > 0 ? (
-                    <div style={{ width: '100%', paddingLeft: '24px' }}>
-                        <ul>
-                            {getSubentities(object).map((el: any) => (
-                                <li>
-                                    <AutoDynamicView
-                                        object={new UnigraphObject(el._value)}
-                                        callbacks={callbacks}
-                                    />
-                                </li>
-                            ))}
-                        </ul>
+                {!noSubentities && getSubentities(getObject())?.length > 0 ? (
+                    <div style={{ width: '100%', paddingLeft: '12px' }}>
+                        <Typography
+                            onClick={() => {
+                                setShowSubentities(!showSubentities);
+                            }}
+                            variant="body2"
+                            style={{ color: 'gray' }}
+                        >
+                            {!showSubentities ? '+ show ' : '- hide '}
+                            {`${
+                                getSubentities(getObject())?.length
+                            } subentities`}
+                        </Typography>
+                        {showSubentities ? (
+                            <ul>
+                                {getSubentities(getObject()).map((el: any) => (
+                                    <li>
+                                        <AutoDynamicView
+                                            object={
+                                                new UnigraphObject(el._value)
+                                            }
+                                            component={component}
+                                            callbacks={callbacks}
+                                        />
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            []
+                        )}
                     </div>
                 ) : (
                     []

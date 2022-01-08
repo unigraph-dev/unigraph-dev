@@ -275,13 +275,15 @@ function DynamicList({
 
     React.useEffect(() => {
         // eslint-disable-next-line max-len
-        if (
-            scrollerRef.current?.el?.scrollHeight <
-                scrollerRef.current?.el?.clientHeight &&
-            loadedItems.length < items.length
-        ) {
-            setupProps?.next();
-        }
+        requestAnimationFrame(() => {
+            if (
+                scrollerRef.current?._infScroll?.scrollHeight <
+                    scrollerRef.current?.el?.clientHeight &&
+                loadedItems.length < items.length
+            ) {
+                setupProps?.next();
+            }
+        });
     }, [loadedItems.length]);
 
     React.useEffect(() => {
