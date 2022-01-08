@@ -57,29 +57,33 @@ export function WorkspacePageComponent({
     maximize,
     paddingTop,
     id,
+    tabCtx,
 }: any) {
     const [_maximize, setMaximize] = React.useState(maximize);
     React.useContext(TabContext).setMaximize = (val: boolean) => {
         setMaximize(val);
     };
+    const memoTabCtx = React.useMemo(() => tabCtx, [id]);
 
     return (
-        <div style={{ width: '100%', height: '100%', overflow: 'auto' }}>
-            <Container
-                maxWidth={_maximize ? false : 'lg'}
-                id={`workspaceContainer${id}`}
-                disableGutters
-                style={{
-                    paddingTop: _maximize || !paddingTop ? '0px' : '12px',
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                }}
-            >
-                <CssBaseline />
-                {children}
-            </Container>
-        </div>
+        <TabContext.Provider value={memoTabCtx}>
+            <div style={{ width: '100%', height: '100%', overflow: 'auto' }}>
+                <Container
+                    maxWidth={_maximize ? false : 'lg'}
+                    id={`workspaceContainer${id}`}
+                    disableGutters
+                    style={{
+                        paddingTop: _maximize || !paddingTop ? '0px' : '12px',
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                    }}
+                >
+                    <CssBaseline />
+                    {children}
+                </Container>
+            </div>
+        </TabContext.Provider>
     );
 }
 
@@ -530,28 +534,27 @@ export function WorkSpace(this: any) {
         ).subscribers = [subber];
 
         return component.startsWith('/pages/') ? (
-            <TabContext.Provider value={tabCtx(node, config)}>
-                <WorkspacePageComponent
-                    maximize={page.maximize}
-                    paddingTop={page.paddingTop}
-                    id={node._attributes.id}
-                >
-                    {node._attributes.floating ? (
-                        <div id="global-elements">
-                            <SearchOverlayPopover />
-                            <ContextMenu />
-                            <InlineSearch />
-                            <MobileBar />
-                        </div>
-                    ) : (
-                        []
-                    )}
-                    <WorkspaceInnerEl
-                        config={{ id: config.id, ...(config.viewConfig || {}) }}
-                        component={component}
-                    />
-                </WorkspacePageComponent>
-            </TabContext.Provider>
+            <WorkspacePageComponent
+                maximize={page.maximize}
+                paddingTop={page.paddingTop}
+                id={node._attributes.id}
+                tabCtx={tabCtx(node, config)}
+            >
+                {node._attributes.floating ? (
+                    <div id="global-elements">
+                        <SearchOverlayPopover />
+                        <ContextMenu />
+                        <InlineSearch />
+                        <MobileBar />
+                    </div>
+                ) : (
+                    []
+                )}
+                <WorkspaceInnerEl
+                    config={{ id: config.id, ...(config.viewConfig || {}) }}
+                    component={component}
+                />
+            </WorkspacePageComponent>
         ) : (
             <WorkspaceInnerEl
                 config={{ id: config.id, ...(config.viewConfig || {}) }}
