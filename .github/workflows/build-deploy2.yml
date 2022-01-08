@@ -66,6 +66,7 @@ jobs:
             - run: yarn install
             - run: yarn build-deps
             - run: yarn prepare-electron
+            - run: cd packages/unigraph-dev-electron
 
             # - name: Prepare for app notarization (macOS)
             #   if: startsWith(matrix.os, 'macos')
