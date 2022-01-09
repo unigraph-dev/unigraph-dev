@@ -64,10 +64,14 @@ jobs:
             - run: mv ./dgraph-download/dgraph_linux_amd64 ${{env.DGRAPH_PATH}}/dgraph
             # - run: mv ${{env.DGRAPH_PATH}}/dgraph_linux_amd64 ${{env.DGRAPH_PATH}}/dgraph
 
-            - run: ls ./packages/unigraph-dev-common/lib/data
+            
             - run: yarn install
-            - run: yarn prepare-electron
+            - run: ls ./packages/unigraph-dev-common/
+            - run: yarn build-deps
+            - run: ls ./packages/unigraph-dev-common/lib/
             - run: ls ./packages/unigraph-dev-common/lib/data
+            - run: yarn prepare-electron
+            
 
             - name: Build and Publish Electron App
               uses: TheExGenesis/action-electron-builder@master
