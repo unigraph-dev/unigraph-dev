@@ -1,24 +1,32 @@
 import React from 'react';
 import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import { TabContext } from '../../utils';
 import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
 
-export const AppLibrary = () => {
-
+export function AppLibrary() {
     const [totalViews, setTotalViews] = React.useState([]);
-
+    const tabContext = React.useContext(TabContext);
     React.useEffect(() => {
         const viewId = getRandomInt();
 
-        window.unigraph.subscribeToType('$/schema/view', (views: any) => {
-            setTotalViews(views)
-        }, viewId);
+        tabContext.subscribeToType(
+            '$/schema/view',
+            (views: any) => {
+                setTotalViews(views);
+            },
+            viewId,
+        );
 
-        return function cleanup () { window.unigraph.unsubscribe(viewId) }
-    })
+        return function cleanup() {
+            tabContext.unsubscribe(viewId);
+        };
+    }, []);
 
-    return <div>
-        {totalViews.map((el: any) =>
-            <AutoDynamicView object={el}/>)}
-    </div>
-
+    return (
+        <div>
+            {totalViews.map((el: any) => (
+                <AutoDynamicView object={el} />
+            ))}
+        </div>
+    );
 }

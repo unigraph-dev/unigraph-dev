@@ -46,7 +46,7 @@ if (account?.uid) {
     await unigraph.updateObject(account.uid, {
         access_token: token,
         token_expires_in: (new Date((new Date()).getTime() + 3600 * 1000)).toISOString()
-    });
+    }, undefined, undefined, []);
 
     let auth = new google.auth.OAuth2(
         gmailClientId,
@@ -69,8 +69,8 @@ if (account?.uid) {
             name: {type: {"unigraph.id": "$/schema/markdown"}, _value: cal.summary}
         }
     });
+    const uids = await unigraph.addObject(calObjs, '$/schema/calendar', undefined, []);
     for (let i=0; i<calObjs.length; ++i) {
-        const uids = await unigraph.addObject(calObjs[i], '$/schema/calendar');
-        await unigraph.runExecutable('$/executable/sync-google-calendar-specific', {uid: uids[0]}, {calendar: calendar});
+        await unigraph.runExecutable('$/executable/sync-google-calendar-specific', {uid: uids[i]}, {calendar: calendar});
     }
 }

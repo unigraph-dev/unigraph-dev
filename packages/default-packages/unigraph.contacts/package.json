@@ -1,0 +1,89 @@
+{
+    "displayName": "Unigraph Contacts",
+    "version": "0.0.1",
+    "description": "Contacts management with Unigraph",
+    "unigraph": {
+        "package_name": "unigraph.contacts",
+        "schemas": [
+            {"id": "contact", "src": "schemas/contact.json"}
+        ],
+        "executables": [{
+            "id": "merge-person-with-contacts",
+            "env": "routine/js",
+            "src": "executables/mergePersonWithContacts.js",
+            "editable": true,
+            "name": "Merge a person object with existing contacts",
+            "on_hook": "after_object_created/person"
+        },
+        {
+            "id": "add-person-as-contact",
+            "env": "routine/js",
+            "src": "executables/addPersonAsContact.js",
+            "editable": true,
+            "name": "Add a person as a contact"
+        },
+        {
+            "id": "migrate-person-to-contact",
+            "env": "routine/js",
+            "src": "executables/migratePersonToContact.js",
+            "editable": true,
+            "name": "Change all occurances of a persons mentioned in database into contact"
+        },
+        {
+            "id": "contact-view",
+            "env": "component/react-jsx",
+            "src": "executables/contactView.jsx",
+            "editable": true,
+            "name": "Contact view",
+            "imports": [
+                {"env": "npm", "package": "@material-ui/core", "import": "ListItemIcon", "as": "ListItemIcon"},
+                {"env": "npm", "package": "@material-ui/core", "import": "ListItemText", "as": "ListItemText"},
+                {"env": "npm", "package": "@material-ui/core", "import": "Typography", "as": "Typography"},
+                {"env": "npm", "package": "@material-ui/core", "import": "Avatar", "as": "Avatar"}
+            ]
+        },
+        {
+            "id": "contacts-list-view",
+            "env": "component/react-jsx",
+            "src": "executables/contactsListView.jsx",
+            "editable": true,
+            "name": "Contacts list view",
+            "imports": [
+                {"env": "npm", "package": "@material-ui/core", "import": "TextField", "as": "TextField"},
+                {"env": "npm", "package": "@material-ui/core", "import": "Button", "as": "Button"}
+            ]
+        },
+        {
+            "id": "contact-view-detailed",
+            "env": "component/react-jsx",
+            "src": "executables/contactViewDetailed.jsx",
+            "editable": true,
+            "name": "Contact view detailed",
+            "imports": [
+                {"env": "npm", "package": "@material-ui/core", "import": "Typography", "as": "Typography"},
+                {"env": "npm", "package": "@material-ui/core", "import": "Card", "as": "Card"},
+                {"env": "npm", "package": "@material-ui/core", "import": "TextField", "as": "TextField"},
+                {"env": "npm", "package": "@material-ui/core", "import": "Button", "as": "Button"},
+                {"env": "npm", "package": "@material-ui/core", "import": "MenuItem", "as": "MenuItem"},
+                {"env": "npm", "package": "@material-ui/icons", "import": "MoreVert", "as": "MoreVert"},
+                {"env": "npm", "package": "@material-ui/core", "import": "Grid", "as": "Grid"}
+            ]
+        }],
+        "entities": [{
+            "id": "contact_view",
+            "src": "entities/contact_view.json"
+        },
+        {
+            "id": "contacts_list_view",
+            "src": "entities/contacts_list_view.json"
+        },
+        {
+            "id": "contact_view_detailed",
+            "src": "entities/contact_view_detailed.json"
+        },
+        {
+            "id": "convert_to_contact_context_menu",
+            "src": "entities/convert_to_contact_context_menu.json"
+        }]
+    }
+}

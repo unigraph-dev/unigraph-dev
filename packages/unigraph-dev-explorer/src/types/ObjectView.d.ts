@@ -1,24 +1,42 @@
-import React from "react";
-import { UnigraphObject } from "unigraph-dev-common/lib/api/unigraph";
+import React from 'react';
+import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 
 export type AutoDynamicViewCallbacks = {
-    context?: any,
-    removeFromContext?: (where: "left" | "right" | undefined) => any,
-} & Record<string, any>
+    context?: any;
+    removeFromContext?: (where: 'left' | 'right' | undefined) => any;
+} & Record<string, any>;
 
 export type AutoDynamicViewProps = {
-    object: UnigraphObject & any,
-    callbacks?: AutoDynamicViewCallbacks,
-    component?: Record<string, {view: React.FC<any>, query?: (string) => string}>,
-    attributes?: Record<string, any>,
-    inline?: boolean,
-    allowSubentity?: boolean,
-    allowSemantic?: boolean,
-    style?: React.CSSProperties,
-    noDrag?: boolean,
-    noDrop?: boolean,
-    noContextMenu?: boolean,
-    subentityExpandByDefault?: boolean,
-}
+    object: UnigraphObject & any;
+    callbacks?: AutoDynamicViewCallbacks;
+    component?: Record<
+        string,
+        { view: React.FC<any>; query?: (string) => string }
+    >;
+    attributes?: Record<string, any>;
+    inline?: boolean;
+    allowSubentity?: boolean;
+    allowSemantic?: boolean;
+    style?: React.CSSProperties;
+    noDrag?: boolean;
+    noDrop?: boolean;
+    noContextMenu?: boolean;
+    noSubentities?: boolean;
+    noBacklinks?: boolean;
+    noParents?: boolean;
+    withParent?: boolean;
+    subentityExpandByDefault?: boolean;
+    compact?: boolean;
+    index?: number;
+    noClickthrough?: boolean;
+    onClick?: any;
+    recursive?: boolean;
+};
 
-export type ContextMenuGenerator = (uid: string, object: any, handleClose: () => any, callbacks?: any, contextUid?: string) => React.ReactElement<any>
+export type ContextMenuGenerator = (
+    uid: string,
+    object: any,
+    handleClose: () => any,
+    callbacks?: any,
+    contextUid?: string,
+) => React.ReactElement<any>;

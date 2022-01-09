@@ -1,6 +1,6 @@
-import _ from "lodash"
-import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
-import { buildGraph } from "unigraph-dev-common/lib/utils/utils";
+import _ from 'lodash';
+import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
+import { buildGraph } from 'unigraph-dev-common/lib/utils/utils';
 
 /**
  * Manages the data side of an infinite scrolling view.
@@ -9,43 +9,87 @@ import { buildGraph } from "unigraph-dev-common/lib/utils/utils";
  * @param chunk Number, default to 50, meaning how much objects to get in a given subscription.
  * @param stateCallback A callback that would be called every time loaded items are updated.
  */
-export const setupInfiniteScrolling = (uids: string[], chunk = 50, stateCallback: (loadedItems: any[]) => void, subscribeOptions?: any) => {
-
+export const setupInfiniteScrolling = (
+    uids: string[],
+    // eslint-disable-next-line default-param-last
+    chunk = 50,
+    stateCallback: (loadedItems: any[]) => void,
+    tabContext: any,
+    subscribeOptions?: any,
+) => {
     const states = {
-        subs: [] as any[],
+        results: [] as any[],
+        currentSubs: [] as string[],
         chunks: _.chunk(uids, chunk),
-    }
+        subsId: getRandomInt(),
+    };
 
     const onStateUpdated = () => {
-        const items = states.subs.reduce((prev: any[], curr: any) => [...prev, ...curr.result], []);
-        stateCallback(items);
-    }
+        stateCallback(states.results);
+    };
 
     const onUserNext = () => {
-        const [subsHead, chunksHead] = [states.subs.length, states.chunks.length];
+        const [subsHead, chunksHead] = [
+            states.currentSubs.length / chunk,
+            states.chunks.length,
+        ];
         if (subsHead < chunksHead) {
             const toSub = states.chunks[subsHead];
-            const subsId = getRandomInt();
-            states.subs.push({id: subsId, result: []});
-            window.unigraph.subscribeToObject(toSub, (results: any[] | any) => {
-                let uidsMap: any = {};
-                buildGraph(results);
-                results.forEach ? results.forEach((el: any) => {uidsMap[el.uid] = el}) : uidsMap[results.uid] = results;
-                states.subs[subsHead].result = toSub.map(el => uidsMap[el]);
-                onStateUpdated();
-            }, subsId, subscribeOptions);
+            states.currentSubs = [
+                ...states.results.map((el: any) => el.uid),
+                ...toSub,
+            ];
+            tabContext.subscribe(
+                {
+                    type: 'object',
+                    uid: states.currentSubs,
+                    options: subscribeOptions,
+                },
+                () => false,
+                states.subsId,
+                true,
+            );
         }
-    }
+    };
+
+    const onUpdate = (newUids: string[]) => {
+        if (_.isEqual(uids, newUids)) return;
+        uids = newUids;
+        states.chunks = _.chunk(uids, chunk);
+        states.results = [];
+        states.currentSubs = [];
+        onUserNext();
+    };
 
     const onCleanup = () => {
-        states.subs.forEach(el => window.unigraph.unsubscribe(el.id));
-        stateCallback = () => {};
-    }
+        tabContext.unsubscribe(states.subsId);
+        stateCallback = () => false;
+    };
 
     const returns = {
         next: onUserNext,
-        cleanup: onCleanup
-    }
+        cleanup: onCleanup,
+        onUpdate,
+    };
+
+    const toSub = states.chunks[0] || [];
+    states.currentSubs = toSub;
+    tabContext.subscribeToObject(
+        toSub,
+        (results: any[] | any) => {
+            const uidsMap: any = {};
+            buildGraph(results);
+            results.forEach
+                ? results.forEach((el: any) => {
+                      uidsMap[el.uid] = el;
+                  })
+                : (uidsMap[results.uid] = results);
+            states.results = states.currentSubs.map((el: any) => uidsMap[el]);
+            onStateUpdated();
+        },
+        states.subsId,
+        subscribeOptions,
+    );
 
     return returns;
-}
+};

@@ -1,42 +1,53 @@
-
-import { Chip } from "@material-ui/core";
+import { Chip } from '@material-ui/core';
 import { LocalOffer } from '@material-ui/icons';
-import { getContrast, NavigationContext } from '../../utils';
-import { DynamicViewRenderer } from '../../global';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
+import Icon from '@mdi/react';
+import { mdiTagOutline } from '@mdi/js';
+import { getContrast, NavigationContext } from '../../utils';
+import { DynamicViewRenderer } from '../../global.d';
 import { registerDynamicViews } from '../../unigraph-react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 
-import Icon from '@mdi/react'
-import { mdiTagOutline } from '@mdi/js';
-
-export const Tag: DynamicViewRenderer = ({data, callbacks}) => {
+export const Tag: DynamicViewRenderer = ({ data, callbacks }) => {
     let tag = data;
-    let uid = data.uid
-    if (data['_value']) tag = unpad(data);
-    const bgc = (tag?.color?.startsWith && tag.color.startsWith('#')) ? tag.color : "unset";
-    return <NavigationContext.Consumer>
-        {(navigator) => <Chip
+    const { uid } = data;
+    if (data._value) tag = unpad(data);
+    const bgc =
+        tag?.color?.startsWith && tag.color.startsWith('#')
+            ? tag.color
+            : 'unset';
+    return (
+        <Chip
             size="small"
-            icon={<Icon path={mdiTagOutline} size={0.75} style={{filter: (bgc === "unset" || getContrast(bgc) === "black") ? "unset" : "invert(1)"}}/>}
+            icon={
+                <Icon
+                    path={mdiTagOutline}
+                    size={0.75}
+                    style={{
+                        filter:
+                            bgc === 'unset' || getContrast(bgc) === 'black'
+                                ? 'unset'
+                                : 'invert(1)',
+                    }}
+                />
+            }
             style={{
                 backgroundColor: bgc,
-                color: bgc.startsWith("#") ? getContrast(bgc) : "unset"
+                color: bgc.startsWith('#') ? getContrast(bgc) : 'unset',
             }}
-            variant={"outlined"}
+            variant="outlined"
             label={tag.name}
             onClick={() => {
-                //console.log(data)
-                navigator(`/library/object?uid=${uid}&type=${data?.type?.['unigraph.id']}`)
+                console.log(data);
+                window.wsnavigator(`/library/backlink?uid=${uid}`);
             }}
-        />}
-    </NavigationContext.Consumer>
-}
+        />
+    );
+};
 
-export const SemanticProperties = ({data}: any) => {
-    //console.log(data);
-
-    return (data?.['_value']?.['children']?.['_value[']) ? (data?.['_value']?.['children']?.['_value['].map((el: any) => {
-        return <AutoDynamicView object={unpad(el['_value'])} />
-    })) : []
-}
+export const SemanticProperties = ({ data }: any) =>
+    data?._value?.children?.['_value[']
+        ? data?._value?.children?.['_value['].map((el: any) => (
+              <AutoDynamicView object={unpad(el._value)} />
+          ))
+        : [];

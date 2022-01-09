@@ -1,29 +1,31 @@
-import { Chip } from "@material-ui/core";
-import { mdiPlayOutline } from "@mdi/js";
-import React from "react";
-import Icon from '@mdi/react'
+import { Chip } from '@material-ui/core';
+import { mdiPlayOutline } from '@mdi/js';
+import React from 'react';
+import Icon from '@mdi/react';
 
-export const SubentityView = ({data, callbacks}: any) => {
-    const [isMain, setIsMain] = React.useState(false);
-    const [subEntities, setSubentities] = React.useState(1);
+export function SubentityView({ data, callbacks }: any) {
+    const objDef =
+        window.unigraph.getNamespaceMap?.()?.[
+            data?._value?.type?.['unigraph.id']
+        ];
 
-    React.useEffect(() => {
-        if (!callbacks.addSubentity) {
-            callbacks.addSubentity = () => setSubentities(subEntities + 1);
-            setIsMain(true);
-        } else {
-            callbacks.addSubentity();
-        }
-    }, [])
-
-    return isMain ? <Chip
-        size="small"
-        icon={<Icon path={mdiPlayOutline} size={0.75}/>}
-        variant={"outlined"}
-        label={"Expand " + subEntities + " subentities"}
-        onClick={() => {
-            callbacks?.showSubentities?.();
-        }}
-    /> : []
-
+    return (
+        <Chip
+            size="small"
+            icon={
+                <div
+                    style={{
+                        minWidth: '16px',
+                        minHeight: '16px',
+                        marginLeft: '2px',
+                        marginRight: '-4px',
+                        backgroundImage: `url("data:image/svg+xml,${objDef?._icon}")`,
+                        opacity: 0.54,
+                    }}
+                />
+            }
+            variant="outlined"
+            label={`Child: ${objDef?._name}`}
+        />
+    );
 }

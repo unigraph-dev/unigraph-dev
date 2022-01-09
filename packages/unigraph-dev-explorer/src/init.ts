@@ -1,169 +1,307 @@
-import { unigraph } from "unigraph-dev-common";
-import { unpad } from "unigraph-dev-common/lib/utils/entityUtils";
-import { isJsonString } from "unigraph-dev-common/lib/utils/utils";
-import { BasicPersonView, CodeOrComponentView, DefaultSkeleton, Executable, ViewViewDetailed } from "./components/ObjectView/DefaultObjectView";
-import { ANotification, Notification as CNotification } from "./components/UnigraphCore/Notification";
-import { UserSettings } from "./global";
+/* eslint-disable @typescript-eslint/no-var-requires */
+import { unigraph } from 'unigraph-dev-common';
+import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
+import {
+    isJsonString,
+    getRandomInt,
+} from 'unigraph-dev-common/lib/utils/utils';
+import _ from 'lodash';
+import { ViewViewDetailed } from './components/ObjectView/DefaultObjectView';
+import {
+    BasicPersonView,
+    DefaultSkeleton,
+} from './components/ObjectView/BasicObjectViews';
+import {
+    CodeOrComponentView,
+    Executable,
+} from './components/ObjectView/ExecutableView';
+import {
+    ANotification,
+    Notification as CNotification,
+} from './components/UnigraphCore/Notification';
+import { UserSettings } from './global.d';
 
-import { init as nb_init } from './examples/notes/init';
-import { init as sm_init } from './examples/semantic/init';
-import { init as cl_init } from './examples/calendar/init';
-import { init as tw_init } from './examples/twitter/Tweet';
-import { init as re_init } from './examples/reddit/RedditPost';
-import { init as bm_init } from './examples/bookmarks/Bookmarks';
-import { init as em_init } from './examples/email/Email';
-import { init as td_init } from './examples/todo/TodoList';
-import { init as rss_init } from './examples/rss_reader/RSSFeeds';
-import { pb_init } from './components/UnigraphCore/Pinboard';
+import { init as nbInit } from './examples/notes/init';
+import { init as smInit } from './examples/semantic/init';
+import { init as clInit } from './examples/calendar/init';
+import { init as twInit } from './examples/twitter/Tweet';
+import { init as reInit } from './examples/reddit/RedditPost';
+import { init as bmInit } from './examples/bookmarks/Bookmarks';
+import { init as emInit } from './examples/email/Email';
+import { init as tdInit } from './examples/todo/TodoList';
+import { init as rssInit } from './examples/rss_reader/RSSFeeds';
+import { init as pbInit } from './components/UnigraphCore/Pinboard';
 
-import { ListObjectQuery, ListObjectView } from "./components/UnigraphCore/ListObjectView";
-import { getRandomInt } from "unigraph-dev-common/lib/api/unigraph";
-import { SubentityView } from "./components/UnigraphCore/SubentityView";
-import { ViewItem } from "./components/UnigraphCore/FavoriteBar";
+import {
+    ListObjectQuery,
+    ListObjectView,
+} from './components/UnigraphCore/ListObjectView';
+import { SubentityView } from './components/UnigraphCore/SubentityView';
+import { ViewItem } from './components/ObjectView/ViewObjectView';
+import { backlinkQuery } from './components/ObjectView/backlinksUtils';
+import { MiniListView } from './components/UnigraphCore/ListsList';
 
 window.reloadCommands = () => {
-    const commandsState = window.unigraph.getState("registory/commands");
-  
-    const pageCommands = Object.entries(window.unigraph.getState('registry/pages').value).map(([k, v]: any) => {
-      return {
-        name: "Open: " + v.name,
-        about: "Open the page " + v.name,
-        onClick: () => {
-          window.wsnavigator('/' + k)
-        }
-      }
-    });
-  
-    commandsState.setValue(pageCommands);
-}
+    const commandsState = window.unigraph.getState('registry/commands');
+
+    const pageCommands = Object.entries(
+        window.unigraph.getState('registry/pages').value,
+    ).map(([k, v]: any) => ({
+        name: `Open: ${v.name}`,
+        about: `Open the page ${v.name}`,
+        onClick: (ev: any, setInput: any, setClose: any) => {
+            window.wsnavigator(`/${k}`);
+            setInput('');
+            setClose();
+        },
+    }));
+
+    const adderCommands = Object.entries(
+        window.unigraph.getState('registry/quickAdder').value,
+    )
+        .map(([k, v]: any) => {
+            if ((v.alias || []).includes(k)) return false;
+            const matches = [k, ...(v.alias || [])]
+                .map((el: string) => `+${el}`)
+                .join(' / ');
+            return {
+                name: `${matches}: ${v.description}`,
+                about: 'Add a Unigraph object',
+                onClick: (ev: any, setInput: any) => {
+                    ev.stopPropagation();
+                    ev.preventDefault();
+                    setInput(`+${k} `);
+                },
+                group: 'adder',
+            };
+        })
+        .filter(Boolean);
+
+    const searchCommand = {
+        name: '?<search query> : search Unigraph',
+        about: 'Search Unigraph',
+        onClick: (ev: any, setInput: any) => {
+            ev.stopPropagation();
+            ev.preventDefault();
+            setInput('?');
+        },
+        group: 'search',
+    };
+
+    commandsState.setValue([...adderCommands, searchCommand, ...pageCommands]);
+};
 
 /**
  * Things to do when Unigraph explorer loads
  */
 export function init(hostname?: string) {
-    console.log("initialized!")
-    let hst = hostname || (window.location.hostname.length ? window.location.hostname : "localhost");
-    let browserId = `${getRandomInt()}${getRandomInt()}`;
+    console.log('initialized!');
+    const hst =
+        hostname ||
+        (window.location.hostname.length
+            ? window.location.hostname
+            : 'localhost');
+    const browserId = `${getRandomInt()}${getRandomInt()}`;
 
     const defaultSettings: UserSettings = {
         serverLocation: `ws://${hst}:3001`,
-        newWindow: "new-tab",
+        newWindow: 'new-tab',
         nativeNotifications: true,
         developerMode: false,
-        browserId: browserId
-    }
+        browserId,
+    };
 
     let userSettings = defaultSettings;
 
     if (!isJsonString(window.localStorage.getItem('userSettings'))) {
-        window.localStorage.setItem('userSettings', JSON.stringify(defaultSettings));
-    } else { // @ts-ignore: checked type already
-        userSettings = JSON.parse(window.localStorage.getItem('userSettings'));
+        window.localStorage.setItem(
+            'userSettings',
+            JSON.stringify(defaultSettings),
+        );
+    } else {
+        userSettings = JSON.parse(
+            window.localStorage.getItem('userSettings') || '',
+        );
     }
 
     // Connect to Unigraph
-    window.unigraph = unigraph(userSettings.serverLocation, userSettings.browserId);
+    window.unigraph = unigraph(
+        userSettings.serverLocation,
+        userSettings.browserId,
+    );
 
-    const nfState = window.unigraph.addState('notification-center/notifications', []);
+    const nfState = window.unigraph.addState(
+        'notification-center/notifications',
+        [],
+    );
     nfState.subscribe((el: any[]) => {
         el = [...el].pop();
-        const unpadded: ANotification = unpad(el); 
-        let updated = new Date(unpadded?._updatedAt);
-        let current = new Date();
+        const unpadded: ANotification = unpad(el);
+        const updated = new Date(unpadded?._updatedAt);
+        const current = new Date();
         if (current.valueOf() - updated.valueOf() < 5000 && Notification) {
-            new Notification(unpadded.name, {body: unpadded.from + ": " + unpadded.content})
+            // eslint-disable-next-line no-new
+            new Notification(unpadded.name, {
+                body: `${unpadded.from}: ${unpadded.content}`,
+            });
         }
     });
 
-    const devState = window.unigraph.addState('settings/developerMode', userSettings.developerMode);
+    const devState = window.unigraph.addState(
+        'settings/developerMode',
+        userSettings.developerMode,
+    );
     devState.subscribe((val: boolean) => {
-        window.localStorage.setItem('userSettings', JSON.stringify({...JSON.parse(window.localStorage.getItem('userSettings')!), developerMode: val}))
+        window.localStorage.setItem(
+            'userSettings',
+            JSON.stringify({
+                ...JSON.parse(window.localStorage.getItem('userSettings')!),
+                developerMode: val,
+            }),
+        );
     });
 
-    const analyticsState = window.unigraph.addState('settings/enableAnalytics', window.localStorage.getItem('enableAnalytics') === "true");
+    const analyticsState = window.unigraph.addState(
+        'settings/enableAnalytics',
+        window.localStorage.getItem('enableAnalytics') === 'true',
+    );
     analyticsState.subscribe((val: boolean) => {
         if (val && !window.mixpanel) initAnalyticsIfOptedIn();
         window.localStorage.setItem('enableAnalytics', JSON.stringify(val));
     });
 
     window.unigraph.addState('global/selected', []);
+    window.unigraph.addState('global/focused', {
+        uid: '',
+        caret: 0,
+        type: '',
+    });
+    window.unigraph.addState('global/focused/actions', {});
 
     initContextMenu();
     initRegistry();
+    initBacklinkManager();
     initPackages();
 
-    if (window.localStorage.getItem('enableAnalytics') === "true") initAnalyticsIfOptedIn();
-}
-
-export type ContextMenuState = {
-    anchorPosition: {top: number, left: number},
-    menuContent: ((uid: string, object: any, onfire: () => any, callbacks?: any, contextUid?: string) => React.ReactElement)[],
-    contextObject: any,
-    contextUid: string,
-    schemaMenuContent: ((uid: string, object: any, onfire: () => any, callbacks?: any, contextUid?: string) => React.ReactElement)[],
-    menuContextContent: ((uid: string, object: any, onfire: () => any, callbacks?: any, contextUid?: string) => React.ReactElement)[],
-    contextContextObject?: any,
-    contextContextUid?: string,
-    removeFromContext?: string,
-    callbacks?: any,
-    extraContent: any,
-    windowName?: string,
-    show: boolean
-}
-
-export type SearchPopupState = {
-    anchorPosition?: {top: number, left: number},
-    anchorEl?: any,
-    show: boolean,
-    search?: string,
-    hideHidden?: boolean,
-    onSelected?: (newName: string, newUid: string) => any;
-    default: {
-        label: (search: string) => string;
-        onSelected: (search: string) => Promise<string>;
-    }[]
+    if (window.localStorage.getItem('enableAnalytics') === 'true')
+        initAnalyticsIfOptedIn();
 }
 
 function initContextMenu() {
-    window.unigraph.addState('global/contextMenu', {show: false});
-    window.unigraph.addState('global/searchPopup', {show: false});
+    window.unigraph.addState('global/contextMenu', { show: false });
+    window.unigraph.addState('global/searchPopup', { show: false });
     window.unigraph.addState('registry/omnibarSummoner', {});
 }
 
 function initRegistry() {
     window.unigraph.addState('registry/dynamicView', {
-        "$/schema/executable": {view: Executable},
-        "$/skeleton/default": {view: DefaultSkeleton},
-        "$/schema/notification": {view: CNotification},
-        "$/schema/person": {view: BasicPersonView},
-        "$/schema/subentity": {view: SubentityView},
-        "$/schema/view": {view: ViewItem},
+        '$/schema/executable': { view: Executable },
+        '$/skeleton/default': { view: DefaultSkeleton },
+        '$/schema/notification': { view: CNotification },
+        '$/schema/person': { view: BasicPersonView },
+        '$/schema/subentity': { view: SubentityView },
+        '$/schema/view': { view: ViewItem },
+        '$/schema/list': { view: MiniListView },
     });
     window.unigraph.addState('registry/dynamicViewDetailed', {
-        "$/schema/executable": {view: CodeOrComponentView},
-        "$/schema/view": {view: ViewViewDetailed},
-        '$/schema/list': {view: ListObjectView, query: ListObjectQuery},
+        '$/schema/executable': { view: CodeOrComponentView },
+        '$/schema/view': { view: ViewViewDetailed },
+        '$/schema/list': { view: ListObjectView, query: ListObjectQuery },
     });
-    window.unigraph.addState('registry/quickAdder', {})
+    window.unigraph.addState('registry/quickAdder', {});
     window.unigraph.addState('registry/pages', {});
     window.unigraph.addState('registry/widgets', {});
     window.unigraph.addState('registry/components', {});
     window.unigraph.addState('registry/contextMenu', {});
     window.unigraph.addState('registry/commands', {});
+    window.unigraph.addState('registry/backlinks', {});
+    window.unigraph.addState('registry/backlinksCallbacks', {});
 }
 
-function initAnalyticsIfOptedIn () {
+function initBacklinkManager() {
+    const subsId = getRandomInt();
+    let currentObjects: string[] = [];
+    let currentResults: any = {};
+
+    window.unigraph.subscribe(
+        {
+            type: 'object',
+            uid: [],
+            options: {
+                queryFn: backlinkQuery,
+            },
+        },
+        (newBacklinks: any[]) => {
+            const newVal = Object.fromEntries(
+                JSON.parse(JSON.stringify(newBacklinks)).map((el: any) => [
+                    el.uid,
+                    el,
+                ]),
+            );
+            newBacklinks
+                .map((el) => el.uid)
+                .map((el) => {
+                    const subs = window.unigraph.getState(
+                        'registry/backlinksCallbacks',
+                    ).value[el];
+                    if (Array.isArray(subs))
+                        subs.forEach((sub) => sub(newVal[el]));
+                });
+            currentResults = newVal;
+        },
+        subsId,
+    );
+
+    window.unigraph.getState('registry/backlinks').subscribe(
+        _.debounce((newVal: Record<string, any>) => {
+            currentObjects = _.uniq([
+                ...currentObjects,
+                ...Object.keys(newVal),
+            ]);
+            window.unigraph.subscribe(
+                {
+                    type: 'object',
+                    uid: Object.keys(newVal),
+                    options: {
+                        queryFn: backlinkQuery,
+                    },
+                },
+                () => false,
+                subsId,
+                true,
+            );
+            currentResults = Object.fromEntries(
+                Object.entries(currentResults).filter((el) =>
+                    currentObjects.includes(el[0]),
+                ),
+            );
+        }, 20),
+    );
+}
+
+function initAnalyticsIfOptedIn() {
+    // eslint-disable-next-line global-require
     const mixpanel = require('mixpanel-browser');
     window.mixpanel = mixpanel;
 
-    mixpanel.init('d15629c3a0ad692d3b7491a9091dd2be', {debug: true});
-    mixpanel.track("initAnalyticsAndUserOptedIn");
+    mixpanel.init('d15629c3a0ad692d3b7491a9091dd2be', { debug: true });
+    mixpanel.track('initAnalyticsAndUserOptedIn');
 
     (window as any).onEventSend = (eventName: string) => {
-        if (!["run_executable", "unsubscribe_by_id"].includes(eventName))window.mixpanel?.track("event/" + eventName);
-    }
+        if (!['run_executable', 'unsubscribe_by_id'].includes(eventName))
+            window.mixpanel?.track(`event/${eventName}`);
+    };
 }
 
 function initPackages() {
-    bm_init(); em_init(); td_init(); rss_init(); nb_init(); sm_init(); tw_init(); re_init(); cl_init(); pb_init();
+    bmInit();
+    emInit();
+    tdInit();
+    rssInit();
+    nbInit();
+    smInit();
+    twInit();
+    reInit();
+    clInit();
+    pbInit();
 }

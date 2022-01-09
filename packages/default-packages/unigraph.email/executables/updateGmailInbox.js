@@ -1,7 +1,8 @@
 const { google } = require('googleapis');
-const gmailClientId = unigraph.getSecret('google', 'client_id')
-const gmailClientSecret = unigraph.getSecret('google', 'client_secret')
-const fetch = require('node-fetch')
+
+const gmailClientId = unigraph.getSecret('google', 'client_id');
+const gmailClientSecret = unigraph.getSecret('google', 'client_secret');
+const fetch = require('node-fetch');
 
 const account = (await unigraph.getQueries([`(func: uid(accs)) @cascade {
     uid
@@ -31,68 +32,68 @@ const getQuery = (msgid) => `(func: uid(parIds)) @cascade {
     _value {
       message_id @filter(eq(<_value.%>, "${msgid}"))
     }
-}`
+}`;
 
 if (account?.uid) {
-    let token = account['_value']['access_token']['_value.%'];
-    let refresh = account['_value']['refresh_token']['_value.%'];
+    let token = account._value.access_token['_value.%'];
+    const refresh = account._value.refresh_token['_value.%'];
 
     const resp = await fetch('https://www.googleapis.com/oauth2/v4/token', {
-        method: "POST",
+        method: 'POST',
         body: JSON.stringify({
-            grant_type: "refresh_token",
+            grant_type: 'refresh_token',
             refresh_token: refresh,
             client_id: gmailClientId,
             client_secret: gmailClientSecret,
-        })
-    })
+        }),
+    });
 
     const accessTokenResult = await resp.json();
-    if (accessTokenResult['access_token']) token = accessTokenResult['access_token'];
+    if (accessTokenResult.access_token) token = accessTokenResult.access_token;
 
     await unigraph.updateObject(account.uid, {
         access_token: token,
-        token_expires_in: (new Date((new Date()).getTime() + 3600 * 1000)).toISOString()
+        token_expires_in: (new Date((new Date()).getTime() + 3600 * 1000)).toISOString(),
     });
 
-    let auth = new google.auth.OAuth2(
+    const auth = new google.auth.OAuth2(
         gmailClientId,
         gmailClientSecret,
-        'https://localhost:4001/callback?key=gmail'
+        'https://localhost:4001/callback?key=gmail',
     );
-    auth.setCredentials({...accessTokenResult, access_token: token});
+    auth.setCredentials({ ...accessTokenResult, access_token: token });
 
     const gmail = google.gmail({
-        version: "v1",
-        auth: auth,
-    })
+        version: 'v1',
+        auth,
+    });
 
-    const res = await gmail.users.messages.list({userId: 'me', maxResults: 25});
-    const messages = res.data.messages.map(el => el.id);
+    const res = await gmail.users.messages.list({ userId: 'me', maxResults: 25 });
+    const messages = res.data.messages.map((el) => el.id);
 
-    const msgIdResps = await Promise.all(messages.map(id => 
-        gmail.users.messages.get({userId: "me", id, format: "metadata", metadataHeaders: ['Message-Id']})));
+    const msgIdResps = await Promise.all(messages.map((id) => gmail.users.messages.get({
+        userId: 'me', id, format: 'metadata', metadataHeaders: ['Message-Id'],
+    })));
 
-    const msgIds = msgIdResps.map(el => el.data.payload.headers[0].value)
+    const msgIds = msgIdResps.map((el) => el.data.payload.headers[0].value);
 
-    const results = (await unigraph.getQueries([...(msgIds.map(el => getQuery(el))), `var(func: eq(<unigraph.id>, "$/schema/email_message")) {
+    const results = (await unigraph.getQueries([...(msgIds.map((el) => getQuery(el))), `var(func: eq(<unigraph.id>, "$/schema/email_message")) {
         <~type> { parIds as uid }
     }`]));
     const newMsgs = messages.filter((el, index) => results[index].length === 0);
 
-    let newMsgResps = (await Promise.all(newMsgs.map(id => 
-        gmail.users.messages.get({userId: "me", id, format: "raw"}))))
-    
+    let newMsgResps = (await Promise.all(newMsgs.map((id) => gmail.users.messages.get({ userId: 'me', id, format: 'raw' }))));
+
     // Do not insert drafts to Unigraph
-    newMsgResps = newMsgResps.filter(el => !el.data.labelIds.includes('DRAFT'));
+    newMsgResps = newMsgResps.filter((el) => !el.data.labelIds?.includes('DRAFT'));
 
-    if (newMsgs.length) await unigraph.runExecutable('$/executable/add-email', {
-        dont_check_unique: true, 
-        messages: newMsgResps.map(el => {return {message: Buffer.from(el.data.raw, 'base64').toString(), read: !el.data.labelIds?.includes('UNREAD')}})
-    });
+    if (newMsgs.length) {
+        await unigraph.runExecutable('$/executable/add-email', {
+            dont_check_unique: true,
+            messages: newMsgResps.map((el) => ({ message: Buffer.from(el.data.raw, 'base64').toString(), read: !el.data.labelIds?.includes('UNREAD') })),
+        });
+    }
 
-    const readMsgs = msgIdResps.map((el, index) => el.data.labelIds.includes('UNREAD') ? undefined : results[index]?.[0]?.uid)
-    await unigraph.runExecutable('$/executable/delete-item-from-list' , {where: '$/entity/inbox', item: readMsgs.filter(el => el !== undefined)});
-
+    const readMsgs = msgIdResps.map((el, index) => (el.data.labelIds.includes('UNREAD') ? undefined : results[index]?.[0]?.uid));
+    await unigraph.runExecutable('$/executable/delete-item-from-list', { where: '$/entity/inbox', item: readMsgs.filter((el) => el !== undefined) });
 }
-
