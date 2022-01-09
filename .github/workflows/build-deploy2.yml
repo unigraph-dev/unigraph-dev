@@ -29,6 +29,7 @@ jobs:
             DGRAPH_PATH: /opt/unigraph
             LINUX_BUILD_PATH: ./packages/unigraph-dev-electron/dist/Unigraph-0.1.0.AppImage
             LINUX_BIN_NAME: dgraph_linux_amd64
+            USE_HARD_LINKS: false
         defaults:
             run:
                 shell: bash
@@ -66,15 +67,13 @@ jobs:
 
             
             - run: yarn install
-            - run: ls ./packages/unigraph-dev-common/
-            - run: yarn build-deps
-            - run: ls ./packages/unigraph-dev-common/lib/
-            - run: ls ./packages/unigraph-dev-common/lib/data
+            
             - run: yarn prepare-electron
+            - run: ls ./packages/unigraph-dev-electron/
             
 
             - name: Build and Publish Electron App
-              uses: TheExGenesis/action-electron-builder@master
+              uses: samuelmeuli/action-electron-builder@master
               with:
                   # Don't run `yarn build`, which otherwise happens by default
                   skip_build: true
