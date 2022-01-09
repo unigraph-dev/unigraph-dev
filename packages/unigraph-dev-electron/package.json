@@ -12,13 +12,13 @@
     "homepage": "./",
     "devDependencies": {
         "electron": "13.1.7",
-        "electron-builder": "^22.10.5"
+        "electron-builder": "22.14"
     },
     "dependencies": {
-        "electron-store": "^8.0.0",
-        "electron-util": "^0.15.1",
         "@babel/core": "^7.14.8",
         "@babel/preset-react": "^7.14.5",
+        "electron-store": "^8.0.0",
+        "electron-util": "^0.15.1",
         "json-stable-stringify": "^1.0.1",
         "unigraph-dev-backend": "0.1.0",
         "unigraph-dev-common": "0.0.2"
