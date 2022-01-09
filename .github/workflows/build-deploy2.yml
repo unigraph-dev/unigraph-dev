@@ -63,23 +63,11 @@ jobs:
                   out-file-path: ./dgraph-download
             - run: mv ./dgraph-download/dgraph_linux_amd64 ${{env.DGRAPH_PATH}}/dgraph
             # - run: mv ${{env.DGRAPH_PATH}}/dgraph_linux_amd64 ${{env.DGRAPH_PATH}}/dgraph
-            #
+
             - run: yarn install
             - run: yarn build-deps
             - run: yarn prepare-electron
-            # - run: cd packages/unigraph-dev-electron
 
-            # - name: Prepare for app notarization (macOS)
-            #   if: startsWith(matrix.os, 'macos')
-            #   # Import Apple API key for app notarization on macOS
-            #   run: |
-            #       mkdir -p ~/private_keys/
-            #       echo '${{ secrets.api_key }}' > ~/private_keys/AuthKey_${{ secrets.api_key_id }}.p8
-            # - name: Download built app
-            #   uses: actions/download-artifact@v2
-            #   with:
-            #       name: app
-            #       path: resources
             - name: Build and Publish Electron App
               uses: TheExGenesis/action-electron-builder@master
               with:
