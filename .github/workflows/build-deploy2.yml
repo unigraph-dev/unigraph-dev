@@ -63,7 +63,7 @@ jobs:
               with:
                   repository: 'TheExGenesis/dgraph'
                   latest: true
-                  fileName: 'dgraph_windows_amd64'
+                  fileName: 'dgraph_windows_amd64.exe'
                   out-file-path: ./dgraph-download
             - run: mv ./dgraph-download/dgraph_windows_amd64.exe ${{env.DGRAPH_PATH}}/dgraph.exe
               if: runner.os == 'Windows'
