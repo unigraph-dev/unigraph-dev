@@ -7,7 +7,8 @@
     "main": "src/main.js",
     "scripts": {
         "start": "electron . --dev",
-        "dist": "USE_HARD_LINKS=false electron-builder"
+        "dist": "USE_HARD_LINKS=false electron-builder",
+        "ready-env": "CI=false; USE_HARD_LINKS=false "
     },
     "homepage": "./",
     "devDependencies": {
