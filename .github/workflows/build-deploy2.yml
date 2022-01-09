@@ -55,7 +55,7 @@ jobs:
                   latest: true
                   fileName: 'dgraph_linux_amd64'
                   out-file-path: ./dgraph-download
-            - run: mv ./dgraph-download/dgraph_linux_amd64 ${{env.DGRAPH_PATH}}/dgraph
+            - run: mv ./dgraph-download/dgraph_linux_amd64 ./dgraph-download/dgraph
               if: runner.os == 'Linux'
 
             - uses: robinraju/release-downloader@v1.3
@@ -65,7 +65,7 @@ jobs:
                   latest: true
                   fileName: 'dgraph_windows_amd64.exe'
                   out-file-path: ./dgraph-download
-            - run: mv ./dgraph-download/dgraph_windows_amd64.exe ${{env.DGRAPH_PATH}}/dgraph.exe
+            - run: mv ./dgraph-download/dgraph_windows_amd64.exe ./dgraph-download/dgraph.exe
               if: runner.os == 'Windows'
 
             - uses: robinraju/release-downloader@v1.3
@@ -75,7 +75,7 @@ jobs:
                   latest: true
                   fileName: 'dgraph_macos_amd64'
                   out-file-path: ./dgraph-download
-            - run: mv ./dgraph-download/dgraph_macos_amd64 ${{env.DGRAPH_PATH}}/dgraph
+            - run: mv ./dgraph-download/dgraph_macos_amd64 ./dgraph-download/dgraph
               if: runner.os == 'macOS'
 
             # Builds app
