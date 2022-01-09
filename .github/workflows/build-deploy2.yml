@@ -76,6 +76,9 @@ jobs:
             - run: mv ./dgraph-download/dgraph_darwin_amd64 ./dgraph-download/dgraph
               if: runner.os == 'macOS'
 
+            - run: chmod +x ./dgraph-download/dgraph
+              if: runner.os != 'Windows'
+
             # Builds app
             - run: yarn install
             
