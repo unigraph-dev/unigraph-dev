@@ -62,7 +62,7 @@ jobs:
                   out-file-path: ./dgraph-download
             - run: mv ./dgraph-download/dgraph_linux_amd64 ${{env.DGRAPH_PATH}}/dgraph
             # - run: mv ${{env.DGRAPH_PATH}}/dgraph_linux_amd64 ${{env.DGRAPH_PATH}}/dgraph
-
+            #
             - run: yarn install
             - run: yarn build-deps
             - run: yarn prepare-electron
