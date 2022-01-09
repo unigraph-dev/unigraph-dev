@@ -46,7 +46,7 @@ jobs:
                   cache-name: cache-node-modules
               with:
                   # npm cache files are stored in `~/.npm` on Linux/macOS
-                  path: ~/.npm
+                  path: ./node_modules
                   key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
                   restore-keys: |
                       ${{ runner.os }}-build-${{ env.cache-name }}-
@@ -64,9 +64,10 @@ jobs:
             - run: mv ./dgraph-download/dgraph_linux_amd64 ${{env.DGRAPH_PATH}}/dgraph
             # - run: mv ${{env.DGRAPH_PATH}}/dgraph_linux_amd64 ${{env.DGRAPH_PATH}}/dgraph
 
+            - run: ls ./packages/unigraph-dev-common/lib/data
             - run: yarn install
-            - run: yarn build-deps
             - run: yarn prepare-electron
+            - run: ls ./packages/unigraph-dev-common/lib/data
 
             - name: Build and Publish Electron App
               uses: TheExGenesis/action-electron-builder@master
