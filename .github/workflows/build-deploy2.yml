@@ -66,7 +66,7 @@ jobs:
             - run: yarn install
             - run: yarn build-deps
             - run: yarn prepare-electron
-            - run: cd packages/unigraph-dev-electron
+            # - run: cd packages/unigraph-dev-electron
 
             # - name: Prepare for app notarization (macOS)
             #   if: startsWith(matrix.os, 'macos')
@@ -88,3 +88,4 @@ jobs:
                   # (No need to define this secret in the repo settings)
                   github_token: ${{ secrets.github_token }}
                   release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+                  package_root: 'packages/unigraph-dev-electron'
