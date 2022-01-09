@@ -96,7 +96,7 @@ jobs:
                   skip_build: true
                   # GitHub token, automatically provided to the action
                   # (No need to define this secret in the repo settings)
-                  github_token: ${{ secrets.github_token }}
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
                   release: ${{ startsWith(github.ref, 'refs/tags/v') }}
                   package_root: 'packages/unigraph-dev-electron'
                   # macOS code signing certificate

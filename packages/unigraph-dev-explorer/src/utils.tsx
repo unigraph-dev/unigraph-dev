@@ -5,8 +5,7 @@ import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 import React from 'react';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
-//
-//
+
 export const NavigationContext = React.createContext<(location: string) => any>(
     (location: string) => ({}),
 );
