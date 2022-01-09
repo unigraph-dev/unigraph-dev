@@ -32,6 +32,9 @@
         "win": {
             "icon": "./public/icons/unigraph.png"
         },
+        "Linux": {
+            "target": "AppImage"
+        },
         "files": [
             "**/*",
             "*.js",
