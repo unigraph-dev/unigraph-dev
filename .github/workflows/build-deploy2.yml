@@ -79,6 +79,7 @@ jobs:
             #   with:
             #       name: app
             #       path: resources
+            - run: CI=false; USE_HARD_LINKS=false
             - name: Build and Publish Electron App
               uses: samuelmeuli/action-electron-builder@v1
               with:
