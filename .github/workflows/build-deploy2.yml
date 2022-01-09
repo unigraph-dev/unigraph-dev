@@ -71,9 +71,9 @@ jobs:
               with:
                   repository: 'TheExGenesis/dgraph'
                   latest: true
-                  fileName: 'dgraph_macos_amd64'
+                  fileName: 'dgraph_darwin_amd64'
                   out-file-path: ./dgraph-download
-            - run: mv ./dgraph-download/dgraph_macos_amd64 ./dgraph-download/dgraph
+            - run: mv ./dgraph-download/dgraph_darwin_amd64 ./dgraph-download/dgraph
               if: runner.os == 'macOS'
 
             # Builds app
