@@ -2,71 +2,78 @@
     "name": "unigraph-dev",
     "private": true,
     "workspaces": {
-        "packages": [
-            "packages/*"
-        ],
-        "nohoist": [
-            "**/unigraph-dev-electron/**"
-        ]
+      "packages": [
+        "packages/*"
+      ],
+      "nohoist": [
+        "**/unigraph-dev-electron/**"
+      ]
     },
     "scripts": {
-        "postinstall": "(mkdir packages/unigraph-dev-explorer/public/vendor/ && cp -R ./node_modules/monaco-editor/ packages/unigraph-dev-explorer/public/vendor/monaco-editor_at_0.23.0/) || true",
-        "backend-build": "yarn workspace unigraph-dev-backend build",
-        "backend-start": "yarn workspace unigraph-dev-backend start",
-        "explorer-start": "yarn workspace unigraph-dev-explorer start",
-        "build-common": "yarn workspace unigraph-dev-common build",
-        "build-packages": "./scripts/build_default_packages.sh",
-        "build-deps": "yarn build-common && yarn build-packages",
-        "link-common": "cd packages/unigraph-dev-common && yarn link && cd ../unigraph-dev-explorer && yarn link 'unigraph-dev-common' && cd ../unigraph-dev-backend && yarn link 'unigraph-dev-common'",
-        "dev": "bash scripts/start_server.sh",
-        "lint": "yarn eslint . --ext .ts,.tsx",
-        "prepare-electron": "bash scripts/prepare_for_electron.sh",
-        "electron-dist": "CI=false;  yarn prepare-electron && yarn workspace unigraph-dev-electron dist",
-        "electron-start": "yarn workspace unigraph-dev-electron start",
-        "prepare": "husky install"
+      "postinstall": "run-script-os",
+      "postinstall:linux:darwin": "(mkdir packages/unigraph-dev-explorer/public/vendor/ && cp -R ./node_modules/monaco-editor/ packages/unigraph-dev-explorer/public/vendor/monaco-editor_at_0.23.0/) || true",
+      "postinstall:windows": "pwsh -Command \"mkdir -Force packages/unigraph-dev-explorer/public/vendor/ && Copy-Item ./node_modules/@monaco-editor/ -Destination packages/unigraph-dev-explorer/public/vendor/monaco-editor_at_0.23.0/ -Recurse -Force\"",
+      "backend-build": "yarn workspace unigraph-dev-backend build",
+      "backend-start": "yarn workspace unigraph-dev-backend start",
+      "explorer-start": "yarn workspace unigraph-dev-explorer start",
+      "build-common": "yarn workspace unigraph-dev-common build",
+      "build-packages": "run-script-os",
+      "build-packages:linux:darwin": "./scripts/build_default_packages.sh",
+      "build-packages:windows": "pwsh ./scripts/build_default_packages.ps1",
+      "build-deps": "run-script-os",
+      "build-deps:linux:darwin": "yarn build-common && yarn build-packages:linux:darwin",
+      "build-deps:windows": "yarn build-common && yarn build-packages:windows",
+      "link-common": "cd packages/unigraph-dev-common && yarn link && cd ../unigraph-dev-explorer && yarn link 'unigraph-dev-common' && cd ../unigraph-dev-backend && yarn link 'unigraph-dev-common'",
+      "dev": "bash scripts/start_server.sh",
+      "lint": "yarn eslint . --ext .ts,.tsx",
+      "prepare-electron": "bash scripts/prepare_for_electron.sh",
+      "electron-dist": "CI=false;  yarn prepare-electron && yarn workspace unigraph-dev-electron dist",
+      "electron-start": "yarn workspace unigraph-dev-electron start",
+      "prepare": "husky install"
     },
     "engines": {
-        "node": ">=16.0.0",
-        "npm": "^8.1.2"
+      "node": ">=16.0.0",
+      "npm": "^8.1.2"
     },
     "devDependencies": {
-        "@babel/eslint-parser": "^7.13.4",
-        "@types/jest": "^26.0.20",
-        "@types/json-stable-stringify": "^1.0.32",
-        "@types/testing-library__dom": "^7.5.0",
-        "@typescript-eslint/eslint-plugin": "^5.8.1",
-        "@typescript-eslint/parser": "^5.8.1",
-        "babel-eslint": "^10.1.0",
-        "eslint": "^8.6.0",
-        "eslint-config-airbnb": "19.0.4",
-        "eslint-config-prettier": "^8.3.0",
-        "eslint-config-react-app": "^7.0.0",
-        "eslint-plugin-flowtype": "^8.0.3",
-        "eslint-plugin-import": "^2.25.3",
-        "eslint-plugin-jsx-a11y": "^6.5.1",
-        "eslint-plugin-prettier": "^4.0.0",
-        "eslint-plugin-react": "^7.28.0",
-        "eslint-plugin-react-hooks": "^4.3.0",
-        "husky": ">=6",
-        "jest": "^26.6.3",
-        "lint-staged": ">=10",
-        "prettier": "^2.5.1",
-        "ts-jest": "^26.5.2",
-        "typescript": "^4.2.2"
+      "@babel/eslint-parser": "^7.13.4",
+      "@types/jest": "^26.0.20",
+      "@types/json-stable-stringify": "^1.0.32",
+      "@types/testing-library__dom": "^7.5.0",
+      "@typescript-eslint/eslint-plugin": "^5.8.1",
+      "@typescript-eslint/parser": "^5.8.1",
+      "babel-eslint": "^10.1.0",
+      "eslint": "^8.6.0",
+      "eslint-config-airbnb": "19.0.4",
+      "eslint-config-prettier": "^8.3.0",
+      "eslint-config-react-app": "^7.0.0",
+      "eslint-plugin-flowtype": "^8.0.3",
+      "eslint-plugin-import": "^2.25.3",
+      "eslint-plugin-jsx-a11y": "^6.5.1",
+      "eslint-plugin-prettier": "^4.0.0",
+      "eslint-plugin-react": "^7.28.0",
+      "eslint-plugin-react-hooks": "^4.3.0",
+      "husky": ">=6",
+      "jest": "^26.6.3",
+      "run-script-os": "^1.1.6",
+      "lint-staged": ">=10",
+      "prettier": "^2.5.1",
+      "ts-jest": "^26.5.2",
+      "typescript": "^4.2.2"
     },
     "dependencies": {
-        "eslint-plugin-inclusive-language": "^2.2.0",
-        "json-stable-stringify": "^1.0.1",
-        "react": "^17.0.1",
-        "react-dom": "^17.0.1",
-        "schema-utils": "^3.0.0",
-        "yargs": "^17.0.1"
+      "eslint-plugin-inclusive-language": "^2.2.0",
+      "json-stable-stringify": "^1.0.1",
+      "react": "^17.0.1",
+      "react-dom": "^17.0.1",
+      "schema-utils": "^3.0.0",
+      "yargs": "^17.0.1"
     },
     "resolutions": {
-        "bezier-js": "4.0.3"
+      "bezier-js": "4.0.3"
     },
     "version": "0.0.1",
     "lint-staged": {
-        "*.{js,jsx,ts,tsx}": "eslint --cache --fix"
+      "*.{ts,tsx}": "eslint --cache --fix"
     }
 }

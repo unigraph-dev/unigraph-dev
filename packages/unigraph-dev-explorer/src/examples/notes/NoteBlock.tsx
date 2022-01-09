@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import { setRef, Typography } from '@material-ui/core';
 import React, { FormEvent } from 'react';
 import {
@@ -72,14 +73,7 @@ export function NoteBlock({ data }: any) {
     const unpadded = unpad(data);
 
     return (
-        <div
-            onClick={() => {
-                window.wsnavigator(
-                    `/library/object?uid=${data.uid}&isStub=true&type=$/schema/note_block`,
-                );
-            }}
-            style={{ display: 'flex', alignItems: 'center', width: '100%' }}
-        >
+        <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
             <div style={{ flexGrow: 1 }}>
                 <Typography variant="body1">
                     <AutoDynamicView
@@ -279,7 +273,10 @@ export function DetailedNoteBlock({
     options,
     isCollapsed,
     focused,
+    index,
 }: any) {
+    // eslint-disable-next-line no-bitwise
+    isChildren |= callbacks?.isChildren;
     if (!callbacks?.viewId)
         callbacks = { ...(callbacks || {}), viewId: getRandomInt() };
     const [subentities, otherChildren] = getSubentities(data);
@@ -364,8 +361,23 @@ export function DetailedNoteBlock({
                 {
                     uid: data.uid,
                     children: subentities.map((el: any) => el.uid),
+                    type: data?.type?.['unigraph.id'],
                     root: !isChildren,
                 },
+                ...subentities
+                    .filter(
+                        (el: any) =>
+                            el?.type?.['unigraph.id'] !== '$/schema/note_block',
+                    )
+                    .map((el: any) => {
+                        const [subs] = getSubentities(el);
+                        return {
+                            uid: el.uid,
+                            children: subs.map((ell: any) => ell.uid),
+                            type: el?.type?.['unigraph.id'],
+                            root: false,
+                        };
+                    }),
             ],
             nodesState.value,
             'uid',
@@ -911,6 +923,7 @@ export function DetailedNoteBlock({
                                 noDrag
                                 noContextMenu
                                 inline
+                                noClickthrough
                                 callbacks={{
                                     'get-semantic-properties': () => data,
                                 }}
@@ -962,6 +975,13 @@ export function DetailedNoteBlock({
                                                     noDrag
                                                     compact
                                                     allowSubentity
+                                                    noClickthrough
+                                                    noSubentities={
+                                                        el.type?.[
+                                                            'unigraph.id'
+                                                        ] ===
+                                                        '$/schema/note_block'
+                                                    }
                                                     noBacklinks={
                                                         el.type?.[
                                                             'unigraph.id'
@@ -987,6 +1007,7 @@ export function DetailedNoteBlock({
                                                                   type: el.type,
                                                               }
                                                     }
+                                                    index={elindex}
                                                     callbacks={{
                                                         'get-view-id': () =>
                                                             options?.viewId, // only used at root
@@ -1025,6 +1046,9 @@ export function DetailedNoteBlock({
                                                         dataref,
                                                         context: data,
                                                         isEmbed: true,
+                                                        isChildren: true,
+                                                        parentEditorContext:
+                                                            editorContext,
                                                     }}
                                                     component={{
                                                         '$/schema/note_block': {
@@ -1039,6 +1063,7 @@ export function DetailedNoteBlock({
                                                         isChildren: true,
                                                         isCollapsed: isCol,
                                                     }}
+                                                    recursive
                                                     style={
                                                         el.type?.[
                                                             'unigraph.id'

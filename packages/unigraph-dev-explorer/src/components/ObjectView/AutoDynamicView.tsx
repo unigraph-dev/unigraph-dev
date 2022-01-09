@@ -9,6 +9,7 @@ import {
     buildGraph,
     UnigraphObject,
 } from 'unigraph-dev-common/lib/utils/utils';
+import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { AutoDynamicViewProps } from '../../types/ObjectView.d';
 import { subscribeToBacklinks } from '../../unigraph-react';
 import {
@@ -38,9 +39,14 @@ export function AutoDynamicView({
     noContextMenu,
     subentityExpandByDefault,
     noBacklinks,
+    noSubentities,
     noParents,
     withParent,
     compact,
+    noClickthrough,
+    onClick,
+    recursive,
+    ...props
 }: AutoDynamicViewProps) {
     if (!callbacks) callbacks = {};
     allowSubentity = allowSubentity === true;
@@ -55,7 +61,7 @@ export function AutoDynamicView({
     const isObjectStub = isStub(object);
     const [loadedObj, setLoadedObj] = React.useState<any>(false);
     const [subsId, setSubsId] = React.useState(0);
-    const [isRecursion, setIsRecursion] = React.useState<any>(undefined);
+    const [isRecursion, setIsRecursion] = React.useState<any>(false);
     const getObject = () => (isObjectStub ? loadedObj : object);
 
     const [showSubentities, setShowSubentities] = React.useState(
@@ -72,6 +78,11 @@ export function AutoDynamicView({
         ...window.unigraph.getState('registry/dynamicView').value,
         ...(component || {}),
     });
+    const [canClickthrough, setCanClickthrough] = React.useState(
+        Object.keys(
+            window.unigraph.getState('registry/dynamicViewDetailed').value,
+        ).includes(getObject()?.type?.['unigraph.id']),
+    );
 
     const viewEl = React.useRef(null);
 
@@ -82,6 +93,15 @@ export function AutoDynamicView({
                 ...(component || {}),
             });
         window.unigraph.getState('registry/dynamicView').subscribe(cb);
+
+        const cb2 = (newIts: any) =>
+            setCanClickthrough(
+                Object.keys(
+                    window.unigraph.getState('registry/dynamicViewDetailed')
+                        .value,
+                ).includes(getObject()?.type?.['unigraph.id']),
+            );
+        window.unigraph.getState('registry/dynamicViewDetailed').subscribe(cb2);
 
         const cbsel = (sel: any) => {
             if (sel?.includes?.(object?.uid)) setIsSelected(true);
@@ -98,6 +118,9 @@ export function AutoDynamicView({
 
         return function cleanup() {
             window.unigraph.getState('registry/dynamicView').unsubscribe(cb);
+            window.unigraph
+                .getState('registry/dynamicViewDetailed')
+                .unsubscribe(cb2);
             window.unigraph.getState('global/selected').unsubscribe(cbsel);
             window.unigraph.getState('global/focused').unsubscribe(cbfoc);
         };
@@ -165,7 +188,6 @@ export function AutoDynamicView({
                 { noExpand: true },
             );
             setSubsId(newSubs);
-            callbacks = { ...callbacks, subsId: newSubs };
             return function cleanup() {
                 tabContext.unsubscribe(newSubs);
             };
@@ -244,7 +266,7 @@ export function AutoDynamicView({
 
     const attach = React.useCallback(
         (domElement) => {
-            if (domElement && object.uid) {
+            if (domElement && object.uid && recursive) {
                 const ids = getParents(domElement);
                 if (ids.includes(object?.uid) && !inline) {
                     // recursive - deal with it somehow
@@ -287,60 +309,58 @@ export function AutoDynamicView({
         </div>
     );
 
-    const getEl = React.useCallback(
-        (viewId, setTitle) => {
-            if (
-                isRecursion === false &&
-                object?.type &&
-                object.type['unigraph.id'] &&
-                Object.keys(DynamicViews).includes(
-                    object.type['unigraph.id'],
-                ) &&
-                getObject()
-            ) {
-                return React.createElement(
-                    DynamicViews[object.type['unigraph.id']].view,
-                    {
-                        data: getObject(),
-                        callbacks: {
-                            viewId,
-                            setTitle,
-                            ...(callbacks || {}),
-                            ...(noBacklinks ? { BacklinkComponent } : {}),
-                        },
-                        ...(attributes || {}),
-                        inline,
-                        compact,
-                        focused: isFocused,
+    const innerEl = React.useMemo(() => {
+        if (
+            isRecursion === false &&
+            object?.type &&
+            object.type['unigraph.id'] &&
+            Object.keys(DynamicViews).includes(object.type['unigraph.id']) &&
+            getObject()
+        ) {
+            return React.createElement(
+                DynamicViews[object.type['unigraph.id']].view,
+                {
+                    data: getObject(),
+                    ...props,
+                    callbacks: {
+                        viewId: tabContext.viewId,
+                        setTitle: tabContext.setTitle,
+                        ...(callbacks || {}),
+                        ...(noBacklinks ? { BacklinkComponent } : {}),
+                        ...(subsId ? { subsId } : {}),
                     },
-                );
-            }
-            if (isRecursion === false && object && getObject()) {
-                return <StringObjectViewer object={getObject()} />;
-            }
-            if (isRecursion === true) {
-                return (
-                    <Typography style={{ color: 'red' }}>
-                        Recursive element (uid: {object.uid}
-                        ), ignored!
-                    </Typography>
-                );
-            }
-            return '';
-        },
-        [
-            isRecursion,
-            object,
-            object?.uid,
-            callbacks,
-            attributes,
-            DynamicViews,
-            isObjectStub,
-            loadedObj,
-            isFocused,
-            backlinks,
-        ],
-    );
+                    ...(attributes || {}),
+                    inline,
+                    compact,
+                    focused: isFocused,
+                },
+            );
+        }
+        if (isRecursion === false && object && getObject()) {
+            return <StringObjectViewer object={getObject()} />;
+        }
+        if (isRecursion === true) {
+            return (
+                <Typography style={{ color: 'red' }}>
+                    Recursive element (uid: {object.uid}
+                    ), ignored!
+                </Typography>
+            );
+        }
+        return '';
+    }, [
+        isRecursion,
+        object,
+        object?.uid,
+        callbacks,
+        attributes,
+        DynamicViews,
+        isObjectStub,
+        loadedObj,
+        isFocused,
+        subsId,
+        backlinks,
+    ]);
 
     return (
         <ErrorBoundary
@@ -391,6 +411,8 @@ export function AutoDynamicView({
                         boxSizing: 'border-box',
                         display: 'inline-flex',
                         alignItems: 'center',
+                        cursor:
+                            noClickthrough || !canClickthrough ? '' : 'pointer',
                         ...(inline ? {} : { width: '100%' }),
                         ...(isMobile() ? { touchAction: 'pan-y' } : {}),
                         ...style,
@@ -415,25 +437,75 @@ export function AutoDynamicView({
                             selectUid(object.uid, false);
                         }
                     }}
+                    onClick={(ev) => {
+                        if (!noClickthrough && canClickthrough) {
+                            typeof onClick === 'function'
+                                ? onClick(ev)
+                                : (() => {
+                                      ev.stopPropagation();
+                                      ev.preventDefault();
+                                      window.wsnavigator(
+                                          `/library/object?uid=${
+                                              object?.uid
+                                          }&viewer=${'dynamic-view-detailed'}&type=${
+                                              object?.type?.['unigraph.id']
+                                          }`,
+                                      );
+                                  })();
+                        }
+                    }}
                     {...(attributes || {})}
                     ref={attach}
                 >
-                    {getEl(tabContext.viewId, tabContext.setTitle)}
+                    {innerEl}
                     {noBacklinks ? [] : BacklinkComponent}
                 </div>
 
-                {showSubentities && getSubentities(object)?.length > 0 ? (
-                    <div style={{ width: '100%', paddingLeft: '24px' }}>
-                        <ul>
-                            {getSubentities(object).map((el: any) => (
-                                <li>
-                                    <AutoDynamicView
-                                        object={new UnigraphObject(el._value)}
-                                        callbacks={callbacks}
-                                    />
-                                </li>
-                            ))}
-                        </ul>
+                {!noSubentities && getSubentities(getObject())?.length > 0 ? (
+                    <div style={{ width: '100%', paddingLeft: '12px' }}>
+                        <Typography
+                            onClick={() => {
+                                setShowSubentities(!showSubentities);
+                            }}
+                            variant="body2"
+                            style={{ color: 'gray' }}
+                        >
+                            {!showSubentities ? '+ show ' : '- hide '}
+                            {`${
+                                getSubentities(getObject())?.length
+                            } subentities`}
+                        </Typography>
+                        {showSubentities ? (
+                            <ul>
+                                {getSubentities(getObject()).map(
+                                    (el: any, index: number) => (
+                                        <li>
+                                            <AutoDynamicView
+                                                object={
+                                                    new UnigraphObject(
+                                                        el._value,
+                                                    )
+                                                }
+                                                component={component}
+                                                callbacks={{
+                                                    ...callbacks,
+                                                    context: getObject(),
+                                                    index,
+                                                    ...(subsId
+                                                        ? { subsId }
+                                                        : {}),
+                                                }}
+                                                index={index}
+                                                noSubentities
+                                                noClickthrough={noClickthrough}
+                                            />
+                                        </li>
+                                    ),
+                                )}
+                            </ul>
+                        ) : (
+                            []
+                        )}
                     </div>
                 ) : (
                     []

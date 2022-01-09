@@ -21,11 +21,16 @@ export type AutoDynamicViewProps = {
     noDrag?: boolean;
     noDrop?: boolean;
     noContextMenu?: boolean;
+    noSubentities?: boolean;
     noBacklinks?: boolean;
     noParents?: boolean;
     withParent?: boolean;
     subentityExpandByDefault?: boolean;
     compact?: boolean;
+    index?: number;
+    noClickthrough?: boolean;
+    onClick?: any;
+    recursive?: boolean;
 };
 
 export type ContextMenuGenerator = (

@@ -39,9 +39,7 @@ export const Tag: DynamicViewRenderer = ({ data, callbacks }) => {
             label={tag.name}
             onClick={() => {
                 console.log(data);
-                window.wsnavigator(
-                    `/library/object?uid=${uid}&type=${data?.type?.['unigraph.id']}`,
-                );
+                window.wsnavigator(`/library/backlink?uid=${uid}`);
             }}
         />
     );

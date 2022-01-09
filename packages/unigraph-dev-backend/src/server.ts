@@ -260,6 +260,7 @@ export default async function startServer(client: DgraphClient) {
         },
         {
             type: 'query',
+            options: { noExpand: true },
             fragment: `(func: eq(<unigraph.id>, "$/meta/namespace_map")) {
             uid
             <unigraph.id>
