@@ -48,5 +48,10 @@
         "asarUnpack": [
             "dgraph/*"
         ]
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/TheExGenesis/unigraph-dev",
+        "directory": "packages/unigraph-dev-electron"
     }
 }
