@@ -1,42 +1,53 @@
 {
     "displayName": "Unigraph Email",
-    "version": "0.0.1",
+    "version": "0.1.1",
     "description": "Simple email client with Unigraph.",
     "name": "unigraph.email",
     "unigraph": {
-        "schemas": [{"id": "email_message", "src": "schemas/email_message.json"}],
-        "executables": [{
-            "name": "Add email (.eml) to Unigraph",
-            "env": "routine/js",
-            "id": "add-email",
-            "src": "executables/addEmailMessage.js",
-            "editable": true
-        }, {
-            "name": "Add a Gmail account",
-            "env": "routine/js",
-            "id": "add-gmail-account",
-            "src": "executables/addGmailAccount.js",
-            "editable": true
-        }, {
-            "name": "Fully sync a Gmail inbox",
-            "env": "routine/js",
-            "id": "gmail-full-sync",
-            "src": "executables/gmailFullSync.js",
-            "editable": true
-        }, {
-            "id": "update-gmail-inbox",
-            "env": "routine/js",
-            "src": "executables/updateGmailInbox.js",
-            "periodic": "*/2 * * * *",
-            "editable": true,
-            "name": "Sync Gmail inbox every 2 minutes",
-            "concurrency": 1
-        }, {
-            "id": "set-emails-as-read",
-            "env": "routine/js",
-            "src": "executables/setEmailsAsRead.js",
-            "editable": true,
-            "name": "Set emails as read"
-        }]
+        "schemas": [
+            {
+                "id": "email_message",
+                "src": "schemas/email_message.json"
+            }
+        ],
+        "executables": [
+            {
+                "name": "Add email (.eml) to Unigraph",
+                "env": "routine/js",
+                "id": "add-email",
+                "src": "executables/addEmailMessage.js",
+                "editable": true
+            },
+            {
+                "name": "Add a Gmail account",
+                "env": "routine/js",
+                "id": "add-gmail-account",
+                "src": "executables/addGmailAccount.js",
+                "editable": true
+            },
+            {
+                "name": "Fully sync a Gmail inbox",
+                "env": "routine/js",
+                "id": "gmail-full-sync",
+                "src": "executables/gmailFullSync.js",
+                "editable": true
+            },
+            {
+                "id": "update-gmail-inbox",
+                "env": "routine/js",
+                "src": "executables/updateGmailInbox.js",
+                "periodic": "*/2 * * * *",
+                "editable": true,
+                "name": "Sync Gmail inbox every 2 minutes",
+                "concurrency": 1
+            },
+            {
+                "id": "set-emails-as-read",
+                "env": "routine/js",
+                "src": "executables/setEmailsAsRead.js",
+                "editable": true,
+                "name": "Set emails as read"
+            }
+        ]
     }
 }
