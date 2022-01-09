@@ -14,21 +14,11 @@ jobs:
         runs-on: ${{ matrix.os }}
         strategy:
             matrix:
-                # os: [ubuntu-latest]
-                os: [windows-latest]
-                # os: [ubuntu-latest, windows-latest]
+                os: [ubuntu-latest, windows-latest, macos-latest]
                 electron-arch-overrides: ['']
-                # Separate out the arm64 macos build, those are the longest builds.
-                # package.json still includes configuration to build both targets.
-                # include:
-                #     - os: macos-latest
-                #       electron-arch-overrides: '-c.mac.target.target=dmg -c.mac.target.arch=x64'
-                #     - os: macos-latest
-                #       electron-arch-overrides: '-c.mac.target.target=dmg -c.mac.target.arch=arm64'
+
         env:
             DGRAPH_PATH: /opt/unigraph
-            LINUX_BUILD_PATH: ./packages/unigraph-dev-electron/dist/Unigraph-0.1.0.AppImage
-            LINUX_BIN_NAME: dgraph_linux_amd64
             USE_HARD_LINKS: false
         defaults:
             run:
@@ -56,20 +46,42 @@ jobs:
 
             - run: mkdir -p ${{env.DGRAPH_PATH}}
             - run: mkdir ./dgraph-download
+
+            # Gets releases from dgraph
             - uses: robinraju/release-downloader@v1.3
+              if: runner.os == 'Linux'
               with:
                   repository: 'TheExGenesis/dgraph'
                   latest: true
                   fileName: 'dgraph_linux_amd64'
                   out-file-path: ./dgraph-download
             - run: mv ./dgraph-download/dgraph_linux_amd64 ${{env.DGRAPH_PATH}}/dgraph
-            # - run: mv ${{env.DGRAPH_PATH}}/dgraph_linux_amd64 ${{env.DGRAPH_PATH}}/dgraph
+              if: runner.os == 'Linux'
 
-            
+            - uses: robinraju/release-downloader@v1.3
+              if: runner.os == 'Windows'
+              with:
+                  repository: 'TheExGenesis/dgraph'
+                  latest: true
+                  fileName: 'dgraph_windows_amd64'
+                  out-file-path: ./dgraph-download
+            - run: mv ./dgraph-download/dgraph_windows_amd64.exe ${{env.DGRAPH_PATH}}/dgraph.exe
+              if: runner.os == 'Windows'
+
+            - uses: robinraju/release-downloader@v1.3
+              if: runner.os == 'macOS'
+              with:
+                  repository: 'TheExGenesis/dgraph'
+                  latest: true
+                  fileName: 'dgraph_macos_amd64'
+                  out-file-path: ./dgraph-download
+            - run: mv ./dgraph-download/dgraph_macos_amd64 ${{env.DGRAPH_PATH}}/dgraph
+              if: runner.os == 'macOS'
+
+            # Builds app
             - run: yarn install
             
             - run: yarn prepare-electron
-            - run: ls ./packages/unigraph-dev-electron/
             
 
             - name: Build and Publish Electron App
