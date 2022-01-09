@@ -32,7 +32,7 @@
         "win": {
             "icon": "./public/icons/unigraph.png"
         },
-        "Linux": {
+        "linux": {
             "target": "AppImage"
         },
         "files": [
