@@ -1,0 +1,90 @@
+name: build-deploy2
+on:
+    push:
+        paths-ignore:
+            - '*.md'
+            - 'docs/**'
+    pull_request:
+        paths-ignore:
+            - '*.md'
+            - 'docs/**'
+jobs:
+    release-electron:
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        runs-on: ${{ matrix.os }}
+        strategy:
+            matrix:
+                os: [ubuntu-latest]
+                # os: [ubuntu-latest, windows-latest]
+                electron-arch-overrides: ['']
+                # Separate out the arm64 macos build, those are the longest builds.
+                # package.json still includes configuration to build both targets.
+                # include:
+                #     - os: macos-latest
+                #       electron-arch-overrides: '-c.mac.target.target=dmg -c.mac.target.arch=x64'
+                #     - os: macos-latest
+                #       electron-arch-overrides: '-c.mac.target.target=dmg -c.mac.target.arch=arm64'
+        env:
+            DGRAPH_PATH: /opt/unigraph
+            LINUX_BUILD_PATH: ./packages/unigraph-dev-electron/dist/Unigraph-0.1.0.AppImage
+            LINUX_BIN_NAME: dgraph_linux_amd64
+        defaults:
+            run:
+                shell: bash
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v2
+
+            - uses: actions/setup-node@v2
+              with:
+                  node-version: '16.13.1'
+
+            - name: Cache node modules
+              uses: actions/cache@v2
+              env:
+                  cache-name: cache-node-modules
+              with:
+                  # npm cache files are stored in `~/.npm` on Linux/macOS
+                  path: ~/.npm
+                  key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-build-${{ env.cache-name }}-
+                      ${{ runner.os }}-build-
+                      ${{ runner.os }}-
+
+            - run: mkdir -p ${{env.DGRAPH_PATH}}
+            - run: mkdir ./dgraph-download
+            - uses: robinraju/release-downloader@v1.3
+              with:
+                  repository: 'TheExGenesis/dgraph'
+                  latest: true
+                  fileName: 'dgraph_linux_amd64'
+                  out-file-path: ./dgraph-download
+            - run: mv ./dgraph-download/dgraph_linux_amd64 ${{env.DGRAPH_PATH}}/dgraph
+            # - run: mv ${{env.DGRAPH_PATH}}/dgraph_linux_amd64 ${{env.DGRAPH_PATH}}/dgraph
+
+            - run: yarn install
+            - run: yarn build-deps
+            - run: yarn prepare-electron
+            - run: cd packages/unigraph-dev-electron
+
+            # - name: Prepare for app notarization (macOS)
+            #   if: startsWith(matrix.os, 'macos')
+            #   # Import Apple API key for app notarization on macOS
+            #   run: |
+            #       mkdir -p ~/private_keys/
+            #       echo '${{ secrets.api_key }}' > ~/private_keys/AuthKey_${{ secrets.api_key_id }}.p8
+            # - name: Download built app
+            #   uses: actions/download-artifact@v2
+            #   with:
+            #       name: app
+            #       path: resources
+            - name: Build and Publish Electron App
+              uses: samuelmeuli/action-electron-builder@v1
+              with:
+                  # Don't run `yarn build`, which otherwise happens by default
+                  skip_build: true
+                  # GitHub token, automatically provided to the action
+                  # (No need to define this secret in the repo settings)
+                  github_token: ${{ secrets.github_token }}
+                  release: ${{ startsWith(github.ref, 'refs/tags/v') }}
