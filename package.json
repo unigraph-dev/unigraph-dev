@@ -3,7 +3,8 @@
     "private": true,
     "workspaces": {
         "packages": [
-            "packages/*"
+            "packages/*",
+            "packages/default-packages/*"
         ],
         "nohoist": [
             "**/unigraph-dev-electron/**"

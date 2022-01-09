@@ -2,17 +2,35 @@
     "displayName": "Notes",
     "version": "0.0.1",
     "description": "Notetaking system by Unigraph",
+    "name": "unigraph.notes",
     "unigraph": {
         "schemas": [
-            {"id": "note_block", "src": "schemas/note_block.json"}, 
-            {"id": "journal", "src": "schemas/journal.json"}, 
-            {"id": "interface/semantic", "src": "schemas/semantic.json"},
-            {"id": "interface/textual", "src": "schemas/textual.json"}
+            {
+                "id": "note_block",
+                "src": "schemas/note_block.json"
+            },
+            {
+                "id": "journal",
+                "src": "schemas/journal.json"
+            },
+            {
+                "id": "interface/semantic",
+                "src": "schemas/semantic.json"
+            },
+            {
+                "id": "interface/textual",
+                "src": "schemas/textual.json"
+            }
         ],
-        "package_name": "unigraph.notes",
         "entities": [
-            {"id": "section_daily_notes", "src": "entities/daily_notes.json"},
-            {"id": "add_note_context_menu", "src": "entities/add_note_context_menu.json"}
+            {
+                "id": "section_daily_notes",
+                "src": "entities/daily_notes.json"
+            },
+            {
+                "id": "add_note_context_menu",
+                "src": "entities/add_note_context_menu.json"
+            }
         ],
         "executables": [
             {
@@ -21,8 +39,18 @@
                 "id": "daily-notes",
                 "src": "executables/dailyNotes.jsx",
                 "imports": [
-                    {"env": "npm", "package": "@material-ui/core", "import": "Typography", "as": "Typography"},
-                    {"env": "npm", "package": "@material-ui/core", "import": "Button", "as": "Button"}
+                    {
+                        "env": "npm",
+                        "package": "@material-ui/core",
+                        "import": "Typography",
+                        "as": "Typography"
+                    },
+                    {
+                        "env": "npm",
+                        "package": "@material-ui/core",
+                        "import": "Button",
+                        "as": "Button"
+                    }
                 ],
                 "editable": true
             },

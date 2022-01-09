@@ -2,6 +2,7 @@
     "displayName": "Unigraph Email",
     "version": "0.0.1",
     "description": "Simple email client with Unigraph.",
+    "name": "unigraph.email",
     "unigraph": {
         "schemas": [{"id": "email_message", "src": "schemas/email_message.json"}],
         "executables": [{
@@ -36,7 +37,6 @@
             "src": "executables/setEmailsAsRead.js",
             "editable": true,
             "name": "Set emails as read"
-        }],
-        "package_name": "unigraph.email"
+        }]
     }
 }
