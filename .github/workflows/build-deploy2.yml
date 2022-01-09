@@ -81,7 +81,7 @@ jobs:
             #       path: resources
             # - run: CI=false; USE_HARD_LINKS=false
             - name: Build and Publish Electron App
-              uses: TheExGenesis/action-electron-builder@main
+              uses: TheExGenesis/action-electron-builder@master
               with:
                   # Don't run `yarn build`, which otherwise happens by default
                   skip_build: true
