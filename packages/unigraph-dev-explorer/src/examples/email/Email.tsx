@@ -83,7 +83,11 @@ const EmailMessage: DynamicViewRenderer = ({ data, callbacks }) => {
                         fromPerson?.get('profile_image')?.as('primitive') || ''
                     }
                 >
-                    {unpadded.message?.sender?.[0]?.[0]}
+                    {data
+                        .get('message/sender')
+                        ['_value['][0]?._value?.identifier?.[
+                            '_value.%'
+                        ]?.[0]?.toUpperCase?.()}
                 </Avatar>
             </ListItemAvatar>
             <ListItemText

@@ -300,7 +300,9 @@ export function AutoDynamicView({
                 whiteSpace: 'nowrap',
                 cursor: 'pointer',
             }}
-            onClick={() => {
+            onClick={(ev) => {
+                ev.stopPropagation();
+                ev.preventDefault();
                 window.wsnavigator(`/library/backlink?uid=${object?.uid}`);
             }}
         >

@@ -24,6 +24,7 @@ export function BacklinkView({
     hideHeader,
     forward,
     callbacks,
+    reverse,
     uid,
 }: any) {
     const [objects, setObjects]: [any[], any] = React.useState([]);
@@ -36,11 +37,11 @@ export function BacklinkView({
         tabContext.subscribeToQuery(
             getQuery(data?.uid || uid, forward),
             (newObjs: any[]) => {
-                setObjects(
-                    buildGraph(newObjs).filter(
-                        (el: any) => el.uid !== (data?.uid || uid),
-                    ),
+                const finalObjs = buildGraph(newObjs).filter(
+                    (el: any) => el.uid !== (data?.uid || uid),
                 );
+                if (!reverse) finalObjs.reverse();
+                setObjects(finalObjs);
             },
             id,
             { noExpand: true },

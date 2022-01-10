@@ -79,6 +79,8 @@ export function NoteBlock({ data }: any) {
                     <AutoDynamicView
                         object={data.get('text')._value._value}
                         noDrag
+                        noDrop
+                        inline
                         noContextMenu
                         callbacks={{
                             'get-semantic-properties': () => data,
