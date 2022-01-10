@@ -60,7 +60,7 @@ export function getFragment(query: Query, states: any) {
                 : all
                 ? '@recurse { uid <unigraph.id> expand(_userpredicate_) } '
                 : metadataOnly
-                ? ' { uid <dgraph.type> type { <unigraph.id> } } '
+                ? ' { uid <dgraph.type> type { <unigraph.id> } _updatedAt } '
                 : queryAs ||
                   makeQueryFragmentFromType(
                       query.name,

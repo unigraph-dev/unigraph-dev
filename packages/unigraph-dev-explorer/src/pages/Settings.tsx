@@ -1,6 +1,7 @@
 import React from 'react';
 
 import {
+    Button,
     List,
     ListItem,
     ListItemSecondaryAction,
@@ -31,6 +32,9 @@ export default function Settings() {
         analyticsState.value,
     );
     analyticsState.subscribe((newState: boolean) => setAnalyticsMode(newState));
+    const [email, setEmail] = React.useState(
+        window.localStorage.getItem('email') || '',
+    );
 
     const handleClick = (event: any, n: number) => {
         const total = anchorEl;
@@ -117,6 +121,13 @@ export default function Settings() {
                         </Select>
                     </ListItemSecondaryAction>
                 </ListItem>
+                <ListSubheader
+                    component="div"
+                    id="nested-list-subheader"
+                    key="analyticsHeader"
+                >
+                    Analytics
+                </ListSubheader>
                 <ListItem button onClick={(e) => false} key="analytics">
                     <ListItemText
                         id="switch-list-label-analytics-mode"
@@ -135,6 +146,31 @@ export default function Settings() {
                                     'switch-list-label-developer-mode',
                             }}
                         />
+                    </ListItemSecondaryAction>
+                </ListItem>
+                <ListItem button onClick={(e) => false} key="analytics-email">
+                    <ListItemText
+                        id="switch-list-label-analytics-mode"
+                        primary="Email"
+                        secondary="Enter your email to track your activity"
+                    />
+                    <ListItemSecondaryAction>
+                        <TextField
+                            value={email}
+                            onChange={(ev) => setEmail(ev.target.value)}
+                        />
+                        <Button
+                            onClick={() => {
+                                window.localStorage.setItem('email', email);
+                                (window as any).mixpanel.identify(email);
+                                (window as any).mixpanel.people.set({
+                                    $name: email,
+                                    $email: email,
+                                });
+                            }}
+                        >
+                            Submit
+                        </Button>
                     </ListItemSecondaryAction>
                 </ListItem>
                 <ListSubheader

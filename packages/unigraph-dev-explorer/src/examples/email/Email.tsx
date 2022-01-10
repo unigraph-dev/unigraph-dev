@@ -6,7 +6,7 @@ import {
 } from '@material-ui/core';
 import React from 'react';
 import { pkg as emailPackage } from 'unigraph-dev-common/lib/data/unigraph.email.pkg';
-import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { byUpdatedAt, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import Sugar from 'sugar';
 import { Link } from '@material-ui/icons';
 import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
@@ -83,7 +83,11 @@ const EmailMessage: DynamicViewRenderer = ({ data, callbacks }) => {
                         fromPerson?.get('profile_image')?.as('primitive') || ''
                     }
                 >
-                    {unpadded.message?.sender?.[0]?.[0]}
+                    {data
+                        .get('message/sender')
+                        ['_value['][0]?._value?.identifier?.[
+                            '_value.%'
+                        ]?.[0]?.toUpperCase?.()}
                 </Avatar>
             </ListItemAvatar>
             <ListItemText
@@ -132,7 +136,7 @@ export const EmailList = withUnigraphSubscription(
             tabContext.subscribeToType(
                 '$/schema/email_message',
                 (result: any[]) => {
-                    setData(result.reverse());
+                    setData(result.sort(byUpdatedAt).reverse());
                 },
                 subsId,
                 { metadataOnly: true },

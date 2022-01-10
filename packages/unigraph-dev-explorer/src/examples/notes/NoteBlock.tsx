@@ -79,6 +79,8 @@ export function NoteBlock({ data }: any) {
                     <AutoDynamicView
                         object={data.get('text')._value._value}
                         noDrag
+                        noDrop
+                        inline
                         noContextMenu
                         callbacks={{
                             'get-semantic-properties': () => data,
@@ -429,7 +431,7 @@ export function DetailedNoteBlock({
                 let tail;
                 const focusedState =
                     window.unigraph.getState('global/focused').value;
-                const el = textInput.current.firstChild || textInput.current;
+                const el = textInput.current?.firstChild || textInput.current;
                 if (focusedState.tail) tail = el.textContent.length;
                 setCaret(document, el, tail || focusedState.caret);
             }, 0);

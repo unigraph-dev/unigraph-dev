@@ -60,7 +60,7 @@ export function WorkspacePageComponent({
     tabCtx,
 }: any) {
     const [_maximize, setMaximize] = React.useState(maximize);
-    React.useContext(TabContext).setMaximize = (val: boolean) => {
+    tabCtx.setMaximize = (val: boolean) => {
         setMaximize(val);
     };
     const memoTabCtx = React.useMemo(() => tabCtx, [id]);

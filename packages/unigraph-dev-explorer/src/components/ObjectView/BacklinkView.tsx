@@ -24,7 +24,9 @@ export function BacklinkView({
     hideHeader,
     forward,
     callbacks,
+    reverse,
     uid,
+    titleBar,
 }: any) {
     const [objects, setObjects]: [any[], any] = React.useState([]);
     const [id, setId] = React.useState(Date.now());
@@ -36,11 +38,11 @@ export function BacklinkView({
         tabContext.subscribeToQuery(
             getQuery(data?.uid || uid, forward),
             (newObjs: any[]) => {
-                setObjects(
-                    buildGraph(newObjs).filter(
-                        (el: any) => el.uid !== (data?.uid || uid),
-                    ),
+                const finalObjs = buildGraph(newObjs).filter(
+                    (el: any) => el.uid !== (data?.uid || uid),
                 );
+                if (!reverse) finalObjs.reverse();
+                setObjects(finalObjs);
             },
             id,
             { noExpand: true },
@@ -66,6 +68,7 @@ export function BacklinkView({
             </Typography>
             <DynamicObjectListView
                 items={objects}
+                titleBar={titleBar}
                 context={data || null}
                 itemRemover={(uids: any) => {
                     if (!forward) {

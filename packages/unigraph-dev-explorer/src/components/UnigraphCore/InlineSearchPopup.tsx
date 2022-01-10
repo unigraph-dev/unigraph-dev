@@ -121,31 +121,33 @@ export function InlineSearch() {
     }, [searchResults, state]);
 
     React.useEffect(() => {
-        document.addEventListener(
-            'keydown',
-            (ev) => {
-                if (ctxMenuState.value.show && ev.key === 'ArrowDown') {
-                    console.log('D');
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    setCurrentAction((ca) => ca + 1);
-                } else if (ctxMenuState.value.show && ev.key === 'ArrowUp') {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    setCurrentAction((ca) => ca - 1);
-                } else if (ctxMenuState.value.show && ev.key === 'Enter') {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    actionItems[currentAction]?.[1]?.();
-                } else if (ctxMenuState.value.show && ev.key === 'Escape') {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    ctxMenuState.setValue({ show: false });
-                }
-            },
-            { capture: true },
-        );
-    }, []);
+        const handler = (ev: any) => {
+            if (ctxMenuState.value.show && ev.key === 'ArrowDown') {
+                console.log('D');
+                ev.preventDefault();
+                ev.stopPropagation();
+                setCurrentAction((ca) => ca + 1);
+            } else if (ctxMenuState.value.show && ev.key === 'ArrowUp') {
+                ev.preventDefault();
+                ev.stopPropagation();
+                setCurrentAction((ca) => ca - 1);
+            } else if (ctxMenuState.value.show && ev.key === 'Enter') {
+                ev.preventDefault();
+                ev.stopPropagation();
+                actionItems[currentAction]?.[1]?.(ev);
+            } else if (ctxMenuState.value.show && ev.key === 'Escape') {
+                ev.preventDefault();
+                ev.stopPropagation();
+                ctxMenuState.setValue({ show: false });
+            }
+        };
+
+        document.addEventListener('keydown', handler, { capture: true });
+
+        return function cleanup() {
+            document.removeEventListener('keydown', handler, { capture: true });
+        };
+    }, [currentAction, actionItems]);
 
     return (
         <div>
@@ -177,14 +179,15 @@ export function InlineSearch() {
                 {actionItems.map((el: any, index: number) => (
                     <div
                         onPointerDown={el[1]}
-                        style={
-                            index === currentAction
+                        style={{
+                            ...(index === currentAction
                                 ? {
                                       borderRadius: '6px',
                                       backgroundColor: 'gainsboro',
                                   }
-                                : {}
-                        }
+                                : {}),
+                            cursor: 'pointer',
+                        }}
                         id={`globalSearchItem_${
                             index === currentAction ? 'current' : ''
                         }`}

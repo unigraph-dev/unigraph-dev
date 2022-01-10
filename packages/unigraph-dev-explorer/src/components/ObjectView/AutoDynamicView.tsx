@@ -81,7 +81,9 @@ export function AutoDynamicView({
     const [canClickthrough, setCanClickthrough] = React.useState(
         Object.keys(
             window.unigraph.getState('registry/dynamicViewDetailed').value,
-        ).includes(getObject()?.type?.['unigraph.id']),
+        ).includes(
+            getObject()?.type?.['unigraph.id'] || object?.type?.['unigraph.id'],
+        ),
     );
 
     const viewEl = React.useRef(null);
@@ -99,7 +101,10 @@ export function AutoDynamicView({
                 Object.keys(
                     window.unigraph.getState('registry/dynamicViewDetailed')
                         .value,
-                ).includes(getObject()?.type?.['unigraph.id']),
+                ).includes(
+                    getObject()?.type?.['unigraph.id'] ||
+                        object?.type?.['unigraph.id'],
+                ),
             );
         window.unigraph.getState('registry/dynamicViewDetailed').subscribe(cb2);
 
@@ -193,7 +198,7 @@ export function AutoDynamicView({
             };
         }
         return () => {};
-    }, [object.uid]);
+    }, [object?.uid]);
 
     const [{ isDragging }, drag] = useDrag(() => ({
         type: object?.type?.['unigraph.id'] || '$/schema/any',
@@ -278,7 +283,7 @@ export function AutoDynamicView({
 
             if (!noDrag) drag(domElement);
             if (!noDrop) drop(domElement);
-            if (isMobile()) handlers.ref(domElement);
+            if (isMobile() && !noContextMenu) handlers.ref(domElement);
             viewEl.current = domElement;
         },
         [isDragging, drag, callbacks],
@@ -300,7 +305,9 @@ export function AutoDynamicView({
                 whiteSpace: 'nowrap',
                 cursor: 'pointer',
             }}
-            onClick={() => {
+            onClick={(ev) => {
+                ev.stopPropagation();
+                ev.preventDefault();
                 window.wsnavigator(`/library/backlink?uid=${object?.uid}`);
             }}
         >
