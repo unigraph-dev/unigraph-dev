@@ -50,35 +50,19 @@ function AddImportComponent({ onAddImport }: any) {
         <>
             <FormControl>
                 <InputLabel>Select env</InputLabel>
-                <Select
-                    label="Env"
-                    value={env}
-                    onChange={(ev) => setEnv(ev.target.value as string)}
-                >
+                <Select label="Env" value={env} onChange={(ev) => setEnv(ev.target.value as string)}>
                     <MenuItem value="">Env</MenuItem>
                     <MenuItem value="npm">npm</MenuItem>
                     <MenuItem value="unigraph">unigraph</MenuItem>
                 </Select>
             </FormControl>
-            <TextField
-                label="Package name"
-                value={pkgName}
-                onChange={(ev) => setPkgName(ev.target.value)}
-            >
+            <TextField label="Package name" value={pkgName} onChange={(ev) => setPkgName(ev.target.value)}>
                 Pkg Name
             </TextField>
-            <TextField
-                label="Import"
-                value={impt}
-                onChange={(ev) => setImpt(ev.target.value)}
-            >
+            <TextField label="Import" value={impt} onChange={(ev) => setImpt(ev.target.value)}>
                 Import
             </TextField>
-            <TextField
-                label="As"
-                value={imptas}
-                onChange={(ev) => setImptas(ev.target.value)}
-            >
+            <TextField label="As" value={imptas} onChange={(ev) => setImptas(ev.target.value)}>
                 As
             </TextField>
 
@@ -96,12 +80,8 @@ function AddImportComponent({ onAddImport }: any) {
 function ImportItem({ data }: any) {
     return (
         <div style={{ display: 'flex' }}>
-            <Typography style={{ color: 'gray', marginRight: '0.5em' }}>
-                from
-            </Typography>
-            <Typography style={{ marginRight: '0.5em' }}>
-                {data?.env['_value.%']}
-            </Typography>
+            <Typography style={{ color: 'gray', marginRight: '0.5em' }}>from</Typography>
+            <Typography style={{ marginRight: '0.5em' }}>{data?.env['_value.%']}</Typography>
             <Typography>{data?.package['_value.%']}</Typography>
             <Typography
                 style={{
@@ -162,12 +142,7 @@ export function ExecutableCodeEditor({ data, options }: any) {
             window.layoutModel.doAction(
                 Actions.renameTab(
                     options.viewId,
-                    `Code: ${
-                        unpadded['unigraph.id']
-                            ?.split('/')
-                            .slice(-1)
-                            .join('') || data.uid
-                    }`,
+                    `Code: ${unpadded['unigraph.id']?.split('/').slice(-1).join('') || data.uid}`,
                 ),
             );
         }
@@ -189,17 +164,9 @@ export function ExecutableCodeEditor({ data, options }: any) {
                     variant="outlined"
                     style={{ flexGrow: 1, marginBottom: '16px' }}
                 >
-                    <AccordionSummary
-                        expandIcon={<ExpandMore />}
-                        aria-controls="panel1bh-content"
-                        id="panel1bh-header"
-                    >
-                        <Typography style={{ flexBasis: '50%', flexShrink: 0 }}>
-                            {unpadded.name}
-                        </Typography>
-                        <Typography color="textSecondary">
-                            {unpadded.env}
-                        </Typography>
+                    <AccordionSummary expandIcon={<ExpandMore />} aria-controls="panel1bh-content" id="panel1bh-header">
+                        <Typography style={{ flexBasis: '50%', flexShrink: 0 }}>{unpadded.name}</Typography>
+                        <Typography color="textSecondary">{unpadded.env}</Typography>
                     </AccordionSummary>
                     <AccordionDetails>
                         <List style={{ width: '100%' }}>
@@ -213,9 +180,7 @@ export function ExecutableCodeEditor({ data, options }: any) {
                                 >
                                     unigraph.id
                                 </Typography>
-                                <Typography color="textSecondary">
-                                    {unpadded['unigraph.id'] || 'none'}
-                                </Typography>
+                                <Typography color="textSecondary">{unpadded['unigraph.id'] || 'none'}</Typography>
                             </ListItem>
                             <ListItem>
                                 <Typography
@@ -227,36 +192,18 @@ export function ExecutableCodeEditor({ data, options }: any) {
                                 >
                                     Periodic
                                 </Typography>
-                                <Typography color="textSecondary">
-                                    {unpadded.periodic || 'none'}
-                                </Typography>
+                                <Typography color="textSecondary">{unpadded.periodic || 'none'}</Typography>
                             </ListItem>
                             <ListItem
                                 style={{
-                                    display: unpadded.env?.startsWith?.(
-                                        'component',
-                                    )
-                                        ? ''
-                                        : 'none',
+                                    display: unpadded.env?.startsWith?.('component') ? '' : 'none',
                                 }}
                             >
                                 <Button
                                     onClick={() =>
                                         window.unigraph
-                                            .runExecutable(
-                                                unpadded['unigraph.id'] ||
-                                                    data.uid,
-                                                {},
-                                            )
-                                            .then((comp: any) =>
-                                                setPreviewComponent(
-                                                    React.createElement(
-                                                        comp,
-                                                        {},
-                                                        [],
-                                                    ),
-                                                ),
-                                            )
+                                            .runExecutable(unpadded['unigraph.id'] || data.uid, {})
+                                            .then((comp: any) => setPreviewComponent(React.createElement(comp, {}, [])))
                                     }
                                 >
                                     Preview
@@ -273,34 +220,24 @@ export function ExecutableCodeEditor({ data, options }: any) {
                                     Imports
                                 </Typography>
                                 <List>
-                                    {(
-                                        data?._value?.imports?.['_value['] || []
-                                    ).map((el: any) => (
+                                    {(data?._value?.imports?.['_value['] || []).map((el: any) => (
                                         <ListItem>
                                             <ImportItem data={el._value} />
                                         </ListItem>
                                     ))}
                                     <ListItem>
                                         <AddImportComponent
-                                            onAddImport={(
-                                                env: string,
-                                                pkg: string,
-                                                impt: string,
-                                                imptAs: string,
-                                            ) => {
-                                                window.unigraph.updateObject(
-                                                    data.uid,
-                                                    {
-                                                        imports: [
-                                                            {
-                                                                env,
-                                                                package: pkg,
-                                                                import: impt,
-                                                                as: imptAs,
-                                                            },
-                                                        ],
-                                                    },
-                                                );
+                                            onAddImport={(env: string, pkg: string, impt: string, imptAs: string) => {
+                                                window.unigraph.updateObject(data.uid, {
+                                                    imports: [
+                                                        {
+                                                            env,
+                                                            package: pkg,
+                                                            import: impt,
+                                                            as: imptAs,
+                                                        },
+                                                    ],
+                                                });
                                             }}
                                         />
                                     </ListItem>
@@ -318,35 +255,24 @@ export function ExecutableCodeEditor({ data, options }: any) {
                 <Editor
                     defaultLanguage="javascript"
                     beforeMount={(monaco) => {
-                        monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions(
-                            {
-                                noSemanticValidation: false,
-                                noSyntaxValidation: false,
-                                // Disable error codes: allow return value; no top level await *2; check for typescript annotation
-                                diagnosticCodesToIgnore: [
-                                    1108, 1375, 1378, 7044,
-                                ],
-                            },
-                        );
+                        monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+                            noSemanticValidation: false,
+                            noSyntaxValidation: false,
+                            // Disable error codes: allow return value; no top level await *2; check for typescript annotation
+                            diagnosticCodesToIgnore: [1108, 1375, 1378, 7044],
+                        });
 
-                        monaco.languages.typescript.javascriptDefaults.setCompilerOptions(
-                            {
-                                target: monaco.languages.typescript.ScriptTarget
-                                    .ES2016,
-                                allowNonTsExtensions: true,
-                            },
-                        );
+                        monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+                            target: monaco.languages.typescript.ScriptTarget.ES2016,
+                            allowNonTsExtensions: true,
+                        });
 
-                        monaco.languages.typescript.javascriptDefaults.addExtraLib(
-                            decl,
-                        );
-                        (data._value.imports?.['_value['] || []).forEach(
-                            (el: any) => {
-                                if (el._value.env['_value.%'] === 'npm') {
-                                    // TODO: import references
-                                }
-                            },
-                        );
+                        monaco.languages.typescript.javascriptDefaults.addExtraLib(decl);
+                        (data._value.imports?.['_value['] || []).forEach((el: any) => {
+                            if (el._value.env['_value.%'] === 'npm') {
+                                // TODO: import references
+                            }
+                        });
                     }}
                     path={`main${ext[unpadded.env]}`}
                     defaultValue={currentCode}

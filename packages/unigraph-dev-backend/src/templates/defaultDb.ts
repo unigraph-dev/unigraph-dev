@@ -180,14 +180,12 @@ export const packageExecutableSchema = {
                                             _definitions: [
                                                 {
                                                     type: {
-                                                        'unigraph.id':
-                                                            '$/schema/executable',
+                                                        'unigraph.id': '$/schema/executable',
                                                     },
                                                 },
                                                 {
                                                     type: {
-                                                        'unigraph.id':
-                                                            '$/primitive/string',
+                                                        'unigraph.id': '$/primitive/string',
                                                     },
                                                 },
                                             ],
@@ -281,8 +279,7 @@ export const packageExecutableSchema = {
                                     },
                                     {
                                         type: {
-                                            'unigraph.id':
-                                                '$/schema/interface/semantic',
+                                            'unigraph.id': '$/schema/interface/semantic',
                                         },
                                     },
                                 ],

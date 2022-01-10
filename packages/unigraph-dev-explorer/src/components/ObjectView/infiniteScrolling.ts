@@ -29,16 +29,10 @@ export const setupInfiniteScrolling = (
     };
 
     const onUserNext = () => {
-        const [subsHead, chunksHead] = [
-            states.currentSubs.length / chunk,
-            states.chunks.length,
-        ];
+        const [subsHead, chunksHead] = [states.currentSubs.length / chunk, states.chunks.length];
         if (subsHead < chunksHead) {
             const toSub = states.chunks[subsHead];
-            states.currentSubs = [
-                ...states.results.map((el: any) => el.uid),
-                ...toSub,
-            ];
+            states.currentSubs = [...states.results.map((el: any) => el.uid), ...toSub];
             tabContext.subscribe(
                 {
                     type: 'object',

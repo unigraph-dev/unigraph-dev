@@ -12,10 +12,7 @@ export const Tag: DynamicViewRenderer = ({ data, callbacks }) => {
     let tag = data;
     const { uid } = data;
     if (data._value) tag = unpad(data);
-    const bgc =
-        tag?.color?.startsWith && tag.color.startsWith('#')
-            ? tag.color
-            : 'unset';
+    const bgc = tag?.color?.startsWith && tag.color.startsWith('#') ? tag.color : 'unset';
     return (
         <Chip
             size="small"
@@ -24,10 +21,7 @@ export const Tag: DynamicViewRenderer = ({ data, callbacks }) => {
                     path={mdiTagOutline}
                     size={0.75}
                     style={{
-                        filter:
-                            bgc === 'unset' || getContrast(bgc) === 'black'
-                                ? 'unset'
-                                : 'invert(1)',
+                        filter: bgc === 'unset' || getContrast(bgc) === 'black' ? 'unset' : 'invert(1)',
                     }}
                 />
             }
@@ -47,7 +41,5 @@ export const Tag: DynamicViewRenderer = ({ data, callbacks }) => {
 
 export const SemanticProperties = ({ data }: any) =>
     data?._value?.children?.['_value[']
-        ? data?._value?.children?.['_value['].map((el: any) => (
-              <AutoDynamicView object={unpad(el._value)} />
-          ))
+        ? data?._value?.children?.['_value['].map((el: any) => <AutoDynamicView object={unpad(el._value)} />)
         : [];

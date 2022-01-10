@@ -70,10 +70,7 @@ export default function DrawerRouter() {
                     <ListItemText primary="Library" />
                 </ListItem>
 
-                <ListItem
-                    button
-                    onClick={() => window.wsnavigator('/object-editor')}
-                >
+                <ListItem button onClick={() => window.wsnavigator('/object-editor')}>
                     <ListItemIcon>
                         <Icon path={mdiPencilBoxMultipleOutline} size={1} />
                     </ListItemIcon>
@@ -90,65 +87,42 @@ export default function DrawerRouter() {
                     {' '}
                     Unigraph{' '}
                 </ListSubheader>
-                <ListItem
-                    button
-                    onClick={() => window.wsnavigator('/settings')}
-                >
+                <ListItem button onClick={() => window.wsnavigator('/settings')}>
                     <ListItemIcon>
                         <Icon path={mdiCogOutline} size={1} />
                     </ListItemIcon>
                     <ListItemText primary="Settings" />
                 </ListItem>
-                <ListItem
-                    button
-                    onClick={() => window.wsnavigator('/notification-center')}
-                >
+                <ListItem button onClick={() => window.wsnavigator('/notification-center')}>
                     <ListItemIcon>
                         <Icon path={mdiBellOutline} size={1} />
                     </ListItemIcon>
                     <ListItemText primary="Notifications" />
                 </ListItem>
-                <ListItem
-                    button
-                    onClick={() => window.wsnavigator('/package-manager')}
-                >
+                <ListItem button onClick={() => window.wsnavigator('/package-manager')}>
                     <ListItemIcon>
                         <Icon path={mdiPackageVariantClosed} size={1} />
                     </ListItemIcon>
                     <ListItemText primary="Packages" />
                 </ListItem>
                 <div style={{ display: devMode ? 'inherit' : 'none' }}>
-                    <ListSubheader
-                        component="div"
-                        id="subheader-developer-tools"
-                    >
+                    <ListSubheader component="div" id="subheader-developer-tools">
                         {' '}
                         Developer Tools{' '}
                     </ListSubheader>
-                    <ListItem
-                        button
-                        onClick={() => window.wsnavigator('/code-editor')}
-                    >
+                    <ListItem button onClick={() => window.wsnavigator('/code-editor')}>
                         <ListItemIcon>
                             <Icon path={mdiXml} size={1} />
                         </ListItemIcon>
                         <ListItemText primary="Code Editor" />
                     </ListItem>
-                    <ListItem
-                        button
-                        onClick={() => window.wsnavigator('/request')}
-                    >
+                    <ListItem button onClick={() => window.wsnavigator('/request')}>
                         <ListItemIcon>
                             <Comment />
                         </ListItemIcon>
                         <ListItemText primary="Request" />
                     </ListItem>
-                    <ListItem
-                        button
-                        onClick={() =>
-                            window.wsnavigator('/datamodel-playground')
-                        }
-                    >
+                    <ListItem button onClick={() => window.wsnavigator('/datamodel-playground')}>
                         <ListItemIcon>
                             <CompareArrows />
                         </ListItemIcon>

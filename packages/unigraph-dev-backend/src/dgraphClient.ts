@@ -1,17 +1,8 @@
 import AsyncLock from 'async-lock';
-import dgraph, {
-    DgraphClient as ActualDgraphClient,
-    DgraphClientStub,
-    Operation,
-    Mutation,
-    Check,
-} from 'dgraph-js';
+import dgraph, { DgraphClient as ActualDgraphClient, DgraphClientStub, Operation, Mutation, Check } from 'dgraph-js';
 import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { getAsyncLock, withLock } from './asyncManager';
-import {
-    perfLogStartDbTransaction,
-    perfLogAfterDbTransaction,
-} from './logging';
+import { perfLogStartDbTransaction, perfLogAfterDbTransaction } from './logging';
 import { makeSearchQuery } from './search';
 
 export type UnigraphUpsert = {
@@ -38,9 +29,7 @@ export default class DgraphClient {
         });
         this.dgraphClientStub.checkVersion(new Check()).catch((e) => {
             if (e.code === 14) {
-                throw new Error(
-                    'Could not establish connection to Dgraph client, exiting...',
-                );
+                throw new Error('Could not establish connection to Dgraph client, exiting...');
             }
         });
         this.dgraphClient = new ActualDgraphClient(this.dgraphClientStub);
@@ -60,9 +49,7 @@ export default class DgraphClient {
             {},
         );
         return {
-            version: (
-                await this.dgraphClientStub.checkVersion(new Check())
-            ).toString(),
+            version: (await this.dgraphClientStub.checkVersion(new Check())).toString(),
             objects: count[0][0].totalObjects,
             schemas: count[1][0].totalSchemas,
         };
@@ -84,13 +71,9 @@ export default class DgraphClient {
             await txn.commit();
 
             if (test) {
-                const resolvedUid = response
-                    .getUidsMap()
-                    .get(data.uid.slice(2));
+                const resolvedUid = response.getUidsMap().get(data.uid.slice(2));
 
-                console.log(
-                    `Created node named '${data.name}' with uid = ${resolvedUid}\n`,
-                );
+                console.log(`Created node named '${data.name}' with uid = ${resolvedUid}\n`);
 
                 console.log('All created nodes:');
                 const uids = response.getUidsMap();

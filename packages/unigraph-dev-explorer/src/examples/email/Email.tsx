@@ -1,9 +1,4 @@
-import {
-    Avatar,
-    ListItem as div,
-    ListItemAvatar,
-    ListItemText,
-} from '@material-ui/core';
+import { Avatar, ListItem as div, ListItemAvatar, ListItemText } from '@material-ui/core';
 import React from 'react';
 import { pkg as emailPackage } from 'unigraph-dev-common/lib/data/unigraph.email.pkg';
 import { byUpdatedAt, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
@@ -13,11 +8,7 @@ import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { DynamicViewRenderer } from '../../global.d';
 import { getComponentFromPage } from '../../utils';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
-import {
-    registerDetailedDynamicViews,
-    registerDynamicViews,
-    withUnigraphSubscription,
-} from '../../unigraph-react';
+import { registerDetailedDynamicViews, registerDynamicViews, withUnigraphSubscription } from '../../unigraph-react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { AutoDynamicViewDetailed } from '../../components/ObjectView/AutoDynamicViewDetailed';
 
@@ -51,15 +42,8 @@ const EmailMessageDetailed: DynamicViewRenderer = ({ data, callbacks }) => {
 
 const EmailMessage: DynamicViewRenderer = ({ data, callbacks }) => {
     const unpadded: AEmail = unpad(data);
-    const fromPerson = new UnigraphObject(
-        data.get('message/sender')[
-            '_value['
-        ][0]?._value?.person?._value?._value,
-    );
-    const ider =
-        data.get('message/sender')['_value['][0]?._value?.identifier?.[
-            '_value.%'
-        ];
+    const fromPerson = new UnigraphObject(data.get('message/sender')['_value['][0]?._value?.person?._value?._value);
+    const ider = data.get('message/sender')['_value['][0]?._value?.identifier?.['_value.%'];
     return (
         <div
             style={{ display: 'contents' }}
@@ -73,39 +57,24 @@ const EmailMessage: DynamicViewRenderer = ({ data, callbacks }) => {
                         type: data?.type?.['unigraph.id'],
                     }),
                 );
-                if (callbacks?.removeFromContext && callbacks?.removeOnEnter)
-                    callbacks.removeFromContext();
+                if (callbacks?.removeFromContext && callbacks?.removeOnEnter) callbacks.removeFromContext();
             }}
         >
             <ListItemAvatar>
-                <Avatar
-                    src={
-                        fromPerson?.get('profile_image')?.as('primitive') || ''
-                    }
-                >
-                    {data
-                        .get('message/sender')
-                        ['_value['][0]?._value?.identifier?.[
-                            '_value.%'
-                        ]?.[0]?.toUpperCase?.()}
+                <Avatar src={fromPerson?.get('profile_image')?.as('primitive') || ''}>
+                    {data.get('message/sender')['_value['][0]?._value?.identifier?.['_value.%']?.[0]?.toUpperCase?.()}
                 </Avatar>
             </ListItemAvatar>
             <ListItemText
                 primary={[
                     <strong>
-                        <AutoDynamicView
-                            object={fromPerson}
-                            callbacks={{ identifier: ider }}
-                            inline
-                        />
+                        <AutoDynamicView object={fromPerson} callbacks={{ identifier: ider }} inline />
                     </strong>,
                     <br />,
                     data?.get('name')?.as('primitive'),
                 ]}
                 secondary={[
-                    Sugar.Date.relative(
-                        new Date(unpadded?.message?.date_received),
-                    ),
+                    Sugar.Date.relative(new Date(unpadded?.message?.date_received)),
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <Link />
                         {`${unpadded.content?.abstract}...`}
@@ -127,12 +96,7 @@ export const EmailList = withUnigraphSubscription(
     EmailListBody,
     { schemas: [], defaultData: [], packages: [emailPackage] },
     {
-        afterSchemasLoaded: (
-            subsId: number,
-            tabContext: any,
-            data: any,
-            setData: any,
-        ) => {
+        afterSchemasLoaded: (subsId: number, tabContext: any, data: any, setData: any) => {
             tabContext.subscribeToType(
                 '$/schema/email_message',
                 (result: any[]) => {

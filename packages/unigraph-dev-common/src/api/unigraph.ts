@@ -6,11 +6,7 @@ import React from 'react';
 import { string } from 'yargs';
 import { typeMap } from '../types/consts';
 import { PackageDeclaration } from '../types/packages';
-import {
-    Unigraph,
-    AppState,
-    UnigraphObject as IUnigraphObject,
-} from '../types/unigraph';
+import { Unigraph, AppState, UnigraphObject as IUnigraphObject } from '../types/unigraph';
 import { base64ToBlob, isJsonString } from '../utils/utils';
 
 const RETRY_CONNECTION_INTERVAL = 5000;
@@ -38,8 +34,7 @@ function getObjectAsRecursivePrimitive(object: any) {
             targetValue = object[el];
         } else if (el.startsWith('_value') && typeof object[el] === 'object') {
             const subObj = getObjectAsRecursivePrimitive(object[el]);
-            if (subObj || subObj === '' || subObj === 0 || subObj === false)
-                targetValue = subObj;
+            if (subObj || subObj === '' || subObj === 0 || subObj === false) targetValue = subObj;
         }
     });
     return targetValue;
@@ -88,9 +83,7 @@ export class UnigraphObject extends Object {
  * @param objects Objects with uid references
  */
 export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
-    const objs: any[] = JSON.parse(JSON.stringify(objects)).map(
-        (el: any) => new UnigraphObject(el),
-    );
+    const objs: any[] = JSON.parse(JSON.stringify(objects)).map((el: any) => new UnigraphObject(el));
     const dict: any = {};
     objs.forEach((object) => {
         if (object?.uid) dict[object.uid] = object;
@@ -99,22 +92,14 @@ export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
     function buildDictRecurse(obj: any) {
         if (obj && typeof obj === 'object' && Array.isArray(obj)) {
             obj.forEach((val, index) => {
-                if (val?.uid && !dict[val.uid] && Object.keys(val).length !== 1)
-                    dict[val.uid] = obj[index];
+                if (val?.uid && !dict[val.uid] && Object.keys(val).length !== 1) dict[val.uid] = obj[index];
                 buildDictRecurse(val);
             });
         } else if (obj && typeof obj === 'object') {
-            Object.entries(obj).forEach(
-                ([key, value]: [key: string, value: any]) => {
-                    if (
-                        value?.uid &&
-                        !dict[value.uid] &&
-                        Object.keys(value).length !== 1
-                    )
-                        dict[value.uid] = obj[key];
-                    buildDictRecurse(value);
-                },
-            );
+            Object.entries(obj).forEach(([key, value]: [key: string, value: any]) => {
+                if (value?.uid && !dict[value.uid] && Object.keys(value).length !== 1) dict[value.uid] = obj[key];
+                buildDictRecurse(value);
+            });
         }
     }
 
@@ -125,13 +110,10 @@ export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
                 buildGraphRecurse(val);
             });
         } else if (obj && typeof obj === 'object') {
-            Object.entries(obj).forEach(
-                ([key, value]: [key: string, value: any]) => {
-                    if (value?.uid && dict[value.uid])
-                        obj[key] = dict[value.uid];
-                    buildGraphRecurse(value);
-                },
-            );
+            Object.entries(obj).forEach(([key, value]: [key: string, value: any]) => {
+                if (value?.uid && dict[value.uid]) obj[key] = dict[value.uid];
+                buildGraphRecurse(value);
+            });
         }
     }
 
@@ -145,10 +127,7 @@ export function getRandomInt() {
     return Math.floor(Math.random() * Math.floor(1000000));
 }
 
-export default function unigraph(
-    url: string,
-    browserId: string,
-): Unigraph<WebSocket | undefined> {
+export default function unigraph(url: string, browserId: string): Unigraph<WebSocket | undefined> {
     const connection: { current: WebSocket | undefined } = {
         current: undefined,
     };
@@ -160,9 +139,7 @@ export default function unigraph(
     const subscriptions: Record<string, Function> = {};
     const states: Record<string, AppState> = {};
     const caches: Record<string, any> = {
-        namespaceMap: isJsonString(
-            window.localStorage.getItem('caches/namespaceMap'),
-        )
+        namespaceMap: isJsonString(window.localStorage.getItem('caches/namespaceMap'))
             ? // @ts-expect-error: already checked if not JSON
               JSON.parse(window.localStorage.getItem('caches/namespaceMap'))
             : false,
@@ -187,20 +164,16 @@ export default function unigraph(
             const state: AppState = {
                 value: initialValue,
                 subscribers: [],
-                subscribe: (subscriber: (newValue: any) => any) =>
-                    state.subscribers.push(subscriber),
+                subscribe: (subscriber: (newValue: any) => any) => state.subscribers.push(subscriber),
                 unsubscribe: (cb: (newValue: any) => any) => {
-                    state.subscribers = state.subscribers.filter(
-                        (el) => el !== cb,
-                    );
+                    state.subscribers = state.subscribers.filter((el) => el !== cb);
                 },
                 setValue: undefined as any,
             };
             state.setValue = (newValue: any, flush?: boolean) => {
                 const changed = newValue !== state.value;
                 state.value = newValue;
-                if (changed || flush)
-                    state.subscribers.forEach((sub) => sub(state.value));
+                if (changed || flush) state.subscribers.forEach((sub) => sub(state.value));
             };
             states[name] = state;
             return state;
@@ -212,13 +185,8 @@ export default function unigraph(
         const urlString = new URL(url);
         urlString.searchParams.append('browserId', browserId);
         const isRevival = getState('unigraph/connected').value !== undefined;
-        if (getState('unigraph/connected').value !== undefined)
-            urlString.searchParams.append('revival', 'true');
-        if (
-            connection.current?.readyState !== 3 /* CLOSED */ &&
-            connection.current
-        )
-            return;
+        if (getState('unigraph/connected').value !== undefined) urlString.searchParams.append('revival', 'true');
+        if (connection.current?.readyState !== 3 /* CLOSED */ && connection.current) return;
         connection.current = new WebSocket(urlString.toString());
 
         connection.current.onopen = () => {
@@ -247,26 +215,16 @@ export default function unigraph(
             }
             // messages.push(parsed);
             eventTarget.dispatchEvent(new Event('onmessage', parsed));
-            if (parsed.type === 'response' && parsed.id && callbacks[parsed.id])
-                callbacks[parsed.id](parsed);
+            if (parsed.type === 'response' && parsed.id && callbacks[parsed.id]) callbacks[parsed.id](parsed);
             if (parsed.type === 'cache_updated' && parsed.name) {
                 caches[parsed.name] = parsed.result;
-                window.localStorage.setItem(
-                    `caches/${parsed.name}`,
-                    JSON.stringify(parsed.result),
-                );
+                window.localStorage.setItem(`caches/${parsed.name}`, JSON.stringify(parsed.result));
                 cacheCallbacks[parsed.name]?.forEach((el) => el(parsed.result));
             }
-            if (
-                parsed.type === 'subscription' &&
-                parsed.id &&
-                subscriptions[parsed.id] &&
-                parsed.result
-            ) {
+            if (parsed.type === 'subscription' && parsed.id && subscriptions[parsed.id] && parsed.result) {
                 subscriptions[parsed.id](parsed.result);
             }
-            if (parsed.type === 'open_url' && window)
-                window.open(parsed.url, '_blank');
+            if (parsed.type === 'open_url' && window) window.open(parsed.url, '_blank');
             return ev;
         };
     }
@@ -275,12 +233,7 @@ export default function unigraph(
 
     connect();
 
-    function sendEvent(
-        conn: { current: WebSocket | undefined },
-        name: string,
-        params: any,
-        id?: number | undefined,
-    ) {
+    function sendEvent(conn: { current: WebSocket | undefined }, name: string, params: any, id?: number | undefined) {
         if ((window as any).onEventSend) (window as any).onEventSend(name);
         if (!id) id = getRandomInt();
         const msg = JSON.stringify({
@@ -289,8 +242,7 @@ export default function unigraph(
             id,
             ...params,
         });
-        if (getState('unigraph/connected').value === true && conn.current)
-            conn.current.send(msg);
+        if (getState('unigraph/connected').value === true && conn.current) conn.current.send(msg);
         else {
             msgQueue.push(msg);
             connect();
@@ -338,12 +290,7 @@ export default function unigraph(
                     if (response.success) resolve(response);
                     else reject(response);
                 };
-                sendEvent(
-                    connection,
-                    'ensure_unigraph_schema',
-                    { name, fallback },
-                    id,
-                );
+                sendEvent(connection, 'ensure_unigraph_schema', { name, fallback }, id);
             }),
         ensurePackage: (packageName, fallback) =>
             new Promise((resolve, reject) => {
@@ -352,40 +299,24 @@ export default function unigraph(
                     if (response.success) resolve(response);
                     else reject(response);
                 };
-                sendEvent(
-                    connection,
-                    'ensure_unigraph_package',
-                    { packageName, fallback },
-                    id,
-                );
+                sendEvent(connection, 'ensure_unigraph_package', { packageName, fallback }, id);
             }),
         subscribeToType: (name, callback, eventId = undefined, options: any) =>
             new Promise((resolve, reject) => {
-                const id =
-                    typeof eventId === 'number' ? eventId : getRandomInt();
+                const id = typeof eventId === 'number' ? eventId : getRandomInt();
                 callbacks[id] = (response: any) => {
                     if (response.success) resolve(id);
                     else reject(response);
                 };
                 subscriptions[id] = (result: any[]) => {
-                    callback(
-                        buildGraph(
-                            result.map((el: any) => new UnigraphObject(el)),
-                        ),
-                    );
+                    callback(buildGraph(result.map((el: any) => new UnigraphObject(el))));
                 };
-                sendEvent(
-                    connection,
-                    'subscribe_to_type',
-                    { schema: name, options },
-                    id,
-                );
+                sendEvent(connection, 'subscribe_to_type', { schema: name, options }, id);
             }),
         // eslint-disable-next-line no-async-promise-executor
         subscribeToObject: (uid, callback, eventId = undefined, options: any) =>
             new Promise((resolve, reject) => {
-                const id =
-                    typeof eventId === 'number' ? eventId : getRandomInt();
+                const id = typeof eventId === 'number' ? eventId : getRandomInt();
                 callbacks[id] = (response: any) => {
                     if (response.success) resolve(id);
                     else reject(response);
@@ -393,39 +324,23 @@ export default function unigraph(
                 subscriptions[id] = (result: any) =>
                     result.length === 1
                         ? callback(new UnigraphObject(result[0]))
-                        : callback(
-                              result.map((el: any) => new UnigraphObject(el)),
-                          );
-                if (typeof options?.queryFn === 'function')
-                    options.queryFn = options.queryFn('QUERYFN_TEMPLATE');
-                sendEvent(
-                    connection,
-                    'subscribe_to_object',
-                    { uid, options },
-                    id,
-                );
+                        : callback(result.map((el: any) => new UnigraphObject(el)));
+                if (typeof options?.queryFn === 'function') options.queryFn = options.queryFn('QUERYFN_TEMPLATE');
+                sendEvent(connection, 'subscribe_to_object', { uid, options }, id);
             }),
         subscribeToQuery: (fragment, callback, eventId = undefined, options) =>
             new Promise((resolve, reject) => {
-                const id =
-                    typeof eventId === 'number' ? eventId : getRandomInt();
+                const id = typeof eventId === 'number' ? eventId : getRandomInt();
                 callbacks[id] = (response: any) => {
                     if (response.success) resolve(id);
                     else reject(response);
                 };
-                subscriptions[id] = (result: any[]) =>
-                    callback(result.map((el: any) => new UnigraphObject(el)));
-                sendEvent(
-                    connection,
-                    'subscribe_to_query',
-                    { queryFragment: fragment, options },
-                    id,
-                );
+                subscriptions[id] = (result: any[]) => callback(result.map((el: any) => new UnigraphObject(el)));
+                sendEvent(connection, 'subscribe_to_query', { queryFragment: fragment, options }, id);
             }),
         subscribe: (query, callback, eventId = undefined, update) =>
             new Promise((resolve, reject) => {
-                const id =
-                    typeof eventId === 'number' ? eventId : getRandomInt();
+                const id = typeof eventId === 'number' ? eventId : getRandomInt();
                 callbacks[id] = (response: any) => {
                     if (response.success) resolve(id);
                     else reject(response);
@@ -434,9 +349,7 @@ export default function unigraph(
                     subscriptions[id] = (result: any[] | any) => {
                         callback(
                             Array.isArray(result)
-                                ? result.map(
-                                      (el: any) => new UnigraphObject(el),
-                                  )
+                                ? result.map((el: any) => new UnigraphObject(el))
                                 : new UnigraphObject(result),
                         );
                     };
@@ -445,14 +358,8 @@ export default function unigraph(
             }),
         hibernateOrReviveSubscription: (eventId = undefined, revival) =>
             new Promise((resolve, reject) => {
-                const id =
-                    typeof eventId === 'number' ? eventId : getRandomInt();
-                sendEvent(
-                    connection,
-                    'hibernate_or_revive_subscription',
-                    { revival, ids: eventId },
-                    id,
-                );
+                const id = typeof eventId === 'number' ? eventId : getRandomInt();
+                sendEvent(connection, 'hibernate_or_revive_subscription', { revival, ids: eventId }, id);
             }),
         unsubscribe: (id) => {
             sendEvent(connection, 'unsubscribe_by_id', {}, id);
@@ -477,14 +384,7 @@ export default function unigraph(
             // TODO: This is very useless, should be removed once we get something better
             sendEvent(connection, 'update_spo', { objects });
         },
-        updateObject: (
-            uid,
-            newObject,
-            upsert = true,
-            pad = true,
-            subIds,
-            origin,
-        ) =>
+        updateObject: (uid, newObject, upsert = true, pad = true, subIds, origin) =>
             new Promise((resolve, reject) => {
                 const id = getRandomInt();
                 callbacks[id] = (response: any) => {
@@ -525,12 +425,7 @@ export default function unigraph(
                 const id = getRandomInt();
                 callbacks[id] = (response: any) => {
                     if (response.success)
-                        resolve(
-                            response.result.map(
-                                (obj: { [x: string]: any }) =>
-                                    obj['unigraph.id'],
-                            ),
-                        );
+                        resolve(response.result.map((obj: { [x: string]: any }) => obj['unigraph.id']));
                     else reject(response);
                 };
                 sendEvent(
@@ -551,8 +446,7 @@ export default function unigraph(
             new Promise((resolver, reject) => {
                 const id = getRandomInt();
                 callbacks[id] = (response: any) => {
-                    if (response.success && response.schemas)
-                        resolver(response.schemas);
+                    if (response.success && response.schemas) resolver(response.schemas);
                     else reject(response);
                 };
                 sendEvent(
@@ -569,8 +463,7 @@ export default function unigraph(
             new Promise((resolve, reject) => {
                 const id = getRandomInt();
                 callbacks[id] = (response: any) => {
-                    if (response.success && response.packages)
-                        resolve(response.packages);
+                    if (response.success && response.packages) resolve(response.packages);
                     else reject(response);
                 };
                 sendEvent(
@@ -595,12 +488,8 @@ export default function unigraph(
         proxyFetch: (fetchUrl, options?) =>
             new Promise((resolve, reject) => {
                 const id = getRandomInt();
-                callbacks[id] = (responseBlob: {
-                    success: boolean;
-                    blob: string;
-                }) => {
-                    if (responseBlob.success && responseBlob.blob)
-                        resolve(base64ToBlob(responseBlob.blob));
+                callbacks[id] = (responseBlob: { success: boolean; blob: string }) => {
+                    if (responseBlob.success && responseBlob.blob) resolve(base64ToBlob(responseBlob.blob));
                     else reject(responseBlob);
                 };
                 sendEvent(
@@ -615,8 +504,7 @@ export default function unigraph(
             }),
         importObjects: (objects) =>
             new Promise((resolve, reject) => {
-                if (typeof objects !== 'string')
-                    objects = JSON.stringify(objects);
+                if (typeof objects !== 'string') objects = JSON.stringify(objects);
                 const id = getRandomInt();
                 sendEvent(connection, 'import_objects', { objects }, id);
             }),
@@ -625,11 +513,7 @@ export default function unigraph(
                 const id = getRandomInt();
                 callbacks[id] = (response: any) => {
                     if (response.success) {
-                        if (
-                            response.returns?.return_function_component !==
-                                undefined &&
-                            !fnString
-                        ) {
+                        if (response.returns?.return_function_component !== undefined && !fnString) {
                             // eslint-disable-next-line no-new-func
                             const retFn = new Function(
                                 'React',
@@ -642,12 +526,7 @@ export default function unigraph(
                         }
                     } else reject(response);
                 };
-                sendEvent(
-                    connection,
-                    'run_executable',
-                    { uid, params: params || {} },
-                    id,
-                );
+                sendEvent(connection, 'run_executable', { uid, params: params || {} }, id);
             }),
         getNamespaceMapUid: (name) => {
             throw Error('Not implemented');
@@ -660,23 +539,16 @@ export default function unigraph(
             new Promise((resolve, reject) => {
                 const id = getRandomInt();
                 callbacks[id] = (response: any) => {
-                    if (response.success)
-                        resolve(response.results ? response.results : {});
+                    if (response.success) resolve(response.results ? response.results : {});
                     else reject(response);
                 };
-                sendEvent(
-                    connection,
-                    'get_queries',
-                    { fragments: queries },
-                    id,
-                );
+                sendEvent(connection, 'get_queries', { fragments: queries }, id);
             }),
         addNotification: (item) =>
             new Promise((resolve, reject) => {
                 const id = getRandomInt();
                 callbacks[id] = (response: any) => {
-                    if (response.success && response.schemas)
-                        resolve(response.schemas);
+                    if (response.success && response.schemas) resolve(response.schemas);
                     else reject(response);
                 };
                 sendEvent(connection, 'add_notification', { item }, id);
@@ -685,8 +557,7 @@ export default function unigraph(
             new Promise((resolve, reject) => {
                 const id = getRandomInt();
                 callbacks[id] = (response: any) => {
-                    if (response.success && response.results)
-                        resolve(response.results);
+                    if (response.success && response.results) resolve(response.results);
                     else reject(response);
                 };
                 sendEvent(
@@ -706,8 +577,7 @@ export default function unigraph(
             new Promise((resolve, reject) => {
                 const id = getRandomInt();
                 callbacks[id] = (response: any) => {
-                    if (response.success && response.result)
-                        resolve(response.result);
+                    if (response.success && response.result) resolve(response.result);
                     else reject(response);
                 };
                 sendEvent(connection, 'export_objects', { uids, options }, id);
@@ -722,8 +592,7 @@ export default function unigraph(
             new Promise((resolve, reject) => {
                 const id = getRandomInt();
                 callbacks[id] = (response: any) => {
-                    if (response.success && response.result)
-                        resolve(response.result);
+                    if (response.success && response.result) resolve(response.result);
                     else reject(response);
                 };
                 sendEvent(connection, 'get_subscriptions', {}, id);

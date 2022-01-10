@@ -28,24 +28,15 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
     React.useEffect(() => {
         window.unigraph
             .getState('registry/dynamicViewDetailed')
-            .subscribe((newIts) =>
-                setDynamicViewsDetailed({ ...newIts, ...(component || {}) }),
-            );
+            .subscribe((newIts) => setDynamicViewsDetailed({ ...newIts, ...(component || {}) }));
     }, []);
 
     const tabContext = React.useContext(TabContext);
 
     React.useEffect(() => {
         const newSubs = getRandomInt();
-        if (
-            isObjectStub &&
-            Object.keys(DynamicViewsDetailed).includes(
-                object.type?.['unigraph.id'],
-            )
-        ) {
-            const query = DynamicViewsDetailed[
-                object.type['unigraph.id']
-            ].query(object.uid);
+        if (isObjectStub && Object.keys(DynamicViewsDetailed).includes(object.type?.['unigraph.id'])) {
+            const query = DynamicViewsDetailed[object.type['unigraph.id']].query(object.uid);
             tabContext.subscribeToQuery(
                 query,
                 (objects: any[]) => {
@@ -57,15 +48,8 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
             setSubsId(newSubs);
         }
 
-        if (
-            Object.keys(DynamicViewsDetailed).includes(
-                object?.type?.['unigraph.id'],
-            ) &&
-            !callbacks?.isEmbed
-        ) {
-            tabContext.setMaximize(
-                DynamicViewsDetailed[object.type['unigraph.id']].maximize,
-            );
+        if (Object.keys(DynamicViewsDetailed).includes(object?.type?.['unigraph.id']) && !callbacks?.isEmbed) {
+            tabContext.setMaximize(DynamicViewsDetailed[object.type['unigraph.id']].maximize);
         }
 
         return function cleanup() {
@@ -78,9 +62,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
     if (
         object?.type &&
         object.type['unigraph.id'] &&
-        Object.keys(DynamicViewsDetailed).includes(
-            object.type['unigraph.id'],
-        ) &&
+        Object.keys(DynamicViewsDetailed).includes(object.type['unigraph.id']) &&
         ((isObjectStub && loadedObj) || !isObjectStub)
     ) {
         return (
@@ -88,38 +70,29 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
                 // eslint-disable-next-line react/no-unstable-nested-components
                 FallbackComponent={(error) => (
                     <div>
-                        <Typography>
-                            Error in detailed AutoDynamicView:{' '}
-                        </Typography>
+                        <Typography>Error in detailed AutoDynamicView: </Typography>
                         <p>{JSON.stringify(error, null, 4)}</p>
                     </div>
                 )}
             >
-                <div
-                    style={{ display: 'contents' }}
-                    id={`object-view-${object.uid}`}
-                >
+                <div style={{ display: 'contents' }} id={`object-view-${object.uid}`}>
                     <TabContext.Consumer>
                         {({ viewId, setTitle }) =>
-                            React.createElement(
-                                DynamicViewsDetailed[object.type['unigraph.id']]
-                                    .view,
-                                {
-                                    data: isObjectStub ? loadedObj : object,
-                                    callbacks: {
-                                        viewId,
-                                        setTitle,
-                                        ...(callbacks || {}),
-                                    },
-                                    options: {
-                                        viewId,
-                                        setTitle,
-                                        ...(options || {}),
-                                    },
-                                    context,
-                                    ...(attributes || {}),
+                            React.createElement(DynamicViewsDetailed[object.type['unigraph.id']].view, {
+                                data: isObjectStub ? loadedObj : object,
+                                callbacks: {
+                                    viewId,
+                                    setTitle,
+                                    ...(callbacks || {}),
                                 },
-                            )
+                                options: {
+                                    viewId,
+                                    setTitle,
+                                    ...(options || {}),
+                                },
+                                context,
+                                ...(attributes || {}),
+                            })
                         }
                     </TabContext.Consumer>
                 </div>
@@ -127,11 +100,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
         );
     }
     if (useFallback) {
-        return object && ((isObjectStub && loadedObj) || !isObjectStub) ? (
-            <ObjectEditor uid={object?.uid} />
-        ) : (
-            <span />
-        );
+        return object && ((isObjectStub && loadedObj) || !isObjectStub) ? <ObjectEditor uid={object?.uid} /> : <span />;
     }
     return <span />;
 };

@@ -1,13 +1,6 @@
 import React from 'react';
-import {
-    buildGraph,
-    getRandomInt,
-    UnigraphObject,
-} from 'unigraph-dev-common/lib/utils/utils';
-import {
-    byElementIndex,
-    unpad,
-} from 'unigraph-dev-common/lib/utils/entityUtils';
+import { buildGraph, getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
+import { byElementIndex, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import Sugar from 'sugar';
 import { DynamicViewRenderer } from '../../global.d';
 import { getComponentFromExecutable } from '../../unigraph-react';
@@ -21,9 +14,7 @@ import { TabContext } from '../../utils';
 export const globalImports = {
     HelloWorld: () => <p>Hello world!!!</p>,
     AutoDynamicView: (props: any) => <AutoDynamicView {...props} />,
-    AutoDynamicViewDetailed: (props: any) => (
-        <AutoDynamicViewDetailed {...props} />
-    ),
+    AutoDynamicViewDetailed: (props: any) => <AutoDynamicViewDetailed {...props} />,
     DynamicObjectListView: (props: any) => <DynamicObjectListView {...props} />,
     UnigraphObject,
     buildGraph,
@@ -36,23 +27,12 @@ export const globalImports = {
     TabContext,
 };
 
-export const DynamicComponentView: DynamicViewRenderer = ({
-    data,
-    callbacks,
-}) => {
-    const [previewComponent, setPreviewComponent] =
-        React.useState<any>('Loading...');
+export const DynamicComponentView: DynamicViewRenderer = ({ data, callbacks }) => {
+    const [previewComponent, setPreviewComponent] = React.useState<any>('Loading...');
 
     React.useEffect(() => {
-        getComponentFromExecutable(
-            data,
-            callbacks?.props || {},
-            globalImports,
-        ).then((comp: any) => {
-            if (comp)
-                setPreviewComponent(
-                    React.createElement(comp, callbacks?.props || {}, []),
-                );
+        getComponentFromExecutable(data, callbacks?.props || {}, globalImports).then((comp: any) => {
+            if (comp) setPreviewComponent(React.createElement(comp, callbacks?.props || {}, []));
         });
     }, [data]);
 
@@ -60,11 +40,7 @@ export const DynamicComponentView: DynamicViewRenderer = ({
 };
 
 export const getComponentAsView = async (view: any, params: any) => {
-    const ret = await getComponentFromExecutable(
-        view,
-        params || {},
-        globalImports,
-    );
+    const ret = await getComponentFromExecutable(view, params || {}, globalImports);
     if (typeof ret === 'function') {
         return ret;
     }

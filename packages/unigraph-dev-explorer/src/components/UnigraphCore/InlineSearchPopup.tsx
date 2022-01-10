@@ -8,8 +8,7 @@ import { setSearchPopup } from '../../examples/notes/searchPopup';
 import { SearchPopupState } from '../../global.d';
 
 export function InlineSearch() {
-    const ctxMenuState: AppState<Partial<SearchPopupState>> =
-        window.unigraph.getState('global/searchPopup');
+    const ctxMenuState: AppState<Partial<SearchPopupState>> = window.unigraph.getState('global/searchPopup');
 
     const [currentAction, setCurrentAction] = React.useState(0);
     const keyDownRef = React.useRef((ev: any) => {
@@ -26,30 +25,20 @@ export function InlineSearch() {
         _.throttle((key: string) => {
             if (key !== undefined && key.length > 1) {
                 window.unigraph
-                    .getSearchResults(
-                        parseQuery(key as any) as any,
-                        'indexes',
-                        2,
-                        {
-                            limit: -500,
-                            noPrimitives: true,
-                            hideHidden: ctxMenuState.value.hideHidden,
-                        },
-                    )
+                    .getSearchResults(parseQuery(key as any) as any, 'indexes', 2, {
+                        limit: -500,
+                        noPrimitives: true,
+                        hideHidden: ctxMenuState.value.hideHidden,
+                    })
                     .then((res: any) => {
                         const results = res.entities
                             .map((el: any) => ({
-                                name: new UnigraphObject(
-                                    el['unigraph.indexes']?.name || {},
-                                ).as('primitive'),
+                                name: new UnigraphObject(el['unigraph.indexes']?.name || {}).as('primitive'),
                                 uid: el.uid,
                                 type: el.type['unigraph.id'],
                             }))
                             .filter((el: any) => el.name);
-                        if (
-                            window.unigraph.getState('global/searchPopup').value
-                                .search === key
-                        )
+                        if (window.unigraph.getState('global/searchPopup').value.search === key)
                             setSearchResults(results.reverse());
                     });
             }
@@ -71,9 +60,7 @@ export function InlineSearch() {
     React.useEffect(() => {
         setActionItems([
             ...(state.default || []).map((el: any, index: number) => [
-                <Typography variant="body1">
-                    {el.label(state.search!)}
-                </Typography>,
+                <Typography variant="body1">{el.label(state.search!)}</Typography>,
                 (ev: any) => {
                     console.log('Yo');
                     ev.preventDefault();
@@ -95,19 +82,14 @@ export function InlineSearch() {
                             marginRight: '3px',
                             opacity: 0.54,
                             backgroundImage: `url("data:image/svg+xml,${
-                                window.unigraph.getNamespaceMap?.()?.[el.type]
-                                    ?._icon
+                                window.unigraph.getNamespaceMap?.()?.[el.type]?._icon
                             }")`,
                         }}
                     />
                     <Typography style={{ color: 'grey', marginLeft: '2px' }}>
                         {window.unigraph.getNamespaceMap?.()?.[el.type]?._name}
                     </Typography>
-                    <Divider
-                        variant="middle"
-                        orientation="vertical"
-                        style={{ height: '16px', alignSelf: 'center' }}
-                    />
+                    <Divider variant="middle" orientation="vertical" style={{ height: '16px', alignSelf: 'center' }} />
                     <Typography variant="body1">{el.name}</Typography>
                 </div>,
                 (ev: any) => {
@@ -188,9 +170,7 @@ export function InlineSearch() {
                                 : {}),
                             cursor: 'pointer',
                         }}
-                        id={`globalSearchItem_${
-                            index === currentAction ? 'current' : ''
-                        }`}
+                        id={`globalSearchItem_${index === currentAction ? 'current' : ''}`}
                     >
                         {el[0]}
                     </div>
@@ -205,13 +185,7 @@ export function InlineSearch() {
  * domEl => boxRef
  *
  */
-export const inlineTextSearch = (
-    newText: string,
-    domEl: any,
-    caret: number,
-    onMatch: any,
-    setInSearch?: any,
-) => {
+export const inlineTextSearch = (newText: string, domEl: any, caret: number, onMatch: any, setInSearch?: any) => {
     let hasMatch = false;
     const placeholder = /\[\[([^[\]]*)\]\]/g;
     for (let match: any; (match = placeholder.exec(newText)) !== null; ) {
@@ -225,13 +199,7 @@ export const inlineTextSearch = (
     return hasMatch;
 };
 
-export const inlineObjectSearch = (
-    newText: string,
-    domEl: any,
-    caret: number,
-    onMatch: any,
-    setInSearch?: any,
-) => {
+export const inlineObjectSearch = (newText: string, domEl: any, caret: number, onMatch: any, setInSearch?: any) => {
     let hasMatch = false;
     const placeholder = /\(\(([^[\)]*)\)\)/g;
     for (let match: any; (match = placeholder.exec(newText)) !== null; ) {

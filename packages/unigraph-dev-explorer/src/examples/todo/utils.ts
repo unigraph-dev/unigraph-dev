@@ -3,19 +3,8 @@ import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 export const maxDateStamp = 8640000000000000;
 export const getMinDate = () => new Date(0);
 export const getMaxDate = () => new Date(maxDateStamp);
-export const setHours = (
-    date: Date,
-    h: number,
-    m: number,
-    s: number,
-    ms: number,
-) => {
-    if (
-        !date.getHours() &&
-        !date.getMinutes() &&
-        !date.getSeconds() &&
-        !date.getMilliseconds()
-    ) {
+export const setHours = (date: Date, h: number, m: number, s: number, ms: number) => {
+    if (!date.getHours() && !date.getMinutes() && !date.getSeconds() && !date.getMilliseconds()) {
         date.setHours(h, m, s, ms);
     }
     return date;
