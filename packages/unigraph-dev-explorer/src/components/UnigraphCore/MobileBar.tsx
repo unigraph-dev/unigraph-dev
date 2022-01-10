@@ -1,10 +1,6 @@
 import React from 'react';
 import Icon from '@mdi/react';
-import {
-    mdiFormatIndentDecrease,
-    mdiFormatIndentIncrease,
-    mdiKeyboardReturn,
-} from '@mdi/js';
+import { mdiFormatIndentDecrease, mdiFormatIndentIncrease, mdiKeyboardReturn } from '@mdi/js';
 import { isMobile } from '../../utils';
 
 export const MobileBar = () => {
@@ -13,9 +9,7 @@ export const MobileBar = () => {
     React.useEffect(() => {
         window.unigraph.getState('global/focused').subscribe(setFocusedState);
         return function cleanup() {
-            window.unigraph
-                .getState('global/focused')
-                .unsubscribe(setFocusedState);
+            window.unigraph.getState('global/focused').unsubscribe(setFocusedState);
         };
     }, []);
 
@@ -25,10 +19,7 @@ export const MobileBar = () => {
                 bottom: '0',
                 zIndex: 99999,
                 position: 'absolute',
-                display:
-                    isMobile() && focusedState?.type === '$/schema/note_block'
-                        ? 'flex'
-                        : 'none',
+                display: isMobile() && focusedState?.type === '$/schema/note_block' ? 'flex' : 'none',
                 justifyContent: 'center',
                 width: '100%',
             }}
@@ -40,11 +31,7 @@ export const MobileBar = () => {
                     actionsState.value?.unindentChild();
                 }}
             >
-                <Icon
-                    size={0.8}
-                    style={{ margin: '3px 8px' }}
-                    path={mdiFormatIndentDecrease}
-                />
+                <Icon size={0.8} style={{ margin: '3px 8px' }} path={mdiFormatIndentDecrease} />
             </div>
 
             <div
@@ -54,11 +41,7 @@ export const MobileBar = () => {
                     actionsState.value?.indentChild();
                 }}
             >
-                <Icon
-                    size={0.8}
-                    style={{ margin: '3px 8px' }}
-                    path={mdiFormatIndentIncrease}
-                />
+                <Icon size={0.8} style={{ margin: '3px 8px' }} path={mdiFormatIndentIncrease} />
             </div>
 
             <div
@@ -68,11 +51,7 @@ export const MobileBar = () => {
                     actionsState.value?.splitChild();
                 }}
             >
-                <Icon
-                    size={0.8}
-                    style={{ margin: '3px 8px' }}
-                    path={mdiKeyboardReturn}
-                />
+                <Icon size={0.8} style={{ margin: '3px 8px' }} path={mdiKeyboardReturn} />
             </div>
         </div>
     );

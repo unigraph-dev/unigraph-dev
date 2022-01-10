@@ -5,12 +5,8 @@ export type RefUnigraphIdType<uid extends string = string> = {
 };
 
 declare function uid<IdType extends string>(id: IdType): UidType<IdType>;
-declare function makeUnigraphId<IdType extends string>(
-    id: IdType,
-): UnigraphIdType<IdType>;
-declare function makeRefUnigraphId<IdType extends string>(
-    id: IdType,
-): RefUnigraphIdType<IdType>;
+declare function makeUnigraphId<IdType extends string>(id: IdType): UnigraphIdType<IdType>;
+declare function makeRefUnigraphId<IdType extends string>(id: IdType): RefUnigraphIdType<IdType>;
 
 export type ComposerObjectIndexs = '$/primitive/string';
 
@@ -62,10 +58,7 @@ export type UnigraphTypeString =
     | '$/composer/List'
     | '$/primitive/undefined';
 
-export type Composers =
-    | ComposerObjectInstance<ComposerObjectIndexs>
-    | ComposerArrayInstance
-    | ComposerUnionInstance;
+export type Composers = ComposerObjectInstance<ComposerObjectIndexs> | ComposerArrayInstance | ComposerUnionInstance;
 export type PrimitiveTypes = UnigraphIdType<UnigraphPrimitiveTypeString>;
 export type Primitive = { type: PrimitiveTypes };
 
@@ -103,16 +96,10 @@ export type Entity<T extends string> = {
     'unigraph.id'?: string;
 };
 
-export type EntityDgraph<T extends string> =
-    | Entity<T>
-    | { 'dgraph.type': 'Entity' };
+export type EntityDgraph<T extends string> = Entity<T> | { 'dgraph.type': 'Entity' };
 
 export type SchemaShorthandName<T extends string> = `$/schema/${T}`;
-export type SchemaFullName<
-    P extends string,
-    V extends string,
-    T extends string,
-> = `$/package/${P}/${V}/schema/${T}`;
+export type SchemaFullName<P extends string, V extends string, T extends string> = `$/package/${P}/${V}/schema/${T}`;
 export type SchemaAny = 'any';
 
 export type UnigraphUid<T extends string> = `0x${T}`;

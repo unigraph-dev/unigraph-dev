@@ -13,33 +13,20 @@ import { JsontreeObjectViewer, StringObjectViewer } from './BasicObjectViews';
 
 export const ViewViewDetailed: DynamicViewRenderer = ({ data, callbacks }) => {
     if (data.get('view')?._value?.['dgraph.type'].includes('Executable')) {
-        return (
-            <AutoDynamicViewDetailed
-                object={new UnigraphObject(data.get('view')._value)}
-                callbacks={callbacks}
-            />
-        );
+        return <AutoDynamicViewDetailed object={new UnigraphObject(data.get('view')._value)} callbacks={callbacks} />;
     }
     if (data.get('view').as('primitive')?.startsWith?.('/pages')) {
         const pages = window.unigraph.getState('registry/pages').value;
-        return pages[
-            data.get('view').as('primitive').replace('/pages/', '')
-        ].constructor({
+        return pages[data.get('view').as('primitive').replace('/pages/', '')].constructor({
             ...JSON.parse(data.get('props').as('primitive')).config,
             callbacks,
         });
     }
     const widgets = window.unigraph.getState('registry/widgets').value;
-    return widgets[
-        data.get('view').as('primitive').replace('/widgets/', '')
-    ].constructor();
+    return widgets[data.get('view').as('primitive').replace('/widgets/', '')].constructor();
 };
 
-const DefaultObjectView: FC<DefaultObjectViewProps> = ({
-    object,
-    options,
-    callbacks,
-}) => {
+const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options, callbacks }) => {
     // const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
     const [ContextMenu, setContextMenu] = React.useState<any>(null);
@@ -70,29 +57,15 @@ const DefaultObjectView: FC<DefaultObjectViewProps> = ({
 
     switch (options.viewer) {
         case 'dynamic-view':
-            FinalObjectViewer = (
-                <AutoDynamicView
-                    object={object}
-                    allowSubentity
-                    callbacks={callbacks}
-                />
-            );
+            FinalObjectViewer = <AutoDynamicView object={object} allowSubentity callbacks={callbacks} />;
             break;
 
         case 'dynamic-view-detailed':
-            FinalObjectViewer = (
-                <AutoDynamicViewDetailed
-                    object={object}
-                    options={options}
-                    callbacks={callbacks}
-                />
-            );
+            FinalObjectViewer = <AutoDynamicViewDetailed object={object} options={options} callbacks={callbacks} />;
             break;
 
         case 'json-tree':
-            FinalObjectViewer = (
-                <JsontreeObjectViewer object={object} options={options} />
-            );
+            FinalObjectViewer = <JsontreeObjectViewer object={object} options={options} />;
             break;
 
         case 'code-editor':

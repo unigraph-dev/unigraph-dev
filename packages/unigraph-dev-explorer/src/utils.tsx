@@ -6,9 +6,7 @@ import _ from 'lodash';
 import React from 'react';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 
-export const NavigationContext = React.createContext<(location: string) => any>(
-    (location: string) => ({}),
-);
+export const NavigationContext = React.createContext<(location: string) => any>((location: string) => ({}));
 
 export const TabContext = React.createContext({
     viewId: 0,
@@ -17,22 +15,12 @@ export const TabContext = React.createContext({
     isVisible: () => true as boolean,
 
     subscribeToType(name: any, callback: any, eventId?: any, options?: any) {
-        return window.unigraph.subscribeToType(
-            name,
-            callback,
-            eventId,
-            options,
-        );
+        return window.unigraph.subscribeToType(name, callback, eventId, options);
     },
     subscribeToObject(uid: any, callback: any, eventId?: any, options?: any) {
         window.unigraph.subscribeToObject(uid, callback, eventId, options);
     },
-    subscribeToQuery(
-        fragment: any,
-        callback: any,
-        eventId?: any,
-        options?: any,
-    ) {
+    subscribeToQuery(fragment: any, callback: any, eventId?: any, options?: any) {
         window.unigraph.subscribeToQuery(fragment, callback, eventId, options);
     },
     subscribe(query: any, callback: any, eventId?: any, update?: any) {
@@ -49,10 +37,7 @@ export const DataContext = React.createContext({
 export const getComponentFromPage = (location: string, params: any = {}) => {
     const pages = window.unigraph.getState('registry/pages');
     if (location.startsWith('/$/'))
-        location = `/${
-            (window.unigraph.getNamespaceMap as any)()[location.substring(1)]
-                .uid
-        }`;
+        location = `/${(window.unigraph.getNamespaceMap as any)()[location.substring(1)].uid}`;
     return {
         type: 'tab',
         config: params,
@@ -62,16 +47,10 @@ export const getComponentFromPage = (location: string, params: any = {}) => {
     };
 };
 
-export const setCaret = (
-    document: Document,
-    element: any,
-    pos: number,
-    length?: number,
-) => {
+export const setCaret = (document: Document, element: any, pos: number, length?: number) => {
     const range = document.createRange();
     const sel = document.getSelection();
-    const maxLen =
-        element.textContent.length < pos ? element.textContent.length : pos;
+    const maxLen = element.textContent.length < pos ? element.textContent.length : pos;
     range.setStart(element, maxLen);
     if (length) {
         range.setEnd(element, length + maxLen);
@@ -83,15 +62,10 @@ export const setCaret = (
     sel?.addRange(range);
 };
 
-export const removeAllPropsFromObj = function (
-    obj: any,
-    propsToRemove: any,
-    maxLevel?: any,
-) {
+export const removeAllPropsFromObj = function (obj: any, propsToRemove: any, maxLevel?: any) {
     if (typeof maxLevel !== 'number') maxLevel = 20;
     for (const prop in obj) {
-        if (typeof propsToRemove === 'string' && prop === propsToRemove)
-            delete obj[prop];
+        if (typeof propsToRemove === 'string' && prop === propsToRemove) delete obj[prop];
         else if (propsToRemove.indexOf(prop) >= 0) {
             // it must be an array
             delete obj[prop];
@@ -192,10 +166,7 @@ export const getContrast = function (hexcolor: string) {
 
 export function download(filename: string, text: string) {
     const element = document.createElement('a');
-    element.setAttribute(
-        'href',
-        `data:text/json;charset=utf-8,${encodeURIComponent(text)}`,
-    );
+    element.setAttribute('href', `data:text/json;charset=utf-8,${encodeURIComponent(text)}`);
     element.setAttribute('download', filename);
 
     element.style.display = 'none';
@@ -274,9 +245,7 @@ type TreeNode = {
 };
 export const dfs = (nodes: TreeNode[]) => {
     const root = nodes.filter((el) => el.root)[0];
-    const nmap: Record<string, TreeNode> = Object.fromEntries(
-        nodes.map((el) => [el.uid, el]),
-    );
+    const nmap: Record<string, TreeNode> = Object.fromEntries(nodes.map((el) => [el.uid, el]));
     const traversal: TreeNode[] = [];
 
     const recurse = (current: TreeNode, visited: any[]) => {
@@ -284,9 +253,7 @@ export const dfs = (nodes: TreeNode[]) => {
         if (current?.children) {
             // Ignores nodes referenced by but without uid
             traversal.push(current);
-            current.children.forEach((el) =>
-                recurse(nmap[el], [...visited, current.uid]),
-            );
+            current.children.forEach((el) => recurse(nmap[el], [...visited, current.uid]));
         } else if (current) {
             traversal.push(current);
         }
@@ -305,9 +272,7 @@ export const isElectron = () => {
  * Not to be confused with isSmallScreen which checks width.
  */
 export const isMobile = () =>
-    'ontouchstart' in window ||
-    navigator.maxTouchPoints > 0 ||
-    (navigator as any).msMaxTouchPoints > 0;
+    'ontouchstart' in window || navigator.maxTouchPoints > 0 || (navigator as any).msMaxTouchPoints > 0;
 
 /**
  * Whether the window is a small screen for layouting.
@@ -333,13 +298,10 @@ export const selectUid = (uid: string, exclusive = true) => {
 
 export const deselectUid = (uid?: string) => {
     const selected = window.unigraph.getState('global/selected');
-    selected.setValue(
-        selected.value.filter((el: string) => (uid ? el !== uid : false)),
-    );
+    selected.setValue(selected.value.filter((el: string) => (uid ? el !== uid : false)));
 };
 
-export const isMultiSelectKeyPressed = (event: React.MouseEvent) =>
-    event.altKey;
+export const isMultiSelectKeyPressed = (event: React.MouseEvent) => event.altKey;
 
 export const runClientExecutable = (src: string, params: any) => {
     // eslint-disable-next-line @typescript-eslint/no-empty-function

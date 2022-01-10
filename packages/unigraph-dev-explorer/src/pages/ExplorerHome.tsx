@@ -1,9 +1,6 @@
 import { Card, Typography } from '@material-ui/core';
 import React from 'react';
-import {
-    getRandomInt,
-    UnigraphObject,
-} from 'unigraph-dev-common/lib/api/unigraph';
+import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 import { AutoDynamicViewDetailed } from '../components/ObjectView/AutoDynamicViewDetailed';
 import { TabContext } from '../utils';
 
@@ -21,12 +18,10 @@ export function HomeSection({ data }: any) {
     React.useEffect(() => {
         const shouldRender = () => {
             if (tabContext.isVisible()) {
-                window.unigraph
-                    .runExecutable(data.get('condition')._value.uid, {})
-                    .then((ret: any) => {
-                        if (ret === true) setShouldDisplay(true);
-                        else setShouldDisplay(false);
-                    });
+                window.unigraph.runExecutable(data.get('condition')._value.uid, {}).then((ret: any) => {
+                    if (ret === true) setShouldDisplay(true);
+                    else setShouldDisplay(false);
+                });
             }
         };
         const int = setInterval(shouldRender, 180000);
@@ -53,9 +48,7 @@ export function HomeSection({ data }: any) {
             <Typography variant="h6" gutterBottom>
                 {data.get('view/name').as('primitive')}
             </Typography>
-            <AutoDynamicViewDetailed
-                object={new UnigraphObject(data.get('view')._value)}
-            />
+            <AutoDynamicViewDetailed object={new UnigraphObject(data.get('view')._value)} />
         </Card>
     ) : (
         <span />

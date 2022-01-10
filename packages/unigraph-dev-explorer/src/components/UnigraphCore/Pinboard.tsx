@@ -49,8 +49,7 @@ export function Pinboard({ data, callbacks }: any) {
                                         setLayoutLocked(!layoutLocked);
                                     }}
                                 >
-                                    {layoutLocked ? 'Unlock' : 'Lock'} pinboard
-                                    layout
+                                    {layoutLocked ? 'Unlock' : 'Lock'} pinboard layout
                                 </MenuItem>
                             ),
                         )
@@ -79,28 +78,22 @@ export function Pinboard({ data, callbacks }: any) {
                         isDraggable={!isMobile() && !layoutLocked}
                         isResizable={!layoutLocked}
                         onLayoutChange={(newLayout: any, layouts) => {
-                            window.unigraph.runExecutable(
-                                '$/executable/update-pinboard-layout',
-                                { where: data.uid, newLayout: newLayout.lg },
-                            );
+                            window.unigraph.runExecutable('$/executable/update-pinboard-layout', {
+                                where: data.uid,
+                                newLayout: newLayout.lg,
+                            });
                         }}
                     >
-                        {data._value._value.children['_value['].map(
-                            (el: any) => (
-                                <div key={el._value._value.uid}>
-                                    <UnigraphWidget>
-                                        <AutoDynamicViewDetailed
-                                            object={
-                                                new UnigraphObject(
-                                                    el._value._value,
-                                                )
-                                            }
-                                            callbacks={callbacks}
-                                        />
-                                    </UnigraphWidget>
-                                </div>
-                            ),
-                        )}
+                        {data._value._value.children['_value['].map((el: any) => (
+                            <div key={el._value._value.uid}>
+                                <UnigraphWidget>
+                                    <AutoDynamicViewDetailed
+                                        object={new UnigraphObject(el._value._value)}
+                                        callbacks={callbacks}
+                                    />
+                                </UnigraphWidget>
+                            </div>
+                        ))}
                     </ResponsiveGridLayout>
                 </div>
             )}

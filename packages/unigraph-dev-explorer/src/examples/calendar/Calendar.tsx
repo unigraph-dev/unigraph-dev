@@ -1,10 +1,6 @@
 import { Avatar, Typography } from '@material-ui/core';
 import React from 'react';
-import {
-    buildGraph,
-    getRandomInt,
-    UnigraphObject,
-} from 'unigraph-dev-common/lib/utils/utils';
+import { buildGraph, getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import Sugar from 'sugar';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
@@ -18,9 +14,7 @@ export function CalendarEvent({ data, callbacks }: any) {
                     style={{
                         width: 16,
                         height: 16,
-                        backgroundColor: data
-                            .get('calendar/color')
-                            ?.as?.('primitive'),
+                        backgroundColor: data.get('calendar/color')?.as?.('primitive'),
                     }}
                 >
                     {' '}
@@ -45,9 +39,7 @@ export function CalendarEvent({ data, callbacks }: any) {
                 />
                 <div
                     style={{
-                        display: data?._value?.children?.['_value[']?.map
-                            ? ''
-                            : 'none',
+                        display: data?._value?.children?.['_value[']?.map ? '' : 'none',
                         marginTop: '4px',
                     }}
                 >
@@ -70,19 +62,9 @@ export function CalendarEvent({ data, callbacks }: any) {
 export function TimeFrame({ data, callbacks }: any) {
     return (
         <span>
-            {callbacks?.noDate
-                ? ''
-                : `${Sugar.Date.medium(
-                      new Date(data.get('start/datetime').as('primitive')),
-                  )}, `}
-            {`${Sugar.Date.format(
-                new Date(data.get('start/datetime').as('primitive')),
-                '{h}:{mm}%P',
-            )} - `}
-            {Sugar.Date.format(
-                new Date(data.get('end/datetime').as('primitive')),
-                '{h}:{mm}%P',
-            )}
+            {callbacks?.noDate ? '' : `${Sugar.Date.medium(new Date(data.get('start/datetime').as('primitive')))}, `}
+            {`${Sugar.Date.format(new Date(data.get('start/datetime').as('primitive')), '{h}:{mm}%P')} - `}
+            {Sugar.Date.format(new Date(data.get('end/datetime').as('primitive')), '{h}:{mm}%P')}
         </span>
     );
 }

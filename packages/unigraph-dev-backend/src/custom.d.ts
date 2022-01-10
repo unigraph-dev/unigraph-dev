@@ -1,8 +1,5 @@
 import { PackageDeclaration } from 'unigraph-dev-common/lib/types/packages';
-import {
-    Query,
-    UnigraphNotification,
-} from 'unigraph-dev-common/lib/types/unigraph';
+import { Query, UnigraphNotification } from 'unigraph-dev-common/lib/types/unigraph';
 import DgraphClient from './dgraphClient';
 
 declare global {

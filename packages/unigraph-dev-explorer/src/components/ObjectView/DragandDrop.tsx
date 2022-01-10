@@ -36,28 +36,12 @@ export function BelowDropAcceptor({ onDrop, isReverse, style }: any) {
     );
 }
 
-const onDrop = (
-    dndContext: any,
-    listId: any,
-    arrayId: any,
-    index: any,
-    dropperProps: any,
-) => {
+const onDrop = (dndContext: any, listId: any, arrayId: any, index: any, dropperProps: any) => {
     console.log(dropperProps, listId, 'a', dndContext, index);
     console.log(index);
-    if (
-        dndContext &&
-        listId &&
-        dndContext === dropperProps?.dndContext &&
-        listId === dropperProps?.dataContext
-    ) {
+    if (dndContext && listId && dndContext === dropperProps?.dndContext && listId === dropperProps?.dataContext) {
         // If both are in the same list - should just reorder
-        window.unigraph.reorderItemInArray?.(
-            arrayId,
-            [dropperProps.uid, index],
-            undefined,
-            undefined,
-        );
+        window.unigraph.reorderItemInArray?.(arrayId, [dropperProps.uid, index], undefined, undefined);
     } else if (dndContext === dropperProps?.dndContext) {
         // Same DnD context but not same list - should insert and then delete
         window.unigraph
@@ -97,20 +81,8 @@ export function DragandDrop({
                         {child}
                         <BelowDropAcceptor
                             onDrop={(props: any) => {
-                                console.log(
-                                    dndContext,
-                                    listId,
-                                    arrayId,
-                                    index,
-                                    props,
-                                );
-                                onDrop(
-                                    dndContext,
-                                    listId,
-                                    arrayId,
-                                    index,
-                                    props,
-                                );
+                                console.log(dndContext, listId, arrayId, index, props);
+                                onDrop(dndContext, listId, arrayId, index, props);
                             }}
                             isReverse={isReverse}
                             key={`${child.key || index}_dropacceptor`}

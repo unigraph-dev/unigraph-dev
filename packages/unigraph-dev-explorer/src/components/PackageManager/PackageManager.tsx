@@ -29,10 +29,7 @@ export const PackageManager: React.FC = ({}) => {
                                         `let exports = {pkg: undefined};${pkg}return exports.pkg`,
                                     )();
                                     console.log(pkgModule);
-                                    window.unigraph.addPackage?.(
-                                        pkgModule,
-                                        true,
-                                    );
+                                    window.unigraph.addPackage?.(pkgModule, true);
                                 } catch (e) {
                                     console.error('Add package failure!');
                                     console.error(e);
@@ -73,12 +70,8 @@ export const PackageManager: React.FC = ({}) => {
                 ]}
                 rows={packages.map((pkg: any) => ({
                     ...pkg.pkgManifest,
-                    schemaLen: pkg.pkgSchemas
-                        ? Object.keys(pkg.pkgSchemas).length - 1
-                        : 0,
-                    execLen: pkg.pkgExecutables
-                        ? Object.keys(pkg.pkgExecutables).length - 1
-                        : 0,
+                    schemaLen: pkg.pkgSchemas ? Object.keys(pkg.pkgSchemas).length - 1 : 0,
+                    execLen: pkg.pkgExecutables ? Object.keys(pkg.pkgExecutables).length - 1 : 0,
                 }))}
                 getRowId={(row) => row.package_name}
                 pageSize={15}

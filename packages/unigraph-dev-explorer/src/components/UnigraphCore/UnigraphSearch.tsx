@@ -9,16 +9,12 @@ export const parseQuery = (queryText: string) => {
 
     const typeRegex = /type:\$\/schema\/[a-zA-Z0-9_]*\b ?/gm;
     const types = currText.match(typeRegex) || [];
-    finalQuery.push(
-        ...types.map((tag) => ({ method: 'type', value: tag.slice(5).trim() })),
-    );
+    finalQuery.push(...types.map((tag) => ({ method: 'type', value: tag.slice(5).trim() })));
     currText = currText.replace(typeRegex, '');
 
     const uidRegex = /uid:[a-zA-Z0-9]*\b ?/gm;
     const uids = currText.match(uidRegex) || [];
-    finalQuery.push(
-        ...uids.map((tag) => ({ method: 'uid', value: tag.slice(4).trim() })),
-    );
+    finalQuery.push(...uids.map((tag) => ({ method: 'uid', value: tag.slice(4).trim() })));
     currText = currText.replace(uidRegex, '');
 
     return [{ method: 'fulltext', value: currText }, ...finalQuery];
@@ -101,13 +97,7 @@ export function UnigraphSearch({ id }: any) {
                 searchNow={() => search.flush()}
             />
             <FormControlLabel
-                control={
-                    <Switch
-                        checked={showHidden}
-                        onChange={() => setShowHidden(!showHidden)}
-                        name="showHidden"
-                    />
-                }
+                control={<Switch checked={showHidden} onChange={() => setShowHidden(!showHidden)} name="showHidden" />}
                 label="Show items without a view"
             />
             <DynamicObjectListView

@@ -43,11 +43,7 @@ export function AllApps() {
     return (
         <Grid container spacing={2}>
             <Grid item xs={3}>
-                <AppShortcut
-                    avatar={<Icon path={mdiViewDashboardOutline} size={1} />}
-                    address="/today"
-                    text="Today"
-                />
+                <AppShortcut avatar={<Icon path={mdiViewDashboardOutline} size={1} />} address="/today" text="Today" />
             </Grid>
             <Grid item xs={3}>
                 <AppShortcut
@@ -58,12 +54,7 @@ export function AllApps() {
             </Grid>
             <Grid item xs={3}>
                 <AppShortcut
-                    avatar={
-                        <Icon
-                            path={mdiCheckboxMarkedCirclePlusOutline}
-                            size={1}
-                        />
-                    }
+                    avatar={<Icon path={mdiCheckboxMarkedCirclePlusOutline} size={1} />}
                     address="/examples/todo"
                     text="Todo List"
                 />
@@ -90,17 +81,11 @@ export function AllApps() {
                 />
             </Grid>
             <Grid item xs={3}>
-                <AppShortcut
-                    avatar={<Icon path={mdiInboxOutline} size={1} />}
-                    address="/inbox"
-                    text="Inbox"
-                />
+                <AppShortcut avatar={<Icon path={mdiInboxOutline} size={1} />} address="/inbox" text="Inbox" />
             </Grid>
             <Grid item xs={3}>
                 <AppShortcut
-                    avatar={
-                        <Icon path={mdiEmailOpenMultipleOutline} size={1} />
-                    }
+                    avatar={<Icon path={mdiEmailOpenMultipleOutline} size={1} />}
                     address="/email"
                     text="Email"
                 />
@@ -113,11 +98,7 @@ export function AllApps() {
                 />
             </Grid>
             <Grid item xs={3}>
-                <AppShortcut
-                    avatar={<Icon path={mdiCalendarOutline} size={1} />}
-                    address="/calendar"
-                    text="Calendar"
-                />
+                <AppShortcut avatar={<Icon path={mdiCalendarOutline} size={1} />} address="/calendar" text="Calendar" />
             </Grid>
             <Grid item xs={3}>
                 <AppShortcut
@@ -127,11 +108,7 @@ export function AllApps() {
                 />
             </Grid>
             <Grid item xs={3}>
-                <AppShortcut
-                    avatar={<Icon path={mdiAppsBox} size={1} />}
-                    address="/app-library"
-                    text="All Apps"
-                />
+                <AppShortcut avatar={<Icon path={mdiAppsBox} size={1} />} address="/app-library" text="All Apps" />
             </Grid>
         </Grid>
     );

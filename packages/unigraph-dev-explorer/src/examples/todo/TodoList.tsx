@@ -1,11 +1,4 @@
-import {
-    Button,
-    Checkbox,
-    Chip,
-    ListItemText,
-    TextField,
-    Typography,
-} from '@material-ui/core';
+import { Button, Checkbox, Chip, ListItemText, TextField, Typography } from '@material-ui/core';
 import { CalendarToday, PriorityHigh } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { pkg as todoPackage } from 'unigraph-dev-common/lib/data/unigraph.todo.pkg';
@@ -14,11 +7,7 @@ import Sugar from 'sugar';
 import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { DynamicViewRenderer } from '../../global.d';
 
-import {
-    registerDynamicViews,
-    registerQuickAdder,
-    withUnigraphSubscription,
-} from '../../unigraph-react';
+import { registerDynamicViews, registerQuickAdder, withUnigraphSubscription } from '../../unigraph-react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { parseTodoObject } from './parseTodoObject';
 import { ATodoList, filters, maxDateStamp } from './utils';
@@ -47,12 +36,7 @@ function TodoListBody({ data }: { data: ATodoList[] }) {
     );
 }
 
-export const TodoItem: DynamicViewRenderer = ({
-    data,
-    callbacks,
-    compact,
-    inline,
-}) => {
+export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline }) => {
     // console.log(data);
     const unpadded: ATodoList = unpad(data);
     // console.log(unpadded)
@@ -78,8 +62,7 @@ export const TodoItem: DynamicViewRenderer = ({
             <Checkbox
                 checked={unpadded.done}
                 onClick={(_) => {
-                    data.get('done')['_value.!'] =
-                        !data.get('done')['_value.!'];
+                    data.get('done')['_value.!'] = !data.get('done')['_value.!'];
                     totalCallbacks.onUpdate(data);
                 }}
             />
@@ -116,42 +99,28 @@ export const TodoItem: DynamicViewRenderer = ({
                                       />
                                   ))}
                         {unpadded.priority > 0
-                            ? [
-                                  <Chip
-                                      size="small"
-                                      icon={<PriorityHigh />}
-                                      label={`Priority ${unpadded.priority}`}
-                                  />,
-                              ]
+                            ? [<Chip size="small" icon={<PriorityHigh />} label={`Priority ${unpadded.priority}`} />]
                             : []}
                         {unpadded.time_frame?.start?.datetime &&
-                        new Date(
-                            unpadded.time_frame?.start?.datetime,
-                        ).getTime() !== 0
+                        new Date(unpadded.time_frame?.start?.datetime).getTime() !== 0
                             ? [
                                   <Chip
                                       size="small"
                                       icon={<CalendarToday />}
                                       label={`Start: ${Sugar.Date.relative(
-                                          new Date(
-                                              unpadded.time_frame?.start?.datetime,
-                                          ),
+                                          new Date(unpadded.time_frame?.start?.datetime),
                                       )}`}
                                   />,
                               ]
                             : []}
                         {unpadded.time_frame?.end?.datetime &&
-                        new Date(
-                            unpadded.time_frame?.start?.datetime,
-                        ).getTime() !== maxDateStamp
+                        new Date(unpadded.time_frame?.start?.datetime).getTime() !== maxDateStamp
                             ? [
                                   <Chip
                                       size="small"
                                       icon={<CalendarToday />}
                                       label={`End: ${Sugar.Date.relative(
-                                          new Date(
-                                              unpadded.time_frame?.end?.datetime,
-                                          ),
+                                          new Date(unpadded.time_frame?.end?.datetime),
                                       )}`}
                                   />,
                               ]
@@ -181,9 +150,7 @@ const quickAdder = async (
 const tt = () => (
     <>
         <Typography style={{ color: 'gray' }}>Examples:</Typography>
-        <Typography>
-            @tomorrow-&quot;next Friday&quot; #unigraph hello world
-        </Typography>
+        <Typography>@tomorrow-&quot;next Friday&quot; #unigraph hello world</Typography>
         <Typography style={{ color: 'gray' }} variant="body2">
             doable from tomorrow, due next Friday
         </Typography>
@@ -215,12 +182,7 @@ export const TodoList = withUnigraphSubscription(
     TodoListBody,
     { schemas: [], defaultData: [], packages: [todoPackage] },
     {
-        afterSchemasLoaded: (
-            subsId: number,
-            tabContext: any,
-            data: any,
-            setData: any,
-        ) => {
+        afterSchemasLoaded: (subsId: number, tabContext: any, data: any, setData: any) => {
             tabContext.subscribeToType(
                 '$/schema/todo',
                 (result: ATodoList[]) => {
@@ -229,8 +191,7 @@ export const TodoList = withUnigraphSubscription(
                 subsId,
                 {
                     showHidden: true,
-                    queryAs:
-                        ' { uid type { <unigraph.id> } _hide _value { done { <_value.!> } } } ',
+                    queryAs: ' { uid type { <unigraph.id> } _hide _value { done { <_value.!> } } } ',
                 },
             );
         },

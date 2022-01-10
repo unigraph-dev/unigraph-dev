@@ -4,10 +4,7 @@ import React from 'react';
 import Icon from '@mdi/react';
 
 export function SubentityView({ data, callbacks }: any) {
-    const objDef =
-        window.unigraph.getNamespaceMap?.()?.[
-            data?._value?.type?.['unigraph.id']
-        ];
+    const objDef = window.unigraph.getNamespaceMap?.()?.[data?._value?.type?.['unigraph.id']];
 
     return (
         <Chip

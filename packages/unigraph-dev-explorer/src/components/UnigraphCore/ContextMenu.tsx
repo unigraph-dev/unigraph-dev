@@ -1,10 +1,4 @@
-import {
-    Divider,
-    ListItemText,
-    ListItemIcon,
-    MenuItem,
-    Popover,
-} from '@material-ui/core';
+import { Divider, ListItemText, ListItemIcon, MenuItem, Popover } from '@material-ui/core';
 import React from 'react';
 import { AppState } from 'unigraph-dev-common/lib/types/unigraph';
 import Icon from '@mdi/react';
@@ -13,8 +7,7 @@ import { ContextMenuState } from '../../global.d';
 import { deselectUid } from '../../utils';
 
 export function ContextMenu() {
-    const ctxMenuState: AppState<Partial<ContextMenuState>> =
-        window.unigraph.getState('global/contextMenu');
+    const ctxMenuState: AppState<Partial<ContextMenuState>> = window.unigraph.getState('global/contextMenu');
 
     const [state, setState] = React.useState(ctxMenuState.value);
     const thisRef = React.useRef(null);
@@ -24,22 +17,14 @@ export function ContextMenu() {
         ctxMenuState.setValue({ show: false });
     };
     const schemaMenuConstructors = [
-        ...(window.unigraph.getState('registry/contextMenu').value[
-            state.contextObject?.type?.['unigraph.id']
-        ] || []),
+        ...(window.unigraph.getState('registry/contextMenu').value[state.contextObject?.type?.['unigraph.id']] || []),
         ...(state.schemaMenuContent || []),
     ];
 
     React.useMemo(() => ctxMenuState.subscribe((v) => setState(v)), []);
 
-    const objDef =
-        window.unigraph.getNamespaceMap?.()?.[
-            state.contextObject?.type?.['unigraph.id']
-        ];
-    const objCtxDef =
-        window.unigraph.getNamespaceMap?.()?.[
-            state.contextContextObject?.type?.['unigraph.id']
-        ];
+    const objDef = window.unigraph.getNamespaceMap?.()?.[state.contextObject?.type?.['unigraph.id']];
+    const objCtxDef = window.unigraph.getNamespaceMap?.()?.[state.contextContextObject?.type?.['unigraph.id']];
 
     return (
         <div ref={thisRef}>
@@ -67,9 +52,7 @@ export function ContextMenu() {
                 }}
             >
                 <div>
-                    <MenuItem
-                        style={{ paddingTop: '2px', paddingBottom: '2px' }}
-                    >
+                    <MenuItem style={{ paddingTop: '2px', paddingBottom: '2px' }}>
                         <ListItemIcon style={{ minWidth: '32px' }}>
                             <Icon path={mdiCubeOutline} size={0.8} />
                         </ListItemIcon>
@@ -86,16 +69,11 @@ export function ContextMenu() {
                                 }}
                             />
                         ) : (
-                            <ListItemIcon
-                                style={{ minWidth: '36px', marginLeft: '12px' }}
-                            >
+                            <ListItemIcon style={{ minWidth: '36px', marginLeft: '12px' }}>
                                 <Icon path={mdiDatabaseOutline} size={1} />
                             </ListItemIcon>
                         )}
-                        <ListItemText>
-                            {objDef?._name ||
-                                state.contextObject?.type?.['unigraph.id']}
-                        </ListItemText>
+                        <ListItemText>{objDef?._name || state.contextObject?.type?.['unigraph.id']}</ListItemText>
                     </MenuItem>
                     <Divider />
                     {state.menuContent?.map((el: any) =>
@@ -117,8 +95,7 @@ export function ContextMenu() {
                                     handleClose,
                                     {
                                         ...state.callbacks,
-                                        removeFromContext:
-                                            state.removeFromContext,
+                                        removeFromContext: state.removeFromContext,
                                     },
                                     state.contextContextUid,
                                 ),
@@ -139,9 +116,7 @@ export function ContextMenu() {
                                 <ListItemIcon style={{ minWidth: '32px' }}>
                                     <Icon path={mdiCubeOutline} size={0.8} />
                                 </ListItemIcon>
-                                <ListItemText>
-                                    {state.contextContextUid}
-                                </ListItemText>
+                                <ListItemText>{state.contextContextUid}</ListItemText>
                                 {objCtxDef?._icon ? (
                                     <ListItemIcon
                                         style={{
@@ -160,17 +135,11 @@ export function ContextMenu() {
                                             marginLeft: '12px',
                                         }}
                                     >
-                                        <Icon
-                                            path={mdiDatabaseOutline}
-                                            size={0.8}
-                                        />
+                                        <Icon path={mdiDatabaseOutline} size={0.8} />
                                     </ListItemIcon>
                                 )}
                                 <ListItemText>
-                                    {objCtxDef?._name ||
-                                        state.contextContextObject?.type?.[
-                                            'unigraph.id'
-                                        ]}
+                                    {objCtxDef?._name || state.contextContextObject?.type?.['unigraph.id']}
                                 </ListItemText>
                             </MenuItem>
                             <Divider />
@@ -181,8 +150,7 @@ export function ContextMenu() {
                                     handleClose,
                                     {
                                         ...state.callbacks,
-                                        removeFromContext:
-                                            state.removeFromContext,
+                                        removeFromContext: state.removeFromContext,
                                     },
                                     state.contextContextUid,
                                 ),
@@ -192,15 +160,10 @@ export function ContextMenu() {
                         []
                     )}
                     {state.extraContent
-                        ? state.extraContent(
-                              state.contextUid!,
-                              state.contextObject,
-                              handleClose,
-                              {
-                                  ...state.callbacks,
-                                  removeFromContext: state.removeFromContext,
-                              },
-                          )
+                        ? state.extraContent(state.contextUid!, state.contextObject, handleClose, {
+                              ...state.callbacks,
+                              removeFromContext: state.removeFromContext,
+                          })
                         : []}
                 </div>
             </Popover>
