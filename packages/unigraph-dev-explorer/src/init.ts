@@ -284,7 +284,10 @@ function initAnalyticsIfOptedIn() {
     const mixpanel = require('mixpanel-browser');
     window.mixpanel = mixpanel;
 
-    mixpanel.init('d15629c3a0ad692d3b7491a9091dd2be', { debug: true });
+    mixpanel.init('d15629c3a0ad692d3b7491a9091dd2be', {
+        debug: true,
+        ignore_dnt: true, // with user's explicit consent
+    });
     mixpanel.track('initAnalyticsAndUserOptedIn');
 
     (window as any).onEventSend = (eventName: string) => {
