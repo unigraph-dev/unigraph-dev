@@ -193,7 +193,7 @@ export function AutoDynamicView({
             };
         }
         return () => {};
-    }, [object.uid]);
+    }, [object?.uid]);
 
     const [{ isDragging }, drag] = useDrag(() => ({
         type: object?.type?.['unigraph.id'] || '$/schema/any',
@@ -278,7 +278,7 @@ export function AutoDynamicView({
 
             if (!noDrag) drag(domElement);
             if (!noDrop) drop(domElement);
-            if (isMobile()) handlers.ref(domElement);
+            if (isMobile() && !noContextMenu) handlers.ref(domElement);
             viewEl.current = domElement;
         },
         [isDragging, drag, callbacks],

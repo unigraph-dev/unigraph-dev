@@ -429,7 +429,7 @@ export function DetailedNoteBlock({
                 let tail;
                 const focusedState =
                     window.unigraph.getState('global/focused').value;
-                const el = textInput.current.firstChild || textInput.current;
+                const el = textInput.current?.firstChild || textInput.current;
                 if (focusedState.tail) tail = el.textContent.length;
                 setCaret(document, el, tail || focusedState.caret);
             }, 0);
