@@ -26,6 +26,7 @@ export function BacklinkView({
     callbacks,
     reverse,
     uid,
+    titleBar,
 }: any) {
     const [objects, setObjects]: [any[], any] = React.useState([]);
     const [id, setId] = React.useState(Date.now());
@@ -67,6 +68,7 @@ export function BacklinkView({
             </Typography>
             <DynamicObjectListView
                 items={objects}
+                titleBar={titleBar}
                 context={data || null}
                 itemRemover={(uids: any) => {
                     if (!forward) {

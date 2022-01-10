@@ -81,7 +81,9 @@ export function AutoDynamicView({
     const [canClickthrough, setCanClickthrough] = React.useState(
         Object.keys(
             window.unigraph.getState('registry/dynamicViewDetailed').value,
-        ).includes(getObject()?.type?.['unigraph.id']),
+        ).includes(
+            getObject()?.type?.['unigraph.id'] || object?.type?.['unigraph.id'],
+        ),
     );
 
     const viewEl = React.useRef(null);
@@ -99,7 +101,10 @@ export function AutoDynamicView({
                 Object.keys(
                     window.unigraph.getState('registry/dynamicViewDetailed')
                         .value,
-                ).includes(getObject()?.type?.['unigraph.id']),
+                ).includes(
+                    getObject()?.type?.['unigraph.id'] ||
+                        object?.type?.['unigraph.id'],
+                ),
             );
         window.unigraph.getState('registry/dynamicViewDetailed').subscribe(cb2);
 

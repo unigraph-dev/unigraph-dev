@@ -718,23 +718,45 @@ function ObjectEditorBody({ currentObject, setCurrentObject, schemaMap }: any) {
     const currentSchema =
         currentObject.type['_value[']?.[0]?._definition ||
         schemaMap[currentObject.type['unigraph.id']]._definition;
+    const classes = useStyles();
 
     return (
         <div style={{ display: 'flex' }}>
-            <Grid container spacing={2}>
+            <Grid container>
                 <Grid item xs={12} lg={8} style={{ overflow: 'auto' }}>
-                    <ObjectPartEditor
-                        localSchema={currentSchema}
-                        localObject={currentObject}
-                        setLocalObject={setCurrentObject}
-                        schemaMap={schemaMap}
-                    />
+                    <div>
+                        <ObjectPartEditor
+                            localSchema={currentSchema}
+                            localObject={currentObject}
+                            setLocalObject={setCurrentObject}
+                            schemaMap={schemaMap}
+                        />
+                    </div>
                 </Grid>
                 <Grid item xs={12} lg={4}>
-                    <Typography>Backlinks</Typography>
-                    <BacklinkView data={currentObject} hideHeader />
-                    <Typography>Forward links</Typography>
-                    <BacklinkView data={currentObject} hideHeader forward />
+                    <div>
+                        <Paper
+                            variant="outlined"
+                            className={classes.editorFrame}
+                        >
+                            <BacklinkView
+                                data={currentObject}
+                                hideHeader
+                                titleBar=" backlinks"
+                            />
+                        </Paper>
+                        <Paper
+                            variant="outlined"
+                            className={classes.editorFrame}
+                        >
+                            <BacklinkView
+                                data={currentObject}
+                                hideHeader
+                                forward
+                                titleBar=" forward links"
+                            />
+                        </Paper>
+                    </div>
                 </Grid>
             </Grid>
         </div>
