@@ -27,7 +27,23 @@
     "build": {
         "mac": {
             "icon": "./public/icons/unigraph.icns",
-            "category": "public.app-category.utilities"
+            "category": "public.app-category.utilities",
+            "target": [
+                {
+                    "target": "dmg",
+                    "arch": [
+                        "x64",
+                        "arm64"
+                    ]
+                },
+                {
+                    "target": "zip",
+                    "arch": [
+                        "x64",
+                        "arm64"
+                    ]
+                }
+            ]
         },
         "win": {
             "icon": "./public/icons/unigraph.png"
