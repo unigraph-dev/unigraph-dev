@@ -1,10 +1,6 @@
 import { Typography } from '@material-ui/core';
 import React from 'react';
-import {
-    buildGraph,
-    getRandomInt,
-    UnigraphObject,
-} from 'unigraph-dev-common/lib/utils/utils';
+import { buildGraph, getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import Sugar from 'sugar';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
@@ -40,16 +36,9 @@ export function CurrentEvents() {
                     els = buildGraph(els);
                     const groups: any = {};
                     groups[Sugar.Date.medium(new Date())] = [];
-                    els.filter(
-                        (el) =>
-                            el.type['unigraph.id'] === '$/schema/time_frame',
-                    ).forEach((el) => {
+                    els.filter((el) => el.type['unigraph.id'] === '$/schema/time_frame').forEach((el) => {
                         const dd = Sugar.Date.medium(
-                            new Date(
-                                new UnigraphObject(el)
-                                    .get('start/datetime')
-                                    .as('primitive'),
-                            ),
+                            new Date(new UnigraphObject(el).get('start/datetime').as('primitive')),
                         );
                         if (groups[dd]) groups[dd].push(el);
                         else groups[dd] = [el];
@@ -57,44 +46,26 @@ export function CurrentEvents() {
                     // 2. Go through groups and find all entities associated with these timeframes
                     const finalGroups: any = [];
                     Object.entries(groups)
-                        .sort(
-                            (a, b) =>
-                                Sugar.Date.create(a[0]).getTime() -
-                                Sugar.Date.create(b[0]).getTime(),
-                        )
+                        .sort((a, b) => Sugar.Date.create(a[0]).getTime() - Sugar.Date.create(b[0]).getTime())
                         .map(([key, value]: any) => {
                             const insert: any = { name: key, items: [] };
                             value
                                 .sort(
                                     (a: any, b: any) =>
                                         Sugar.Date.create(
-                                            new Date(
-                                                new UnigraphObject(a)
-                                                    .get('start/datetime')
-                                                    .as('primitive'),
-                                            ),
+                                            new Date(new UnigraphObject(a).get('start/datetime').as('primitive')),
                                         ).getTime() -
                                         Sugar.Date.create(
-                                            new Date(
-                                                new UnigraphObject(b)
-                                                    .get('start/datetime')
-                                                    .as('primitive'),
-                                            ),
+                                            new Date(new UnigraphObject(b).get('start/datetime').as('primitive')),
                                         ).getTime(),
                                 )
                                 .map((val: any) => {
-                                    els.filter(
-                                        (el) =>
-                                            el.type['unigraph.id'] !==
-                                            '$/schema/time_frame',
-                                    ).forEach((el) => {
-                                        if (
-                                            JSON.stringify(
-                                                unpad(el, false),
-                                            ).includes(val._value.uid)
-                                        )
-                                            insert.items.push(el);
-                                    });
+                                    els.filter((el) => el.type['unigraph.id'] !== '$/schema/time_frame').forEach(
+                                        (el) => {
+                                            if (JSON.stringify(unpad(el, false)).includes(val._value.uid))
+                                                insert.items.push(el);
+                                        },
+                                    );
                                 });
                             finalGroups.push(insert);
                         });

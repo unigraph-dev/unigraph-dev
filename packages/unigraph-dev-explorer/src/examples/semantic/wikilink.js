@@ -38,8 +38,7 @@ function syntax(opts = {}) {
         return start;
 
         function start(code) {
-            if (code !== startMarker.charCodeAt(startMarkerCursor))
-                return nok(code);
+            if (code !== startMarker.charCodeAt(startMarkerCursor)) return nok(code);
 
             effects.enter('wikiLink');
             effects.enter('wikiLinkMarker');
@@ -259,17 +258,11 @@ function wikiLinkPlugin(opts = {}) {
 
     if (
         !warningIssued &&
-        ((this.Parser &&
-            this.Parser.prototype &&
-            this.Parser.prototype.blockTokenizers) ||
-            (this.Compiler &&
-                this.Compiler.prototype &&
-                this.Compiler.prototype.visitors))
+        ((this.Parser && this.Parser.prototype && this.Parser.prototype.blockTokenizers) ||
+            (this.Compiler && this.Compiler.prototype && this.Compiler.prototype.visitors))
     ) {
         warningIssued = true;
-        console.warn(
-            '[remark-wiki-link] Warning: please upgrade to remark 13 to use this plugin',
-        );
+        console.warn('[remark-wiki-link] Warning: please upgrade to remark 13 to use this plugin');
     }
 
     add('micromarkExtensions', syntax({ aliasDivider: '±', ...opts }));

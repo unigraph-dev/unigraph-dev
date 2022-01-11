@@ -29,20 +29,13 @@ export function MiniListView({ data }: any) {
                 variant="outlined"
                 style={{ padding: '8px', display: 'flex' }}
                 onClick={() => {
-                    window.wsnavigator(
-                        `/library/object?uid=${data.uid}&isStub=true&type=$/schema/list`,
-                    );
+                    window.wsnavigator(`/library/object?uid=${data.uid}&isStub=true&type=$/schema/list`);
                 }}
             >
                 <List style={{ marginRight: '8px' }} />
                 <Typography>
                     {data?._value?.name?.['_value.%']} (
-                    {(
-                        data?._value?.children?.items ||
-                        data?._value?.children?.['_value[']?.length ||
-                        0
-                    ).toString()}
-                    )
+                    {(data?._value?.children?.items || data?._value?.children?.['_value[']?.length || 0).toString()})
                 </Typography>
             </Card>
         </Grid>
@@ -61,12 +54,7 @@ export const ListsList = withUnigraphSubscription(
     ),
     { schemas: [], defaultData: [], packages: [] },
     {
-        afterSchemasLoaded: (
-            subsId: any,
-            tabContext: any,
-            data: any,
-            setData: any,
-        ) => {
+        afterSchemasLoaded: (subsId: any, tabContext: any, data: any, setData: any) => {
             const id = getRandomInt().toString();
             tabContext.subscribeToQuery(
                 `(func: uid(lists${id})) @filter((NOT type(Deleted)) AND (NOT eq(<_hide>, true))) {

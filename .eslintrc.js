@@ -41,14 +41,7 @@ module.exports = {
         'no-underscore-dangle': 'off', // unigraph data model
         'import/extensions': [
             // targeting es module support so file extension is not needed
-            'error',
-            'ignorePackages',
-            {
-                js: 'never',
-                jsx: 'never',
-                ts: 'never',
-                tsx: 'never',
-            },
+            'off',
         ],
         'react/jsx-filename-extension': [
             'error',

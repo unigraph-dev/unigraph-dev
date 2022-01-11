@@ -21,8 +21,7 @@ function getObjectAsRecursivePrimitive(object: any) {
             targetValue = object[el];
         } else if (el.startsWith('_value') && typeof object[el] === 'object') {
             const subObj = getObjectAsRecursivePrimitive(object[el]);
-            if (subObj || subObj === '' || subObj === 0 || subObj === false)
-                targetValue = subObj;
+            if (subObj || subObj === '' || subObj === 0 || subObj === false) targetValue = subObj;
         }
     });
     return targetValue;
@@ -81,31 +80,20 @@ export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
     function buildDictRecurse(obj: any, pastUids: any[] = []) {
         if (obj && typeof obj === 'object' && Array.isArray(obj)) {
             obj.forEach((val, index) => {
-                if (
-                    val?.uid &&
-                    !dict[val.uid] &&
-                    Object.keys(val).filter((el) => el.startsWith('_value'))
-                        .length > 0
-                )
+                if (val?.uid && !dict[val.uid] && Object.keys(val).filter((el) => el.startsWith('_value')).length > 0)
                     dict[val.uid] = obj[index];
-                if (!pastUids.includes(val?.uid))
-                    buildDictRecurse(val, [...pastUids, val?.uid]);
+                if (!pastUids.includes(val?.uid)) buildDictRecurse(val, [...pastUids, val?.uid]);
             });
         } else if (obj && typeof obj === 'object') {
-            Object.entries(obj).forEach(
-                ([key, value]: [key: string, value: any]) => {
-                    if (
-                        value?.uid &&
-                        !dict[value.uid] &&
-                        Object.keys(value).filter((el) =>
-                            el.startsWith('_value'),
-                        ).length > 0
-                    )
-                        dict[value.uid] = obj[key];
-                    if (!pastUids.includes(value?.uid))
-                        buildDictRecurse(value, [...pastUids, value?.uid]);
-                },
-            );
+            Object.entries(obj).forEach(([key, value]: [key: string, value: any]) => {
+                if (
+                    value?.uid &&
+                    !dict[value.uid] &&
+                    Object.keys(value).filter((el) => el.startsWith('_value')).length > 0
+                )
+                    dict[value.uid] = obj[key];
+                if (!pastUids.includes(value?.uid)) buildDictRecurse(value, [...pastUids, value?.uid]);
+            });
         }
     }
 
@@ -113,18 +101,13 @@ export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
         if (obj && typeof obj === 'object' && Array.isArray(obj)) {
             obj.forEach((val, index) => {
                 if (val?.uid && dict[val.uid]) obj[index] = dict[val.uid];
-                if (!pastUids.includes(val?.uid))
-                    buildGraphRecurse(val, [...pastUids, val?.uid]);
+                if (!pastUids.includes(val?.uid)) buildGraphRecurse(val, [...pastUids, val?.uid]);
             });
         } else if (obj && typeof obj === 'object') {
-            Object.entries(obj).forEach(
-                ([key, value]: [key: string, value: any]) => {
-                    if (value?.uid && dict[value.uid])
-                        obj[key] = dict[value.uid];
-                    if (!pastUids.includes(value?.uid))
-                        buildGraphRecurse(value, [...pastUids, value?.uid]);
-                },
-            );
+            Object.entries(obj).forEach(([key, value]: [key: string, value: any]) => {
+                if (value?.uid && dict[value.uid]) obj[key] = dict[value.uid];
+                if (!pastUids.includes(value?.uid)) buildGraphRecurse(value, [...pastUids, value?.uid]);
+            });
         }
     }
 
@@ -167,9 +150,7 @@ export function blobToBase64(blob: Blob): Promise<string> {
         const reader = new FileReader();
         reader.readAsDataURL(blob);
         reader.onloadend = function () {
-            typeof reader.result === 'string'
-                ? resolve(reader.result)
-                : reject(new Error('blob not a string'));
+            typeof reader.result === 'string' ? resolve(reader.result) : reject(new Error('blob not a string'));
         };
     });
 }
@@ -195,9 +176,7 @@ export function base64ToBlob(base64: string): Blob {
 export function blobToJson(blob: Blob): Promise<any> {
     return new Promise((resolve, reject) => {
         blob.text().then((text) =>
-            isJsonString(text)
-                ? resolve(JSON.stringify(text))
-                : reject(new Error('blob not a json')),
+            isJsonString(text) ? resolve(JSON.stringify(text)) : reject(new Error('blob not a json')),
         );
     });
 }

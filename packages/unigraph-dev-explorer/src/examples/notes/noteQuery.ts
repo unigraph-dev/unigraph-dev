@@ -49,12 +49,8 @@ const getQuery: (depth: number) => string = (depth: number) => {
     }`;
 };
 
-export const noteQueryDetailed = (uid: string, depth = 0) =>
-    `(func: uid(${uid})) ${getQuery(depth + 1)}`;
-export const journalQueryDetailed = (
-    uid: string,
-    depth = 0,
-) => `(func: uid(${uid})) {
+export const noteQueryDetailed = (uid: string, depth = 0) => `(func: uid(${uid})) ${getQuery(depth + 1)}`;
+export const journalQueryDetailed = (uid: string, depth = 0) => `(func: uid(${uid})) {
     _updatedAt
     uid
     _hide

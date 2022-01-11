@@ -21,12 +21,7 @@ export const Notification: DynamicViewRenderer = ({ data, callbacks }) => {
             primary={unpadded.name}
             secondary={
                 <>
-                    <Typography
-                        component="span"
-                        variant="body2"
-                        color="textPrimary"
-                        style={{ paddingRight: '4px' }}
-                    >
+                    <Typography component="span" variant="body2" color="textPrimary" style={{ paddingRight: '4px' }}>
                         <span style={{ color: 'gray' }}>From: </span>
                         {unpadded.from}
                         <span style={{ color: 'gray' }}>, updated: </span>
@@ -41,9 +36,7 @@ export const Notification: DynamicViewRenderer = ({ data, callbacks }) => {
     );
 };
 
-export const NotificationCenterBody: React.FC<{ data: ANotification[] }> = ({
-    data,
-}) => {
+export const NotificationCenterBody: React.FC<{ data: ANotification[] }> = ({ data }) => {
     data = [...data].reverse();
     return (
         <div>
@@ -59,9 +52,7 @@ export const NotificationCenterBody: React.FC<{ data: ANotification[] }> = ({
 };
 
 export function NotificationCenter() {
-    const nfState = window.unigraph.getState(
-        'notification-center/notifications',
-    );
+    const nfState = window.unigraph.getState('notification-center/notifications');
 
     const [data, setData] = React.useState(nfState.value);
 

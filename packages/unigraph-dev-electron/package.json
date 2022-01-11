@@ -1,26 +1,26 @@
 {
     "name": "unigraph-dev-electron",
     "productName": "Unigraph",
-    "version": "0.1.0",
+    "version": "0.0.1",
     "author": "Unigraph contributors",
     "description": "A local-first and universal graph database, knowledge engine, and workspace",
     "main": "src/main.js",
     "scripts": {
         "start": "electron . --dev",
-        "dist": "electron-builder"
+        "dist": "USE_HARD_LINKS=false electron-builder"
     },
     "homepage": "./",
     "devDependencies": {
         "electron": "13.1.7",
-        "electron-builder": "^22.10.5"
+        "electron-builder": "22.14"
     },
     "dependencies": {
-        "electron-store": "^8.0.0",
-        "electron-util": "^0.15.1",
         "@babel/core": "^7.14.8",
         "@babel/preset-react": "^7.14.5",
+        "electron-store": "^8.0.0",
+        "electron-util": "^0.15.1",
         "json-stable-stringify": "^1.0.1",
-        "unigraph-dev-backend": "0.1.0",
+        "unigraph-dev-backend": "0.0.1",
         "unigraph-dev-common": "0.0.2"
     },
     "electronVersion": "^13.1.7",
@@ -31,6 +31,9 @@
         },
         "win": {
             "icon": "./public/icons/unigraph.png"
+        },
+        "linux": {
+            "target": "AppImage"
         },
         "files": [
             "**/*",
@@ -48,5 +51,10 @@
         "asarUnpack": [
             "dgraph/*"
         ]
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/unigraph-dev/unigraph-dev",
+        "directory": "packages/unigraph-dev-electron"
     }
 }

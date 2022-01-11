@@ -19,6 +19,7 @@ import { pkg as onboarding } from 'unigraph-dev-common/lib/data/unigraph.onboard
 import { pkg as todo } from 'unigraph-dev-common/lib/data/unigraph.todo.pkg';
 import { pkg as bookmark } from 'unigraph-dev-common/lib/data/unigraph.bookmark.pkg';
 import { pkg as rss_reader } from 'unigraph-dev-common/lib/data/unigraph.rss_reader.pkg';
+import { pkg as reader } from 'unigraph-dev-common/lib/data/unigraph.reader.pkg';
 import { pkg as email } from 'unigraph-dev-common/lib/data/unigraph.email.pkg';
 import { pkg as reddit } from 'unigraph-dev-common/lib/data/unigraph.reddit.pkg';
 import { pkg as twitter } from 'unigraph-dev-common/lib/data/unigraph.twitter.pkg';
@@ -179,14 +180,12 @@ export const packageExecutableSchema = {
                                             _definitions: [
                                                 {
                                                     type: {
-                                                        'unigraph.id':
-                                                            '$/schema/executable',
+                                                        'unigraph.id': '$/schema/executable',
                                                     },
                                                 },
                                                 {
                                                     type: {
-                                                        'unigraph.id':
-                                                            '$/primitive/string',
+                                                        'unigraph.id': '$/primitive/string',
                                                     },
                                                 },
                                             ],
@@ -280,8 +279,7 @@ export const packageExecutableSchema = {
                                     },
                                     {
                                         type: {
-                                            'unigraph.id':
-                                                '$/schema/interface/semantic',
+                                            'unigraph.id': '$/schema/interface/semantic',
                                         },
                                     },
                                 ],
@@ -356,6 +354,7 @@ export const defaultPackages = [
     todo,
     bookmark,
     rss_reader,
+    reader,
     email,
     reddit,
     twitter,

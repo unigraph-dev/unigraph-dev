@@ -8,18 +8,14 @@ import { TabContext } from '../../utils';
 export function RedditSettings() {
     const [loaded, setLoaded] = React.useState(false);
     const [account, setAccount] = React.useState<any>({});
-    const subscriptions = account?._value?.subscriptions['_value['].map(
-        (it: any) => ({
-            uid: it._value.uid,
-            name: it._value._value.name['_value.%'],
-            last_id_fetched: it._value._value.last_id_fetched['_value.%'],
-        }),
-    );
+    const subscriptions = account?._value?.subscriptions['_value['].map((it: any) => ({
+        uid: it._value.uid,
+        name: it._value._value.name['_value.%'],
+        last_id_fetched: it._value._value.last_id_fetched['_value.%'],
+    }));
     const tabContext = React.useContext(TabContext);
     useEffectOnce(() => {
-        window.unigraph
-            .ensurePackage('unigraph.reddit', redditPacakge)
-            .then(() => setLoaded(true));
+        window.unigraph.ensurePackage('unigraph.reddit', redditPacakge).then(() => setLoaded(true));
     });
 
     useEffect(() => {
@@ -88,14 +84,7 @@ export function RedditSettings() {
     return loaded ? (
         <div>
             <Typography variant="h4">Reddit settings</Typography>
-            <Button
-                onClick={() =>
-                    window.unigraph.runExecutable(
-                        '$/executable/add-reddit-account',
-                        {},
-                    )
-                }
-            >
+            <Button onClick={() => window.unigraph.runExecutable('$/executable/add-reddit-account', {})}>
                 Sign in with Reddit
             </Button>
             <Typography variant="body1">Account info</Typography>

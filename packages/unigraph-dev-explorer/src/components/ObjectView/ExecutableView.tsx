@@ -16,10 +16,7 @@ export const Executable: DynamicViewRenderer = ({ data, callbacks }) => {
     };
     const actions: any = {
         'routine/js': () => {
-            window.unigraph.runExecutable(
-                unpadded['unigraph.id'] || data.uid,
-                {},
-            );
+            window.unigraph.runExecutable(unpadded['unigraph.id'] || data.uid, {});
         },
         'component/react-jsx': () => {
             // Open in new
@@ -32,26 +29,17 @@ export const Executable: DynamicViewRenderer = ({ data, callbacks }) => {
             });
         },
         'lambda/js': async () => {
-            const res = await window.unigraph.runExecutable(
-                unpadded['unigraph.id'] || data.uid,
-                {},
-            );
+            const res = await window.unigraph.runExecutable(unpadded['unigraph.id'] || data.uid, {});
             console.log(res);
         },
     };
 
     return (
         <>
-            <ListItemIcon
-                style={{ paddingLeft: '8px' }}
-                onClick={actions[unpadded.env]}
-            >
+            <ListItemIcon style={{ paddingLeft: '8px' }} onClick={actions[unpadded.env]}>
                 {icons[unpadded.env]}
             </ListItemIcon>
-            <ListItemText
-                primary={`Run code: ${unpadded.name}`}
-                secondary={`Environment: ${unpadded.env}`}
-            />
+            <ListItemText primary={`Run code: ${unpadded.name}`} secondary={`Environment: ${unpadded.env}`} />
         </>
     );
 };

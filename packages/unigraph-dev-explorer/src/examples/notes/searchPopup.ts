@@ -1,9 +1,4 @@
-export const setSearchPopup = (
-    boxRef: any,
-    searchString: string,
-    onSelected: any,
-    hideHidden?: boolean,
-) => {
+export const setSearchPopup = (boxRef: any, searchString: string, onSelected: any, hideHidden?: boolean) => {
     window.unigraph.getState('global/searchPopup').setValue({
         show: true,
         search: searchString,
@@ -28,8 +23,7 @@ export const setSearchPopup = (
                 },
             },
             {
-                label: (search: string) =>
-                    `Create new tag and page named ${search}`,
+                label: (search: string) => `Create new tag and page named ${search}`,
                 onSelected: async (search: string) => {
                     const newTagUid = await window.unigraph.addObject(
                         {
@@ -46,8 +40,7 @@ export const setSearchPopup = (
                             children: [
                                 {
                                     type: {
-                                        'unigraph.id':
-                                            '$/schema/interface/semantic',
+                                        'unigraph.id': '$/schema/interface/semantic',
                                     },
                                     _value: {
                                         type: { 'unigraph.id': '$/schema/tag' },

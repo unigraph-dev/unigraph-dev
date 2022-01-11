@@ -8,9 +8,7 @@ export const isStub = (object: any) =>
         object.type &&
         typeof object.type['unigraph.id'] === 'string' &&
         typeof object.type['unigraph.id'].startsWith('$/') &&
-        (Object.keys(object).length === 3 ||
-            Object.keys(object).filter((el) => el.startsWith('_value'))
-                .length === 0));
+        (Object.keys(object).length === 3 || Object.keys(object).filter((el) => el.startsWith('_value')).length === 0));
 
 export function SubentityDropAcceptor({ uid }: any) {
     const [{ isOver, canDrop }, dropSub] = useDrop(() => ({

@@ -22,10 +22,7 @@ declare type DynamicViewCallbacks = {
     onUpdate: (data: Record<string, any>) => any;
 };
 
-declare type DynamicViewRenderer = (
-    data: Record<string, any>,
-    callbacks: DynamicViewCallbacks,
-) => ReactElement;
+declare type DynamicViewRenderer = (data: Record<string, any>, callbacks: DynamicViewCallbacks) => ReactElement;
 
 declare type UserSettings = {
     serverLocation: string;

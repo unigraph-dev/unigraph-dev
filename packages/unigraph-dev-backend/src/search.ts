@@ -5,12 +5,7 @@ const getQueryHead = (qual: string, filter: string, showHidden: boolean) =>
     })`;
 
 const resQueries = {
-    indexes: (
-        qual: string,
-        filter: string,
-        showHidden: boolean,
-        _: string,
-    ) => `${getQueryHead(
+    indexes: (qual: string, filter: string, showHidden: boolean, _: string) => `${getQueryHead(
         qual,
         `${filter} AND has(<unigraph.indexes>)`,
         showHidden,
@@ -26,20 +21,14 @@ const resQueries = {
             uid expand(_userpredicate_) { uid expand(_userpredicate_) { uid expand(_userpredicate_) } } } } }
         }
     }`,
-    uids: (
-        qual: string,
-        filter: string,
-        showHidden: boolean,
-        _: string,
-    ) => `${getQueryHead(qual, filter, showHidden)} {
+    uids: (qual: string, filter: string, showHidden: boolean, _: string) => `${getQueryHead(qual, filter, showHidden)} {
         uid
     }`,
-    metadata: (
-        qual: string,
-        filter: string,
-        showHidden: boolean,
-        _: string,
-    ) => `${getQueryHead(qual, filter, showHidden)} {
+    metadata: (qual: string, filter: string, showHidden: boolean, _: string) => `${getQueryHead(
+        qual,
+        filter,
+        showHidden,
+    )} {
         uid
         type {
             unigraph.id
@@ -47,12 +36,11 @@ const resQueries = {
     }`,
     custom: (qual: string, filter: string, showHidden: boolean, body: string) =>
         `${getQueryHead(qual, filter, showHidden)} ${body}`,
-    default: (
-        qual: string,
-        filter: string,
-        showHidden: boolean,
-        _: string,
-    ) => `${getQueryHead(qual, filter, showHidden)} @recurse(depth: 15) {
+    default: (qual: string, filter: string, showHidden: boolean, _: string) => `${getQueryHead(
+        qual,
+        filter,
+        showHidden,
+    )} @recurse(depth: 15) {
         uid
         expand(_userpredicate_)
         unigraph.id
@@ -87,9 +75,7 @@ export const makeSearchQuery = (
 ): string => {
     const qhops: string[] = [];
     for (let i = 0; i < hops; i += 1) {
-        qhops.push(`qhops${(
-            i + 1
-        ).toString()}(func: uid(uhops${i.toString()})) {
+        qhops.push(`qhops${(i + 1).toString()}(func: uid(uhops${i.toString()})) {
             <unigraph.origin> {
                 ${i === hops - 1 ? '' : `uhops${(i + 1).toString()} as `}uid
             }
@@ -119,35 +105,25 @@ export const makeSearchQuery = (
     return fq;
 };
 
-export const getQueryString = (
-    query: { method: 'fulltext' | 'type' | 'uid'; value: any }[],
-) => {
+export const getQueryString = (query: { method: 'fulltext' | 'type' | 'uid'; value: any }[]) => {
     const entityQueries: string[] = [];
     const resultQueries: string[] = [];
     const queries = query.map((el, index) => {
         if (el.method === 'fulltext') {
             if (el.value.startsWith('/') && el.value.endsWith('/')) {
                 resultQueries.push(`queryresult${index.toString()}`);
-                return `queryresult${index.toString()} as var(func: regexp(<_value.%>, ${
-                    el.value
-                }i))`;
+                return `queryresult${index.toString()} as var(func: regexp(<_value.%>, ${el.value}i))`;
             }
             resultQueries.push(`queryresult${index.toString()}`);
-            return `queryresult${index.toString()} as var(func: alloftext(<_value.%>, "${
-                el.value
-            }"))`;
+            return `queryresult${index.toString()} as var(func: alloftext(<_value.%>, "${el.value}"))`;
         }
         if (el.method === 'type') {
             entityQueries.push(`queryresult${index.toString()}`);
-            return `var(func: eq(<unigraph.id>, "${
-                el.value
-            }")) { <~type> { queryresult${index.toString()} as uid } }`;
+            return `var(func: eq(<unigraph.id>, "${el.value}")) { <~type> { queryresult${index.toString()} as uid } }`;
         }
         if (el.method === 'uid') {
             resultQueries.push(`queryresult${index.toString()}`);
-            return `queryresult${index.toString()} as var(func: uid(${
-                el.value
-            }))`;
+            return `queryresult${index.toString()} as var(func: uid(${el.value}))`;
         }
         return '';
     });

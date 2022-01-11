@@ -7,21 +7,11 @@ import * as serviceWorker from './serviceWorker';
 
 import App from './App';
 import { WorkSpace } from './Workspace';
-import {
-    DynamicComponentView,
-    getComponentAsView,
-} from './components/ObjectView/DynamicComponentView';
-import {
-    getComponentFromExecutable,
-    registerDetailedDynamicViews,
-    registerDynamicViews,
-} from './unigraph-react';
+import { DynamicComponentView, getComponentAsView } from './components/ObjectView/DynamicComponentView';
+import { getComponentFromExecutable, registerDetailedDynamicViews, registerDynamicViews } from './unigraph-react';
 
 function render(component: any) {
-    ReactDOM.render(
-        <React.StrictMode>{component}</React.StrictMode>,
-        document.getElementById('root'),
-    );
+    ReactDOM.render(<React.StrictMode>{component}</React.StrictMode>, document.getElementById('root'));
 }
 
 init();
@@ -29,13 +19,7 @@ initDefaultComponents();
 
 if (typeof window.electronPreload === 'function') window.electronPreload();
 
-render(
-    new URLSearchParams(window.location.search).get('pageName') ? (
-        <App />
-    ) : (
-        <WorkSpace />
-    ),
-);
+render(new URLSearchParams(window.location.search).get('pageName') ? <App /> : <WorkSpace />);
 
 function initDynamicObjectViews() {
     window.unigraph.subscribeToType(
@@ -44,10 +28,7 @@ function initDynamicObjectViews() {
             // console.log(views);
             views.forEach(async (el) => {
                 const typeId = el.get('item_type')._value['unigraph.id'];
-                const view = await getComponentAsView(
-                    el._value.view._value,
-                    {},
-                );
+                const view = await getComponentAsView(el._value.view._value, {});
                 registerDynamicViews({ [typeId]: { view } });
             });
         },
@@ -60,10 +41,7 @@ function initDynamicObjectViews() {
         (views: any[]) => {
             views.forEach(async (el) => {
                 const typeId = el.get('item_type')._value['unigraph.id'];
-                const view = await getComponentAsView(
-                    el._value.view._value,
-                    {},
-                );
+                const view = await getComponentAsView(el._value.view._value, {});
                 registerDetailedDynamicViews({
                     [typeId]: {
                         view,
@@ -81,19 +59,12 @@ function initDynamicObjectViews() {
         async (views: any[]) => {
             const resolvedViews = await Promise.all(
                 views
-                    .filter(
-                        (el) =>
-                            el?._value?.view?._value?.type?.['unigraph.id'] ===
-                            '$/schema/executable',
-                    )
+                    .filter((el) => el?._value?.view?._value?.type?.['unigraph.id'] === '$/schema/executable')
                     .map(async (el) => [
                         el._value.view._value.uid,
                         {
                             name: el._value.name['_value.%'],
-                            constructor: await getComponentAsView(
-                                el._value.view._value,
-                                {},
-                            ),
+                            constructor: await getComponentAsView(el._value.view._value, {}),
                         },
                     ]),
             );
@@ -114,30 +85,21 @@ window.unigraph.onReady!(() => {
     window.unigraph.subscribeToType(
         '$/schema/notification',
         (data: any[]) => {
-            const nfState = window.unigraph.getState(
-                'notification-center/notifications',
-            );
+            const nfState = window.unigraph.getState('notification-center/notifications');
             nfState.setValue(data);
         },
         undefined,
         { all: false, showHidden: true, first: -30 },
     );
 
-    const semanticChildrenState = window.unigraph.addState(
-        'referenceables/semantic_children',
-        [],
-    );
-    window.unigraph
-        .getSchemas(['$/schema/interface/semantic'])
-        .then((schemas: any) => {
-            semanticChildrenState.setValue(
-                (
-                    schemas['$/schema/interface/semantic']?._definition as any
-                )?._parameters?._definitions.map(
-                    (el: any) => el?.type?.['unigraph.id'],
-                ) || [],
-            );
-        });
+    const semanticChildrenState = window.unigraph.addState('referenceables/semantic_children', []);
+    window.unigraph.getSchemas(['$/schema/interface/semantic']).then((schemas: any) => {
+        semanticChildrenState.setValue(
+            (schemas['$/schema/interface/semantic']?._definition as any)?._parameters?._definitions.map(
+                (el: any) => el?.type?.['unigraph.id'],
+            ) || [],
+        );
+    });
 
     initDynamicObjectViews();
     window.reloadCommands();
