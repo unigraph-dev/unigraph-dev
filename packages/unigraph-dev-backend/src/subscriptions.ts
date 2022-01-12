@@ -235,7 +235,7 @@ const resolvers = {
             const newUid = Array.isArray(newQuery.uid) ? newQuery.uid : [newQuery.uid];
             const oldUid = Array.isArray(oldQuery.uid) ? oldQuery.uid : [oldQuery.uid];
             const addUids = _.difference(newUid, oldUid);
-            let newData = sub.data;
+            let newData = sub.data || [];
             if (addUids.length !== 0) {
                 const query = `{ sub${getFragment({ ...newQuery, uid: addUids }, states)} }`;
                 const results: any[] = await states.dgraphClient.queryDgraph(query).catch((e: any) => {

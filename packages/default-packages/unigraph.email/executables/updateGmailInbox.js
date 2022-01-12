@@ -4,7 +4,9 @@ const gmailClientId = unigraph.getSecret('google', 'client_id');
 const gmailClientSecret = unigraph.getSecret('google', 'client_secret');
 const fetch = require('node-fetch');
 
-const account = (await unigraph.getQueries([`(func: uid(accs)) @cascade {
+const account = (
+    await unigraph.getQueries([
+        `(func: uid(accs)) @cascade {
     uid
     type {<unigraph.id>}
     _value {
@@ -25,7 +27,9 @@ const account = (await unigraph.getQueries([`(func: uid(accs)) @cascade {
 
 var(func: eq(<unigraph.id>, "$/schema/internet_account")) {
     <~type> { accs as uid }
-}`]))?.[0]?.[0];
+}`,
+    ])
+)?.[0]?.[0];
 
 const getQuery = (msgid) => `(func: uid(parIds)) @cascade { 
     uid
@@ -53,14 +57,10 @@ if (account?.uid) {
 
     await unigraph.updateObject(account.uid, {
         access_token: token,
-        token_expires_in: (new Date((new Date()).getTime() + 3600 * 1000)).toISOString(),
+        token_expires_in: new Date(new Date().getTime() + 3600 * 1000).toISOString(),
     });
 
-    const auth = new google.auth.OAuth2(
-        gmailClientId,
-        gmailClientSecret,
-        'https://localhost:4001/callback?key=gmail',
-    );
+    const auth = new google.auth.OAuth2(gmailClientId, gmailClientSecret, 'https://localhost:4001/callback?key=gmail');
     auth.setCredentials({ ...accessTokenResult, access_token: token });
 
     const gmail = google.gmail({
@@ -71,29 +71,49 @@ if (account?.uid) {
     const res = await gmail.users.messages.list({ userId: 'me', maxResults: 25 });
     const messages = res.data.messages.map((el) => el.id);
 
-    const msgIdResps = await Promise.all(messages.map((id) => gmail.users.messages.get({
-        userId: 'me', id, format: 'metadata', metadataHeaders: ['Message-Id'],
-    })));
+    const msgIdResps = await Promise.all(
+        messages.map((id) =>
+            gmail.users.messages.get({
+                userId: 'me',
+                id,
+                format: 'metadata',
+                metadataHeaders: ['Message-Id'],
+            }),
+        ),
+    );
 
     const msgIds = msgIdResps.map((el) => el.data.payload.headers[0].value);
 
-    const results = (await unigraph.getQueries([...(msgIds.map((el) => getQuery(el))), `var(func: eq(<unigraph.id>, "$/schema/email_message")) {
+    const results = await unigraph.getQueries([
+        ...msgIds.map((el) => getQuery(el)),
+        `var(func: eq(<unigraph.id>, "$/schema/email_message")) {
         <~type> { parIds as uid }
-    }`]));
+    }`,
+    ]);
     const newMsgs = messages.filter((el, index) => results[index].length === 0);
 
-    let newMsgResps = (await Promise.all(newMsgs.map((id) => gmail.users.messages.get({ userId: 'me', id, format: 'raw' }))));
+    let newMsgResps = await Promise.all(
+        newMsgs.map((id) => gmail.users.messages.get({ userId: 'me', id, format: 'raw' })),
+    );
 
     // Do not insert drafts to Unigraph
     newMsgResps = newMsgResps.filter((el) => !el.data.labelIds?.includes('DRAFT'));
 
-    if (newMsgs.length) {
+    if (newMsgResps.length) {
         await unigraph.runExecutable('$/executable/add-email', {
             dont_check_unique: true,
-            messages: newMsgResps.map((el) => ({ message: Buffer.from(el.data.raw, 'base64').toString(), read: !el.data.labelIds?.includes('UNREAD') })),
+            messages: newMsgResps.map((el) => ({
+                message: Buffer.from(el.data.raw, 'base64').toString(),
+                read: !el.data.labelIds?.includes('UNREAD'),
+            })),
         });
     }
 
-    const readMsgs = msgIdResps.map((el, index) => (el.data.labelIds.includes('UNREAD') ? undefined : results[index]?.[0]?.uid));
-    await unigraph.runExecutable('$/executable/delete-item-from-list', { where: '$/entity/inbox', item: readMsgs.filter((el) => el !== undefined) });
+    const readMsgs = msgIdResps.map((el, index) =>
+        el.data.labelIds.includes('UNREAD') ? undefined : results[index]?.[0]?.uid,
+    );
+    await unigraph.runExecutable('$/executable/delete-item-from-list', {
+        where: '$/entity/inbox',
+        item: readMsgs.filter((el) => el !== undefined),
+    });
 }
