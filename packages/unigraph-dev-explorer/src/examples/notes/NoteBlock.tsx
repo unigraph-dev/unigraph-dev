@@ -286,6 +286,21 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
 
     const [isChildrenCollapsed, setIsChildrenCollapsed] = React.useState<any>({});
 
+    const newTextSinceDataUpdating = React.useRef<any>(false);
+    React.useEffect(() => {
+        if (newTextSinceDataUpdating.current !== false) {
+            if (textInput.current?.firstChild?.textContent !== undefined) {
+                textInput.current.firstChild.textContent = textInput.current.firstChild.textContent.slice(
+                    newTextSinceDataUpdating.current.caret,
+                );
+                setCaret(document, textInput.current.firstChild, newTextSinceDataUpdating.current.offset);
+            }
+            newTextSinceDataUpdating.current = false;
+            inputDebounced.current(textInput.current.firstChild.textContent);
+            inputDebounced.current.flush();
+        }
+    }, [data]);
+
     React.useEffect(() => {
         const newNodes = _.unionBy(
             [
@@ -562,21 +577,25 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                     textref.current = ev.currentTarget.textContent;
                                     onNoteInput(inputDebounced, ev);
                                 }}
-                                onKeyDown={async (ev) => {
+                                onKeyUp={(ev) => {
+                                    if (newTextSinceDataUpdating.current !== false) {
+                                        newTextSinceDataUpdating.current.offset += 1;
+                                    }
+                                }}
+                                onKeyDown={(ev) => {
                                     const sel = document.getSelection();
                                     const caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
                                     switch (ev.keyCode) {
                                         case 13: // enter
                                             ev.preventDefault();
                                             edited.current = false;
+                                            newTextSinceDataUpdating.current = { caret, offset: 0 };
                                             inputDebounced.current.cancel();
-                                            setCommand(() =>
-                                                callbacks['split-child']?.bind(
-                                                    null,
-                                                    textref.current || data.get('text').as('primitive'),
-                                                    caret,
-                                                ),
-                                            );
+                                            callbacks['split-child']?.bind(
+                                                null,
+                                                textref.current || data.get('text').as('primitive'),
+                                                caret,
+                                            )();
                                             break;
 
                                         case 9: // tab
