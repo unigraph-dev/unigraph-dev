@@ -319,7 +319,7 @@ export const unindentChild = async (data: any, context: NoteEditorContext, paren
             const childChildren = getSemanticChildren(curr._value._value)?.['_value['].sort(byElementIndex);
             const newChildChildren = childChildren.reduce((cprev: any[], ccurr: any) => {
                 if (ccurr?._value?.type?.['unigraph.id'] === '$/schema/subentity' && ++currChildSubentity === index) {
-                    targetChild = ccurr;
+                    targetChild = { uid: ccurr.uid };
                     delUidChild = ccurr.uid;
                     return cprev;
                 }
@@ -370,12 +370,11 @@ export const unindentChild = async (data: any, context: NoteEditorContext, paren
         { ...data._value, children: { '_value[': newChildren } },
         false,
         false,
-        [],
+        context.callbacks.subsId,
         parents,
         true,
     );
     window.unigraph.touch(parents.map((el) => el.uid));
-    await window.unigraph.deleteItemFromArray(delUidPar, delUidChild);
     context.edited.current = true;
     // context.setCommand(() => () => focusUid(newChildren[parent + 1]._value._value.uid));
 };
