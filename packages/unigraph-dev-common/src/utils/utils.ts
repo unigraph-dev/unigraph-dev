@@ -115,7 +115,12 @@ export function augmentStubs(objWithStubs: any, origObj: any) {
             } else {
                 if (curr.uid && seen.includes(curr.uid)) return;
                 if (curr.uid) seen = [...seen, curr.uid];
-                if (curr.uid && uidDict[curr.uid] && JSON.stringify(curr, getCircularReplacer()).length < 100) {
+                if (
+                    curr.uid &&
+                    uidDict[curr.uid] &&
+                    Object.keys(curr).length <= 2 &&
+                    JSON.stringify(curr, getCircularReplacer()).length < 50
+                ) {
                     _.merge(curr, uidDict[curr.uid], JSON.parse(JSON.stringify(curr)));
                 }
                 Object.keys(curr).forEach((el) => {
