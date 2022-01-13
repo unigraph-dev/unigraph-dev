@@ -664,6 +664,15 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 };
                 sendEvent(connection, 'get_subscriptions', {}, id);
             }),
+        touch: (uids) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success && response.result) resolve(response.result);
+                    else reject(response);
+                };
+                sendEvent(connection, 'touch', { uids }, id);
+            }),
     };
 
     return api;

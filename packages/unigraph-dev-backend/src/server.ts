@@ -45,6 +45,7 @@ import {
     EventSubscribeObject,
     EventSubscribeQuery,
     EventSubscribeType,
+    EventTouch,
     EventUnsubscribeById,
     EventUpdateObject,
     EventUpdateSPO,
@@ -659,6 +660,12 @@ export default async function startServer(client: DgraphClient) {
 
         "get_subscriptions": async function (event: EventGetSubscriptions, ws: IWebsocket) {
             const res = serverStates.localApi.getSubscriptions();
+            ws.send(makeResponse(event, true, {result: res}))
+        },
+
+        "touch": async function (event: EventTouch, ws: IWebsocket) {
+            const res = await serverStates.localApi.touch(event.uids)
+                .catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
             ws.send(makeResponse(event, true, {result: res}))
         }
     };

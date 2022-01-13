@@ -295,3 +295,10 @@ declare type EventGetSubscriptions = {
     event: "get_subscriptions",
     id: number,
 }
+
+declare type EventTouch = {
+    type: 'event',
+    event: 'touch',
+    id: number,
+    uids: string[] | string
+}
