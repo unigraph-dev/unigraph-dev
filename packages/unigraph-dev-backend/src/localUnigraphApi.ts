@@ -520,6 +520,18 @@ export function getLocalUnigraphAPI(
                 queryNow: el.queryNow,
                 queryTime: el.queryTime,
             })) || [],
+        touch: async (uids) => {
+            const totalUids = Array.isArray(uids) ? uids : [];
+            const nowDateString = new Date().toISOString();
+            const quads = totalUids.map((uid) => `<${uid}> <_updatedAt> "${nowDateString}" .`);
+            const updater = new dgraph.Mutation();
+            updater.setSetNquads(quads.join('\n'));
+            const result = await client.createDgraphUpsert({
+                query: false,
+                mutations: [updater],
+            });
+            return result;
+        },
     };
 
     return api;

@@ -7,6 +7,9 @@ import { buildGraph, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { Actions } from 'flexlayout-react';
 import { FiberManualRecord, MoreVert } from '@material-ui/icons';
 import stringify from 'json-stable-stringify';
+import { mdiClockOutline, mdiNoteOutline } from '@mdi/js';
+import { Icon } from '@mdi/react';
+import Sugar from 'sugar';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { ViewViewDetailed } from '../../components/ObjectView/DefaultObjectView';
 
@@ -327,6 +330,7 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
         if (isEditing && textref.current !== dataText && !edited.current) {
             setCurrentText(dataText);
             textInput.current.textContent = dataText;
+            if (dataText === '') textInput.current.appendChild(document.createElement('br'));
         }
         if (textref.current !== dataText && !edited.current) {
             textref.current = dataText;
@@ -425,8 +429,22 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                 window.unigraph.getState('global/focused').setValue({ uid: '', caret: 0, type: '' });
                             }
                         }}
-                        style={{ width: '100%' }}
+                        style={{ width: '100%', display: 'flex', cursor: 'text' }}
                     >
+                        {isChildren && data._hide !== true ? (
+                            <div
+                                style={{ display: 'contents' }}
+                                onClick={() => {
+                                    window.wsnavigator(
+                                        `/library/object?uid=${data.uid}&type=${data?.type?.['unigraph.id']}`,
+                                    );
+                                }}
+                            >
+                                <Icon path={mdiNoteOutline} size={0.8} style={{ opacity: 0.54, marginRight: '4px' }} />
+                            </div>
+                        ) : (
+                            []
+                        )}
                         {isEditing ? (
                             <Typography
                                 variant={isChildren || callbacks.isEmbed ? 'body1' : 'h4'}
@@ -436,7 +454,7 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                         : (event) => onUnigraphContextMenu(event, data, undefined, callbacks)
                                 }
                                 contentEditable
-                                style={{ outline: '0px solid transparent' }}
+                                style={{ outline: '0px solid transparent', minWidth: '16px' }}
                                 suppressContentEditableWarning
                                 ref={textInput}
                                 onInput={(ev) => {
@@ -677,7 +695,9 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                     const state = window.unigraph.getState('global/focused');
                                     state.setValue({ ...state.value, caret });
                                 }}
-                            />
+                            >
+                                <br />
+                            </Typography>
                         ) : (
                             <AutoDynamicView
                                 object={data.get('text')._value._value}
@@ -695,7 +715,16 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                         )}
                     </div>
                 </NoteViewTextWrapper>
-                {!isChildren ? <div style={{ height: '12px' }} /> : []}
+                {!isChildren && !callbacks.isEmbed ? (
+                    <div style={{ marginTop: '4px', marginBottom: '12px', display: 'flex', color: 'gray' }}>
+                        <Icon path={mdiClockOutline} size={0.8} style={{ marginRight: '4px' }} />
+                        {`${new Date(data._updatedAt).toLocaleString()} (${Sugar.Date.relative(
+                            new Date(data._updatedAt),
+                        )})`}
+                    </div>
+                ) : (
+                    []
+                )}
                 {!(isCollapsed === true) ? (
                     <div ref={childrenref} style={{ width: '100%' }}>
                         {subentities.length || isChildren ? (
