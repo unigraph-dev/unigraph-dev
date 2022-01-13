@@ -7,8 +7,9 @@ import { buildGraph, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { Actions } from 'flexlayout-react';
 import { FiberManualRecord, MoreVert } from '@material-ui/icons';
 import stringify from 'json-stable-stringify';
-import { mdiNoteOutline } from '@mdi/js';
+import { mdiClockOutline, mdiNoteOutline } from '@mdi/js';
 import { Icon } from '@mdi/react';
+import Sugar from 'sugar';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { ViewViewDetailed } from '../../components/ObjectView/DefaultObjectView';
 
@@ -714,7 +715,16 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                         )}
                     </div>
                 </NoteViewTextWrapper>
-                {!isChildren ? <div style={{ height: '12px' }} /> : []}
+                {!isChildren && !callbacks.isEmbed ? (
+                    <div style={{ marginTop: '4px', marginBottom: '12px', display: 'flex', color: 'gray' }}>
+                        <Icon path={mdiClockOutline} size={0.8} style={{ marginRight: '4px' }} />
+                        {`${new Date(data._updatedAt).toLocaleString()} (${Sugar.Date.relative(
+                            new Date(data._updatedAt),
+                        )})`}
+                    </div>
+                ) : (
+                    []
+                )}
                 {!(isCollapsed === true) ? (
                     <div ref={childrenref} style={{ width: '100%' }}>
                         {subentities.length || isChildren ? (

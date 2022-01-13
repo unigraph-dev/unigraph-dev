@@ -18,6 +18,11 @@ export const focusUid = (uid: string, tail?: boolean) => {
     });
 };
 
+const getParents = (data: any) =>
+    getParentsAndReferences(data['~_value'], data['unigraph.origin'] || [])[0].map((el: any) => ({
+        uid: el.uid,
+    }));
+
 export const getSemanticChildren = (data: any) => data?._value?.children;
 
 export const addChild = (data: any, context: NoteEditorContext) => {
@@ -66,9 +71,7 @@ export const addChild = (data: any, context: NoteEditorContext) => {
 
 export const splitChild = (data: any, context: NoteEditorContext, index: number, oldtext: string, at: number) => {
     // console.log(JSON.stringify([data, index, at], null, 4))
-    const parents = getParentsAndReferences(data['~_value'], data['unigraph.origin'] || [])[0].map((el: any) => ({
-        uid: el.uid,
-    }));
+    const parents = getParents(data);
     if (!data._hide) parents.push({ uid: data.uid });
     let currSubentity = -1;
     let isInserted = false;
@@ -157,7 +160,7 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
         parents,
         true,
     );
-    // context.edited.current = true;
+    window.unigraph.touch(parents.map((el) => el.uid));
 };
 
 export const unsplitChild = async (data: any, context: NoteEditorContext, index: number) => {
@@ -192,6 +195,7 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
                 ] as any,
                 true,
             );
+            window.unigraph.touch(getParents(data).map((el) => el.uid));
         }, 1000);
 
         context.edited.current = true;
@@ -213,9 +217,7 @@ export const setFocus = (data: any, context: NoteEditorContext, index: number) =
  * TODO: This code is very poorly written. We need to change it after we have unigraph object prototypes.
  */
 export const indentChild = (data: any, context: NoteEditorContext, index: number, parent?: number) => {
-    const parents = getParentsAndReferences(data['~_value'], data['unigraph.origin'] || [])[0].map((el: any) => ({
-        uid: el.uid,
-    }));
+    const parents = getParents(data);
     if (!data._hide) parents.push({ uid: data.uid });
     removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     if (!parent && index !== 0) {
@@ -291,6 +293,7 @@ export const indentChild = (data: any, context: NoteEditorContext, index: number
         context.callbacks.subsId,
         parents,
     );
+    window.unigraph.touch(parents.map((el) => el.uid));
     context.edited.current = true;
 
     // context.setCommand(() => () => focusUid(newUid._value.uid));
@@ -298,9 +301,7 @@ export const indentChild = (data: any, context: NoteEditorContext, index: number
 };
 
 export const unindentChild = async (data: any, context: NoteEditorContext, parent: number, index: number) => {
-    const parents = getParentsAndReferences(data['~_value'], data['unigraph.origin'] || [])[0].map((el: any) => ({
-        uid: el.uid,
-    }));
+    const parents = getParents(data);
     if (!data._hide) parents.push({ uid: data.uid });
     removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     // console.log(parent, index)
@@ -371,6 +372,7 @@ export const unindentChild = async (data: any, context: NoteEditorContext, paren
         [],
         parents,
     );
+    window.unigraph.touch(parents.map((el) => el.uid));
     await window.unigraph.deleteItemFromArray(delUidPar, delUidChild);
     context.edited.current = true;
     // context.setCommand(() => () => focusUid(newChildren[parent + 1]._value._value.uid));
@@ -399,9 +401,7 @@ export const getNextDFSNode = (data: any, context: NoteEditorContext, index: num
 };
 
 export const convertChildToTodo = async (data: any, context: NoteEditorContext, index: number) => {
-    const parents = getParentsAndReferences(data['~_value'], data['unigraph.origin'] || [])[0].map((el: any) => ({
-        uid: el.uid,
-    }));
+    const parents = getParents(data);
     if (!data._hide) parents.push({ uid: data.uid });
     removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     // console.log(index);
@@ -446,6 +446,7 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
         context.callbacks.subsId,
         parents,
     );
+    window.unigraph.touch(parents.map((el) => el.uid));
 };
 
 export const replaceChildWithUid = async (data: any, context: NoteEditorContext, index: number, uid: string) => {
@@ -474,4 +475,5 @@ export const replaceChildWithUid = async (data: any, context: NoteEditorContext,
         false,
         context.callbacks.subsId,
     );
+    window.unigraph.touch(getParents(data).map((el) => el.uid));
 };
