@@ -205,7 +205,8 @@ declare type EventUpdateObject = {
     upsert: boolean | undefined,
     pad: boolean | undefined,
     subIds?: any[] | any,
-    origin?: any[]
+    origin?: any[],
+    usedUids?: any[],
 }
 
 declare type EventDeleteRelation = {

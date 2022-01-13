@@ -62,4 +62,4 @@ export const getSubentities = (data: any) =>
     data?._value?.children?.['_value[']
         ?.sort(byElementIndex)
         ?.map?.((el: any) => el._value)
-        .filter((el: any) => el?.type['unigraph.id'] === '$/schema/subentity');
+        .filter((el: any) => el?.type?.['unigraph.id'] === '$/schema/subentity');

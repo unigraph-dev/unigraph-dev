@@ -265,6 +265,7 @@ export interface Unigraph<TT = WebSocket | false> {
         pad?: boolean,
         subIds?: any[] | any,
         origin?: any[],
+        eagarlyUpdate?: boolean,
     ): any;
     /**
      * Deletes relationships by supplying the origin UID and JSONs to delete.

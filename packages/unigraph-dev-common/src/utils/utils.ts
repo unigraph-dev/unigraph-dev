@@ -1,3 +1,6 @@
+import _ from 'lodash';
+
+/* eslint-disable no-param-reassign */
 function getPath(obj: any, path: string | string[]): any {
     if (path.length === 0) return new UnigraphObject(obj);
     if (!Array.isArray(path)) path = path.split('/').filter((e) => e.length);
@@ -12,6 +15,124 @@ function getPath(obj: any, path: string | string[]): any {
         return undefined;
         // throw new RangeError('Requested path doesn\'t exist')
     }
+}
+
+export function findUid(object: any, uid: string) {
+    if (object?.uid === uid) return object;
+    if (typeof object === 'object' && object) {
+        if (Array.isArray(object)) {
+            for (const el of object) {
+                const result: any = findUid(el, uid);
+                if (result) return result;
+            }
+        } else {
+            const keys = Object.keys(object);
+            for (let i = 0; i < keys.length; i += 1) {
+                const result: any = findUid(object[keys[i]], uid);
+                if (result) return result;
+            }
+        }
+    }
+    return undefined;
+}
+
+export function assignUids(object: any, totalLeases: string[], usedLeases: string[], blankMap: any) {
+    if (typeof object === 'object' && object) {
+        if (Array.isArray(object)) {
+            for (const el of object) {
+                assignUids(el, totalLeases, usedLeases, blankMap);
+            }
+        } else {
+            const keys = Object.keys(object);
+            if (keys.includes('unigraph.id')) return;
+            if (!keys.includes('uid')) {
+                // Assign a new uid to the object
+                const newUid = totalLeases.shift();
+                if (!newUid) throw new RangeError('No more uids available');
+                object.uid = newUid;
+                usedLeases.push(newUid);
+            } else if (object.uid?.startsWith?.('_:')) {
+                if (blankMap[object.uid]) {
+                    object.uid = blankMap[object.uid];
+                } else {
+                    const newUid = totalLeases.shift();
+                    if (!newUid) throw new RangeError('No more uids available');
+                    blankMap[object.uid] = newUid;
+                    object.uid = newUid;
+                    usedLeases.push(newUid);
+                }
+            }
+            for (let i = 0; i < keys.length; i += 1) {
+                assignUids(object[keys[i]], totalLeases, usedLeases, blankMap);
+            }
+        }
+    }
+}
+
+export const getCircularReplacer = () => {
+    const seen = new WeakSet();
+    return (key: any, value: any) => {
+        if (typeof value === 'object' && value !== null) {
+            if (seen.has(value)) {
+                return;
+            }
+            seen.add(value);
+        }
+        // eslint-disable-next-line consistent-return
+        return value;
+    };
+};
+
+/**
+ * Augment a object with previous values in the same UIDs.
+ * @param objWithStubs The new object with stubs.
+ * @param origObj Original object with full values of the same UIDs.
+ */
+export function augmentStubs(objWithStubs: any, origObj: any) {
+    const uidDict: any = {};
+
+    function recurseOrig(curr: any, seen: any[] = []) {
+        if (typeof curr === 'object' && curr) {
+            if (Array.isArray(curr)) {
+                curr.forEach((el) => recurseOrig(el, seen));
+            } else {
+                if (curr.uid && seen.includes(curr.uid)) return;
+                if (curr.uid) seen = [...seen, curr.uid];
+                if (curr.uid && JSON.stringify(curr, getCircularReplacer()).length >= 100) {
+                    uidDict[curr.uid] = curr;
+                }
+                Object.keys(curr).forEach((el) => {
+                    recurseOrig(curr[el], seen);
+                });
+            }
+        }
+    }
+
+    function recurseObj(curr: any, seen: any[] = []) {
+        if (typeof curr === 'object' && curr) {
+            if (Array.isArray(curr)) {
+                curr.forEach((el) => recurseObj(el, seen));
+            } else {
+                if (curr.uid && seen.includes(curr.uid)) return;
+                if (curr.uid) seen = [...seen, curr.uid];
+                if (
+                    curr.uid &&
+                    uidDict[curr.uid] &&
+                    Object.keys(curr).length <= 2 &&
+                    JSON.stringify(curr, getCircularReplacer()).length < 50
+                ) {
+                    _.merge(curr, uidDict[curr.uid], JSON.parse(JSON.stringify(curr)));
+                }
+                Object.keys(curr).forEach((el) => {
+                    recurseObj(curr[el], seen);
+                });
+            }
+        }
+    }
+
+    recurseOrig(origObj);
+    recurseObj(objWithStubs);
+    // console.log(uidDict);
 }
 
 function getObjectAsRecursivePrimitive(object: any) {

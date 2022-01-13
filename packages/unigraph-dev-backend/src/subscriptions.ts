@@ -84,7 +84,13 @@ export function buildPollingQuery(subs: Subscription[], states: any) {
     }, '{')} }`;
 }
 
-export type MsgCallbackFn = (id: number | string, updated: any, msgPort: IWebsocket, sub: Subscription) => any;
+export type MsgCallbackFn = (
+    id: number | string,
+    updated: any,
+    msgPort: IWebsocket,
+    sub: Subscription,
+    ofUpdate?: number | string,
+) => any;
 
 /**
  * Poll the database for subscription updates. Should be called by server roughly every 1 seconds (or more/less).
@@ -97,6 +103,7 @@ export async function pollSubscriptions(
     msgCallback: MsgCallbackFn,
     ids: any[] | undefined,
     serverStates: any,
+    ofUpdate?: any,
 ) {
     if (!ids) ids = subs.map((el) => el.id);
     if (subs.length >= 1) {
@@ -140,7 +147,7 @@ export async function pollSubscriptions(
                     const val = results[0];
                     if (stringify(val) !== stringify(subs[index].data)) {
                         subs[index].data = val;
-                        msgCallback(subs[index].id, val, subs[index].msgPort!, subs[index]);
+                        msgCallback(subs[index].id, val, subs[index].msgPort!, subs[index], ofUpdate);
                     }
                     el.queryNow = false;
                     el.queryTime = new Date().getTime() - startTime;

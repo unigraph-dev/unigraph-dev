@@ -12,7 +12,7 @@ import {
 } from 'unigraph-dev-common/lib/utils/entityUtils';
 import repl from 'repl';
 import fetch from 'node-fetch';
-import { uniqueId } from 'lodash';
+import _, { uniqueId } from 'lodash';
 import { Unigraph } from 'unigraph-dev-common/lib/types/unigraph';
 import stringify from 'json-stable-stringify';
 import DgraphClient from './dgraphClient';
@@ -102,7 +102,7 @@ export default async function startServer(client: DgraphClient) {
     await checkOrCreateDefaultDataModel(client);
 
     // Initialize subscriptions
-    const pollCallback: MsgCallbackFn = (id, newdata, msgPort, sub) => {
+    const pollCallback: MsgCallbackFn = (id, newdata, msgPort, sub, ofUpdate) => {
         if (sub?.callbackType === 'messageid') {
             if (msgPort.readyState === 1) {
                 msgPort.send(
@@ -111,6 +111,7 @@ export default async function startServer(client: DgraphClient) {
                         updated: true,
                         id,
                         result: newdata,
+                        ofUpdate,
                     }),
                 );
             }
@@ -120,6 +121,24 @@ export default async function startServer(client: DgraphClient) {
     };
 
     const serverStates: any = {};
+
+    const checkLeasedUid = async () => {
+        if (serverStates?.leasedUids?.length < 128) {
+            const lease = await dgraphClient.leaseUids();
+            for (let i = parseInt(lease.startId, 10); i < parseInt(lease.endId, 10); i += 1) {
+                serverStates.leasedUids.push(`0x${i.toString(16)}`);
+            }
+            Object.values(connections).forEach((el) => {
+                el.send(
+                    stringify({
+                        type: 'cache_updated',
+                        name: 'uid_lease',
+                        result: serverStates.leasedUids,
+                    }),
+                );
+            });
+        }
+    };
 
     const hooks: Hooks = {
         after_subscription_added: [
@@ -146,7 +165,14 @@ export default async function startServer(client: DgraphClient) {
         after_object_changed: [
             async (context: HookAfterObjectChangedParams) => {
                 if (context.subIds && !Array.isArray(context.subIds)) context.subIds = [context.subIds];
-                pollSubscriptions(context.subscriptions, dgraphClient, pollCallback, context.subIds, serverStates);
+                pollSubscriptions(
+                    context.subscriptions,
+                    dgraphClient,
+                    pollCallback,
+                    context.subIds,
+                    serverStates,
+                    context.ofUpdate,
+                );
                 await context.caches.executables.updateNow();
 
                 // Call after_object_created hooks with uids cached
@@ -161,6 +187,8 @@ export default async function startServer(client: DgraphClient) {
                     await afterObjectCreatedHooks(serverStates, objectCreatedHooks, client);
                     done(false, null);
                 });
+
+                checkLeasedUid();
             },
         ],
     };
@@ -177,6 +205,7 @@ export default async function startServer(client: DgraphClient) {
         namespaceMap,
         localApi: {} as Unigraph,
         lock,
+        leasedUids: [],
         httpCallbacks: {},
         runningExecutables: [],
         addRunningExecutable: (defn: any) => {
@@ -212,6 +241,8 @@ export default async function startServer(client: DgraphClient) {
         entityHeadByType: {},
         pollCallback,
     });
+
+    await checkLeasedUid();
 
     const namespaceSub = createSubscriptionLocal(
         getRandomInt(),
@@ -262,10 +293,10 @@ export default async function startServer(client: DgraphClient) {
     serverStates.localApi = localApi;
     caches.executables = createExecutableCache(client, { hello: 'world' }, localApi, serverStates);
 
-    setInterval(
-        () => pollSubscriptions(serverStates.subscriptions, dgraphClient, pollCallback, undefined, serverStates),
-        pollInterval,
-    );
+    setInterval(() => {
+        pollSubscriptions(serverStates.subscriptions, dgraphClient, pollCallback, undefined, serverStates);
+        checkLeasedUid();
+    }, pollInterval);
 
     const makeResponse = (event: { id: number | string }, success: boolean, body: Record<string, unknown> = {}) =>
         stringify({
@@ -288,7 +319,7 @@ export default async function startServer(client: DgraphClient) {
         set_dgraph_schema(event: EventSetDgraphSchema, ws: IWebsocket) {
             dgraphClient
                 .setSchema(event.schema)
-                .then((_) => {
+                .then((res) => {
                     ws.send(makeResponse(event, true));
                 })
                 .catch((e) => ws.send(makeResponse(event, false, { error: e.toString() })));
@@ -297,10 +328,11 @@ export default async function startServer(client: DgraphClient) {
         create_data_by_json(event: EventCreateDataByJson, ws: IWebsocket) {
             dgraphClient
                 .createData(event.data)
-                .then((_) => {
+                .then((res) => {
                     callHooks(serverStates.hooks, 'after_object_changed', {
                         subscriptions: serverStates.subscriptions,
                         caches,
+                        ofUpdate: event.id,
                     });
                     ws.send(makeResponse(event, true));
                 })
@@ -436,7 +468,7 @@ export default async function startServer(client: DgraphClient) {
 
         "update_spo": function (event: EventUpdateSPO, ws: IWebsocket) {
             localApi.updateTriplets(event.objects).then((_: any) => {
-                callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
+                callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches, ofUpdate: event.id})
                 ws.send(makeResponse(event, true))
             }).catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
         },
@@ -470,11 +502,14 @@ export default async function startServer(client: DgraphClient) {
                 let autorefObject = processAutorefUnigraphId(newObject);
                 const upsert = insertsToUpsert([autorefObject], false, serverStates.caches['schemas'].dataAlt![0]);
                 perfLogStartDbTransaction();
-                dgraphClient.createUnigraphUpsert(upsert).then(_ => {
+                
+                dgraphClient.createUnigraphUpsert(upsert).then(res => {
                     perfLogAfterDbTransaction();
-                    callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches, subIds: event.subIds})
+                    if (event.usedUids) serverStates.leasedUids = _.difference(serverStates.leasedUids, event.usedUids);
+                    callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches, subIds: event.subIds, ofUpdate: event.id})
                     ws.send(makeResponse(event, true))
                 }).catch(e => ws.send(makeResponse(event, false, {"error": e.toString()})));
+                
                 }
             } else { // upsert mode
                 let finalUpdater: any;
@@ -491,10 +526,12 @@ export default async function startServer(client: DgraphClient) {
                 }
 
                 const finalUpsert = insertsToUpsert([finalUpdater], undefined, serverStates.caches['schemas'].dataAlt![0]);
+                
                 dgraphClient.createUnigraphUpsert(finalUpsert).then(_ => {
-                callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches, subIds: event.subIds})
-                ws.send(makeResponse(event, true))
+                    callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches, subIds: event.subIds, ofUpdate: event.id})
+                    ws.send(makeResponse(event, true))
                 }).catch(e => ws.send(makeResponse(event, false, {"error": e.toString()})));
+                
             }
         },
 
@@ -579,7 +616,7 @@ export default async function startServer(client: DgraphClient) {
             fs.writeFileSync('imports_log.json', JSON.stringify(ref));
             const upsert = insertsToUpsert(ref, undefined, serverStates.caches['schemas'].dataAlt![0]);
             dgraphClient.createUnigraphUpsert(upsert).then(_ => {
-                callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches})
+                callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches, ofUpdate: event.id})
                 ws.send(makeResponse(event, true))
                 }).catch(e => ws.send(makeResponse(event, false, {"error": e.toString()})));
             },
@@ -593,7 +630,7 @@ export default async function startServer(client: DgraphClient) {
 
         "add_notification": async function (event: EventAddNotification, ws: IWebsocket) {
             await addNotification(event.item, caches, dgraphClient).catch(e => ws.send(makeResponse(event, false, {error: e})));
-            callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches});
+            callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches, ofUpdate: event.id});
             ws.send(makeResponse(event, true));
         },
 
@@ -687,7 +724,14 @@ export default async function startServer(client: DgraphClient) {
             "name": "schemaMap",
             result: serverStates.caches['schemas'].data
         }))
+        ws.send(stringify({
+            type: 'cache_updated',
+            name: 'uid_lease',
+            result: serverStates.leasedUids,
+        }))
         console.log('opened socket connection');
+
+        checkLeasedUid();
 
         if (revival) {
             serverStates.subscriptions = reviveSubscriptions(serverStates.subscriptions, historialClients[clientBrowserId], clientBrowserId, ws)
