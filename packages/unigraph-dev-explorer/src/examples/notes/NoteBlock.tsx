@@ -290,13 +290,12 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
     React.useEffect(() => {
         if (newTextSinceDataUpdating.current !== false) {
             if (textInput.current?.firstChild?.textContent !== undefined) {
-                textInput.current.firstChild.textContent = textInput.current.firstChild.textContent.slice(
-                    newTextSinceDataUpdating.current.caret,
-                );
+                const newText = textInput.current.firstChild.textContent.slice(newTextSinceDataUpdating.current.caret);
+                textInput.current.firstChild.textContent = newText;
                 setCaret(document, textInput.current.firstChild, newTextSinceDataUpdating.current.offset);
+                inputDebounced.current(newText);
             }
             newTextSinceDataUpdating.current = false;
-            inputDebounced.current(textInput.current.firstChild.textContent);
             inputDebounced.current.flush();
         }
     }, [data]);
