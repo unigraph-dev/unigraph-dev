@@ -286,20 +286,6 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
 
     const [isChildrenCollapsed, setIsChildrenCollapsed] = React.useState<any>({});
 
-    const newTextSinceDataUpdating = React.useRef<any>(false);
-    React.useEffect(() => {
-        if (newTextSinceDataUpdating.current !== false) {
-            if (textInput.current?.firstChild?.textContent !== undefined) {
-                const newText = textInput.current.firstChild.textContent.slice(newTextSinceDataUpdating.current.caret);
-                textInput.current.firstChild.textContent = newText;
-                setCaret(document, textInput.current.firstChild, newTextSinceDataUpdating.current.offset);
-                inputDebounced.current(newText);
-            }
-            newTextSinceDataUpdating.current = false;
-            inputDebounced.current.flush();
-        }
-    }, [data]);
-
     React.useEffect(() => {
         const newNodes = _.unionBy(
             [
@@ -335,6 +321,7 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
     React.useEffect(() => {
         dataref.current = data;
         const dataText = data.get('text').as('primitive');
+        console.log('UID = ', data.uid, dataText);
         if (dataText && options?.viewId && !callbacks.isEmbed)
             window.layoutModel.doAction(Actions.renameTab(options.viewId, `Note: ${dataText}`));
         if (isEditing && textref.current !== dataText && !edited.current) {
@@ -576,11 +563,6 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                     textref.current = ev.currentTarget.textContent;
                                     onNoteInput(inputDebounced, ev);
                                 }}
-                                onKeyUp={(ev) => {
-                                    if (newTextSinceDataUpdating.current !== false) {
-                                        newTextSinceDataUpdating.current.offset += 1;
-                                    }
-                                }}
                                 onKeyDown={(ev) => {
                                     const sel = document.getSelection();
                                     const caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
@@ -588,7 +570,6 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                         case 13: // enter
                                             ev.preventDefault();
                                             edited.current = false;
-                                            newTextSinceDataUpdating.current = { caret, offset: 0 };
                                             inputDebounced.current.cancel();
                                             callbacks['split-child']?.bind(
                                                 null,

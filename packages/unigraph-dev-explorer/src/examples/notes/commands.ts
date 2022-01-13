@@ -155,8 +155,9 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
         false,
         context.callbacks.subsId,
         parents,
+        true,
     );
-    context.edited.current = true;
+    // context.edited.current = true;
 };
 
 export const unsplitChild = async (data: any, context: NoteEditorContext, index: number) => {

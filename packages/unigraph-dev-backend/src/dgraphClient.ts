@@ -1,6 +1,7 @@
 import AsyncLock from 'async-lock';
 import dgraph, { DgraphClient as ActualDgraphClient, DgraphClientStub, Operation, Mutation, Check } from 'dgraph-js';
 import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import fetch from 'node-fetch';
 import { getAsyncLock, withLock } from './asyncManager';
 import { perfLogStartDbTransaction, perfLogAfterDbTransaction } from './logging';
 import { makeSearchQuery } from './search';
@@ -23,8 +24,17 @@ export default class DgraphClient {
 
     private txnlock: AsyncLock;
 
-    constructor(connectionUri: string) {
-        this.dgraphClientStub = new DgraphClientStub(connectionUri, undefined, {
+    private ports: any = { grpc: '9080', zero: '6080' };
+
+    private connectionUri: string;
+
+    constructor(connectionUri: string, ports: any) {
+        // Define default ports
+        this.ports.grpc = ports.grpc;
+        this.ports.zero = ports.zero;
+        this.connectionUri = connectionUri;
+
+        this.dgraphClientStub = new DgraphClientStub(`${connectionUri}:${ports.grpc}`, undefined, {
             'grpc.max_receive_message_length': 1024 * 1024 * 1024,
         });
         this.dgraphClientStub.checkVersion(new Check()).catch((e) => {
@@ -34,6 +44,16 @@ export default class DgraphClient {
         });
         this.dgraphClient = new ActualDgraphClient(this.dgraphClientStub);
         this.txnlock = getAsyncLock();
+    }
+
+    async leaseUids(num = 256) {
+        const res = await fetch(`http://${this.connectionUri}:${this.ports.zero}/assign?what=uids&num=${num}`);
+        if (res.status !== 200) {
+            console.log(res);
+            throw new Error(`Could not lease ${num} uids from Dgraph`);
+        }
+        const json = await res.json();
+        return json;
     }
 
     async getStatus() {
