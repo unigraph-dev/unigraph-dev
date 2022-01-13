@@ -14,7 +14,7 @@ export const focusUid = (uid: string, tail?: boolean) => {
         uid,
         caret: window.unigraph.getState('global/focused').value?.caret || 0,
         type: '$/schema/note_block',
-        tail,
+        tail: tail || window.unigraph.getState('global/focused').value?.tail,
     });
 };
 

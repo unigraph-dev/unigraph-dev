@@ -630,6 +630,22 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                             }
                                             break;
 
+                                        case 37: // left arrow
+                                            if (caret === 0) {
+                                                ev.preventDefault();
+                                                inputDebounced.current.flush();
+                                                callbacks['focus-last-dfs-node'](data, editorContext, 0, true);
+                                            }
+                                            break;
+
+                                        case 39: // right arrow
+                                            if (caret === textref.current.length) {
+                                                ev.preventDefault();
+                                                inputDebounced.current.flush();
+                                                callbacks['focus-next-dfs-node'](data, editorContext, 0);
+                                            }
+                                            break;
+
                                         case 38: // up arrow
                                             ev.preventDefault();
                                             inputDebounced.current.flush();
