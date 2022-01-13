@@ -292,6 +292,7 @@ export const indentChild = (data: any, context: NoteEditorContext, index: number
         false,
         context.callbacks.subsId,
         parents,
+        true,
     );
     window.unigraph.touch(parents.map((el) => el.uid));
     context.edited.current = true;
@@ -371,6 +372,7 @@ export const unindentChild = async (data: any, context: NoteEditorContext, paren
         false,
         [],
         parents,
+        true,
     );
     window.unigraph.touch(parents.map((el) => el.uid));
     await window.unigraph.deleteItemFromArray(delUidPar, delUidChild);
