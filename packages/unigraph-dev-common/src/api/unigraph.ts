@@ -2,12 +2,13 @@
 
 // FIXME: This file is ambiguous in purpose! Move utils to utils folder and keep this a small interface with a window object.
 
+import _ from 'lodash';
 import React from 'react';
 import { string } from 'yargs';
 import { typeMap } from '../types/consts';
 import { PackageDeclaration } from '../types/packages';
 import { Unigraph, AppState, UnigraphObject as IUnigraphObject } from '../types/unigraph';
-import { base64ToBlob, isJsonString } from '../utils/utils';
+import { assignUids, augmentStubs, base64ToBlob, findUid, isJsonString } from '../utils/utils';
 
 const RETRY_CONNECTION_INTERVAL = 5000;
 
@@ -45,6 +46,40 @@ export const getObjectAs = (object: any, type: 'primitive') => {
         return getObjectAsRecursivePrimitive(object);
     }
     return object;
+};
+
+export const uidMerger = (objValue: any, srcValue: any) => {
+    if (_.isArray(objValue) && !_.isArray(srcValue)) {
+        srcValue = [srcValue];
+    } else if (!_.isArray(objValue) && _.isArray(srcValue)) {
+        objValue = [objValue];
+    }
+
+    if (_.isArray(objValue) && _.isArray(srcValue)) {
+        const uids: string[] = [];
+        const [[primObj, objObj], [primSrc, objSrc]] = [objValue, srcValue].map((arr) => {
+            const objs: any[] = [];
+            const prims: any[] = [];
+            arr.forEach((el) => {
+                if (typeof el?.uid === 'string') {
+                    objs.push(el);
+                    uids.push(el.uid);
+                } else prims.push(el);
+            });
+            return [prims, objs];
+        });
+        const finPrims = _.uniq(primObj.concat(primSrc));
+        const finObjs: any[] = [];
+        _.uniq(uids).forEach((uid) => {
+            const obj = objObj.find((el) => el.uid === uid);
+            const src = objSrc.find((el) => el.uid === uid);
+            if (obj && src) finObjs.push(_.mergeWith(obj, src, uidMerger));
+            else if (obj) finObjs.push(obj);
+            else if (src) finObjs.push(src);
+        });
+        return [...finPrims, ...finObjs];
+    }
+    return undefined;
 };
 
 // TODO: Switch to prototype-based, faster helper functions
@@ -137,6 +172,8 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
     const callbacks: Record<string, Function> = {};
     // eslint-disable-next-line @typescript-eslint/ban-types
     const subscriptions: Record<string, Function> = {};
+    const subResults: Record<string, any> = {};
+    const subFakeUpdates: Record<string, any[]> = {};
     const states: Record<string, AppState> = {};
     const caches: Record<string, any> = {
         namespaceMap: isJsonString(window.localStorage.getItem('caches/namespaceMap'))
@@ -218,10 +255,20 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             if (parsed.type === 'response' && parsed.id && callbacks[parsed.id]) callbacks[parsed.id](parsed);
             if (parsed.type === 'cache_updated' && parsed.name) {
                 caches[parsed.name] = parsed.result;
-                window.localStorage.setItem(`caches/${parsed.name}`, JSON.stringify(parsed.result));
+                if (parsed.name !== 'uid_lease')
+                    window.localStorage.setItem(`caches/${parsed.name}`, JSON.stringify(parsed.result));
                 cacheCallbacks[parsed.name]?.forEach((el) => el(parsed.result));
             }
             if (parsed.type === 'subscription' && parsed.id && subscriptions[parsed.id] && parsed.result) {
+                if (
+                    Array.isArray(subFakeUpdates[parsed.id]) &&
+                    (subFakeUpdates[parsed.id].includes(parsed.ofUpdate) || subFakeUpdates[parsed.id].length > 0) &&
+                    subFakeUpdates[parsed.id].lastIndexOf(parsed.ofUpdate) < subFakeUpdates[parsed.id].length - 1
+                ) {
+                    return ev;
+                }
+                subFakeUpdates[parsed.id] = [];
+                subResults[parsed.id] = JSON.parse(JSON.stringify(parsed.result));
                 subscriptions[parsed.id](parsed.result);
             }
             if (parsed.type === 'open_url' && window) window.open(parsed.url, '_blank');
@@ -363,6 +410,8 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             }),
         unsubscribe: (id) => {
             sendEvent(connection, 'unsubscribe_by_id', {}, id);
+            delete subscriptions[id];
+            delete subResults[id];
         },
         addObject: (object, schema) =>
             new Promise((resolve, reject) => {
@@ -384,22 +433,40 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             // TODO: This is very useless, should be removed once we get something better
             sendEvent(connection, 'update_spo', { objects });
         },
-        updateObject: (uid, newObject, upsert = true, pad = true, subIds, origin) =>
+        updateObject: (uid, newObject, upsert = true, pad = true, subIds, origin, eagarlyUpdate) =>
             new Promise((resolve, reject) => {
                 const id = getRandomInt();
                 callbacks[id] = (response: any) => {
                     if (response.success) resolve(id);
                     else reject(response);
                 };
-                sendEvent(connection, 'update_object', {
-                    uid,
-                    newObject,
-                    upsert,
-                    pad,
-                    id,
-                    subIds,
-                    origin,
-                });
+                let usedUids: any;
+                if (!upsert && !pad && subIds && (!Array.isArray(subIds) || subIds.length === 1) && eagarlyUpdate) {
+                    // for simple queries like this, we can just merge and return to interactivity prematurely
+                    const subId = Array.isArray(subIds) ? subIds[0] : subIds;
+                    if (subscriptions[subId]) {
+                        // Assign UIDs to the updated object
+                        usedUids = [];
+                        if (!newObject.uid) newObject.uid = uid;
+                        assignUids(newObject, caches.uid_lease, usedUids, {});
+
+                        // Merge updater object with existing one
+                        const newObj = JSON.parse(JSON.stringify(subResults[subId]));
+                        const changeLoc = findUid(newObj, uid);
+                        _.mergeWith(changeLoc, JSON.parse(JSON.stringify(newObject)), uidMerger);
+                        augmentStubs(changeLoc, subResults[subId]);
+                        subResults[subId] = newObj;
+                        setTimeout(() => {
+                            // console.log(newObj);
+                            subscriptions[subId](newObj);
+                        }, 0);
+
+                        // Record state changes
+                        if (subFakeUpdates[subId] === undefined) subFakeUpdates[subId] = [id];
+                        else subFakeUpdates[subId].push(id);
+                    }
+                }
+                sendEvent(connection, 'update_object', { uid, newObject, upsert, pad, id, subIds, origin, usedUids });
             }),
         deleteRelation: (uid, relation) => {
             sendEvent(connection, 'delete_relation', { uid, relation });
