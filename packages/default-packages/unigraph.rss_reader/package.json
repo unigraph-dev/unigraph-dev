@@ -2,35 +2,48 @@
     "displayName": "RSS Reader",
     "version": "0.0.1",
     "description": "An RSS Reader with Unigraph",
+    "name": "unigraph.rss_reader",
     "unigraph": {
-        "package_name": "unigraph.rss_reader",
-        "schemas": [{"id": "rss_feed", "src": "schemas/rss_feed.json"}, 
-            {"id": "rss_item", "src": "schemas/rss_item.json"}],
-        "executables": [{
-            "id": "update-feeds",
-            "env": "routine/js",
-            "src": "executables/updateFeeds.js",
-            "periodic": "*/30 * * * *",
-            "editable": true,
-            "name": "Update feeds every half an hour"
-        }, {
-            "id": "add-feed",
-            "env": "routine/js",
-            "src": "executables/addFeed.js",
-            "editable": true,
-            "name": "Add a feed to RSS feeds list"
-        }, {
-            "id": "import-opml",
-            "env": "routine/js",
-            "src": "executables/importOpml.js",
-            "editable": true,
-            "name": "Import RSS feeds via OPML"
-        }, {
-            "id": "export-opml",
-            "env": "routine/js",
-            "src": "executables/exportOpml.js",
-            "editable": true,
-            "name": "Export RSS feeds to OPML"
-        }]
+        "schemas": [
+            {
+                "id": "rss_feed",
+                "src": "schemas/rss_feed.json"
+            },
+            {
+                "id": "rss_item",
+                "src": "schemas/rss_item.json"
+            }
+        ],
+        "executables": [
+            {
+                "id": "update-feeds",
+                "env": "routine/js",
+                "src": "executables/updateFeeds.js",
+                "periodic": "*/30 * * * *",
+                "editable": true,
+                "name": "Update feeds every half an hour"
+            },
+            {
+                "id": "add-feed",
+                "env": "routine/js",
+                "src": "executables/addFeed.js",
+                "editable": true,
+                "name": "Add a feed to RSS feeds list"
+            },
+            {
+                "id": "import-opml",
+                "env": "routine/js",
+                "src": "executables/importOpml.js",
+                "editable": true,
+                "name": "Import RSS feeds via OPML"
+            },
+            {
+                "id": "export-opml",
+                "env": "routine/js",
+                "src": "executables/exportOpml.js",
+                "editable": true,
+                "name": "Export RSS feeds to OPML"
+            }
+        ]
     }
 }

@@ -2,6 +2,7 @@
     "displayName": "Unigraph Kanban",
     "version": "0.0.1",
     "description": "Kanban component for Unigraph",
+    "name": "unigraph.kanban",
     "unigraph": {
         "executables": [
             {
@@ -11,8 +12,18 @@
                 "editable": true,
                 "name": "Kanban view",
                 "imports": [
-                    {"env": "npm", "package": "@material-ui/core", "import": "Typography", "as": "Typography"},
-                    {"env": "npm", "package": "@material-ui/core", "import": "Card", "as": "Card"}
+                    {
+                        "env": "npm",
+                        "package": "@material-ui/core",
+                        "import": "Typography",
+                        "as": "Typography"
+                    },
+                    {
+                        "env": "npm",
+                        "package": "@material-ui/core",
+                        "import": "Card",
+                        "as": "Card"
+                    }
                 ]
             },
             {
@@ -22,8 +33,18 @@
                 "editable": true,
                 "name": "Kanban list view",
                 "imports": [
-                    {"env": "npm", "package": "@material-ui/core", "import": "TextField", "as": "TextField"},
-                    {"env": "npm", "package": "@material-ui/core", "import": "Button", "as": "Button"}
+                    {
+                        "env": "npm",
+                        "package": "@material-ui/core",
+                        "import": "TextField",
+                        "as": "TextField"
+                    },
+                    {
+                        "env": "npm",
+                        "package": "@material-ui/core",
+                        "import": "Button",
+                        "as": "Button"
+                    }
                 ]
             },
             {
@@ -33,17 +54,50 @@
                 "editable": true,
                 "name": "Kanban view detailed",
                 "imports": [
-                    {"env": "npm", "package": "@material-ui/core", "import": "Typography", "as": "Typography"},
-                    {"env": "npm", "package": "@material-ui/core", "import": "Card", "as": "Card"},
-                    {"env": "npm", "package": "@material-ui/core", "import": "TextField", "as": "TextField"},
-                    {"env": "npm", "package": "@material-ui/core", "import": "Button", "as": "Button"},
-                    {"env": "npm", "package": "@material-ui/core", "import": "MenuItem", "as": "MenuItem"},
-                    {"env": "npm", "package": "@material-ui/icons", "import": "MoreVert", "as": "MoreVert"}
+                    {
+                        "env": "npm",
+                        "package": "@material-ui/core",
+                        "import": "Typography",
+                        "as": "Typography"
+                    },
+                    {
+                        "env": "npm",
+                        "package": "@material-ui/core",
+                        "import": "Card",
+                        "as": "Card"
+                    },
+                    {
+                        "env": "npm",
+                        "package": "@material-ui/core",
+                        "import": "TextField",
+                        "as": "TextField"
+                    },
+                    {
+                        "env": "npm",
+                        "package": "@material-ui/core",
+                        "import": "Button",
+                        "as": "Button"
+                    },
+                    {
+                        "env": "npm",
+                        "package": "@material-ui/core",
+                        "import": "MenuItem",
+                        "as": "MenuItem"
+                    },
+                    {
+                        "env": "npm",
+                        "package": "@material-ui/icons",
+                        "import": "MoreVert",
+                        "as": "MoreVert"
+                    }
                 ]
             }
         ],
         "schemas": [
-            {"id": "kanban", "src": "schemas/kanban.json"}
+            {
+                "id": "kanban",
+                "src": "schemas/kanban.json"
+            }
         ],
         "entities": [
             {
@@ -58,7 +112,6 @@
                 "id": "kanban_view_detailed",
                 "src": "entities/kanban_view_detailed.json"
             }
-        ],
-        "package_name": "unigraph.kanban"
+        ]
     }
 }

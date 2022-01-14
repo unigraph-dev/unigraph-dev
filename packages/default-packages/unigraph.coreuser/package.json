@@ -2,28 +2,60 @@
     "displayName": "Unigraph CoreUser",
     "version": "0.0.1",
     "description": "Provides core utilities for enhancing the user experience.",
+    "name": "unigraph.coreuser",
     "unigraph": {
-        "package_name": "unigraph.coreuser",
         "schemas": [
-            {"id": "notification", "src": "schemas/notification.json"},
-            {"id": "internet_account", "src": "schemas/internet_account.json"}
+            {
+                "id": "notification",
+                "src": "schemas/notification.json"
+            },
+            {
+                "id": "internet_account",
+                "src": "schemas/internet_account.json"
+            }
         ],
-        "executables": [{
-            "name": "Speed reader",
-            "env": "component/react-jsx",
-            "id": "speed-reader",
-            "src": "executables/speed_reader.jsx",
-            "editable": true
-        }],
+        "executables": [
+            {
+                "name": "Speed reader",
+                "env": "component/react-jsx",
+                "id": "speed-reader",
+                "src": "executables/speed_reader.jsx",
+                "editable": true
+            }
+        ],
         "entities": [
-            {"id": "notification_center", "src": "entities/notification_center.json"},
-            {"id": "favorite_bar", "src": "entities/favorite_bar.json"},
-            {"id": "inbox", "src": "entities/inbox.json"},
-            {"id": "domains", "src": "entities/domains.json"},
-            {"id": "focus", "src": "entities/focus.json"},
-            {"id": "read_later", "src": "entities/read_later.json"},
-            {"id": "speed_reader_context_menu", "src": "entities/speed_reader_context_menu.json"},
-            {"id": "dashboard", "src": "entities/dashboard.json"}
+            {
+                "id": "notification_center",
+                "src": "entities/notification_center.json"
+            },
+            {
+                "id": "favorite_bar",
+                "src": "entities/favorite_bar.json"
+            },
+            {
+                "id": "inbox",
+                "src": "entities/inbox.json"
+            },
+            {
+                "id": "domains",
+                "src": "entities/domains.json"
+            },
+            {
+                "id": "focus",
+                "src": "entities/focus.json"
+            },
+            {
+                "id": "read_later",
+                "src": "entities/read_later.json"
+            },
+            {
+                "id": "speed_reader_context_menu",
+                "src": "entities/speed_reader_context_menu.json"
+            },
+            {
+                "id": "dashboard",
+                "src": "entities/dashboard.json"
+            }
         ]
     }
 }

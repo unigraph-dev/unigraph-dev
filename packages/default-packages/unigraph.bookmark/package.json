@@ -2,8 +2,8 @@
     "displayName": "Bookmark",
     "version": "0.0.1",
     "description": "Bookmark manager.",
+    "name": "unigraph.bookmark",
     "unigraph": {
-        "package_name": "unigraph.bookmark",
         "schemas": [
             {
                 "id": "web_bookmark",
@@ -14,25 +14,29 @@
                 "src": "schemas/bookmark_handler.json"
             }
         ],
-        "executables": [{
-            "id": "add-bookmark",
-            "env": "routine/js",
-            "src": "executables/addBookmark.js",
-            "editable": true,
-            "name": "Adds a bookmark to bookmarks list"
-        }, {
-            "id": "fulltextify",
-            "env": "routine/js",
-            "src": "executables/fulltextify.js",
-            "editable": true,
-            "name": "Returns the full text content of a given URL or HTML using Mozilla Readability"
-        }, {
-            "id": "on-bookmark-updated",
-            "env": "routine/js",
-            "src": "executables/onBookmarkUpdated.js",
-            "on_hook": "after_bookmark_updated",
-            "editable": true,
-            "name": "Called when bookmark is updated to process relevant information"
-        }]
+        "executables": [
+            {
+                "id": "add-bookmark",
+                "env": "routine/js",
+                "src": "executables/addBookmark.js",
+                "editable": true,
+                "name": "Adds a bookmark to bookmarks list"
+            },
+            {
+                "id": "fulltextify",
+                "env": "routine/js",
+                "src": "executables/fulltextify.js",
+                "editable": true,
+                "name": "Returns the full text content of a given URL or HTML using Mozilla Readability"
+            },
+            {
+                "id": "on-bookmark-updated",
+                "env": "routine/js",
+                "src": "executables/onBookmarkUpdated.js",
+                "on_hook": "after_bookmark_updated",
+                "editable": true,
+                "name": "Called when bookmark is updated to process relevant information"
+            }
+        ]
     }
 }
