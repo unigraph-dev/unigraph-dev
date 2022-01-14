@@ -55,7 +55,9 @@ window.reloadCommands = () => {
             setClose();
         },
     }));
-
+    //
+    //
+    //
     const adderCommands = Object.entries(
         window.unigraph.getState('registry/quickAdder').value,
     )
