@@ -519,8 +519,7 @@ export default async function startServer(client: DgraphClient) {
                     if (event.usedUids) {
                         serverStates.leasedUids = _.difference(serverStates.leasedUids, event.usedUids)
                         Object.entries(serverStates.clientLeasedUids).forEach(([connId, el]: any[]) => {
-                            serverStates.clientLeasedUids[connId] = _.difference(el, event.usedUids as any[])
-                            console.log(connId, serverStates.clientLeasedUids[connId])
+                            serverStates.clientLeasedUids[connId] = _.difference(el, event.usedUids as any[]);
                         })
                     };
                     callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches, subIds: event.subIds, ofUpdate: event.id})
@@ -639,7 +638,7 @@ export default async function startServer(client: DgraphClient) {
             },
 
             "run_executable": async function (event: EventRunExecutable, ws: IWebsocket) {
-                localApi.runExecutable(event.uid, event.params, {send: (it: string) => {ws.send(it)}})
+                localApi.runExecutable(event.uid, event.params, {send: (it: string) => {ws.send(it)}}, undefined, event.bypassCache)
                     .then((ret: any) => ws.send(makeResponse(event, true, {returns: ret})));
         },
 

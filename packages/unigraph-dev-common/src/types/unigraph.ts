@@ -347,7 +347,7 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param params The parameters defined for that executable.
      * @param fnString Whether to return the executable function as a function or stirng.
      */
-    runExecutable<T>(uid: string, params: T, context?: any, fnString?: boolean): Promise<any>;
+    runExecutable<T>(uid: string, params: T, context?: any, fnString?: boolean, bypassCache?: boolean): Promise<any>;
     /**
      * Adds a notification to the global notification list.
      *

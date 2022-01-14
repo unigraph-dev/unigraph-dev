@@ -601,7 +601,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 const id = getRandomInt();
                 sendEvent(connection, 'import_objects', { objects }, id);
             }),
-        runExecutable: (uid, params?, context?, fnString?) =>
+        runExecutable: (uid, params?, context?, fnString?, bypassCache?) =>
             new Promise((resolve, reject) => {
                 const id = getRandomInt();
                 callbacks[id] = (response: any) => {
@@ -619,7 +619,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                         }
                     } else reject(response);
                 };
-                sendEvent(connection, 'run_executable', { uid, params: params || {} }, id);
+                sendEvent(connection, 'run_executable', { uid, params: params || {}, bypassCache }, id);
             }),
         getNamespaceMapUid: (name) => {
             throw Error('Not implemented');
