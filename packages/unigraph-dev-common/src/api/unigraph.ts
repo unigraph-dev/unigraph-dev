@@ -8,7 +8,7 @@ import { string } from 'yargs';
 import { typeMap } from '../types/consts';
 import { PackageDeclaration } from '../types/packages';
 import { Unigraph, AppState, UnigraphObject as IUnigraphObject } from '../types/unigraph';
-import { assignUids, augmentStubs, base64ToBlob, findUid, isJsonString } from '../utils/utils';
+import { assignUids, augmentStubs, base64ToBlob, findUid, getCircularReplacer, isJsonString } from '../utils/utils';
 
 const RETRY_CONNECTION_INTERVAL = 5000;
 
@@ -474,7 +474,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                         assignUids(newObject, caches.uid_lease, usedUids, {});
 
                         // Merge updater object with existing one
-                        const newObj = JSON.parse(JSON.stringify(subResults[subId]));
+                        const newObj = JSON.parse(JSON.stringify(subResults[subId]), getCircularReplacer());
                         const changeLoc = findUid(newObj, uid);
                         deepMerge(changeLoc, JSON.parse(JSON.stringify(newObject)));
                         augmentStubs(changeLoc, subResults[subId]);
@@ -696,6 +696,11 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 };
                 sendEvent(connection, 'touch', { uids }, id);
             }),
+        leaseUid: () => {
+            const leased = caches.uid_lease.shift();
+            sendEvent(connection, 'lease_uid', { uid: leased });
+            return leased;
+        },
     };
 
     return api;
