@@ -139,14 +139,14 @@ export default async function startServer(client: DgraphClient) {
         Object.entries(connections).forEach(([connId, el]) => {
             if (serverStates.clientLeasedUids[connId].length < 128) {
                 leaseToClient(connId);
-                el.send(
-                    stringify({
-                        type: 'cache_updated',
-                        name: 'uid_lease',
-                        result: serverStates.clientLeasedUids[connId],
-                    }),
-                );
             }
+            el.send(
+                stringify({
+                    type: 'cache_updated',
+                    name: 'uid_lease',
+                    result: serverStates.clientLeasedUids[connId],
+                }),
+            );
         });
     };
 
@@ -520,6 +520,7 @@ export default async function startServer(client: DgraphClient) {
                         serverStates.leasedUids = _.difference(serverStates.leasedUids, event.usedUids)
                         Object.entries(serverStates.clientLeasedUids).forEach(([connId, el]: any[]) => {
                             serverStates.clientLeasedUids[connId] = _.difference(el, event.usedUids as any[])
+                            console.log(connId, serverStates.clientLeasedUids[connId])
                         })
                     };
                     callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches, subIds: event.subIds, ofUpdate: event.id})

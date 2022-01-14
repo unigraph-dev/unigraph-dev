@@ -93,6 +93,9 @@ export const deepMerge = (target: any, source: any) => {
             return src;
         }
 
+        if (typeof src === 'undefined' || src === null) return targ;
+        if (typeof targ === 'undefined' || targ === null) return src;
+
         // Iterate through `source` properties and if an `Object` set property to merge of `target` and `source` properties
         for (const key of Object.keys(src)) {
             if (src[key] instanceof Object) Object.assign(src[key], recurse(targ[key], src[key]));
