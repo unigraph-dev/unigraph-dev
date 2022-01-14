@@ -1,6 +1,6 @@
 {
     "displayName": "Unigraph Core",
-    "version": "0.1.1",
+    "version": "0.0.1",
     "description": "The core package of Unigraph, contains many high level abstractions for development.",
     "name": "unigraph.core",
     "unigraph": {
