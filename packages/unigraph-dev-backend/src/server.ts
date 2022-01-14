@@ -682,6 +682,11 @@ export default async function startServer(client: DgraphClient) {
             const res = await serverStates.localApi.touch(event.uids)
                 .catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
             ws.send(makeResponse(event, true, {result: res}))
+        },
+
+        "lease_uid": function (event: any, ws: IWebsocket, connId) {
+            serverStates.clientLeasedUids[connId] = _.difference(serverStates.clientLeasedUids[connId], [event.uid]);
+            checkLeasedUid();
         }
     };
 
@@ -723,8 +728,9 @@ export default async function startServer(client: DgraphClient) {
             if (msgObject) {
                 // match events
                 if (msgObject.type === "event" && msgObject.event && eventRouter[msgObject.event]) {
-                if (verbose >= 1 && !["run_executable", "get_subscriptions"].includes(msgObject.event)) console.log("Event: " + msgObject.event + ", from: " + clientBrowserId + " | " + connId);
-                    eventRouter[msgObject.event]({...msgObject, connId: connId}, ws);
+                    if (verbose >= 1 && !["run_executable", "get_subscriptions"].includes(msgObject.event)) 
+                        console.log("Event: " + msgObject.event + ", from: " + clientBrowserId + " | " + connId);
+                    eventRouter[msgObject.event]({...msgObject, connId: connId}, ws, connId);
                 }
                 if (verbose >= 6) console.log(msgObject);
             } else {
