@@ -478,3 +478,14 @@ export class Badger {
         this.update();
     }
 }
+
+export function getParents(elem: any) {
+    const parents: any[] = [];
+    if (!elem) return parents;
+    while (elem.parentNode && elem.parentNode.nodeName.toLowerCase() != 'body') {
+        elem = elem.parentNode;
+        if (!elem) return parents;
+        if (elem.id?.startsWith?.('object-view-')) parents.push(elem.id.slice(12));
+    }
+    return parents;
+}
