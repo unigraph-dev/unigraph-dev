@@ -26,7 +26,7 @@ import { SubentityView } from './components/UnigraphCore/SubentityView';
 import { ViewItem } from './components/ObjectView/ViewObjectView';
 import { backlinkQuery } from './components/ObjectView/backlinksUtils';
 import { MiniListView } from './components/UnigraphCore/ListsList';
-import { isMobile } from './utils';
+import { getParents, isMobile } from './utils';
 
 window.reloadCommands = () => {
     const commandsState = window.unigraph.getState('registry/commands');
@@ -153,29 +153,33 @@ export function init(hostname?: string) {
 
 function initSelect() {
     if (!isMobile()) {
-        window.dragselect = new DragSelect({});
+        window.dragselect = new DragSelect({ autoScrollSpeed: 0.0001, draggability: false });
         window.dragselect.subscribe('callback', ({ items, event }: any) => {
             event.stopPropagation();
             event.preventDefault();
-            if (items.length > 1) {
-                const selectedUids = items
-                    .map((el: any) => {
-                        if (el.id?.startsWith?.('object-view-0x')) {
-                            return el.id.slice(12);
-                        }
-                        if (el.id?.startsWith?.('bounding-box-0x')) {
-                            return el.id.slice(13);
-                        }
-                        return undefined;
-                    })
-                    .filter(Boolean);
-                console.log(selectedUids);
+            const distance = window.dragselect.getCursorPositionDifference();
+            const available = items
+                .map((el: any) => {
+                    if (el.id?.startsWith?.('object-view-0x')) {
+                        return el.id.slice(12);
+                    }
+                    if (el.id?.startsWith?.('bounding-box-0x')) {
+                        return el.id.slice(13);
+                    }
+                    return undefined;
+                })
+                .filter(Boolean);
+            const selectedUids = available.filter((el: string) => {
+                const parents = getParents(document.getElementById(`object-view-${el}`));
+                if (_.intersection(parents, available).length > 0) return false;
+                return true;
+            });
+            if (Math.abs(distance.x) > 10 && Math.abs(distance.y) > 10)
                 window.unigraph.getState('global/selected').setValue(selectedUids);
-            }
+            else window.unigraph.getState('global/selected').setValue([]);
             document.body.classList.remove('in-multiselect');
         });
         window.dragselect.subscribe('elementselect', ({ items, item, event }: any) => {
-            console.log(item.id.slice(12));
             if (items.length >= 2) {
                 document.body.classList.add('in-multiselect');
             }

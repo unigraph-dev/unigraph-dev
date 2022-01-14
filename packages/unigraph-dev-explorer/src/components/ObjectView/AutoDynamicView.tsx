@@ -9,7 +9,7 @@ import { buildGraph, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils'
 import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { AutoDynamicViewProps } from '../../types/ObjectView.d';
 import { subscribeToBacklinks } from '../../unigraph-react';
-import { DataContext, isMobile, isMultiSelectKeyPressed, selectUid, TabContext } from '../../utils';
+import { DataContext, getParents, isMobile, isMultiSelectKeyPressed, selectUid, TabContext } from '../../utils';
 import { getParentsAndReferences } from './backlinksUtils';
 import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import { StringObjectViewer } from './BasicObjectViews';
@@ -221,17 +221,6 @@ export function AutoDynamicView({
     });
 
     const contextEntity = typeof callbacks?.context === 'object' ? callbacks.context : null;
-
-    function getParents(elem: any) {
-        const parents: any[] = [];
-        if (!elem) return parents;
-        while (elem.parentNode && elem.parentNode.nodeName.toLowerCase() != 'body') {
-            elem = elem.parentNode;
-            if (!elem) return parents;
-            if (elem.id?.startsWith?.('object-view-')) parents.push(elem.id.slice(12));
-        }
-        return parents;
-    }
 
     const attach = React.useCallback(
         (domElement) => {
