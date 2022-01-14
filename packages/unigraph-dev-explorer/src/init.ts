@@ -3,6 +3,7 @@ import { unigraph } from 'unigraph-dev-common';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { isJsonString, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import _ from 'lodash';
+import DragSelect from 'dragselect';
 import { ViewViewDetailed } from './components/ObjectView/DefaultObjectView';
 import { BasicPersonView, DefaultSkeleton } from './components/ObjectView/BasicObjectViews';
 import { CodeOrComponentView, Executable } from './components/ObjectView/ExecutableView';
@@ -25,6 +26,7 @@ import { SubentityView } from './components/UnigraphCore/SubentityView';
 import { ViewItem } from './components/ObjectView/ViewObjectView';
 import { backlinkQuery } from './components/ObjectView/backlinksUtils';
 import { MiniListView } from './components/UnigraphCore/ListsList';
+import { isMobile } from './utils';
 
 window.reloadCommands = () => {
     const commandsState = window.unigraph.getState('registry/commands');
@@ -132,6 +134,7 @@ export function init(hostname?: string) {
     });
 
     window.unigraph.addState('global/selected', []);
+    window.unigraph.addState('global/selectionStart', false);
     window.unigraph.addState('global/focused', {
         uid: '',
         caret: 0,
@@ -143,8 +146,41 @@ export function init(hostname?: string) {
     initRegistry();
     initBacklinkManager();
     initPackages();
+    initSelect();
 
     if (window.localStorage.getItem('enableAnalytics') === 'true') initAnalyticsIfOptedIn();
+}
+
+function initSelect() {
+    if (!isMobile()) {
+        window.dragselect = new DragSelect({});
+        window.dragselect.subscribe('callback', ({ items, event }: any) => {
+            event.stopPropagation();
+            event.preventDefault();
+            if (items.length > 1) {
+                const selectedUids = items
+                    .map((el: any) => {
+                        if (el.id?.startsWith?.('object-view-0x')) {
+                            return el.id.slice(12);
+                        }
+                        if (el.id?.startsWith?.('bounding-box-0x')) {
+                            return el.id.slice(13);
+                        }
+                        return undefined;
+                    })
+                    .filter(Boolean);
+                console.log(selectedUids);
+                window.unigraph.getState('global/selected').setValue(selectedUids);
+            }
+            document.body.classList.remove('in-multiselect');
+        });
+        window.dragselect.subscribe('elementselect', ({ items, item, event }: any) => {
+            console.log(item.id.slice(12));
+            if (items.length >= 2) {
+                document.body.classList.add('in-multiselect');
+            }
+        });
+    }
 }
 
 function initContextMenu() {

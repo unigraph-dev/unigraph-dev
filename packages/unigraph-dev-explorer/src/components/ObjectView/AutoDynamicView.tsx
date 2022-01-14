@@ -37,6 +37,7 @@ export function AutoDynamicView({
     noClickthrough,
     onClick,
     recursive,
+    customBoundingBox,
     ...props
 }: AutoDynamicViewProps) {
     if (!callbacks) callbacks = {};
@@ -100,6 +101,9 @@ export function AutoDynamicView({
             else setIsFocused(false);
         };
         window.unigraph.getState('global/focused').subscribe(cbfoc);
+
+        if (window.dragselect && !noContextMenu && !customBoundingBox)
+            window.dragselect.addSelectables([viewEl.current]);
 
         return function cleanup() {
             window.unigraph.getState('registry/dynamicView').unsubscribe(cb);
@@ -289,6 +293,14 @@ export function AutoDynamicView({
                     setTitle: tabContext.setTitle,
                     ...(callbacks || {}),
                     ...(noBacklinks ? { BacklinkComponent } : {}),
+                    ...(window.dragselect && !noContextMenu && customBoundingBox
+                        ? {
+                              registerBoundingBox: (el: any) => {
+                                  el.id = `bounding-box-${object?.uid}`;
+                                  window.dragselect.addSelectables([el]);
+                              },
+                          }
+                        : {}),
                     ...(subsId ? { subsId } : {}),
                 },
                 ...(attributes || {}),

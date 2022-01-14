@@ -290,6 +290,12 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
     const [isChildrenCollapsed, setIsChildrenCollapsed] = React.useState<any>({});
 
     React.useEffect(() => {
+        if (callbacks?.registerBoundingBox) {
+            callbacks.registerBoundingBox(editorRef.current);
+        }
+    }, []);
+
+    React.useEffect(() => {
         const newNodes = _.unionBy(
             [
                 {
@@ -776,6 +782,7 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                                 noDrag
                                                 compact
                                                 allowSubentity
+                                                customBoundingBox
                                                 noClickthrough
                                                 noSubentities={el.type?.['unigraph.id'] === '$/schema/note_block'}
                                                 noBacklinks={el.type?.['unigraph.id'] === '$/schema/note_block'}
