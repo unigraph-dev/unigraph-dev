@@ -770,7 +770,7 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                                 });
                                             }}
                                             createBelow={() => {
-                                                addChild(dataref.current, editorContext);
+                                                addChild(dataref.current, editorContext, elindex);
                                             }}
                                         >
                                             <AutoDynamicView
