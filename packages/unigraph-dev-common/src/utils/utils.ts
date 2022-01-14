@@ -98,7 +98,7 @@ export function augmentStubs(objWithStubs: any, origObj: any) {
             } else {
                 if (curr.uid && seen.includes(curr.uid)) return;
                 if (curr.uid) seen = [...seen, curr.uid];
-                if (curr.uid && JSON.stringify(curr, getCircularReplacer()).length >= 100) {
+                if (curr.uid && Object.keys(curr).length >= 2) {
                     uidDict[curr.uid] = curr;
                 }
                 Object.keys(curr).forEach((el) => {
@@ -115,17 +115,17 @@ export function augmentStubs(objWithStubs: any, origObj: any) {
             } else {
                 if (curr.uid && seen.includes(curr.uid)) return;
                 if (curr.uid) seen = [...seen, curr.uid];
+                Object.keys(curr).forEach((el) => {
+                    recurseObj(curr[el], seen);
+                });
                 if (
                     curr.uid &&
                     uidDict[curr.uid] &&
                     Object.keys(curr).length <= 2 &&
-                    JSON.stringify(curr, getCircularReplacer()).length < 50
+                    _.difference(Object.keys(uidDict[curr.uid]), Object.keys(curr)).length > 0
                 ) {
-                    _.merge(curr, uidDict[curr.uid], JSON.parse(JSON.stringify(curr)));
+                    Object.assign(curr, uidDict[curr.uid], JSON.parse(JSON.stringify(curr)));
                 }
-                Object.keys(curr).forEach((el) => {
-                    recurseObj(curr[el], seen);
-                });
             }
         }
     }

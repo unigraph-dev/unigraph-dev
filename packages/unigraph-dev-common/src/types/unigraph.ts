@@ -406,5 +406,11 @@ export interface Unigraph<TT = WebSocket | false> {
      * Gets all subscriptions of Unigraph. Used as a developer tool for debug.
      */
     getSubscriptions?(): any;
+    /**
+     * Changes last edited time of an object/objects.
+     * @param uids uids of objects to change.
+     */
+    touch(uids: string[] | string): any;
+    leaseUid?(): string;
 }
 /** End of unigraph interface */ // Don't remove this line - needed for Monaco to work

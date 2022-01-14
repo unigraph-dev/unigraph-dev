@@ -237,7 +237,7 @@ declare type EventReorderItemInArray = {
     subIds: any[] | any,
 }
 
-declare type EventResponser = (event: any, ws: IWebsocket) => any
+declare type EventResponser = (event: any, ws: IWebsocket, connId?: any) => any
 
 declare type EventProxyFetch = {
     type: "event",
@@ -294,4 +294,11 @@ declare type EventGetSubscriptions = {
     type: "event",
     event: "get_subscriptions",
     id: number,
+}
+
+declare type EventTouch = {
+    type: 'event',
+    event: 'touch',
+    id: number,
+    uids: string[] | string
 }

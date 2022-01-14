@@ -8,7 +8,7 @@ import { string } from 'yargs';
 import { typeMap } from '../types/consts';
 import { PackageDeclaration } from '../types/packages';
 import { Unigraph, AppState, UnigraphObject as IUnigraphObject } from '../types/unigraph';
-import { assignUids, augmentStubs, base64ToBlob, findUid, isJsonString } from '../utils/utils';
+import { assignUids, augmentStubs, base64ToBlob, findUid, getCircularReplacer, isJsonString } from '../utils/utils';
 
 const RETRY_CONNECTION_INTERVAL = 5000;
 
@@ -48,38 +48,61 @@ export const getObjectAs = (object: any, type: 'primitive') => {
     return object;
 };
 
-export const uidMerger = (objValue: any, srcValue: any) => {
-    if (_.isArray(objValue) && !_.isArray(srcValue)) {
-        srcValue = [srcValue];
-    } else if (!_.isArray(objValue) && _.isArray(srcValue)) {
-        objValue = [objValue];
-    }
+/**
+ * Merges a single source object to a target object.
+ *
+ * NOTE: this function mutates the target object.
+ *
+ * @param target
+ * @param source
+ */
+export const deepMerge = (target: any, source: any) => {
+    const recurse = (targ: any, src: any) => {
+        if (_.isArray(targ) && !_.isArray(src)) {
+            src = [src];
+        } else if (!_.isArray(targ) && _.isArray(src)) {
+            targ = [targ];
+        }
 
-    if (_.isArray(objValue) && _.isArray(srcValue)) {
-        const uids: string[] = [];
-        const [[primObj, objObj], [primSrc, objSrc]] = [objValue, srcValue].map((arr) => {
-            const objs: any[] = [];
-            const prims: any[] = [];
-            arr.forEach((el) => {
-                if (typeof el?.uid === 'string') {
-                    objs.push(el);
-                    uids.push(el.uid);
-                } else prims.push(el);
+        if (_.isArray(targ) && _.isArray(src)) {
+            const uids: string[] = [];
+            const [[primObj, objObj], [primSrc, objSrc]] = [targ, src].map((arr) => {
+                const objs: any[] = [];
+                const prims: any[] = [];
+                arr.forEach((el) => {
+                    if (typeof el?.uid === 'string') {
+                        objs.push(el);
+                        uids.push(el.uid);
+                    } else prims.push(el);
+                });
+                return [prims, objs];
             });
-            return [prims, objs];
-        });
-        const finPrims = _.uniq(primObj.concat(primSrc));
-        const finObjs: any[] = [];
-        _.uniq(uids).forEach((uid) => {
-            const obj = objObj.find((el) => el.uid === uid);
-            const src = objSrc.find((el) => el.uid === uid);
-            if (obj && src) finObjs.push(_.mergeWith(obj, src, uidMerger));
-            else if (obj) finObjs.push(obj);
-            else if (src) finObjs.push(src);
-        });
-        return [...finPrims, ...finObjs];
-    }
-    return undefined;
+            const finPrims = _.uniq(primObj.concat(primSrc));
+            const finObjs: any[] = [];
+            _.uniq(uids).forEach((uid) => {
+                const obj = objObj.find((el) => el.uid === uid);
+                const srcc = objSrc.find((el) => el.uid === uid);
+                if (obj && srcc) finObjs.push(recurse(obj, srcc));
+                else if (obj) finObjs.push(obj);
+                else if (srcc) finObjs.push(srcc);
+            });
+            return [...finPrims, ...finObjs];
+        }
+
+        if (targ?.uid && src?.uid && targ.uid !== src.uid) {
+            return src;
+        }
+
+        // Iterate through `source` properties and if an `Object` set property to merge of `target` and `source` properties
+        for (const key of Object.keys(src)) {
+            if (src[key] instanceof Object) Object.assign(src[key], recurse(targ[key], src[key]));
+        }
+
+        // Join `target` and modified `source`
+        return Object.assign(targ || {}, src);
+    };
+
+    return recurse(target, source);
 };
 
 // TODO: Switch to prototype-based, faster helper functions
@@ -451,9 +474,9 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                         assignUids(newObject, caches.uid_lease, usedUids, {});
 
                         // Merge updater object with existing one
-                        const newObj = JSON.parse(JSON.stringify(subResults[subId]));
+                        const newObj = JSON.parse(JSON.stringify(subResults[subId]), getCircularReplacer());
                         const changeLoc = findUid(newObj, uid);
-                        _.mergeWith(changeLoc, JSON.parse(JSON.stringify(newObject)), uidMerger);
+                        deepMerge(changeLoc, JSON.parse(JSON.stringify(newObject)));
                         augmentStubs(changeLoc, subResults[subId]);
                         subResults[subId] = newObj;
                         setTimeout(() => {
@@ -664,6 +687,20 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 };
                 sendEvent(connection, 'get_subscriptions', {}, id);
             }),
+        touch: (uids) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success && response.result) resolve(response.result);
+                    else reject(response);
+                };
+                sendEvent(connection, 'touch', { uids }, id);
+            }),
+        leaseUid: () => {
+            const leased = caches.uid_lease.shift();
+            sendEvent(connection, 'lease_uid', { uid: leased });
+            return leased;
+        },
     };
 
     return api;

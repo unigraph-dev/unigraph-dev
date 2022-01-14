@@ -45,6 +45,7 @@ import {
     EventSubscribeObject,
     EventSubscribeQuery,
     EventSubscribeType,
+    EventTouch,
     EventUnsubscribeById,
     EventUpdateObject,
     EventUpdateSPO,
@@ -122,22 +123,31 @@ export default async function startServer(client: DgraphClient) {
 
     const serverStates: any = {};
 
+    function leaseToClient(connId: any) {
+        const lease = serverStates.leasedUids.splice(0, 128);
+        if (!serverStates.clientLeasedUids[connId]) serverStates.clientLeasedUids[connId] = [];
+        serverStates.clientLeasedUids[connId].push(...lease);
+    }
+
     const checkLeasedUid = async () => {
-        if (serverStates?.leasedUids?.length < 128) {
-            const lease = await dgraphClient.leaseUids();
+        if (serverStates?.leasedUids?.length < 8192) {
+            const lease = await dgraphClient.leaseUids(8192);
             for (let i = parseInt(lease.startId, 10); i < parseInt(lease.endId, 10); i += 1) {
                 serverStates.leasedUids.push(`0x${i.toString(16)}`);
             }
-            Object.values(connections).forEach((el) => {
+        }
+        Object.entries(connections).forEach(([connId, el]) => {
+            if (serverStates.clientLeasedUids[connId].length < 128) {
+                leaseToClient(connId);
                 el.send(
                     stringify({
                         type: 'cache_updated',
                         name: 'uid_lease',
-                        result: serverStates.leasedUids,
+                        result: serverStates.clientLeasedUids[connId],
                     }),
                 );
-            });
-        }
+            }
+        });
     };
 
     const hooks: Hooks = {
@@ -206,6 +216,7 @@ export default async function startServer(client: DgraphClient) {
         localApi: {} as Unigraph,
         lock,
         leasedUids: [],
+        clientLeasedUids: {},
         httpCallbacks: {},
         runningExecutables: [],
         addRunningExecutable: (defn: any) => {
@@ -505,7 +516,12 @@ export default async function startServer(client: DgraphClient) {
                 
                 dgraphClient.createUnigraphUpsert(upsert).then(res => {
                     perfLogAfterDbTransaction();
-                    if (event.usedUids) serverStates.leasedUids = _.difference(serverStates.leasedUids, event.usedUids);
+                    if (event.usedUids) {
+                        serverStates.leasedUids = _.difference(serverStates.leasedUids, event.usedUids)
+                        Object.entries(serverStates.clientLeasedUids).forEach(([connId, el]: any[]) => {
+                            serverStates.clientLeasedUids[connId] = _.difference(el, event.usedUids as any[])
+                        })
+                    };
                     callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches, subIds: event.subIds, ofUpdate: event.id})
                     ws.send(makeResponse(event, true))
                 }).catch(e => ws.send(makeResponse(event, false, {"error": e.toString()})));
@@ -660,6 +676,17 @@ export default async function startServer(client: DgraphClient) {
         "get_subscriptions": async function (event: EventGetSubscriptions, ws: IWebsocket) {
             const res = serverStates.localApi.getSubscriptions();
             ws.send(makeResponse(event, true, {result: res}))
+        },
+
+        "touch": async function (event: EventTouch, ws: IWebsocket) {
+            const res = await serverStates.localApi.touch(event.uids)
+                .catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
+            ws.send(makeResponse(event, true, {result: res}))
+        },
+
+        "lease_uid": function (event: any, ws: IWebsocket, connId) {
+            serverStates.clientLeasedUids[connId] = _.difference(serverStates.clientLeasedUids[connId], [event.uid]);
+            checkLeasedUid();
         }
     };
 
@@ -701,8 +728,9 @@ export default async function startServer(client: DgraphClient) {
             if (msgObject) {
                 // match events
                 if (msgObject.type === "event" && msgObject.event && eventRouter[msgObject.event]) {
-                if (verbose >= 1 && !["run_executable", "get_subscriptions"].includes(msgObject.event)) console.log("Event: " + msgObject.event + ", from: " + clientBrowserId + " | " + connId);
-                    eventRouter[msgObject.event]({...msgObject, connId: connId}, ws);
+                    if (verbose >= 1 && !["run_executable", "get_subscriptions"].includes(msgObject.event)) 
+                        console.log("Event: " + msgObject.event + ", from: " + clientBrowserId + " | " + connId);
+                    eventRouter[msgObject.event]({...msgObject, connId: connId}, ws, connId);
                 }
                 if (verbose >= 6) console.log(msgObject);
             } else {
@@ -713,6 +741,9 @@ export default async function startServer(client: DgraphClient) {
         ws.on('close', () => {
             serverStates.subscriptions = removeOrHibernateSubscriptionsById(serverStates.subscriptions, connId, clientBrowserId);
             delete connections[connId];
+            if (verbose >= 1) console.log("Connection closed: " + connId);
+            serverStates.leasedUids.push(...serverStates.clientLeasedUids[connId]);
+            delete serverStates.clientLeasedUids[connId];
         })
         ws.send(stringify({
             "type": "cache_updated",
@@ -724,10 +755,11 @@ export default async function startServer(client: DgraphClient) {
             "name": "schemaMap",
             result: serverStates.caches['schemas'].data
         }))
+        leaseToClient(connId);
         ws.send(stringify({
             type: 'cache_updated',
             name: 'uid_lease',
-            result: serverStates.leasedUids,
+            result: serverStates.clientLeasedUids[connId],
         }))
         console.log('opened socket connection');
 
