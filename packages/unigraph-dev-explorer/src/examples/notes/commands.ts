@@ -29,6 +29,7 @@ export const addChild = (data: any, context: NoteEditorContext, index?: number) 
     if (typeof index === 'undefined') index = (getSemanticChildren(data)?.['_value[']?.length || 0) - 1;
     const parents = getParents(data);
     if (!data._hide) parents.push({ uid: data.uid });
+    const myUid = (window.unigraph as any).leaseUid();
     window.unigraph.updateObject(
         data._value.uid,
         {
@@ -62,6 +63,7 @@ export const addChild = (data: any, context: NoteEditorContext, index?: number) 
                                     (window.unigraph as any).getSchemaMap(),
                                 ),
                                 _hide: true,
+                                uid: myUid,
                             },
                             _updatedAt: new Date().toISOString(),
                             _createdAt: new Date().toISOString(),
@@ -81,12 +83,7 @@ export const addChild = (data: any, context: NoteEditorContext, index?: number) 
         parents,
         true,
     );
-    context.edited.current = true;
-    context.setCommand(() => {
-        setTimeout(() => {
-            focusNextDFSNode(data, context, 0);
-        }, 250);
-    });
+    focusUid(myUid);
 };
 
 export const splitChild = (data: any, context: NoteEditorContext, index: number, oldtext: string, at: number) => {

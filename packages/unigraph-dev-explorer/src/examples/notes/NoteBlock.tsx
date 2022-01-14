@@ -324,7 +324,6 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
     React.useEffect(() => {
         dataref.current = data;
         const dataText = data.get('text').as('primitive');
-        console.log('UID = ', data.uid, dataText);
         if (dataText && options?.viewId && !callbacks.isEmbed)
             window.layoutModel.doAction(Actions.renameTab(options.viewId, `Note: ${dataText}`));
         if (isEditing && textref.current !== dataText && !edited.current) {
