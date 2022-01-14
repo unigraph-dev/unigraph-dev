@@ -102,7 +102,7 @@ export function AutoDynamicView({
         };
         window.unigraph.getState('global/focused').subscribe(cbfoc);
 
-        if (window.dragselect && !noContextMenu && !customBoundingBox)
+        if (window.dragselect && !noContextMenu && !customBoundingBox && viewEl.current)
             window.dragselect.addSelectables([viewEl.current]);
 
         return function cleanup() {

@@ -27,6 +27,11 @@ export const getSemanticChildren = (data: any) => data?._value?.children;
 
 export const addChild = (data: any, context: NoteEditorContext, index?: number) => {
     if (typeof index === 'undefined') index = (getSemanticChildren(data)?.['_value[']?.length || 0) - 1;
+    return addChildren(data, context, index, ['']);
+};
+
+export const addChildren = (data: any, context: NoteEditorContext, index: number, children: string[]) => {
+    if (typeof index === 'undefined') index = (getSemanticChildren(data)?.['_value[']?.length || 0) - 1;
     const parents = getParents(data);
     if (!data._hide) parents.push({ uid: data.uid });
     const myUid = (window.unigraph as any).leaseUid();
@@ -41,29 +46,31 @@ export const addChild = (data: any, context: NoteEditorContext, index?: number) 
                             uid: el._index?.uid,
                             '_value.#i':
                                 el._index['_value.#i'] > (index as number)
-                                    ? el._index['_value.#i'] + 1
+                                    ? el._index['_value.#i'] + children.length
                                     : el._index['_value.#i'],
                         },
                     })),
-                    {
+                    ...children.map((el: string, i: number) => ({
                         _value: {
                             type: {
                                 'unigraph.id': '$/schema/subentity',
                             },
                             'dgraph.type': 'Entity',
                             _value: {
-                                ...buildUnigraphEntity(
+                                ...(buildUnigraphEntity as any)(
                                     {
                                         text: {
                                             type: { 'unigraph.id': '$/schema/markdown' },
-                                            _value: '',
+                                            _value: el,
                                         },
                                     },
                                     '$/schema/note_block',
                                     (window.unigraph as any).getSchemaMap(),
+                                    undefined,
+                                    { globalStates: { nextUid: 100000 * i } },
                                 ),
                                 _hide: true,
-                                uid: myUid,
+                                uid: i === children.length - 1 ? myUid : undefined,
                             },
                             _updatedAt: new Date().toISOString(),
                             _createdAt: new Date().toISOString(),
@@ -71,9 +78,9 @@ export const addChild = (data: any, context: NoteEditorContext, index?: number) 
                             'unigraph.indexes': {},
                         },
                         _index: {
-                            '_value.#i': index + 1,
+                            '_value.#i': index + i + 1,
                         },
-                    },
+                    })),
                 ],
             },
         },

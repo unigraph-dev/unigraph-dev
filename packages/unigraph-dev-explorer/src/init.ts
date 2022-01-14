@@ -170,7 +170,9 @@ function initSelect() {
                 })
                 .filter(Boolean);
             const selectedUids = available.filter((el: string) => {
-                const parents = getParents(document.getElementById(`object-view-${el}`));
+                const elm = document.getElementById(`object-view-${el}`);
+                if (!elm) return false;
+                const parents = getParents(elm);
                 if (_.intersection(parents, available).length > 0) return false;
                 return true;
             });

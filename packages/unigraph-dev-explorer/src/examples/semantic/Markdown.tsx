@@ -4,9 +4,17 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkBreaks from 'remark-breaks';
-import remarkWikilink from './wikilink';
-import { DynamicViewRenderer } from '../../global.d';
 import 'katex/dist/katex.min.css';
+import TurndownService from 'turndown';
+import { DynamicViewRenderer } from '../../global.d';
+import remarkWikilink from './wikilink';
+
+export function htmlToMarkdown(html: string) {
+    const turndown = new (TurndownService as any)({
+        preformattedCode: true,
+    });
+    return turndown.turndown(html);
+}
 
 const compFactory = (name: string, { node, inline, className, children, ...props }: any) =>
     // eslint-disable-next-line react/no-children-prop
@@ -40,7 +48,7 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                 <ReactMarkdown
                     // eslint-disable-next-line react/no-children-prop
                     children={data['_value.%'] || (isHeading ? '_no title_' : '|')}
-                    remarkPlugins={[remarkMath, remarkWikilink, remarkBreaks]}
+                    remarkPlugins={[remarkMath as any, remarkWikilink, remarkBreaks as any]}
                     rehypePlugins={[rehypeKatex]}
                     components={{
                         p: compFactory.bind(this, 'p'),
