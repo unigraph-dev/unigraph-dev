@@ -260,6 +260,7 @@ declare type EventRunExecutable = {
     id: number,
     "uid": string,
     params: any,
+    bypassCache?: boolean,
 }
 
 declare type EventAddNotification = {

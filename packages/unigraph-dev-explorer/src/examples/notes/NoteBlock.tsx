@@ -802,7 +802,7 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                                         ]),
                                                     ),
                                                     'unindent-child-in-parent': () => {
-                                                        callbacks['unindent-child'](elindex);
+                                                        callbacks['unindent-child']?.(elindex);
                                                     },
                                                     'focus-last-dfs-node': focusLastDFSNode,
                                                     'focus-next-dfs-node': focusNextDFSNode,

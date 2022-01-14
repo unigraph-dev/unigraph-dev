@@ -305,7 +305,6 @@ export const indentChild = (data: any, context: NoteEditorContext, index: number
         };
     }
     const finalChildren = newChildren.filter((el: any) => el !== undefined);
-    console.log(finalChildren);
     window.unigraph.updateObject(
         data?._value?.uid,
         { children: { '_value[': finalChildren } },
@@ -328,12 +327,13 @@ export const unindentChild = async (data: any, context: NoteEditorContext, paren
     removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     // console.log(parent, index)
     let currSubentity = -1;
-    const isCompleted = false;
+    let isCompleted = false;
     const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
     let delUidPar = '';
     let delUidChild = '';
     const newChildren = children.reduce((prev: any[], curr: any) => {
         if (curr?._value?.type?.['unigraph.id'] === '$/schema/subentity' && ++currSubentity === parent) {
+            isCompleted = true;
             let currChildSubentity = -1;
             const childIsCompleted = false;
             let targetChild: any = null;
@@ -385,7 +385,6 @@ export const unindentChild = async (data: any, context: NoteEditorContext, paren
             ];
         return [...prev, { uid: curr.uid }];
     }, []);
-    // console.log(newChildren, newChildren[parent+1]['_value']['_value'].uid);
     await window.unigraph.updateObject(
         data?._value?.uid,
         { ...data._value, children: { '_value[': newChildren } },
