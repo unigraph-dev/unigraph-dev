@@ -411,5 +411,6 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param uids uids of objects to change.
      */
     touch(uids: string[] | string): any;
+    leaseUid?(): string;
 }
 /** End of unigraph interface */ // Don't remove this line - needed for Monaco to work

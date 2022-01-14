@@ -324,7 +324,6 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
     React.useEffect(() => {
         dataref.current = data;
         const dataText = data.get('text').as('primitive');
-        console.log('UID = ', data.uid, dataText);
         if (dataText && options?.viewId && !callbacks.isEmbed)
             window.layoutModel.doAction(Actions.renameTab(options.viewId, `Note: ${dataText}`));
         if (isEditing && textref.current !== dataText && !edited.current) {
@@ -630,6 +629,22 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                             }
                                             break;
 
+                                        case 37: // left arrow
+                                            if (caret === 0) {
+                                                ev.preventDefault();
+                                                inputDebounced.current.flush();
+                                                callbacks['focus-last-dfs-node'](data, editorContext, 0, true);
+                                            }
+                                            break;
+
+                                        case 39: // right arrow
+                                            if (caret === textref.current.length) {
+                                                ev.preventDefault();
+                                                inputDebounced.current.flush();
+                                                callbacks['focus-next-dfs-node'](data, editorContext, 0);
+                                            }
+                                            break;
+
                                         case 38: // up arrow
                                             ev.preventDefault();
                                             inputDebounced.current.flush();
@@ -754,7 +769,7 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                                 });
                                             }}
                                             createBelow={() => {
-                                                addChild(dataref.current, editorContext);
+                                                addChild(dataref.current, editorContext, elindex);
                                             }}
                                         >
                                             <AutoDynamicView
