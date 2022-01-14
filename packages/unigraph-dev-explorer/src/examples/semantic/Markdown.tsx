@@ -10,6 +10,7 @@ import { DynamicViewRenderer } from '../../global.d';
 import remarkWikilink from './wikilink';
 
 export function htmlToMarkdown(html: string) {
+    TurndownService.prototype.escape = (input: string) => input;
     const turndown = new (TurndownService as any)({
         preformattedCode: true,
     });
@@ -33,7 +34,7 @@ const compFactory = (name: string, { node, inline, className, children, ...props
             }
         },
         ...props,
-        style: { ...props.style, display: 'contents' },
+        style: { display: 'contents', ...props.style },
     });
 
 export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) => {
@@ -55,6 +56,20 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                         strong: compFactory.bind(this, 'strong'),
                         em: compFactory.bind(this, 'em'),
                         code: compFactory.bind(this, 'code'),
+                        img: ({ node, inline, className, children, ...props }: any) => {
+                            console.log(node);
+                            return compFactory('img', {
+                                ...props,
+                                node,
+                                inline,
+                                className,
+                                children,
+                                style: {
+                                    display: '',
+                                    height: node?.properties?.alt?.startsWith?.('inline:') ? '1.5em' : '',
+                                },
+                            });
+                        },
                         ol: (props) =>
                             compFactory('ol', {
                                 ...props,

@@ -462,7 +462,7 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                         : (event) => onUnigraphContextMenu(event, data, undefined, callbacks)
                                 }
                                 contentEditable
-                                style={{ outline: '0px solid transparent', minWidth: '16px' }}
+                                style={{ outline: '0px solid transparent', minWidth: '16px', wordBreak: 'break-all' }}
                                 suppressContentEditableWarning
                                 ref={textInput}
                                 onPaste={(event) => {
@@ -480,7 +480,18 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                         const mdresult = htmlToMarkdown(paste);
                                         const lines = mdresult.split('\n\n');
 
-                                        textInput.current.textContent += lines[0];
+                                        if (selection.getRangeAt(0).startContainer.nodeName === 'BR') {
+                                            textInput.current.textContent += lines[0];
+                                            setCaret(
+                                                document,
+                                                textInput.current.firstChild,
+                                                textInput.current.textContent.length,
+                                            );
+                                        } else {
+                                            selection.getRangeAt(0).insertNode(document.createTextNode(lines[0]));
+                                            selection.collapseToEnd();
+                                        }
+
                                         edited.current = true;
                                         inputDebounced.current(textInput.current.textContent);
                                         textref.current = textInput.current.textContent;
@@ -503,7 +514,18 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
 
                                                 const res = `![${blob.name || 'image'}](${base64})`;
 
-                                                textInput.current.textContent += res;
+                                                if (selection.getRangeAt(0).startContainer.nodeName === 'BR') {
+                                                    textInput.current.textContent += res;
+                                                    setCaret(
+                                                        document,
+                                                        textInput.current.firstChild,
+                                                        textInput.current.textContent.length,
+                                                    );
+                                                } else {
+                                                    selection.getRangeAt(0).insertNode(document.createTextNode(res));
+                                                    selection.collapseToEnd();
+                                                }
+
                                                 edited.current = true;
                                                 inputDebounced.current(textInput.current.textContent);
                                                 textref.current = textInput.current.textContent;
