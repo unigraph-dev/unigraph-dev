@@ -8,6 +8,7 @@ import 'katex/dist/katex.min.css';
 import TurndownService from 'turndown';
 import { DynamicViewRenderer } from '../../global.d';
 import remarkWikilink from './wikilink';
+import { openUrl } from '../../utils';
 
 export function htmlToMarkdown(html: string) {
     TurndownService.prototype.escape = (input: string) => input;
@@ -80,9 +81,9 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                             compFactory('a', {
                                 ...props,
                                 onPointerUp: (ev: any) => {
-                                    console.log(ev);
                                     ev.preventDefault();
                                     ev.stopPropagation();
+                                    openUrl((props?.node as any)?.properties?.href);
                                 },
                                 target: '_blank',
                                 style: { cursor: 'pointer' },

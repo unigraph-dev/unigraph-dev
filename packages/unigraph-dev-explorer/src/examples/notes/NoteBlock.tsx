@@ -814,8 +814,8 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                 {!isChildren && !callbacks.isEmbed ? (
                     <div style={{ marginTop: '4px', marginBottom: '12px', display: 'flex', color: 'gray' }}>
                         <Icon path={mdiClockOutline} size={0.8} style={{ marginRight: '4px' }} />
-                        {`${new Date(data._updatedAt).toLocaleString()} (${Sugar.Date.relative(
-                            new Date(data._updatedAt),
+                        {`${new Date(data._updatedAt || 0).toLocaleString()} (${Sugar.Date.relative(
+                            new Date(data._updatedAt || 0),
                         )})`}
                     </div>
                 ) : (
