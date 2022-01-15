@@ -19,10 +19,7 @@ const List = React.useMemo(() => {
                     <b>{column._value.name['_value.%']}</b>
                 </Typography>
                 <DynamicObjectListView
-                    items={
-                        (listValue?.['_value['] || []).sort(byElementIndex) ||
-                        []
-                    }
+                    items={(listValue?.['_value['] || []).sort(byElementIndex) || []}
                     context={column}
                     listUid={listValue?.uid}
                     callbacks={{ ...callbacks }}
@@ -44,8 +41,7 @@ const List = React.useMemo(() => {
                     onClick={() => {
                         unigraph.getState('global/omnibarSummoner').setValue({
                             show: true,
-                            tooltip:
-                                'Press Enter to add current item to current Kanban column',
+                            tooltip: 'Press Enter to add current item to current Kanban column',
                             callback: (uid) => {
                                 unigraph.runExecutable(
                                     '$/executable/add-item-to-list',
@@ -54,6 +50,9 @@ const List = React.useMemo(() => {
                                         item: uid,
                                         subIds: [callbacks?.subsId],
                                     },
+                                    undefined,
+                                    undefined,
+                                    true,
                                 );
                             },
                             defaultValue: '+',
@@ -74,9 +73,7 @@ const SetBgim = React.useMemo(() => {
 
         return (
             <div style={{ paddingTop: '2px', paddingBottom: '2px' }}>
-                <Typography style={{ color: 'grey' }}>
-                    Set new background image
-                </Typography>
+                <Typography style={{ color: 'grey' }}>Set new background image</Typography>
                 <TextField
                     value={bgimText}
                     onChange={(e) => {
@@ -86,12 +83,7 @@ const SetBgim = React.useMemo(() => {
                 <Button
                     onClick={() => {
                         handleClose();
-                        unigraph.updateObject(
-                            data.uid,
-                            { _backgroundImage: bgimText },
-                            false,
-                            false,
-                        );
+                        unigraph.updateObject(data.uid, { _backgroundImage: bgimText }, false, false);
                     }}
                 >
                     Set
@@ -154,29 +146,19 @@ return (
         }}
     >
         <div style={{ display: 'flex' }}>
-            <Typography
-                variant="h5"
-                gutterBottom
-                style={{ marginTop: '8px', width: '100%' }}
-            >
+            <Typography variant="h5" gutterBottom style={{ marginTop: '8px', width: '100%' }}>
                 {data.get('title').as('primitive')}
             </Typography>
             <MoreVert
                 onClick={(event) =>
-                    onUnigraphContextMenu(
-                        event,
-                        data,
-                        undefined,
-                        callbacks,
-                        (uid, object, handleClose, callbacks) => {
-                            return (
-                                <div>
-                                    <SetBgim handleClose={handleClose} />
-                                    <AddBoard handleClose={handleClose} />
-                                </div>
-                            );
-                        },
-                    )
+                    onUnigraphContextMenu(event, data, undefined, callbacks, (uid, object, handleClose, callbacks) => {
+                        return (
+                            <div>
+                                <SetBgim handleClose={handleClose} />
+                                <AddBoard handleClose={handleClose} />
+                            </div>
+                        );
+                    })
                 }
                 style={{ marginLeft: '8px' }}
             />
@@ -185,10 +167,7 @@ return (
             {data
                 .get('children')
                 ['_value['].sort(byElementIndex)
-                .filter(
-                    (el) =>
-                        el?._value?.type?.['unigraph.id'] === '$/schema/list',
-                )
+                .filter((el) => el?._value?.type?.['unigraph.id'] === '$/schema/list')
                 .map((el) => (
                     <List column={el._value} />
                 ))}

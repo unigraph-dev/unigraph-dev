@@ -425,25 +425,32 @@ export function getLocalUnigraphAPI(
         proxyFetch: async (url, options?) => new Blob([]),
         // latertodo
         importObjects: async (objects) => Error('Not implemented'),
-        runExecutable: async (uid: string, params: any, context?: ExecContext) => {
+        runExecutable: async (
+            uid: string,
+            params: any,
+            context?: ExecContext,
+            fnString?: any,
+            bypassCache?: boolean,
+        ) => {
             let ret;
-            await states.lock.acquire('caches/exec', async (done: any) => {
-                const exec = uid.startsWith('0x')
-                    ? unpad((await client.queryUID(uid))[0])
-                    : states.caches.executables.data[uid];
-                const execFn = await buildExecutable(
-                    exec,
-                    { params, definition: exec, ...context },
-                    states.localApi,
-                    states,
-                );
-                if (typeof execFn === 'function') {
-                    ret = execFn();
-                } else if (typeof execFn === 'string') {
-                    ret = { return_function_component: execFn };
-                } else ret = {};
-                done(false, null);
-            });
+            if (!bypassCache)
+                await states.lock.acquire('caches/exec', async (done: any) => {
+                    done(false, null);
+                });
+            const exec = uid.startsWith('0x')
+                ? unpad((await client.queryUID(uid))[0])
+                : states.caches.executables.data[uid];
+            const execFn = await buildExecutable(
+                exec,
+                { params, definition: exec, ...context },
+                states.localApi,
+                states,
+            );
+            if (typeof execFn === 'function') {
+                ret = execFn();
+            } else if (typeof execFn === 'string') {
+                ret = { return_function_component: execFn };
+            } else ret = {};
             return ret;
         },
         addNotification: async (notification) => {

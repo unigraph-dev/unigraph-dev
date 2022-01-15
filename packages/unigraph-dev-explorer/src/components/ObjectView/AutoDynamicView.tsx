@@ -9,7 +9,7 @@ import { buildGraph, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils'
 import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { AutoDynamicViewProps } from '../../types/ObjectView.d';
 import { subscribeToBacklinks } from '../../unigraph-react';
-import { DataContext, isMobile, isMultiSelectKeyPressed, selectUid, TabContext } from '../../utils';
+import { DataContext, getParents, isMobile, isMultiSelectKeyPressed, selectUid, TabContext } from '../../utils';
 import { getParentsAndReferences } from './backlinksUtils';
 import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import { StringObjectViewer } from './BasicObjectViews';
@@ -37,6 +37,7 @@ export function AutoDynamicView({
     noClickthrough,
     onClick,
     recursive,
+    customBoundingBox,
     ...props
 }: AutoDynamicViewProps) {
     if (!callbacks) callbacks = {};
@@ -100,6 +101,9 @@ export function AutoDynamicView({
             else setIsFocused(false);
         };
         window.unigraph.getState('global/focused').subscribe(cbfoc);
+
+        if (window.dragselect && !noContextMenu && !customBoundingBox && viewEl.current)
+            window.dragselect.addSelectables([viewEl.current]);
 
         return function cleanup() {
             window.unigraph.getState('registry/dynamicView').unsubscribe(cb);
@@ -218,17 +222,6 @@ export function AutoDynamicView({
 
     const contextEntity = typeof callbacks?.context === 'object' ? callbacks.context : null;
 
-    function getParents(elem: any) {
-        const parents: any[] = [];
-        if (!elem) return parents;
-        while (elem.parentNode && elem.parentNode.nodeName.toLowerCase() != 'body') {
-            elem = elem.parentNode;
-            if (!elem) return parents;
-            if (elem.id?.startsWith?.('object-view-')) parents.push(elem.id.slice(12));
-        }
-        return parents;
-    }
-
     const attach = React.useCallback(
         (domElement) => {
             if (domElement && object.uid && recursive) {
@@ -289,6 +282,14 @@ export function AutoDynamicView({
                     setTitle: tabContext.setTitle,
                     ...(callbacks || {}),
                     ...(noBacklinks ? { BacklinkComponent } : {}),
+                    ...(window.dragselect && !noContextMenu && customBoundingBox
+                        ? {
+                              registerBoundingBox: (el: any) => {
+                                  el.id = `bounding-box-${object?.uid}`;
+                                  window.dragselect.addSelectables([el]);
+                              },
+                          }
+                        : {}),
                     ...(subsId ? { subsId } : {}),
                 },
                 ...(attributes || {}),

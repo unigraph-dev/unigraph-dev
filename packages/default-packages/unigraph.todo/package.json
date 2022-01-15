@@ -2,16 +2,28 @@
     "displayName": "Todo",
     "version": "0.0.1",
     "description": "Todo lists and task management.",
+    "name": "unigraph.todo",
     "unigraph": {
-        "package_name": "unigraph.todo",
-        "schemas": [{"id": "todo", "src": "schemas/todo.json"}],
-        "entities": [{"id": "add_follow_up_context_menu", "src": "entities/add_follow_up_context_menu.json"}],
-        "executables": [{
-            "id": "add-follow-up-todo",
-            "env": "routine/js",
-            "src": "executables/addFollowUpContextMenu.js",
-            "editable": true,
-            "name": "Add an item as follow-up todo task"
-        }]
+        "schemas": [
+            {
+                "id": "todo",
+                "src": "schemas/todo.json"
+            }
+        ],
+        "entities": [
+            {
+                "id": "add_follow_up_context_menu",
+                "src": "entities/add_follow_up_context_menu.json"
+            }
+        ],
+        "executables": [
+            {
+                "id": "add-follow-up-todo",
+                "env": "routine/js",
+                "src": "executables/addFollowUpContextMenu.js",
+                "editable": true,
+                "name": "Add an item as follow-up todo task"
+            }
+        ]
     }
 }

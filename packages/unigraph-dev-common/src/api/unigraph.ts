@@ -93,6 +93,9 @@ export const deepMerge = (target: any, source: any) => {
             return src;
         }
 
+        if (typeof src === 'undefined' || src === null) return targ;
+        if (typeof targ === 'undefined' || targ === null) return src;
+
         // Iterate through `source` properties and if an `Object` set property to merge of `target` and `source` properties
         for (const key of Object.keys(src)) {
             if (src[key] instanceof Object) Object.assign(src[key], recurse(targ[key], src[key]));
@@ -474,7 +477,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                         assignUids(newObject, caches.uid_lease, usedUids, {});
 
                         // Merge updater object with existing one
-                        const newObj = JSON.parse(JSON.stringify(subResults[subId]), getCircularReplacer());
+                        const newObj = JSON.parse(JSON.stringify(subResults[subId], getCircularReplacer()));
                         const changeLoc = findUid(newObj, uid);
                         deepMerge(changeLoc, JSON.parse(JSON.stringify(newObject)));
                         augmentStubs(changeLoc, subResults[subId]);
@@ -598,7 +601,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 const id = getRandomInt();
                 sendEvent(connection, 'import_objects', { objects }, id);
             }),
-        runExecutable: (uid, params?, context?, fnString?) =>
+        runExecutable: (uid, params?, context?, fnString?, bypassCache?) =>
             new Promise((resolve, reject) => {
                 const id = getRandomInt();
                 callbacks[id] = (response: any) => {
@@ -616,7 +619,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                         }
                     } else reject(response);
                 };
-                sendEvent(connection, 'run_executable', { uid, params: params || {} }, id);
+                sendEvent(connection, 'run_executable', { uid, params: params || {}, bypassCache }, id);
             }),
         getNamespaceMapUid: (name) => {
             throw Error('Not implemented');

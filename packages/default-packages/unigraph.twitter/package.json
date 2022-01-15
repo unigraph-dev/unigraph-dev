@@ -2,27 +2,38 @@
     "displayName": "Twitter subscriptions",
     "version": "0.0.1",
     "description": "Subscribe to your Twitter updates.",
+    "name": "unigraph.twitter",
     "unigraph": {
-        "package_name": "unigraph.twitter",
         "schemas": [
-            {"id": "tweet", "src": "schemas/tweet.json"},
-            {"id": "twitter_user", "src": "schemas/twitter_user.json"},
-            {"id": "twitter_list", "src": "schemas/twitter_list.json"}
+            {
+                "id": "tweet",
+                "src": "schemas/tweet.json"
+            },
+            {
+                "id": "twitter_user",
+                "src": "schemas/twitter_user.json"
+            },
+            {
+                "id": "twitter_list",
+                "src": "schemas/twitter_list.json"
+            }
         ],
         "executables": [
-            { 
+            {
                 "id": "add-twitter-account",
                 "env": "routine/js",
                 "src": "executables/addTwitterAccount.js",
                 "editable": true,
                 "name": "Adds a twitter account"
-            },{ 
+            },
+            {
                 "id": "get-twitter-lists",
                 "env": "routine/js",
                 "src": "executables/getTwitterLists.js",
                 "editable": true,
                 "name": "Gets all lists in your account"
-            },{
+            },
+            {
                 "id": "update-twitter-subscriptions",
                 "env": "routine/js",
                 "src": "executables/updateTwitterSubscriptions.js",
@@ -30,13 +41,15 @@
                 "editable": true,
                 "name": "Update twitter subscriptions every minute",
                 "concurrency": 1
-            },{ 
+            },
+            {
                 "id": "fetch-tweets-of-list",
                 "env": "routine/js",
                 "src": "executables/fetchTweetsOfList.js",
                 "editable": true,
                 "name": "Fetch all new tweets of a list, given access token and list ID"
-            },{ 
+            },
+            {
                 "id": "add-tweet-from-url",
                 "env": "routine/js",
                 "src": "executables/addTweetFromUrl.js",
@@ -44,9 +57,11 @@
                 "name": "Adds a new tweet from a URL"
             }
         ],
-        "entities": [{
-            "id": "add_tweet_handler",
-            "src": "entities/add_tweet_handler.json"
-        }]
+        "entities": [
+            {
+                "id": "add_tweet_handler",
+                "src": "entities/add_tweet_handler.json"
+            }
+        ]
     }
 }

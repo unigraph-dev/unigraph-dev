@@ -1,0 +1,14 @@
+{
+    "packages": [
+        "packages/*",
+        "packages/default-packages/*"
+    ],
+    "npmClient": "yarn",
+    "useWorkspaces": true,
+    "version": "0.0.1",
+    "command": {
+        "version": {
+            "allowBranch": "main"
+        }
+    }
+}

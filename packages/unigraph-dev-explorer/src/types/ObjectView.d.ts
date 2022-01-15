@@ -28,6 +28,7 @@ export type AutoDynamicViewProps = {
     noClickthrough?: boolean;
     onClick?: any;
     recursive?: boolean;
+    customBoundingBox?: boolean;
 };
 
 export type ContextMenuGenerator = (

@@ -3,7 +3,7 @@ import { setRef, Typography } from '@material-ui/core';
 import React, { FormEvent } from 'react';
 import { byElementIndex, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import _ from 'lodash';
-import { buildGraph, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import { blobToBase64, buildGraph, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { Actions } from 'flexlayout-react';
 import { FiberManualRecord, MoreVert } from '@material-ui/icons';
 import stringify from 'json-stable-stringify';
@@ -24,6 +24,7 @@ import {
     unindentChild,
     unsplitChild,
     replaceChildWithUid,
+    addChildren,
 } from './commands';
 import { onUnigraphContextMenu } from '../../components/ObjectView/DefaultObjectContextMenu';
 import { noteQuery } from './noteQuery';
@@ -32,6 +33,7 @@ import { DynamicObjectListView } from '../../components/ObjectView/DynamicObject
 import { setCaret, TabContext } from '../../utils';
 import { DragandDrop } from '../../components/ObjectView/DragandDrop';
 import { inlineObjectSearch, inlineTextSearch } from '../../components/UnigraphCore/InlineSearchPopup';
+import { htmlToMarkdown } from '../semantic/Markdown';
 
 export const getSubentities = (data: any) => {
     let subentities: any;
@@ -65,7 +67,7 @@ export function NoteBlock({ data }: any) {
             <div style={{ flexGrow: 1 }}>
                 <Typography variant="body1">
                     <AutoDynamicView
-                        object={data.get('text')._value._value}
+                        object={data.get('text')?._value._value}
                         noDrag
                         noDrop
                         inline
@@ -97,6 +99,7 @@ const onNoteInput = (inputDebounced: any, event: FormEvent<HTMLSpanElement>) => 
 
 const noteBlockCommands = {
     'add-child': addChild,
+    'add-children': addChildren,
     'set-focus': setFocus,
     'unsplit-child': unsplitChild,
     'split-child': splitChild,
@@ -290,6 +293,12 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
     const [isChildrenCollapsed, setIsChildrenCollapsed] = React.useState<any>({});
 
     React.useEffect(() => {
+        if (callbacks?.registerBoundingBox) {
+            callbacks.registerBoundingBox(editorRef.current);
+        }
+    }, []);
+
+    React.useEffect(() => {
         const newNodes = _.unionBy(
             [
                 {
@@ -453,9 +462,81 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                         : (event) => onUnigraphContextMenu(event, data, undefined, callbacks)
                                 }
                                 contentEditable
-                                style={{ outline: '0px solid transparent', minWidth: '16px' }}
+                                style={{ outline: '0px solid transparent', minWidth: '16px', wordBreak: 'break-all' }}
                                 suppressContentEditableWarning
                                 ref={textInput}
+                                onPaste={(event) => {
+                                    const paste = (event.clipboardData || (window as any).clipboardData).getData(
+                                        'text/html',
+                                    );
+
+                                    const img = event.clipboardData.items[0];
+
+                                    if (paste.length > 0) {
+                                        const selection = window.getSelection();
+                                        if (!selection?.rangeCount) return false;
+                                        selection?.deleteFromDocument();
+
+                                        const mdresult = htmlToMarkdown(paste);
+                                        const lines = mdresult.split('\n\n');
+
+                                        if (selection.getRangeAt(0).startContainer.nodeName === 'BR') {
+                                            textInput.current.textContent += lines[0];
+                                            setCaret(
+                                                document,
+                                                textInput.current.firstChild,
+                                                textInput.current.textContent.length,
+                                            );
+                                        } else {
+                                            selection.getRangeAt(0).insertNode(document.createTextNode(lines[0]));
+                                            selection.collapseToEnd();
+                                        }
+
+                                        edited.current = true;
+                                        inputDebounced.current(textInput.current.textContent);
+                                        textref.current = textInput.current.textContent;
+                                        inputDebounced.current.flush();
+
+                                        if (lines.length > 1) {
+                                            const newLines = lines.slice(1);
+                                            callbacks['add-children'](newLines);
+                                        }
+                                        event.preventDefault();
+                                    } else if (img.type.indexOf('image') === 0) {
+                                        const blob = img.getAsFile();
+                                        if (blob) {
+                                            event.preventDefault();
+
+                                            blobToBase64(blob).then((base64: string) => {
+                                                const selection = window.getSelection();
+                                                if (!selection?.rangeCount) return false;
+                                                selection?.deleteFromDocument();
+
+                                                const res = `![${blob.name || 'image'}](${base64})`;
+
+                                                if (selection.getRangeAt(0).startContainer.nodeName === 'BR') {
+                                                    textInput.current.textContent += res;
+                                                    setCaret(
+                                                        document,
+                                                        textInput.current.firstChild,
+                                                        textInput.current.textContent.length,
+                                                    );
+                                                } else {
+                                                    selection.getRangeAt(0).insertNode(document.createTextNode(res));
+                                                    selection.collapseToEnd();
+                                                }
+
+                                                edited.current = true;
+                                                inputDebounced.current(textInput.current.textContent);
+                                                textref.current = textInput.current.textContent;
+                                                inputDebounced.current.flush();
+                                                return false;
+                                            });
+                                        }
+                                    }
+
+                                    return event;
+                                }}
                                 onInput={(ev) => {
                                     if (
                                         ev.currentTarget.textContent !== data.get('text').as('primitive') &&
@@ -715,7 +796,7 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                             </Typography>
                         ) : (
                             <AutoDynamicView
-                                object={data.get('text')._value._value}
+                                object={data.get('text')?._value?._value}
                                 attributes={{
                                     isHeading: !(isChildren || callbacks.isEmbed),
                                 }}
@@ -776,6 +857,7 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                                 noDrag
                                                 compact
                                                 allowSubentity
+                                                customBoundingBox
                                                 noClickthrough
                                                 noSubentities={el.type?.['unigraph.id'] === '$/schema/note_block'}
                                                 noBacklinks={el.type?.['unigraph.id'] === '$/schema/note_block'}
@@ -802,7 +884,7 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                                         ]),
                                                     ),
                                                     'unindent-child-in-parent': () => {
-                                                        callbacks['unindent-child'](elindex);
+                                                        callbacks['unindent-child']?.(elindex);
                                                     },
                                                     'focus-last-dfs-node': focusLastDFSNode,
                                                     'focus-next-dfs-node': focusNextDFSNode,

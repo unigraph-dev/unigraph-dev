@@ -14,6 +14,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
     context,
     component,
     attributes,
+    onLoad,
     useFallback = true,
 }) => {
     const isObjectStub = isStub(object);
@@ -41,6 +42,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
                 query,
                 (objects: any[]) => {
                     setLoadedObj(objects[0]);
+                    if (typeof onLoad === 'function') onLoad(objects[0]);
                 },
                 newSubs,
                 { noExpand: true },

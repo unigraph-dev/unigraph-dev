@@ -137,8 +137,10 @@ export default async function startServer(client: DgraphClient) {
             }
         }
         Object.entries(connections).forEach(([connId, el]) => {
-            if (serverStates.clientLeasedUids[connId].length < 128) {
+            if (serverStates.clientLeasedUids[connId]?.length < 128) {
                 leaseToClient(connId);
+            }
+            if (serverStates.clientLeasedUids[connId]?.length)
                 el.send(
                     stringify({
                         type: 'cache_updated',
@@ -146,7 +148,6 @@ export default async function startServer(client: DgraphClient) {
                         result: serverStates.clientLeasedUids[connId],
                     }),
                 );
-            }
         });
     };
 
@@ -519,7 +520,7 @@ export default async function startServer(client: DgraphClient) {
                     if (event.usedUids) {
                         serverStates.leasedUids = _.difference(serverStates.leasedUids, event.usedUids)
                         Object.entries(serverStates.clientLeasedUids).forEach(([connId, el]: any[]) => {
-                            serverStates.clientLeasedUids[connId] = _.difference(el, event.usedUids as any[])
+                            serverStates.clientLeasedUids[connId] = _.difference(el, event.usedUids as any[]);
                         })
                     };
                     callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches, subIds: event.subIds, ofUpdate: event.id})
@@ -638,7 +639,7 @@ export default async function startServer(client: DgraphClient) {
             },
 
             "run_executable": async function (event: EventRunExecutable, ws: IWebsocket) {
-                localApi.runExecutable(event.uid, event.params, {send: (it: string) => {ws.send(it)}})
+                localApi.runExecutable(event.uid, event.params, {send: (it: string) => {ws.send(it)}}, undefined, event.bypassCache)
                     .then((ret: any) => ws.send(makeResponse(event, true, {returns: ret})));
         },
 
@@ -742,7 +743,7 @@ export default async function startServer(client: DgraphClient) {
             serverStates.subscriptions = removeOrHibernateSubscriptionsById(serverStates.subscriptions, connId, clientBrowserId);
             delete connections[connId];
             if (verbose >= 1) console.log("Connection closed: " + connId);
-            serverStates.leasedUids.push(...serverStates.clientLeasedUids[connId]);
+            serverStates.leasedUids.push(...(serverStates.clientLeasedUids[connId] || []));
             delete serverStates.clientLeasedUids[connId];
         })
         ws.send(stringify({
