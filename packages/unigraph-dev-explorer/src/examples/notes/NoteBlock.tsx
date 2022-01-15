@@ -362,7 +362,10 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                 const focusedState = window.unigraph.getState('global/focused').value;
                 const el = textInput.current?.firstChild || textInput.current;
                 if (focusedState.tail) tail = el.textContent.length;
-                if (focusedState.newData) el.textContent = focusedState.newData;
+                if (focusedState.newData) {
+                    el.textContent = focusedState.newData;
+                    delete focusedState.newData;
+                }
                 setCaret(document, el, tail || focusedState.caret);
             }, 0);
         }
