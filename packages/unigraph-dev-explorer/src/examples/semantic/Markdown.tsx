@@ -6,6 +6,7 @@ import rehypeKatex from 'rehype-katex';
 import remarkBreaks from 'remark-breaks';
 import 'katex/dist/katex.min.css';
 import TurndownService from 'turndown';
+import rehypeRaw from 'rehype-raw';
 import { DynamicViewRenderer } from '../../global.d';
 import remarkWikilink from './wikilink';
 import { openUrl } from '../../utils';
@@ -51,7 +52,7 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                     // eslint-disable-next-line react/no-children-prop
                     children={data['_value.%'] || (isHeading ? '_no title_' : '|')}
                     remarkPlugins={[remarkMath as any, remarkWikilink, remarkBreaks as any]}
-                    rehypePlugins={[rehypeKatex]}
+                    rehypePlugins={[rehypeKatex, rehypeRaw as any]}
                     components={{
                         p: compFactory.bind(this, 'p'),
                         strong: compFactory.bind(this, 'strong'),
@@ -67,6 +68,7 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                                 children,
                                 style: {
                                     display: '',
+                                    // eslint-disable-next-line no-nested-ternary
                                     height: node?.properties?.alt?.startsWith?.('inline:') ? '1.5em' : '',
                                 },
                             });

@@ -666,14 +666,16 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                     const caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
                                     switch (ev.keyCode) {
                                         case 13: // enter
-                                            ev.preventDefault();
-                                            edited.current = false;
-                                            inputDebounced.current.cancel();
-                                            callbacks['split-child']?.bind(
-                                                null,
-                                                textref.current || data.get('text').as('primitive'),
-                                                caret,
-                                            )();
+                                            if (!ev.shiftKey) {
+                                                ev.preventDefault();
+                                                edited.current = false;
+                                                inputDebounced.current.cancel();
+                                                callbacks['split-child']?.bind(
+                                                    null,
+                                                    textref.current || data.get('text').as('primitive'),
+                                                    caret,
+                                                )();
+                                            }
                                             break;
 
                                         case 9: // tab
@@ -836,95 +838,97 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                     zIndex: 999,
                                 }}
                             >
-                                {buildGraph(subentities).map((el: any, elindex) => {
-                                    const isCol = isChildrenCollapsed[el.uid];
-                                    return (
-                                        <OutlineComponent
-                                            key={el.uid}
-                                            isChildren={isChildren}
-                                            collapsed={isCol}
-                                            setCollapsed={(val: boolean) => {
-                                                setIsChildrenCollapsed({
-                                                    ...isChildrenCollapsed,
-                                                    [el.uid]: val,
-                                                });
-                                            }}
-                                            createBelow={() => {
-                                                addChild(dataref.current, editorContext, elindex);
-                                            }}
-                                        >
-                                            <AutoDynamicView
-                                                noDrag
-                                                compact
-                                                allowSubentity
-                                                customBoundingBox
-                                                noClickthrough
-                                                noSubentities={el.type?.['unigraph.id'] === '$/schema/note_block'}
-                                                noBacklinks={el.type?.['unigraph.id'] === '$/schema/note_block'}
-                                                subentityExpandByDefault={
-                                                    !(el.type?.['unigraph.id'] === '$/schema/note_block')
-                                                }
-                                                object={
-                                                    el.type?.['unigraph.id'] === '$/schema/note_block'
-                                                        ? el
-                                                        : {
-                                                              uid: el.uid,
-                                                              type: el.type,
-                                                          }
-                                                }
-                                                index={elindex}
-                                                callbacks={{
-                                                    'get-view-id': () => options?.viewId, // only used at root
-                                                    ...callbacks,
-                                                    ...Object.fromEntries(
-                                                        Object.entries(noteBlockCommands).map(([k, v]: any) => [
-                                                            k,
-                                                            (...args: any[]) =>
-                                                                v(dataref.current, editorContext, elindex, ...args),
-                                                        ]),
-                                                    ),
-                                                    'unindent-child-in-parent': () => {
-                                                        callbacks['unindent-child']?.(elindex);
-                                                    },
-                                                    'focus-last-dfs-node': focusLastDFSNode,
-                                                    'focus-next-dfs-node': focusNextDFSNode,
-                                                    dataref,
-                                                    context: data,
-                                                    isEmbed: true,
-                                                    isChildren: true,
-                                                    parentEditorContext: editorContext,
+                                {buildGraph(subentities)
+                                    // .filter((el) => (el as any)?.type?.['unigraph.id'])
+                                    .map((el: any, elindex) => {
+                                        const isCol = isChildrenCollapsed[el.uid];
+                                        return (
+                                            <OutlineComponent
+                                                key={el.uid}
+                                                isChildren={isChildren}
+                                                collapsed={isCol}
+                                                setCollapsed={(val: boolean) => {
+                                                    setIsChildrenCollapsed({
+                                                        ...isChildrenCollapsed,
+                                                        [el.uid]: val,
+                                                    });
                                                 }}
-                                                component={{
-                                                    '$/schema/note_block': {
-                                                        view: DetailedNoteBlock,
-                                                        query: noteQuery,
-                                                    },
-                                                    '$/schema/view': {
-                                                        view: ViewViewDetailed,
-                                                    },
+                                                createBelow={() => {
+                                                    addChild(dataref.current, editorContext, elindex);
                                                 }}
-                                                attributes={{
-                                                    isChildren: true,
-                                                    isCollapsed: isCol,
-                                                }}
-                                                recursive
-                                                style={
-                                                    el.type?.['unigraph.id'] === '$/schema/note_block'
-                                                        ? {}
-                                                        : {
-                                                              border: 'lightgray',
-                                                              borderStyle: 'solid',
-                                                              borderWidth: 'thin',
-                                                              margin: '2px',
-                                                              borderRadius: '8px',
-                                                              maxWidth: 'fit-content',
-                                                              padding: '4px',
-                                                          }
-                                                }
-                                            />
-                                        </OutlineComponent>
-                                    );
-                                })}
+                                            >
+                                                <AutoDynamicView
+                                                    noDrag
+                                                    compact
+                                                    allowSubentity
+                                                    customBoundingBox
+                                                    noClickthrough
+                                                    noSubentities={el.type?.['unigraph.id'] === '$/schema/note_block'}
+                                                    noBacklinks={el.type?.['unigraph.id'] === '$/schema/note_block'}
+                                                    subentityExpandByDefault={
+                                                        !(el.type?.['unigraph.id'] === '$/schema/note_block')
+                                                    }
+                                                    object={
+                                                        el.type?.['unigraph.id'] === '$/schema/note_block'
+                                                            ? el
+                                                            : {
+                                                                  uid: el.uid,
+                                                                  type: el.type,
+                                                              }
+                                                    }
+                                                    index={elindex}
+                                                    callbacks={{
+                                                        'get-view-id': () => options?.viewId, // only used at root
+                                                        ...callbacks,
+                                                        ...Object.fromEntries(
+                                                            Object.entries(noteBlockCommands).map(([k, v]: any) => [
+                                                                k,
+                                                                (...args: any[]) =>
+                                                                    v(dataref.current, editorContext, elindex, ...args),
+                                                            ]),
+                                                        ),
+                                                        'unindent-child-in-parent': () => {
+                                                            callbacks['unindent-child']?.(elindex);
+                                                        },
+                                                        'focus-last-dfs-node': focusLastDFSNode,
+                                                        'focus-next-dfs-node': focusNextDFSNode,
+                                                        dataref,
+                                                        context: data,
+                                                        isEmbed: true,
+                                                        isChildren: true,
+                                                        parentEditorContext: editorContext,
+                                                    }}
+                                                    component={{
+                                                        '$/schema/note_block': {
+                                                            view: DetailedNoteBlock,
+                                                            query: noteQuery,
+                                                        },
+                                                        '$/schema/view': {
+                                                            view: ViewViewDetailed,
+                                                        },
+                                                    }}
+                                                    attributes={{
+                                                        isChildren: true,
+                                                        isCollapsed: isCol,
+                                                    }}
+                                                    recursive
+                                                    style={
+                                                        el.type?.['unigraph.id'] === '$/schema/note_block'
+                                                            ? {}
+                                                            : {
+                                                                  border: 'lightgray',
+                                                                  borderStyle: 'solid',
+                                                                  borderWidth: 'thin',
+                                                                  margin: '2px',
+                                                                  borderRadius: '8px',
+                                                                  maxWidth: 'fit-content',
+                                                                  padding: '4px',
+                                                              }
+                                                    }
+                                                />
+                                            </OutlineComponent>
+                                        );
+                                    })}
                             </DragandDrop>
                         ) : (
                             <OutlineComponent isChildren={isChildren}>
