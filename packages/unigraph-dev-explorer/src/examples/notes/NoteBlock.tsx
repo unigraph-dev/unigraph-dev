@@ -362,6 +362,7 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                 const focusedState = window.unigraph.getState('global/focused').value;
                 const el = textInput.current?.firstChild || textInput.current;
                 if (focusedState.tail) tail = el.textContent.length;
+                if (focusedState.newData) el.textContent = focusedState.newData;
                 setCaret(document, el, tail || focusedState.caret);
             }, 0);
         }
@@ -690,15 +691,16 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
 
                                         case 8: // backspace
                                             // console.log(caret, document.getSelection()?.type)
-                                            if (
-                                                caret === 0 &&
-                                                document.getSelection()?.type === 'Caret' &&
-                                                !textref.current.length
-                                            ) {
+                                            if (caret === 0 && document.getSelection()?.type === 'Caret') {
                                                 ev.preventDefault();
                                                 // inputDebounced.cancel();
                                                 edited.current = false;
-                                                setCommand(() => callbacks['unsplit-child'].bind(null));
+                                                setCommand(() =>
+                                                    callbacks['unsplit-child'].bind(
+                                                        null,
+                                                        textInput.current.textContent,
+                                                    ),
+                                                );
                                             } else if (
                                                 textref.current[caret - 1] === '[' &&
                                                 textref.current[caret] === ']'
