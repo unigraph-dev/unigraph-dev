@@ -15,6 +15,7 @@ declare global {
         electronShell: any;
         reloadCommands: () => any;
         mixpanel?: any;
+        dragselect: any;
     }
 }
 

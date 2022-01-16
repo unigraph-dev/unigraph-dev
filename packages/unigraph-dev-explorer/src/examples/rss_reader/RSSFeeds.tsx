@@ -91,13 +91,17 @@ const RSSItem: DynamicViewRenderer = ({ data, callbacks }) => {
                     <div>
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                             <OpenInBrowserOutlined
-                                onClick={() => {
+                                onClick={(ev) => {
+                                    ev.stopPropagation();
+                                    ev.preventDefault();
                                     openUrl(unpadded.item_data?.url);
                                     if (callbacks?.removeFromContext) callbacks.removeFromContext();
                                 }}
                             />
                             <Link
-                                onClick={() => {
+                                onClick={(ev) => {
+                                    ev.stopPropagation();
+                                    ev.preventDefault();
                                     const htmlUid = data?.get('content/text')?._value?._value?.uid;
                                     if (htmlUid)
                                         window.newTab(
@@ -114,7 +118,9 @@ const RSSItem: DynamicViewRenderer = ({ data, callbacks }) => {
                             />
                             {unpadded.item_data?.creative_work?.text ? (
                                 <Description
-                                    onClick={() => {
+                                    onClick={(ev) => {
+                                        ev.stopPropagation();
+                                        ev.preventDefault();
                                         const htmlUid = data?.get('item_data/creative_work/text')?._value?._value?.uid;
                                         if (htmlUid)
                                             window.newTab(

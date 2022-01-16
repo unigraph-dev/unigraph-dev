@@ -137,16 +137,17 @@ export default async function startServer(client: DgraphClient) {
             }
         }
         Object.entries(connections).forEach(([connId, el]) => {
-            if (serverStates.clientLeasedUids[connId].length < 128) {
+            if (serverStates.clientLeasedUids[connId]?.length < 128) {
                 leaseToClient(connId);
             }
-            el.send(
-                stringify({
-                    type: 'cache_updated',
-                    name: 'uid_lease',
-                    result: serverStates.clientLeasedUids[connId],
-                }),
-            );
+            if (serverStates.clientLeasedUids[connId]?.length)
+                el.send(
+                    stringify({
+                        type: 'cache_updated',
+                        name: 'uid_lease',
+                        result: serverStates.clientLeasedUids[connId],
+                    }),
+                );
         });
     };
 
@@ -742,7 +743,7 @@ export default async function startServer(client: DgraphClient) {
             serverStates.subscriptions = removeOrHibernateSubscriptionsById(serverStates.subscriptions, connId, clientBrowserId);
             delete connections[connId];
             if (verbose >= 1) console.log("Connection closed: " + connId);
-            serverStates.leasedUids.push(...serverStates.clientLeasedUids[connId]);
+            serverStates.leasedUids.push(...(serverStates.clientLeasedUids[connId] || []));
             delete serverStates.clientLeasedUids[connId];
         })
         ws.send(stringify({

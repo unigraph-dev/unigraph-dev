@@ -49,6 +49,7 @@ export const getComponentFromPage = (location: string, params: any = {}) => {
 };
 
 export const setCaret = (document: Document, element: any, pos: number, length?: number) => {
+    // console.log(element, pos, length);
     const range = document.createRange();
     const sel = document.getSelection();
     const maxLen = element.textContent.length < pos ? element.textContent.length : pos;
@@ -477,4 +478,15 @@ export class Badger {
         this._value = val;
         this.update();
     }
+}
+
+export function getParents(elem: any) {
+    const parents: any[] = [];
+    if (!elem) return parents;
+    while (elem.parentNode && elem.parentNode.nodeName.toLowerCase() != 'body') {
+        elem = elem.parentNode;
+        if (!elem) return parents;
+        if (elem.id?.startsWith?.('object-view-')) parents.push(elem.id.slice(12));
+    }
+    return parents;
 }

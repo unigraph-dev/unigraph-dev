@@ -27,6 +27,11 @@ export const getSemanticChildren = (data: any) => data?._value?.children;
 
 export const addChild = (data: any, context: NoteEditorContext, index?: number) => {
     if (typeof index === 'undefined') index = (getSemanticChildren(data)?.['_value[']?.length || 0) - 1;
+    return addChildren(data, context, index, ['']);
+};
+
+export const addChildren = (data: any, context: NoteEditorContext, index: number, children: string[]) => {
+    if (typeof index === 'undefined') index = (getSemanticChildren(data)?.['_value[']?.length || 0) - 1;
     const parents = getParents(data);
     if (!data._hide) parents.push({ uid: data.uid });
     const myUid = (window.unigraph as any).leaseUid();
@@ -41,29 +46,31 @@ export const addChild = (data: any, context: NoteEditorContext, index?: number) 
                             uid: el._index?.uid,
                             '_value.#i':
                                 el._index['_value.#i'] > (index as number)
-                                    ? el._index['_value.#i'] + 1
+                                    ? el._index['_value.#i'] + children.length
                                     : el._index['_value.#i'],
                         },
                     })),
-                    {
+                    ...children.map((el: string, i: number) => ({
                         _value: {
                             type: {
                                 'unigraph.id': '$/schema/subentity',
                             },
                             'dgraph.type': 'Entity',
                             _value: {
-                                ...buildUnigraphEntity(
+                                ...(buildUnigraphEntity as any)(
                                     {
                                         text: {
                                             type: { 'unigraph.id': '$/schema/markdown' },
-                                            _value: '',
+                                            _value: el,
                                         },
                                     },
                                     '$/schema/note_block',
                                     (window.unigraph as any).getSchemaMap(),
+                                    undefined,
+                                    { globalStates: { nextUid: 100000 * i } },
                                 ),
                                 _hide: true,
-                                uid: myUid,
+                                uid: i === children.length - 1 ? myUid : undefined,
                             },
                             _updatedAt: new Date().toISOString(),
                             _createdAt: new Date().toISOString(),
@@ -71,9 +78,9 @@ export const addChild = (data: any, context: NoteEditorContext, index?: number) 
                             'unigraph.indexes': {},
                         },
                         _index: {
-                            '_value.#i': index + 1,
+                            '_value.#i': index + i + 1,
                         },
-                    },
+                    })),
                 ],
             },
         },
@@ -180,44 +187,198 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
     window.unigraph.touch(parents.map((el) => el.uid));
 };
 
-export const unsplitChild = async (data: any, context: NoteEditorContext, index: number) => {
+export const unsplitChild = async (data: any, context: NoteEditorContext, index: number, currString: string) => {
     let currSubentity = -1;
+    let prevIndex = -1;
+    const parents = getParents(data);
+    if (!data._hide) parents.push({ uid: data.uid });
     removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
     const delAt = children?.reduce((prev: any[], el: any, elindex: any) => {
         if (el?._value?.type?.['unigraph.id'] === '$/schema/subentity') {
             currSubentity++;
             if (currSubentity === index) return elindex;
+            if (currSubentity + 1 === index) prevIndex = elindex;
             return prev;
         }
         return prev;
     }, 0);
-    if (typeof children[delAt]?._value?._value?._value?.text?._value?._value?.['_value.%'] === 'string') {
-        window.unigraph.deleteItemFromArray(
-            getSemanticChildren(data).uid,
-            children[delAt].uid,
-            data.uid,
+    // console.log(index, children[delAt]?._value?._value?._value?.children?.['_value[']);
+    // Index = 0 if current block doesn't have children, merge with parent
+    // Index > 0 and last DFS is last item, should merge with previous
+    if (
+        currString === '' &&
+        !(children[delAt]?._value?._value?._value?.children?.['_value['] || []).filter(
+            (ch: any) => ch?._value?.type?.['unigraph.id'] === '$/schema/subentity',
+        ).length
+    ) {
+        const newChildren = [
+            ...children
+                .map((el: any, iindex: number) =>
+                    iindex === delAt
+                        ? undefined
+                        : {
+                              uid: el.uid,
+                              _index: {
+                                  '_value.#i': iindex > delAt ? el._index['_value.#i'] - 1 : el._index['_value.#i'],
+                              },
+                          },
+                )
+                .filter(Boolean),
+        ];
+        window.unigraph.updateObject(
+            data?._value?.uid,
+            { children: { '_value[': newChildren } },
+            false,
+            false,
             context.callbacks.subsId,
+            parents,
+            true,
         );
-        setTimeout(() => {
-            window.unigraph.deleteObject(
-                [
-                    children[delAt].uid,
-                    children[delAt]._value.uid,
-                    children[delAt]._value._value.uid,
-                    children[delAt]._value._value._value.uid,
-                    children[delAt]._value._value._value.text.uid,
-                    children[delAt]._value._value._value.text._value.uid,
-                    children[delAt]._value._value._value.text._value._value.uid,
-                ] as any,
-                true,
-            );
-            window.unigraph.touch(getParents(data).map((el) => el.uid));
-        }, 1000);
-
-        context.edited.current = true;
         focusLastDFSNode({ uid: children[delAt]._value._value.uid }, context, index, true);
-    }
+    } else if (
+        index === 0 &&
+        !(children[delAt]?._value?._value?._value?.children?.['_value['] || []).filter(
+            (ch: any) => ch?._value?.type?.['unigraph.id'] === '$/schema/subentity',
+        ).length
+    ) {
+        // Merge with parent
+        // 1. merge text
+        // 2. merge children (remove delAt, shift indexes, add semantic children)
+        const oldCaret = (data?._value?.text?._value?._value?.['_value.%'] || '').length;
+        const newText = (data?._value?.text?._value?._value?.['_value.%'] || '') + currString;
+        const newChildren = [
+            ...children
+                .map((el: any, iindex: number) =>
+                    iindex === delAt
+                        ? undefined
+                        : {
+                              uid: el.uid,
+                              _index: {
+                                  '_value.#i': iindex > delAt ? el._index['_value.#i'] - 1 : el._index['_value.#i'],
+                              },
+                          },
+                )
+                .filter(Boolean),
+            ...(children[delAt]?._value?._value?._value?.children?.['_value['] || []).map((el: any) => ({
+                uid: el.uid,
+                _index: { '_value.#i': el._index['_value.#i'] + children.length - 1 },
+            })),
+        ];
+        // console.log(newText, newChildren);
+        window.unigraph.updateObject(
+            data?._value?.uid,
+            {
+                text: {
+                    uid: data?._value?.text?.uid,
+                    _value: {
+                        uid: data?._value?.text?._value?.uid,
+                        _value: { uid: data?._value?.text?._value?._value?.uid, '_value.%': newText },
+                    },
+                },
+                children: {
+                    '_value[': newChildren,
+                },
+            },
+            false,
+            false,
+            context.callbacks.subsId,
+            parents,
+            true,
+        );
+        window.unigraph.getState('global/focused').setValue({
+            uid: getLastDFSNode({ uid: children[delAt]._value._value.uid }, context, index),
+            caret: oldCaret || 0,
+            type: '$/schema/note_block',
+            newData: newText,
+        });
+    } else if (
+        index > 0 &&
+        getLastDFSNode({ uid: children[delAt]._value._value.uid }, context, index) ===
+            children[prevIndex]?._value?._value?.uid
+    ) {
+        // Merge with previous
+        // 1. merge children text
+        // 2. merge children and grandchildren (for children, remove delAt and prevIndex, then append prevIndex's grandchildren)
+        const oldText = children[prevIndex]?._value?._value?._value?.text?._value?._value?.['_value.%'] || '';
+        const newText = oldText + currString;
+        const newChildren = [
+            ...children
+                .map((el: any, iindex: number) =>
+                    iindex === delAt || iindex === prevIndex
+                        ? undefined
+                        : {
+                              uid: el.uid,
+                              _index: {
+                                  '_value.#i': iindex > delAt ? el._index['_value.#i'] - 1 : el._index['_value.#i'],
+                              },
+                          },
+                )
+                .filter(Boolean),
+            {
+                uid: children[prevIndex]?.uid,
+                _value: {
+                    uid: children[prevIndex]?._value?.uid,
+                    _value: {
+                        uid: children[prevIndex]?._value?._value?.uid,
+                        _value: {
+                            uid: children[prevIndex]?._value?._value?._value?.uid,
+                            text: {
+                                uid: children[prevIndex]?._value?._value?._value?.text?.uid,
+                                _value: {
+                                    uid: children[prevIndex]?._value?._value?._value?.text?._value?.uid,
+                                    _value: {
+                                        uid: children[prevIndex]?._value?._value?._value?.text?._value?._value?.uid,
+                                        '_value.%': newText,
+                                    },
+                                },
+                            },
+                            children: {
+                                '_value[': [
+                                    ...(children[delAt]?._value?._value?._value?.children?.['_value['] || []).map(
+                                        (el: any) => ({ uid: el.uid }),
+                                    ),
+                                ],
+                            },
+                        },
+                    },
+                },
+            },
+        ];
+        window.unigraph.updateObject(
+            data?._value?.uid,
+            { children: { '_value[': newChildren } },
+            false,
+            false,
+            context.callbacks.subsId,
+            parents,
+            true,
+        );
+        window.unigraph.getState('global/focused').setValue({
+            uid: getLastDFSNode({ uid: children[delAt]._value._value.uid }, context, index),
+            caret: oldText.length || 0,
+            type: '$/schema/note_block',
+            newData: newText,
+        });
+    } else return false;
+
+    setTimeout(() => {
+        window.unigraph.deleteObject(
+            [
+                children[delAt].uid,
+                children[delAt]._value.uid,
+                children[delAt]._value._value.uid,
+                children[delAt]._value._value._value.uid,
+                children[delAt]._value._value._value.text.uid,
+                children[delAt]._value._value._value.text._value.uid,
+                children[delAt]._value._value._value.text._value._value.uid,
+            ] as any,
+            true,
+        );
+        window.unigraph.touch(getParents(data).map((el) => el.uid));
+    }, 1000);
+
+    return true;
 };
 
 export const setFocus = (data: any, context: NoteEditorContext, index: number) => {
