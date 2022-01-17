@@ -3,7 +3,7 @@ import { setRef, Typography } from '@material-ui/core';
 import React, { FormEvent } from 'react';
 import { byElementIndex, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import _ from 'lodash';
-import { blobToBase64, buildGraph, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import { blobToBase64, buildGraph, getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { Actions } from 'flexlayout-react';
 import { FiberManualRecord, MoreVert } from '@material-ui/icons';
 import stringify from 'json-stable-stringify';
@@ -734,19 +734,29 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                             break;
 
                                         case 38: // up arrow
-                                            ev.preventDefault();
+                                            // console.log(document.getSelection()?.focusOffset);
+                                            // ev.preventDefault();
                                             inputDebounced.current.flush();
-                                            setCommand(() =>
-                                                callbacks['focus-last-dfs-node'].bind(null, data, editorContext, 0),
-                                            );
+                                            // setCommand(() =>
+                                            //    callbacks['focus-last-dfs-node'].bind(null, data, editorContext, 0),
+                                            // );
+                                            requestAnimationFrame(() => {
+                                                if (document.getSelection()?.focusOffset === 0) {
+                                                    callbacks['focus-last-dfs-node'](data, editorContext, 0);
+                                                }
+                                            });
                                             return;
 
                                         case 40: // down arrow
-                                            ev.preventDefault();
                                             inputDebounced.current.flush();
-                                            setCommand(() =>
-                                                callbacks['focus-next-dfs-node'].bind(null, data, editorContext, 0),
-                                            );
+                                            requestAnimationFrame(() => {
+                                                if (
+                                                    (document.getSelection()?.focusOffset || 0) >=
+                                                    (textInput.current?.textContent?.trim()?.length || 0)
+                                                ) {
+                                                    callbacks['focus-next-dfs-node'](data, editorContext, 0);
+                                                }
+                                            });
                                             return;
 
                                         case 219: // left bracket
@@ -843,9 +853,10 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                     zIndex: 999,
                                 }}
                             >
-                                {buildGraph(subentities)
+                                {subentities
+                                    .map((el: any) => new UnigraphObject(el))
                                     // .filter((el) => (el as any)?.type?.['unigraph.id'])
-                                    .map((el: any, elindex) => {
+                                    .map((el: any, elindex: any) => {
                                         const isCol = isChildrenCollapsed[el.uid];
                                         return (
                                             <OutlineComponent
