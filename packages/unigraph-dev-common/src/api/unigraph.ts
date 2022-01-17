@@ -4,11 +4,17 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { string } from 'yargs';
-import { typeMap } from '../types/consts';
 import { PackageDeclaration } from '../types/packages';
 import { Unigraph, AppState, UnigraphObject as IUnigraphObject } from '../types/unigraph';
-import { assignUids, augmentStubs, base64ToBlob, findUid, getCircularReplacer, isJsonString } from '../utils/utils';
+import {
+    assignUids,
+    augmentStubs,
+    base64ToBlob,
+    buildGraph,
+    findUid,
+    getCircularReplacer,
+    isJsonString,
+} from '../utils/utils';
 
 const RETRY_CONNECTION_INTERVAL = 5000;
 
@@ -134,54 +140,6 @@ export class UnigraphObject extends Object {
     getRefType = () => ((this as any)['dgraph.type'] ? 'ref' : 'value');
 
     as = (type: string) => getObjectAs(this, type as any);
-}
-
-/**
- * Implement a graph-like data structure based on js pointers from uid references.
- *
- * Since pointers are not serializable, this must be done on the client side.
- *
- * @param objects Objects with uid references
- */
-export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
-    const objs: any[] = JSON.parse(JSON.stringify(objects)).map((el: any) => new UnigraphObject(el));
-    const dict: any = {};
-    objs.forEach((object) => {
-        if (object?.uid) dict[object.uid] = object;
-    });
-
-    function buildDictRecurse(obj: any) {
-        if (obj && typeof obj === 'object' && Array.isArray(obj)) {
-            obj.forEach((val, index) => {
-                if (val?.uid && !dict[val.uid] && Object.keys(val).length !== 1) dict[val.uid] = obj[index];
-                buildDictRecurse(val);
-            });
-        } else if (obj && typeof obj === 'object') {
-            Object.entries(obj).forEach(([key, value]: [key: string, value: any]) => {
-                if (value?.uid && !dict[value.uid] && Object.keys(value).length !== 1) dict[value.uid] = obj[key];
-                buildDictRecurse(value);
-            });
-        }
-    }
-
-    function buildGraphRecurse(obj: any) {
-        if (obj && typeof obj === 'object' && Array.isArray(obj)) {
-            obj.forEach((val, index) => {
-                if (val?.uid && dict[val.uid]) obj[index] = dict[val.uid];
-                buildGraphRecurse(val);
-            });
-        } else if (obj && typeof obj === 'object') {
-            Object.entries(obj).forEach(([key, value]: [key: string, value: any]) => {
-                if (value?.uid && dict[value.uid]) obj[key] = dict[value.uid];
-                buildGraphRecurse(value);
-            });
-        }
-    }
-
-    objs.forEach((object) => buildDictRecurse(object));
-    objs.forEach((object) => buildGraphRecurse(object));
-
-    return objs;
 }
 
 export function getRandomInt() {
@@ -382,7 +340,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                     else reject(response);
                 };
                 subscriptions[id] = (result: any[]) => {
-                    callback(buildGraph(result.map((el: any) => new UnigraphObject(el))));
+                    callback(buildGraph(result.map((el: any) => new UnigraphObject(el)) as any));
                 };
                 sendEvent(connection, 'subscribe_to_type', { schema: name, options }, id);
             }),
