@@ -734,19 +734,29 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                             break;
 
                                         case 38: // up arrow
-                                            ev.preventDefault();
+                                            // console.log(document.getSelection()?.focusOffset);
+                                            // ev.preventDefault();
                                             inputDebounced.current.flush();
-                                            setCommand(() =>
-                                                callbacks['focus-last-dfs-node'].bind(null, data, editorContext, 0),
-                                            );
+                                            // setCommand(() =>
+                                            //    callbacks['focus-last-dfs-node'].bind(null, data, editorContext, 0),
+                                            // );
+                                            requestAnimationFrame(() => {
+                                                if (document.getSelection()?.focusOffset === 0) {
+                                                    callbacks['focus-last-dfs-node'](data, editorContext, 0);
+                                                }
+                                            });
                                             return;
 
                                         case 40: // down arrow
-                                            ev.preventDefault();
                                             inputDebounced.current.flush();
-                                            setCommand(() =>
-                                                callbacks['focus-next-dfs-node'].bind(null, data, editorContext, 0),
-                                            );
+                                            requestAnimationFrame(() => {
+                                                if (
+                                                    (document.getSelection()?.focusOffset || 0) >=
+                                                    (textInput.current?.textContent?.trim()?.length || 0)
+                                                ) {
+                                                    callbacks['focus-next-dfs-node'](data, editorContext, 0);
+                                                }
+                                            });
                                             return;
 
                                         case 219: // left bracket
