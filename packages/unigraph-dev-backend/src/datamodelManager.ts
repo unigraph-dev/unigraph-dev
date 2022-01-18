@@ -320,3 +320,34 @@ export async function addUnigraphPackage(
     );
     await client.createUnigraphUpsert(upsertM);
 }
+
+/**
+ * Purges old versions of a package.
+ */
+export const purgeOldVersions = (client: DgraphClient, states: any, pkg: PackageDeclaration) => {
+    const shorthandKeys = Object.keys(pkg.pkgSchemas)
+        .map((el) =>
+            el.startsWith('interface/') ? [`$/schema/${el}`] : [`$/schema/${el}`, `$/schema/interface/${el}`],
+        )
+        .flat();
+    const oldMap = states.caches.schemas.dataAlt[0];
+    const delNquads = [];
+    shorthandKeys.forEach((key) => {
+        const mapResult = oldMap[key]['_value['];
+        if (Array.isArray(mapResult)) {
+            const quads = mapResult
+                .map((el) => {
+                    // $/package/pkgName/version/schema/schemaName
+                    if (
+                        el['unigraph.id']?.split?.('/')[2] !== pkg.pkgManifest.package_name &&
+                        el['unigraph.id']?.split?.('/')[3] !== pkg.pkgManifest.version
+                    ) {
+                        return `<${oldMap[key].uid}> <_value[> <${el.uid}> .`;
+                    }
+                    return undefined;
+                })
+                .filter(Boolean);
+            delNquads.push(...quads);
+        }
+    });
+};
