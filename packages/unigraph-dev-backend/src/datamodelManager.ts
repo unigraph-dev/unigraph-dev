@@ -186,6 +186,7 @@ export async function addUnigraphPackage(
         };
     });
     const fullSchemas = [...schemas, ...interfaces];
+    const toUpsert = [];
     for (let i = 0; i < fullSchemas.length; i += 1) {
         const schemaShorthandRef = {
             ...getRefQueryUnigraphId(`$/${fullSchemas[i]['unigraph.id'].split('/').slice(4).join('/')}`),
@@ -193,11 +194,10 @@ export async function addUnigraphPackage(
             '_value[': getRefQueryUnigraphId(fullSchemas[i]['unigraph.id']),
         };
         const schemaAutoref = processAutorefUnigraphId(fullSchemas[i]);
-        const upsert = insertsToUpsert([schemaAutoref], undefined, caches.schemas.dataAlt![0]);
-        await client.createUnigraphUpsert(upsert);
-        const upsert2 = insertsToUpsert([schemaShorthandRef], undefined, caches.schemas.dataAlt![0]);
-        await client.createUnigraphUpsert(upsert2);
+        toUpsert.push(schemaAutoref, schemaShorthandRef);
     }
+    const upsertSchema = insertsToUpsert(toUpsert, undefined, caches.schemas.dataAlt![0]);
+    await client.createUnigraphUpsert(upsertSchema);
     await caches.schemas.updateNow();
     // 1.5 Create all executables if there are any
     const executables = !(pkg.pkgExecutables && Object.entries(pkg.pkgExecutables))
@@ -244,16 +244,17 @@ export async function addUnigraphPackage(
         throw new SyntaxError('Malformed package declaration, aborting!');
     }
     // TODO: Use concurrency here
+    const toUpsert2 = [];
     for (let i = 0; i < executables.length; i += 1) {
         const autoRefExecutable = processAutorefUnigraphId(executables[i]);
-        const upsert = insertsToUpsert([autoRefExecutable], undefined, caches.schemas.dataAlt![0]);
-        await client.createUnigraphUpsert(upsert);
+        toUpsert2.push(autoRefExecutable);
     }
     for (let i = 0; i < entities.length; i += 1) {
         const autoRefEntity = processAutorefUnigraphId(entities[i]);
-        const upsert = insertsToUpsert([autoRefEntity], undefined, caches.schemas.dataAlt![0]);
-        await client.createUnigraphUpsert(upsert);
+        toUpsert2.push(autoRefEntity);
     }
+    const upsertEntityExecutable = insertsToUpsert(toUpsert2, undefined, caches.schemas.dataAlt![0]);
+    await client.createUnigraphUpsert(upsertEntityExecutable);
     // 2. Create package object and link to all schemas
     const newManifest = buildUnigraphEntity(pkg.pkgManifest, '$/schema/package_manifest', caches.schemas.data);
     const autorefManifest = processAutorefUnigraphId({
@@ -283,14 +284,11 @@ export async function addUnigraphPackage(
               ),
         ...getRefQueryUnigraphId(`$/package/${pkg.pkgManifest.package_name}/${pkg.pkgManifest.version}`),
     };
-    console.log(JSON.stringify(pkgObj, null, 4));
-    const upsertM = insertsToUpsert([autorefManifest], undefined, caches.schemas.dataAlt![0]);
-    await client.createUnigraphUpsert(upsertM);
-    const upsert = insertsToUpsert([pkgObj], undefined, caches.schemas.dataAlt![0]);
-    await client.createUnigraphUpsert(upsert);
-    // 3. Update schema reference table for these schemas
-    const upsert2 = insertsToUpsert(
+    // console.log(JSON.stringify(pkgObj, null, 4));
+    const upsertM = insertsToUpsert(
         [
+            autorefManifest,
+            pkgObj,
             {
                 ...getRefQueryUnigraphId('$/meta/namespace_map'),
                 ...Object.fromEntries(
@@ -320,5 +318,5 @@ export async function addUnigraphPackage(
         undefined,
         caches.schemas.dataAlt![0],
     );
-    await client.createUnigraphUpsert(upsert2);
+    await client.createUnigraphUpsert(upsertM);
 }
