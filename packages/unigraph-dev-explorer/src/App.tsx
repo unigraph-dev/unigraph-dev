@@ -10,6 +10,7 @@ import { InlineSearch } from './components/UnigraphCore/InlineSearchPopup';
 import { SearchOverlayPopover } from './pages/SearchOverlay';
 import { MobileBar } from './components/UnigraphCore/MobileBar';
 
+//
 // TODO: custom theme
 const useStyles = makeStyles((theme) => ({
     root: {
