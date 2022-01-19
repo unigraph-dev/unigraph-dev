@@ -9,27 +9,32 @@ import { Calendar as BigCalendar, DateLocalizer, momentLocalizer, stringOrDate }
 import moment from 'moment';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
-import { TabContext } from '../../utils';
+import { getDateAsUTC, TabContext } from '../../utils';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
-export function CalendarEvent({ data, callbacks }: any) {
+export function CalendarEvent({ data, callbacks, inline }: any) {
+    const CalendarColor = (
+        <div style={{ alignSelf: 'center', marginRight: inline ? '8px' : '16px' }}>
+            <Avatar
+                style={{
+                    width: inline ? 8 : 16,
+                    height: inline ? 8 : 16,
+                    backgroundColor: data.get('calendar/color')?.as?.('primitive'),
+                }}
+            >
+                {' '}
+            </Avatar>
+        </div>
+    );
+
     return (
         <div style={{ display: 'flex' }}>
-            <div style={{ alignSelf: 'center', marginRight: '16px' }}>
-                <Avatar
-                    style={{
-                        width: 16,
-                        height: 16,
-                        backgroundColor: data.get('calendar/color')?.as?.('primitive'),
-                    }}
-                >
-                    {' '}
-                </Avatar>
-            </div>
+            {inline ? [] : CalendarColor}
 
             <div>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
+                    {inline ? CalendarColor : []}
                     <Typography variant="body1" style={{ marginRight: '8px' }}>
                         <strong>{data.get('name').as('primitive')}</strong>
                     </Typography>
@@ -42,6 +47,7 @@ export function CalendarEvent({ data, callbacks }: any) {
                     callbacks={callbacks}
                     noDrag
                     noDrop
+                    noContextMenu
                     inline
                 />
                 <div
@@ -157,8 +163,8 @@ const datedToBigCalendarEvent = (datedObj: any): any => {
         '$/schema/journal': (datedObjX: any) => {
             return {
                 title: datedObjX.get('note/text').as('primitive'),
-                start: new Date(datedObjX.get('date/datetime').as('primitive')),
-                end: new Date(datedObjX.get('date/datetime').as('primitive')),
+                start: getDateAsUTC(datedObjX.get('date/datetime').as('primitive')),
+                end: getDateAsUTC(datedObjX.get('date/datetime').as('primitive')),
                 allDay: true,
                 unigraphObj: datedObjX,
             };
@@ -168,7 +174,7 @@ const datedToBigCalendarEvent = (datedObj: any): any => {
 };
 
 const unigraphBigCalendarEventComponent = ({ event, ...props }: any) => {
-    return <AutoDynamicView object={new UnigraphObject(event.unigraphObj)} inline />;
+    return <AutoDynamicView object={new UnigraphObject(event.unigraphObj)} inline callbacks={{ noDate: true }} />;
 };
 
 export function Calendar() {
