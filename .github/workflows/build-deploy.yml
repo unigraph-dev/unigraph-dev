@@ -58,19 +58,26 @@ jobs:
               run: >
                   echo "{
                     "twitter": {
-                      "api_key": "${{secrets.TWITTER_API_KEY}}",
-                      "api_secret_key": "${{secrets.TWITTER_API_SECRET_KEY}}",
-                      "bearer_token": "${{secrets.TWITTER_BEARER_TOKEN}}"
+                      "api_key": "$TWITTER_API_KEY",
+                      "api_secret_key": "$TWITTER_API_SECRET_KEY",
+                      "bearer_token": "$TWITTER_BEARER_TOKEN"
                     },
                     "reddit": {
-                        "client_id": "${{secrets.REDDIT_CLIENT_ID}}"
+                        "client_id": "$REDDIT_CLIENT_ID"
                     },
                     "google": {
-                      "client_id": "${{secrets.GOOGLE_CLIENT_ID}}"
-                      "client_secret": "${{secrets.GOOGLE_CLIENT_SECRET}}"
+                      "client_id": "$GOOGLE_CLIENT_ID"
+                      "client_secret": "$GOOGLE_CLIENT_SECRET"
                     }
                   }"
                   > secrets.env.json
+              env:
+                  TWITTER_API_KEY: ${{secrets.TWITTER_API_KEY}
+                  TWITTER_API_SECRET_KEY: ${{secrets.TWITTER_API_SECRET_KEY}
+                  TWITTER_BEARER_TOKEN: ${{secrets.TWITTER_BEARER_TOKEN}
+                  REDDIT_CLIENT_ID: ${{secrets.REDDIT_CLIENT_ID}
+                  GOOGLE_CLIENT_ID: ${{secrets.GOOGLE_CLIENT_ID}
+                  GOOGLE_CLIENT_SECRET: ${{secrets.GOOGLE_CLIENT_SECRET}
 
             - run: mkdir ./dgraph-download
 
@@ -101,7 +108,7 @@ jobs:
                   repository: 'TheExGenesis/dgraph'
                   latest: true
                   fileName: 'dgraph_darwin_amd64'
-                  token: '{{secrets.GITHUB_TOKEN}}'
+                  token: '{{secrets.XIQ_UNIGRAPH_BUILD}}'
                   out-file-path: ./dgraph-download
 
             - run: mv ./dgraph-download/dgraph_darwin_amd64 ./dgraph-download/dgraph
