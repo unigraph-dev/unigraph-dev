@@ -442,7 +442,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
 
                         // Merge updater object with existing one
                         const newObj = JSON.parse(JSON.stringify(subResults[subId], getCircularReplacer()));
-                        const changeLoc = findUid(newObj, uid);
+                        const [changeLoc] = findUid(newObj, uid);
                         deepMerge(changeLoc, JSON.parse(JSON.stringify(newObject)));
                         augmentStubs(changeLoc, subResults[subId]);
                         subResults[subId] = newObj;

@@ -102,7 +102,7 @@ export const setCaret = (document: Document, element: any, pos: number, length?:
 };
 
 export const removeAllPropsFromObj = function (obj: any, propsToRemove: any, maxLevel?: any) {
-    if (typeof maxLevel !== 'number') maxLevel = 20;
+    if (typeof maxLevel !== 'number') maxLevel = 100;
     for (const prop in obj) {
         if (typeof propsToRemove === 'string' && prop === propsToRemove) delete obj[prop];
         else if (propsToRemove.indexOf(prop) >= 0) {

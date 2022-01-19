@@ -17,23 +17,31 @@ function getPath(obj: any, path: string | string[]): any {
     }
 }
 
-export function findUid(object: any, uid: string) {
-    if (object?.uid === uid) return object;
+export function findUid(object: any, uid: string, path?: any[]) {
+    const currentPath = [...(path || [])];
+    if (
+        object?.['dgraph.type'] === 'Entity' ||
+        object?.['dgraph.type']?.includes('Entity') ||
+        object?.type?.['unigraph.id']?.startsWith('$/schema')
+    ) {
+        currentPath.push(object);
+    }
+    if (object?.uid === uid) return [object, currentPath];
     if (typeof object === 'object' && object) {
         if (Array.isArray(object)) {
             for (const el of object) {
-                const result: any = findUid(el, uid);
-                if (result) return result;
+                const result: any = findUid(el, uid, currentPath);
+                if (result[0]) return result;
             }
         } else {
             const keys = Object.keys(object);
             for (let i = 0; i < keys.length; i += 1) {
-                const result: any = findUid(object[keys[i]], uid);
-                if (result) return result;
+                const result: any = findUid(object[keys[i]], uid, currentPath);
+                if (result[0]) return result;
             }
         }
     }
-    return undefined;
+    return [undefined, currentPath];
 }
 
 export function assignUids(object: any, totalLeases: string[], usedLeases: string[], blankMap: any) {
