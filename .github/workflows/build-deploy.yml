@@ -55,7 +55,7 @@ jobs:
                       ${{ runner.os }}-build-
                       ${{ runner.os }}-
             - name: Make secrets.env.json
-            - run: |
+              run: |
                   echo { \
                     "twitter": { \
                       "api_key": "${{secrets.TWITTER_API_KEY}}", \
