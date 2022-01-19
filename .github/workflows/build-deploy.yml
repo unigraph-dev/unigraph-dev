@@ -63,7 +63,7 @@ jobs:
                       "bearer_token": "${{secrets.TWITTER_BEARER_TOKEN}}"
                     },
                     "reddit": {
-                        "client_id": "t8a9c0MvLEMUpMtAGHVioA"
+                        "client_id": "${{secrets.REDDIT_CLIENT_ID}}"
                     },
                     "google": {
                       "client_id": "${{secrets.GOOGLE_CLIENT_ID}}"
@@ -101,7 +101,9 @@ jobs:
                   repository: 'TheExGenesis/dgraph'
                   latest: true
                   fileName: 'dgraph_darwin_amd64'
+                  token: '{{secrets.GITHUB_TOKEN}}'
                   out-file-path: ./dgraph-download
+
             - run: mv ./dgraph-download/dgraph_darwin_amd64 ./dgraph-download/dgraph
               if: runner.os == 'macOS'
 
