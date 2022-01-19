@@ -17,7 +17,7 @@ on:
 
 jobs:
     release-electron:
-        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
+        # if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
         runs-on: ${{ matrix.os }}
         strategy:
             matrix:
@@ -28,13 +28,13 @@ jobs:
                       electron-arch-overrides: '-c.mac.target.target=dmg -c.mac.target.arch=x64'
                     - os: macos-latest
                       electron-arch-overrides: '-c.mac.target.target=dmg -c.mac.target.arch=arm64'
-
         env:
             USE_HARD_LINKS: false
         defaults:
             run:
                 shell: bash
         steps:
+            - run: echo ${{github.event_name}}
             - name: Checkout code
               uses: actions/checkout@v2
 
