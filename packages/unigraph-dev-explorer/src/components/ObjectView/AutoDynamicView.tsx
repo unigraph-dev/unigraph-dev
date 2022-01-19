@@ -27,7 +27,7 @@ import { getSubentities, isStub, SubentityDropAcceptor } from './utils';
 export function AutoDynamicView({
     object,
     callbacks,
-    component,
+    components,
     attributes,
     inline,
     allowSubentity,
@@ -74,7 +74,7 @@ export function AutoDynamicView({
 
     const [DynamicViews, setDynamicViews] = React.useState({
         ...window.unigraph.getState('registry/dynamicView').value,
-        ...(component || {}),
+        ...(components || {}),
     });
     const [canClickthrough, setCanClickthrough] = React.useState(
         Object.keys(window.unigraph.getState('registry/dynamicViewDetailed').value).includes(
@@ -88,7 +88,7 @@ export function AutoDynamicView({
         const cb = (newIts: any) =>
             setDynamicViews({
                 ...window.unigraph.getState('registry/dynamicView').value,
-                ...(component || {}),
+                ...(components || {}),
             });
         window.unigraph.getState('registry/dynamicView').subscribe(cb);
 
@@ -450,7 +450,7 @@ export function AutoDynamicView({
                                         <li>
                                             <AutoDynamicView
                                                 object={new UnigraphObject(el._value)}
-                                                component={component}
+                                                components={components}
                                                 callbacks={{
                                                     ...callbacks,
                                                     context: getObject(),

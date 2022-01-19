@@ -928,7 +928,7 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                                         isChildren: true,
                                                         parentEditorContext: editorContext,
                                                     }}
-                                                    component={{
+                                                    components={{
                                                         '$/schema/note_block': {
                                                             view: DetailedNoteBlock,
                                                             query: noteQuery,
