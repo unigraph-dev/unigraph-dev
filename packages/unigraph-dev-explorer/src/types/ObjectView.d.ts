@@ -29,6 +29,7 @@ export type AutoDynamicViewProps = {
     onClick?: any;
     recursive?: boolean;
     customBoundingBox?: boolean;
+    expandedChildren?: boolean;
 };
 
 export type ContextMenuGenerator = (

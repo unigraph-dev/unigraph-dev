@@ -66,11 +66,15 @@ export function NoteBlock({ data, inline }: any) {
         <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
             <div style={{ flexGrow: 1 }}>
                 <Typography variant="body1">
-                    <Icon
-                        path={mdiNoteOutline}
-                        size={0.8}
-                        style={{ opacity: 0.54, marginRight: '4px', verticalAlign: 'text-bottom' }}
-                    />
+                    {data?._hide ? (
+                        []
+                    ) : (
+                        <Icon
+                            path={mdiNoteOutline}
+                            size={0.8}
+                            style={{ opacity: 0.54, marginRight: '4px', verticalAlign: 'text-bottom' }}
+                        />
+                    )}
                     <AutoDynamicView
                         object={data.get('text')?._value._value}
                         noDrag
@@ -902,6 +906,7 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                                               }
                                                     }
                                                     index={elindex}
+                                                    expandedChildren
                                                     callbacks={{
                                                         'get-view-id': () => options?.viewId, // only used at root
                                                         ...callbacks,

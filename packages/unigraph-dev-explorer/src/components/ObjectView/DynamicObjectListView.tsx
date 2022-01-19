@@ -30,7 +30,7 @@ import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { TransitionGroup } from 'react-transition-group';
 import { getDynamicViews } from '../../unigraph-react';
 import { AutoDynamicView } from './AutoDynamicView';
-import { DataContext, isMobile, TabContext } from '../../utils';
+import { DataContext, DataContextWrapper, isMobile, TabContext } from '../../utils';
 import { setupInfiniteScrolling } from './infiniteScrolling';
 import { DragandDrop } from './DragandDrop';
 
@@ -524,10 +524,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
             }}
             ref={drop}
         >
-            <DataContext.Provider
-                // eslint-disable-next-line react/jsx-no-constructed-context-values
-                value={{ rootUid: context?.uid || '0x0' }}
-            >
+            <DataContextWrapper contextUid={context?.uid} contextData={context} parents={[]}>
                 <div style={{ display: 'flex' }}>
                     {noBar ? (
                         []
@@ -696,7 +693,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                               </>
                           ))}
                 </div>
-            </DataContext.Provider>
+            </DataContextWrapper>
         </div>
     );
 };
