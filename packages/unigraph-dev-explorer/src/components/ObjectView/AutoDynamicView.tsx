@@ -112,6 +112,7 @@ export function AutoDynamicView({
         };
         window.unigraph.getState('global/focused').subscribe(cbfoc);
 
+        const viewElRef = viewEl.current;
         if (window.dragselect && !noContextMenu && !customBoundingBox && viewEl.current)
             window.dragselect.addSelectables([viewEl.current]);
 
@@ -120,6 +121,7 @@ export function AutoDynamicView({
             window.unigraph.getState('registry/dynamicViewDetailed').unsubscribe(cb2);
             window.unigraph.getState('global/selected').unsubscribe(cbsel);
             window.unigraph.getState('global/focused').unsubscribe(cbfoc);
+            window.dragselect.removeSelectables([viewElRef]);
         };
     }, []);
 
