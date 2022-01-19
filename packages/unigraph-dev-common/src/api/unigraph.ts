@@ -151,6 +151,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
         current: undefined,
     };
     const messages: any[] = [];
+    const exhaustedLeases: string[] = [];
     const eventTarget: EventTarget = new EventTarget();
     // eslint-disable-next-line @typescript-eslint/ban-types
     const callbacks: Record<string, Function> = {};
@@ -238,9 +239,13 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             eventTarget.dispatchEvent(new Event('onmessage', parsed));
             if (parsed.type === 'response' && parsed.id && callbacks[parsed.id]) callbacks[parsed.id](parsed);
             if (parsed.type === 'cache_updated' && parsed.name) {
-                caches[parsed.name] = parsed.result;
-                if (parsed.name !== 'uid_lease')
+                if (parsed.name !== 'uid_lease') {
+                    caches[parsed.name] = parsed.result;
                     window.localStorage.setItem(`caches/${parsed.name}`, JSON.stringify(parsed.result));
+                } else {
+                    const finalLeaseResult = _.difference(parsed.result, exhaustedLeases);
+                    caches[parsed.name] = finalLeaseResult;
+                }
                 cacheCallbacks[parsed.name]?.forEach((el) => el(parsed.result));
             }
             if (parsed.type === 'subscription' && parsed.id && subscriptions[parsed.id] && parsed.result) {
@@ -433,6 +438,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                         usedUids = [];
                         if (!newObject.uid) newObject.uid = uid;
                         assignUids(newObject, caches.uid_lease, usedUids, {});
+                        exhaustedLeases.push(...usedUids);
 
                         // Merge updater object with existing one
                         const newObj = JSON.parse(JSON.stringify(subResults[subId], getCircularReplacer()));
