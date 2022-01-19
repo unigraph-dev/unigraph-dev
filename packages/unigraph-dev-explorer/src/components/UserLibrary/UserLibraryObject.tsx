@@ -93,7 +93,7 @@ export default function DetailedObjectView({ uid, viewer, id, context, component
                 }}
                 callbacks={{ ...callbacks, subsId: myid, viewId: id }}
                 context={contextObj}
-                component={component}
+                components={component}
             />
         </React.Fragment>
     );

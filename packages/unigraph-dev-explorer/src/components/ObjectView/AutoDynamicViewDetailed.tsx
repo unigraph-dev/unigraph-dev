@@ -12,7 +12,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
     options,
     callbacks,
     context,
-    component,
+    components,
     attributes,
     onLoad,
     useFallback = true,
@@ -23,13 +23,13 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
 
     const [DynamicViewsDetailed, setDynamicViewsDetailed] = React.useState({
         ...window.unigraph.getState('registry/dynamicViewDetailed').value,
-        ...(component || {}),
+        ...(components || {}),
     });
 
     React.useEffect(() => {
         window.unigraph
             .getState('registry/dynamicViewDetailed')
-            .subscribe((newIts) => setDynamicViewsDetailed({ ...newIts, ...(component || {}) }));
+            .subscribe((newIts) => setDynamicViewsDetailed({ ...newIts, ...(components || {}) }));
     }, []);
 
     const tabContext = React.useContext(TabContext);
