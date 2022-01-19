@@ -17,7 +17,7 @@ on:
 
 jobs:
     release-electron:
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        if: (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) || github.event_name == 'workflow_dispatch'
         runs-on: ${{ matrix.os }}
         strategy:
             matrix:
@@ -55,22 +55,22 @@ jobs:
                       ${{ runner.os }}-build-
                       ${{ runner.os }}-
             - name: Make secrets.env.json
-              run: |
-                  echo { \
-                    "twitter": { \
-                      "api_key": "${{secrets.TWITTER_API_KEY}}", \
-                      "api_secret_key": "${{secrets.TWITTER_API_SECRET_KEY}}", \
-                      "bearer_token": "${{secrets.TWITTER_BEARER_TOKEN}}" \
-                    }, \
-                    "reddit": { \
-                        "client_id": "t8a9c0MvLEMUpMtAGHVioA" \
-                    }, \
-                    "google": { \
-                      "client_id": "${{secrets.GOOGLE_CLIENT_ID}}" \
-                      "client_secret": "${{secrets.GOOGLE_CLIENT_SECRET}}" \
-                    } \
-                  } \
-                  > secrets.env.json \
+              run: >
+                  echo {
+                    "twitter": {
+                      "api_key": "${{secrets.TWITTER_API_KEY}}",
+                      "api_secret_key": "${{secrets.TWITTER_API_SECRET_KEY}}",
+                      "bearer_token": "${{secrets.TWITTER_BEARER_TOKEN}}"
+                    },
+                    "reddit": {
+                        "client_id": "t8a9c0MvLEMUpMtAGHVioA"
+                    },
+                    "google": {
+                      "client_id": "${{secrets.GOOGLE_CLIENT_ID}}"
+                      "client_secret": "${{secrets.GOOGLE_CLIENT_SECRET}}"
+                    }
+                  }
+                  > secrets.env.json
 
             - run: mkdir ./dgraph-download
 
