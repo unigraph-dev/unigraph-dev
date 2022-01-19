@@ -23,7 +23,7 @@ export const init = () => {
     });
     registerDynamicViews({
         '$/schema/journal': {
-            view: ({ data }: { data: any }) => NoteBlock({ data: new UnigraphObject(data._value.note._value) }),
+            view: (props: any) => NoteBlock({ ...props, data: new UnigraphObject(props.data._value.note._value) }),
             query: journalQuery,
         },
     });

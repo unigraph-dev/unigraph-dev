@@ -54,7 +54,7 @@ export const getSubentities = (data: any) => {
     return [subentities, otherChildren];
 };
 
-export function NoteBlock({ data }: any) {
+export function NoteBlock({ data, inline }: any) {
     const [parents, references] = getParentsAndReferences(
         data['~_value'],
         (data['unigraph.origin'] || []).filter((el: any) => el.uid !== data.uid),
@@ -66,6 +66,11 @@ export function NoteBlock({ data }: any) {
         <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
             <div style={{ flexGrow: 1 }}>
                 <Typography variant="body1">
+                    <Icon
+                        path={mdiNoteOutline}
+                        size={0.8}
+                        style={{ opacity: 0.54, marginRight: '4px', verticalAlign: 'text-bottom' }}
+                    />
                     <AutoDynamicView
                         object={data.get('text')?._value._value}
                         noDrag
@@ -77,10 +82,14 @@ export function NoteBlock({ data }: any) {
                         }}
                     />
                 </Typography>
-                <Typography variant="body2" color="textSecondary">
-                    {subentities.length} immediate children, {parents.length} parents, {references.length} linked
-                    references
-                </Typography>
+                {inline ? (
+                    []
+                ) : (
+                    <Typography variant="body2" color="textSecondary">
+                        {subentities.length} immediate children, {parents.length} parents, {references.length} linked
+                        references
+                    </Typography>
+                )}
             </div>
             <div>
                 {otherChildren.map((el: any) => (

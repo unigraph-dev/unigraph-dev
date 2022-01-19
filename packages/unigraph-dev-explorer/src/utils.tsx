@@ -490,3 +490,9 @@ export function getParents(elem: any) {
     }
     return parents;
 }
+
+export function getDateAsUTC(input: any) {
+    const date = new Date(input);
+    const utc = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+    return utc;
+}
