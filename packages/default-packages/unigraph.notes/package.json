@@ -1,6 +1,6 @@
 {
     "displayName": "Notes",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "description": "Notetaking system by Unigraph",
     "name": "unigraph.notes",
     "unigraph": {
