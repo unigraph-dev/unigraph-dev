@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.2](https://github.com/TheExGenesis/unigraph-dev/compare/v0.1.1...v0.1.2) (2022-01-19)
+
+
+### Bug Fixes
+
+* **build:** } ([bd0cde1](https://github.com/TheExGenesis/unigraph-dev/commit/bd0cde1983fb553e9c6829f1c2f9f5c85a47382c))
+* **build:** enable build workflow to run manually ([8d770db](https://github.com/TheExGenesis/unigraph-dev/commit/8d770dbb63571aea4d8059287ef2f4e597c665a1))
+* **build:** enable build workflow to run manually ([cadd6d6](https://github.com/TheExGenesis/unigraph-dev/commit/cadd6d66cb43ab644ac820ba483afb68987328b1))
+* **build:** enable build workflow to run manually ([67810fe](https://github.com/TheExGenesis/unigraph-dev/commit/67810fe57eb275aaed4fb9bb943b0aaf4945c383))
+* **build:** enable build workflow to run manually ([41b3d00](https://github.com/TheExGenesis/unigraph-dev/commit/41b3d00417d3f6f027d43fce5fb99e8c029f68a6))
+* **build:** enable build workflow to run manually ([6efa009](https://github.com/TheExGenesis/unigraph-dev/commit/6efa00936596184e7cb4b69db1a8484b49039df3))
+* **build:** enable build workflow to run manually ([0ebd37f](https://github.com/TheExGenesis/unigraph-dev/commit/0ebd37f386729f0ec8d818b17a97c15b81001cb9))
+* **build:** macos  vms get rate limited often, adding token ([fbc5d1c](https://github.com/TheExGenesis/unigraph-dev/commit/fbc5d1cdcb05a534b94c5877c99da0501b257855))
+* **build:** missing $ ([290006a](https://github.com/TheExGenesis/unigraph-dev/commit/290006aa3291c0d7057faf5e9ed2a34f632a3d80))
+* **build:** secrets as env, change macos token ([c8aa415](https://github.com/TheExGenesis/unigraph-dev/commit/c8aa41594b029e733f1f487d9c4bcb1cb492bc50))
+
+
+
+
+
 ## [0.1.1](https://github.com/TheExGenesis/unigraph-dev/compare/v0.1.0...v0.1.1) (2022-01-19)
 
 **Note:** Version bump only for package unigraph-dev
