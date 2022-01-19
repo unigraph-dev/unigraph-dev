@@ -56,7 +56,7 @@ jobs:
                       ${{ runner.os }}-
             - name: Make secrets.env.json
               run: >
-                  echo {
+                  echo "{
                     "twitter": {
                       "api_key": "${{secrets.TWITTER_API_KEY}}",
                       "api_secret_key": "${{secrets.TWITTER_API_SECRET_KEY}}",
@@ -69,7 +69,7 @@ jobs:
                       "client_id": "${{secrets.GOOGLE_CLIENT_ID}}"
                       "client_secret": "${{secrets.GOOGLE_CLIENT_SECRET}}"
                     }
-                  }
+                  }"
                   > secrets.env.json
 
             - run: mkdir ./dgraph-download
