@@ -2,11 +2,16 @@ import { Avatar, Typography } from '@material-ui/core';
 import React from 'react';
 import { buildGraph, getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import Sugar from 'sugar';
-import { fromPairs, flow, curry, mergeWith } from 'lodash/fp';
+import { fromPairs, flow, curry, mergeWith, sortBy, reverse } from 'lodash/fp';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { AnyAaaaRecord } from 'dns';
+import { Calendar as BigCalendar, DateLocalizer, momentLocalizer, stringOrDate } from 'react-big-calendar';
+import moment from 'moment';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { TabContext } from '../../utils';
+import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 export function CalendarEvent({ data, callbacks }: any) {
     return (
@@ -130,52 +135,45 @@ const queryDatedWithinMonth = (year: number, month: number) => {
     return queryDatedWithinTimeRange(start, end);
 };
 
-const groupByList = (getGroups: (x: any) => any, data: any[]) => {
-    // items can appear in several groups
-    return data.reduce((storage: any, item: any) => {
-        const groups = getGroups(item);
-        const groupItemPairs = groups.map((group: any) => [group, [item]]);
-        const objectFromPairs = fromPairs(groupItemPairs);
-        // console.log('groupByList', { groups, groupItemPairs, objectFromPairs, storage, item });
-        // return { ...storage, ...objectFromPairs } );
-        return mergeWith((x: any[], y: any[]) => (x ?? []).concat(y), objectFromPairs, storage);
-    }, {});
+const datedToBigCalendarEvent = (datedObj: any): any => {
+    const bigCalendarEventByType: any = {
+        '$/schema/todo': (datedObjX: any) => {
+            return {
+                title: datedObjX.get('name').as('primitive'),
+                start: new Date(datedObjX.get('time_frame/start/datetime').as('primitive')),
+                end: new Date(datedObjX.get('time_frame/end/datetime').as('primitive')),
+                allDay: true,
+                unigraphObj: datedObjX,
+            };
+        },
+        '$/schema/calendar_event': (datedObjX: any) => {
+            return {
+                title: datedObjX.get('name').as('primitive'),
+                start: new Date(datedObjX.get('time_frame/start/datetime').as('primitive')),
+                end: new Date(datedObjX.get('time_frame/end/datetime').as('primitive')),
+                unigraphObj: datedObjX,
+            };
+        },
+        '$/schema/journal': (datedObjX: any) => {
+            return {
+                title: datedObjX.get('note/text').as('primitive'),
+                start: new Date(datedObjX.get('date/datetime').as('primitive')),
+                end: new Date(datedObjX.get('date/datetime').as('primitive')),
+                allDay: true,
+                unigraphObj: datedObjX,
+            };
+        },
+    };
+    return bigCalendarEventByType[datedObj.getType()](datedObj);
 };
 
-const getDaysTimePointed = (datedObj: any) => {
-    return [Sugar.Date.format(new Date(datedObj.get('date/datetime').as('primitive')), '{yyyy}-{MM}-{dd}')];
+const unigraphBigCalendarEventComponent = ({ event, ...props }: any) => {
+    return <AutoDynamicView object={new UnigraphObject(event.unigraphObj)} inline />;
 };
-
-const roundToDate = (date: Date) => {
-    return new Date(date).setHours(0, 0, 0, 1);
-};
-const getDaysBetween = (start: Date, end: Date): string[] => {
-    const dates = [];
-    const curr = start;
-    while (roundToDate(curr) <= roundToDate(end)) {
-        dates.push(Sugar.Date.format(curr, '{yyyy}-{MM}-{dd}'));
-        curr.setDate(curr.getDate() + 1);
-    }
-    return dates;
-};
-const getDaysTimeFramed = (datedObj: any) => {
-    const start = new Date(datedObj.get('time_frame/start/datetime').as('primitive'));
-    const end = new Date(datedObj.get('time_frame/end/datetime').as('primitive'));
-    const days = getDaysBetween(start, end);
-    return days;
-};
-
-const getDaysDated = (datedObj: any) => {
-    // if object with time frame, get days within timeframe. if object with time point, get days with time point
-    if (datedObj.get('time_frame')) {
-        return getDaysTimeFramed(datedObj);
-    }
-    return getDaysTimePointed(datedObj);
-};
-const groupDatedByDay = curry(groupByList)(getDaysDated);
 
 export function Calendar() {
-    const [currentEvents, setCurrentEvents] = React.useState<any[]>([]);
+    const [currentEvents, setCurrentEvents] = React.useState<any>([]);
+    const [localizer, _] = React.useState<DateLocalizer>(() => momentLocalizer(moment));
     const tabContext = React.useContext(TabContext);
     React.useEffect(() => {
         const id = getRandomInt();
@@ -184,8 +182,7 @@ export function Calendar() {
             queryDatedWithinMonth(today.getFullYear(), today.getMonth()),
             (res: any) => {
                 const graphRes = buildGraph(res);
-                // setCurrentEvents(groupDatedByDay(graphRes));
-                setCurrentEvents(graphRes);
+                setCurrentEvents(graphRes.map(datedToBigCalendarEvent).filter((x) => x));
             },
             id,
             { metadataOnly: true },
@@ -197,14 +194,17 @@ export function Calendar() {
     }, []);
 
     return (
-        <DynamicObjectListView
-            groupBy="date"
-            groupers={{
-                date: groupDatedByDay,
-            }}
-            items={currentEvents}
-            context={null}
-            reverse
-        />
+        localizer && (
+            <BigCalendar
+                localizer={localizer}
+                events={currentEvents}
+                startAccessor="start"
+                endAccessor="end"
+                components={{ event: unigraphBigCalendarEventComponent }}
+                eventPropGetter={(event: any, start: stringOrDate, end: stringOrDate, isSelected: boolean) => ({
+                    style: { backgroundColor: '#fff', color: 'black', border: '1px', borderColor: 'black' },
+                })}
+            />
+        )
     );
 }
