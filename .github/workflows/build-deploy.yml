@@ -72,12 +72,12 @@ jobs:
                   }"
                   > secrets.env.json
               env:
-                  TWITTER_API_KEY: ${{secrets.TWITTER_API_KEY}
-                  TWITTER_API_SECRET_KEY: ${{secrets.TWITTER_API_SECRET_KEY}
-                  TWITTER_BEARER_TOKEN: ${{secrets.TWITTER_BEARER_TOKEN}
-                  REDDIT_CLIENT_ID: ${{secrets.REDDIT_CLIENT_ID}
-                  GOOGLE_CLIENT_ID: ${{secrets.GOOGLE_CLIENT_ID}
-                  GOOGLE_CLIENT_SECRET: ${{secrets.GOOGLE_CLIENT_SECRET}
+                  TWITTER_API_KEY: ${{secrets.TWITTER_API_KEY}}
+                  TWITTER_API_SECRET_KEY: ${{secrets.TWITTER_API_SECRET_KEY}}
+                  TWITTER_BEARER_TOKEN: ${{secrets.TWITTER_BEARER_TOKEN}}
+                  REDDIT_CLIENT_ID: ${{secrets.REDDIT_CLIENT_ID}}
+                  GOOGLE_CLIENT_ID: ${{secrets.GOOGLE_CLIENT_ID}}
+                  GOOGLE_CLIENT_SECRET: ${{secrets.GOOGLE_CLIENT_SECRET}}
 
             - run: mkdir ./dgraph-download
 
