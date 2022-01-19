@@ -56,12 +56,7 @@ export function Focus() {
             listUid={listUid}
             itemGetter={(el: any) => el._value._value}
             itemRemover={(uids) => {
-                window.unigraph.deleteItemFromArray(
-                    listUid,
-                    uids,
-                    focusEntity.uid,
-                    subsId,
-                );
+                window.unigraph.deleteItemFromArray(listUid, uids, focusEntity.uid, subsId);
             }}
         />
     );

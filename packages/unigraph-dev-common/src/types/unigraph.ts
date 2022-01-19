@@ -1,10 +1,4 @@
-import {
-    SchemaAny,
-    SchemaDgraph,
-    SchemaFullName,
-    SchemaShorthandName,
-    UnigraphUid,
-} from './json-ts';
+import { SchemaAny, SchemaDgraph, SchemaFullName, SchemaShorthandName, UnigraphUid } from './json-ts';
 import { PackageDeclaration } from './packages';
 
 /** Unigraph interface */ // Don't remove this line - needed for Monaco to work
@@ -37,10 +31,7 @@ export type UnigraphHooks = {
     afterSchemasLoaded: (subsId: any, data: any, componentThis: any) => any;
 };
 
-export type UnigraphExecutable<T = any> = (
-    context: { params: T },
-    unigraph: Unigraph,
-) => any;
+export type UnigraphExecutable<T = any> = (context: { params: T }, unigraph: Unigraph) => any;
 
 export type UnigraphNotification = {
     name: string;
@@ -54,11 +45,7 @@ export type Query = QueryType | QueryObject | QueryRaw | QueryGroup;
 
 export type QueryType = {
     type: 'type';
-    name:
-        | SchemaShorthandName<string>
-        | SchemaFullName<string, string, string>
-        | SchemaAny
-        | string;
+    name: SchemaShorthandName<string> | SchemaFullName<string, string, string> | SchemaAny | string;
     options?: {
         all?: boolean;
         showHidden?: boolean;
@@ -74,10 +61,7 @@ export type QueryObject = {
     type: 'object';
     uid: UnigraphUid<string> | UnigraphUid<string>[] | string | string[];
     options?: {
-        queryAsType?:
-            | SchemaShorthandName<string>
-            | SchemaFullName<string, string, string>
-            | string;
+        queryAsType?: SchemaShorthandName<string> | SchemaFullName<string, string, string> | string;
         queryFn?: string;
         depth?: number;
     };
@@ -152,10 +136,7 @@ export interface Unigraph<TT = WebSocket | false> {
      * You can also attach a version number, such as `unigraph.core@0.0.1`.
      * @param fallback the fallback schema with the `PackageDeclaration` format.
      */
-    ensurePackage(
-        packageName: string,
-        fallback: PackageDeclaration,
-    ): Promise<any>;
+    ensurePackage(packageName: string, fallback: PackageDeclaration): Promise<any>;
     /**
      * Subscribes to a Unigraph type, and call the callback function every time the subscription is updated.
      *
@@ -205,21 +186,13 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param eventId subscription ID (if update, must be the same)
      * @param update whether we're updating the query (delta query).
      */
-    subscribe(
-        query: Query,
-        callback: (results: any[] | any) => void,
-        eventId?: number,
-        update?: boolean,
-    ): Promise<any>;
+    subscribe(query: Query, callback: (results: any[] | any) => void, eventId?: number, update?: boolean): Promise<any>;
     /**
      * Hibernates (or revives) a Unigraph subscription.
      * @param eventId the subscription ID to (un)hibernate.
      * @param revival whether this is a revival or hibernation.
      */
-    hibernateOrReviveSubscription(
-        eventId?: number | number[],
-        revival?: boolean,
-    ): Promise<any>;
+    hibernateOrReviveSubscription(eventId?: number | number[], revival?: boolean): Promise<any>;
     /** Unsubscribes using the subscription ID. */
     unsubscribe(id: number): any;
     /**
@@ -228,12 +201,7 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param object The object to be added.
      * @param schema Schema of that object, must be valid. Such as: `$/schema/abc`
      */
-    addObject(
-        object: any,
-        schema: string,
-        padded?: boolean,
-        subIds?: any[],
-    ): any;
+    addObject(object: any, schema: string, padded?: boolean, subIds?: any[]): any;
     /**
      * Reach into the namespace map cache and get a UID corresponding to the name.
      *
@@ -253,12 +221,7 @@ export interface Unigraph<TT = WebSocket | false> {
      *
      * @param fragments Array of DQL (GraphQL+-) Query fragments - such as `(func: fn1(something)){ uid expand(_predicate_) }`
      */
-    getQueries(
-        fragments: string[] | string,
-        getAll?: boolean,
-        batch?: number,
-        commonVars?: string,
-    ): any;
+    getQueries(fragments: string[] | string, getAll?: boolean, batch?: number, commonVars?: string): any;
     /**
      * Gets search results given a search query.
      *
@@ -302,6 +265,7 @@ export interface Unigraph<TT = WebSocket | false> {
         pad?: boolean,
         subIds?: any[] | any,
         origin?: any[],
+        eagarlyUpdate?: boolean,
     ): any;
     /**
      * Deletes relationships by supplying the origin UID and JSONs to delete.
@@ -341,15 +305,9 @@ export interface Unigraph<TT = WebSocket | false> {
     /** Gets all referenceables from the library (like primitives, schemas, shorthands, etc) */
     getReferenceables(): Promise<any>;
     /** Deprecated: get selected referenceables. */
-    getReferenceables(
-        key?: string | undefined,
-        asMapWithContent?: boolean | undefined,
-    ): Promise<any>;
+    getReferenceables(key?: string | undefined, asMapWithContent?: boolean | undefined): Promise<any>;
     /** Gets a list of schemas. */
-    getSchemas(
-        schemas?: string[] | undefined,
-        resolve?: boolean,
-    ): Promise<Record<string, SchemaDgraph>>;
+    getSchemas(schemas?: string[] | undefined, resolve?: boolean): Promise<Record<string, SchemaDgraph>>;
     getObject?(
         uidOrName: string,
         options?: {
@@ -357,9 +315,7 @@ export interface Unigraph<TT = WebSocket | false> {
         },
     ): Promise<any>;
     /** Gets a list of packages. */
-    getPackages(
-        packages?: string[] | undefined,
-    ): Promise<Record<string, PackageDeclaration>>;
+    getPackages(packages?: string[] | undefined): Promise<Record<string, PackageDeclaration>>;
     /**
      * Fetches a URL and return its contents in Blob format.
      *
@@ -391,12 +347,7 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param params The parameters defined for that executable.
      * @param fnString Whether to return the executable function as a function or stirng.
      */
-    runExecutable<T>(
-        uid: string,
-        params: T,
-        context?: any,
-        fnString?: boolean,
-    ): Promise<any>;
+    runExecutable<T>(uid: string, params: T, context?: any, fnString?: boolean, bypassCache?: boolean): Promise<any>;
     /**
      * Adds a notification to the global notification list.
      *
@@ -455,5 +406,11 @@ export interface Unigraph<TT = WebSocket | false> {
      * Gets all subscriptions of Unigraph. Used as a developer tool for debug.
      */
     getSubscriptions?(): any;
+    /**
+     * Changes last edited time of an object/objects.
+     * @param uids uids of objects to change.
+     */
+    touch(uids: string[] | string): any;
+    leaseUid?(): string;
 }
 /** End of unigraph interface */ // Don't remove this line - needed for Monaco to work

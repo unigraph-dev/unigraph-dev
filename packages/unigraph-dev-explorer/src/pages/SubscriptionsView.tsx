@@ -6,9 +6,7 @@ import { AutoDynamicView } from '../components/ObjectView/AutoDynamicView';
 function Column({ name, children }: any) {
     return (
         <div style={{ display: 'flex' }}>
-            <Typography style={{ color: 'gray', marginRight: '4px' }}>
-                {name}
-            </Typography>
+            <Typography style={{ color: 'gray', marginRight: '4px' }}>{name}</Typography>
             {children}
         </div>
     );
@@ -40,10 +38,7 @@ export function SubscriptionsView() {
                 {' active'}
             </Typography>
             {subs.map((el) => (
-                <Card
-                    style={{ margin: '12px', padding: '12px' }}
-                    variant="outlined"
-                >
+                <Card style={{ margin: '12px', padding: '12px' }} variant="outlined">
                     <Column name="ID">
                         <Typography>{el.id}</Typography>
                     </Column>
@@ -54,14 +49,10 @@ export function SubscriptionsView() {
                         <Typography>{el.queryTime}</Typography>
                     </Column>
                     <Column name="Result type example">
-                        <Typography>
-                            {el.data[0]?.type?.['unigraph.id'] || 'No type'}
-                        </Typography>
+                        <Typography>{el.data[0]?.type?.['unigraph.id'] || 'No type'}</Typography>
                     </Column>
                     <Column name="Started at">
-                        <Typography>
-                            {Sugar.Date.relative(new Date(el.regTime))}
-                        </Typography>
+                        <Typography>{Sugar.Date.relative(new Date(el.regTime))}</Typography>
                     </Column>
                     <Column name="Subscription type">
                         <Typography>{el.subType}</Typography>
@@ -72,9 +63,7 @@ export function SubscriptionsView() {
                         </Typography>
                     </Column>
                     <Column name="Hibernated">
-                        <Typography>
-                            {el.hibernated === true ? 'Yes' : 'No'}
-                        </Typography>
+                        <Typography>{el.hibernated === true ? 'Yes' : 'No'}</Typography>
                     </Column>
                 </Card>
             ))}

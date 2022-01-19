@@ -27,10 +27,7 @@ import { InspectorView } from './components/UnigraphCore/InspectorView';
 import { RedditSettings } from './examples/reddit/RedditSettings';
 import { AppDrawer } from './components';
 import { ConnectionWidget } from './components/UnigraphCore/ConnectionWidget';
-import {
-    AllApps,
-    AppLibraryWidget,
-} from './components/PackageManager/AppLibraryWidget';
+import { AllApps, AppLibraryWidget } from './components/PackageManager/AppLibraryWidget';
 import { EmailSettings } from './examples/email/EmailSettings';
 import { BacklinkView } from './components/ObjectView/BacklinkView';
 import ExplorerDashboard from './pages/ExplorerDashboard';
@@ -171,12 +168,7 @@ const pages: Record<string, any> = {
     omnibar: {
         // only used in electron
         constructor: (props: any) => (
-            <SearchOverlayPopover
-                {...props}
-                open
-                setClose={() => (window as any).setClose()}
-                noShadow
-            />
+            <SearchOverlayPopover {...props} open setClose={() => (window as any).setClose()} noShadow />
         ),
         maximize: true,
         name: 'Omnibar',

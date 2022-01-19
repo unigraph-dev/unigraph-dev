@@ -1,8 +1,5 @@
 import { PackageDeclaration } from 'unigraph-dev-common/lib/types/packages';
-import {
-    Query,
-    UnigraphNotification,
-} from 'unigraph-dev-common/lib/types/unigraph';
+import { Query, UnigraphNotification } from 'unigraph-dev-common/lib/types/unigraph';
 import DgraphClient from './dgraphClient';
 
 declare global {
@@ -208,7 +205,8 @@ declare type EventUpdateObject = {
     upsert: boolean | undefined,
     pad: boolean | undefined,
     subIds?: any[] | any,
-    origin?: any[]
+    origin?: any[],
+    usedUids?: any[],
 }
 
 declare type EventDeleteRelation = {
@@ -239,7 +237,7 @@ declare type EventReorderItemInArray = {
     subIds: any[] | any,
 }
 
-declare type EventResponser = (event: any, ws: IWebsocket) => any
+declare type EventResponser = (event: any, ws: IWebsocket, connId?: any) => any
 
 declare type EventProxyFetch = {
     type: "event",
@@ -262,6 +260,7 @@ declare type EventRunExecutable = {
     id: number,
     "uid": string,
     params: any,
+    bypassCache?: boolean,
 }
 
 declare type EventAddNotification = {
@@ -296,4 +295,11 @@ declare type EventGetSubscriptions = {
     type: "event",
     event: "get_subscriptions",
     id: number,
+}
+
+declare type EventTouch = {
+    type: 'event',
+    event: 'touch',
+    id: number,
+    uids: string[] | string
 }

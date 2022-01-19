@@ -10,12 +10,7 @@ export function StringObjectViewer({ object }: { object: any }) {
 
     return (
         <div style={{ maxHeight: '160px', width: '100%', overflowX: 'auto' }}>
-            Type:{' '}
-            {
-                window.unigraph.getNamespaceMap?.()?.[
-                    object?.type?.['unigraph.id']
-                ]?._name
-            }
+            Type: {window.unigraph.getNamespaceMap?.()?.[object?.type?.['unigraph.id']]?._name}
             <br />
             {!object._value ? (
                 new UnigraphObject({ ...object }).as('primitive')
@@ -52,16 +47,9 @@ const onPropertyEdit = (edit: InteractionProps, pad: boolean) => {
     }
 };
 
-export function JsontreeObjectViewer({
-    object,
-    options,
-}: {
-    object: any;
-    options: ObjectViewOptions;
-}) {
+export function JsontreeObjectViewer({ object, options }: { object: any; options: ObjectViewOptions }) {
     const [showPadded, setShowPadded] = React.useState(false);
-    const onedit = (props: InteractionProps) =>
-        onPropertyEdit(props, !showPadded);
+    const onedit = (props: InteractionProps) => onPropertyEdit(props, !showPadded);
 
     return (
         <div>

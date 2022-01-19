@@ -18,12 +18,7 @@ export const TagListSubscription = withUnigraphSubscription(
     TagList,
     { schemas: [], defaultData: [], packages: [] },
     {
-        afterSchemasLoaded: (
-            subsId: any,
-            tabContext: any,
-            data: any,
-            setData: any,
-        ) => {
+        afterSchemasLoaded: (subsId: any, tabContext: any, data: any, setData: any) => {
             tabContext.subscribeToType('$/schema/tag', (result: any) => {
                 setData(result);
             });
@@ -37,8 +32,7 @@ export const TagWidget: React.FC = () => (
             Tags
         </Typography>
         <Typography variant="body2" gutterBottom>
-            Quickly navigate to all items with a tag by clicking, or drag tag
-            onto items to assign it
+            Quickly navigate to all items with a tag by clicking, or drag tag onto items to assign it
         </Typography>
         <TagListSubscription />
     </div>

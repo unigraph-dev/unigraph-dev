@@ -22,12 +22,7 @@ export const NotesListAll = withUnigraphSubscription(
     NotesListBody,
     { schemas: [], defaultData: [], packages: [] },
     {
-        afterSchemasLoaded: (
-            subsId: number,
-            tabContext: any,
-            data: any,
-            setData: any,
-        ) => {
+        afterSchemasLoaded: (subsId: number, tabContext: any, data: any, setData: any) => {
             tabContext.subscribeToType(
                 '$/schema/note_block',
                 (result: any[]) => {
@@ -42,9 +37,7 @@ export const NotesListAll = withUnigraphSubscription(
 
 export function NotesList() {
     return (
-        <div
-            style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
-        >
+        <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <NotesListAll />
         </div>
     );

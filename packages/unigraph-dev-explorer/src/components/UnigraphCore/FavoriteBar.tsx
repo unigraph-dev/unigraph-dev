@@ -1,10 +1,7 @@
 import React from 'react';
 import { useEffectOnce } from 'react-use';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
-import {
-    byElementIndex,
-    unpad,
-} from 'unigraph-dev-common/lib/utils/entityUtils';
+import { byElementIndex, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { TabContext } from '../../utils';
 import { DynamicObjectListView } from '../ObjectView/DynamicObjectListView';
 
@@ -56,11 +53,7 @@ export function FavoriteBar() {
             noRemover
             defaultFilter={['no-deleted', 'no-noview']}
             itemRemover={(uids) => {
-                window.unigraph.deleteItemFromArray(
-                    favEntity?._value?.children?.uid,
-                    uids,
-                    favEntity.uid,
-                );
+                window.unigraph.deleteItemFromArray(favEntity?._value?.children?.uid, uids, favEntity.uid);
             }}
         />
     );

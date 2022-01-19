@@ -5,20 +5,11 @@ import { useDrag, useDrop } from 'react-dnd';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useSwipeable } from 'react-swipeable';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
-import {
-    buildGraph,
-    UnigraphObject,
-} from 'unigraph-dev-common/lib/utils/utils';
+import { buildGraph, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { AutoDynamicViewProps } from '../../types/ObjectView.d';
 import { subscribeToBacklinks } from '../../unigraph-react';
-import {
-    DataContext,
-    isMobile,
-    isMultiSelectKeyPressed,
-    selectUid,
-    TabContext,
-} from '../../utils';
+import { DataContext, getParents, isMobile, isMultiSelectKeyPressed, selectUid, TabContext } from '../../utils';
 import { getParentsAndReferences } from './backlinksUtils';
 import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import { StringObjectViewer } from './BasicObjectViews';
@@ -46,13 +37,13 @@ export function AutoDynamicView({
     noClickthrough,
     onClick,
     recursive,
+    customBoundingBox,
     ...props
 }: AutoDynamicViewProps) {
     if (!callbacks) callbacks = {};
     allowSubentity = allowSubentity === true;
 
-    const shouldGetBacklinks =
-        !excludableTypes.includes(object?.type?.['unigraph.id']) && !inline;
+    const shouldGetBacklinks = !excludableTypes.includes(object?.type?.['unigraph.id']) && !inline;
     const [backlinks, setBacklinks] = React.useState<any>([]);
 
     const dataContext = React.useContext(DataContext);
@@ -64,14 +55,11 @@ export function AutoDynamicView({
     const [isRecursion, setIsRecursion] = React.useState<any>(false);
     const getObject = () => (isObjectStub ? loadedObj : object);
 
-    const [showSubentities, setShowSubentities] = React.useState(
-        !!subentityExpandByDefault,
-    );
+    const [showSubentities, setShowSubentities] = React.useState(!!subentityExpandByDefault);
 
     const [isSelected, setIsSelected] = React.useState(false);
     const [isFocused, setIsFocused] = React.useState(
-        window.unigraph.getState('global/focused').value.uid === object?.uid &&
-            tabContext.isVisible(),
+        window.unigraph.getState('global/focused').value.uid === object?.uid && tabContext.isVisible(),
     );
 
     const [DynamicViews, setDynamicViews] = React.useState({
@@ -79,9 +67,9 @@ export function AutoDynamicView({
         ...(component || {}),
     });
     const [canClickthrough, setCanClickthrough] = React.useState(
-        Object.keys(
-            window.unigraph.getState('registry/dynamicViewDetailed').value,
-        ).includes(getObject()?.type?.['unigraph.id']),
+        Object.keys(window.unigraph.getState('registry/dynamicViewDetailed').value).includes(
+            getObject()?.type?.['unigraph.id'] || object?.type?.['unigraph.id'],
+        ),
     );
 
     const viewEl = React.useRef(null);
@@ -96,10 +84,9 @@ export function AutoDynamicView({
 
         const cb2 = (newIts: any) =>
             setCanClickthrough(
-                Object.keys(
-                    window.unigraph.getState('registry/dynamicViewDetailed')
-                        .value,
-                ).includes(getObject()?.type?.['unigraph.id']),
+                Object.keys(window.unigraph.getState('registry/dynamicViewDetailed').value).includes(
+                    getObject()?.type?.['unigraph.id'] || object?.type?.['unigraph.id'],
+                ),
             );
         window.unigraph.getState('registry/dynamicViewDetailed').subscribe(cb2);
 
@@ -110,17 +97,17 @@ export function AutoDynamicView({
         window.unigraph.getState('global/selected').subscribe(cbsel);
 
         const cbfoc = (foc: any) => {
-            if (foc.uid === object?.uid && tabContext.isVisible())
-                setIsFocused(true);
+            if (foc.uid === object?.uid && tabContext.isVisible()) setIsFocused(true);
             else setIsFocused(false);
         };
         window.unigraph.getState('global/focused').subscribe(cbfoc);
 
+        if (window.dragselect && !noContextMenu && !customBoundingBox && viewEl.current)
+            window.dragselect.addSelectables([viewEl.current]);
+
         return function cleanup() {
             window.unigraph.getState('registry/dynamicView').unsubscribe(cb);
-            window.unigraph
-                .getState('registry/dynamicViewDetailed')
-                .unsubscribe(cb2);
+            window.unigraph.getState('registry/dynamicViewDetailed').unsubscribe(cb2);
             window.unigraph.getState('global/selected').unsubscribe(cbsel);
             window.unigraph.getState('global/focused').unsubscribe(cbfoc);
         };
@@ -145,13 +132,8 @@ export function AutoDynamicView({
                     [pars, refs].map((it) =>
                         it.filter(
                             (el) =>
-                                Object.keys(DynamicViews).includes(
-                                    el?.type?.['unigraph.id'],
-                                ) &&
-                                ![
-                                    ...getParents(viewEl.current),
-                                    callbacks?.context?.uid,
-                                ].includes(el.uid),
+                                Object.keys(DynamicViews).includes(el?.type?.['unigraph.id']) &&
+                                ![...getParents(viewEl.current), callbacks?.context?.uid].includes(el.uid),
                         ),
                     ),
                 );
@@ -169,9 +151,7 @@ export function AutoDynamicView({
         if (isObjectStub) {
             console.log(tabContext);
             if (subsId) tabContext.unsubscribe(subsId);
-            let query = DynamicViews[object.type?.['unigraph.id']]?.query?.(
-                object.uid,
-            );
+            let query = DynamicViews[object.type?.['unigraph.id']]?.query?.(object.uid);
             if (!query) {
                 query = `(func: uid(${object.uid})) @recurse {
                 uid
@@ -193,7 +173,7 @@ export function AutoDynamicView({
             };
         }
         return () => {};
-    }, [object.uid]);
+    }, [object?.uid]);
 
     const [{ isDragging }, drag] = useDrag(() => ({
         type: object?.type?.['unigraph.id'] || '$/schema/any',
@@ -210,15 +190,9 @@ export function AutoDynamicView({
     }));
 
     const [, drop] = useDrop(() => ({
-        accept: window.unigraph.getState('referenceables/semantic_children')
-            .value,
+        accept: window.unigraph.getState('referenceables/semantic_children').value,
         drop: (item: { uid: string; itemType: string }, monitor) => {
-            if (
-                !monitor.didDrop() &&
-                allowSemantic &&
-                !noDrop &&
-                item.uid !== object?.uid
-            ) {
+            if (!monitor.didDrop() && allowSemantic && !noDrop && item.uid !== object?.uid) {
                 window.unigraph.updateObject(object?.uid, {
                     children: [
                         {
@@ -246,23 +220,7 @@ export function AutoDynamicView({
             ),
     });
 
-    const contextEntity =
-        typeof callbacks?.context === 'object' ? callbacks.context : null;
-
-    function getParents(elem: any) {
-        const parents: any[] = [];
-        if (!elem) return parents;
-        while (
-            elem.parentNode &&
-            elem.parentNode.nodeName.toLowerCase() != 'body'
-        ) {
-            elem = elem.parentNode;
-            if (!elem) return parents;
-            if (elem.id?.startsWith?.('object-view-'))
-                parents.push(elem.id.slice(12));
-        }
-        return parents;
-    }
+    const contextEntity = typeof callbacks?.context === 'object' ? callbacks.context : null;
 
     const attach = React.useCallback(
         (domElement) => {
@@ -278,7 +236,7 @@ export function AutoDynamicView({
 
             if (!noDrag) drag(domElement);
             if (!noDrop) drop(domElement);
-            if (isMobile()) handlers.ref(domElement);
+            if (isMobile() && !noContextMenu) handlers.ref(domElement);
             viewEl.current = domElement;
         },
         [isDragging, drag, callbacks],
@@ -288,9 +246,7 @@ export function AutoDynamicView({
         <div
             style={{
                 display:
-                    shouldGetBacklinks &&
-                    (backlinks?.[1]?.length ||
-                        (!noParents && backlinks?.[0]?.length > 0))
+                    shouldGetBacklinks && (backlinks?.[1]?.length || (!noParents && backlinks?.[0]?.length > 0))
                         ? ''
                         : 'none',
                 marginLeft: 'auto',
@@ -300,12 +256,13 @@ export function AutoDynamicView({
                 whiteSpace: 'nowrap',
                 cursor: 'pointer',
             }}
-            onClick={() => {
+            onClick={(ev) => {
+                ev.stopPropagation();
+                ev.preventDefault();
                 window.wsnavigator(`/library/backlink?uid=${object?.uid}`);
             }}
         >
-            {(noParents ? 0 : backlinks?.[0]?.length || 0) +
-                (backlinks?.[1]?.length || 0)}
+            {(noParents ? 0 : backlinks?.[0]?.length || 0) + (backlinks?.[1]?.length || 0)}
         </div>
     );
 
@@ -317,24 +274,29 @@ export function AutoDynamicView({
             Object.keys(DynamicViews).includes(object.type['unigraph.id']) &&
             getObject()
         ) {
-            return React.createElement(
-                DynamicViews[object.type['unigraph.id']].view,
-                {
-                    data: getObject(),
-                    ...props,
-                    callbacks: {
-                        viewId: tabContext.viewId,
-                        setTitle: tabContext.setTitle,
-                        ...(callbacks || {}),
-                        ...(noBacklinks ? { BacklinkComponent } : {}),
-                        ...(subsId ? { subsId } : {}),
-                    },
-                    ...(attributes || {}),
-                    inline,
-                    compact,
-                    focused: isFocused,
+            return React.createElement(DynamicViews[object.type['unigraph.id']].view, {
+                data: getObject(),
+                ...props,
+                callbacks: {
+                    viewId: tabContext.viewId,
+                    setTitle: tabContext.setTitle,
+                    ...(callbacks || {}),
+                    ...(noBacklinks ? { BacklinkComponent } : {}),
+                    ...(window.dragselect && !noContextMenu && customBoundingBox
+                        ? {
+                              registerBoundingBox: (el: any) => {
+                                  el.id = `bounding-box-${object?.uid}`;
+                                  window.dragselect.addSelectables([el]);
+                              },
+                          }
+                        : {}),
+                    ...(subsId ? { subsId } : {}),
                 },
-            );
+                ...(attributes || {}),
+                inline,
+                compact,
+                focused: isFocused,
+            });
         }
         if (isRecursion === false && object && getObject()) {
             return <StringObjectViewer object={getObject()} />;
@@ -377,13 +339,7 @@ export function AutoDynamicView({
                     onContextMenu={
                         noContextMenu
                             ? () => false
-                            : (event) =>
-                                  onUnigraphContextMenu(
-                                      event,
-                                      getObject(),
-                                      contextEntity,
-                                      callbacks,
-                                  )
+                            : (event) => onUnigraphContextMenu(event, getObject(), contextEntity, callbacks)
                     }
                 >
                     <Typography>
@@ -398,8 +354,7 @@ export function AutoDynamicView({
                 style={{
                     display: inline ? 'inline' : 'block',
                     ...(inline ? {} : { width: '100%' }),
-                    backgroundColor:
-                        isSelected || isDragging ? 'whitesmoke' : 'unset',
+                    backgroundColor: isSelected || isDragging ? 'whitesmoke' : 'unset',
                     borderRadius: isSelected || isDragging ? '12px' : '',
                 }}
                 key={`object-view-${object?.uid}`}
@@ -411,8 +366,7 @@ export function AutoDynamicView({
                         boxSizing: 'border-box',
                         display: 'inline-flex',
                         alignItems: 'center',
-                        cursor:
-                            noClickthrough || !canClickthrough ? '' : 'pointer',
+                        cursor: noClickthrough || !canClickthrough ? '' : 'pointer',
                         ...(inline ? {} : { width: '100%' }),
                         ...(isMobile() ? { touchAction: 'pan-y' } : {}),
                         ...style,
@@ -423,13 +377,7 @@ export function AutoDynamicView({
                     onContextMenu={
                         noContextMenu
                             ? () => false
-                            : (event) =>
-                                  onUnigraphContextMenu(
-                                      event,
-                                      getObject(),
-                                      contextEntity,
-                                      callbacks,
-                                  )
+                            : (event) => onUnigraphContextMenu(event, getObject(), contextEntity, callbacks)
                     }
                     onClickCapture={(ev) => {
                         if (isMultiSelectKeyPressed(ev)) {
@@ -445,9 +393,7 @@ export function AutoDynamicView({
                                       ev.stopPropagation();
                                       ev.preventDefault();
                                       window.wsnavigator(
-                                          `/library/object?uid=${
-                                              object?.uid
-                                          }&viewer=${'dynamic-view-detailed'}&type=${
+                                          `/library/object?uid=${object?.uid}&viewer=${'dynamic-view-detailed'}&type=${
                                               object?.type?.['unigraph.id']
                                           }`,
                                       );
@@ -471,37 +417,27 @@ export function AutoDynamicView({
                             style={{ color: 'gray' }}
                         >
                             {!showSubentities ? '+ show ' : '- hide '}
-                            {`${
-                                getSubentities(getObject())?.length
-                            } subentities`}
+                            {`${getSubentities(getObject())?.length} subentities`}
                         </Typography>
                         {showSubentities ? (
                             <ul>
-                                {getSubentities(getObject()).map(
-                                    (el: any, index: number) => (
-                                        <li>
-                                            <AutoDynamicView
-                                                object={
-                                                    new UnigraphObject(
-                                                        el._value,
-                                                    )
-                                                }
-                                                component={component}
-                                                callbacks={{
-                                                    ...callbacks,
-                                                    context: getObject(),
-                                                    index,
-                                                    ...(subsId
-                                                        ? { subsId }
-                                                        : {}),
-                                                }}
-                                                index={index}
-                                                noSubentities
-                                                noClickthrough={noClickthrough}
-                                            />
-                                        </li>
-                                    ),
-                                )}
+                                {getSubentities(getObject()).map((el: any, index: number) => (
+                                    <li>
+                                        <AutoDynamicView
+                                            object={new UnigraphObject(el._value)}
+                                            component={component}
+                                            callbacks={{
+                                                ...callbacks,
+                                                context: getObject(),
+                                                index,
+                                                ...(subsId ? { subsId } : {}),
+                                            }}
+                                            index={index}
+                                            noSubentities
+                                            noClickthrough={noClickthrough}
+                                        />
+                                    </li>
+                                ))}
                             </ul>
                         ) : (
                             []
@@ -510,11 +446,7 @@ export function AutoDynamicView({
                 ) : (
                     []
                 )}
-                {allowSubentity && !noDrop ? (
-                    <SubentityDropAcceptor uid={object?.uid} />
-                ) : (
-                    []
-                )}
+                {allowSubentity && !noDrop ? <SubentityDropAcceptor uid={object?.uid} /> : []}
             </div>
         </ErrorBoundary>
     );
