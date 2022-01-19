@@ -70,6 +70,7 @@ export function UnigraphSearch({ id }: any) {
                     window.unigraph
                         .getSearchResults(newQuery, 'metadata', 3, {
                             noPrimitives: true,
+                            hideHidden: !showHidden,
                         })
                         .then((res) => {
                             // setResults(res.results.reverse());
@@ -81,12 +82,12 @@ export function UnigraphSearch({ id }: any) {
                     setEntities([]);
                 }
             }, 500),
-        [],
+        [showHidden],
     );
 
     React.useEffect(() => {
         search(query);
-    }, [query]);
+    }, [query, showHidden]);
 
     return (
         <>
@@ -98,7 +99,7 @@ export function UnigraphSearch({ id }: any) {
             />
             <FormControlLabel
                 control={<Switch checked={showHidden} onChange={() => setShowHidden(!showHidden)} name="showHidden" />}
-                label="Show items without a view"
+                label="Show hidden items"
             />
             <DynamicObjectListView
                 items={entities}

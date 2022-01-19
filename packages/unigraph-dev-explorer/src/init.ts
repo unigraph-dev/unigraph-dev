@@ -27,6 +27,7 @@ import { ViewItem } from './components/ObjectView/ViewObjectView';
 import { backlinkQuery } from './components/ObjectView/backlinksUtils';
 import { MiniListView } from './components/UnigraphCore/ListsList';
 import { getParents, isMobile } from './utils';
+import { PackageManifestView } from './components/PackageManager/PackageManager';
 
 window.reloadCommands = () => {
     const commandsState = window.unigraph.getState('registry/commands');
@@ -203,6 +204,7 @@ function initRegistry() {
         '$/schema/person': { view: BasicPersonView },
         '$/schema/subentity': { view: SubentityView },
         '$/schema/view': { view: ViewItem },
+        '$/schema/package_manifest': { view: PackageManifestView },
         '$/schema/list': { view: MiniListView },
     });
     window.unigraph.addState('registry/dynamicViewDetailed', {
