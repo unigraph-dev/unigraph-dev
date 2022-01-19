@@ -182,9 +182,11 @@ function initSelect() {
             else window.unigraph.getState('global/selected').setValue([]);
             document.body.classList.remove('in-multiselect');
         });
-        window.dragselect.subscribe('elementselect', ({ items, item, event }: any) => {
-            if (items.length >= 2) {
+        window.dragselect.subscribe('predragstart', ({ items, item, event }: any) => {
+            if (!window.unigraph.getState('global/focused').value.uid) {
                 document.body.classList.add('in-multiselect');
+            } else {
+                window.dragselect.break();
             }
         });
     }
