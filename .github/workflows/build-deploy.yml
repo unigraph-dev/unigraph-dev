@@ -17,7 +17,7 @@ on:
 
 jobs:
     release-electron:
-        if: (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) || github.event_name == 'workflow_dispatch'
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v'))
         runs-on: ${{ matrix.os }}
         strategy:
             matrix:
