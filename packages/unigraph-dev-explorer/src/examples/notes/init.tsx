@@ -13,7 +13,7 @@ import { noteQuery, noteQueryDetailed, journalQuery, journalQueryDetailed } from
 
 export const init = () => {
     registerDynamicViews({
-        '$/schema/note_block': { view: NoteBlock, query: noteQuery },
+        '$/schema/note_block': { view: NoteBlock, query: noteQuery, noSubentities: true },
     });
     registerDetailedDynamicViews({
         '$/schema/note_block': {

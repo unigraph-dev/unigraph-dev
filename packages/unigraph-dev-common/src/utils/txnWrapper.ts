@@ -98,10 +98,25 @@ export function wrapUpsertFromUpdater(
             // TODO: document expected behavior: when upserting an array, elements are always appended.
             if (typeof origNow[0] === 'object') {
                 const currPos = buildQueryCount(thisUid, origNow.length, hasUidHere);
-                const newOrig = origNow.map((el, index) => ({
-                    ...el,
-                    _index: { '_value.#i': `val(${currPos}_${index})` },
-                }));
+                const newOrig = origNow.map((el, index) => {
+                    if (el?._key) {
+                        queries.push(
+                            `var(func: uid(${hasUidHere || thisUid})) {
+                                <_value[> @filter(eq(<_key>, "${el?._key}")) {
+                                    ${currPos}_key_${index} as uid
+                                } 
+                            }`,
+                        );
+                        appends.push({
+                            uid: `uid(${currPos}_key_${index})`,
+                            _value: { uid: `_:${getRandomInt()}${getRandomInt()}` },
+                        });
+                    }
+                    return {
+                        ...el,
+                        _index: { '_value.#i': `val(${currPos}_${index})` },
+                    };
+                });
                 return newOrig; // Appends it
             }
             if (origNow.length > 0) {

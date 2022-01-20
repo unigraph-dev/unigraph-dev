@@ -96,7 +96,7 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                             if (className?.includes('wikilink')) {
                                 const matches = (
                                     callbacks?.['get-semantic-properties']?.()?._value?.children?.['_value['] || []
-                                ).filter((el: any) => el._key === `[[${children[0]}]]`);
+                                ).filter((el: any) => el._key === `[[${children[0]}]]` && el._value?.type);
                                 const objDef =
                                     window.unigraph.getNamespaceMap?.()?.[
                                         matches[0]?._value?._value?.type?.['unigraph.id']
