@@ -108,7 +108,7 @@ jobs:
                   repository: 'TheExGenesis/dgraph'
                   latest: true
                   fileName: 'dgraph_darwin_amd64'
-                  token: '${{secrets.XIQ_UNIGRAPH_BUILD}}'
+                  token: '${{secrets.XIQ_UNIGRAPH_UNIGRAPH_BUILD}}'
                   out-file-path: ./dgraph-download
 
             - run: mv ./dgraph-download/dgraph_darwin_amd64 ./dgraph-download/dgraph
