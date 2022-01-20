@@ -4,13 +4,17 @@
     "_definition": {
         "type": { "unigraph.id": "$/composer/Union" },
         "_parameters": {
-            "_definitions": [{
-                "type": { "unigraph.id": "$/schema/semantic_property" }
-            }, {
-                "type": { "unigraph.id": "$/schema/interface/textual" }
-            }, {
-                "type": { "unigraph.id": "$/schema/tag" }
-            }]
+            "_definitions": [
+                {
+                    "type": { "unigraph.id": "$/schema/semantic_property" }
+                },
+                {
+                    "type": { "unigraph.id": "$/schema/interface/textual" }
+                },
+                {
+                    "type": { "unigraph.id": "$/schema/tag" }
+                }
+            ]
         }
     }
 }

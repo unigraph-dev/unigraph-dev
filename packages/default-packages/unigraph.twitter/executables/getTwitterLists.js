@@ -1,9 +1,11 @@
 const OAuth = require('oauth');
 
-const appTokenKey = unigraph.getSecret("twitter", "api_key");
-const appTokenSecret = unigraph.getSecret("twitter", "api_secret_key");
+const appTokenKey = unigraph.getSecret('twitter', 'api_key');
+const appTokenSecret = unigraph.getSecret('twitter', 'api_secret_key');
 
-const account = (await unigraph.getQueries([`(func: uid(accs)) @cascade {
+const account = (
+    await unigraph.getQueries([
+        `(func: uid(accs)) @cascade {
     uid
     type {<unigraph.id>}
     _value {
@@ -25,7 +27,9 @@ const account = (await unigraph.getQueries([`(func: uid(accs)) @cascade {
 
 var(func: eq(<unigraph.id>, "$/schema/internet_account")) {
     <~type> { accs as uid }
-}`]))?.[0]?.[0];
+}`,
+    ])
+)?.[0]?.[0];
 
 const oauth = new OAuth.OAuth(
     'https://api.twitter.com/oauth/request_token',
@@ -34,20 +38,24 @@ const oauth = new OAuth.OAuth(
     appTokenSecret,
     '1.0',
     'http://127.0.0.1:4001/callback?key=twitter',
-    'HMAC-SHA1'
+    'HMAC-SHA1',
 );
 
 const getLists = async (userAccToken, userAccTokenSecret) => {
-    const [err2, lists, response2] = await (new Promise((resolve, reject) => oauth.get("https://api.twitter.com/1.1/lists/list.json", userAccToken, userAccTokenSecret, (...ans) => resolve(ans))));
+    const [err2, lists, response2] = await new Promise((resolve, reject) =>
+        oauth.get('https://api.twitter.com/1.1/lists/list.json', userAccToken, userAccTokenSecret, (...ans) =>
+            resolve(ans),
+        ),
+    );
 
-    const subObj = JSON.parse(lists)
+    const subObj = JSON.parse(lists);
 
     return subObj;
-}
+};
 
 if (account?.uid) {
-    const access_token = account['_value']['access_token']['_value.%'];
-    const access_token_secret = account['_value']['access_token_secret']['_value.%'];
+    const access_token = account._value.access_token['_value.%'];
+    const access_token_secret = account._value.access_token_secret['_value.%'];
     const res = await getLists(access_token, access_token_secret);
     return res;
 }

@@ -1,6 +1,6 @@
 {
     "type": { "unigraph.id": "$/schema/object_view" },
     "name": "Contact view",
-    "item_type": {"unigraph.id": "$/schema/contact"},
-    "view": {"unigraph.id": "$/package/unigraph.contacts/0.0.1/executable/contact-view"}
+    "item_type": { "unigraph.id": "$/schema/contact" },
+    "view": { "unigraph.id": "$/package/unigraph.contacts/0.0.1/executable/contact-view" }
 }

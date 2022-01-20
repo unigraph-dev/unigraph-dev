@@ -31,15 +31,19 @@
                         "_element": {
                             "type": { "unigraph.id": "$/composer/Union" },
                             "_parameters": {
-                                "_definitions": [{
-                                    "type": { "unigraph.id": "$/schema/subentity" }
-                                }, {
-                                    "type": { "unigraph.id": "$/schema/interface/semantic" }
-                                }, {
-                                    "type": {
-                                        "unigraph.id": "$/schema/list"
+                                "_definitions": [
+                                    {
+                                        "type": { "unigraph.id": "$/schema/subentity" }
+                                    },
+                                    {
+                                        "type": { "unigraph.id": "$/schema/interface/semantic" }
+                                    },
+                                    {
+                                        "type": {
+                                            "unigraph.id": "$/schema/list"
+                                        }
                                     }
-                                }]
+                                ]
                             }
                         }
                     }

@@ -8,7 +8,9 @@ frames as var(func: uid(partf)) @cascade {
         end {
             _value {
                 _value {
-                    datetime @filter(ge(<_value.%dt>, "${new Date().toJSON()}") AND le(<_value.%dt>, "${new Date(new Date().getTime() + 1000 * 60 * 60 * 24).toJSON()}")) {
+                    datetime @filter(ge(<_value.%dt>, "${new Date().toJSON()}") AND le(<_value.%dt>, "${new Date(
+    new Date().getTime() + 1000 * 60 * 60 * 24,
+).toJSON()}")) {
                         <_value.%dt>
                     }
                 }
@@ -26,5 +28,7 @@ var(func: uid(frames)) {
         res as uid
     }
 }`;
-const events = (await unigraph.getQueries([query]))?.[0].filter((el) => el?.type?.['unigraph.id'] !== '$/schema/time_frame');
+const events = (await unigraph.getQueries([query]))?.[0].filter(
+    (el) => el?.type?.['unigraph.id'] !== '$/schema/time_frame',
+);
 return events?.length > 0;

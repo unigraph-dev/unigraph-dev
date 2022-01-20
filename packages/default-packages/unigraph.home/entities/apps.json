@@ -1,12 +1,12 @@
 {
-    "type": {"unigraph.id": "$/schema/home_section"},
+    "type": { "unigraph.id": "$/schema/home_section" },
     "view": {
         "name": "Apps",
         "env": "react-explorer",
         "view": "/widgets/apps"
     },
     "condition": {
-        "type": {"unigraph.id": "$/schema/executable"},
+        "type": { "unigraph.id": "$/schema/executable" },
         "env": "routine/js",
         "src": "return true;",
         "editable": true
