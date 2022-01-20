@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://github.com/unigraph-dev/unigraph-dev/compare/v0.1.2...v0.2.0) (2022-01-20)
+
+
+### Bug Fixes
+
+* **api:** race condition of uid assignment resulting in recursive elements ([0ddf223](https://github.com/unigraph-dev/unigraph-dev/commit/0ddf2230ac012fe6aeb5ccc9632cd53080a862a9))
+
+
+### Features
+
+* better backlinks display ([4603182](https://github.com/unigraph-dev/unigraph-dev/commit/460318271e48209b59290a5d9ec23c9d76faf2f5))
+
+
+
+
+
 # [0.1.0](https://github.com/unigraph-dev/unigraph-dev/compare/v0.0.1...v0.1.0) (2022-01-19)
 
 

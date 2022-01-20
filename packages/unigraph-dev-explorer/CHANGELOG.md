@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://github.com/TheExGenesis/unigraph-dev/compare/v0.1.2...v0.2.0) (2022-01-20)
+
+
+### Bug Fixes
+
+* **calendar:** styling fixes for inline components with calendar ([9ea09d5](https://github.com/TheExGenesis/unigraph-dev/commit/9ea09d542ebf4943953c1b2b16c9e00c09fb7a9e))
+* **data:** data context with better backlink display ([0da3c62](https://github.com/TheExGenesis/unigraph-dev/commit/0da3c6264be33c62e7346e4ff91e9fb48d976685))
+* **multiselect:** behavior changes for multiselect ([26aabe2](https://github.com/TheExGenesis/unigraph-dev/commit/26aabe287556178569559f97b265e3a95bd0e28e))
+
+
+### Features
+
+* better backlinks display ([4603182](https://github.com/TheExGenesis/unigraph-dev/commit/460318271e48209b59290a5d9ec23c9d76faf2f5))
+* **frontend:** add option to specify components in lists ([d8d7683](https://github.com/TheExGenesis/unigraph-dev/commit/d8d7683fedf65c5c8c697eeb214b40337de0f1f5))
+
+
+
+
+
 ## [0.1.2](https://github.com/TheExGenesis/unigraph-dev/compare/v0.1.1...v0.1.2) (2022-01-19)
 
 **Note:** Version bump only for package unigraph-dev-explorer
