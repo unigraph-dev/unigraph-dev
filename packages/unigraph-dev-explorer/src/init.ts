@@ -26,7 +26,7 @@ import { SubentityView } from './components/UnigraphCore/SubentityView';
 import { ViewItem } from './components/ObjectView/ViewObjectView';
 import { backlinkQuery } from './components/ObjectView/backlinksUtils';
 import { MiniListView } from './components/UnigraphCore/ListsList';
-import { getParents, isMobile } from './utils';
+import { getParents, isMobile, isMultiSelectKeyPressed } from './utils';
 import { PackageManifestView } from './components/PackageManager/PackageManager';
 
 window.reloadCommands = () => {
@@ -177,14 +177,16 @@ function initSelect() {
                 if (_.intersection(parents, available).length > 0) return false;
                 return true;
             });
-            if (Math.abs(distance.x) > 10 && Math.abs(distance.y) > 10)
+            if (Math.abs(distance.x) > 10 && Math.abs(distance.y) > 10 && !isMultiSelectKeyPressed(event))
                 window.unigraph.getState('global/selected').setValue(selectedUids);
-            else window.unigraph.getState('global/selected').setValue([]);
+            else if (!isMultiSelectKeyPressed(event)) window.unigraph.getState('global/selected').setValue([]);
             document.body.classList.remove('in-multiselect');
         });
-        window.dragselect.subscribe('elementselect', ({ items, item, event }: any) => {
-            if (items.length >= 2) {
+        window.dragselect.subscribe('predragstart', ({ items, item, event }: any) => {
+            if (!window.unigraph.getState('global/focused').value.uid) {
                 document.body.classList.add('in-multiselect');
+            } else {
+                window.dragselect.break();
             }
         });
     }

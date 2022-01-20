@@ -151,6 +151,6 @@ const TwitterUser = ({ data, callbacks }: any) => (
 );
 
 export const init = () => {
-    registerDynamicViews({ '$/schema/tweet': Tweet });
+    registerDynamicViews({ '$/schema/tweet': { view: Tweet, noSubentities: true } });
     registerDynamicViews({ '$/schema/twitter_user': TwitterUser });
 };

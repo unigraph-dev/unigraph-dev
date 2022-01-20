@@ -31,9 +31,46 @@ export const TabContext = React.createContext({
         window.unigraph.unsubscribe(id);
     },
 });
-export const DataContext = React.createContext({
-    rootUid: '0x0',
+
+type DataContextType = {
+    contextUid: string;
+    contextData?: any;
+    parents?: string[];
+    viewType?: string;
+    expandedChildren: boolean;
+    getParents: (withParents?: boolean) => string[];
+};
+
+export const DataContext = React.createContext<DataContextType>({
+    contextUid: '0x0',
+    contextData: {},
+    parents: undefined,
+    getParents: () => [],
+    expandedChildren: false,
 });
+
+export const DataContextWrapper = ({ children, contextUid, contextData, parents, viewType, expandedChildren }: any) => {
+    const parentContext = React.useContext(DataContext);
+
+    const dataContext = React.useMemo(() => {
+        return {
+            contextUid,
+            contextData,
+            viewType,
+            parents,
+            expandedChildren: !!expandedChildren,
+            getParents: (withParents?: boolean) => {
+                return [
+                    ...parentContext.getParents(withParents),
+                    ...(withParents ? parents || [] : []),
+                    ...(expandedChildren ? [contextUid] : []),
+                ];
+            },
+        };
+    }, [contextUid, contextData, viewType, expandedChildren, JSON.stringify((parents || []).sort?.())]);
+
+    return <DataContext.Provider value={dataContext}>{children}</DataContext.Provider>;
+};
 
 export const getComponentFromPage = (location: string, params: any = {}) => {
     const pages = window.unigraph.getState('registry/pages');
@@ -65,7 +102,7 @@ export const setCaret = (document: Document, element: any, pos: number, length?:
 };
 
 export const removeAllPropsFromObj = function (obj: any, propsToRemove: any, maxLevel?: any) {
-    if (typeof maxLevel !== 'number') maxLevel = 20;
+    if (typeof maxLevel !== 'number') maxLevel = 100;
     for (const prop in obj) {
         if (typeof propsToRemove === 'string' && prop === propsToRemove) delete obj[prop];
         else if (propsToRemove.indexOf(prop) >= 0) {
@@ -489,4 +526,10 @@ export function getParents(elem: any) {
         if (elem.id?.startsWith?.('object-view-')) parents.push(elem.id.slice(12));
     }
     return parents;
+}
+
+export function getDateAsUTC(input: any) {
+    const date = new Date(input);
+    const utc = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+    return utc;
 }

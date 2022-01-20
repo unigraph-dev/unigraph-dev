@@ -75,7 +75,7 @@ export function CodeEditor({ id }: any) {
         <DetailedObjectView
             uid={currentUid}
             id={id}
-            component={{
+            components={{
                 '$/schema/executable': { view: ExecutableCodeEditor },
             }}
             callbacks={{ isEmbed: true }}

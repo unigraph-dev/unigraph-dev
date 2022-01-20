@@ -30,7 +30,7 @@ import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { TransitionGroup } from 'react-transition-group';
 import { getDynamicViews } from '../../unigraph-react';
 import { AutoDynamicView } from './AutoDynamicView';
-import { DataContext, isMobile, TabContext } from '../../utils';
+import { DataContext, DataContextWrapper, isMobile, TabContext } from '../../utils';
 import { setupInfiniteScrolling } from './infiniteScrolling';
 import { DragandDrop } from './DragandDrop';
 
@@ -97,6 +97,7 @@ function DynamicListItem({
     itemUids,
     itemRemover,
     noRemover,
+    components,
     removeOnEnter,
     compact,
 }: any) {
@@ -119,6 +120,7 @@ function DynamicListItem({
             <AutoDynamicView
                 compact={compact}
                 object={new UnigraphObject(item)}
+                components={components}
                 withParent={!!listUid}
                 callbacks={{
                     ...callbacks,
@@ -165,6 +167,7 @@ export type DynamicObjectListViewProps = {
     loadAll?: boolean;
     removeOnEnter?: boolean;
     style?: any;
+    components?: any;
 };
 
 function DynamicListBasic({
@@ -180,6 +183,7 @@ function DynamicListBasic({
     noRemover,
     compact,
     removeOnEnter,
+    components,
 }: any) {
     const tabContext = React.useContext(TabContext);
     return (
@@ -205,6 +209,7 @@ function DynamicListBasic({
                     reverse={reverse}
                     noRemover={noRemover}
                     removeOnEnter={removeOnEnter}
+                    components={components}
                 />
             ))}
         </DragandDrop>
@@ -227,6 +232,7 @@ function DynamicList({
     compact,
     subscribeOptions,
     removeOnEnter,
+    components,
 }: any) {
     const tabContext = React.useContext(TabContext);
     const [loadedItems, setLoadedItems] = React.useState<any[]>([]);
@@ -307,6 +313,7 @@ function DynamicList({
                         itemRemover={itemRemover}
                         noRemover={noRemover}
                         removeOnEnter={removeOnEnter}
+                        components={components}
                     />
                 ))}
             </DragandDrop>
@@ -416,6 +423,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
     subscribeOptions,
     loadAll,
     removeOnEnter,
+    components,
     itemAdder,
 }) => {
     const classes = useStyles();
@@ -524,10 +532,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
             }}
             ref={drop}
         >
-            <DataContext.Provider
-                // eslint-disable-next-line react/jsx-no-constructed-context-values
-                value={{ rootUid: context?.uid || '0x0' }}
-            >
+            <DataContextWrapper contextUid={context?.uid} contextData={context} parents={[]}>
                 <div style={{ display: 'flex' }}>
                     {noBar ? (
                         []
@@ -665,6 +670,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                               compact,
                               subscribeOptions,
                               removeOnEnter,
+                              components,
                           })
                         : groupers[groupBy](procItems.map(itemGetter)).map((el: Group) => (
                               <>
@@ -692,11 +698,12 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                       compact,
                                       subscribeOptions,
                                       removeOnEnter,
+                                      components,
                                   })}
                               </>
                           ))}
                 </div>
-            </DataContext.Provider>
+            </DataContextWrapper>
         </div>
     );
 };

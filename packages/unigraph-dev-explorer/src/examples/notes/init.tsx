@@ -9,16 +9,22 @@ import {
     registerQuickAdder,
 } from '../../unigraph-react';
 import { NoteBlock, DetailedNoteBlock } from './NoteBlock';
-import { noteQuery, noteQueryDetailed, journalQueryDetailed } from './noteQuery';
+import { noteQuery, noteQueryDetailed, journalQuery, journalQueryDetailed } from './noteQuery';
 
 export const init = () => {
     registerDynamicViews({
-        '$/schema/note_block': { view: NoteBlock, query: noteQuery },
+        '$/schema/note_block': { view: NoteBlock, query: noteQuery, noSubentities: true },
     });
     registerDetailedDynamicViews({
         '$/schema/note_block': {
             view: DetailedNoteBlock,
             query: noteQueryDetailed,
+        },
+    });
+    registerDynamicViews({
+        '$/schema/journal': {
+            view: (props: any) => NoteBlock({ ...props, data: new UnigraphObject(props.data._value.note._value) }),
+            query: journalQuery,
         },
     });
     registerDetailedDynamicViews({
