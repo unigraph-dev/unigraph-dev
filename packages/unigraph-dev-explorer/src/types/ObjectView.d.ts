@@ -9,7 +9,7 @@ export type AutoDynamicViewCallbacks = {
 export type AutoDynamicViewProps = {
     object: UnigraphObject & any;
     callbacks?: AutoDynamicViewCallbacks;
-    component?: Record<string, { view: React.FC<any>; query?: (string) => string }>;
+    components?: Record<string, { view: React.FC<any>; query?: (string) => string }>;
     attributes?: Record<string, any>;
     inline?: boolean;
     allowSubentity?: boolean;
@@ -29,6 +29,7 @@ export type AutoDynamicViewProps = {
     onClick?: any;
     recursive?: boolean;
     customBoundingBox?: boolean;
+    expandedChildren?: boolean;
 };
 
 export type ContextMenuGenerator = (

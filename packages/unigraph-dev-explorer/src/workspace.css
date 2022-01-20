@@ -14,6 +14,14 @@
                                   supported by Chrome, Edge, Opera and Firefox */
 }
 
+.in-multiselect > .ds-selector-area {
+    opacity: inherit !important
+}
+
+.ds-selector-area {
+    opacity: 0
+}
+
 .flexlayout__tab_button {
     transition: 0.3s;
     -webkit-app-region: no-drag;

@@ -3,7 +3,7 @@ import { setRef, Typography } from '@material-ui/core';
 import React, { FormEvent } from 'react';
 import { byElementIndex, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import _ from 'lodash';
-import { blobToBase64, buildGraph, getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
+import { blobToBase64, buildGraph, findUid, getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { Actions } from 'flexlayout-react';
 import { FiberManualRecord, MoreVert } from '@material-ui/icons';
 import stringify from 'json-stable-stringify';
@@ -27,45 +27,34 @@ import {
     addChildren,
 } from './commands';
 import { onUnigraphContextMenu } from '../../components/ObjectView/DefaultObjectContextMenu';
-import { noteQuery } from './noteQuery';
+import { noteQuery, noteQueryDetailed } from './noteQuery';
 import { getParentsAndReferences } from '../../components/ObjectView/backlinksUtils';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
-import { setCaret, TabContext } from '../../utils';
+import { removeAllPropsFromObj, setCaret, TabContext } from '../../utils';
 import { DragandDrop } from '../../components/ObjectView/DragandDrop';
 import { inlineObjectSearch, inlineTextSearch } from '../../components/UnigraphCore/InlineSearchPopup';
 import { htmlToMarkdown } from '../semantic/Markdown';
 
-export const getSubentities = (data: any) => {
-    let subentities: any;
-    let otherChildren: any;
-    if (!data?._value?.children?.['_value[']) {
-        [subentities, otherChildren] = [[], []];
-    } else {
-        [subentities, otherChildren] = data?._value?.children?.['_value['].sort(byElementIndex).reduce(
-            (prev: any, el: any) => {
-                if (el?._value?.type?.['unigraph.id'] !== '$/schema/subentity' && !el._key)
-                    return [prev[0], [...prev[1], el._value]];
-                if (!el._key) return [[...prev[0], el?._value._value], prev[1]];
-                return prev;
-            },
-            [[], []],
-        ) || [[], []];
-    }
-    return [subentities, otherChildren];
-};
-
-export function NoteBlock({ data }: any) {
+export function NoteBlock({ data, inline }: any) {
     const [parents, references] = getParentsAndReferences(
         data['~_value'],
         (data['unigraph.origin'] || []).filter((el: any) => el.uid !== data.uid),
     );
     const [subentities, otherChildren] = getSubentities(data);
-    const unpadded = unpad(data);
 
     return (
         <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
             <div style={{ flexGrow: 1 }}>
                 <Typography variant="body1">
+                    {data?._hide ? (
+                        []
+                    ) : (
+                        <Icon
+                            path={mdiNoteOutline}
+                            size={0.8}
+                            style={{ opacity: 0.54, marginRight: '4px', verticalAlign: 'text-bottom' }}
+                        />
+                    )}
                     <AutoDynamicView
                         object={data.get('text')?._value._value}
                         noDrag
@@ -77,10 +66,14 @@ export function NoteBlock({ data }: any) {
                         }}
                     />
                 </Typography>
-                <Typography variant="body2" color="textSecondary">
-                    {subentities.length} immediate children, {parents.length} parents, {references.length} linked
-                    references
-                </Typography>
+                {inline ? (
+                    []
+                ) : (
+                    <Typography variant="body2" color="textSecondary">
+                        {subentities.length} immediate children, {parents.length} parents, {references.length} linked
+                        references
+                    </Typography>
+                )}
             </div>
             <div>
                 {otherChildren.map((el: any) => (
@@ -193,14 +186,33 @@ export function ParentsAndReferences({ data }: any) {
 
     return (
         <div style={{ marginTop: '36px' }}>
-            <DynamicObjectListView items={parents} context={null} compact noDrop titleBar=" parents" loadAll />
+            <DynamicObjectListView
+                items={parents}
+                context={data}
+                compact
+                noDrop
+                titleBar=" parents"
+                loadAll
+                components={{
+                    '$/schema/note_block': {
+                        view: ReferenceNoteView,
+                        query: noteQueryDetailed,
+                    },
+                }}
+            />
             <DynamicObjectListView
                 items={references}
-                context={null}
+                context={data}
                 compact
                 noDrop
                 titleBar=" linked references"
                 loadAll
+                components={{
+                    '$/schema/note_block': {
+                        view: ReferenceNoteView,
+                        query: noteQueryDetailed,
+                    },
+                }}
             />
         </div>
     );
@@ -893,6 +905,7 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                                               }
                                                     }
                                                     index={elindex}
+                                                    expandedChildren
                                                     callbacks={{
                                                         'get-view-id': () => options?.viewId, // only used at root
                                                         ...callbacks,
@@ -914,7 +927,7 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                                         isChildren: true,
                                                         parentEditorContext: editorContext,
                                                     }}
-                                                    component={{
+                                                    components={{
                                                         '$/schema/note_block': {
                                                             view: DetailedNoteBlock,
                                                             query: noteQuery,
@@ -965,3 +978,99 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
         </NoteViewPageWrapper>
     );
 }
+
+export const getSubentities = (data: any) => {
+    let subentities: any;
+    let otherChildren: any;
+    if (!data?._value?.children?.['_value[']) {
+        [subentities, otherChildren] = [[], []];
+    } else {
+        [subentities, otherChildren] = data?._value?.children?.['_value['].sort(byElementIndex).reduce(
+            (prev: any, el: any) => {
+                if (el?._value?.type?.['unigraph.id'] !== '$/schema/subentity' && !el._key)
+                    return [prev[0], [...prev[1], el._value]];
+                if (!el._key) return [[...prev[0], el?._value._value], prev[1]];
+                return prev;
+            },
+            [[], []],
+        ) || [[], []];
+    }
+    return [subentities, otherChildren];
+};
+
+export const ReferenceNoteView = ({ data, callbacks }: any) => {
+    const [subentities, otherChildren] = getSubentities(data);
+
+    const [pathNames, setPathNames] = React.useState([]);
+    const [refObject, setRefObject] = React.useState({});
+
+    React.useEffect(() => {
+        removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
+        const [targetObj, path] = findUid(data, callbacks?.context?.uid);
+        const refinedPath = path.filter(
+            (el: any) => !['$/schema/subentity', '$/schema/interface/semantic'].includes(el?.type?.['unigraph.id']),
+        );
+        setRefObject(refinedPath[refinedPath.length - 2]);
+        setPathNames(
+            refinedPath
+                .map((el: any) => new UnigraphObject(el)?.get('text')?.as('primitive'))
+                .filter(Boolean)
+                .slice(0, -2),
+        );
+    }, []);
+
+    return (
+        <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+            <div style={{ flexGrow: 1 }}>
+                <Typography variant="body1">
+                    {data?._hide ? (
+                        []
+                    ) : (
+                        <Icon
+                            path={mdiNoteOutline}
+                            size={0.8}
+                            style={{ opacity: 0.54, marginRight: '4px', verticalAlign: 'text-bottom' }}
+                        />
+                    )}
+                    <AutoDynamicView
+                        object={data.get('text')?._value._value}
+                        noDrag
+                        noDrop
+                        inline
+                        noContextMenu
+                        callbacks={{
+                            'get-semantic-properties': () => data,
+                        }}
+                    />
+                </Typography>
+                <Typography style={{ color: 'gray' }}>{pathNames.join(' > ')}</Typography>
+                <div style={{ marginLeft: '16px' }}>
+                    <OutlineComponent isChildren>
+                        <AutoDynamicView
+                            object={refObject}
+                            noClickthrough
+                            noSubentities
+                            components={{
+                                '$/schema/note_block': {
+                                    view: DetailedNoteBlock,
+                                    query: noteQuery,
+                                },
+                                '$/schema/view': {
+                                    view: ViewViewDetailed,
+                                },
+                            }}
+                            attributes={{
+                                isChildren: true,
+                            }}
+                        />
+                    </OutlineComponent>
+                </div>
+            </div>
+            <div>
+                {otherChildren.map((el: any) => (
+                    <AutoDynamicView object={el} inline />
+                ))}
+            </div>
+        </div>
+    );
+};
