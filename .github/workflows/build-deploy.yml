@@ -118,7 +118,7 @@ jobs:
               if: runner.os != 'Windows'
 
             # Builds app
-            - run: yarn install
+            - run: yarn install  --network-timeout 100000
 
             - run: yarn prepare-electron
 
