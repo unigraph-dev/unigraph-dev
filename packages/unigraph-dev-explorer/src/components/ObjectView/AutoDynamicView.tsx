@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Typography } from '@material-ui/core';
 import React from 'react';
@@ -82,6 +83,13 @@ export function AutoDynamicView({
         ),
     );
 
+    noClickthrough = noClickthrough || DynamicViews[object?.type?.['unigraph.id']]?.noClickthrough;
+    noSubentities = noSubentities || DynamicViews[object?.type?.['unigraph.id']]?.noSubentities;
+    noDrag = noDrag || DynamicViews[object?.type?.['unigraph.id']]?.noDrag;
+    noDrop = noDrop || DynamicViews[object?.type?.['unigraph.id']]?.noDrop;
+    noContextMenu = noContextMenu || DynamicViews[object?.type?.['unigraph.id']]?.noContextMenu;
+    noBacklinks = noBacklinks || DynamicViews[object?.type?.['unigraph.id']]?.noBacklinks;
+
     const viewEl = React.useRef(null);
 
     React.useEffect(() => {
@@ -121,7 +129,7 @@ export function AutoDynamicView({
             window.unigraph.getState('registry/dynamicViewDetailed').unsubscribe(cb2);
             window.unigraph.getState('global/selected').unsubscribe(cbsel);
             window.unigraph.getState('global/focused').unsubscribe(cbfoc);
-            window.dragselect.removeSelectables([viewElRef]);
+            window.dragselect?.removeSelectables([viewElRef]);
         };
     }, []);
 
