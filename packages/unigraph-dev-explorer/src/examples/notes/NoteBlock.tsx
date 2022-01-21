@@ -674,6 +674,7 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                                 }, 500);
                                             },
                                             setInSearch,
+                                            false,
                                         ) || hasMatch;
                                     if (!hasMatch) {
                                         window.unigraph.getState('global/searchPopup').setValue({ show: false });
