@@ -1,6 +1,6 @@
 {
     "displayName": "NLP for Unigraph",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "Basic NLP tasks for Unigraph",
     "name": "unigraph.nlp",
     "unigraph": {

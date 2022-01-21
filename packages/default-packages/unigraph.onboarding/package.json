@@ -1,6 +1,6 @@
 {
     "displayName": "Unigraph Onboarding",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "Initial setup instructions for Unigraph",
     "name": "unigraph.onboarding",
     "unigraph": {
