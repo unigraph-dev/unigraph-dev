@@ -106,7 +106,7 @@ export function init(hostname?: string) {
         const unpadded: ANotification = unpad(el);
         const updated = new Date(unpadded?._updatedAt);
         const current = new Date();
-        if (current.valueOf() - updated.valueOf() < 5000 && Notification) {
+        if (current.valueOf() - updated.valueOf() < 5000 && Notification && !isMobile()) {
             // eslint-disable-next-line no-new
             new Notification(unpadded.name, {
                 body: `${unpadded.from}: ${unpadded.content}`,
