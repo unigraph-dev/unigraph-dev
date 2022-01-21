@@ -28,6 +28,7 @@ import { backlinkQuery } from './components/ObjectView/backlinksUtils';
 import { MiniListView } from './components/UnigraphCore/ListsList';
 import { getParents, isMobile, isMultiSelectKeyPressed } from './utils';
 import { PackageManifestView } from './components/PackageManager/PackageManager';
+import { initKeyboardShortcuts } from './keyboardShortcuts';
 
 window.reloadCommands = () => {
     const commandsState = window.unigraph.getState('registry/commands');
@@ -140,14 +141,18 @@ export function init(hostname?: string) {
         uid: '',
         caret: 0,
         type: '',
+        commponent: '',
     });
     window.unigraph.addState('global/focused/actions', {});
+    /* Example: {'shift+Tab': {'319908': () => {return true;}}} */
+    window.unigraph.addState('global/keyboardShortcuts', {});
 
     initContextMenu();
     initRegistry();
     initBacklinkManager();
     initPackages();
     initSelect();
+    initKeyboardShortcuts();
 
     if (window.localStorage.getItem('enableAnalytics') === 'true') initAnalyticsIfOptedIn();
 }
@@ -161,17 +166,14 @@ function initSelect() {
             const distance = window.dragselect.getCursorPositionDifference();
             const available = items
                 .map((el: any) => {
-                    if (el.id?.startsWith?.('object-view-0x')) {
-                        return el.id.slice(12);
-                    }
-                    if (el.id?.startsWith?.('bounding-box-0x')) {
-                        return el.id.slice(13);
+                    if (el.dataset?.component) {
+                        return el.dataset?.component;
                     }
                     return undefined;
                 })
                 .filter(Boolean);
             const selectedUids = available.filter((el: string) => {
-                const elm = document.getElementById(`object-view-${el}`);
+                const elm = document.querySelector(`[data-component="${el}"]`);
                 if (!elm) return false;
                 const parents = getParents(elm);
                 if (_.intersection(parents, available).length > 0) return false;
