@@ -197,6 +197,9 @@ export function ParentsAndReferences({ data }: any) {
                     '$/schema/note_block': {
                         view: ReferenceNoteView,
                         query: noteQueryDetailed,
+                        noClickthrough: true,
+                        noSubentities: true,
+                        noContextMenu: true,
                     },
                 }}
             />
@@ -211,6 +214,9 @@ export function ParentsAndReferences({ data }: any) {
                     '$/schema/note_block': {
                         view: ReferenceNoteView,
                         query: noteQueryDetailed,
+                        noClickthrough: true,
+                        noSubentities: true,
+                        noContextMenu: true,
                     },
                 }}
             />
@@ -1022,7 +1028,13 @@ export const ReferenceNoteView = ({ data, callbacks }: any) => {
     return (
         <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
             <div style={{ flexGrow: 1 }}>
-                <Typography variant="body1">
+                <Typography
+                    variant="body1"
+                    style={{ cursor: 'pointer' }}
+                    onClick={(ev) => {
+                        window.wsnavigator(`/library/object?uid=${data.uid}&type=${data?.type?.['unigraph.id']}`);
+                    }}
+                >
                     {data?._hide ? (
                         []
                     ) : (

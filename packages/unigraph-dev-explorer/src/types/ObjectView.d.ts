@@ -32,6 +32,18 @@ export type AutoDynamicViewProps = {
     expandedChildren?: boolean;
 };
 
+export type DynamicViewRendererProps = {
+    view: any;
+    query: any;
+    noClickthrough?: boolean;
+    noSubentities?: boolean;
+    noBacklinks?: boolean;
+    noContextMenu?: boolean;
+    noDrag?: boolean;
+    noDrop?: boolean;
+    onClick?: any;
+};
+
 export type ContextMenuGenerator = (
     uid: string,
     object: any,
