@@ -21,8 +21,7 @@ jobs:
         runs-on: ${{ matrix.os }}
         strategy:
             matrix:
-                # os: [ubuntu-latest, windows-latest]
-                os: []
+                os: [ubuntu-latest]
                 electron-arch-overrides: ['']
                 include:
                     - os: macos-latest
