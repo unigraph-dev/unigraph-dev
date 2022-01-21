@@ -1,6 +1,6 @@
 {
     "displayName": "Calendar",
-    "version": "0.2.0",
+    "version": "0.0.2",
     "description": "Package for calendar and time-based objects.",
     "name": "unigraph.calendar",
     "unigraph": {
