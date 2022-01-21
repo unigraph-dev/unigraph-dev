@@ -26,8 +26,8 @@ jobs:
                 include:
                     - os: macos-latest
                       electron-arch-overrides: '-c.mac.target.target=dmg -c.mac.target.arch=x64'
-                    # - os: macos-latest
-                    #   electron-arch-overrides: '-c.mac.target.target=dmg -c.mac.target.arch=arm64'
+                    - os: macos-latest
+                      electron-arch-overrides: '-c.mac.target.target=dmg -c.mac.target.arch=arm64'
         env:
             USE_HARD_LINKS: false
         defaults:
@@ -141,6 +141,8 @@ jobs:
                   # macOS code signing certificate
                   # mac_certs: ${{ secrets.mac_certs }}
                   # mac_certs_password: ${{ secrets.mac_certs_password }}
+                  args: ${{ matrix.electron-arch-overrides }}
+
               # env:
               #     # macOS notarization API key
               #     API_KEY_ID: ${{ secrets.mac_notarization_api_key_id }}
