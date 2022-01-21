@@ -141,7 +141,7 @@ jobs:
                   # macOS code signing certificate
                   # mac_certs: ${{ secrets.mac_certs }}
                   # mac_certs_password: ${{ secrets.mac_certs_password }}
-                  args: ${{ matrix.electron-arch-overrides }}
+                  args: -c.publish.publishAutoUpdate=false ${{ matrix.electron-arch-overrides }}
 
               # env:
               #     # macOS notarization API key

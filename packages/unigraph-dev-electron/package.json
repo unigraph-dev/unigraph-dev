@@ -26,6 +26,7 @@
     },
     "electronVersion": "^13.1.7",
     "build": {
+        "generateUpdatesFilesForAllChannels": true,
         "afterSign": "electron-builder-notarize",
         "mac": {
             "icon": "./public/icons/unigraph.icns",
