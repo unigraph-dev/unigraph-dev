@@ -1,6 +1,6 @@
 {
     "displayName": "OpenAI API for Unigraph",
-    "version": "0.0.4-beta.4",
+    "version": "0.0.4-beta.5",
     "description": "GPT-3 and Codex integration for Unigraph",
     "name": "unigraph.openai",
     "unigraph": {
