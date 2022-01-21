@@ -1,6 +1,6 @@
 {
     "displayName": "Unigraph Contacts",
-    "version": "0.0.4-beta.2",
+    "version": "0.0.4-beta.3",
     "description": "Contacts management with Unigraph",
     "name": "unigraph.contacts",
     "unigraph": {
