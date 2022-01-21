@@ -1,7 +1,7 @@
 {
     "name": "unigraph-dev-electron",
     "productName": "Unigraph",
-    "version": "0.0.4-beta.1",
+    "version": "0.0.4-beta.2",
     "author": "Unigraph contributors",
     "description": "A local-first and universal graph database, knowledge engine, and workspace",
     "main": "src/main.js",
@@ -21,8 +21,8 @@
         "electron-store": "^8.0.0",
         "electron-util": "^0.15.1",
         "json-stable-stringify": "^1.0.1",
-        "unigraph-dev-backend": "^0.0.4-beta.1",
-        "unigraph-dev-common": "^0.0.4-beta.1"
+        "unigraph-dev-backend": "^0.0.4-beta.2",
+        "unigraph-dev-common": "^0.0.4-beta.2"
     },
     "electronVersion": "^13.1.7",
     "build": {
