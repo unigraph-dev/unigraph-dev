@@ -157,6 +157,10 @@ export const Html: DynamicViewRenderer = ({ data, context, callbacks }) => {
                         'beforeend',
                         '<style>img{ max-width: 100%; height: auto } video{ max-width: 100%; height: auto } body{margin-bottom: 64px}</style>',
                     );
+                    (frm.current as any).contentDocument.head.insertAdjacentHTML(
+                        'beforeend',
+                        '<base target="_parent" />',
+                    );
                     userStyle.current = (frm.current as any).contentDocument.head.insertAdjacentElement(
                         'beforeend',
                         (frm.current as any).contentDocument.createElement('style'),

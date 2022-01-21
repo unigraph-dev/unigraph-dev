@@ -7,7 +7,6 @@ import { registerDynamicViews } from '../../unigraph-react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { DynamicViewRenderer } from '../../global.d';
 import { externalNamespaces } from '../../externalNamespaceStub';
-import { openUrl } from '../../utils';
 
 const removeContextEntities = (tweet: any, entities: any[]) => {
     let finalStr: string = tweet['_value.%'];
@@ -50,10 +49,11 @@ export const Tweet: DynamicViewRenderer = ({ data, callbacks }) => {
                     <Avatar
                         src={data.get('from_user/profile_image').as('primitive')}
                         onClick={() => {
-                            openUrl(
+                            window.open(
                                 `https://twitter.com/${data.get('from_user/username').as('primitive')}/status/${data
                                     .get('twitter_id')
                                     .as('primitive')}`,
+                                '_blank',
                             );
                             if (callbacks?.removeFromContext && callbacks?.removeOnEnter) callbacks.removeFromContext();
                         }}
@@ -131,7 +131,7 @@ const TwitterUser = ({ data, callbacks }: any) => (
                 <Avatar
                     src={data.get('profile_image').as('primitive')}
                     onClick={() => {
-                        openUrl(`https://twitter.com/${data.get('username').as('primitive')}}`);
+                        window.open(`https://twitter.com/${data.get('username').as('primitive')}}`, '_blank');
                     }}
                 />
             </Badge>
