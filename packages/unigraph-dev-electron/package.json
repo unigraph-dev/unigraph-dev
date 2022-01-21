@@ -72,7 +72,10 @@
         "asar": false,
         "asarUnpack": [
             "dgraph/*"
-        ]
+        ],
+        "publish": {
+            "provider": "github"
+        }
     },
     "repository": {
         "type": "git",
