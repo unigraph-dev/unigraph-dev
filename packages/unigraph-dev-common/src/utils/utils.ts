@@ -250,6 +250,10 @@ export function getRandomInt() {
     return Math.floor(Math.random() * Math.floor(1000000));
 }
 
+export function getRandomId() {
+    return `${getRandomInt()}${getRandomInt()}`;
+}
+
 export function isJsonString(str: any) {
     if (!(typeof str === 'string')) return false;
     try {

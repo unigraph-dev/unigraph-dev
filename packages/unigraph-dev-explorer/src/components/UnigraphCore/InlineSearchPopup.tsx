@@ -185,7 +185,14 @@ export function InlineSearch() {
  * domEl => boxRef
  *
  */
-export const inlineTextSearch = (newText: string, domEl: any, caret: number, onMatch: any, setInSearch?: any) => {
+export const inlineTextSearch = (
+    newText: string,
+    domEl: any,
+    caret: number,
+    onMatch: any,
+    setInSearch?: any,
+    hideHidden = true,
+) => {
     let hasMatch = false;
     const placeholder = /\[\[([^[\]]*)\]\]/g;
     for (let match: any; (match = placeholder.exec(newText)) !== null; ) {
@@ -193,13 +200,20 @@ export const inlineTextSearch = (newText: string, domEl: any, caret: number, onM
             if (setInSearch) setInSearch(true);
             hasMatch = true;
             // inputDebounced.cancel();
-            setSearchPopup(domEl, match[1], onMatch.bind(this, match));
+            setSearchPopup(domEl, match[1], onMatch.bind(this, match), hideHidden);
         }
     }
     return hasMatch;
 };
 
-export const inlineObjectSearch = (newText: string, domEl: any, caret: number, onMatch: any, setInSearch?: any) => {
+export const inlineObjectSearch = (
+    newText: string,
+    domEl: any,
+    caret: number,
+    onMatch: any,
+    setInSearch?: any,
+    hideHidden = true,
+) => {
     let hasMatch = false;
     const placeholder = /\(\(([^[\)]*)\)\)/g;
     for (let match: any; (match = placeholder.exec(newText)) !== null; ) {
@@ -207,7 +221,7 @@ export const inlineObjectSearch = (newText: string, domEl: any, caret: number, o
             if (setInSearch) setInSearch(true);
             hasMatch = true;
             // inputDebounced.cancel();
-            setSearchPopup(domEl, match[1], onMatch.bind(this, match));
+            setSearchPopup(domEl, match[1], onMatch.bind(this, match), hideHidden);
         }
     }
     return hasMatch;

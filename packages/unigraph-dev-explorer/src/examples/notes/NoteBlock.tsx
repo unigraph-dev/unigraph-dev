@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable no-param-reassign */
 import { setRef, Typography } from '@material-ui/core';
 import React, { FormEvent } from 'react';
@@ -240,7 +241,16 @@ function NoteViewTextWrapper({ children, semanticChildren, isRoot, onContextMenu
     );
 }
 
-export function DetailedNoteBlock({ data, isChildren, callbacks, options, isCollapsed, focused, index }: any) {
+export function DetailedNoteBlock({
+    data,
+    isChildren,
+    callbacks,
+    options,
+    isCollapsed,
+    focused,
+    index,
+    componentId,
+}: any) {
     // eslint-disable-next-line no-bitwise
     isChildren |= callbacks?.isChildren;
     if (!callbacks?.viewId) callbacks = { ...(callbacks || {}), viewId: getRandomInt() };
@@ -321,6 +331,7 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
             [
                 {
                     uid: data.uid,
+                    componentId,
                     children: subentities.map((el: any) => el.uid),
                     type: data?.type?.['unigraph.id'],
                     root: !isChildren,
@@ -415,7 +426,9 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
             >
                 <NoteViewTextWrapper
                     isRoot={!isChildren}
-                    onContextMenu={(event: any) => onUnigraphContextMenu(event, data, undefined, callbacks)}
+                    onContextMenu={(event: any) =>
+                        onUnigraphContextMenu(event, data, undefined, { ...callbacks, componentId })
+                    }
                     callbacks={callbacks}
                     semanticChildren={buildGraph(otherChildren)
                         .filter((el: any) => el.type)
@@ -674,6 +687,7 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                                 }, 500);
                                             },
                                             setInSearch,
+                                            false,
                                         ) || hasMatch;
                                     if (!hasMatch) {
                                         window.unigraph.getState('global/searchPopup').setValue({ show: false });
@@ -688,7 +702,7 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                     const caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
                                     switch (ev.keyCode) {
                                         case 13: // enter
-                                            if (!ev.shiftKey) {
+                                            if (!ev.shiftKey && !ev.ctrlKey) {
                                                 ev.preventDefault();
                                                 edited.current = false;
                                                 inputDebounced.current.cancel();
@@ -702,6 +716,7 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
 
                                         case 9: // tab
                                             ev.preventDefault();
+                                            ev.stopPropagation();
                                             inputDebounced.current.flush();
                                             if (ev.shiftKey) {
                                                 setCommand(() => callbacks['unindent-child-in-parent']?.bind(null));
@@ -912,6 +927,21 @@ export function DetailedNoteBlock({ data, isChildren, callbacks, options, isColl
                                                     }
                                                     index={elindex}
                                                     expandedChildren
+                                                    shortcuts={{
+                                                        'shift+Tab': (ev: any) => {
+                                                            ev.preventDefault();
+                                                            callbacks['unindent-child']?.(elindex);
+                                                        },
+                                                        Tab: (ev: any) => {
+                                                            ev.preventDefault();
+                                                            console.log(dataref.current, elindex);
+                                                            indentChild(dataref.current, editorContext, elindex);
+                                                        },
+                                                        'ctrl+Enter': (ev: any) => {
+                                                            ev.preventDefault();
+                                                            convertChildToTodo(dataref.current, editorContext, elindex);
+                                                        },
+                                                    }}
                                                     callbacks={{
                                                         'get-view-id': () => options?.viewId, // only used at root
                                                         ...callbacks,

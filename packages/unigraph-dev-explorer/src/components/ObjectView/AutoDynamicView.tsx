@@ -5,8 +5,7 @@ import React from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useSwipeable } from 'react-swipeable';
-import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
-import { buildGraph, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
+import { buildGraph, UnigraphObject, getRandomInt, getRandomId } from 'unigraph-dev-common/lib/utils/utils';
 import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { AutoDynamicViewProps } from '../../types/ObjectView.d';
 import { subscribeToBacklinks } from '../../unigraph-react';
@@ -24,6 +23,7 @@ import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import { StringObjectViewer } from './BasicObjectViews';
 import { excludableTypes } from './GraphView';
 import { getSubentities, isStub, SubentityDropAcceptor } from './utils';
+import { registerKeyboardShortcut, removeKeyboardShortcut } from '../../keyboardShortcuts';
 
 export function AutoDynamicView({
     object,
@@ -47,6 +47,7 @@ export function AutoDynamicView({
     onClick,
     recursive,
     customBoundingBox,
+    shortcuts,
     expandedChildren,
     ...props
 }: AutoDynamicViewProps) {
@@ -63,6 +64,7 @@ export function AutoDynamicView({
     const isObjectStub = isStub(object);
     const [loadedObj, setLoadedObj] = React.useState<any>(false);
     const [subsId, setSubsId] = React.useState(0);
+    const [componentId, setComponentId] = React.useState(getRandomId());
     const [isRecursion, setIsRecursion] = React.useState<any>(false);
     const getObject = () => (isObjectStub ? loadedObj : object);
 
@@ -89,6 +91,7 @@ export function AutoDynamicView({
     noDrop = noDrop || DynamicViews[object?.type?.['unigraph.id']]?.noDrop;
     noContextMenu = noContextMenu || DynamicViews[object?.type?.['unigraph.id']]?.noContextMenu;
     noBacklinks = noBacklinks || DynamicViews[object?.type?.['unigraph.id']]?.noBacklinks;
+    shortcuts = shortcuts || DynamicViews[object?.type?.['unigraph.id']]?.shortcuts;
 
     const viewEl = React.useRef(null);
 
@@ -109,13 +112,23 @@ export function AutoDynamicView({
         window.unigraph.getState('registry/dynamicViewDetailed').subscribe(cb2);
 
         const cbsel = (sel: any) => {
-            if (sel?.includes?.(object?.uid)) setIsSelected(true);
+            if (sel?.includes?.(componentId)) setIsSelected(true);
             else setIsSelected(false);
         };
         window.unigraph.getState('global/selected').subscribe(cbsel);
 
+        let hasFocus = false;
         const cbfoc = (foc: any) => {
-            if (foc.uid === object?.uid && tabContext.isVisible()) setIsFocused(true);
+            if (foc.uid === object?.uid && tabContext.isVisible() && !foc?.component?.length) {
+                hasFocus = true;
+                window.unigraph.getState('global/focused').value.component = componentId;
+            }
+            if (
+                foc.uid === object?.uid &&
+                tabContext.isVisible() &&
+                window.unigraph.getState('global/focused').value.component === componentId
+            )
+                setIsFocused(true);
             else setIsFocused(false);
         };
         window.unigraph.getState('global/focused').subscribe(cbfoc);
@@ -130,8 +143,28 @@ export function AutoDynamicView({
             window.unigraph.getState('global/selected').unsubscribe(cbsel);
             window.unigraph.getState('global/focused').unsubscribe(cbfoc);
             window.dragselect?.removeSelectables([viewElRef]);
+            if (hasFocus) {
+                const focused = window.unigraph.getState('global/focused');
+                focused.setValue({ ...focused.value, component: '' });
+            }
         };
     }, []);
+
+    React.useEffect(() => {
+        if (typeof shortcuts === 'object' && Object.keys(shortcuts).length > 0) {
+            Object.entries(shortcuts).forEach(([key, value]) => {
+                registerKeyboardShortcut(componentId, key, value as any);
+            });
+        }
+
+        return function cleanup() {
+            if (typeof shortcuts === 'object' && Object.keys(shortcuts).length > 0) {
+                Object.entries(shortcuts).forEach(([key, value]) => {
+                    removeKeyboardShortcut(componentId, key);
+                });
+            }
+        };
+    }, [shortcuts]);
 
     if (getSubentities(object)?.length > 0) {
         callbacks!.showSubentities = (show?: boolean) => {
@@ -263,7 +296,7 @@ export function AutoDynamicView({
         },
         [isDragging, drag, callbacks],
     );
-    if (object.uid === '0x3d0935') console.log(dataContext.parents, dataContext.getParents(true), backlinks[0]);
+
     const BacklinkComponent = (
         <div
             style={{
@@ -309,7 +342,7 @@ export function AutoDynamicView({
                     ...(window.dragselect && !noContextMenu && customBoundingBox
                         ? {
                               registerBoundingBox: (el: any) => {
-                                  el.id = `bounding-box-${object?.uid}`;
+                                  el.dataset.component = componentId;
                                   window.dragselect.addSelectables([el]);
                               },
                           }
@@ -319,6 +352,7 @@ export function AutoDynamicView({
                 ...(attributes || {}),
                 inline,
                 compact,
+                componentId,
                 focused: isFocused,
             });
         }
@@ -363,7 +397,11 @@ export function AutoDynamicView({
                     onContextMenu={
                         noContextMenu
                             ? () => false
-                            : (event) => onUnigraphContextMenu(event, getObject(), contextEntity, callbacks)
+                            : (event) =>
+                                  onUnigraphContextMenu(event, getObject(), contextEntity, {
+                                      ...callbacks,
+                                      componentId,
+                                  })
                     }
                 >
                     <Typography>
@@ -392,6 +430,7 @@ export function AutoDynamicView({
                 >
                     <div
                         id={`object-view-${object?.uid}`}
+                        data-component={componentId}
                         style={{
                             opacity: isDragging ? 0 : 1,
                             boxSizing: 'border-box',
@@ -408,12 +447,16 @@ export function AutoDynamicView({
                         onContextMenu={
                             noContextMenu
                                 ? () => false
-                                : (event) => onUnigraphContextMenu(event, getObject(), contextEntity, callbacks)
+                                : (event) =>
+                                      onUnigraphContextMenu(event, getObject(), contextEntity, {
+                                          ...callbacks,
+                                          componentId,
+                                      })
                         }
                         onClickCapture={(ev) => {
                             if (isMultiSelectKeyPressed(ev)) {
                                 ev.stopPropagation();
-                                selectUid(object.uid, false);
+                                selectUid(componentId, false);
                             }
                         }}
                         onClick={(ev) => {

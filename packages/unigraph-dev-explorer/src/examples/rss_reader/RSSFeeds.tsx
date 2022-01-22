@@ -21,7 +21,7 @@ import { mdiRssBox } from '@mdi/js';
 import { registerDynamicViews, registerDetailedDynamicViews, withUnigraphSubscription } from '../../unigraph-react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { DynamicViewRenderer } from '../../global.d';
-import { download, openUrl, upload, getComponentFromPage, TabContext, timeSince } from '../../utils';
+import { download, upload, getComponentFromPage, TabContext, timeSince } from '../../utils';
 import { Html } from '../semantic/Html';
 import { setupInfiniteScrolling } from '../../components/ObjectView/infiniteScrolling';
 
@@ -94,7 +94,7 @@ const RSSItem: DynamicViewRenderer = ({ data, callbacks }) => {
                                 onClick={(ev) => {
                                     ev.stopPropagation();
                                     ev.preventDefault();
-                                    openUrl(unpadded.item_data?.url);
+                                    window.open(unpadded.item_data?.url, '_blank');
                                     if (callbacks?.removeFromContext) callbacks.removeFromContext();
                                 }}
                             />

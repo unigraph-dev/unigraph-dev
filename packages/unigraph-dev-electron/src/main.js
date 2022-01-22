@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, Tray, nativeImage, globalShortcut } = require('electron');
+const { app, BrowserWindow, Menu, Tray, nativeImage, globalShortcut, shell } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const { fixPathForAsarUnpack } = require('electron-util');
@@ -6,6 +6,7 @@ const { ipcMain } = require('electron');
 
 const Store = require('electron-store');
 const net = require('net');
+const { electron } = require('process');
 const { createTrayMenu } = require('./tray');
 
 const store = new Store();
@@ -16,7 +17,6 @@ const unigraph_trayIcon =
     'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABUAAAAVCAYAAACpF6WWAAADiXRFWHRteGZpbGUAJTNDbXhmaWxlJTIwaG9zdCUzRCUyMmFwcC5kaWFncmFtcy5uZXQlMjIlMjBtb2RpZmllZCUzRCUyMjIwMjEtMDUtMDNUMTclM0EwNiUzQTA5LjUxMlolMjIlMjBhZ2VudCUzRCUyMjUuMCUyMChNYWNpbnRvc2glM0IlMjBJbnRlbCUyME1hYyUyME9TJTIwWCUyMDExXzNfMCklMjBBcHBsZVdlYktpdCUyRjUzNy4zNiUyMChLSFRNTCUyQyUyMGxpa2UlMjBHZWNrbyklMjBDaHJvbWUlMkY4OC4wLjQzMjQuMTUwJTIwU2FmYXJpJTJGNTM3LjM2JTIyJTIwZXRhZyUzRCUyMmFKRldEQUR0MlEzVk5fZVpKd3I0JTIyJTIwdmVyc2lvbiUzRCUyMjE0LjYuOSUyMiUyMHR5cGUlM0QlMjJkZXZpY2UlMjIlM0UlM0NkaWFncmFtJTIwaWQlM0QlMjJCV0JHLVBoeFRTZkFxRlZBOTdhRSUyMiUyMG5hbWUlM0QlMjJQYWdlLTElMjIlM0VqWkxCYm9Nd0RJYWZobU1sS0czSGpvTjEzV1hTcXFyck9TSXVpUnBpRkVLaGUlMkZxWmtaU3lxdEl1eVA1c3glMkJhM2d6Z3J1NDFobGZoQURpcVloN3dMNHRkZ1BuOWVyT2piZzhzQWxxdkZBQW9qJTJCWUNpRWV6a056Z1lPdHBJRHZVazBTSXFLNnNwekZGcnlPMkVNV093bmFZZFVVMjdWcXlBTzdETG1icW5COG10R0dpeURFZiUyQkRySVF2bk1VdWtqSmZMSUR0V0FjMnhzVXI0TTRNNGgyc01vdUE5VnI1M1VaNnQ0ZVJLJTJCREdkRDJQd1d6elZjaW5qNlhNamx2RDlYMnhMcDRQM092bkpscTNBJTJGdjNiVDI0aVd3MEZHRFZOaFNFWWpJckszQkUyU28wQkRScUNrelBVcWwlMkZpQ21aS0hKeldsRUlKNmV3VmhKNHI2NFFDazU3OXVrclpBV2RoWEwlMkI1NHRYUkl4ZzQzbTBFOGZrdWNHcFFlZ2U2aEFkTldWN2hHd0JHc3VsTktPbSUyRlBiRURkTDg0eTVXeW11bGFPY1pEaEZ2VHR1N2pkMmMlMkY3eCUyQmdjJTNEJTNDJTJGZGlhZ3JhbSUzRSUzQyUyRm14ZmlsZSUzRQ4QufQAAACnSURBVDhP7dQxDgFREIDhb1vR6PTEFbiCOARX4ABKxyERdGqJG0hwBAWFREM22WIRu2vZbl/yqjfvn8k/mQkUcIICmEro/60mOe1ixZv3OfYYfSonCdrDooS+KvrJaQcbVHCNNWWN8E7yNKqGE9rYxgBn9DHLAw3/7HDAADcMMUYDx7zQJpZoRYBLlGCaNDJZF0od1ajqe9oMZoWmcZ7eS+hXujIFPwCUDCEWIOzIUgAAAABJRU5ErkJggg==';
 
 const frontendLocation = process.env.FRONTEND_LOCATION || 'localhost';
-//
 const logs = [];
 let mainWindow = null;
 const todayWindow = null;
@@ -248,6 +248,15 @@ app.whenReady().then(() => {
             }),
         );
         windows.map((el) => el.on('hide', (event) => {}));
+        mainWindow.webContents.on('will-navigate', function (e, url) {
+            e.preventDefault();
+            shell.openExternal(url);
+        });
+        mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+            // open url in a browser and prevent default
+            shell.openExternal(url);
+            return { action: 'deny' };
+        });
     }, 0);
 });
 

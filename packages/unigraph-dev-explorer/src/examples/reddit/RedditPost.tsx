@@ -6,7 +6,6 @@ import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { DynamicViewRenderer } from '../../global.d';
 import { registerDynamicViews } from '../../unigraph-react';
-import { openUrl } from '../../utils';
 
 const getThumbnail = (url: string) => {
     if (url === 'image') {
@@ -119,7 +118,7 @@ export const RedditPost: DynamicViewRenderer = ({ data, callbacks }) => {
                             onClick={() => {
                                 if (callbacks?.removeFromContext && callbacks?.removeOnEnter)
                                     callbacks.removeFromContext();
-                                openUrl(data.get('permalink').as('primitive'));
+                                window.open(data.get('permalink').as('primitive'), '_blank');
                             }}
                         >
                             Comment

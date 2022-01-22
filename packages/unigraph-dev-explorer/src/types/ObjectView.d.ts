@@ -28,6 +28,7 @@ export type AutoDynamicViewProps = {
     noClickthrough?: boolean;
     onClick?: any;
     recursive?: boolean;
+    shortcuts?: any;
     customBoundingBox?: boolean;
     expandedChildren?: boolean;
 };
@@ -41,6 +42,7 @@ export type DynamicViewRendererProps = {
     noContextMenu?: boolean;
     noDrag?: boolean;
     noDrop?: boolean;
+    shortcuts?: any;
     onClick?: any;
 };
 
