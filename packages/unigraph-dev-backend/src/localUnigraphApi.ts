@@ -480,9 +480,13 @@ export function getLocalUnigraphAPI(
             return res;
         },
         getSecret: (scope, key) => {
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
-            const keyfile = require(path.join(__dirname, 'secrets.env.json'));
-            if (keyfile?.[scope]?.[key]) return keyfile[scope][key];
+            try {
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
+                const keyfile = require(path.join(__dirname, 'secrets.env.json'));
+                if (keyfile?.[scope]?.[key]) return keyfile[scope][key];
+            } catch (e) {
+                console.error(e);
+            }
             return '';
         },
         awaitHttpCallback: (key: string) =>

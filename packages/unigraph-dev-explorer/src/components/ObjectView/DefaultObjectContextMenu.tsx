@@ -277,7 +277,9 @@ export const onUnigraphContextMenu = (
     event.preventDefault?.();
     event.stopPropagation?.();
 
-    selectUid(object.uid, !isMultiSelectKeyPressed(event));
+    const compId = callbacks?.componentId || object?.uid;
+
+    selectUid(compId, !isMultiSelectKeyPressed(event));
 
     window.unigraph.getState('global/contextMenu').setValue({
         anchorPosition: { top: event.clientY, left: event.clientX },

@@ -9,7 +9,6 @@ import TurndownService from 'turndown';
 import rehypeRaw from 'rehype-raw';
 import { DynamicViewRenderer } from '../../global.d';
 import remarkWikilink from './wikilink';
-import { openUrl } from '../../utils';
 
 export function htmlToMarkdown(html: string) {
     TurndownService.prototype.escape = (input: string) => input;
@@ -85,7 +84,7 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                                 onPointerUp: (ev: any) => {
                                     ev.preventDefault();
                                     ev.stopPropagation();
-                                    openUrl((props?.node as any)?.properties?.href);
+                                    window.open((props?.node as any)?.properties?.href, '_blank');
                                 },
                                 target: '_blank',
                                 style: { cursor: 'pointer' },

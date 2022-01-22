@@ -319,14 +319,6 @@ export const isMobile = () =>
  */
 export const isSmallScreen = () => window.innerWidth <= 720;
 
-export const openUrl = (url: string) => {
-    if (isElectron()) {
-        window.electronShell.openExternal(url);
-    } else {
-        window.open(url, '_blank');
-    }
-};
-
 export const selectUid = (uid: string, exclusive = true) => {
     const selected = window.unigraph.getState('global/selected');
     const newUid = selected.value?.includes?.(uid)
