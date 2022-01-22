@@ -1,8 +1,8 @@
 {
     "type": { "unigraph.id": "$/schema/prompt_preset" },
     "name": "Prompt preset: tl;dr",
-    "generator": {"unigraph.id": "$/package/unigraph.nlp/0.0.1/executable/prompt-preset-tldr-generator"},
-    "processor": {"unigraph.id": "$/package/unigraph.nlp/0.0.1/executable/prompt-preset-tldr-processor"},
+    "generator": { "unigraph.id": "$/package/unigraph.nlp/0.0.1/executable/prompt-preset-tldr-generator" },
+    "processor": { "unigraph.id": "$/package/unigraph.nlp/0.0.1/executable/prompt-preset-tldr-processor" },
     "stop_sequence": "\n\n",
     "max_tokens": 128
 }

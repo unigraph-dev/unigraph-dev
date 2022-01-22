@@ -1,9 +1,9 @@
 {
-    "type": {"unigraph.id": "$/schema/home_section"},
+    "type": { "unigraph.id": "$/schema/home_section" },
     "view": {
         "name": "Upcoming events",
         "env": "react-explorer",
-        "view": {"unigraph.id": "$/package/unigraph.calendar/0.0.1/executable/home-next-events"}
+        "view": { "unigraph.id": "$/package/unigraph.calendar/0.0.1/executable/home-next-events" }
     },
-    "condition": {"unigraph.id": "$/package/unigraph.calendar/0.0.1/executable/home-next-events-condition"}
+    "condition": { "unigraph.id": "$/package/unigraph.calendar/0.0.1/executable/home-next-events-condition" }
 }

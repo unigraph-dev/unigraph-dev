@@ -2,6 +2,6 @@
     "type": { "unigraph.id": "$/schema/object_view_detailed" },
     "name": "Detailed kanban view",
     "maximize": true,
-    "item_type": {"unigraph.id": "$/schema/kanban"},
-    "view": {"unigraph.id": "$/package/unigraph.kanban/0.0.1/executable/kanban-view-detailed"}
+    "item_type": { "unigraph.id": "$/schema/kanban" },
+    "view": { "unigraph.id": "$/package/unigraph.kanban/0.0.1/executable/kanban-view-detailed" }
 }

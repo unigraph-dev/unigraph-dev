@@ -1,5 +1,5 @@
 {
     "type": { "unigraph.id": "$/schema/bookmark_handler" },
     "match_domain": ".*twitter\\.com\\/.*\\/status\\/.*",
-    "handler": {"unigraph.id": "$/package/unigraph.twitter/0.0.1/executable/add-tweet-from-url"}
+    "handler": { "unigraph.id": "$/package/unigraph.twitter/0.0.1/executable/add-tweet-from-url" }
 }

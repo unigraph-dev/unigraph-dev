@@ -1,3 +1,3 @@
 {
-    summary: context.params.result
+    context.params.result;
 }

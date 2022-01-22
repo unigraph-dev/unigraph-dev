@@ -10,9 +10,7 @@ if (destUidOrName.startsWith('$/entity')) {
     // UID
     destUid = destUidOrName;
 } else {
-    throw new Error(
-        'Destination is not valid - should either be a named entity or an UID.',
-    );
+    throw new Error('Destination is not valid - should either be a named entity or an UID.');
 }
 
 const sources = !Array.isArray(sourceUid) ? [sourceUid] : sourceUid;
@@ -39,9 +37,7 @@ await unigraph.updateObject(
 
 if (indexes && Array.isArray(indexes) && indexes.length === sources.length) {
     // Now do reorder
-    const listRes = await unigraph.getQueries([
-        `(func: uid(${destUid})) { _value { children { uid } } }`,
-    ]);
+    const listRes = await unigraph.getQueries([`(func: uid(${destUid})) { _value { children { uid } } }`]);
     const listUid = listRes?.[0]?.[0]?._value?.children?.uid;
     if (listUid)
         await unigraph.reorderItemInArray(
