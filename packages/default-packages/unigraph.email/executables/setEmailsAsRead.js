@@ -1,12 +1,9 @@
 const { uids } = context.params;
 const { google } = require('googleapis');
+const gmailClientId = unigraph.getSecret('google', 'client_id')
+const gmailClientSecret = unigraph.getSecret('google', 'client_secret')
 
-const gmailClientId = unigraph.getSecret('google', 'client_id');
-const gmailClientSecret = unigraph.getSecret('google', 'client_secret');
-
-const account = (
-    await unigraph.getQueries([
-        `(func: uid(accs)) @cascade {
+const account = (await unigraph.getQueries([`(func: uid(accs)) @cascade {
     uid
     type {<unigraph.id>}
     _value {
@@ -27,38 +24,33 @@ const account = (
 
 var(func: eq(<unigraph.id>, "$/schema/internet_account")) {
     <~type> { accs as uid }
-}`,
-    ])
-)?.[0]?.[0];
+}`]))?.[0]?.[0];
 
-const msgIds = (
-    await unigraph.getQueries(
-        uids.map(
-            (el) => `(func: uid(${el})) {
+const msgIds = (await unigraph.getQueries(uids.map(el => `(func: uid(${el})) {
     _value { <message_id> { <_value.%> } }
-}`,
-        ),
-    )
-).map((el) => el?.[0]?._value?.message_id?.['_value.%']);
+}`))).map(el => el?.[0]?._value?.message_id?.['_value.%']);
 
 if (account?.uid) {
-    const token = account._value.access_token['_value.%'];
-    const auth = new google.auth.OAuth2(gmailClientId, gmailClientSecret, 'https://localhost:4001/callback?key=gmail');
-    auth.setCredentials({ access_token: token });
+    let token = account['_value']['access_token']['_value.%'];
+    let auth = new google.auth.OAuth2(
+        gmailClientId,
+        gmailClientSecret,
+        'https://localhost:4001/callback?key=gmail'
+    );
+    auth.setCredentials({access_token: token});
 
     const gmail = google.gmail({
-        version: 'v1',
-        auth,
-    });
+        version: "v1",
+        auth: auth,
+    })
 
-    const gmailIds = await Promise.all(
-        msgIds.map((el) => gmail.users.messages.list({ userId: 'me', q: `rfc822msgid:${el}` })),
-    );
-    const mids = gmailIds.map((el) => el.data?.messages?.[0]?.id).filter((el) => el !== undefined);
+    const gmailIds = await Promise.all(msgIds.map(el => gmail.users.messages.list({userId: 'me', q: 'rfc822msgid:' + el})));
+    const mids = gmailIds.map(el => el.data?.messages?.[0]?.id).filter(el => el !== undefined);
 
     await gmail.users.messages.batchModify({
-        userId: 'me',
+        userId: "me",
         ids: mids,
-        removeLabelIds: ['UNREAD'],
-    });
+        removeLabelIds: ['UNREAD']
+    })
+
 }

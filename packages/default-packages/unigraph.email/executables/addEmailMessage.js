@@ -19,7 +19,8 @@ const dest = parsed.map((el) => {
         },
         message_id: el.messageId,
         message: {
-            date_received: el.date?.toISOString?.() || new Date(0).toISOString(),
+            date_received:
+                el.date?.toISOString?.() || new Date(0).toISOString(),
             sender: (el.from?.value || [])
                 .filter((it) => it.address)
                 .map((it) => ({
@@ -85,7 +86,10 @@ const toAddChunks = toAdd.reduce((resultArray, item, index) => {
 const uids = [];
 for (let i = 0; i < toAddChunks.length; i += 1) {
     try {
-        const res = await unigraph.addObject(toAddChunks[i], '$/schema/email_message');
+        const res = await unigraph.addObject(
+            toAddChunks[i],
+            '$/schema/email_message',
+        );
         uids.push(...res);
     } catch (e) {
         uids.push(...Array(100).fill(undefined));

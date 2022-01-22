@@ -32,14 +32,11 @@
                 "_definition": {
                     "type": { "unigraph.id": "$/composer/Union" },
                     "_parameters": {
-                        "_definitions": [
-                            {
-                                "type": { "unigraph.id": "$/schema/executable" }
-                            },
-                            {
-                                "type": { "unigraph.id": "$/primitive/string" }
-                            }
-                        ]
+                        "_definitions": [{
+                            "type": { "unigraph.id": "$/schema/executable" }
+                        }, {
+                            "type": { "unigraph.id": "$/primitive/string" }
+                        }]
                     }
                 }
             },
@@ -59,14 +56,11 @@
                         "_element": {
                             "type": { "unigraph.id": "$/composer/Union" },
                             "_parameters": {
-                                "_definitions": [
-                                    {
-                                        "type": { "unigraph.id": "$/schema/subentity" }
-                                    },
-                                    {
-                                        "type": { "unigraph.id": "$/schema/interface/semantic" }
-                                    }
-                                ]
+                                "_definitions": [{
+                                    "type": { "unigraph.id": "$/schema/subentity" }
+                                }, {
+                                    "type": { "unigraph.id": "$/schema/interface/semantic" }
+                                }]
                             }
                         }
                     }

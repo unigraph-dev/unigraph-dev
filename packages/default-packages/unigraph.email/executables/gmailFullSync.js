@@ -57,10 +57,16 @@ if (account?.uid) {
 
     await unigraph.updateObject(account.uid, {
         access_token: token,
-        token_expires_in: new Date(new Date().getTime() + 3600 * 1000).toISOString(),
+        token_expires_in: new Date(
+            new Date().getTime() + 3600 * 1000,
+        ).toISOString(),
     });
 
-    const auth = new google.auth.OAuth2(gmailClientId, gmailClientSecret, 'https://localhost:4001/callback?key=gmail');
+    const auth = new google.auth.OAuth2(
+        gmailClientId,
+        gmailClientSecret,
+        'https://localhost:4001/callback?key=gmail',
+    );
     auth.setCredentials({ ...accessTokenResult, access_token: token });
 
     const gmail = google.gmail({
@@ -96,9 +102,13 @@ if (account?.uid) {
             <~type> { parIds as uid }
         }`,
         ]);
-        const pageMsg = messages.filter((el, index) => results[index].length === 0);
+        const pageMsg = messages.filter(
+            (el, index) => results[index].length === 0,
+        );
         const pageFullMsgs = await Promise.all(
-            pageMsg.map((id) => gmail.users.messages.get({ userId: 'me', id, format: 'raw' })),
+            pageMsg.map((id) =>
+                gmail.users.messages.get({ userId: 'me', id, format: 'raw' }),
+            ),
         );
         newMsgs.push(...pageFullMsgs);
         console.log(`${newMsgs.length} emails loaded!`);

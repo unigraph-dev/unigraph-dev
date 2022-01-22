@@ -1,6 +1,6 @@
 {
     "displayName": "Unigraph Email",
-    "version": "0.0.4-beta.5",
+    "version": "0.0.1",
     "description": "Simple email client with Unigraph.",
     "name": "unigraph.email",
     "unigraph": {

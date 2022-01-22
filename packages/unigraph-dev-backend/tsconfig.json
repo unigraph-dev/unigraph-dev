@@ -1,19 +1,29 @@
 {
-    "compilerOptions": {
-        "baseUrl": ".",
-        "esModuleInterop": true,
-        "lib": ["ESNext", "WebWorker"],
-        "module": "CommonJS",
-        "moduleResolution": "node",
-        "outDir": "dist",
-        "paths": {
-            "@/*": ["./src/*"]
-        },
-        "resolveJsonModule": true,
-        "sourceMap": true,
-        "strict": true,
-        "target": "ES2017",
-        "typeRoots": ["src/custom.d.ts", "node_modules/@types"]
+  "compilerOptions": {
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "lib": [
+      "ESNext",
+      "WebWorker"
+    ],
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "outDir": "dist",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
     },
-    "include": ["src"]
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "strict": true,
+    "target": "ES2017",
+    "typeRoots": [
+      "src/custom.d.ts",
+      "node_modules/@types"
+    ]
+  },
+  "include": [
+    "src"
+  ]
 }

@@ -43,32 +43,25 @@ React.useEffect(() => {
     };
 }, []);
 
-return note && note?.type?.['unigraph.id'] === '$/schema/journal' ? (
-    <AutoDynamicViewDetailed object={note} />
-) : note ? (
-    ''
-) : (
+return ((note && note?.type?.['unigraph.id'] === '$/schema/journal') ? <AutoDynamicViewDetailed object={note} /> : (note ? '' : (
     <div>
         <Button
             style={{ textTransform: 'none', marginTop: '8px' }}
             variant="outlined"
             onClick={() => {
-                window.unigraph.addObject(
-                    {
-                        date: {
-                            datetime: utcTime,
-                            all_day: true,
-                            timezone: 'local',
-                        },
-                        note: {
-                            text: { _value: dateStr, type: { 'unigraph.id': '$/schema/markdown' } },
-                        },
+                window.unigraph.addObject({
+                    date: {
+                        datetime: utcTime,
+                        all_day: true,
+                        timezone: 'local',
                     },
-                    '$/schema/journal',
-                );
-            }}
+                    note: {
+                                text: { _value: dateStr, type: { 'unigraph.id': '$/schema/markdown' } },
+                            },
+                        }, '$/schema/journal');
+                }}
         >
             + Add daily note
         </Button>
     </div>
-);
+)));

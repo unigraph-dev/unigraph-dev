@@ -44,7 +44,9 @@
                     "unigraph.id": "$/primitive/string"
                 }
             },
-            "dgraph.type": ["Type"],
+            "dgraph.type": [
+                "Type"
+            ],
             "unigraph.id": "$/schema/color"
         },
         "$/schema/tag": {
@@ -61,7 +63,9 @@
                         "uid": "0xa",
                         "unigraph.id": "$/primitive/string"
                     },
-                    "_indexes": ["name"]
+                    "_indexes": [
+                        "name"
+                    ]
                 },
                 "_properties": [
                     {
@@ -72,7 +76,9 @@
                             "type": {
                                 "uid": "0xc",
                                 "unigraph.id": "$/schema/color",
-                                "dgraph.type": ["Type"]
+                                "dgraph.type": [
+                                    "Type"
+                                ]
                             }
                         }
                     },
@@ -90,7 +96,9 @@
                     }
                 ]
             },
-            "dgraph.type": ["Type"],
+            "dgraph.type": [
+                "Type"
+            ],
             "unigraph.id": "$/schema/tag"
         },
         "$/schema/note": {
@@ -102,7 +110,9 @@
                     "unigraph.id": "$/primitive/string"
                 }
             },
-            "dgraph.type": ["Type"],
+            "dgraph.type": [
+                "Type"
+            ],
             "unigraph.id": "$/schema/note"
         },
         "$/schema/semantic_properties": {
@@ -119,7 +129,9 @@
                         "uid": "0x16",
                         "unigraph.id": "$/primitive/string"
                     },
-                    "_indexes": ["name"]
+                    "_indexes": [
+                        "name"
+                    ]
                 },
                 "_properties": [
                     {
@@ -137,7 +149,9 @@
                                     "uid": "0x1d",
                                     "type": {
                                         "uid": "0x15",
-                                        "dgraph.type": ["Type"],
+                                        "dgraph.type": [
+                                            "Type"
+                                        ],
                                         "unigraph.id": "$/schema/note"
                                     }
                                 }
@@ -166,7 +180,9 @@
                     }
                 ]
             },
-            "dgraph.type": ["Type"],
+            "dgraph.type": [
+                "Type"
+            ],
             "unigraph.id": "$/schema/semantic_properties"
         },
         "$/schema/todo": {
@@ -183,7 +199,9 @@
                         "uid": "0x16",
                         "unigraph.id": "$/primitive/string"
                     },
-                    "_indexes": ["name"]
+                    "_indexes": [
+                        "name"
+                    ]
                 },
                 "_properties": [
                     {
@@ -228,13 +246,17 @@
                             "type": {
                                 "uid": "0x18",
                                 "unigraph.id": "$/schema/semantic_properties",
-                                "dgraph.type": ["Type"]
+                                "dgraph.type": [
+                                    "Type"
+                                ]
                             }
                         }
                     }
                 ]
             },
-            "dgraph.type": ["Type"],
+            "dgraph.type": [
+                "Type"
+            ],
             "unigraph.id": "$/schema/todo"
         }
     }

@@ -1,6 +1,6 @@
 {
     "displayName": "Unigraph Home",
-    "version": "0.0.4-beta.5",
+    "version": "0.0.1",
     "description": "Provides the default Home integrations for Unigraph.",
     "name": "unigraph.home",
     "unigraph": {
