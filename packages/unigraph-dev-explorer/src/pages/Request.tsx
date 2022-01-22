@@ -26,9 +26,7 @@ const templateRequests = {
 };
 
 export default function Request() {
-    const [code, setCode]: [string, any] = React.useState(
-        '// Your request here...',
-    );
+    const [code, setCode]: [string, any] = React.useState('// Your request here...');
 
     return (
         <div>
@@ -49,19 +47,11 @@ export default function Request() {
                 Send to server
             </Button>
             <p>Templates: </p>
-            <Button
-                onClick={() =>
-                    setCode(templateRequests['get-all-objects-with-id'])
-                }
-            >
+            <Button onClick={() => setCode(templateRequests['get-all-objects-with-id'])}>
                 Get all objects with ID
             </Button>
-            <Button onClick={() => setCode(templateRequests['get-status'])}>
-                Get server status
-            </Button>
-            <Button onClick={() => setCode(templateRequests['subscribe-all'])}>
-                Subscribe to all changes
-            </Button>
+            <Button onClick={() => setCode(templateRequests['get-status'])}>Get server status</Button>
+            <Button onClick={() => setCode(templateRequests['subscribe-all'])}>Subscribe to all changes</Button>
         </div>
     );
 }

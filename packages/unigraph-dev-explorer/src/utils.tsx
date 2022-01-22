@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable no-bitwise */
 /* eslint-disable no-plusplus */
@@ -6,10 +7,8 @@ import _ from 'lodash';
 import React from 'react';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 
-export const NavigationContext = React.createContext<(location: string) => any>(
-    (location: string) => ({}),
-);
-//
+export const NavigationContext = React.createContext<(location: string) => any>((location: string) => ({}));
+
 export const TabContext = React.createContext({
     viewId: 0,
     setTitle: (title: string) => {},
@@ -17,22 +16,12 @@ export const TabContext = React.createContext({
     isVisible: () => true as boolean,
 
     subscribeToType(name: any, callback: any, eventId?: any, options?: any) {
-        return window.unigraph.subscribeToType(
-            name,
-            callback,
-            eventId,
-            options,
-        );
+        return window.unigraph.subscribeToType(name, callback, eventId, options);
     },
     subscribeToObject(uid: any, callback: any, eventId?: any, options?: any) {
         window.unigraph.subscribeToObject(uid, callback, eventId, options);
     },
-    subscribeToQuery(
-        fragment: any,
-        callback: any,
-        eventId?: any,
-        options?: any,
-    ) {
+    subscribeToQuery(fragment: any, callback: any, eventId?: any, options?: any) {
         window.unigraph.subscribeToQuery(fragment, callback, eventId, options);
     },
     subscribe(query: any, callback: any, eventId?: any, update?: any) {
@@ -42,17 +31,51 @@ export const TabContext = React.createContext({
         window.unigraph.unsubscribe(id);
     },
 });
-export const DataContext = React.createContext({
-    rootUid: '0x0',
+
+type DataContextType = {
+    contextUid: string;
+    contextData?: any;
+    parents?: string[];
+    viewType?: string;
+    expandedChildren: boolean;
+    getParents: (withParents?: boolean) => string[];
+};
+
+export const DataContext = React.createContext<DataContextType>({
+    contextUid: '0x0',
+    contextData: {},
+    parents: undefined,
+    getParents: () => [],
+    expandedChildren: false,
 });
+
+export const DataContextWrapper = ({ children, contextUid, contextData, parents, viewType, expandedChildren }: any) => {
+    const parentContext = React.useContext(DataContext);
+
+    const dataContext = React.useMemo(() => {
+        return {
+            contextUid,
+            contextData,
+            viewType,
+            parents,
+            expandedChildren: !!expandedChildren,
+            getParents: (withParents?: boolean) => {
+                return [
+                    ...parentContext.getParents(withParents),
+                    ...(withParents ? parents || [] : []),
+                    ...(expandedChildren ? [contextUid] : []),
+                ];
+            },
+        };
+    }, [contextUid, contextData, viewType, expandedChildren, JSON.stringify((parents || []).sort?.())]);
+
+    return <DataContext.Provider value={dataContext}>{children}</DataContext.Provider>;
+};
 
 export const getComponentFromPage = (location: string, params: any = {}) => {
     const pages = window.unigraph.getState('registry/pages');
     if (location.startsWith('/$/'))
-        location = `/${
-            (window.unigraph.getNamespaceMap as any)()[location.substring(1)]
-                .uid
-        }`;
+        location = `/${(window.unigraph.getNamespaceMap as any)()[location.substring(1)].uid}`;
     return {
         type: 'tab',
         config: params,
@@ -62,16 +85,11 @@ export const getComponentFromPage = (location: string, params: any = {}) => {
     };
 };
 
-export const setCaret = (
-    document: Document,
-    element: any,
-    pos: number,
-    length?: number,
-) => {
+export const setCaret = (document: Document, element: any, pos: number, length?: number) => {
+    // console.log(element, pos, length);
     const range = document.createRange();
     const sel = document.getSelection();
-    const maxLen =
-        element.textContent.length < pos ? element.textContent.length : pos;
+    const maxLen = element.textContent.length < pos ? element.textContent.length : pos;
     range.setStart(element, maxLen);
     if (length) {
         range.setEnd(element, length + maxLen);
@@ -83,15 +101,10 @@ export const setCaret = (
     sel?.addRange(range);
 };
 
-export const removeAllPropsFromObj = function (
-    obj: any,
-    propsToRemove: any,
-    maxLevel?: any,
-) {
-    if (typeof maxLevel !== 'number') maxLevel = 20;
+export const removeAllPropsFromObj = function (obj: any, propsToRemove: any, maxLevel?: any) {
+    if (typeof maxLevel !== 'number') maxLevel = 100;
     for (const prop in obj) {
-        if (typeof propsToRemove === 'string' && prop === propsToRemove)
-            delete obj[prop];
+        if (typeof propsToRemove === 'string' && prop === propsToRemove) delete obj[prop];
         else if (propsToRemove.indexOf(prop) >= 0) {
             // it must be an array
             delete obj[prop];
@@ -192,10 +205,7 @@ export const getContrast = function (hexcolor: string) {
 
 export function download(filename: string, text: string) {
     const element = document.createElement('a');
-    element.setAttribute(
-        'href',
-        `data:text/json;charset=utf-8,${encodeURIComponent(text)}`,
-    );
+    element.setAttribute('href', `data:text/json;charset=utf-8,${encodeURIComponent(text)}`);
     element.setAttribute('download', filename);
 
     element.style.display = 'none';
@@ -274,9 +284,7 @@ type TreeNode = {
 };
 export const dfs = (nodes: TreeNode[]) => {
     const root = nodes.filter((el) => el.root)[0];
-    const nmap: Record<string, TreeNode> = Object.fromEntries(
-        nodes.map((el) => [el.uid, el]),
-    );
+    const nmap: Record<string, TreeNode> = Object.fromEntries(nodes.map((el) => [el.uid, el]));
     const traversal: TreeNode[] = [];
 
     const recurse = (current: TreeNode, visited: any[]) => {
@@ -284,9 +292,7 @@ export const dfs = (nodes: TreeNode[]) => {
         if (current?.children) {
             // Ignores nodes referenced by but without uid
             traversal.push(current);
-            current.children.forEach((el) =>
-                recurse(nmap[el], [...visited, current.uid]),
-            );
+            current.children.forEach((el) => recurse(nmap[el], [...visited, current.uid]));
         } else if (current) {
             traversal.push(current);
         }
@@ -305,23 +311,13 @@ export const isElectron = () => {
  * Not to be confused with isSmallScreen which checks width.
  */
 export const isMobile = () =>
-    'ontouchstart' in window ||
-    navigator.maxTouchPoints > 0 ||
-    (navigator as any).msMaxTouchPoints > 0;
+    'ontouchstart' in window || navigator.maxTouchPoints > 0 || (navigator as any).msMaxTouchPoints > 0;
 
 /**
  * Whether the window is a small screen for layouting.
  * Not to be confused with isMobile which checks touch.
  */
 export const isSmallScreen = () => window.innerWidth <= 720;
-
-export const openUrl = (url: string) => {
-    if (isElectron()) {
-        window.electronShell.openExternal(url);
-    } else {
-        window.open(url, '_blank');
-    }
-};
 
 export const selectUid = (uid: string, exclusive = true) => {
     const selected = window.unigraph.getState('global/selected');
@@ -333,13 +329,10 @@ export const selectUid = (uid: string, exclusive = true) => {
 
 export const deselectUid = (uid?: string) => {
     const selected = window.unigraph.getState('global/selected');
-    selected.setValue(
-        selected.value.filter((el: string) => (uid ? el !== uid : false)),
-    );
+    selected.setValue(selected.value.filter((el: string) => (uid ? el !== uid : false)));
 };
 
-export const isMultiSelectKeyPressed = (event: React.MouseEvent) =>
-    event.altKey;
+export const isMultiSelectKeyPressed = (event: React.MouseEvent) => event.altKey;
 
 export const runClientExecutable = (src: string, params: any) => {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -360,3 +353,175 @@ export const runClientExecutable = (src: string, params: any) => {
     ).bind(this, require, unpad, { params }, window.unigraph);
     fn();
 };
+
+/**
+ * Add notification badge (pill) to favicon in browser tab
+ * @url stackoverflow.com/questions/65719387/
+ */
+export class Badger {
+    canvas: HTMLCanvasElement;
+
+    src: any;
+
+    ctx: any;
+
+    radius: any;
+
+    offset: any;
+
+    badgeSize: any;
+
+    backgroundColor: any;
+
+    color: any;
+
+    size: any;
+
+    position: any;
+
+    _value!: number;
+
+    onChange: any;
+
+    img!: HTMLImageElement;
+
+    faviconSize!: number;
+
+    constructor(options: any) {
+        Object.assign(
+            this,
+            {
+                backgroundColor: '#0cf',
+                color: '#fff',
+                size: 1, // 0..1 (Scale in respect to the favicon image size)
+                position: 'c', // Position inside favicon "n", "e", "s", "w", "ne", "nw", "se", "sw"
+                radius: 16, // Border radius
+                src: '', // Favicon source (dafaults to the <link> icon href)
+                onChange() {},
+            },
+            options,
+        );
+        this.canvas = document.createElement('canvas');
+        this.src = this.src || this.faviconEL?.getAttribute('href');
+        this.ctx = this.canvas.getContext('2d');
+    }
+
+    faviconEL = document.querySelector('link[rel$=icon]');
+
+    _drawIcon() {
+        this.ctx.clearRect(0, 0, this.faviconSize, this.faviconSize);
+        this.ctx.drawImage(this.img, 0, 0, this.faviconSize, this.faviconSize);
+    }
+
+    _drawShape() {
+        const r = this.radius;
+        const xa = this.offset.x;
+        const ya = this.offset.y;
+        const xb = this.offset.x + this.badgeSize;
+        const yb = this.offset.y + this.badgeSize;
+        this.ctx.beginPath();
+        this.ctx.moveTo(xb - r, ya);
+        this.ctx.quadraticCurveTo(xb, ya, xb, ya + r);
+        this.ctx.lineTo(xb, yb - r);
+        this.ctx.quadraticCurveTo(xb, yb, xb - r, yb);
+        this.ctx.lineTo(xa + r, yb);
+        this.ctx.quadraticCurveTo(xa, yb, xa, yb - r);
+        this.ctx.lineTo(xa, ya + r);
+        this.ctx.quadraticCurveTo(xa, ya, xa + r, ya);
+        this.ctx.fillStyle = this.backgroundColor;
+        this.ctx.fill();
+        this.ctx.closePath();
+    }
+
+    _drawVal() {
+        const margin = (this.badgeSize * 0.18) / 2;
+        this.ctx.beginPath();
+        this.ctx.textBaseline = 'middle';
+        this.ctx.textAlign = 'center';
+        this.ctx.font = `bold ${this.badgeSize * 0.6}px Arial`;
+        this.ctx.fillStyle = this.color;
+        this.ctx.fillText(this.value, this.badgeSize / 2 + this.offset.x, this.badgeSize / 2 + this.offset.y + margin);
+        this.ctx.closePath();
+    }
+
+    _drawFavicon() {
+        this.faviconEL!.setAttribute('href', this.dataURL);
+    }
+
+    _draw() {
+        this._drawIcon();
+        if (this.value) this._drawShape();
+        if (this.value) this._drawVal();
+        this._drawFavicon();
+    }
+
+    _setup() {
+        this.faviconSize = this.img.naturalWidth;
+        this.badgeSize = this.faviconSize * this.size;
+        this.canvas.width = this.faviconSize;
+        this.canvas.height = this.faviconSize;
+        const sd = this.faviconSize - this.badgeSize;
+        const sd2 = sd / 2;
+        this.offset = (
+            {
+                n: { x: sd2, y: 0 },
+                e: { x: sd, y: sd2 },
+                s: { x: sd2, y: sd },
+                w: { x: 0, y: sd2 },
+                nw: { x: 0, y: 0 },
+                ne: { x: sd, y: 0 },
+                sw: { x: 0, y: sd },
+                se: { x: sd, y: sd },
+                c: { x: sd2, y: sd2 },
+            } as any
+        )[this.position];
+    }
+
+    // Public functions / methods:
+
+    update() {
+        this._value = Math.min(999, parseInt(this._value as any, 10));
+        if (this.img) {
+            this._draw();
+            if (this.onChange) this.onChange.call(this);
+        } else {
+            this.img = new Image();
+            this.img.addEventListener('load', () => {
+                this._setup();
+                this._draw();
+                if (this.onChange) this.onChange.call(this);
+            });
+            this.img.src = this.src;
+        }
+    }
+
+    get dataURL() {
+        return this.canvas.toDataURL();
+    }
+
+    get value() {
+        return this._value;
+    }
+
+    set value(val) {
+        this._value = val;
+        this.update();
+    }
+}
+
+export function getParents(elem: any) {
+    const parents: any[] = [];
+    if (!elem) return parents;
+    while (elem.parentNode && elem.parentNode.nodeName.toLowerCase() != 'body') {
+        elem = elem.parentNode;
+        if (!elem) return parents;
+        if (elem.id?.startsWith?.('object-view-')) parents.push(elem.id.slice(12));
+    }
+    return parents;
+}
+
+export function getDateAsUTC(input: any) {
+    const date = new Date(input);
+    const utc = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+    return utc;
+}

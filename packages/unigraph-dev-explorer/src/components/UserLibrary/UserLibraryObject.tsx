@@ -4,16 +4,7 @@ import { TabContext } from '../../utils';
 import { AutoDynamicViewDetailed } from '../ObjectView/AutoDynamicViewDetailed';
 import { DefaultObjectView } from '../ObjectView/DefaultObjectView';
 
-export default function DetailedObjectView({
-    uid,
-    viewer,
-    id,
-    context,
-    component,
-    callbacks,
-    isStub,
-    type,
-}: any) {
+export default function DetailedObjectView({ uid, viewer, id, context, component, callbacks, isStub, type }: any) {
     // console.log(uid, isStub, type)
     const objectId: any = uid;
 
@@ -35,9 +26,7 @@ export default function DetailedObjectView({
     React.useEffect(() => {
         window.unigraph
             .getState('registry/dynamicViewDetailed')
-            .subscribe((newIts) =>
-                setDynamicViewsDetailed({ ...newIts, ...(component || {}) }),
-            );
+            .subscribe((newIts) => setDynamicViewsDetailed({ ...newIts, ...(component || {}) }));
     }, []);
 
     // eslint-disable-next-line consistent-return
@@ -62,11 +51,7 @@ export default function DetailedObjectView({
                         type: { 'unigraph.id': '$/skeleton/default' },
                         uid: '0x0',
                     });
-                    tabContext.subscribeToObject(
-                        context,
-                        (obj: any) => setContextObj(obj),
-                        myid! + 1,
-                    );
+                    tabContext.subscribeToObject(context, (obj: any) => setContextObj(obj), myid! + 1);
                 }
 
                 return function cleanup() {
@@ -108,7 +93,7 @@ export default function DetailedObjectView({
                 }}
                 callbacks={{ ...callbacks, subsId: myid, viewId: id }}
                 context={contextObj}
-                component={component}
+                components={component}
             />
         </React.Fragment>
     );

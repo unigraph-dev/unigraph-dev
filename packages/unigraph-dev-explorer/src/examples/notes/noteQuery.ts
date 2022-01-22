@@ -1,5 +1,6 @@
+const MAX_DEPTH = 8;
 const getQuery: (depth: number) => string = (depth: number) => {
-    if (depth >= 8) return '{ uid _hide type {<unigraph.id>} }';
+    if (depth >= MAX_DEPTH) return '{ uid _hide type {<unigraph.id>} }';
     return `{
         _updatedAt
         uid
@@ -49,12 +50,8 @@ const getQuery: (depth: number) => string = (depth: number) => {
     }`;
 };
 
-export const noteQueryDetailed = (uid: string, depth = 0) =>
-    `(func: uid(${uid})) ${getQuery(depth + 1)}`;
-export const journalQueryDetailed = (
-    uid: string,
-    depth = 0,
-) => `(func: uid(${uid})) {
+export const noteQueryDetailed = (uid: string, depth = 0) => `(func: uid(${uid})) ${getQuery(depth + 1)}`;
+export const journalQueryDetailed = (uid: string, depth = 0) => `(func: uid(${uid})) {
     _updatedAt
     uid
     _hide
@@ -68,4 +65,17 @@ export const journalQueryDetailed = (
     }
 }`;
 
-export const noteQuery = (uid: string) => `(func: uid(${uid})) ${getQuery(7)}`;
+export const noteQuery = (uid: string) => `(func: uid(${uid})) ${getQuery(MAX_DEPTH - 1)}`;
+export const journalQuery = (uid: string) => `(func: uid(${uid})) {
+    _updatedAt
+    uid
+    _hide
+    type {
+        <unigraph.id>
+    }
+    _value {
+        note {
+            _value ${getQuery(MAX_DEPTH - 1)}
+        }
+    }
+}`;

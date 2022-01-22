@@ -34,24 +34,11 @@ export function ListObjectView({ data, callbacks, ...attributes }: any) {
             callbacks={{ ...(attributes?.callbacks || {}), ...callbacks }}
             itemGetter={(el: any) => el._value._value}
             itemRemover={(uids) => {
-                window.unigraph.deleteItemFromArray(
-                    listValue.uid,
-                    uids,
-                    data.uid,
-                    callbacks?.subsId || undefined,
-                );
-                if (
-                    window.unigraph.getNamespaceMap?.()['$/entity/inbox']
-                        .uid === data.uid
-                ) {
+                window.unigraph.deleteItemFromArray(listValue.uid, uids, data.uid, callbacks?.subsId || undefined);
+                if (window.unigraph.getNamespaceMap?.()['$/entity/inbox'].uid === data.uid) {
                     // Is removing from inbox, do things here...
                     window.unigraph
-                        .getQueries(
-                            uids.map(
-                                (el: string) =>
-                                    `(func: uid(${el})) { type { <unigraph.id> } }`,
-                            ),
-                        )
+                        .getQueries(uids.map((el: string) => `(func: uid(${el})) { type { <unigraph.id> } }`))
                         .then((res: any[]) => {
                             const types = res
                                 .map((el, index) => ({
@@ -60,14 +47,11 @@ export function ListObjectView({ data, callbacks, ...attributes }: any) {
                                 }))
                                 .filter((el) => el.type !== undefined);
                             // TODO: expand this into more general cases - e.g. over a hook
-                            const emails = types.filter(
-                                (el) => el.type === '$/schema/email_message',
-                            );
+                            const emails = types.filter((el) => el.type === '$/schema/email_message');
                             if (emails.length) {
-                                window.unigraph.runExecutable(
-                                    '$/executable/set-emails-as-read',
-                                    { uids: emails.map((el) => el.uid) },
-                                );
+                                window.unigraph.runExecutable('$/executable/set-emails-as-read', {
+                                    uids: emails.map((el) => el.uid),
+                                });
                             }
                         });
                 }

@@ -30,25 +30,15 @@ export function NewUserCode({}) {
 
     return (
         <div style={{ display: 'flex', alignItems: 'baseline' }}>
-            <TextField
-                label="Display name"
-                value={displayName}
-                onChange={(ev) => setDisplayName(ev.target.value)}
-            >
+            <TextField label="Display name" value={displayName} onChange={(ev) => setDisplayName(ev.target.value)}>
                 Display Name
             </TextField>
             <FormControl>
                 <InputLabel>Select env</InputLabel>
-                <Select
-                    label="Env"
-                    value={env}
-                    onChange={(ev) => setEnv(ev.target.value as string)}
-                >
+                <Select label="Env" value={env} onChange={(ev) => setEnv(ev.target.value as string)}>
                     <MenuItem value="">Select environment</MenuItem>
                     <MenuItem value="routine/js">routine/js</MenuItem>
-                    <MenuItem value="component/react-jsx">
-                        component/react-jsx
-                    </MenuItem>
+                    <MenuItem value="component/react-jsx">component/react-jsx</MenuItem>
                     <MenuItem value="lambda/js">lambda/js</MenuItem>
                     <MenuItem value="client/js">client/js</MenuItem>
                 </Select>
@@ -85,7 +75,7 @@ export function CodeEditor({ id }: any) {
         <DetailedObjectView
             uid={currentUid}
             id={id}
-            component={{
+            components={{
                 '$/schema/executable': { view: ExecutableCodeEditor },
             }}
             callbacks={{ isEmbed: true }}
@@ -111,11 +101,7 @@ export function CodeEditor({ id }: any) {
                 });
                 setexecContent(namedEx);
                 setUserExecContent(userEx);
-                const packages = _.uniq(
-                    namedEx.map((el) =>
-                        el['unigraph.id'].split('/').slice(0, 3).join('/'),
-                    ),
-                ).sort();
+                const packages = _.uniq(namedEx.map((el) => el['unigraph.id'].split('/').slice(0, 3).join('/'))).sort();
                 setExecPackages(packages);
             },
             subsId,
@@ -143,10 +129,7 @@ export function CodeEditor({ id }: any) {
                     <NewUserCode />
                     <List style={{ overflow: 'auto' }}>
                         {userExecContent.map((it: any) => (
-                            <ListItem
-                                key={it.uid}
-                                selected={currentUid === it.uid}
-                            >
+                            <ListItem key={it.uid} selected={currentUid === it.uid}>
                                 <AutoDynamicView
                                     object={it}
                                     onClick={() => {
@@ -162,30 +145,19 @@ export function CodeEditor({ id }: any) {
                     <>
                         <ListItem
                             onClick={() => {
-                                setCurrentPackage(
-                                    currentPackage === el ? '' : el,
-                                );
+                                setCurrentPackage(currentPackage === el ? '' : el);
                             }}
                             style={{ cursor: 'pointer' }}
                         >
                             <ListItemText primary={el} />
-                            {currentPackage === el ? (
-                                <ExpandLess />
-                            ) : (
-                                <ExpandMore />
-                            )}
+                            {currentPackage === el ? <ExpandLess /> : <ExpandMore />}
                         </ListItem>
                         <Collapse in={currentPackage === el}>
                             <List style={{ overflow: 'auto' }}>
                                 {execcontent
-                                    .filter((it: any) =>
-                                        it['unigraph.id']?.startsWith(el),
-                                    )
+                                    .filter((it: any) => it['unigraph.id']?.startsWith(el))
                                     .map((it: any) => (
-                                        <ListItem
-                                            key={it.uid}
-                                            selected={currentUid === it.uid}
-                                        >
+                                        <ListItem key={it.uid} selected={currentUid === it.uid}>
                                             <AutoDynamicView
                                                 object={it}
                                                 onClick={() => {

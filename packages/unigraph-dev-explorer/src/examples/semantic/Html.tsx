@@ -23,25 +23,15 @@ export type Style = {
     };
 };
 
-export function HtmlStyleChooser({
-    style,
-    onStyleChange,
-    data,
-    context,
-    callbacks,
-}: any) {
+export function HtmlStyleChooser({ style, onStyleChange, data, context, callbacks }: any) {
     const [shortcuts, setShortcuts] = React.useState<any[]>([]);
 
     React.useEffect(() => {
-        window.unigraph
-            .getQueries([
-                getObjectContextMenuQuery(data.type['unigraph.id'], true),
-            ])
-            .then((res: any) => {
-                const items = res[0];
-                console.log(items);
-                setShortcuts(items);
-            });
+        window.unigraph.getQueries([getObjectContextMenuQuery(data.type['unigraph.id'], true)]).then((res: any) => {
+            const items = res[0];
+            console.log(items);
+            setShortcuts(items);
+        });
     }, []);
 
     return (
@@ -55,13 +45,7 @@ export function HtmlStyleChooser({
                             variant="outlined"
                             onClick={() => {
                                 console.log(callbacks);
-                                onDynamicContextMenu(
-                                    it,
-                                    data.uid,
-                                    data,
-                                    callbacks,
-                                    context.uid,
-                                );
+                                onDynamicContextMenu(it, data.uid, data, callbacks, context.uid);
                             }}
                         >
                             <div
@@ -69,9 +53,7 @@ export function HtmlStyleChooser({
                                     width: '24px',
                                     height: '24px',
                                     backgroundImage: `url("${
-                                        it?._value?.icon?._value?.[
-                                            '_value.%'
-                                        ] || 'about:blank'
+                                        it?._value?.icon?._value?.['_value.%'] || 'about:blank'
                                     }")`,
                                 }}
                             />
@@ -82,9 +64,7 @@ export function HtmlStyleChooser({
             <ToggleButtonGroup
                 value={style?.text?.lineHeight}
                 onChange={(ev, newStyle) => {
-                    onStyleChange(
-                        _.merge({}, style, { text: { lineHeight: newStyle } }),
-                    );
+                    onStyleChange(_.merge({}, style, { text: { lineHeight: newStyle } }));
                 }}
                 exclusive
             >
@@ -101,18 +81,12 @@ export function HtmlStyleChooser({
             <ToggleButtonGroup
                 value={style?.text?.fontFamily}
                 onChange={(ev, newStyle) => {
-                    onStyleChange(
-                        _.merge({}, style, { text: { fontFamily: newStyle } }),
-                    );
+                    onStyleChange(_.merge({}, style, { text: { fontFamily: newStyle } }));
                 }}
                 exclusive
             >
                 <ToggleButton value="Georgia">
-                    <span
-                        style={{ fontFamily: 'Georgia', textTransform: 'none' }}
-                    >
-                        Georgia
-                    </span>
+                    <span style={{ fontFamily: 'Georgia', textTransform: 'none' }}>Georgia</span>
                 </ToggleButton>
                 <ToggleButton value="Times New Roman">
                     <span
@@ -136,11 +110,7 @@ export function HtmlStyleChooser({
                 </ToggleButton>
             </ToggleButtonGroup>
             <ToggleButtonGroup>
-                <ToggleButton
-                    onClick={(event) =>
-                        onUnigraphContextMenu(event, data, context)
-                    }
-                >
+                <ToggleButton onClick={(event) => onUnigraphContextMenu(event, data, context)}>
                     <Menu />
                 </ToggleButton>
             </ToggleButtonGroup>
@@ -158,8 +128,7 @@ export const Html: DynamicViewRenderer = ({ data, context, callbacks }) => {
         },
     });
     React.useEffect(() => {
-        if (userStyle.current)
-            (userStyle.current as any).innerHTML = makeCSS(style);
+        if (userStyle.current) (userStyle.current as any).innerHTML = makeCSS(style);
     }, [style]);
 
     return (
@@ -184,23 +153,20 @@ export const Html: DynamicViewRenderer = ({ data, context, callbacks }) => {
                 style={{ flexGrow: 1, width: '100%' }}
                 ref={frm}
                 onLoad={() => {
-                    (
-                        frm.current as any
-                    ).contentDocument.head.insertAdjacentHTML(
+                    (frm.current as any).contentDocument.head.insertAdjacentHTML(
                         'beforeend',
                         '<style>img{ max-width: 100%; height: auto } video{ max-width: 100%; height: auto } body{margin-bottom: 64px}</style>',
                     );
-                    userStyle.current = (
-                        frm.current as any
-                    ).contentDocument.head.insertAdjacentElement(
+                    (frm.current as any).contentDocument.head.insertAdjacentHTML(
                         'beforeend',
-                        (frm.current as any).contentDocument.createElement(
-                            'style',
-                        ),
+                        '<base target="_parent" />',
+                    );
+                    userStyle.current = (frm.current as any).contentDocument.head.insertAdjacentElement(
+                        'beforeend',
+                        (frm.current as any).contentDocument.createElement('style'),
                     );
                     // @ts-expect-error: already checked for nullity
-                    (userStyle.current as HTMLElement).innerHTML =
-                        makeCSS(style);
+                    (userStyle.current as HTMLElement).innerHTML = makeCSS(style);
                     if (callbacks?.onLoad) callbacks.onLoad(frm);
                 }}
                 title={`object-view-${data.uid}`}

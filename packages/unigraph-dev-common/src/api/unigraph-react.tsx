@@ -21,14 +21,9 @@ export function withUnigraphSubscription(
 
         const init = async () => {
             Promise.all([
-                ...unigraphContext.schemas.map((el) =>
-                    (window as any).unigraph.ensureSchema(el.name, el.schema),
-                ),
+                ...unigraphContext.schemas.map((el) => (window as any).unigraph.ensureSchema(el.name, el.schema)),
                 ...unigraphContext.packages.map((el) =>
-                    (window as any).unigraph.ensurePackage(
-                        el.pkgManifest.package_name,
-                        el,
-                    ),
+                    (window as any).unigraph.ensurePackage(el.pkgManifest.package_name, el),
                 ),
             ]).then(unigraphHooks.afterSchemasLoaded(subsId, data, setData));
         };
@@ -48,9 +43,7 @@ export function withUnigraphSubscription(
 
 const addViewToRegistry = (state: any, views: Record<string, any>): void => {
     const finalViews = Object.fromEntries(
-        Object.entries(views).map((entry) =>
-            entry[1].view ? entry : [entry[0], { view: entry[1] }],
-        ),
+        Object.entries(views).map((entry) => (entry[1].view ? entry : [entry[0], { view: entry[1] }])),
     );
     state.setValue({ ...state.value, ...finalViews });
 };
@@ -60,24 +53,14 @@ export const registerDynamicViews = (views: Record<string, any>): void => {
     addViewToRegistry(state, views);
 };
 
-export const getDynamicViews = () =>
-    Object.keys(
-        (window as any).unigraph.getState('registry/dynamicView').value,
-    );
+export const getDynamicViews = () => Object.keys((window as any).unigraph.getState('registry/dynamicView').value);
 
-export const registerDetailedDynamicViews = (
-    views: Record<string, any>,
-): void => {
-    const state = (window as any).unigraph.getState(
-        'registry/dynamicViewDetailed',
-    );
+export const registerDetailedDynamicViews = (views: Record<string, any>): void => {
+    const state = (window as any).unigraph.getState('registry/dynamicViewDetailed');
     addViewToRegistry(state, views);
 };
 
-export const registerContextMenuItems = (
-    schema: string,
-    items: any[],
-): void => {
+export const registerContextMenuItems = (schema: string, items: any[]): void => {
     const state = (window as any).unigraph.getState('registry/contextMenu');
     state.setValue({
         ...state,
@@ -111,25 +94,14 @@ const buildRefs = (
     return [refStrings, refValues];
 };
 
-export const getComponentFromExecutable = async (
-    data: any,
-    params: any,
-    globalImports: Record<string, any> = {},
-) => {
-    const ret = await (window as any).unigraph.runExecutable(
-        data['unigraph.id'] || data.uid,
-        params,
-        {},
-        true,
-    );
-    const imports = (data?._value?.imports?.['_value['] || []).map(
-        (el: any) => ({
-            env: el?._value?.env['_value.%'],
-            package: el?._value?.package['_value.%'],
-            import: el?._value?.import?.['_value.%'],
-            as: el?._value?.as['_value.%'],
-        }),
-    );
+export const getComponentFromExecutable = async (data: any, params: any, globalImports: Record<string, any> = {}) => {
+    const ret = await (window as any).unigraph.runExecutable(data['unigraph.id'] || data.uid, params, {}, true);
+    const imports = (data?._value?.imports?.['_value['] || []).map((el: any) => ({
+        env: el?._value?.env['_value.%'],
+        package: el?._value?.package['_value.%'],
+        import: el?._value?.import?.['_value.%'],
+        as: el?._value?.as['_value.%'],
+    }));
     console.log(imports);
     const [refstr, refval] = buildRefs(imports);
     Object.entries(globalImports).forEach(([key, value]) => {
@@ -137,11 +109,7 @@ export const getComponentFromExecutable = async (
         refval.push(value);
     });
     // eslint-disable-next-line no-new-func
-    const retFn = new Function(
-        'React',
-        ...refstr,
-        `return ${ret?.return_function_component}`,
-    )(React, ...refval);
+    const retFn = new Function('React', ...refstr, `return ${ret?.return_function_component}`)(React, ...refval);
     // Build the component with imports!
     return retFn;
 };

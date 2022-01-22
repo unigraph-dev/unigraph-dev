@@ -16,15 +16,8 @@ import {
     mdiGraphOutline,
     mdiBookOutline,
 } from '@mdi/js';
-import {
-    AutoDynamicViewCallbacks,
-    ContextMenuGenerator,
-} from '../../types/ObjectView.d';
-import {
-    isMultiSelectKeyPressed,
-    runClientExecutable,
-    selectUid,
-} from '../../utils';
+import { AutoDynamicViewCallbacks, ContextMenuGenerator } from '../../types/ObjectView.d';
+import { isMultiSelectKeyPressed, runClientExecutable, selectUid } from '../../utils';
 
 export const defaultContextMenu: Array<ContextMenuGenerator> = [
     (uid, object, handleClose, callbacks) => (
@@ -50,9 +43,7 @@ export const defaultContextMenu: Array<ContextMenuGenerator> = [
             style={{ paddingTop: '2px', paddingBottom: '2px' }}
             onClick={() => {
                 handleClose();
-                window.wsnavigator(
-                    `/library/object?uid=${uid}&viewer=${'json-tree'}`,
-                );
+                window.wsnavigator(`/library/object?uid=${uid}&viewer=${'json-tree'}`);
             }}
         >
             <ListItemIcon style={{ minWidth: '32px' }}>
@@ -179,9 +170,7 @@ export const defaultContextContextMenu: Array<ContextMenuGenerator> = [
             <ListItemIcon style={{ minWidth: '32px' }}>
                 <Icon path={mdiCloseBoxMultipleOutline} size={0.8} />
             </ListItemIcon>
-            <ListItemText>
-                Remove all items above (on the left) from context
-            </ListItemText>
+            <ListItemText>Remove all items above (on the left) from context</ListItemText>
         </MenuItem>
     ),
 ];
@@ -198,21 +187,13 @@ export function DefaultObjectContextMenu({
     handleClose: any;
 }) {
     return (
-        <Menu
-            id={`context-menu-${uid}`}
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleClose}
-        >
+        <Menu id={`context-menu-${uid}`} anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
             <>{defaultContextMenu.map((el) => el(uid, object, handleClose))}</>
         </Menu>
     );
 }
 
-export const getObjectContextMenuQuery = (
-    schema: string,
-    onlyShortcuts = false,
-) => `(func: uid(uids)) @recurse{
+export const getObjectContextMenuQuery = (schema: string, onlyShortcuts = false) => `(func: uid(uids)) @recurse{
     uid
 unigraph.id
 expand(_userpredicate_)
@@ -247,22 +228,14 @@ var(func: eq(<unigraph.id>, "$/schema/context_menu_item")) {
 }
 }`;
 
-export const onDynamicContextMenu = (
-    data: any,
-    uid: string,
-    object: any,
-    callbacks?: any,
-    contextUid?: string,
-) => {
+export const onDynamicContextMenu = (data: any, uid: string, object: any, callbacks?: any, contextUid?: string) => {
     const view = data._value?.view?._value;
     console.log(view);
     const onClick = data._value?.on_click?._value;
     if (
         view &&
         view?._value?.view?._value?.['dgraph.type']?.includes?.('Executable') &&
-        view?._value.view?._value?._value?.env?.['_value.%']?.startsWith?.(
-            'component',
-        )
+        view?._value.view?._value?._value?.env?.['_value.%']?.startsWith?.('component')
     ) {
         window.newTab(window.layoutModel, {
             type: 'tab',
@@ -272,18 +245,16 @@ export const onDynamicContextMenu = (
             config: { object, contextUid },
         });
     } else if (onClick && onClick['dgraph.type']?.includes?.('Executable')) {
-        window.unigraph
-            .runExecutable(onClick.uid, { uid, contextUid }, undefined, true)
-            .then((ret: any) => {
-                if (ret?.return_function_component !== undefined) {
-                    // Not a component, but custom code to be run here
-                    runClientExecutable(ret.return_function_component, {
-                        uid,
-                        callbacks,
-                        contextUid,
-                    });
-                }
-            });
+        window.unigraph.runExecutable(onClick.uid, { uid, contextUid }, undefined, true).then((ret: any) => {
+            if (ret?.return_function_component !== undefined) {
+                // Not a component, but custom code to be run here
+                runClientExecutable(ret.return_function_component, {
+                    uid,
+                    callbacks,
+                    contextUid,
+                });
+            }
+        });
     }
 };
 
@@ -306,7 +277,9 @@ export const onUnigraphContextMenu = (
     event.preventDefault?.();
     event.stopPropagation?.();
 
-    selectUid(object.uid, !isMultiSelectKeyPressed(event));
+    const compId = callbacks?.componentId || object?.uid;
+
+    selectUid(compId, !isMultiSelectKeyPressed(event));
 
     window.unigraph.getState('global/contextMenu').setValue({
         anchorPosition: { top: event.clientY, left: event.clientX },
@@ -326,75 +299,53 @@ export const onUnigraphContextMenu = (
         extraContent: extra,
         callbacks,
         windowName: window.name,
-        ...(callbacks?.removeFromContext
-            ? { removeFromContext: callbacks.removeFromContext }
-            : {}),
+        ...(callbacks?.removeFromContext ? { removeFromContext: callbacks.removeFromContext } : {}),
     });
 
     // TODO: Currently lazy-loaded context menus. Should we eagarly load them in the future?
     if (object.type?.['unigraph.id']) {
-        window.unigraph
-            .getQueries([getObjectContextMenuQuery(object.type['unigraph.id'])])
-            .then((res: any) => {
-                const items = res[0];
-                console.log(items);
-                window.unigraph.getState('global/contextMenu').setValue({
-                    ...window.unigraph.getState('global/contextMenu').value,
-                    schemaMenuContent: items.map(
-                        (el: any) =>
-                            function (
-                                uid: string,
-                                object: any,
-                                onfire: () => any,
-                                callbacks?: any,
-                                contextUid?: string,
-                            ) {
-                                return (
-                                    <MenuItem
-                                        style={{
-                                            paddingTop: '2px',
-                                            paddingBottom: '2px',
-                                        }}
-                                        onClick={() => {
-                                            onfire();
-                                            onDynamicContextMenu(
-                                                el,
-                                                uid,
-                                                object,
-                                                callbacks,
-                                                contextUid,
-                                            );
-                                        }}
-                                    >
-                                        {new UnigraphObject(el)
-                                            .get('icon')
-                                            ?.as('primitive') ? (
-                                            <ListItemIcon
-                                                style={{
-                                                    minWidth: '19px',
-                                                    minHeight: '19px',
-                                                    marginRight: '12px',
-                                                    backgroundImage: `url("data:image/svg+xml,${new UnigraphObject(
-                                                        el,
-                                                    )
-                                                        .get('icon')
-                                                        ?.as('primitive')}")`,
-                                                    opacity: 0.54,
-                                                }}
-                                            />
-                                        ) : (
-                                            []
-                                        )}
-                                        <ListItemText>
-                                            {new UnigraphObject(el)
-                                                .get('name')
-                                                .as('primitive') || ''}
-                                        </ListItemText>
-                                    </MenuItem>
-                                );
-                            },
-                    ),
-                });
+        window.unigraph.getQueries([getObjectContextMenuQuery(object.type['unigraph.id'])]).then((res: any) => {
+            const items = res[0];
+            console.log(items);
+            window.unigraph.getState('global/contextMenu').setValue({
+                ...window.unigraph.getState('global/contextMenu').value,
+                schemaMenuContent: items.map(
+                    (el: any) =>
+                        function (uid: string, object: any, onfire: () => any, callbacks?: any, contextUid?: string) {
+                            return (
+                                <MenuItem
+                                    style={{
+                                        paddingTop: '2px',
+                                        paddingBottom: '2px',
+                                    }}
+                                    onClick={() => {
+                                        onfire();
+                                        onDynamicContextMenu(el, uid, object, callbacks, contextUid);
+                                    }}
+                                >
+                                    {new UnigraphObject(el).get('icon')?.as('primitive') ? (
+                                        <ListItemIcon
+                                            style={{
+                                                minWidth: '19px',
+                                                minHeight: '19px',
+                                                marginRight: '12px',
+                                                backgroundImage: `url("data:image/svg+xml,${new UnigraphObject(el)
+                                                    .get('icon')
+                                                    ?.as('primitive')}")`,
+                                                opacity: 0.54,
+                                            }}
+                                        />
+                                    ) : (
+                                        []
+                                    )}
+                                    <ListItemText>
+                                        {new UnigraphObject(el).get('name').as('primitive') || ''}
+                                    </ListItemText>
+                                </MenuItem>
+                            );
+                        },
+                ),
             });
+        });
     }
 };

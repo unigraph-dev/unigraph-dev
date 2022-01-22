@@ -1,10 +1,7 @@
 import React, { useEffect } from 'react';
 import { Typography } from '@material-ui/core';
 import { Controlled as CodeMirror } from 'react-codemirror2';
-import {
-    buildUnigraphEntity,
-    processAutoref,
-} from 'unigraph-dev-common/lib/utils/entityUtils';
+import { buildUnigraphEntity, processAutoref } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { useEffectOnce } from 'react-use';
 import { ReferenceableSelectorControlled } from '../components/ObjectView/ReferenceableSelector';
 
@@ -18,9 +15,7 @@ export default function DataModelPlayground() {
     const [name, setName]: [any, (_: any) => void] = React.useState(false);
 
     useEffectOnce(() => {
-        window.unigraph
-            .getReferenceables()
-            .then((refs: any) => setReferenceables(refs));
+        window.unigraph.getReferenceables().then((refs: any) => setReferenceables(refs));
     });
 
     useEffect(() => {
@@ -30,16 +25,8 @@ export default function DataModelPlayground() {
             const schemaName = name || 'any';
             window.unigraph.getSchemas().then((schemas: any) => {
                 try {
-                    const unigraphObject = buildUnigraphEntity(
-                        objUpdated,
-                        schemaName,
-                        schemas,
-                    );
-                    transformed = processAutoref(
-                        unigraphObject,
-                        schemaName,
-                        schemas,
-                    );
+                    const unigraphObject = buildUnigraphEntity(objUpdated, schemaName, schemas);
+                    transformed = processAutoref(unigraphObject, schemaName, schemas);
                     // console.log(transformed);
                     setProcessedData(JSON.stringify(transformed, null, 4));
                 } catch (e: any) {
@@ -58,11 +45,7 @@ export default function DataModelPlayground() {
         <div>
             <Typography variant="h4">DataModel Playground</Typography>
             <p>Try composing an object here and see what happens!</p>
-            <ReferenceableSelectorControlled
-                referenceables={referenceables}
-                onChange={setName}
-                value={name}
-            />
+            <ReferenceableSelectorControlled referenceables={referenceables} onChange={setName} value={name} />
             <CodeMirror
                 value={origData}
                 onBeforeChange={(editor: any, data: any, value: string) => {

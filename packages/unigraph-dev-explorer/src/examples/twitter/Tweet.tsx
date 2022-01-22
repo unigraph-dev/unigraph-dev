@@ -7,7 +7,6 @@ import { registerDynamicViews } from '../../unigraph-react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { DynamicViewRenderer } from '../../global.d';
 import { externalNamespaces } from '../../externalNamespaceStub';
-import { openUrl } from '../../utils';
 
 const removeContextEntities = (tweet: any, entities: any[]) => {
     let finalStr: string = tweet['_value.%'];
@@ -22,9 +21,7 @@ const removeContextEntities = (tweet: any, entities: any[]) => {
 export const Tweet: DynamicViewRenderer = ({ data, callbacks }) => {
     buildGraph([data]);
     const twid = data.get('from_user/twitter_id').as('primitive');
-    const nslnk = externalNamespaces.filter((el) =>
-        el.participants.includes(twid),
-    )[0]?.createLink;
+    const nslnk = externalNamespaces.filter((el) => el.participants.includes(twid))[0]?.createLink;
 
     return (
         <div style={{ display: 'flex' }}>
@@ -50,22 +47,15 @@ export const Tweet: DynamicViewRenderer = ({ data, callbacks }) => {
                     }
                 >
                     <Avatar
-                        src={data
-                            .get('from_user/profile_image')
-                            .as('primitive')}
+                        src={data.get('from_user/profile_image').as('primitive')}
                         onClick={() => {
-                            openUrl(
-                                `https://twitter.com/${data
-                                    .get('from_user/username')
-                                    .as('primitive')}/status/${data
+                            window.open(
+                                `https://twitter.com/${data.get('from_user/username').as('primitive')}/status/${data
                                     .get('twitter_id')
                                     .as('primitive')}`,
+                                '_blank',
                             );
-                            if (
-                                callbacks?.removeFromContext &&
-                                callbacks?.removeOnEnter
-                            )
-                                callbacks.removeFromContext();
+                            if (callbacks?.removeFromContext && callbacks?.removeOnEnter) callbacks.removeFromContext();
                         }}
                     />
                 </Badge>
@@ -74,18 +64,12 @@ export const Tweet: DynamicViewRenderer = ({ data, callbacks }) => {
             <div>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                     <Typography variant="body1" style={{ marginRight: '8px' }}>
-                        <strong>
-                            {data.get('from_user/name').as('primitive')}
-                        </strong>
+                        <strong>{data.get('from_user/name').as('primitive')}</strong>
                     </Typography>
                     <Typography variant="body2" style={{ color: 'gray' }}>
                         @{data.get('from_user/username').as('primitive')}
                         {', '}
-                        {Sugar.Date.relative(
-                            new Date(
-                                data._updatedAt || data._timestamp._updatedAt,
-                            ),
-                        )}
+                        {Sugar.Date.relative(new Date(data._updatedAt || data._timestamp._updatedAt))}
                     </Typography>
                 </div>
 
@@ -99,33 +83,28 @@ export const Tweet: DynamicViewRenderer = ({ data, callbacks }) => {
                     withParent
                 />
                 <div>
-                    {(data?._value?.children?.['_value['] || []).map(
-                        (el: any) => {
-                            const elObj = el._value._value;
-                            if (
-                                elObj.type['unigraph.id'] ===
-                                '$/schema/icon_url'
-                            ) {
-                                return (
-                                    <img
-                                        src={elObj['_value.%']}
-                                        style={{
-                                            maxWidth: '240px',
-                                            borderRadius: '8px',
-                                        }}
-                                        alt=""
-                                    />
-                                );
-                            }
+                    {(data?._value?.children?.['_value['] || []).map((el: any) => {
+                        const elObj = el._value._value;
+                        if (elObj.type['unigraph.id'] === '$/schema/icon_url') {
                             return (
-                                <AutoDynamicView
-                                    object={new UnigraphObject(elObj)}
-                                    withParent
-                                    callbacks={{ context: data }}
+                                <img
+                                    src={elObj['_value.%']}
+                                    style={{
+                                        maxWidth: '240px',
+                                        borderRadius: '8px',
+                                    }}
+                                    alt=""
                                 />
                             );
-                        },
-                    )}
+                        }
+                        return (
+                            <AutoDynamicView
+                                object={new UnigraphObject(elObj)}
+                                withParent
+                                callbacks={{ context: data }}
+                            />
+                        );
+                    })}
                 </div>
             </div>
         </div>
@@ -152,11 +131,7 @@ const TwitterUser = ({ data, callbacks }: any) => (
                 <Avatar
                     src={data.get('profile_image').as('primitive')}
                     onClick={() => {
-                        openUrl(
-                            `https://twitter.com/${data
-                                .get('username')
-                                .as('primitive')}}`,
-                        );
+                        window.open(`https://twitter.com/${data.get('username').as('primitive')}}`, '_blank');
                     }}
                 />
             </Badge>
@@ -170,14 +145,12 @@ const TwitterUser = ({ data, callbacks }: any) => (
             </Typography>
         </div>
         <div style={{ alignSelf: 'center' }}>
-            <Typography variant="body1">
-                {data.get('description').as('primitive')}
-            </Typography>
+            <Typography variant="body1">{data.get('description').as('primitive')}</Typography>
         </div>
     </div>
 );
 
 export const init = () => {
-    registerDynamicViews({ '$/schema/tweet': Tweet });
+    registerDynamicViews({ '$/schema/tweet': { view: Tweet, noSubentities: true } });
     registerDynamicViews({ '$/schema/twitter_user': TwitterUser });
 };

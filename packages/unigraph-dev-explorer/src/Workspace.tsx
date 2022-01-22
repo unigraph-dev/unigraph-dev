@@ -6,23 +6,10 @@ import React from 'react';
 
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 
-import FlexLayout, {
-    Action,
-    Actions,
-    DockLocation,
-    Model,
-    Node,
-    TabNode,
-} from 'flexlayout-react';
+import FlexLayout, { Action, Actions, DockLocation, Model, Node, TabNode } from 'flexlayout-react';
 import 'flexlayout-react/style/light.css';
 import './workspace.css';
-import {
-    Container,
-    CssBaseline,
-    ListItem,
-    Popover,
-    Typography,
-} from '@material-ui/core';
+import { Container, CssBaseline, ListItem, Popover, Typography } from '@material-ui/core';
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { Menu, Details } from '@material-ui/icons';
@@ -32,35 +19,18 @@ import { HTML5Backend } from 'react-dnd-html5-backend';
 import MomentUtils from '@date-io/moment';
 
 import Icon from '@mdi/react';
-import {
-    mdiFormTextarea,
-    mdiStarPlusOutline,
-    mdiSync,
-    mdiTagMultipleOutline,
-} from '@mdi/js';
+import { mdiFormTextarea, mdiStarPlusOutline, mdiSync, mdiTagMultipleOutline } from '@mdi/js';
 import _ from 'lodash';
 import { components } from './pages';
 import { InlineSearch } from './components/UnigraphCore/InlineSearchPopup';
 import { ContextMenu } from './components/UnigraphCore/ContextMenu';
-import {
-    getComponentFromPage,
-    getParameters,
-    isElectron,
-    isSmallScreen,
-    TabContext,
-} from './utils';
+import { getComponentFromPage, getParameters, isElectron, isSmallScreen, TabContext } from './utils';
 import { SearchOverlayPopover } from './pages/SearchOverlay';
 import { MobileBar } from './components/UnigraphCore/MobileBar';
 
-export function WorkspacePageComponent({
-    children,
-    maximize,
-    paddingTop,
-    id,
-    tabCtx,
-}: any) {
+export function WorkspacePageComponent({ children, maximize, paddingTop, id, tabCtx }: any) {
     const [_maximize, setMaximize] = React.useState(maximize);
-    React.useContext(TabContext).setMaximize = (val: boolean) => {
+    tabCtx.setMaximize = (val: boolean) => {
         setMaximize(val);
     };
     const memoTabCtx = React.useMemo(() => tabCtx, [id]);
@@ -94,16 +64,11 @@ const WorkspaceInnerEl_ = ({ config, component }: any) => {
         return page.constructor(config);
     }
     if (component.startsWith('/components/')) {
-        return components[
-            component.replace('/components/', '') as string
-        ].constructor(config.viewConfig);
+        return components[component.replace('/components/', '') as string].constructor(config.viewConfig);
     }
     return () => '';
 };
-const WorkspaceInnerEl = React.memo(
-    WorkspaceInnerEl_,
-    (a, b) => JSON.stringify(a) === JSON.stringify(b),
-);
+const WorkspaceInnerEl = React.memo(WorkspaceInnerEl_, (a, b) => JSON.stringify(a) === JSON.stringify(b));
 
 function ConnectionIndicator() {
     const [connected, setConnected] = React.useState(false);
@@ -139,12 +104,7 @@ function MobileOmnibarIndicator() {
                 });
             }}
         >
-            <Icon
-                path={mdiFormTextarea}
-                size={0.7}
-                style={{ verticalAlign: 'middle' }}
-                key="icon"
-            />
+            <Icon path={mdiFormTextarea} size={0.7} style={{ verticalAlign: 'middle' }} key="icon" />
         </div>
     );
 }
@@ -153,12 +113,9 @@ function ExecutablesIndicator() {
     const [totalExecutables, setTotalExecutables] = React.useState([]);
     const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
     React.useMemo(() => {
-        window.unigraph.onCacheUpdated?.(
-            'runningExecutables',
-            (cacheResult: any) => {
-                setTotalExecutables(cacheResult);
-            },
-        );
+        window.unigraph.onCacheUpdated?.('runningExecutables', (cacheResult: any) => {
+            setTotalExecutables(cacheResult);
+        });
     }, []);
     return (
         <div
@@ -196,12 +153,7 @@ function ExecutablesIndicator() {
                     console.log('aaaa');
                 }}
             >
-                <Icon
-                    path={mdiSync}
-                    size={0.7}
-                    style={{ verticalAlign: 'middle' }}
-                    key="icon"
-                />
+                <Icon path={mdiSync} size={0.7} style={{ verticalAlign: 'middle' }} key="icon" />
                 {totalExecutables.length}
             </div>
         </div>
@@ -223,37 +175,18 @@ const getFinalJson = (model: Model, initJson: any) => {
 const newWindowActions = {
     'new-tab': (model: Model, initJson: any) => {
         const newJson = getFinalJson(model, initJson);
-        model.doAction(
-            Actions.addNode(
-                newJson,
-                'workspace-main-tabset',
-                DockLocation.CENTER,
-                -1,
-            ),
-        );
+        model.doAction(Actions.addNode(newJson, 'workspace-main-tabset', DockLocation.CENTER, -1));
     },
     'new-pane': (model: Model, initJson: any) => {
         const newJson = getFinalJson(model, initJson);
-        const action = Actions.addNode(
-            newJson,
-            'workspace-main-tabset',
-            DockLocation.RIGHT,
-            0,
-            true,
-        );
+        const action = Actions.addNode(newJson, 'workspace-main-tabset', DockLocation.RIGHT, 0, true);
         model.doAction(action);
     },
     'new-popout': (model: Model, initJson: any) => {
         const someId = getRandomInt().toString();
         const newJson = getFinalJson(model, initJson);
         newJson.id = someId;
-        const action = Actions.addNode(
-            newJson,
-            'workspace-main-tabset',
-            DockLocation.CENTER,
-            -1,
-            false,
-        );
+        const action = Actions.addNode(newJson, 'workspace-main-tabset', DockLocation.CENTER, -1, false);
         model.doAction(action);
         model.doAction(Actions.floatTab(someId));
     },
@@ -265,10 +198,7 @@ window.closeTab = (tabId: any) => {
 };
 
 const newTab = (model: Model, initJson: any) => {
-    if (
-        initJson.component &&
-        window.localStorage.getItem('enableAnalytics') === 'true'
-    ) {
+    if (initJson.component && window.localStorage.getItem('enableAnalytics') === 'true') {
         window.mixpanel?.track('selectTab', {
             component: initJson.component,
             new: true,
@@ -276,13 +206,10 @@ const newTab = (model: Model, initJson: any) => {
     }
     const userSettings = JSON.parse(
         // @ts-expect-error: already checked for isJsonString
-        isJsonString(window.localStorage.getItem('userSettings'))
-            ? window.localStorage.getItem('userSettings')
-            : '{}',
+        isJsonString(window.localStorage.getItem('userSettings')) ? window.localStorage.getItem('userSettings') : '{}',
     );
     const newWindowBehavior =
-        userSettings.newWindow &&
-        Object.keys(newWindowActions).includes(userSettings.newWindow)
+        userSettings.newWindow && Object.keys(newWindowActions).includes(userSettings.newWindow)
             ? userSettings.newWindow
             : 'new-tab';
     // @ts-expect-error: already checked and added fallback
@@ -437,78 +364,28 @@ export function WorkSpace(this: any) {
                 // @ts-expect-error: using private API
                 window.layoutModel.getNodeById(node._attributes.id).isVisible(),
 
-            subscribeToType: (
-                name: any,
-                callback: any,
-                eventId?: any,
-                options?: any,
-            ) => {
-                const subsState = window.unigraph.getState(
-                    `tabs/${(node as any)._attributes.id}/subscriptions`,
-                );
+            subscribeToType: (name: any, callback: any, eventId?: any, options?: any) => {
+                const subsState = window.unigraph.getState(`tabs/${(node as any)._attributes.id}/subscriptions`);
                 subsState.setValue([...(subsState.value || []), eventId]);
-                return window.unigraph.subscribeToType(
-                    name,
-                    callback,
-                    eventId,
-                    options,
-                );
+                return window.unigraph.subscribeToType(name, callback, eventId, options);
             },
-            subscribeToObject: (
-                uid: any,
-                callback: any,
-                eventId?: any,
-                options?: any,
-            ) => {
-                const subsState = window.unigraph.getState(
-                    `tabs/${(node as any)._attributes.id}/subscriptions`,
-                );
+            subscribeToObject: (uid: any, callback: any, eventId?: any, options?: any) => {
+                const subsState = window.unigraph.getState(`tabs/${(node as any)._attributes.id}/subscriptions`);
                 subsState.setValue([...(subsState.value || []), eventId]);
-                return window.unigraph.subscribeToObject(
-                    uid,
-                    callback,
-                    eventId,
-                    options,
-                );
+                return window.unigraph.subscribeToObject(uid, callback, eventId, options);
             },
-            subscribeToQuery: (
-                fragment: any,
-                callback: any,
-                eventId?: any,
-                options?: any,
-            ) => {
-                const subsState = window.unigraph.getState(
-                    `tabs/${(node as any)._attributes.id}/subscriptions`,
-                );
+            subscribeToQuery: (fragment: any, callback: any, eventId?: any, options?: any) => {
+                const subsState = window.unigraph.getState(`tabs/${(node as any)._attributes.id}/subscriptions`);
                 subsState.setValue([...(subsState.value || []), eventId]);
-                return window.unigraph.subscribeToQuery(
-                    fragment,
-                    callback,
-                    eventId,
-                    options,
-                );
+                return window.unigraph.subscribeToQuery(fragment, callback, eventId, options);
             },
-            subscribe: (
-                query: any,
-                callback: any,
-                eventId?: any,
-                update?: any,
-            ) => {
-                const subsState = window.unigraph.getState(
-                    `tabs/${(node as any)._attributes.id}/subscriptions`,
-                );
+            subscribe: (query: any, callback: any, eventId?: any, update?: any) => {
+                const subsState = window.unigraph.getState(`tabs/${(node as any)._attributes.id}/subscriptions`);
                 subsState.setValue([...(subsState.value || []), eventId]);
-                return window.unigraph.subscribe(
-                    query,
-                    callback,
-                    eventId,
-                    update,
-                );
+                return window.unigraph.subscribe(query, callback, eventId, update);
             },
             unsubscribe: (id: any) => {
-                const subsState = window.unigraph.getState(
-                    `tabs/${(node as any)._attributes.id}/subscriptions`,
-                );
+                const subsState = window.unigraph.getState(`tabs/${(node as any)._attributes.id}/subscriptions`);
                 subsState.setValue(_.difference(subsState.value || [], [id]));
                 return window.unigraph.unsubscribe(id);
             },
@@ -523,15 +400,10 @@ export function WorkSpace(this: any) {
 
         const subber = (isVisible: boolean) => {
             // console.log(`Tab id ${node._attributes.id}'s visibility status is ${isVisible}`)
-            const subs =
-                window.unigraph.getState(
-                    `tabs/${(node as any)._attributes.id}/subscriptions`,
-                ).value || [];
+            const subs = window.unigraph.getState(`tabs/${(node as any)._attributes.id}/subscriptions`).value || [];
             window.unigraph.hibernateOrReviveSubscription(subs, isVisible);
         };
-        window.unigraph.getState(
-            `tabs/${(node as any)._attributes.id}/isVisible`,
-        ).subscribers = [subber];
+        window.unigraph.getState(`tabs/${(node as any)._attributes.id}/isVisible`).subscribers = [subber];
 
         return component.startsWith('/pages/') ? (
             <WorkspacePageComponent
@@ -550,16 +422,10 @@ export function WorkSpace(this: any) {
                 ) : (
                     []
                 )}
-                <WorkspaceInnerEl
-                    config={{ id: config.id, ...(config.viewConfig || {}) }}
-                    component={component}
-                />
+                <WorkspaceInnerEl config={{ id: config.id, ...(config.viewConfig || {}) }} component={component} />
             </WorkspacePageComponent>
         ) : (
-            <WorkspaceInnerEl
-                config={{ id: config.id, ...(config.viewConfig || {}) }}
-                component={component}
-            />
+            <WorkspaceInnerEl config={{ id: config.id, ...(config.viewConfig || {}) }} component={component} />
         );
     };
 
@@ -606,26 +472,18 @@ export function WorkSpace(this: any) {
                     onAction={(action: Action) => {
                         if (
                             action.type === 'FlexLayout_SelectTab' &&
-                            window.localStorage.getItem('enableAnalytics') ===
-                                'true'
+                            window.localStorage.getItem('enableAnalytics') === 'true'
                         ) {
                             window.mixpanel?.track('selectTab', {
-                                component: (
-                                    window.layoutModel.getNodeById(
-                                        action.data.tabNode,
-                                    ) as any
-                                )?._attributes?.component,
+                                component: (window.layoutModel.getNodeById(action.data.tabNode) as any)?._attributes
+                                    ?.component,
                             });
                         }
                         return action;
                     }}
                     onRenderTab={(node: TabNode, renderValues: any) => {
                         window.unigraph
-                            .getState(
-                                `tabs/${
-                                    (node as any)._attributes.id
-                                }/isVisible`,
-                            )
+                            .getState(`tabs/${(node as any)._attributes.id}/isVisible`)
                             .setValue(node.isVisible());
                         setTitleOnRenderTab(model);
                         const nodeId = node.getId();
@@ -669,31 +527,14 @@ export function WorkSpace(this: any) {
                                 </Typography>,
                             ];
                         }
-                        renderValues.buttons.push(
-                            <div
-                                id={`tabId${nodeId}`}
-                                key={`tabId${nodeId}`}
-                            />,
-                        );
+                        renderValues.buttons.push(<div id={`tabId${nodeId}`} key={`tabId${nodeId}`} />);
                         setTimeout(() => {
-                            const el = document.getElementById(
-                                `tabId${nodeId}`,
-                            );
+                            const el = document.getElementById(`tabId${nodeId}`);
 
-                            if (
-                                el &&
-                                el.parentElement &&
-                                node.isEnableClose()
-                            ) {
+                            if (el && el.parentElement && node.isEnableClose()) {
                                 const fn = getMouseDownFn(nodeId);
-                                el.parentElement.removeEventListener(
-                                    'mousedown',
-                                    fn,
-                                );
-                                el.parentElement.addEventListener(
-                                    'mousedown',
-                                    fn,
-                                );
+                                el.parentElement.removeEventListener('mousedown', fn);
+                                el.parentElement.addEventListener('mousedown', fn);
                             }
                         }, 0);
                     }}
@@ -702,31 +543,27 @@ export function WorkSpace(this: any) {
                             renderValues.buttons.push(
                                 <span
                                     onClick={async () => {
-                                        const node: TabNode =
-                                            tabSetNode.getSelectedNode() as any;
+                                        const node: TabNode = tabSetNode.getSelectedNode() as any;
                                         if (node && node.getId() !== 'home') {
                                             const config = node.getConfig();
                                             if (config) {
                                                 delete config.undefine;
                                                 delete config.id;
                                             }
-                                            const uid =
-                                                await window.unigraph.addObject(
-                                                    {
-                                                        name: node.getName(),
-                                                        env: 'react-explorer',
-                                                        view: node.getComponent(),
-                                                        props: JSON.stringify({
-                                                            config:
-                                                                config?.viewConfig ||
-                                                                {},
-                                                        }),
-                                                        $context: {
-                                                            _hide: true,
-                                                        },
+                                            const uid = await window.unigraph.addObject(
+                                                {
+                                                    name: node.getName(),
+                                                    env: 'react-explorer',
+                                                    view: node.getComponent(),
+                                                    props: JSON.stringify({
+                                                        config: config?.viewConfig || {},
+                                                    }),
+                                                    $context: {
+                                                        _hide: true,
                                                     },
-                                                    '$/schema/view',
-                                                );
+                                                },
+                                                '$/schema/view',
+                                            );
                                             await window.unigraph.runExecutable(
                                                 '$/package/unigraph.core/0.0.1/executable/add-item-to-list',
                                                 {
@@ -737,11 +574,7 @@ export function WorkSpace(this: any) {
                                         }
                                     }}
                                 >
-                                    <Icon
-                                        path={mdiStarPlusOutline}
-                                        size={0.7}
-                                        style={{ marginTop: '5px' }}
-                                    />
+                                    <Icon path={mdiStarPlusOutline} size={0.7} style={{ marginTop: '5px' }} />
                                 </span>,
                             );
                         } else if (tabSetNode.getId() === 'border_bottom') {
@@ -751,21 +584,10 @@ export function WorkSpace(this: any) {
                                 <ConnectionIndicator />,
                             );
                         }
-                        if (
-                            isElectron() &&
-                            tabSetNode.getId() === 'border_left'
-                        ) {
+                        if (isElectron() && tabSetNode.getId() === 'border_left') {
                             const getTopLeft = () =>
-                                Array.from(
-                                    document.querySelectorAll(
-                                        '.flexlayout__tabset_tabbar_outer',
-                                    ),
-                                )
-                                    .filter(
-                                        (el) =>
-                                            (el.parentElement || undefined)
-                                                ?.style?.top === '0px',
-                                    )
+                                Array.from(document.querySelectorAll('.flexlayout__tabset_tabbar_outer'))
+                                    .filter((el) => (el.parentElement || undefined)?.style?.top === '0px')
 
                                     .sort(
                                         (a, b) =>
@@ -783,18 +605,11 @@ export function WorkSpace(this: any) {
                             const topLeft = getTopLeft();
                             if (topLeft) {
                                 const isLeftOpen =
-                                    (model.getNodeById('border_left') as any)
-                                        ._attributes.selected === -1;
+                                    (model.getNodeById('border_left') as any)._attributes.selected === -1;
                                 window.requestAnimationFrame(() => {
                                     const newTopLeft = getTopLeft();
-                                    if (isLeftOpen)
-                                        newTopLeft.classList.add(
-                                            'topleft_bar_with_electron',
-                                        );
-                                    else
-                                        newTopLeft.classList.remove(
-                                            'topleft_bar_with_electron',
-                                        );
+                                    if (isLeftOpen) newTopLeft.classList.add('topleft_bar_with_electron');
+                                    else newTopLeft.classList.remove('topleft_bar_with_electron');
                                 });
                             }
                         }
@@ -804,8 +619,7 @@ export function WorkSpace(this: any) {
                     classNameMapper={(name) => {
                         if (
                             isElectron() &&
-                            (name === 'flexlayout__tab_border_left' ||
-                                name === 'flexlayout__border_left')
+                            (name === 'flexlayout__tab_border_left' || name === 'flexlayout__border_left')
                         ) {
                             return `${name} ${name}_electron`;
                         }

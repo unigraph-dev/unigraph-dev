@@ -23,11 +23,7 @@ import DgraphClient, { UnigraphUpsert } from './dgraphClient';
 import { buildExecutable, ExecContext } from './executableManager';
 import { callHooks } from './hooks';
 import { addNotification } from './notifications';
-import {
-    createSubscriptionLocal,
-    createSubscriptionWS,
-    resolveSubscriptionUpdate,
-} from './subscriptions';
+import { createSubscriptionLocal, createSubscriptionWS, resolveSubscriptionUpdate } from './subscriptions';
 import { Cache } from './caches';
 import { getQueryString } from './search';
 
@@ -72,42 +68,18 @@ export function getLocalUnigraphAPI(
         // latertodo
         ensureSchema: async (name, fallback) => Error('Not implemented'),
         // latertodo
-        ensurePackage: async (packageName, fallback) =>
-            Error('Not implemented'),
-        subscribeToType: async (
-            name,
-            callback: any,
-            eventId = undefined,
-            options: any,
-        ) => api.subscribe({ type: 'type', name, options }, callback, eventId),
-        subscribeToObject: async (
-            uid,
-            callback: any,
-            eventId = undefined,
-            options: any,
-        ) => api.subscribe({ type: 'object', uid, options }, callback, eventId),
-        subscribeToQuery: async (
-            fragment,
-            callback: any,
-            eventId = undefined,
-            options: any,
-        ) =>
-            api.subscribe(
-                { type: 'query', fragment, options },
-                callback,
-                eventId,
-            ),
-        subscribe: async (
-            query,
-            callback: any,
-            eventId = undefined,
-            update,
-        ) => {
+        ensurePackage: async (packageName, fallback) => Error('Not implemented'),
+        subscribeToType: async (name, callback: any, eventId = undefined, options: any) =>
+            api.subscribe({ type: 'type', name, options }, callback, eventId),
+        subscribeToObject: async (uid, callback: any, eventId = undefined, options: any) =>
+            api.subscribe({ type: 'object', uid, options }, callback, eventId),
+        subscribeToQuery: async (fragment, callback: any, eventId = undefined, options: any) =>
+            api.subscribe({ type: 'query', fragment, options }, callback, eventId),
+        subscribe: async (query, callback: any, eventId = undefined, update) => {
             eventId = eventId || getRandomInt();
             if (update) {
                 const ret = resolveSubscriptionUpdate(eventId, query, states);
-                if (ret === false)
-                    throw new Error('Not a valid subscription update!');
+                if (ret === false) throw new Error('Not a valid subscription update!');
             } else {
                 const newSub =
                     typeof callback === 'function'
@@ -132,9 +104,7 @@ export function getLocalUnigraphAPI(
             if (!Array.isArray(eventId)) eventIds = [eventId];
             states.subscriptions = states.subscriptions.map((el) =>
                 Object.assign(el, {
-                    hibernated: eventIds.includes(el.id)
-                        ? shouldHibernated
-                        : el.hibernated,
+                    hibernated: eventIds.includes(el.id) ? shouldHibernated : el.hibernated,
                 }),
             );
             if (revival)
@@ -144,14 +114,11 @@ export function getLocalUnigraphAPI(
                 });
         },
         unsubscribe: async (id) => {
-            states.subscriptions = states.subscriptions.reduce(
-                (prev: Subscription[], curr: Subscription) => {
-                    if (curr.id === id) return prev;
-                    prev.push(curr);
-                    return prev;
-                },
-                [],
-            );
+            states.subscriptions = states.subscriptions.reduce((prev: Subscription[], curr: Subscription) => {
+                if (curr.id === id) return prev;
+                prev.push(curr);
+                return prev;
+            }, []);
         },
         addObject: async (object, schema, padded, subIds) => {
             clearEmpties(object);
@@ -161,25 +128,13 @@ export function getLocalUnigraphAPI(
             const finalUnigraphObjects = objects.map((obj, index) => {
                 let unigraphObject = obj;
                 if (!padded)
-                    unigraphObject = buildUnigraphEntity(
-                        obj,
-                        schema,
-                        states.caches.schemas.data,
-                        undefined,
-                        { globalStates: { nextUid: 100000 * index } } as any,
-                    );
-                return processAutoref(
-                    unigraphObject,
-                    schema,
-                    states.caches.schemas.data,
-                );
+                    unigraphObject = buildUnigraphEntity(obj, schema, states.caches.schemas.data, undefined, {
+                        globalStates: { nextUid: 100000 * index },
+                    } as any);
+                return processAutoref(unigraphObject, schema, states.caches.schemas.data);
             });
             // console.log(JSON.stringify(finalUnigraphObject, null, 4));
-            const upsert = insertsToUpsert(
-                finalUnigraphObjects,
-                undefined,
-                states.caches.schemas.dataAlt![0],
-            );
+            const upsert = insertsToUpsert(finalUnigraphObjects, undefined, states.caches.schemas.dataAlt![0]);
             const uids = await client.createUnigraphUpsert(upsert);
             callHooks(states.hooks, 'after_object_changed', {
                 subscriptions: states.subscriptions,
@@ -210,21 +165,11 @@ export function getLocalUnigraphAPI(
                 uid = states.namespaceMap[uid].uid;
             }
             const frag = `query(func: uid(${
-                Array.isArray(uid)
-                    ? uid
-                          .reduce(
-                              (prev: string, el: string) => `${prev + el},`,
-                              '',
-                          )
-                          .slice(0, -1)
-                    : uid
+                Array.isArray(uid) ? uid.reduce((prev: string, el: string) => `${prev + el},`, '').slice(0, -1) : uid
             })) 
                 ${
                     options?.queryAsType
-                        ? makeQueryFragmentFromType(
-                              options.queryAsType,
-                              states.caches.schemas.data,
-                          )
+                        ? makeQueryFragmentFromType(options.queryAsType, states.caches.schemas.data)
                         : '@recurse { uid unigraph.id expand(_userpredicate_) }'
                 }`;
             const ret = Array.isArray(uid)
@@ -232,12 +177,7 @@ export function getLocalUnigraphAPI(
                 : (await client.queryDgraph(`query { ${frag} }`))[0]?.[0];
             return ret;
         },
-        getQueries: async (
-            fragments,
-            getAll = false,
-            batch = 50,
-            commonVars,
-        ) => {
+        getQueries: async (fragments, getAll = false, batch = 50, commonVars) => {
             let allQueries;
             if (!Array.isArray(fragments)) fragments = [fragments];
             if (getAll) {
@@ -248,31 +188,25 @@ export function getLocalUnigraphAPI(
                     ) => `query${index}(func: uid(par${index})) @recurse {uid unigraph.id expand(_userpredicate_)}
             par${index} as var${it}`,
                 );
-            } else
-                allQueries = fragments.map((it, index) => `query${index}${it}`);
+            } else allQueries = fragments.map((it, index) => `query${index}${it}`);
             if (!batch) batch = allQueries.length;
-            const batchedQueries = allQueries.reduce(
-                (resultArray, item, index) => {
-                    const chunkIndex = Math.floor(index / batch);
+            const batchedQueries = allQueries.reduce((resultArray, item, index) => {
+                const chunkIndex = Math.floor(index / batch);
 
-                    if (!resultArray[chunkIndex]) {
-                        resultArray[chunkIndex] = []; // start a new chunk
-                    }
+                if (!resultArray[chunkIndex]) {
+                    resultArray[chunkIndex] = []; // start a new chunk
+                }
 
-                    resultArray[chunkIndex].push(item);
+                resultArray[chunkIndex].push(item);
 
-                    return resultArray;
-                },
-                [] as any,
-            );
+                return resultArray;
+            }, [] as any);
             const res: any[] = [];
             for (let i = 0; i < batchedQueries.length; i += 1) {
                 if (commonVars) batchedQueries[i].push(commonVars);
                 res.push(
                     // eslint-disable-next-line no-await-in-loop
-                    ...(await client.queryDgraph(
-                        `query {${batchedQueries[i].join('\n')}}`,
-                    )),
+                    ...(await client.queryDgraph(`query {${batchedQueries[i].join('\n')}}`)),
                 );
             }
             return res;
@@ -280,13 +214,9 @@ export function getLocalUnigraphAPI(
         deleteObject: async (uid, permanent) => {
             if (!Array.isArray(uid)) uid = [uid];
             const toDel = uid.map((uidi: any) =>
-                uidi.startsWith('$/') && states.namespaceMap[uidi]
-                    ? states.namespaceMap[uidi].uid
-                    : uidi,
+                uidi.startsWith('$/') && states.namespaceMap[uidi] ? states.namespaceMap[uidi].uid : uidi,
             );
-            permanent
-                ? await client.deleteUnigraphObjectPermanently(toDel)
-                : await client.deleteUnigraphObject(toDel);
+            permanent ? await client.deleteUnigraphObjectPermanently(toDel) : await client.deleteUnigraphObject(toDel);
             callHooks(states.hooks, 'after_object_changed', {
                 subscriptions: states.subscriptions,
                 caches: states.caches,
@@ -308,14 +238,7 @@ export function getLocalUnigraphAPI(
                 });
             }
         },
-        updateObject: async (
-            uid,
-            newObject,
-            isUpsert = true,
-            pad = true,
-            subIds,
-            origin,
-        ) => {
+        updateObject: async (uid, newObject, isUpsert = true, pad = true, subIds, origin) => {
             clearEmpties(newObject);
             const newUid = uid || newObject.uid;
             // Get new object's unigraph.origin first
@@ -338,23 +261,13 @@ export function getLocalUnigraphAPI(
             try {
                 if (pad) {
                     const schema = origObject.type['unigraph.id'];
-                    const paddedUpdater = buildUnigraphEntity(
-                        newObject,
-                        schema,
-                        states.caches.schemas.data,
-                        true,
-                        {
-                            validateSchema: true,
-                            isUpdate: true,
-                            states: {},
-                            globalStates: {},
-                        },
-                    );
-                    finalUpdater = processAutoref(
-                        paddedUpdater,
-                        schema,
-                        states.caches.schemas.data,
-                    );
+                    const paddedUpdater = buildUnigraphEntity(newObject, schema, states.caches.schemas.data, true, {
+                        validateSchema: true,
+                        isUpdate: true,
+                        states: {},
+                        globalStates: {},
+                    });
+                    finalUpdater = processAutoref(paddedUpdater, schema, states.caches.schemas.data);
                 } else {
                     finalUpdater = processAutorefUnigraphId(finalUpdater);
                 }
@@ -364,11 +277,7 @@ export function getLocalUnigraphAPI(
                     'unigraph.origin': origin,
                 };
                 // console.log(finalUpdater, upsert)
-                const finalUpsert = insertsToUpsert(
-                    [upsert],
-                    isUpsert,
-                    states.caches.schemas.dataAlt![0],
-                );
+                const finalUpsert = insertsToUpsert([upsert], isUpsert, states.caches.schemas.dataAlt![0]);
                 // console.log(finalUpsert)
                 await client.createUnigraphUpsert(finalUpsert);
                 callHooks(states.hooks, 'after_object_changed', {
@@ -388,9 +297,7 @@ export function getLocalUnigraphAPI(
             });
         },
         reorderItemInArray: async (uid, item, relUid, subIds) => {
-            const items: [number | string, number][] = (
-                Array.isArray(item[0]) ? item : [item]
-            ) as any;
+            const items: [number | string, number][] = (Array.isArray(item[0]) ? item : [item]) as any;
             const query = `query { res(func: uid(${uid})) {
                 uid
                 <_value[> {
@@ -406,9 +313,7 @@ export function getLocalUnigraphAPI(
                 throw Error('Cannot reorder as source item is not an array!');
             }
             origObject['_value['].sort(
-                (a: any, b: any) =>
-                    (a._index?.['_value.#i'] || 0) -
-                    (b._index?.['_value.#i'] || 0),
+                (a: any, b: any) => (a._index?.['_value.#i'] || 0) - (b._index?.['_value.#i'] || 0),
             );
             // Reorder items
             let newObject = origObject['_value['].map((el) => el._index.uid);
@@ -435,16 +340,10 @@ export function getLocalUnigraphAPI(
                     if (el === source) oldIndex = index;
                     return el !== source;
                 });
-                toInsert.splice(
-                    oldIndex < target ? target : target + 1,
-                    0,
-                    source,
-                );
+                toInsert.splice(oldIndex < target ? target : target + 1, 0, source);
                 newObject = toInsert;
             });
-            const quads = newObject.map(
-                (el, index) => `<${el}> <_value.#i> "${index}" .\n`,
-            );
+            const quads = newObject.map((el, index) => `<${el}> <_value.#i> "${index}" .\n`);
             const createJson = new dgraph.Mutation();
             createJson.setSetNquads(quads.join(''));
             const result = await client.createDgraphUpsert({
@@ -476,9 +375,7 @@ export function getLocalUnigraphAPI(
                 throw Error('Cannot delete as source item is not an array!');
             }
             origObject['_value['].sort(
-                (a: any, b: any) =>
-                    (a._index?.['_value.#i'] || 0) -
-                    (b._index?.['_value.#i'] || 0),
+                (a: any, b: any) => (a._index?.['_value.#i'] || 0) - (b._index?.['_value.#i'] || 0),
             );
             const newValues: any[] = [];
             let toDel = '';
@@ -489,24 +386,15 @@ export function getLocalUnigraphAPI(
                     !items.includes(el._value?.uid) &&
                     !items.includes(el._value?._value?.uid)
                 ) {
-                    newValues.push(
-                        `<${
-                            el._index.uid
-                        }> <_value.#i> "${newValues.length.toString()}" .`,
-                    );
+                    if (el._index?.uid)
+                        newValues.push(`<${el._index.uid}> <_value.#i> "${newValues.length.toString()}" .`);
                 } else {
                     if (relUid) {
-                        toDel += `<${
-                            el._value.uid
-                        }> <unigraph.origin> <${+relUid}> .\n`;
+                        if (el._value?.uid) toDel += `<${el._value.uid}> <unigraph.origin> <${+relUid}> .\n`;
                         if (el?._value?._value?.uid)
-                            toDel += `<${
-                                el._value._value.uid
-                            }> <unigraph.origin> <${+relUid}> .\n`;
+                            toDel += `<${el._value._value.uid}> <unigraph.origin> <${+relUid}> .\n`;
                         if (el?._value?._value?._value?.uid)
-                            toDel += `<${
-                                el._value._value._value.uid
-                            }> <unigraph.origin> <${+relUid}> .\n`;
+                            toDel += `<${el._value._value._value.uid}> <unigraph.origin> <${+relUid}> .\n`;
                     }
                     toDel += `<${uid}> <_value[> <${el.uid}> .\n`;
                 }
@@ -527,15 +415,10 @@ export function getLocalUnigraphAPI(
             return result;
         },
         // latertodo
-        getReferenceables: async (
-            key = 'unigraph.id',
-            asMapWithContent = false,
-        ) => Error('Not implemented'),
+        getReferenceables: async (key = 'unigraph.id', asMapWithContent = false) => Error('Not implemented'),
         getSchemas: async (schemas: string[] | undefined, resolve = false) =>
             Object.fromEntries(
-                Object.entries(states.caches.schemas.data).filter(
-                    ([k, _]) => !schemas?.length || schemas?.includes(k),
-                ),
+                Object.entries(states.caches.schemas.data).filter(([k, _]) => !schemas?.length || schemas?.includes(k)),
             ) as any,
         getPackages: async (packages) => states.caches.packages.data,
         // latertodo
@@ -546,25 +429,28 @@ export function getLocalUnigraphAPI(
             uid: string,
             params: any,
             context?: ExecContext,
+            fnString?: any,
+            bypassCache?: boolean,
         ) => {
             let ret;
-            await states.lock.acquire('caches/exec', async (done: any) => {
-                const exec = uid.startsWith('0x')
-                    ? unpad((await client.queryUID(uid))[0])
-                    : states.caches.executables.data[uid];
-                const execFn = await buildExecutable(
-                    exec,
-                    { params, definition: exec, ...context },
-                    states.localApi,
-                    states,
-                );
-                if (typeof execFn === 'function') {
-                    ret = execFn();
-                } else if (typeof execFn === 'string') {
-                    ret = { return_function_component: execFn };
-                } else ret = {};
-                done(false, null);
-            });
+            if (!bypassCache)
+                await states.lock.acquire('caches/exec', async (done: any) => {
+                    done(false, null);
+                });
+            const exec = uid.startsWith('0x')
+                ? unpad((await client.queryUID(uid))[0])
+                : states.caches.executables.data[uid];
+            const execFn = await buildExecutable(
+                exec,
+                { params, definition: exec, ...context },
+                states.localApi,
+                states,
+            );
+            if (typeof execFn === 'function') {
+                ret = execFn();
+            } else if (typeof execFn === 'string') {
+                ret = { return_function_component: execFn };
+            } else ret = {};
             return ret;
         },
         addNotification: async (notification) => {
@@ -590,18 +476,17 @@ export function getLocalUnigraphAPI(
                 entities: [],
             };
             const finalQuery = getQueryString(query);
-            res = await client.getSearchResults(
-                finalQuery,
-                display,
-                hops,
-                searchOptions,
-            );
+            res = await client.getSearchResults(finalQuery, display, hops, searchOptions);
             return res;
         },
         getSecret: (scope, key) => {
-            // eslint-disable-next-line @typescript-eslint/no-var-requires
-            const keyfile = require(path.join(__dirname, 'secrets.env.json'));
-            if (keyfile?.[scope]?.[key]) return keyfile[scope][key];
+            try {
+                // eslint-disable-next-line @typescript-eslint/no-var-requires
+                const keyfile = require(path.join(__dirname, 'secrets.env.json'));
+                if (keyfile?.[scope]?.[key]) return keyfile[scope][key];
+            } catch (e) {
+                console.error(e);
+            }
             return '';
         },
         awaitHttpCallback: (key: string) =>
@@ -609,23 +494,15 @@ export function getLocalUnigraphAPI(
                 states.httpCallbacks[key] = resolve;
             }),
         exportObjects: async (uids, options) => {
-            const queries = uids.map(
-                (el) =>
-                    `(func: uid(${el})) @recurse {uid unigraph.id expand(_userpredicate_) }`,
-            );
-            const res: any[] = (await states.localApi.getQueries(queries)).map(
-                (el: any[]) => el[0],
-            );
+            const queries = uids.map((el) => `(func: uid(${el})) @recurse {uid unigraph.id expand(_userpredicate_) }`);
+            const res: any[] = (await states.localApi.getQueries(queries)).map((el: any[]) => el[0]);
             const entityMap = flatten(res);
             const indexesQueries = Object.keys(entityMap).map(
-                (el) =>
-                    `(func: uid(${el})) {unigraph.indexes {expand(_userpredicate_) {uid } }}`,
+                (el) => `(func: uid(${el})) {unigraph.indexes {expand(_userpredicate_) {uid } }}`,
             );
             const indexesRes = await states.localApi.getQueries(indexesQueries);
             indexesRes.forEach((el: any, idx: number) => {
-                if (el[0])
-                    entityMap[Object.keys(entityMap)[idx]]['unigraph.indexes'] =
-                        el[0]['unigraph.indexes'];
+                if (el[0]) entityMap[Object.keys(entityMap)[idx]]['unigraph.indexes'] = el[0]['unigraph.indexes'];
             });
             return unflatten(entityMap, uids);
         },
@@ -634,13 +511,7 @@ export function getLocalUnigraphAPI(
         },
         buildUnigraphEntity: (entity, schema, options) => {
             clearEmpties(entity);
-            const unigraphObject = buildUnigraphEntity(
-                entity,
-                schema,
-                states.caches.schemas.data,
-                undefined,
-                options,
-            );
+            const unigraphObject = buildUnigraphEntity(entity, schema, states.caches.schemas.data, undefined, options);
             return unigraphObject;
         },
         getSubscriptions: () =>
@@ -660,6 +531,18 @@ export function getLocalUnigraphAPI(
                 queryNow: el.queryNow,
                 queryTime: el.queryTime,
             })) || [],
+        touch: async (uids) => {
+            const totalUids = Array.isArray(uids) ? uids : [];
+            const nowDateString = new Date().toISOString();
+            const quads = totalUids.map((uid) => `<${uid}> <_updatedAt> "${nowDateString}" .`);
+            const updater = new dgraph.Mutation();
+            updater.setSetNquads(quads.join('\n'));
+            const result = await client.createDgraphUpsert({
+                query: false,
+                mutations: [updater],
+            });
+            return result;
+        },
     };
 
     return api;

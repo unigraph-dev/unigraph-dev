@@ -1,20 +1,54 @@
-import { Button, Typography } from '@material-ui/core';
+import { Button, Paper, Typography } from '@material-ui/core';
 import React from 'react';
-import { DataGrid } from '@material-ui/data-grid';
-import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
-import { deselectUid, selectUid, upload } from '../../utils';
+import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import { TabContext, upload } from '../../utils';
+import { DynamicObjectListView } from '../ObjectView/DynamicObjectListView';
+
+export const PackageManifestView = ({ data }: any) => {
+    return (
+        <Paper variant="outlined" style={{ margin: '4px', padding: '16px', width: '100%' }}>
+            <Typography style={{ marginBottom: '8px' }}>
+                <span style={{ color: 'gray', marginRight: '8px' }}>Name</span>
+                {data?.get('name')?.as('primitive')}
+            </Typography>
+            <Typography style={{ marginBottom: '8px' }}>
+                <span style={{ color: 'gray', marginRight: '8px' }}>Description</span>
+                {data?.get('description')?.as('primitive')}
+            </Typography>
+            <Typography style={{ marginBottom: '8px' }}>
+                <span style={{ color: 'gray', marginRight: '8px' }}>Package name</span>
+                {data?.get('package_name')?.as('primitive')}
+            </Typography>
+            <Typography>
+                <span style={{ color: 'gray', marginRight: '8px' }}>Version</span>
+                {data?.get('version')?.as('primitive')}
+            </Typography>
+        </Paper>
+    );
+};
 
 export const PackageManager: React.FC = ({}) => {
     const [packages, setPackages]: any = React.useState([]);
+    const tabContext = React.useContext(TabContext);
 
     React.useEffect(() => {
-        window.unigraph.getPackages().then((pkg: any) => {
-            setPackages(Object.values(pkg));
-        });
+        const id = getRandomInt();
+
+        tabContext.subscribeToType(
+            '$/schema/package_manifest',
+            (pkgs: any[]) => {
+                setPackages(pkgs);
+            },
+            id,
+        );
+
+        return () => {
+            tabContext.unsubscribe(id);
+        };
     }, []);
 
     return (
-        <div style={{ height: 800 }}>
+        <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <Typography gutterBottom variant="h4">
                 Package Manager
             </Typography>
@@ -29,10 +63,7 @@ export const PackageManager: React.FC = ({}) => {
                                         `let exports = {pkg: undefined};${pkg}return exports.pkg`,
                                     )();
                                     console.log(pkgModule);
-                                    window.unigraph.addPackage?.(
-                                        pkgModule,
-                                        true,
-                                    );
+                                    window.unigraph.addPackage?.(pkgModule, true);
                                 } catch (e) {
                                     console.error('Add package failure!');
                                     console.error(e);
@@ -44,49 +75,7 @@ export const PackageManager: React.FC = ({}) => {
                     Add package (overwrite)
                 </Button>
             </div>
-            <DataGrid
-                columns={[
-                    {
-                        field: 'package_name',
-                        headerName: 'Package Name',
-                        width: 200,
-                    },
-                    { field: 'name', headerName: 'Name', width: 150 },
-                    {
-                        field: 'description',
-                        headerName: 'Description',
-                        width: 250,
-                    },
-                    { field: 'version', headerName: 'Ver', width: 75 },
-                    {
-                        field: 'schemaLen',
-                        headerName: 'Schemas',
-                        width: 120,
-                        type: 'number',
-                    },
-                    {
-                        field: 'execLen',
-                        headerName: 'Executables',
-                        width: 135,
-                        type: 'number',
-                    },
-                ]}
-                rows={packages.map((pkg: any) => ({
-                    ...pkg.pkgManifest,
-                    schemaLen: pkg.pkgSchemas
-                        ? Object.keys(pkg.pkgSchemas).length - 1
-                        : 0,
-                    execLen: pkg.pkgExecutables
-                        ? Object.keys(pkg.pkgExecutables).length - 1
-                        : 0,
-                }))}
-                getRowId={(row) => row.package_name}
-                pageSize={15}
-                onRowSelected={(param) => {
-                    deselectUid();
-                    selectUid(param.data.uid);
-                }}
-            />
+            <DynamicObjectListView items={packages} context={null} compact />
         </div>
     );
 };

@@ -1,20 +1,11 @@
 import { Badge, Avatar, Typography } from '@material-ui/core';
 import Sugar from 'sugar';
-import {
-    AddCircle,
-    ArrowDownward,
-    ArrowUpward,
-    Chat,
-    Image,
-    Link,
-    RemoveCircle,
-} from '@material-ui/icons';
+import { AddCircle, ArrowDownward, ArrowUpward, Chat, Image, Link, RemoveCircle } from '@material-ui/icons';
 import React from 'react';
 import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { DynamicViewRenderer } from '../../global.d';
 import { registerDynamicViews } from '../../unigraph-react';
-import { openUrl } from '../../utils';
 
 const getThumbnail = (url: string) => {
     if (url === 'image') {
@@ -115,13 +106,7 @@ export const RedditPost: DynamicViewRenderer = ({ data, callbacks }) => {
                     <div>
                         <Typography variant="body2">
                             Submitted
-                            {Sugar.Date.relative(
-                                new Date(
-                                    data._updatedAt ||
-                                        data._timestamp._updatedAt,
-                                ),
-                            )}{' '}
-                            to r/
+                            {Sugar.Date.relative(new Date(data._updatedAt || data._timestamp._updatedAt))} to r/
                             {data.get('subreddit/name').as('primitive')}
                         </Typography>
                         <div
@@ -131,12 +116,9 @@ export const RedditPost: DynamicViewRenderer = ({ data, callbacks }) => {
                                 cursor: 'pointer',
                             }}
                             onClick={() => {
-                                if (
-                                    callbacks?.removeFromContext &&
-                                    callbacks?.removeOnEnter
-                                )
+                                if (callbacks?.removeFromContext && callbacks?.removeOnEnter)
                                     callbacks.removeFromContext();
-                                openUrl(data.get('permalink').as('primitive'));
+                                window.open(data.get('permalink').as('primitive'), '_blank');
                             }}
                         >
                             Comment
@@ -146,19 +128,9 @@ export const RedditPost: DynamicViewRenderer = ({ data, callbacks }) => {
                 {innerExpanded ? (
                     <div>
                         {data.get('selftext').as('primitive').length ? (
-                            <AutoDynamicView
-                                object={
-                                    new UnigraphObject(
-                                        data.get('selftext')._value._value,
-                                    )
-                                }
-                            />
+                            <AutoDynamicView object={new UnigraphObject(data.get('selftext')._value._value)} />
                         ) : (
-                            <img
-                                src={data.get('url').as('primitive')}
-                                style={{ maxWidth: '100%' }}
-                                alt=""
-                            />
+                            <img src={data.get('url').as('primitive')} style={{ maxWidth: '100%' }} alt="" />
                         )}
                     </div>
                 ) : (

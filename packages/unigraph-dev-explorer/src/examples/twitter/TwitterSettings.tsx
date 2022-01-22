@@ -10,25 +10,19 @@ export function TwitterSettings() {
     const [loaded, setLoaded] = React.useState(false);
     const [lists, setLists] = React.useState([]);
     const [account, setAccount] = React.useState<any>({});
-    const subscriptions = account?._value?.subscriptions['_value['].map(
-        (it: any) => ({
-            uid: it._value.uid,
-            name: it._value._value.name['_value.%'],
-            last_id_fetched: it._value._value.last_id_fetched['_value.%'],
-        }),
-    );
+    const subscriptions = account?._value?.subscriptions['_value['].map((it: any) => ({
+        uid: it._value.uid,
+        name: it._value._value.name['_value.%'],
+        last_id_fetched: it._value._value.last_id_fetched['_value.%'],
+    }));
     const tabContext = React.useContext(TabContext);
     useEffectOnce(() => {
-        window.unigraph
-            .ensurePackage('unigraph.twitter', twitterPackage)
-            .then(() => setLoaded(true));
+        window.unigraph.ensurePackage('unigraph.twitter', twitterPackage).then(() => setLoaded(true));
     });
 
     React.useEffect(() => {
         if (account?.uid) {
-            window.unigraph
-                .runExecutable('$/executable/get-twitter-lists', {})
-                .then(setLists);
+            window.unigraph.runExecutable('$/executable/get-twitter-lists', {}).then(setLists);
         }
     }, [account]);
 
@@ -99,20 +93,12 @@ export function TwitterSettings() {
     return loaded ? (
         <div>
             <Typography variant="h4">Twitter settings</Typography>
-            <Button
-                onClick={() =>
-                    window.unigraph.runExecutable(
-                        '$/executable/add-twitter-account',
-                        {},
-                    )
-                }
-            >
+            <Button onClick={() => window.unigraph.runExecutable('$/executable/add-twitter-account', {})}>
                 Sign in with Twitter
             </Button>
             <Typography>
-                Note: for now, in order to sync with Twitter, you need to create
-                a twitter list nameed 'Subscription' (exactly) and add any
-                accounts you want to sync to unigraph there.
+                Note: for now, in order to sync with Twitter, you need to create a twitter list nameed 'Subscription'
+                (exactly) and add any accounts you want to sync to unigraph there.
             </Typography>
             <Typography variant="body1">Account info</Typography>
             <p>
@@ -140,8 +126,7 @@ export function TwitterSettings() {
                                 subscriptions: [
                                     {
                                         type: {
-                                            'unigraph.id':
-                                                '$/schema/twitter_list',
+                                            'unigraph.id': '$/schema/twitter_list',
                                         },
                                         twitter_id: el?.id_str,
                                         name: el?.name,

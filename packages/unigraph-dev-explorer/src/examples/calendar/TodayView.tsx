@@ -9,10 +9,7 @@ export function TodayView({ pageName }: any) {
     const pages = window.unigraph.getState('registry/pages');
 
     const [currentTime, setCurrentTime] = React.useState(new Date());
-    React.useMemo(
-        () => setInterval(() => setCurrentTime(new Date()), 1000),
-        [],
-    );
+    React.useMemo(() => setInterval(() => setCurrentTime(new Date()), 1000), []);
 
     const [showInboxes, setShowInboxes] = React.useState(!pageName);
 
@@ -32,12 +29,8 @@ export function TodayView({ pageName }: any) {
             >
                 <UnigraphWidget style={{ flex: 1 }}>
                     <div style={{ height: '120px' }}>
-                        <Typography variant="h2">
-                            {Sugar.Date.format(currentTime, '{hh}:{mm}:{ss}')}
-                        </Typography>
-                        <Typography variant="h6">
-                            {Sugar.Date.medium(currentTime)}
-                        </Typography>
+                        <Typography variant="h2">{Sugar.Date.format(currentTime, '{hh}:{mm}:{ss}')}</Typography>
+                        <Typography variant="h6">{Sugar.Date.medium(currentTime)}</Typography>
                         <Button
                             onClick={() => {
                                 setShowInboxes(!showInboxes);
@@ -67,15 +60,11 @@ export function TodayView({ pageName }: any) {
                 }}
             >
                 <UnigraphWidget style={{ overflow: 'auto' }}>
-                    <div style={{ flex: 1, height: '100%' }}>
-                        {pages.value.inbox.constructor()}
-                    </div>
+                    <div style={{ flex: 1, height: '100%' }}>{pages.value.inbox.constructor()}</div>
                 </UnigraphWidget>
                 <div style={{ height: '16px' }} />
                 <UnigraphWidget style={{ overflow: 'auto' }}>
-                    <div style={{ flex: 1, height: '100%' }}>
-                        {pages.value['current-events'].constructor()}
-                    </div>
+                    <div style={{ flex: 1, height: '100%' }}>{pages.value['current-events'].constructor()}</div>
                 </UnigraphWidget>
             </div>
         </div>

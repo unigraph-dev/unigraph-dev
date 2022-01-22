@@ -1,10 +1,5 @@
 type ObjectViewOptions = {
-    viewer?:
-        | 'string'
-        | 'json-tree'
-        | 'dynamic-view'
-        | 'code-editor'
-        | 'dynamic-view-detailed';
+    viewer?: 'string' | 'json-tree' | 'dynamic-view' | 'code-editor' | 'dynamic-view-detailed';
     unpad?: boolean;
     canEdit?: boolean;
     showContextMenu?: boolean;

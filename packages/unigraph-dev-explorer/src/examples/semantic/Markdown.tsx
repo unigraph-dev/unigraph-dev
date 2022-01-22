@@ -4,14 +4,21 @@ import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkBreaks from 'remark-breaks';
-import remarkWikilink from './wikilink';
-import { DynamicViewRenderer } from '../../global.d';
 import 'katex/dist/katex.min.css';
+import TurndownService from 'turndown';
+import rehypeRaw from 'rehype-raw';
+import { DynamicViewRenderer } from '../../global.d';
+import remarkWikilink from './wikilink';
 
-const compFactory = (
-    name: string,
-    { node, inline, className, children, ...props }: any,
-) =>
+export function htmlToMarkdown(html: string) {
+    TurndownService.prototype.escape = (input: string) => input;
+    const turndown = new (TurndownService as any)({
+        preformattedCode: true,
+    });
+    return turndown.turndown(html);
+}
+
+const compFactory = (name: string, { node, inline, className, children, ...props }: any) =>
     // eslint-disable-next-line react/no-children-prop
     React.createElement(name, {
         className,
@@ -23,23 +30,15 @@ const compFactory = (
                 console.log(props.sourcePosition, window.getSelection());
                 (event.target as HTMLElement).setAttribute(
                     'markdownPos',
-                    String(
-                        (props.sourcePosition?.start.column || 0) -
-                            1 +
-                            (window.getSelection()?.anchorOffset || 0),
-                    ),
+                    String((props.sourcePosition?.start.column || 0) - 1 + (window.getSelection()?.anchorOffset || 0)),
                 );
             }
         },
         ...props,
-        style: { ...props.style, display: 'contents' },
+        style: { display: 'contents', ...props.style },
     });
 
-export const Markdown: DynamicViewRenderer = ({
-    data,
-    callbacks,
-    isHeading,
-}) => {
+export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) => {
     const MarkdownComponent = React.useMemo(() => {
         return (
             <Typography
@@ -50,16 +49,29 @@ export const Markdown: DynamicViewRenderer = ({
             >
                 <ReactMarkdown
                     // eslint-disable-next-line react/no-children-prop
-                    children={
-                        data['_value.%'] || (isHeading ? '_no title_' : '|')
-                    }
-                    remarkPlugins={[remarkMath, remarkWikilink, remarkBreaks]}
-                    rehypePlugins={[rehypeKatex]}
+                    children={data['_value.%'] || (isHeading ? '_no title_' : '|')}
+                    remarkPlugins={[remarkMath as any, remarkWikilink, remarkBreaks as any]}
+                    rehypePlugins={[rehypeKatex, rehypeRaw as any]}
                     components={{
                         p: compFactory.bind(this, 'p'),
                         strong: compFactory.bind(this, 'strong'),
                         em: compFactory.bind(this, 'em'),
                         code: compFactory.bind(this, 'code'),
+                        img: ({ node, inline, className, children, ...props }: any) => {
+                            console.log(node);
+                            return compFactory('img', {
+                                ...props,
+                                node,
+                                inline,
+                                className,
+                                children,
+                                style: {
+                                    display: '',
+                                    // eslint-disable-next-line no-nested-ternary
+                                    height: node?.properties?.alt?.startsWith?.('inline:') ? '1.5em' : '',
+                                },
+                            });
+                        },
                         ol: (props) =>
                             compFactory('ol', {
                                 ...props,
@@ -70,41 +82,27 @@ export const Markdown: DynamicViewRenderer = ({
                             compFactory('a', {
                                 ...props,
                                 onPointerUp: (ev: any) => {
-                                    console.log(ev);
                                     ev.preventDefault();
                                     ev.stopPropagation();
+                                    window.open((props?.node as any)?.properties?.href, '_blank');
                                 },
                                 target: '_blank',
                                 style: { cursor: 'pointer' },
                             }),
                         // TODO: optimize this
                         // eslint-disable-next-line react/no-unstable-nested-components
-                        span: ({
-                            node,
-                            inline,
-                            className,
-                            children,
-                            ...props
-                        }: any) => {
+                        span: ({ node, inline, className, children, ...props }: any) => {
                             if (className?.includes('wikilink')) {
                                 const matches = (
-                                    callbacks?.['get-semantic-properties']?.()
-                                        ?._value?.children?.['_value['] || []
-                                ).filter(
-                                    (el: any) =>
-                                        el._key === `[[${children[0]}]]`,
-                                );
+                                    callbacks?.['get-semantic-properties']?.()?._value?.children?.['_value['] || []
+                                ).filter((el: any) => el._key === `[[${children[0]}]]` && el._value?.type);
                                 const objDef =
                                     window.unigraph.getNamespaceMap?.()?.[
-                                        matches[0]?._value?._value?.type?.[
-                                            'unigraph.id'
-                                        ]
+                                        matches[0]?._value?._value?.type?.['unigraph.id']
                                     ];
                                 return (
                                     <>
-                                        <span style={{ color: 'darkgray' }}>
-                                            [[
-                                        </span>
+                                        <span style={{ color: 'darkgray' }}>[[</span>
                                         {objDef ? (
                                             <div
                                                 style={{
@@ -124,58 +122,35 @@ export const Markdown: DynamicViewRenderer = ({
                                                 className,
                                                 children,
                                                 contentEditable: true,
-                                                suppressContentEditableWarning:
-                                                    true,
-                                                onPointerUp: (
-                                                    event: MouseEvent,
-                                                ) => {
+                                                suppressContentEditableWarning: true,
+                                                onPointerUp: (event: MouseEvent) => {
                                                     event.stopPropagation();
                                                     event.preventDefault();
                                                     if (matches[0])
                                                         window.wsnavigator(
                                                             `/library/object?uid=${
-                                                                matches[0]
-                                                                    ._value
-                                                                    ._value.uid
+                                                                matches[0]._value._value.uid
                                                             }&viewer=${'dynamic-view-detailed'}&type=${
-                                                                matches[0]
-                                                                    ._value
-                                                                    ._value
-                                                                    ?.type?.[
-                                                                    'unigraph.id'
-                                                                ]
+                                                                matches[0]._value._value?.type?.['unigraph.id']
                                                             }`,
                                                         );
-                                                    else if (
-                                                        callbacks?.namespaceLink
-                                                    ) {
-                                                        window.open(
-                                                            callbacks.namespaceLink(
-                                                                children[0],
-                                                            ),
-                                                            '_blank',
-                                                        );
+                                                    else if (callbacks?.namespaceLink) {
+                                                        window.open(callbacks.namespaceLink(children[0]), '_blank');
                                                     }
                                                 },
                                                 ...props,
                                                 style: {
                                                     display: 'contents',
                                                     color:
-                                                        matches[0] ||
-                                                        callbacks?.namespaceLink
-                                                            ? 'mediumblue'
-                                                            : 'black',
+                                                        matches[0] || callbacks?.namespaceLink ? 'mediumblue' : 'black',
                                                     ':hover': {
-                                                        textDecoration:
-                                                            'underline',
+                                                        textDecoration: 'underline',
                                                     },
                                                     cursor: 'pointer',
                                                 },
                                             })
                                         }
-                                        <span style={{ color: 'darkgray' }}>
-                                            ]]
-                                        </span>
+                                        <span style={{ color: 'darkgray' }}>]]</span>
                                     </>
                                 );
                             }
@@ -197,7 +172,7 @@ export const Markdown: DynamicViewRenderer = ({
         data['_value.%'],
         JSON.stringify(
             callbacks?.['get-semantic-properties']?.()
-                ?.map?.((el: any) => el?._value?.uid)
+                ?.map?.((el: any) => el._value)
                 .sort(),
         ),
     ]);

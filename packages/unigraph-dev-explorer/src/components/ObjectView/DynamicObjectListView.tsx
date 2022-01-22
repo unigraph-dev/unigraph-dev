@@ -24,16 +24,13 @@ import _ from 'lodash';
 import React from 'react';
 import { useDrop } from 'react-dnd';
 import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
-import {
-    buildGraph as buildGraphFn,
-    getRandomInt,
-} from 'unigraph-dev-common/lib/utils/utils';
+import { buildGraph as buildGraphFn, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { TransitionGroup } from 'react-transition-group';
 import { getDynamicViews } from '../../unigraph-react';
 import { AutoDynamicView } from './AutoDynamicView';
-import { DataContext, isMobile, TabContext } from '../../utils';
+import { DataContext, DataContextWrapper, isMobile, TabContext } from '../../utils';
 import { setupInfiniteScrolling } from './infiniteScrolling';
 import { DragandDrop } from './DragandDrop';
 
@@ -58,15 +55,9 @@ const groupersDefault: Record<string, Grouper> = {
                 const now = new Date();
                 if (now.getTime() - day.getTime() <= 1000 * 60 * 60 * 24) {
                     groupsMap.Today.push(it);
-                } else if (
-                    now.getTime() - day.getTime() <=
-                    1000 * 60 * 60 * 24 * 7
-                ) {
+                } else if (now.getTime() - day.getTime() <= 1000 * 60 * 60 * 24 * 7) {
                     groupsMap['Last week'].push(it);
-                } else if (
-                    now.getTime() - day.getTime() <=
-                    1000 * 60 * 60 * 24 * 31
-                ) {
+                } else if (now.getTime() - day.getTime() <= 1000 * 60 * 60 * 24 * 31) {
                     groupsMap['Last month'].push(it);
                 } else {
                     groupsMap.Earlier.push(it);
@@ -106,6 +97,7 @@ function DynamicListItem({
     itemUids,
     itemRemover,
     noRemover,
+    components,
     removeOnEnter,
     compact,
 }: any) {
@@ -120,10 +112,7 @@ function DynamicListItem({
                     itemRemover([item.uid]);
                 }}
                 style={{
-                    display:
-                        itemRemover === _.noop || isMobile() || noRemover
-                            ? 'none'
-                            : '',
+                    display: itemRemover === _.noop || isMobile() || noRemover ? 'none' : '',
                 }}
             >
                 <ClearAll />
@@ -131,14 +120,13 @@ function DynamicListItem({
             <AutoDynamicView
                 compact={compact}
                 object={new UnigraphObject(item)}
+                components={components}
                 withParent={!!listUid}
                 callbacks={{
                     ...callbacks,
                     context,
                     removeOnEnter,
-                    removeFromContext: (
-                        where: undefined | 'left' | 'right',
-                    ) => {
+                    removeFromContext: (where: undefined | 'left' | 'right') => {
                         const uids = {
                             left: itemUids.slice(0, index),
                             right: undefined,
@@ -179,6 +167,7 @@ export type DynamicObjectListViewProps = {
     loadAll?: boolean;
     removeOnEnter?: boolean;
     style?: any;
+    components?: any;
 };
 
 function DynamicListBasic({
@@ -194,6 +183,7 @@ function DynamicListBasic({
     noRemover,
     compact,
     removeOnEnter,
+    components,
 }: any) {
     const tabContext = React.useContext(TabContext);
     return (
@@ -219,6 +209,7 @@ function DynamicListBasic({
                     reverse={reverse}
                     noRemover={noRemover}
                     removeOnEnter={removeOnEnter}
+                    components={components}
                 />
             ))}
         </DragandDrop>
@@ -241,6 +232,7 @@ function DynamicList({
     compact,
     subscribeOptions,
     removeOnEnter,
+    components,
 }: any) {
     const tabContext = React.useContext(TabContext);
     const [loadedItems, setLoadedItems] = React.useState<any[]>([]);
@@ -277,8 +269,7 @@ function DynamicList({
         // eslint-disable-next-line max-len
         requestAnimationFrame(() => {
             if (
-                scrollerRef.current?._infScroll?.scrollHeight <
-                    scrollerRef.current?.el?.clientHeight &&
+                scrollerRef.current?._infScroll?.scrollHeight < scrollerRef.current?.el?.clientHeight &&
                 loadedItems.length < items.length
             ) {
                 setupProps?.next();
@@ -322,6 +313,7 @@ function DynamicList({
                         itemRemover={itemRemover}
                         noRemover={noRemover}
                         removeOnEnter={removeOnEnter}
+                        components={components}
                     />
                 ))}
             </DragandDrop>
@@ -342,17 +334,10 @@ function MultiTypeDescriptor({
 
     return itemGroups.length > 1 ? (
         <>
-            <Divider
-                variant="middle"
-                orientation="vertical"
-                style={{ height: 'auto' }}
-            />
+            <Divider variant="middle" orientation="vertical" style={{ height: 'auto' }} />
             <div style={{ whiteSpace: 'nowrap', display: 'flex' }}>
                 {itemGroups.map((el, index) => (
-                    <TabButton
-                        isSelected={selectedTab === el.name}
-                        onClick={() => setSelectedTab(el.name)}
-                    >
+                    <TabButton isSelected={selectedTab === el.name} onClick={() => setSelectedTab(el.name)}>
                         <div
                             style={{
                                 minHeight: '18px',
@@ -363,24 +348,14 @@ function MultiTypeDescriptor({
                                 marginRight: '3px',
                                 opacity: 0.54,
                                 backgroundImage: `url("data:image/svg+xml,${
-                                    window.unigraph.getNamespaceMap?.()?.[
-                                        el.name
-                                    ]?._icon
+                                    window.unigraph.getNamespaceMap?.()?.[el.name]?._icon
                                 }")`,
                             }}
                         />
-                        <Typography
-                            style={{ color: 'grey', marginRight: '4px' }}
-                        >
-                            {
-                                window.unigraph.getNamespaceMap?.()?.[el.name]
-                                    ?._name
-                            }
-                            :
+                        <Typography style={{ color: 'grey', marginRight: '4px' }}>
+                            {window.unigraph.getNamespaceMap?.()?.[el.name]?._name}:
                         </Typography>
-                        <Typography style={{ marginRight: '8px' }}>
-                            {el.items.length}
-                        </Typography>
+                        <Typography style={{ marginRight: '8px' }}>{el.items.length}</Typography>
                     </TabButton>
                 ))}
             </div>
@@ -407,9 +382,7 @@ export function TabButton({ children, isSelected, onClick }: any) {
                 paddingTop: '2px',
                 paddingBottom: '2px',
                 borderRadius: '8px',
-                ...(isSelected
-                    ? { backgroundColor: '#E9E9E9', borderRadius: '8px' }
-                    : {}),
+                ...(isSelected ? { backgroundColor: '#E9E9E9', borderRadius: '8px' } : {}),
             }}
             onClick={onClick}
         >
@@ -450,6 +423,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
     subscribeOptions,
     loadAll,
     removeOnEnter,
+    components,
     itemAdder,
 }) => {
     const classes = useStyles();
@@ -465,33 +439,23 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
 
     const isStub =
         !items[0] ||
-        Object.keys(itemGetter(items[0])).filter((el) =>
-            el.startsWith('_value'),
-        ).length < 1 ||
+        Object.keys(itemGetter(items[0])).filter((el) => el.startsWith('_value')).length < 1 ||
         items[0]._stub;
 
     const totalFilters: Filter[] = [
         { id: 'no-filter', fn: () => true },
         {
             id: 'no-deleted',
-            fn: (obj) =>
-                obj?.['dgraph.type']?.includes?.('Deleted') ? null : obj,
+            fn: (obj) => (obj?.['dgraph.type']?.includes?.('Deleted') ? null : obj),
         },
         {
             id: 'no-noview',
-            fn: (obj) =>
-                getDynamicViews().includes(obj?.type?.['unigraph.id'])
-                    ? obj
-                    : null,
+            fn: (obj) => (getDynamicViews().includes(obj?.type?.['unigraph.id']) ? obj : null),
         },
         {
             id: 'no-trivial',
             fn: (obj) =>
-                ['$/schema/markdown', '$/schema/subentity'].includes(
-                    obj?.type?.['unigraph.id'],
-                )
-                    ? null
-                    : obj,
+                ['$/schema/markdown', '$/schema/subentity'].includes(obj?.type?.['unigraph.id']) ? null : obj,
         },
         { id: 'no-hidden', fn: (obj) => obj._hide !== true },
         ...filters,
@@ -515,15 +479,11 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
         else allItems = [...currItems];
         filtersUsed.forEach((el) => {
             const filter = totalFilters.find((flt) => flt.id === el);
-            allItems = allItems.filter((it: any) =>
-                (filter?.fn || (() => true))(itemGetter(it)),
-            );
+            allItems = allItems.filter((it: any) => (filter?.fn || (() => true))(itemGetter(it)));
         });
         setTotalItems([...allItems]);
         if (currentTab.length >= 1)
-            allItems = allItems.filter(
-                (it: any) => itemGetter(it).type['unigraph.id'] === currentTab,
-            );
+            allItems = allItems.filter((it: any) => itemGetter(it).type['unigraph.id'] === currentTab);
         setProcItems(allItems);
         if (allItems.length === 0) setCurrentTab('');
     }, [reverseOrder, items, filtersUsed, currentTab]);
@@ -537,18 +497,15 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
     const [{ canDrop }, drop] = useDrop(() => ({
         // @ts-expect-error: already checked for namespace map
         accept: Object.keys(window.unigraph.getNamespaceMap() || {}),
-        drop: (
-            item: { uid: string; dndContext: any; removeFromContext?: any },
-            monitor,
-        ) => {
+        drop: (item: { uid: string; dndContext: any; removeFromContext?: any }, monitor) => {
             if (!monitor.didDrop() && !noDrop && contextRef.current) {
                 if (itemAdder) {
                     itemAdder(item.uid);
                 } else {
-                    window.unigraph.runExecutable(
-                        '$/executable/add-item-to-list',
-                        { where: contextRef.current.uid, item: item.uid },
-                    );
+                    window.unigraph.runExecutable('$/executable/add-item-to-list', {
+                        where: contextRef.current.uid,
+                        item: item.uid,
+                    });
                 }
                 if (tabContext.viewId === item.dndContext) {
                     item?.removeFromContext();
@@ -575,10 +532,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
             }}
             ref={drop}
         >
-            <DataContext.Provider
-                // eslint-disable-next-line react/jsx-no-constructed-context-values
-                value={{ rootUid: context?.uid || '0x0' }}
-            >
+            <DataContextWrapper contextUid={context?.uid} contextData={context} parents={[]}>
                 <div style={{ display: 'flex' }}>
                     {noBar ? (
                         []
@@ -594,13 +548,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                 }}
                             >
                                 <AccordionSummary
-                                    expandIcon={
-                                        <ExpandMore
-                                            onClick={() =>
-                                                setOptionsOpen(!optionsOpen)
-                                            }
-                                        />
-                                    }
+                                    expandIcon={<ExpandMore onClick={() => setOptionsOpen(!optionsOpen)} />}
                                     aria-controls="panel1bh-content"
                                     id="panel1bh-header"
                                     classes={{ content: classes.content }}
@@ -609,17 +557,13 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                     <TabButton
                                         isSelected={
                                             currentTab === '' &&
-                                            groupersDefault.type?.(
-                                                totalItems.map(itemGetter),
-                                            )?.length > 1
+                                            groupersDefault.type?.(totalItems.map(itemGetter))?.length > 1
                                         }
                                         onClick={() => {
                                             setCurrentTab('');
                                         }}
                                     >
-                                        <Typography
-                                            style={{ whiteSpace: 'nowrap' }}
-                                        >
+                                        <Typography style={{ whiteSpace: 'nowrap' }}>
                                             {totalItems.length}
                                             {titleBar || ' items'}
                                         </Typography>
@@ -633,30 +577,19 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                 <AccordionDetails>
                                     <List>
                                         <ListItem>
-                                            <Typography>
-                                                Group items by
-                                            </Typography>
+                                            <Typography>Group items by</Typography>
                                             <Select
                                                 value={groupBy}
                                                 onChange={(ev) => {
-                                                    setGroupBy(
-                                                        ev.target
-                                                            .value as string,
-                                                    );
+                                                    setGroupBy(ev.target.value as string);
                                                 }}
                                                 style={{ marginLeft: '24px' }}
                                                 displayEmpty
                                             >
-                                                <MenuItem value="">
-                                                    None
-                                                </MenuItem>
-                                                {Object.keys(groupers).map(
-                                                    (el) => (
-                                                        <MenuItem value={el}>
-                                                            {el}
-                                                        </MenuItem>
-                                                    ),
-                                                )}
+                                                <MenuItem value="">None</MenuItem>
+                                                {Object.keys(groupers).map((el) => (
+                                                    <MenuItem value={el}>{el}</MenuItem>
+                                                ))}
                                             </Select>
                                         </ListItem>
                                         <ListItem>
@@ -664,11 +597,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                                 control={
                                                     <Switch
                                                         checked={reverseOrder}
-                                                        onChange={() =>
-                                                            setReverseOrder(
-                                                                !reverseOrder,
-                                                            )
-                                                        }
+                                                        onChange={() => setReverseOrder(!reverseOrder)}
                                                         name="moveToInbox"
                                                     />
                                                 }
@@ -683,32 +612,21 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                                     setFiltersUsed(newValue);
                                                 }}
                                                 id="filter-selector"
-                                                options={totalFilters.map(
-                                                    (el) => el.id,
-                                                )}
+                                                options={totalFilters.map((el) => el.id)}
                                                 style={{ width: 300 }}
                                                 renderInput={(params) => (
-                                                    <TextField
-                                                        {...params}
-                                                        label="Filter presets"
-                                                        variant="outlined"
-                                                    />
+                                                    <TextField {...params} label="Filter presets" variant="outlined" />
                                                 )}
                                             />
                                         </ListItem>
                                         <ListItem
                                             style={{
-                                                display:
-                                                    context?.uid && !noRemover
-                                                        ? ''
-                                                        : 'none',
+                                                display: context?.uid && !noRemover ? '' : 'none',
                                             }}
                                         >
                                             <Button
                                                 onClick={() => {
-                                                    window.wsnavigator(
-                                                        `/graph?uid=${context.uid}`,
-                                                    );
+                                                    window.wsnavigator(`/graph?uid=${context.uid}`);
                                                 }}
                                             >
                                                 Show Graph view
@@ -718,26 +636,16 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                 </AccordionDetails>
                             </Accordion>
                             <IconButton
-                                onClick={() =>
-                                    itemRemover(
-                                        procItems.map(
-                                            (el, idx) => itemGetter(el).uid,
-                                        ),
-                                    )
-                                }
+                                onClick={() => itemRemover(procItems.map((el, idx) => itemGetter(el).uid))}
                                 style={{
-                                    display:
-                                        itemRemover === _.noop ? 'none' : '',
+                                    display: itemRemover === _.noop ? 'none' : '',
                                 }}
                             >
                                 <ClearAll />
                             </IconButton>
                             <IconButton
                                 style={{
-                                    display:
-                                        canDrop && !noDrop && contextRef.current
-                                            ? ''
-                                            : 'none',
+                                    display: canDrop && !noDrop && contextRef.current ? '' : 'none',
                                 }}
                             >
                                 <InboxOutlined />
@@ -745,74 +653,57 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                         </>
                     )}
                 </div>
-                <div
-                    style={{ flexGrow: 1, overflowY: 'auto' }}
-                    id={`scrollableDiv${parId}`}
-                >
+                <div style={{ flexGrow: 1, overflowY: 'auto' }} id={`scrollableDiv${parId}`}>
                     {!groupBy.length
-                        ? React.createElement(
-                              isStub && !loadAll
-                                  ? DynamicList
-                                  : DynamicListBasic,
-                              {
-                                  reverse: reverseOrder,
-                                  items: procItems,
-                                  context,
-                                  listUid,
-                                  callbacks,
-                                  itemRemover,
-                                  itemUids: procItems.map((el) => el.uid),
-                                  itemGetter,
-                                  buildGraph,
-                                  parId,
-                                  noRemover,
-                                  compact,
-                                  subscribeOptions,
-                                  removeOnEnter,
-                              },
-                          )
-                        : groupers[groupBy](procItems.map(itemGetter)).map(
-                              (el: Group) => (
-                                  <>
-                                      <ListSubheader
-                                          style={{
-                                              padding: compact ? '2px' : '',
-                                              lineHeight: compact
-                                                  ? '1.2em'
-                                                  : '',
-                                          }}
-                                      >
-                                          {el.name}
-                                      </ListSubheader>
-                                      {React.createElement(
-                                          isStub && !loadAll
-                                              ? DynamicList
-                                              : DynamicListBasic,
-                                          {
-                                              reverse: reverseOrder,
-                                              items: el.items,
-                                              context,
-                                              listUid,
-                                              callbacks,
-                                              itemRemover,
-                                              itemUids: el.items.map(
-                                                  (ell) => ell.uid,
-                                              ),
-                                              itemGetter: _.identity,
-                                              infinite: false,
-                                              buildGraph,
-                                              parId,
-                                              noRemover,
-                                              compact,
-                                              subscribeOptions,
-                                              removeOnEnter,
-                                          },
-                                      )}
-                                  </>
-                              ),
-                          )}
+                        ? React.createElement(isStub && !loadAll ? DynamicList : DynamicListBasic, {
+                              reverse: reverseOrder,
+                              items: procItems,
+                              context,
+                              listUid,
+                              callbacks,
+                              itemRemover,
+                              itemUids: procItems.map((el) => el.uid),
+                              itemGetter,
+                              buildGraph,
+                              parId,
+                              noRemover,
+                              compact,
+                              subscribeOptions,
+                              removeOnEnter,
+                              components,
+                          })
+                        : groupers[groupBy](procItems.map(itemGetter)).map((el: Group) => (
+                              <>
+                                  <ListSubheader
+                                      style={{
+                                          padding: compact ? '2px' : '',
+                                          lineHeight: compact ? '1.2em' : '',
+                                      }}
+                                  >
+                                      {el.name}
+                                  </ListSubheader>
+                                  {React.createElement(isStub && !loadAll ? DynamicList : DynamicListBasic, {
+                                      reverse: reverseOrder,
+                                      items: el.items,
+                                      context,
+                                      listUid,
+                                      callbacks,
+                                      itemRemover,
+                                      itemUids: el.items.map((ell) => ell.uid),
+                                      itemGetter: _.identity,
+                                      infinite: false,
+                                      buildGraph,
+                                      parId,
+                                      noRemover,
+                                      compact,
+                                      subscribeOptions,
+                                      removeOnEnter,
+                                      components,
+                                  })}
+                              </>
+                          ))}
                 </div>
-            </DataContext.Provider>
+            </DataContextWrapper>
         </div>
     );
 };
