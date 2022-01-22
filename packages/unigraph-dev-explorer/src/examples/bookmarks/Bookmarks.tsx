@@ -10,7 +10,7 @@ import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { DynamicViewRenderer } from '../../global.d';
 import { registerDynamicViews, registerQuickAdder, withUnigraphSubscription } from '../../unigraph-react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
-import { openUrl, getComponentFromPage } from '../../utils';
+import { getComponentFromPage } from '../../utils';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
 
 type ABookmark = {
@@ -108,7 +108,7 @@ export const BookmarkItem: DynamicViewRenderer = ({ data, callbacks }) => {
                 >
                     <Link
                         onClick={() => {
-                            openUrl(unpadded.url);
+                            window.open(unpadded.url, '_blank');
                         }}
                         style={{ verticalAlign: 'middle' }}
                     />

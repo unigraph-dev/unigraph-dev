@@ -6,15 +6,16 @@ import { parseTodoObject } from '../todo/parseTodoObject';
 import { NoteEditorContext } from './types';
 import { getParentsAndReferences } from '../../components/ObjectView/backlinksUtils';
 
-export const focusUid = (uid: string, tail?: boolean) => {
+export const focusUid = (obj: any, tail?: boolean) => {
     // console.log("UID " + uid);
     // console.log(document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]);
     // (document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]?.children[0] as any)?.click();
     window.unigraph.getState('global/focused').setValue({
-        uid,
+        uid: obj?.startsWith?.('0x') ? obj : obj.uid,
         caret: window.unigraph.getState('global/focused').value?.caret || 0,
         type: '$/schema/note_block',
         tail: tail || window.unigraph.getState('global/focused').value?.tail,
+        component: obj?.componentId || '',
     });
 };
 
@@ -387,6 +388,18 @@ export const setFocus = (data: any, context: NoteEditorContext, index: number) =
         ?.children[0]?.children[0]?.children[0]?.click();
 };
 
+export const indentChild = (data: any, context: NoteEditorContext, index: number, parent?: number) => {
+    const indenters = window.unigraph.getState(`temp/indentChildren/${data.uid}`);
+    if (!indenters.value) indenters.value = [];
+    indenters.value.push(index);
+    setTimeout(() => {
+        if (indenters.value) {
+            indentChildren(data, context, indenters.value.sort(), parent);
+            indenters.value = undefined;
+        }
+    }, 0);
+};
+
 /**
  * Indents a child node into their last sibling (or a specified element).
  *
@@ -394,44 +407,43 @@ export const setFocus = (data: any, context: NoteEditorContext, index: number) =
  *
  * TODO: This code is very poorly written. We need to change it after we have unigraph object prototypes.
  */
-export const indentChild = (data: any, context: NoteEditorContext, index: number, parent?: number) => {
+export const indentChildren = (data: any, context: NoteEditorContext, index: number[], parent?: number) => {
     const parents = getParents(data);
     if (!data._hide) parents.push({ uid: data.uid });
     removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
-    if (!parent && index !== 0) {
-        parent = index - 1;
+    if (!parent && index[0] !== 0) {
+        parent = index[0] - 1;
     } else if (!parent) {
         return;
     }
     let currSubentity = -1;
-    let isDeleted = false;
+    let isDeleted = 0;
     let parIndex: number | undefined;
-    const newUid: any = { uid: undefined };
+    const newUid: any = [];
     const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
     const newChildren = children?.map((el: any, elindex: any) => {
         if (el?._value?.type?.['unigraph.id'] === '$/schema/subentity') {
             currSubentity++;
-            if (currSubentity === index) {
-                isDeleted = true;
-                newUid.uid = el._value.uid;
-                newUid._value = { uid: el._value._value.uid };
+            if (index.includes(currSubentity)) {
+                isDeleted++;
+                newUid.push({ uid: el._value.uid, _value: { uid: el._value._value.uid } });
                 return undefined;
             }
             if (currSubentity === parent) {
                 parIndex = elindex;
                 return el;
             }
-            if (isDeleted)
+            if (isDeleted > 0)
                 return {
                     uid: el.uid,
-                    _index: { '_value.#i': el._index['_value.#i'] - 1 },
+                    _index: { '_value.#i': el._index['_value.#i'] - isDeleted },
                 };
             return { uid: el.uid };
         }
-        if (isDeleted)
+        if (isDeleted > 0)
             return {
                 uid: el.uid,
-                _index: { '_value.#i': el._index['_value.#i'] - 1 },
+                _index: { '_value.#i': el._index['_value.#i'] - isDeleted },
             };
         return { uid: el.uid };
     });
@@ -450,14 +462,15 @@ export const indentChild = (data: any, context: NoteEditorContext, index: number
                                 ...(getSemanticChildren(newChildren[parIndex]._value._value)?.['_value['] || []).map(
                                     (el: any) => ({ uid: el?.uid }),
                                 ),
-                                {
+                                ...newUid.map((el: any, idx: number) => ({
                                     _index: {
                                         '_value.#i':
-                                            getSemanticChildren(newChildren[parIndex]._value._value)?.['_value[']
-                                                ?.length || 0,
+                                            (getSemanticChildren(newChildren[parIndex as any]._value._value)?.[
+                                                '_value['
+                                            ]?.length || 0) + idx,
                                     }, // always append at bottom
-                                    _value: newUid,
-                                },
+                                    _value: el,
+                                })),
                             ],
                         },
                     },
@@ -571,14 +584,14 @@ export const focusNextDFSNode = (data: any, context: NoteEditorContext, index: n
 export const getLastDFSNode = (data: any, context: NoteEditorContext, index: number) => {
     const orderedNodes = dfs(context.nodesState.value).filter((el) => el.type === '$/schema/note_block');
     const newIndex = orderedNodes.findIndex((el) => el.uid === data.uid) - 1;
-    if (orderedNodes[newIndex] && !orderedNodes[newIndex].root) return orderedNodes[newIndex].uid;
+    if (orderedNodes[newIndex] && !orderedNodes[newIndex].root) return orderedNodes[newIndex];
     return '';
 };
 
 export const getNextDFSNode = (data: any, context: NoteEditorContext, index: number) => {
     const orderedNodes = dfs(context.nodesState.value).filter((el) => el.type === '$/schema/note_block');
     const newIndex = orderedNodes.findIndex((el) => el.uid === data.uid) + 1;
-    if (orderedNodes[newIndex] && !orderedNodes[newIndex].root) return orderedNodes[newIndex].uid;
+    if (orderedNodes[newIndex] && !orderedNodes[newIndex].root) return orderedNodes[newIndex];
     return '';
 };
 
