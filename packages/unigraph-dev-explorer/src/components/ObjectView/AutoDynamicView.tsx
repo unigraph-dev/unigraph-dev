@@ -165,7 +165,7 @@ export function AutoDynamicView({
 
     React.useEffect(() => {
         if (object?.uid?.startsWith('0x') && shouldGetBacklinks && dataContext.parents !== undefined) {
-            console.log(dataContext.getParents(true));
+            // console.log(dataContext.getParents(true));
             const cb = (newBacklinks: any) => {
                 const [pars, refs] = getParentsAndReferences(
                     newBacklinks['~_value'],

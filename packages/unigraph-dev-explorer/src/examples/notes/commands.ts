@@ -382,12 +382,6 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
     return true;
 };
 
-export const setFocus = (data: any, context: NoteEditorContext, index: number) => {
-    context.childrenref.current?.children[index]?.children
-        ?.slice?.(-1)[0]
-        ?.children[0]?.children[0]?.children[0]?.click();
-};
-
 export const indentChild = (data: any, context: NoteEditorContext, index: number, parent?: number) => {
     const indenters = window.unigraph.getState(`temp/indentChildren/${data.uid}`);
     if (!indenters.value) indenters.value = [];
