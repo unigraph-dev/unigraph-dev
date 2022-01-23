@@ -44,7 +44,7 @@ type DataContextType = {
 export const DataContext = React.createContext<DataContextType>({
     contextUid: '0x0',
     contextData: {},
-    parents: undefined,
+    parents: [],
     getParents: () => [],
     expandedChildren: false,
 });

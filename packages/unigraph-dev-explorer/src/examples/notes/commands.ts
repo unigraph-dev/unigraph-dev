@@ -394,7 +394,12 @@ export const indentChild = (data: any, context: NoteEditorContext, index: number
     indenters.value.push(index);
     setTimeout(() => {
         if (indenters.value) {
-            indentChildren(data, context, indenters.value.sort(), parent);
+            indentChildren(
+                data,
+                context,
+                indenters.value.sort((a: any, b: any) => a - b),
+                parent,
+            );
             indenters.value = undefined;
         }
     }, 0);
@@ -501,7 +506,12 @@ export const unindentChild = async (data: any, context: NoteEditorContext, paren
     indenters.value.push(index);
     setTimeout(() => {
         if (indenters.value) {
-            unindentChildren(data, context, parent, indenters.value.sort());
+            unindentChildren(
+                data,
+                context,
+                parent,
+                indenters.value.sort((a: any, b: any) => a - b),
+            );
             indenters.value = undefined;
         }
     }, 0);
