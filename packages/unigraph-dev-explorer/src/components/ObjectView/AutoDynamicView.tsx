@@ -125,7 +125,7 @@ export function AutoDynamicView({
         window.unigraph.getState('global/focused').subscribe(cbfoc);
 
         const viewElRef = viewEl.current;
-        if (window.dragselect && !noContextMenu && !customBoundingBox && viewEl.current)
+        if (window.dragselect && !customBoundingBox && viewEl.current)
             window.dragselect.addSelectables([viewEl.current]);
 
         return function cleanup() {
@@ -330,7 +330,7 @@ export function AutoDynamicView({
                     setTitle: tabContext.setTitle,
                     ...(callbacks || {}),
                     ...(noBacklinks ? { BacklinkComponent } : {}),
-                    ...(window.dragselect && !noContextMenu && customBoundingBox
+                    ...(window.dragselect && customBoundingBox
                         ? {
                               registerBoundingBox: (el: any) => {
                                   el.dataset.component = componentId;

@@ -223,6 +223,10 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             retries = setInterval(() => {
                 connect();
             }, RETRY_CONNECTION_INTERVAL);
+
+            // remove uid leases since they are no longer valid at server
+            caches.uid_lease = [];
+            exhaustedLeases.splice(0, exhaustedLeases.length);
         };
 
         connection.current.onmessage = (ev) => {

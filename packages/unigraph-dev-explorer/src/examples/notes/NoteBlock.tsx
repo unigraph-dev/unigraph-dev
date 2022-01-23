@@ -31,7 +31,7 @@ import { onUnigraphContextMenu } from '../../components/ObjectView/DefaultObject
 import { noteQuery, noteQueryDetailed } from './noteQuery';
 import { getParentsAndReferences } from '../../components/ObjectView/backlinksUtils';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
-import { removeAllPropsFromObj, setCaret, TabContext } from '../../utils';
+import { removeAllPropsFromObj, selectUid, setCaret, TabContext } from '../../utils';
 import { DragandDrop } from '../../components/ObjectView/DragandDrop';
 import { inlineObjectSearch, inlineTextSearch } from '../../components/UnigraphCore/InlineSearchPopup';
 import { htmlToMarkdown } from '../semantic/Markdown';
@@ -229,10 +229,13 @@ function NoteViewPageWrapper({ children, isRoot }: any) {
     return !isRoot ? children : <div style={{ height: '100%', width: '100%', padding: '16px' }}>{children}</div>;
 }
 
-function NoteViewTextWrapper({ children, semanticChildren, isRoot, onContextMenu, callbacks }: any) {
+function NoteViewTextWrapper({ children, semanticChildren, isRoot, onContextMenu, callbacks, isEditing }: any) {
     // console.log(callbacks.BacklinkComponent);
     return (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div
+            style={{ display: 'flex', alignItems: 'center' }}
+            onContextMenu={isRoot || isEditing ? undefined : onContextMenu}
+        >
             {children}
             {semanticChildren}
             {isRoot ? <MoreVert onClick={onContextMenu} style={{ marginLeft: '8px' }} /> : []}
@@ -426,6 +429,7 @@ export function DetailedNoteBlock({
             >
                 <NoteViewTextWrapper
                     isRoot={!isChildren}
+                    isEditing={isEditing}
                     onContextMenu={(event: any) =>
                         onUnigraphContextMenu(event, data, undefined, { ...callbacks, componentId })
                     }
@@ -491,11 +495,6 @@ export function DetailedNoteBlock({
                         {isEditing ? (
                             <Typography
                                 variant={isChildren || callbacks.isEmbed ? 'body1' : 'h4'}
-                                onContextMenu={
-                                    isChildren
-                                        ? undefined
-                                        : (event) => onUnigraphContextMenu(event, data, undefined, callbacks)
-                                }
                                 contentEditable
                                 style={{ outline: '0px solid transparent', minWidth: '16px', wordBreak: 'break-all' }}
                                 suppressContentEditableWarning
@@ -775,6 +774,9 @@ export function DetailedNoteBlock({
                                             // );
                                             requestAnimationFrame(() => {
                                                 if (document.getSelection()?.focusOffset === 0) {
+                                                    if (ev.shiftKey) {
+                                                        selectUid(componentId, false);
+                                                    }
                                                     callbacks['focus-last-dfs-node'](data, editorContext, 0);
                                                 }
                                             });
@@ -787,6 +789,9 @@ export function DetailedNoteBlock({
                                                     (document.getSelection()?.focusOffset || 0) >=
                                                     (textInput.current?.textContent?.trim()?.length || 0)
                                                 ) {
+                                                    if (ev.shiftKey) {
+                                                        selectUid(componentId, false);
+                                                    }
                                                     callbacks['focus-next-dfs-node'](data, editorContext, 0);
                                                 }
                                             });
@@ -908,6 +913,7 @@ export function DetailedNoteBlock({
                                             >
                                                 <AutoDynamicView
                                                     noDrag
+                                                    noContextMenu
                                                     compact
                                                     allowSubentity
                                                     customBoundingBox
