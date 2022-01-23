@@ -30,7 +30,7 @@ import { onUnigraphContextMenu } from '../../components/ObjectView/DefaultObject
 import { noteQuery, noteQueryDetailed } from './noteQuery';
 import { getParentsAndReferences } from '../../components/ObjectView/backlinksUtils';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
-import { removeAllPropsFromObj, selectUid, setCaret, TabContext } from '../../utils';
+import { removeAllPropsFromObj, scrollIntoViewIfNeeded, selectUid, setCaret, TabContext } from '../../utils';
 import { DragandDrop } from '../../components/ObjectView/DragandDrop';
 import { inlineObjectSearch, inlineTextSearch } from '../../components/UnigraphCore/InlineSearchPopup';
 import { htmlToMarkdown } from '../semantic/Markdown';
@@ -313,6 +313,16 @@ export function DetailedNoteBlock({
     };
     const tabContext = React.useContext(TabContext);
 
+    const handlePotentialResize = () => {
+        const listener = () => {
+            scrollIntoViewIfNeeded(textInput.current);
+        };
+        window.addEventListener('resize', listener);
+        setTimeout(() => {
+            window.removeEventListener('resize', listener);
+        }, 1000);
+    };
+
     const commandFn = () => {
         if (edited.current !== true && command) {
             command();
@@ -391,9 +401,7 @@ export function DetailedNoteBlock({
 
     React.useEffect(() => {
         if (focused) {
-            setIsEditing(true);
-            if (isEditing) textInput.current.focus();
-            setTimeout(() => {
+            const setCaretFn = () => {
                 let tail;
                 const focusedState = window.unigraph.getState('global/focused').value;
                 const el = textInput.current?.firstChild || textInput.current;
@@ -403,9 +411,23 @@ export function DetailedNoteBlock({
                     delete focusedState.newData;
                 }
                 setCaret(document, el, tail || focusedState.caret);
-            }, 0);
+            };
+            if (!isEditing) {
+                setIsEditing(true);
+                setTimeout(setCaretFn, 0);
+            } else {
+                textInput.current.focus();
+                setCaretFn();
+                handlePotentialResize();
+            }
         }
     }, [focused]);
+
+    React.useEffect(() => {
+        if (focused) {
+            scrollIntoViewIfNeeded(textInput.current);
+        }
+    }, [data.uid, index, focused]);
 
     React.useEffect(() => {
         if (focused) {
@@ -457,19 +479,15 @@ export function DetailedNoteBlock({
                         onPointerUp={(ev) => {
                             if (!isEditing) {
                                 setIsEditing(true);
-                                const caretPos = Number((ev.target as HTMLElement).getAttribute('markdownPos') || -1);
-                                (ev.target as HTMLElement).removeAttribute('markdownPos');
-                                setTimeout(() => {
-                                    const finalCaretPos =
-                                        caretPos === -1 ? textInput.current?.textContent?.length : caretPos;
-                                    window.unigraph.getState('global/focused').setValue({
-                                        uid: data?.uid,
-                                        caret: finalCaretPos,
-                                        type: '$/schema/note_block',
-                                    });
-                                    setCaret(document, textInput.current.firstChild, finalCaretPos);
-                                }, 0);
                             }
+                            const caretPos = Number((ev.target as HTMLElement).getAttribute('markdownPos') || -1);
+                            (ev.target as HTMLElement).removeAttribute('markdownPos');
+                            const finalCaretPos = caretPos === -1 ? textInput.current?.textContent?.length : caretPos;
+                            window.unigraph.getState('global/focused').setValue({
+                                uid: data?.uid,
+                                caret: finalCaretPos,
+                                type: '$/schema/note_block',
+                            });
                         }}
                         onBlur={(ev) => {
                             setIsEditing(false);
