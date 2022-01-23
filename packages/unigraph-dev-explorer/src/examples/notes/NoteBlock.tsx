@@ -260,6 +260,7 @@ export function DetailedNoteBlock({
     callbacks,
     options,
     isCollapsed,
+    setCollapsed,
     focused,
     index,
     componentId,
@@ -741,7 +742,7 @@ export function DetailedNoteBlock({
                                         if (caret === 0) {
                                             ev.preventDefault();
                                             inputDebounced.current.flush();
-                                            callbacks['focus-last-dfs-node'](data, editorContext, 0, true);
+                                            callbacks['focus-last-dfs-node'](data, editorContext, 0, -1);
                                         }
                                         break;
 
@@ -749,7 +750,7 @@ export function DetailedNoteBlock({
                                         if (caret === getCurrentText().length) {
                                             ev.preventDefault();
                                             inputDebounced.current.flush();
-                                            callbacks['focus-next-dfs-node'](data, editorContext, 0);
+                                            callbacks['focus-next-dfs-node'](data, editorContext, 0, 0);
                                         }
                                         break;
 
@@ -839,6 +840,19 @@ export function DetailedNoteBlock({
                                 'get-semantic-properties': () => data,
                             }}
                         />
+                        <Typography
+                            style={{
+                                display: isEditing || !isCollapsed ? 'none' : '',
+                                marginLeft: '6px',
+                                color: 'gray',
+                                cursor: 'pointer',
+                            }}
+                            onClick={(ev) => {
+                                ev.preventDefault();
+                                ev.stopPropagation();
+                                setCollapsed(false);
+                            }}
+                        >{`(${subentities.length})`}</Typography>
                     </div>
                 </NoteViewTextWrapper>
                 {!isChildren && !callbacks.isEmbed ? (
@@ -955,6 +969,12 @@ export function DetailedNoteBlock({
                                                     attributes={{
                                                         isChildren: true,
                                                         isCollapsed: isCol,
+                                                        setCollapsed: (val: boolean) => {
+                                                            setIsChildrenCollapsed({
+                                                                ...isChildrenCollapsed,
+                                                                [el.uid]: val,
+                                                            });
+                                                        },
                                                     }}
                                                     recursive
                                                     style={
