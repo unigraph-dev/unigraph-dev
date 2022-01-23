@@ -11,14 +11,6 @@ export function InlineSearch() {
     const ctxMenuState: AppState<Partial<SearchPopupState>> = window.unigraph.getState('global/searchPopup');
 
     const [currentAction, setCurrentAction] = React.useState(0);
-    const keyDownRef = React.useRef((ev: any) => {
-        console.log(ev);
-        if (ev.key === 'ArrowDown') {
-            ev.preventDefault();
-            ev.stopPropagation();
-            setCurrentAction(currentAction + 1);
-        }
-    });
 
     const [state, setState] = React.useState(ctxMenuState.value);
     const search = React.useRef(
@@ -160,7 +152,7 @@ export function InlineSearch() {
             >
                 {actionItems.map((el: any, index: number) => (
                     <div
-                        onPointerDown={el[1]}
+                        onClick={el[1]}
                         style={{
                             ...(index === currentAction
                                 ? {

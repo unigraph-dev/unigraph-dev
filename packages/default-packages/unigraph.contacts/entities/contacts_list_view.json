@@ -2,5 +2,5 @@
     "type": { "unigraph.id": "$/schema/view" },
     "env": "react-explorer",
     "name": "Contacts",
-    "view": {"unigraph.id": "$/package/unigraph.contacts/0.0.1/executable/contacts-list-view"}
+    "view": { "unigraph.id": "$/package/unigraph.contacts/0.0.1/executable/contacts-list-view" }
 }

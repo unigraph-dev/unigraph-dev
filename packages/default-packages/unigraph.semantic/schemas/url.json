@@ -2,6 +2,6 @@
     "dgraph.type": "Type",
     "_name": "URL",
     "_definition": {
-        "type": {"unigraph.id": "$/primitive/string"}
+        "type": { "unigraph.id": "$/primitive/string" }
     }
 }

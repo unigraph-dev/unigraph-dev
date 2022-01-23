@@ -1,12 +1,12 @@
 {
-    "type": {"unigraph.id": "$/schema/home_section"},
+    "type": { "unigraph.id": "$/schema/home_section" },
     "view": {
         "name": "Journal",
         "env": "react-explorer",
-        "view": {"unigraph.id": "$/package/unigraph.notes/0.0.1/executable/daily-notes"}
+        "view": { "unigraph.id": "$/package/unigraph.notes/0.0.1/executable/daily-notes" }
     },
     "condition": {
-        "type": {"unigraph.id": "$/schema/executable"},
+        "type": { "unigraph.id": "$/schema/executable" },
         "env": "routine/js",
         "src": "return true;",
         "editable": true

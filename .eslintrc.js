@@ -43,10 +43,7 @@ module.exports = {
             // targeting es module support so file extension is not needed
             'off',
         ],
-        'react/jsx-filename-extension': [
-            'error',
-            { extensions: ['.tsx', '.jsx'] },
-        ],
+        'react/jsx-filename-extension': ['error', { extensions: ['.tsx', '.jsx'] }],
         'react/jsx-props-no-spreading': 'off',
         'react/function-component-definition': 'off',
         'react/prop-types': 'off', // for now, maybe we'll enforce this later

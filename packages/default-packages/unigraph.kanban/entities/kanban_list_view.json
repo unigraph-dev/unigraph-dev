@@ -2,5 +2,5 @@
     "type": { "unigraph.id": "$/schema/view" },
     "env": "react-explorer",
     "name": "Kanbans",
-    "view": {"unigraph.id": "$/package/unigraph.kanban/0.0.1/executable/kanban-list-view"}
+    "view": { "unigraph.id": "$/package/unigraph.kanban/0.0.1/executable/kanban-list-view" }
 }

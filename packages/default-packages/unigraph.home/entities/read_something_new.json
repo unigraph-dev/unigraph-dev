@@ -1,9 +1,9 @@
 {
-    "type": {"unigraph.id": "$/schema/home_section"},
+    "type": { "unigraph.id": "$/schema/home_section" },
     "view": {
         "name": "Read something new",
         "env": "react-explorer",
-        "view": {"unigraph.id": "$/package/unigraph.home/0.0.1/executable/read-something-new"}
+        "view": { "unigraph.id": "$/package/unigraph.home/0.0.1/executable/read-something-new" }
     },
-    "condition": {"unigraph.id": "$/package/unigraph.home/0.0.1/executable/read-something-new-condition"}
+    "condition": { "unigraph.id": "$/package/unigraph.home/0.0.1/executable/read-something-new-condition" }
 }

@@ -9,10 +9,7 @@ return (
                 // Now we load it to the detailed view
                 const htmlUid = data._value.item._value.uid;
                 const ctxUid = data._value.context._value.uid;
-                if (htmlUid)
-                    window.wsnavigator(
-                        `/library/object?uid=${data.uid}&type=${data?.type?.['unigraph.id']}`,
-                    );
+                if (htmlUid) window.wsnavigator(`/library/object?uid=${data.uid}&type=${data?.type?.['unigraph.id']}`);
                 if (callbacks?.removeFromContext) callbacks.removeFromContext();
                 window.unigraph.deleteObject(data.uid);
             }}
@@ -20,9 +17,6 @@ return (
             <p>{data._value.percent['_value.#i']}%</p>
             <p>&gt;&gt;</p>
         </div>
-        <AutoDynamicView
-            object={new UnigraphObject(data._value.context._value)}
-            noClickthrough
-        />
+        <AutoDynamicView object={new UnigraphObject(data._value.context._value)} noClickthrough />
     </div>
 );
