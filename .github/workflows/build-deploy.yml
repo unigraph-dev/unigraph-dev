@@ -47,7 +47,22 @@ jobs:
                       ${{ runner.os }}-build-${{ env.cache-name }}-
                       ${{ runner.os }}-build-
                       ${{ runner.os }}-
+            - name: Make secrets.env.json
+            - run: |
+              echo {
+                "twitter": {
+                  "api_key": "${{secrets.TWITTER_API_KEY}}",
+                  "api_secret_key": "${{secrets.TWITTER_API_SECRET_KEY}}",
+                  "bearer_token": "${{secrets.TWITTER_BEARER_TOKEN}}"
+                },
+                "google": {
+                  "client_id": "${{secrets.GOOGLE_CLIENT_ID}}"
+                  "client_secret": "${{secrets.GOOGLE_CLIENT_SECRET}}"
+                }
+              }
+              > secrets.env.json
 
+            
             - run: mkdir ./dgraph-download
 
             # Gets releases from dgraph
