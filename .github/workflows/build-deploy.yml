@@ -1,5 +1,11 @@
 name: build-deploy
 on:
+    workflow_dispatch:
+        inputs:
+            name:
+                description: 'Person to greet'
+                required: true
+                default: 'Mona the Octocat'
     push:
         paths-ignore:
             - '*.md'
@@ -8,6 +14,7 @@ on:
         paths-ignore:
             - '*.md'
             - 'docs/**'
+
 jobs:
     release-electron:
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
@@ -21,13 +28,13 @@ jobs:
                       electron-arch-overrides: '-c.mac.target.target=dmg -c.mac.target.arch=x64'
                     - os: macos-latest
                       electron-arch-overrides: '-c.mac.target.target=dmg -c.mac.target.arch=arm64'
-
         env:
             USE_HARD_LINKS: false
         defaults:
             run:
                 shell: bash
         steps:
+            - run: echo ${{github.event_name}}
             - name: Checkout code
               uses: actions/checkout@v2
 
@@ -48,21 +55,30 @@ jobs:
                       ${{ runner.os }}-build-
                       ${{ runner.os }}-
             - name: Make secrets.env.json
-            - run: |
-              echo {
-                "twitter": {
-                  "api_key": "${{secrets.TWITTER_API_KEY}}",
-                  "api_secret_key": "${{secrets.TWITTER_API_SECRET_KEY}}",
-                  "bearer_token": "${{secrets.TWITTER_BEARER_TOKEN}}"
-                },
-                "google": {
-                  "client_id": "${{secrets.GOOGLE_CLIENT_ID}}"
-                  "client_secret": "${{secrets.GOOGLE_CLIENT_SECRET}}"
-                }
-              }
-              > secrets.env.json
+              run: >
+                  echo "{
+                    "twitter": {
+                      "api_key": "$TWITTER_API_KEY",
+                      "api_secret_key": "$TWITTER_API_SECRET_KEY",
+                      "bearer_token": "$TWITTER_BEARER_TOKEN"
+                    },
+                    "reddit": {
+                        "client_id": "$REDDIT_CLIENT_ID"
+                    },
+                    "google": {
+                      "client_id": "$GOOGLE_CLIENT_ID"
+                      "client_secret": "$GOOGLE_CLIENT_SECRET"
+                    }
+                  }"
+                  > secrets.env.json
+              env:
+                  TWITTER_API_KEY: ${{secrets.TWITTER_API_KEY}}
+                  TWITTER_API_SECRET_KEY: ${{secrets.TWITTER_API_SECRET_KEY}}
+                  TWITTER_BEARER_TOKEN: ${{secrets.TWITTER_BEARER_TOKEN}}
+                  REDDIT_CLIENT_ID: ${{secrets.REDDIT_CLIENT_ID}}
+                  GOOGLE_CLIENT_ID: ${{secrets.GOOGLE_CLIENT_ID}}
+                  GOOGLE_CLIENT_SECRET: ${{secrets.GOOGLE_CLIENT_SECRET}}
 
-            
             - run: mkdir ./dgraph-download
 
             # Gets releases from dgraph
@@ -92,7 +108,9 @@ jobs:
                   repository: 'TheExGenesis/dgraph'
                   latest: true
                   fileName: 'dgraph_darwin_amd64'
+                  token: '${{secrets.XIQ_UNIGRAPH_UNIGRAPH_BUILD}}'
                   out-file-path: ./dgraph-download
+
             - run: mv ./dgraph-download/dgraph_darwin_amd64 ./dgraph-download/dgraph
               if: runner.os == 'macOS'
 
@@ -100,10 +118,16 @@ jobs:
               if: runner.os != 'Windows'
 
             # Builds app
-            - run: yarn install
+            - run: yarn install  --network-timeout 100000
 
             - run: yarn prepare-electron
 
+            # - name: Prepare for app notarization
+            #   if: startsWith(matrix.os, 'macos')
+            #   # Import Apple API key for app notarization on macOS
+            #   run: |
+            #       mkdir -p ~/private_keys/
+            #       echo '${{ secrets.apple_api_key }}' > ~/private_keys/AuthKey_${{ secrets.apple_api_key_id }}.p8
             - name: Build and Publish Electron App
               uses: samuelmeuli/action-electron-builder@master
               with:
@@ -115,8 +139,10 @@ jobs:
                   release: ${{ startsWith(github.ref, 'refs/tags/v') }}
                   package_root: 'packages/unigraph-dev-electron'
                   # macOS code signing certificate
-              #     mac_certs: ${{ secrets.mac_certs }}
-              #     mac_certs_password: ${{ secrets.mac_certs_password }}
+                  # mac_certs: ${{ secrets.mac_certs }}
+                  # mac_certs_password: ${{ secrets.mac_certs_password }}
+                  args: -c.publish.publishAutoUpdate=false ${{ matrix.electron-arch-overrides }}
+
               # env:
               #     # macOS notarization API key
               #     API_KEY_ID: ${{ secrets.mac_notarization_api_key_id }}
