@@ -288,14 +288,14 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
             true,
         );
         window.unigraph.getState('global/focused').setValue({
-            uid: getLastDFSNode({ uid: children[delAt]._value._value.uid }, context, index),
+            uid: getLastDFSNode({ uid: children[delAt]._value._value.uid }, context, index).uid,
             caret: oldCaret || 0,
             type: '$/schema/note_block',
             newData: newText,
         });
     } else if (
         index > 0 &&
-        getLastDFSNode({ uid: children[delAt]._value._value.uid }, context, index) ===
+        getLastDFSNode({ uid: children[delAt]._value._value.uid }, context, index).uid ===
             children[prevIndex]?._value?._value?.uid
     ) {
         // Merge with previous
@@ -356,7 +356,7 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
             true,
         );
         window.unigraph.getState('global/focused').setValue({
-            uid: getLastDFSNode({ uid: children[delAt]._value._value.uid }, context, index),
+            uid: getLastDFSNode({ uid: children[delAt]._value._value.uid }, context, index).uid,
             caret: oldText.length || 0,
             type: '$/schema/note_block',
             newData: newText,
@@ -613,14 +613,14 @@ export const getLastDFSNode = (data: any, context: NoteEditorContext, index: num
     const orderedNodes = dfs(context.nodesState.value).filter((el) => el.type === '$/schema/note_block');
     const newIndex = orderedNodes.findIndex((el) => el.uid === data.uid) - 1;
     if (orderedNodes[newIndex] && !orderedNodes[newIndex].root) return orderedNodes[newIndex];
-    return '';
+    return { uid: '' };
 };
 
 export const getNextDFSNode = (data: any, context: NoteEditorContext, index: number) => {
     const orderedNodes = dfs(context.nodesState.value).filter((el) => el.type === '$/schema/note_block');
     const newIndex = orderedNodes.findIndex((el) => el.uid === data.uid) + 1;
     if (orderedNodes[newIndex] && !orderedNodes[newIndex].root) return orderedNodes[newIndex];
-    return '';
+    return { uid: '' };
 };
 
 export const convertChildToTodo = async (data: any, context: NoteEditorContext, index: number) => {
