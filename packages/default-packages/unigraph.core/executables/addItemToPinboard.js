@@ -5,18 +5,18 @@
 }
 */
 
-let destUidOrName = context.params.where;
+const destUidOrName = context.params.where;
 let sourceUid = context.params.item;
 let destUid;
 
 if (destUidOrName.startsWith('$/entity')) {
     // Named entity
-    destUid = unigraph.getNamespaceMapUid(destUidOrName)
+    destUid = unigraph.getNamespaceMapUid(destUidOrName);
 } else if (destUidOrName.startsWith('0x')) {
     // UID
     destUid = destUidOrName;
 } else {
-    throw new Error("Destination is not valid - should either be a named entity or an UID.")
+    throw new Error('Destination is not valid - should either be a named entity or an UID.');
 }
 
 if (!sourceUid.startsWith?.('0x') && sourceUid.type) {
@@ -28,21 +28,29 @@ if (!sourceUid.startsWith?.('0x') && sourceUid.type) {
 }
 
 // Actually update the pinboard
-await unigraph.updateObject(destUid, {
-    _value: {
+await unigraph.updateObject(
+    destUid,
+    {
         _value: {
-            children: {
-                "_value[": [{
-                    _index: {"_value.#i": 0}, // We don't sort by index because this is a pinboard
-                    _pos: context.params.pos,
-                    _value: {
-                        "type": {"unigraph.id": "$/schema/subentity"},
-                        _value: {
-                            uid: sourceUid
-                        }
-                    }
-                }]
-            }
-        }
-    }
-}, true, false, context.params.subsId || undefined)
+            _value: {
+                children: {
+                    '_value[': [
+                        {
+                            _index: { '_value.#i': 0 }, // We don't sort by index because this is a pinboard
+                            _pos: context.params.pos,
+                            _value: {
+                                type: { 'unigraph.id': '$/schema/subentity' },
+                                _value: {
+                                    uid: sourceUid,
+                                },
+                            },
+                        },
+                    ],
+                },
+            },
+        },
+    },
+    true,
+    false,
+    context.params.subsId || undefined,
+);

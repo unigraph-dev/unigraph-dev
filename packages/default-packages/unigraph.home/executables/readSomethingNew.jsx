@@ -28,19 +28,7 @@ React.useEffect(() => {
 
 return (
     <div>
-        <Typography>
-            You have
-            {' '}
-            {count['$/entity/inbox'].toString()}
-            {' '}
-            items in your inbox.
-        </Typography>
-        <Typography>
-            You have
-            {' '}
-            {count['$/entity/read_later'].toString()}
-            {' '}
-            items in your read later feed.
-        </Typography>
+        <Typography>You have {count['$/entity/inbox'].toString()} items in your inbox.</Typography>
+        <Typography>You have {count['$/entity/read_later'].toString()} items in your read later feed.</Typography>
     </div>
 );

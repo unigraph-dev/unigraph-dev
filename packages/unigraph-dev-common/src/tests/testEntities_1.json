@@ -10,9 +10,7 @@
                 "_indexedBy": {
                     "unigraph.id": "$/primitive/string"
                 },
-                "_indexes": [
-                    "name"
-                ]
+                "_indexes": ["name"]
             },
             "_properties": [
                 {
@@ -60,9 +58,7 @@
                 "_indexedBy": {
                     "unigraph.id": "$/primitive/string"
                 },
-                "_indexes": [
-                    "name"
-                ]
+                "_indexes": ["name"]
             },
             "_properties": [
                 {
@@ -109,9 +105,7 @@
                         ]
                     }
                 },
-                "_indexes": [
-                    "name"
-                ]
+                "_indexes": ["name"]
             },
             "_properties": [
                 {

@@ -1,8 +1,9 @@
 // TODO: Use twitter-like UX in views (RT, reply, etc) + include RTs
-const {uid, access_token, access_token_secret, id, last_id_fetched} = context.params;
+const { uid, access_token, access_token_secret, id, last_id_fetched } = context.params;
 const OAuth = require('oauth');
-const appTokenKey = unigraph.getSecret("twitter", "api_key");
-const appTokenSecret = unigraph.getSecret("twitter", "api_secret_key");
+
+const appTokenKey = unigraph.getSecret('twitter', 'api_key');
+const appTokenSecret = unigraph.getSecret('twitter', 'api_secret_key');
 
 const oauth = new OAuth.OAuth(
     'https://api.twitter.com/oauth/request_token',
@@ -11,86 +12,112 @@ const oauth = new OAuth.OAuth(
     appTokenSecret,
     '1.0',
     'http://127.0.0.1:4001/callback?key=twitter',
-    'HMAC-SHA1'
+    'HMAC-SHA1',
 );
 
 const getSemanticEntities = async (el) => {
     const children = [];
-    el.entities?.media?.forEach(el => {
+    el.entities?.media?.forEach((el) => {
         children.push({
-            key: el.url || "about:blank",
-            value: unigraph.buildUnigraphEntity(el.media_url, '$/schema/icon_url')
-        })
+            key: el.url || 'about:blank',
+            value: unigraph.buildUnigraphEntity(el.media_url, '$/schema/icon_url'),
+        });
     });
-    await Promise.all(el.entities?.urls?.map(async el => {
-        const url = el.unwound?.url || el.expanded_url;
-        const uids = await unigraph.runExecutable('$/executable/add-bookmark', {url: url, context: {_hide: true}});
-        if (uids?.[0]) children.push({
-            key: el.url,
-            value: {
-                uid: uids[0]
-            }
-        }); else console.log(url);
-    }));
-    return children.map((el, index) => {return {
-            '_index': {'_value.#i': index},
-            '_key': el.key,
-            '_value': {
-                'dgraph.type': ['Entity'],
-                'type': {'unigraph.id': '$/schema/subentity'},
-                '_hide': true,
-                '_value': el.value
-            }
-    }});
-}
-
-const objects = await (new Promise((resolve, reject) => oauth.get(`https://api.twitter.com/1.1/lists/statuses.json?list_id=${id}&tweet_mode=extended&count=100&since_id=${last_id_fetched}`, access_token, access_token_secret, async (err, result, response) => {
-    if (!result) {
-        resolve([]);
-    } else {
-        const resObjects = JSON.parse(result);
-        const unigraphObjects = await Promise.all(resObjects?.map?.(async (el, index) => {
-            if (el.truncated) console.log("Truncated"); 
-            const entity = {
-                _updatedAt: (new Date(el['created_at'])).toISOString(),
-                text: {
-                    type: {"unigraph.id": "$/schema/markdown"},
-                    _value: el['full_text']
-                },
-                from_user: {
-                    twitter_id: el.user['id_str'],
-                    name: el.user['name'],
-                    username: el.user['screen_name'],
-                    description: {
-                        type: {"unigraph.id": "$/schema/markdown"},
-                        _value: el.user['description'] || "No description"
+    await Promise.all(
+        el.entities?.urls?.map(async (el) => {
+            const url = el.unwound?.url || el.expanded_url;
+            const uids = await unigraph.runExecutable('$/executable/add-bookmark', {
+                url,
+                context: { _hide: true },
+            });
+            if (uids?.[0])
+                children.push({
+                    key: el.url,
+                    value: {
+                        uid: uids[0],
                     },
-                    profile_image: el.user['profile_image_url_https']
-                },
-                twitter_id: el['id_str'],
-                children: [{uid: "0x123" + index}] // prevent duplicate placehoder UIDs
-            };
-            const padded = unigraph.buildUnigraphEntity(entity, '$/schema/tweet', {globalStates: {nextUid: 100000 * index}});
-            padded['_value']['children']['_value['] = await getSemanticEntities(el);
-            return padded;
-        })) || [];
-        resolve(unigraphObjects);
-    }
-})))
+                });
+            else console.log(url);
+        }),
+    );
+    return children.map((el, index) => {
+        return {
+            _index: { '_value.#i': index },
+            _key: el.key,
+            _value: {
+                'dgraph.type': ['Entity'],
+                type: { 'unigraph.id': '$/schema/subentity' },
+                _hide: true,
+                _value: el.value,
+            },
+        };
+    });
+};
+
+const objects = await new Promise((resolve, reject) =>
+    oauth.get(
+        `https://api.twitter.com/1.1/lists/statuses.json?list_id=${id}&tweet_mode=extended&count=100&since_id=${last_id_fetched}`,
+        access_token,
+        access_token_secret,
+        async (err, result, response) => {
+            if (!result) {
+                resolve([]);
+            } else {
+                const resObjects = JSON.parse(result);
+                const unigraphObjects =
+                    (await Promise.all(
+                        resObjects?.map?.(async (el, index) => {
+                            if (el.truncated) console.log('Truncated');
+                            const entity = {
+                                _updatedAt: new Date(el.created_at).toISOString(),
+                                text: {
+                                    type: { 'unigraph.id': '$/schema/markdown' },
+                                    _value: el.full_text,
+                                },
+                                from_user: {
+                                    twitter_id: el.user.id_str,
+                                    name: el.user.name,
+                                    username: el.user.screen_name,
+                                    description: {
+                                        type: { 'unigraph.id': '$/schema/markdown' },
+                                        _value: el.user.description || 'No description',
+                                    },
+                                    profile_image: el.user.profile_image_url_https,
+                                },
+                                twitter_id: el.id_str,
+                                children: [{ uid: `0x123${index}` }], // prevent duplicate placehoder UIDs
+                            };
+                            const padded = unigraph.buildUnigraphEntity(entity, '$/schema/tweet', {
+                                globalStates: { nextUid: 100000 * index },
+                            });
+                            padded._value.children['_value['] = await getSemanticEntities(el);
+                            return padded;
+                        }),
+                    )) || [];
+                resolve(unigraphObjects);
+            }
+        },
+    ),
+);
 
 const count = objects.length;
 const uids = await unigraph.addObject(objects, '$/schema/tweet', true);
 const inbox_els = uids.slice(0, count);
 
-if (objects?.[0]?.['_value']?.['twitter_id']?.['_value.%']) {
-    await unigraph.updateObject(uid, {
-        _value: {
-            last_id_fetched: {
-                "_value.%": objects[0]['_value']['twitter_id']['_value.%']
-            }
-        }
-    }, true, false)
+if (objects?.[0]?._value?.twitter_id?.['_value.%']) {
+    await unigraph.updateObject(
+        uid,
+        {
+            _value: {
+                last_id_fetched: {
+                    '_value.%': objects[0]._value.twitter_id['_value.%'],
+                },
+            },
+        },
+        true,
+        false,
+    );
 }
 
-await unigraph.runExecutable("$/executable/add-item-to-list", {where: "$/entity/inbox", item: inbox_els.reverse()});
-//setTimeout(() => unigraph.addNotification({name: "Tweets added", from: "unigraph.twitter", content: "Added " + count + " items.", actions: []}), 1000); 
+await unigraph.runExecutable('$/executable/add-item-to-list', { where: '$/entity/inbox', item: inbox_els.reverse() });
+// setTimeout(() => unigraph.addNotification({name: "Tweets added", from: "unigraph.twitter", content: "Added " + count + " items.", actions: []}), 1000);

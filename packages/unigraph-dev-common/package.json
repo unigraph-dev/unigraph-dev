@@ -1,31 +1,31 @@
 {
-  "name": "unigraph-dev-common",
-  "version": "0.0.1",
-  "description": "Common libraries and files for unigraph-dev",
-  "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc",
-    "prepare": "tsc"
-  },
-  "devDependencies": {
-    "typescript": "^4.2.2"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/unigraph-dev/unigraph-dev.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/unigraph-dev/unigraph-dev/issues"
-  },
-  "homepage": "https://github.com/unigraph-dev/unigraph-dev#readme",
-  "peerDependencies": {
-    "react": "^17.0.1"
-  },
-  "dependencies": {
-    "json-to-graphql-query": "^2.0.0"
-  }
+    "name": "unigraph-dev-common",
+    "version": "0.0.1",
+    "description": "Common libraries and files for unigraph-dev",
+    "main": "./lib/index.js",
+    "types": "./lib/index.d.ts",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "build": "tsc",
+        "prepare": "tsc"
+    },
+    "devDependencies": {
+        "typescript": "^4.2.2"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/unigraph-dev/unigraph-dev.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/unigraph-dev/unigraph-dev/issues"
+    },
+    "homepage": "https://github.com/unigraph-dev/unigraph-dev#readme",
+    "peerDependencies": {
+        "react": "^17.0.1"
+    },
+    "dependencies": {
+        "json-to-graphql-query": "^2.0.0"
+    }
 }

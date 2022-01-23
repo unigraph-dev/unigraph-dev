@@ -3,32 +3,38 @@
         "name": "Hello world",
         "done": false,
         "semantic_properties": {
-            "tags": [{
-                "type": {
-                    "unigraph.id": "$/schema/tag"
-                },
-                "name": "unigraph",
-                "color": "#b8a2c8"
-            }]
+            "tags": [
+                {
+                    "type": {
+                        "unigraph.id": "$/schema/tag"
+                    },
+                    "name": "unigraph",
+                    "color": "#b8a2c8"
+                }
+            ]
         }
     },
     "typealias-todo-object-disallow": {
         "name": "Hello world",
         "done": false,
         "semantic_properties": {
-            "tags": [{
-                "name": "unigraph",
-                "color": "#b8a2c8"
-            }]
+            "tags": [
+                {
+                    "name": "unigraph",
+                    "color": "#b8a2c8"
+                }
+            ]
         }
     },
     "typealias-todo-object-uidref": {
         "name": "Hello world",
         "done": false,
         "semantic_properties": {
-            "tags": [{
-                "uid": "0x1"
-            }]
+            "tags": [
+                {
+                    "uid": "0x1"
+                }
+            ]
         }
     },
     "$/schema/semantic_properties": {
@@ -45,9 +51,7 @@
                     "uid": "0x16",
                     "unigraph.id": "$/primitive/string"
                 },
-                "_indexes": [
-                    "name"
-                ]
+                "_indexes": ["name"]
             },
             "_properties": [
                 {
@@ -65,9 +69,7 @@
                                 "uid": "0x1d",
                                 "type": {
                                     "uid": "0x15",
-                                    "dgraph.type": [
-                                        "Type"
-                                    ],
+                                    "dgraph.type": ["Type"],
                                     "unigraph.id": "$/schema/note"
                                 }
                             }
@@ -91,9 +93,7 @@
                 }
             ]
         },
-        "dgraph.type": [
-            "Type"
-        ],
+        "dgraph.type": ["Type"],
         "unigraph.id": "$/schema/semantic_properties"
     }
 }

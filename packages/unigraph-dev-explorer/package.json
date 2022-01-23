@@ -159,36 +159,95 @@
       "^.+\\.css$": "<rootDir>/config/jest/cssTransform.js",
       "^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)": "<rootDir>/config/jest/fileTransform.js"
     },
-    "transformIgnorePatterns": [
-      "[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs|cjs|ts|tsx)$",
-      "^.+\\.module\\.(css|sass|scss)$"
-    ],
-    "modulePaths": [],
-    "moduleNameMapper": {
-      "^react-native$": "react-native-web",
-      "^.+\\.module\\.(css|sass|scss)$": "identity-obj-proxy"
+    "devDependencies": {
+        "@testing-library/jest-dom": "^4.2.4",
+        "@testing-library/react": "^9.3.2",
+        "@testing-library/user-event": "^7.1.2",
+        "@types/jest": "^24.0.0",
+        "@types/jquery": "^3.5.5",
+        "@types/lodash": "^4.14.165",
+        "@types/node": "^12.0.0",
+        "@types/react": "^17.0.1",
+        "@types/react-big-calendar": "^0.36.2",
+        "@types/react-dom": "^17.0.1",
+        "@types/react-router-dom": "^5.1.6",
+        "@types/react-virtualized": "^9.21.13",
+        "@types/turndown": "^5.0.1",
+        "@types/uuid": "^8.3.0",
+        "raw-loader": "^4.0.2"
     },
-    "moduleFileExtensions": [
-      "web.js",
-      "js",
-      "web.ts",
-      "ts",
-      "web.tsx",
-      "tsx",
-      "json",
-      "web.jsx",
-      "jsx",
-      "node"
-    ],
-    "watchPlugins": [
-      "jest-watch-typeahead/filename",
-      "jest-watch-typeahead/testname"
-    ],
-    "resetMocks": true
-  },
-  "babel": {
-    "presets": [
-      "react-app"
-    ]
-  }
+    "scripts": {
+        "start": "node scripts/start.js",
+        "build": "node scripts/build.js",
+        "test": "node scripts/test.js",
+        "prepare": "node scripts/build.js --lib"
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    },
+    "homepage": "./",
+    "jest": {
+        "roots": [
+            "<rootDir>/src"
+        ],
+        "collectCoverageFrom": [
+            "src/**/*.{js,jsx,ts,tsx}",
+            "!src/**/*.d.ts"
+        ],
+        "setupFiles": [
+            "react-app-polyfill/jsdom"
+        ],
+        "setupFilesAfterEnv": [],
+        "testMatch": [
+            "<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}",
+            "<rootDir>/src/**/*.{spec,test}.{js,jsx,ts,tsx}"
+        ],
+        "testEnvironment": "jsdom",
+        "testRunner": "/home/sophiaxu/unigraph-dev/node_modules/jest-circus/runner.js",
+        "transform": {
+            "^.+\\.(js|jsx|mjs|cjs|ts|tsx)$": "<rootDir>/config/jest/babelTransform.js",
+            "^.+\\.css$": "<rootDir>/config/jest/cssTransform.js",
+            "^(?!.*\\.(js|jsx|mjs|cjs|ts|tsx|css|json)$)": "<rootDir>/config/jest/fileTransform.js"
+        },
+        "transformIgnorePatterns": [
+            "[/\\\\]node_modules[/\\\\].+\\.(js|jsx|mjs|cjs|ts|tsx)$",
+            "^.+\\.module\\.(css|sass|scss)$"
+        ],
+        "modulePaths": [],
+        "moduleNameMapper": {
+            "^react-native$": "react-native-web",
+            "^.+\\.module\\.(css|sass|scss)$": "identity-obj-proxy"
+        },
+        "moduleFileExtensions": [
+            "web.js",
+            "js",
+            "web.ts",
+            "ts",
+            "web.tsx",
+            "tsx",
+            "json",
+            "web.jsx",
+            "jsx",
+            "node"
+        ],
+        "watchPlugins": [
+            "jest-watch-typeahead/filename",
+            "jest-watch-typeahead/testname"
+        ],
+        "resetMocks": true
+    },
+    "babel": {
+        "presets": [
+            "react-app"
+        ]
+    }
 }
