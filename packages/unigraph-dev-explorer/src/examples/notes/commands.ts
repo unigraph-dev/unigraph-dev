@@ -496,6 +496,18 @@ export const indentChildren = (data: any, context: NoteEditorContext, index: num
 };
 
 export const unindentChild = async (data: any, context: NoteEditorContext, parent: number, index: number) => {
+    const indenters = window.unigraph.getState(`temp/unindentChildren/${data.uid}/${parent}`);
+    if (!indenters.value) indenters.value = [];
+    indenters.value.push(index);
+    setTimeout(() => {
+        if (indenters.value) {
+            unindentChildren(data, context, parent, indenters.value.sort());
+            indenters.value = undefined;
+        }
+    }, 0);
+};
+
+export const unindentChildren = async (data: any, context: NoteEditorContext, parent: number, index: number[]) => {
     const parents = getParents(data);
     if (!data._hide) parents.push({ uid: data.uid });
     removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
@@ -509,28 +521,34 @@ export const unindentChild = async (data: any, context: NoteEditorContext, paren
         if (curr?._value?.type?.['unigraph.id'] === '$/schema/subentity' && ++currSubentity === parent) {
             isCompleted = true;
             let currChildSubentity = -1;
-            const childIsCompleted = false;
-            let targetChild: any = null;
+            let childIsCompleted = 0;
+            const targetChild: any[] = [];
             const childChildren = getSemanticChildren(curr._value._value)?.['_value['].sort(byElementIndex);
             const newChildChildren = childChildren.reduce((cprev: any[], ccurr: any) => {
-                if (ccurr?._value?.type?.['unigraph.id'] === '$/schema/subentity' && ++currChildSubentity === index) {
-                    targetChild = { uid: ccurr.uid };
+                if (
+                    ccurr?._value?.type?.['unigraph.id'] === '$/schema/subentity' &&
+                    index.includes(++currChildSubentity)
+                ) {
+                    targetChild.push({
+                        uid: ccurr.uid,
+                        _index: { '_value.#i': curr._index['_value.#i'] + targetChild.length + 1 },
+                    });
                     delUidChild = ccurr.uid;
+                    childIsCompleted += 1;
                     return cprev;
                 }
-                if (childIsCompleted)
+                if (childIsCompleted > 0)
                     return [
                         ...cprev,
                         {
                             uid: ccurr.uid,
                             _index: {
-                                '_value.#i': ccurr._index['_value.#i'] + 1,
+                                '_value.#i': ccurr._index['_value.#i'] - childIsCompleted,
                             },
                         },
                     ];
                 return [...cprev, { uid: ccurr.uid }];
             }, []);
-            targetChild._index = { '_value.#i': curr._index['_value.#i'] + 1 };
             const newParent = {
                 uid: curr.uid,
                 _value: {
@@ -547,14 +565,14 @@ export const unindentChild = async (data: any, context: NoteEditorContext, paren
                 },
             };
             delUidPar = curr._value._value._value.children.uid;
-            return [...prev, newParent, targetChild];
+            return [...prev, newParent, ...targetChild];
         }
         if (isCompleted)
             return [
                 ...prev,
                 {
                     uid: curr.uid,
-                    _index: { '_value.#i': curr._index['_value.#i'] + 1 },
+                    _index: { '_value.#i': curr._index['_value.#i'] + index.length },
                 },
             ];
         return [...prev, { uid: curr.uid }];
