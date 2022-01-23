@@ -161,8 +161,6 @@ function initSelect() {
     if (!isMobile()) {
         window.dragselect = new DragSelect({ autoScrollSpeed: 0.0001, draggability: false });
         window.dragselect.subscribe('callback', ({ items, event }: any) => {
-            event.stopPropagation();
-            event.preventDefault();
             const distance = window.dragselect.getCursorPositionDifference();
             const available = items
                 .map((el: any) => {
@@ -179,16 +177,25 @@ function initSelect() {
                 if (_.intersection(parents, available).length > 0) return false;
                 return true;
             });
-            if (Math.abs(distance.x) > 10 && Math.abs(distance.y) > 10 && !isMultiSelectKeyPressed(event))
+            if (
+                Math.abs(distance.x) > 5 &&
+                Math.abs(distance.y) > 5 &&
+                !isMultiSelectKeyPressed(event) &&
+                document.body.classList.contains('in-multiselect')
+            )
                 window.unigraph.getState('global/selected').setValue(selectedUids);
             else if (!isMultiSelectKeyPressed(event)) window.unigraph.getState('global/selected').setValue([]);
             document.body.classList.remove('in-multiselect');
         });
-        window.dragselect.subscribe('predragstart', ({ items, item, event }: any) => {
-            if (!window.unigraph.getState('global/focused').value.uid) {
+        window.dragselect.subscribe('dragmove', ({ items, item, event }: any) => {
+            const distance = window.dragselect.getCursorPositionDifference();
+            if (
+                Math.abs(distance.x) > 5 &&
+                Math.abs(distance.y) > 5 &&
+                (document.getSelection()?.type === 'Caret' || items.length > 1)
+            ) {
                 document.body.classList.add('in-multiselect');
-            } else {
-                window.dragselect.break();
+                if (document.getSelection()?.type !== 'Caret') document.getSelection()?.removeAllRanges();
             }
         });
     }

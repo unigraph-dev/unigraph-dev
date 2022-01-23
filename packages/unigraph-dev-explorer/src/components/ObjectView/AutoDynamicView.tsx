@@ -6,18 +6,9 @@ import { useDrag, useDrop } from 'react-dnd';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useSwipeable } from 'react-swipeable';
 import { buildGraph, UnigraphObject, getRandomInt, getRandomId } from 'unigraph-dev-common/lib/utils/utils';
-import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { AutoDynamicViewProps } from '../../types/ObjectView.d';
 import { subscribeToBacklinks } from '../../unigraph-react';
-import {
-    DataContext,
-    DataContextWrapper,
-    getParents,
-    isMobile,
-    isMultiSelectKeyPressed,
-    selectUid,
-    TabContext,
-} from '../../utils';
+import { DataContext, DataContextWrapper, isMobile, isMultiSelectKeyPressed, selectUid, TabContext } from '../../utils';
 import { getParentsAndReferences } from './backlinksUtils';
 import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import { StringObjectViewer } from './BasicObjectViews';
@@ -271,7 +262,7 @@ export function AutoDynamicView({
                 { clientX: eventData.absX, clientY: eventData.absY } as any,
                 getObject(),
                 contextEntity,
-                callbacks,
+                { ...callbacks, componentId },
             ),
     });
 
