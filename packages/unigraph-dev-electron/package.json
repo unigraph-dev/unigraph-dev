@@ -12,7 +12,8 @@
     "homepage": "./",
     "devDependencies": {
         "electron": "13.1.7",
-        "electron-builder": "22.14"
+        "electron-builder": "22.14",
+        "electron-builder-notarize": "^1.4.0"
     },
     "dependencies": {
         "@babel/core": "^7.14.8",
@@ -25,6 +26,8 @@
     },
     "electronVersion": "^13.1.7",
     "build": {
+        "generateUpdatesFilesForAllChannels": true,
+        "afterSign": "electron-builder-notarize",
         "mac": {
             "icon": "./public/icons/unigraph.icns",
             "category": "public.app-category.utilities",
@@ -43,7 +46,10 @@
                         "arm64"
                     ]
                 }
-            ]
+            ],
+            "hardenedRuntime": true,
+            "entitlements": "./build/entitlements.mac.plist",
+            "entitlementsInherit": "./build/entitlements.mac.plist"
         },
         "win": {
             "icon": "./public/icons/unigraph.png"
@@ -66,7 +72,10 @@
         "asar": false,
         "asarUnpack": [
             "dgraph/*"
-        ]
+        ],
+        "publish": {
+            "provider": "github"
+        }
     },
     "repository": {
         "type": "git",

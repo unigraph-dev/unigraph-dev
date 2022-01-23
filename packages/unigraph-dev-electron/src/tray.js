@@ -1,12 +1,12 @@
-const { ipcMain } = require("electron");
+const { ipcMain } = require('electron');
 
 const createTrayMenu = (onNewTemplate) => {
-    let mainWindow = undefined;
-    let todayWindow = undefined;
+    let mainWindow;
+    let todayWindow;
 
-    let menuTemplateMain = [
-        {label: 'Show main window'},
-        {label: 'Show today window', click: () => todayWindow.show()}
+    const menuTemplateMain = [
+        { label: 'Show main window' },
+        { label: 'Show today window', click: () => todayWindow.show() },
     ];
     let menuTemplateFavorites = [];
 
@@ -14,31 +14,40 @@ const createTrayMenu = (onNewTemplate) => {
 
     function setTemplate() {
         menuTemplate = [
-            {label: 'Unigraph', enabled: false},
+            { label: 'Unigraph', enabled: false },
             ...menuTemplateMain,
-            {type: 'separator'},
-            {label: 'Favorites', enabled: false},
-            ...menuTemplateFavorites
+            { type: 'separator' },
+            { label: 'Favorites', enabled: false },
+            ...menuTemplateFavorites,
         ];
-        console.log(menuTemplate)
+        console.log(menuTemplate);
         onNewTemplate(menuTemplate);
-    };
+    }
 
     setTemplate();
-    
+
     return {
         getTemplate: () => menuTemplate,
         setFavorites: (newFav) => {
-            menuTemplateFavorites = newFav.map(el => {return {
-                click: () => {mainWindow.webContents.send('newTab', el); mainWindow.show()},
-                type: "normal",
-                label: el.name
-            }});
+            menuTemplateFavorites = newFav.map((el) => {
+                return {
+                    click: () => {
+                        mainWindow.webContents.send('newTab', el);
+                        mainWindow.show();
+                    },
+                    type: 'normal',
+                    label: el.name,
+                };
+            });
             setTemplate();
         },
-        setMainWindow: (window) => {mainWindow = window},
-        setTodayWindow: (window) => {todayWindow = window}
-    }
-}
+        setMainWindow: (window) => {
+            mainWindow = window;
+        },
+        setTodayWindow: (window) => {
+            todayWindow = window;
+        },
+    };
+};
 
-module.exports = { createTrayMenu }
+module.exports = { createTrayMenu };

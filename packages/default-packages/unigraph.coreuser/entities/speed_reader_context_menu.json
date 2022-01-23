@@ -1,7 +1,7 @@
 {
     "type": { "unigraph.id": "$/schema/context_menu_item" },
     "name": "Open in speed reader view",
-    "item_type": {"unigraph.id": "$/schema/html"},
+    "item_type": { "unigraph.id": "$/schema/html" },
     "view": {
         "name": "Speed reader",
         "env": "react-explorer",
@@ -9,5 +9,4 @@
             "unigraph.id": "$/package/unigraph.coreuser/0.0.1/executable/speed-reader"
         }
     }
-
 }
