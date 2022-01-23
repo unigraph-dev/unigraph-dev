@@ -44,7 +44,7 @@ type DataContextType = {
 export const DataContext = React.createContext<DataContextType>({
     contextUid: '0x0',
     contextData: {},
-    parents: undefined,
+    parents: [],
     getParents: () => [],
     expandedChildren: false,
 });
@@ -515,7 +515,9 @@ export function getParents(elem: any) {
     while (elem.parentNode && elem.parentNode.nodeName.toLowerCase() != 'body') {
         elem = elem.parentNode;
         if (!elem) return parents;
-        if (elem.id?.startsWith?.('object-view-')) parents.push(elem.id.slice(12));
+        if (elem.dataset?.component) {
+            parents.push(elem.dataset?.component);
+        }
     }
     return parents;
 }
