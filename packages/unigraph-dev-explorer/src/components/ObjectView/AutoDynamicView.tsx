@@ -125,7 +125,7 @@ export function AutoDynamicView({
         window.unigraph.getState('global/focused').subscribe(cbfoc);
 
         const viewElRef = viewEl.current;
-        if (window.dragselect && !noContextMenu && !customBoundingBox && viewEl.current)
+        if (window.dragselect && !customBoundingBox && viewEl.current)
             window.dragselect.addSelectables([viewEl.current]);
 
         return function cleanup() {
@@ -165,7 +165,7 @@ export function AutoDynamicView({
 
     React.useEffect(() => {
         if (object?.uid?.startsWith('0x') && shouldGetBacklinks && dataContext.parents !== undefined) {
-            console.log(dataContext.getParents(true));
+            // console.log(dataContext.getParents(true));
             const cb = (newBacklinks: any) => {
                 const [pars, refs] = getParentsAndReferences(
                     newBacklinks['~_value'],
@@ -330,7 +330,7 @@ export function AutoDynamicView({
                     setTitle: tabContext.setTitle,
                     ...(callbacks || {}),
                     ...(noBacklinks ? { BacklinkComponent } : {}),
-                    ...(window.dragselect && !noContextMenu && customBoundingBox
+                    ...(window.dragselect && customBoundingBox
                         ? {
                               registerBoundingBox: (el: any) => {
                                   el.dataset.component = componentId;

@@ -9,6 +9,7 @@ import TurndownService from 'turndown';
 import rehypeRaw from 'rehype-raw';
 import { DynamicViewRenderer } from '../../global.d';
 import remarkWikilink from './wikilink';
+import { getCaret } from '../../utils';
 
 export function htmlToMarkdown(html: string) {
     TurndownService.prototype.escape = (input: string) => input;
@@ -25,12 +26,11 @@ const compFactory = (name: string, { node, inline, className, children, ...props
         children,
         contentEditable: true,
         suppressContentEditableWarning: true,
-        onPointerUp: (event: MouseEvent) => {
+        onPointerUp: (event: PointerEvent) => {
             if (!(event.target as HTMLElement).getAttribute('markdownPos')) {
-                console.log(props.sourcePosition, window.getSelection());
                 (event.target as HTMLElement).setAttribute(
                     'markdownPos',
-                    String((props.sourcePosition?.start.column || 0) - 1 + (window.getSelection()?.anchorOffset || 0)),
+                    String((props.sourcePosition?.start.column || 0) - 1 + (getCaret(event) || 0)),
                 );
             }
         },
