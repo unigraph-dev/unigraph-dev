@@ -101,6 +101,23 @@ export const setCaret = (document: Document, element: any, pos: number, length?:
     sel?.addRange(range);
 };
 
+export const getCaret = (ev: PointerEvent) => {
+    if (document.caretRangeFromPoint) {
+        return document.caretRangeFromPoint(ev.clientX, ev.clientY)?.startOffset;
+    }
+    return window.getSelection()?.anchorOffset;
+};
+
+export function scrollIntoViewIfNeeded(target: Element) {
+    if (target.getBoundingClientRect().bottom > window.innerHeight - 33) {
+        target.scrollIntoView(false);
+    }
+
+    if (target.getBoundingClientRect().top < 0) {
+        target.scrollIntoView();
+    }
+}
+
 export const removeAllPropsFromObj = function (obj: any, propsToRemove: any, maxLevel?: any) {
     if (typeof maxLevel !== 'number') maxLevel = 100;
     for (const prop in obj) {
