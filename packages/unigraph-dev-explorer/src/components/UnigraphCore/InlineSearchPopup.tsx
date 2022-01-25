@@ -18,7 +18,7 @@ export function InlineSearch() {
             if (key !== undefined && key.length > 1) {
                 window.unigraph
                     .getSearchResults(parseQuery(key as any) as any, 'indexes', 2, {
-                        limit: -500,
+                        limit: 500,
                         noPrimitives: true,
                         hideHidden: ctxMenuState.value.hideHidden,
                     })
@@ -31,7 +31,7 @@ export function InlineSearch() {
                             }))
                             .filter((el: any) => el.name);
                         if (window.unigraph.getState('global/searchPopup').value.search === key)
-                            setSearchResults(results.reverse());
+                            setSearchResults(results);
                     });
             }
         }, 500),

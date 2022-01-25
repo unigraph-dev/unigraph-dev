@@ -385,7 +385,7 @@ export function DetailedNoteBlock({
         return function cleanup() {
             inputDebounced.current.flush();
         };
-    }, [data]);
+    }, [JSON.stringify(subentities.map((el: any) => el.uid).sort()), data.uid, componentId]);
 
     React.useEffect(() => {
         const dataText = data.get('text').as('primitive');
@@ -397,7 +397,7 @@ export function DetailedNoteBlock({
         } else if ((getCurrentText() === dataText && edited.current) || getCurrentText() === '') {
             resetEdited();
         }
-    }, [data, isEditing]);
+    }, [data.get('text').as('primitive'), isEditing]);
 
     React.useEffect(() => {
         if (focused) {
@@ -441,7 +441,7 @@ export function DetailedNoteBlock({
                 unindentChild: callbacks['unindent-child-in-parent'],
             });
         }
-    }, [data, focused]);
+    }, [data.get('text').as('primitive'), focused]);
 
     React.useEffect(commandFn, [command]);
 

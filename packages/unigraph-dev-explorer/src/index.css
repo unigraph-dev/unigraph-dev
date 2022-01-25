@@ -17,9 +17,9 @@ span.wikilink:hover {
   text-decoration: underline;
 }
 
-[contenteditable], p {
-  -webkit-user-select: auto;
-  user-select: all;
+[contenteditable] {
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 .showOnHover {

@@ -1,6 +1,7 @@
 import { FormControlLabel, Switch, TextField } from '@material-ui/core';
 import _ from 'lodash';
 import React from 'react';
+import { getDynamicViews } from '../../unigraph-react';
 import { DynamicObjectListView } from '../ObjectView/DynamicObjectListView';
 
 export const parseQuery = (queryText: string) => {
@@ -16,6 +17,8 @@ export const parseQuery = (queryText: string) => {
     const uids = currText.match(uidRegex) || [];
     finalQuery.push(...uids.map((tag) => ({ method: 'uid', value: tag.slice(4).trim() })));
     currText = currText.replace(uidRegex, '');
+
+    // finalQuery.push(...getDynamicViews().map((type: string) => ({ method: 'type', value: type })));
 
     return [{ method: 'fulltext', value: currText }, ...finalQuery];
 };
@@ -74,7 +77,7 @@ export function UnigraphSearch({ id }: any) {
                         })
                         .then((res) => {
                             // setResults(res.results.reverse());
-                            setEntities(res.entities.reverse());
+                            setEntities(res.entities);
                             setResponse(true);
                         });
                 } else {
