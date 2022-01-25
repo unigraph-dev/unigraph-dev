@@ -574,66 +574,74 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                         setSelectedTab={setCurrentTab}
                                     />
                                 </AccordionSummary>
-                                <AccordionDetails>
-                                    <List>
-                                        <ListItem>
-                                            <Typography>Group items by</Typography>
-                                            <Select
-                                                value={groupBy}
-                                                onChange={(ev) => {
-                                                    setGroupBy(ev.target.value as string);
+                                {optionsOpen ? (
+                                    <AccordionDetails>
+                                        <List>
+                                            <ListItem>
+                                                <Typography>Group items by</Typography>
+                                                <Select
+                                                    value={groupBy}
+                                                    onChange={(ev) => {
+                                                        setGroupBy(ev.target.value as string);
+                                                    }}
+                                                    style={{ marginLeft: '24px' }}
+                                                    displayEmpty
+                                                >
+                                                    <MenuItem value="">None</MenuItem>
+                                                    {Object.keys(groupers).map((el) => (
+                                                        <MenuItem value={el}>{el}</MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </ListItem>
+                                            <ListItem>
+                                                <FormControlLabel
+                                                    control={
+                                                        <Switch
+                                                            checked={reverseOrder}
+                                                            onChange={() => setReverseOrder(!reverseOrder)}
+                                                            name="moveToInbox"
+                                                        />
+                                                    }
+                                                    label="Latest items on top"
+                                                />
+                                            </ListItem>
+                                            <ListItem>
+                                                <Autocomplete
+                                                    multiple
+                                                    value={filtersUsed}
+                                                    onChange={(event, newValue) => {
+                                                        setFiltersUsed(newValue);
+                                                    }}
+                                                    id="filter-selector"
+                                                    options={totalFilters.map((el) => el.id)}
+                                                    style={{ width: 300 }}
+                                                    renderInput={(params) => (
+                                                        <TextField
+                                                            {...params}
+                                                            label="Filter presets"
+                                                            variant="outlined"
+                                                        />
+                                                    )}
+                                                />
+                                            </ListItem>
+                                            <ListItem
+                                                style={{
+                                                    display: context?.uid && !noRemover ? '' : 'none',
                                                 }}
-                                                style={{ marginLeft: '24px' }}
-                                                displayEmpty
                                             >
-                                                <MenuItem value="">None</MenuItem>
-                                                {Object.keys(groupers).map((el) => (
-                                                    <MenuItem value={el}>{el}</MenuItem>
-                                                ))}
-                                            </Select>
-                                        </ListItem>
-                                        <ListItem>
-                                            <FormControlLabel
-                                                control={
-                                                    <Switch
-                                                        checked={reverseOrder}
-                                                        onChange={() => setReverseOrder(!reverseOrder)}
-                                                        name="moveToInbox"
-                                                    />
-                                                }
-                                                label="Latest items on top"
-                                            />
-                                        </ListItem>
-                                        <ListItem>
-                                            <Autocomplete
-                                                multiple
-                                                value={filtersUsed}
-                                                onChange={(event, newValue) => {
-                                                    setFiltersUsed(newValue);
-                                                }}
-                                                id="filter-selector"
-                                                options={totalFilters.map((el) => el.id)}
-                                                style={{ width: 300 }}
-                                                renderInput={(params) => (
-                                                    <TextField {...params} label="Filter presets" variant="outlined" />
-                                                )}
-                                            />
-                                        </ListItem>
-                                        <ListItem
-                                            style={{
-                                                display: context?.uid && !noRemover ? '' : 'none',
-                                            }}
-                                        >
-                                            <Button
-                                                onClick={() => {
-                                                    window.wsnavigator(`/graph?uid=${context.uid}`);
-                                                }}
-                                            >
-                                                Show Graph view
-                                            </Button>
-                                        </ListItem>
-                                    </List>
-                                </AccordionDetails>
+                                                <Button
+                                                    onClick={() => {
+                                                        window.wsnavigator(`/graph?uid=${context.uid}`);
+                                                    }}
+                                                >
+                                                    Show Graph view
+                                                </Button>
+                                            </ListItem>
+                                        </List>
+                                    </AccordionDetails>
+                                ) : (
+                                    []
+                                )}
                             </Accordion>
                             <IconButton
                                 onClick={() => itemRemover(procItems.map((el, idx) => itemGetter(el).uid))}

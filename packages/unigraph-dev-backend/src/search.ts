@@ -1,12 +1,23 @@
 /* eslint-disable max-len */
-const getQueryHead = (qual: string, filter: string, showHidden: boolean) =>
-    `result(${qual}) @filter(${filter} type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) ${
+const getQueryHead = (qual: string, options: string, filter: string, showHidden: boolean) =>
+    `result(${qual}${options}) @filter(${filter} type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) ${
         showHidden ? '' : 'AND (NOT eq(<_hide>, true))'
     })`;
 
 const resQueries = {
-    indexes: (qual: string, filter: string, showHidden: boolean, _: string) => `${getQueryHead(
+    indexes: (qual: string, options: string, filter: string, showHidden: boolean, _: string) => `var${getQueryHead(
         qual,
+        '',
+        filter,
+        showHidden,
+    )} {incoming as sum(val(incoming2))
+        <unigraph.origin> @filter(type(Entity)) {
+          incoming2 as count(<unigraph.origin>) @filter(type(Entity) AND uid(uhops0, uhops1))
+        }
+    }
+    ${getQueryHead(
+        `${qual}, orderdesc: val(incoming), orderdesc: _updatedAt`,
+        options,
         `${filter} AND has(<unigraph.indexes>)`,
         showHidden,
     )} {
@@ -21,23 +32,36 @@ const resQueries = {
             uid expand(_userpredicate_) { uid expand(_userpredicate_) { uid expand(_userpredicate_) } } } } }
         }
     }`,
-    uids: (qual: string, filter: string, showHidden: boolean, _: string) => `${getQueryHead(qual, filter, showHidden)} {
-        uid
-    }`,
-    metadata: (qual: string, filter: string, showHidden: boolean, _: string) => `${getQueryHead(
+    uids: (qual: string, options: string, filter: string, showHidden: boolean, _: string) => `${getQueryHead(
         qual,
+        options,
         filter,
         showHidden,
     )} {
         uid
+    }`,
+    metadata: (qual: string, options: string, filter: string, showHidden: boolean, _: string) => `var${getQueryHead(
+        qual,
+        '',
+        filter,
+        showHidden,
+    )} {incoming as sum(val(incoming2))
+        <unigraph.origin> @filter(type(Entity)) {
+          incoming2 as count(<unigraph.origin>) @filter(type(Entity) AND uid(uhops0, uhops1))
+        }
+    }
+    ${getQueryHead(`${qual}, orderdesc: val(incoming), orderdesc: _updatedAt`, options, filter, showHidden)} {
+        uid
         type {
             unigraph.id
         }
+        score : val(incoming)
     }`,
-    custom: (qual: string, filter: string, showHidden: boolean, body: string) =>
-        `${getQueryHead(qual, filter, showHidden)} ${body}`,
-    default: (qual: string, filter: string, showHidden: boolean, _: string) => `${getQueryHead(
+    custom: (qual: string, options: string, filter: string, showHidden: boolean, body: string) =>
+        `${getQueryHead(qual, options, filter, showHidden)} ${body}`,
+    default: (qual: string, options: string, filter: string, showHidden: boolean, _: string) => `${getQueryHead(
         qual,
+        options,
         filter,
         showHidden,
     )} @recurse(depth: 15) {
@@ -82,7 +106,8 @@ export const makeSearchQuery = (
         }`);
     }
     const resultQuery = resQueries[display || 'default'](
-        `func: uid(${getQualUids(hops)})${getQualFromOptions(searchOptions)}`,
+        `func: uid(${getQualUids(hops)})`,
+        getQualFromOptions(searchOptions),
         queryString[2],
         searchOptions.hideHidden === false,
         searchOptions.body,
@@ -101,7 +126,7 @@ export const makeSearchQuery = (
         ${qhops.join('\n')}
         ${resultQuery}
     }`;
-    // console.log(fq)
+    console.log(fq);
     return fq;
 };
 

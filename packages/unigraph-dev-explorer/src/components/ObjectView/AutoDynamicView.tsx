@@ -157,12 +157,6 @@ export function AutoDynamicView({
         };
     }, [shortcuts]);
 
-    if (getSubentities(object)?.length > 0) {
-        callbacks!.showSubentities = (show?: boolean) => {
-            setShowSubentities(show === undefined ? !showSubentities : show);
-        };
-    }
-
     React.useEffect(() => {
         if (object?.uid?.startsWith('0x') && shouldGetBacklinks && dataContext.parents !== undefined) {
             // console.log(dataContext.getParents(true));
@@ -190,7 +184,7 @@ export function AutoDynamicView({
             };
         }
         return () => {};
-    }, [object?.uid, shouldGetBacklinks, DynamicViews, dataContext]);
+    }, [object?.uid, shouldGetBacklinks, DynamicViews, JSON.stringify(dataContext?.getParents(true)?.sort())]);
 
     React.useEffect(() => {
         const newSubs = getRandomInt();
@@ -285,33 +279,36 @@ export function AutoDynamicView({
             if (isMobile() && !noContextMenu) handlers.ref(domElement);
             viewEl.current = domElement;
         },
-        [isDragging, drag, callbacks],
+        [isDragging, drag],
     );
 
-    const BacklinkComponent = (
-        <div
-            style={{
-                display:
-                    shouldGetBacklinks &&
-                    dataContext.parents !== undefined &&
-                    (backlinks?.[1]?.length || (!noParents && backlinks?.[0]?.length > 0))
-                        ? ''
-                        : 'none',
-                marginLeft: 'auto',
-                background: 'lightgray',
-                padding: '2px 6px',
-                borderRadius: '6px',
-                whiteSpace: 'nowrap',
-                cursor: 'pointer',
-            }}
-            onClick={(ev) => {
-                ev.stopPropagation();
-                ev.preventDefault();
-                window.wsnavigator(`/library/backlink?uid=${object?.uid}`);
-            }}
-        >
-            {(noParents ? 0 : backlinks?.[0]?.length || 0) + (backlinks?.[1]?.length || 0)}
-        </div>
+    const BacklinkComponent = React.useMemo(
+        () => (
+            <div
+                style={{
+                    display:
+                        shouldGetBacklinks &&
+                        dataContext.parents !== undefined &&
+                        (backlinks?.[1]?.length || (!noParents && backlinks?.[0]?.length > 0))
+                            ? ''
+                            : 'none',
+                    marginLeft: 'auto',
+                    background: 'lightgray',
+                    padding: '2px 6px',
+                    borderRadius: '6px',
+                    whiteSpace: 'nowrap',
+                    cursor: 'pointer',
+                }}
+                onClick={(ev) => {
+                    ev.stopPropagation();
+                    ev.preventDefault();
+                    window.wsnavigator(`/library/backlink?uid=${object?.uid}`);
+                }}
+            >
+                {(noParents ? 0 : backlinks?.[0]?.length || 0) + (backlinks?.[1]?.length || 0)}
+            </div>
+        ),
+        [noParents, backlinks[0]?.length, backlinks[1]?.length, dataContext.parents === undefined, shouldGetBacklinks],
     );
 
     const innerEl = React.useMemo(() => {
@@ -362,7 +359,6 @@ export function AutoDynamicView({
     }, [
         isRecursion,
         object,
-        object?.uid,
         callbacks,
         attributes,
         DynamicViews,
