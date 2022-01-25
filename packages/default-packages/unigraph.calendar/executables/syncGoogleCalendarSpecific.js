@@ -2,12 +2,20 @@ const calUid = context.params.uid;
 const { calendar } = context;
 const cal = await unigraph.getObject(calUid);
 
-const { RRule } = require('rrule');
+const { RRule, rrulestr } = require('rrule');
 const { DateTime } = require('luxon');
+const Sugar = require('sugar');
+
+const rrulestrFixed = (rrule, options = {}) => {
+    let timeStr = '';
+    if (options.dtstart && !rrule.includes('DTSTART')) {
+        timeStr = `DTSTART:${new Sugar.Date(options.dtstart).format('{yyyy}{MM}{dd}T{HH}{mm}{ss}Z').raw}\n`;
+    }
+    return rrulestr(timeStr + rrule, options);
+};
 
 // Full sync: fetch 50 events per page until exhausted all events
 // If no sync token, perform full sync
-
 const sync = async (syncToken) => {
     let hasNext = true;
     let nextPageToken;
@@ -30,13 +38,11 @@ const sync = async (syncToken) => {
 };
 syncToken = cal._value?.sync_token?.['_value.%'] || undefined;
 const { items, nextSyncToken } = await sync(syncToken);
-// console.log(items[items.length-1])
 
 const parseRecurrence = (start, end, rrule, timezone) => {
     const startDate = new Date(start);
     const endDate = new Date(end);
-    const options = RRule.parseString(rrule);
-    options.dtstart = new Date(
+    const startDateUTC = new Date(
         Date.UTC(
             startDate.getFullYear(),
             startDate.getMonth(),
@@ -46,9 +52,10 @@ const parseRecurrence = (start, end, rrule, timezone) => {
             startDate.getSeconds(),
         ),
     );
-    const rule = new RRule(options);
+    // const rule = new RRule(options);
+    const ruleOrSet = rrulestrFixed(rrule, { dtstart: startDateUTC });
     const diff = endDate.getTime() - startDate.getTime();
-    const utcStarts = rule.all().map((date) => {
+    const utcStarts = ruleOrSet.all().map((date) => {
         return {
             start: DateTime.fromJSDate(date).toUTC().setZone(timezone, { keepLocalTime: true }).toJSDate().toJSON(),
             end: DateTime.fromJSDate(date)
@@ -101,7 +108,7 @@ for (let i = 0; i < items.length; ++i) {
                 const frames = parseRecurrence(
                     ev.start.dateTime || new Date(ev.start.date).toJSON(),
                     ev.end.dateTime || toEod(new Date(ev.end.date)).toJSON(),
-                    ev.recurrence[0],
+                    ev.recurrence.join('\n'),
                     ev.start.timeZone,
                 );
                 const uid = (await unigraph.getQueries([queryFromEventId(ev.id)]))?.[0]?.[0]?.uid;
