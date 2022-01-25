@@ -67,7 +67,7 @@ export const DataContextWrapper = ({ children, contextUid, contextData, parents,
                 ];
             },
         };
-    }, [contextUid, contextData, viewType, expandedChildren, JSON.stringify((parents || []).sort?.())]);
+    }, [contextUid, contextData?.uid, viewType, expandedChildren, JSON.stringify((parents || []).sort?.())]);
 
     return <DataContext.Provider value={dataContext}>{children}</DataContext.Provider>;
 };

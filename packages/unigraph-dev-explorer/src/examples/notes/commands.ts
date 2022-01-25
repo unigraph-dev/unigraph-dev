@@ -100,8 +100,8 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
     if (!data._hide) parents.push({ uid: data.uid });
     let currSubentity = -1;
     let isInserted = false;
-    let targetUid = '';
     removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
+    let toDelete: any = [];
     const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
     const newChildren = children?.reduce((prev: any[], el: any, elindex: any) => {
         if (el?._value?.type?.['unigraph.id'] === '$/schema/subentity' && ++currSubentity === index) {
@@ -129,7 +129,6 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
                     _value: splittedEntity,
                 },
             };
-            targetUid = el._value._value.uid;
             // console.log(el)
             el._index['_value.#i'] = elindex + 1;
             el._value._hide = true;
@@ -154,6 +153,10 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
                         uid: ell.uid,
                         _index: { '_value.#i': idx },
                     }));
+                if (upchildren.length) {
+                    // re-create references in old block
+                    toDelete = [oldChildren.uid, upchildren.map((ell: any) => ell.uid), el._value._value.uid];
+                }
                 // console.log(oldChildren);
                 _.merge(newel, {
                     _value: {
@@ -186,6 +189,8 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
         true,
     );
     window.unigraph.touch(parents.map((el) => el.uid));
+    if (toDelete.length)
+        window.unigraph.deleteItemFromArray(toDelete[0], toDelete[1], toDelete[2], context.callbacks.subsId);
 };
 
 export const unsplitChild = async (data: any, context: NoteEditorContext, index: number, currString: string) => {

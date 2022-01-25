@@ -171,11 +171,10 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
     }, [
         data['_value.%'],
         JSON.stringify(
-            callbacks?.['get-semantic-properties']?.()
-                ?.map?.((el: any) => el._value)
-                .sort(),
+            (callbacks?.['get-semantic-properties']?.()?._value?.children?.['_value[']?.sort() || [])?.map?.(
+                (el: any) => el?._key,
+            ),
         ),
     ]);
-
     return MarkdownComponent;
 };
