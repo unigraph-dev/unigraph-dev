@@ -206,7 +206,7 @@ export function ParentsAndReferences({ data }: any) {
                 loadAll
                 components={{
                     '$/schema/note_block': {
-                        view: ReferenceNoteView,
+                        view: NoChildrenReferenceNoteView,
                         query: noteQueryDetailed,
                         noClickthrough: true,
                         noSubentities: true,
@@ -413,6 +413,7 @@ export function DetailedNoteBlock({
                 setCaret(document, el, tail || focusedState.caret);
             };
             if (!isEditing) {
+                console.log('yas');
                 setIsEditing(true);
                 setTimeout(setCaretFn, 0);
             } else {
@@ -487,6 +488,7 @@ export function DetailedNoteBlock({
                                 uid: data?.uid,
                                 caret: finalCaretPos,
                                 type: '$/schema/note_block',
+                                componentId,
                             });
                         }}
                         onBlur={(ev) => {
@@ -1051,7 +1053,7 @@ export const getSubentities = (data: any) => {
     return [subentities, otherChildren];
 };
 
-export const ReferenceNoteView = ({ data, callbacks }: any) => {
+export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
     const [subentities, otherChildren] = getSubentities(data);
 
     const [pathNames, setPathNames] = React.useState([]);
@@ -1068,7 +1070,7 @@ export const ReferenceNoteView = ({ data, callbacks }: any) => {
             refinedPath
                 .map((el: any) => new UnigraphObject(el)?.get('text')?.as('primitive'))
                 .filter(Boolean)
-                .slice(0, -2),
+                .slice(0, noChildren ? undefined : -2),
         );
     }, []);
 
@@ -1104,25 +1106,29 @@ export const ReferenceNoteView = ({ data, callbacks }: any) => {
                 </Typography>
                 <Typography style={{ color: 'gray' }}>{pathNames.join(' > ')}</Typography>
                 <div style={{ marginLeft: '16px' }}>
-                    <OutlineComponent isChildren>
-                        <AutoDynamicView
-                            object={refObject}
-                            noClickthrough
-                            noSubentities
-                            components={{
-                                '$/schema/note_block': {
-                                    view: DetailedNoteBlock,
-                                    query: noteQuery,
-                                },
-                                '$/schema/view': {
-                                    view: ViewViewDetailed,
-                                },
-                            }}
-                            attributes={{
-                                isChildren: true,
-                            }}
-                        />
-                    </OutlineComponent>
+                    {noChildren ? (
+                        []
+                    ) : (
+                        <OutlineComponent isChildren>
+                            <AutoDynamicView
+                                object={refObject}
+                                noClickthrough
+                                noSubentities
+                                components={{
+                                    '$/schema/note_block': {
+                                        view: DetailedNoteBlock,
+                                        query: noteQuery,
+                                    },
+                                    '$/schema/view': {
+                                        view: ViewViewDetailed,
+                                    },
+                                }}
+                                attributes={{
+                                    isChildren: true,
+                                }}
+                            />
+                        </OutlineComponent>
+                    )}
                 </div>
             </div>
             <div>
@@ -1133,3 +1139,7 @@ export const ReferenceNoteView = ({ data, callbacks }: any) => {
         </div>
     );
 };
+
+export const NoChildrenReferenceNoteView = ({ data, callbacks }: any) => (
+    <ReferenceNoteView data={data} callbacks={callbacks} noChildren />
+);
