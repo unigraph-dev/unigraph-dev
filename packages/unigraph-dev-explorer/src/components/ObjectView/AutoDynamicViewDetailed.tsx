@@ -53,7 +53,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
             else setIsFocused(false);
 
             return function cleanup() {
-                window.unigraph.getState('registry/dynamicViewDetailed').unsubscribe(DVD);
+                window.unigraph.getState('registry/dynamicViewDetailed').unsubscribe(cbDVD);
                 if (hasFocus) {
                     const focused = window.unigraph.getState('global/focused');
                     focused.setValue({ ...focused.value, component: '' });
