@@ -211,6 +211,7 @@ export function ParentsAndReferences({ data }: any) {
                         noClickthrough: true,
                         noSubentities: true,
                         noContextMenu: true,
+                        noBacklinks: true,
                     },
                 }}
             />
@@ -228,6 +229,7 @@ export function ParentsAndReferences({ data }: any) {
                         noClickthrough: true,
                         noSubentities: true,
                         noContextMenu: true,
+                        noBacklinks: true,
                     },
                 }}
             />
@@ -1043,21 +1045,42 @@ export const getSubentities = (data: any) => {
 export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
     const [subentities, otherChildren] = getSubentities(data);
 
-    const [pathNames, setPathNames] = React.useState([]);
-    const [refObject, setRefObject] = React.useState({});
+    const [pathNames, setPathNames] = React.useState<any[]>([]);
+    const [refObjects, setRefObjects] = React.useState([{}]);
 
     React.useEffect(() => {
         removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
-        const [targetObj, path] = findUid(data, callbacks?.context?.uid);
-        const refinedPath = path.filter(
-            (el: any) => !['$/schema/subentity', '$/schema/interface/semantic'].includes(el?.type?.['unigraph.id']),
-        );
-        setRefObject(refinedPath[refinedPath.length - 2]);
+        let targetObj = data;
+        const paths = [];
+        let its = 0;
+        while (its < 1000) {
+            let path;
+            its += 1;
+            [targetObj, path] = findUid(data, callbacks?.context?.uid);
+            if (targetObj?.uid) delete targetObj.uid;
+            else break;
+            paths.push(path);
+        }
+        const refinedPaths = paths
+            .map((path) =>
+                path.filter(
+                    (el: any) =>
+                        !['$/schema/subentity', '$/schema/interface/semantic'].includes(el?.type?.['unigraph.id']),
+                ),
+            )
+            .filter(
+                (path) =>
+                    path.filter((el: any) => el?.type?.['unigraph.id'] === '$/schema/note_block' && el?._hide !== true)
+                        .length <= 2,
+            );
+        setRefObjects(refinedPaths.map((refinedPath) => refinedPath[refinedPath.length - 2]));
         setPathNames(
-            refinedPath
-                .map((el: any) => new UnigraphObject(el)?.get('text')?.as('primitive'))
-                .filter(Boolean)
-                .slice(0, noChildren ? undefined : -2),
+            refinedPaths.map((refinedPath: any) =>
+                refinedPath
+                    .map((el: any) => new UnigraphObject(el)?.get('text')?.as('primitive'))
+                    .filter(Boolean)
+                    .slice(0, noChildren ? undefined : -2),
+            ),
         );
     }, []);
 
@@ -1091,32 +1114,36 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
                         }}
                     />
                 </Typography>
-                <Typography style={{ color: 'gray' }}>{pathNames.join(' > ')}</Typography>
-                <div style={{ marginLeft: '16px' }}>
-                    {noChildren ? (
-                        []
-                    ) : (
-                        <OutlineComponent isChildren>
-                            <AutoDynamicView
-                                object={refObject}
-                                noClickthrough
-                                noSubentities
-                                components={{
-                                    '$/schema/note_block': {
-                                        view: DetailedNoteBlock,
-                                        query: noteQuery,
-                                    },
-                                    '$/schema/view': {
-                                        view: ViewViewDetailed,
-                                    },
-                                }}
-                                attributes={{
-                                    isChildren: true,
-                                }}
-                            />
-                        </OutlineComponent>
-                    )}
-                </div>
+                {refObjects?.map((refObject: any, index: number) => (
+                    <div style={{ marginBottom: '16px' }}>
+                        <Typography style={{ color: 'gray' }}>{pathNames[index]?.join(' > ')}</Typography>
+                        <div style={{ marginLeft: '16px' }}>
+                            {noChildren ? (
+                                []
+                            ) : (
+                                <OutlineComponent isChildren>
+                                    <AutoDynamicView
+                                        object={refObject}
+                                        noClickthrough
+                                        noSubentities
+                                        components={{
+                                            '$/schema/note_block': {
+                                                view: DetailedNoteBlock,
+                                                query: noteQuery,
+                                            },
+                                            '$/schema/view': {
+                                                view: ViewViewDetailed,
+                                            },
+                                        }}
+                                        attributes={{
+                                            isChildren: true,
+                                        }}
+                                    />
+                                </OutlineComponent>
+                            )}
+                        </div>
+                    </div>
+                ))}
             </div>
             <div>
                 {otherChildren.map((el: any) => (

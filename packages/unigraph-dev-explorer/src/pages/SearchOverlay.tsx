@@ -249,7 +249,7 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
                         })
                         .then((res) => {
                             // setResults(res.results.reverse());
-                            setEntities(res.entities.reverse());
+                            setEntities(res.entities);
                             setResponse(true);
                         });
                 } else {

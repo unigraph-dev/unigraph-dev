@@ -95,7 +95,8 @@ const RSSItem: DynamicViewRenderer = ({ data, callbacks }) => {
                                     ev.stopPropagation();
                                     ev.preventDefault();
                                     window.open(unpadded.item_data?.url, '_blank');
-                                    if (callbacks?.removeFromContext) callbacks.removeFromContext();
+                                    if (callbacks?.removeFromContext && callbacks?.removeOnEnter)
+                                        callbacks.removeFromContext();
                                 }}
                             />
                             <Link
@@ -131,7 +132,8 @@ const RSSItem: DynamicViewRenderer = ({ data, callbacks }) => {
                                                     type: data?.type?.['unigraph.id'],
                                                 }),
                                             );
-                                        if (callbacks?.removeFromContext) callbacks.removeFromContext();
+                                        if (callbacks?.removeFromContext && callbacks?.removeOnEnter)
+                                            callbacks.removeFromContext();
                                     }}
                                 />
                             ) : (
