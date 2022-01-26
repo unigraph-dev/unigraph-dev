@@ -480,7 +480,7 @@ export default async function startServer(client: DgraphClient) {
 
         "update_spo": function (event: EventUpdateSPO, ws: IWebsocket) {
             localApi.updateTriplets(event.objects).then((_: any) => {
-                callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches, ofUpdate: event.id})
+                callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches, subIds: event.subIds, ofUpdate: event.id})
                 ws.send(makeResponse(event, true))
             }).catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
         },

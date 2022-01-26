@@ -422,9 +422,9 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
         deleteObject: (uid, permanent?) => {
             sendEvent(connection, 'delete_unigraph_object', { uid, permanent });
         },
-        updateTriplets: (objects) => {
+        updateTriplets: (objects, subIds?) => {
             // TODO: This is very useless, should be removed once we get something better
-            sendEvent(connection, 'update_spo', { objects });
+            sendEvent(connection, 'update_spo', { objects, subIds });
         },
         updateObject: (uid, newObject, upsert = true, pad = true, subIds, origin, eagarlyUpdate) =>
             new Promise((resolve, reject) => {

@@ -61,7 +61,8 @@ declare type EventCreateUnigraphObject = {
 declare type EventUpdateSPO = {
     type: 'event',
     event: 'update_spo',
-    objects: string[]
+    objects: string[],
+    subIds: any[] | any,
     id: number
 }
 

@@ -85,7 +85,6 @@ export function InlineSearch() {
                     <Typography variant="body1">{el.name}</Typography>
                 </div>,
                 (ev: any) => {
-                    console.log('Yo');
                     ev.preventDefault();
                     ev.stopPropagation();
                     state.onSelected?.(el.name, el.uid);
@@ -95,13 +94,16 @@ export function InlineSearch() {
     }, [searchResults, state]);
 
     React.useEffect(() => {
+        if (searchResults.length > 0) setCurrentAction((ca: number) => Math.max(ca, (state.default || []).length));
+    }, [searchResults, (state.default || []).length]);
+
+    React.useEffect(() => {
         const handler = (ev: any) => {
-            if (ctxMenuState.value.show && ev.key === 'ArrowDown') {
-                console.log('D');
+            if (ctxMenuState.value.show && ev.key === 'ArrowDown' && currentAction < actionItems.length) {
                 ev.preventDefault();
                 ev.stopPropagation();
                 setCurrentAction((ca) => ca + 1);
-            } else if (ctxMenuState.value.show && ev.key === 'ArrowUp') {
+            } else if (ctxMenuState.value.show && ev.key === 'ArrowUp' && currentAction > 0) {
                 ev.preventDefault();
                 ev.stopPropagation();
                 setCurrentAction((ca) => ca - 1);
@@ -182,17 +184,16 @@ export const inlineTextSearch = (
     domEl: any,
     caret: number,
     onMatch: any,
-    setInSearch?: any,
     hideHidden = true,
+    matchOnly = false,
 ) => {
     let hasMatch = false;
     const placeholder = /\[\[([^[\]]*)\]\]/g;
     for (let match: any; (match = placeholder.exec(newText)) !== null; ) {
-        if (match.index <= caret && placeholder.lastIndex >= caret) {
-            if (setInSearch) setInSearch(true);
+        if (match.index + 2 <= caret && placeholder.lastIndex - 2 >= caret) {
             hasMatch = true;
             // inputDebounced.cancel();
-            setSearchPopup(domEl, match[1], onMatch.bind(this, match), hideHidden);
+            if (!matchOnly) setSearchPopup(domEl, match[1], onMatch.bind(this, match), hideHidden);
         }
     }
     return hasMatch;
@@ -203,17 +204,16 @@ export const inlineObjectSearch = (
     domEl: any,
     caret: number,
     onMatch: any,
-    setInSearch?: any,
     hideHidden = true,
+    matchOnly = false,
 ) => {
     let hasMatch = false;
     const placeholder = /\(\(([^[\)]*)\)\)/g;
     for (let match: any; (match = placeholder.exec(newText)) !== null; ) {
-        if (match.index <= caret && placeholder.lastIndex >= caret) {
-            if (setInSearch) setInSearch(true);
+        if (match.index + 2 <= caret && placeholder.lastIndex - 2 >= caret) {
             hasMatch = true;
             // inputDebounced.cancel();
-            setSearchPopup(domEl, match[1], onMatch.bind(this, match), hideHidden);
+            if (!matchOnly) setSearchPopup(domEl, match[1], onMatch.bind(this, match), hideHidden);
         }
     }
     return hasMatch;

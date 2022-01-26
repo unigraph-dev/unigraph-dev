@@ -246,7 +246,7 @@ export interface Unigraph<TT = WebSocket | false> {
     /**
      * Updates objects simply using the SPO triplet format.
      */
-    updateTriplets(triplets: any[]): any;
+    updateTriplets(triplets: any[], subIds?: any[] | any): any;
     /**
      * Updates an existing object by its UID and describing the new object.
      *
