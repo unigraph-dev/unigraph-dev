@@ -206,11 +206,12 @@ export function ParentsAndReferences({ data }: any) {
                 loadAll
                 components={{
                     '$/schema/note_block': {
-                        view: ReferenceNoteView,
+                        view: NoChildrenReferenceNoteView,
                         query: noteQueryDetailed,
                         noClickthrough: true,
                         noSubentities: true,
                         noContextMenu: true,
+                        noBacklinks: true,
                     },
                 }}
             />
@@ -228,6 +229,7 @@ export function ParentsAndReferences({ data }: any) {
                         noClickthrough: true,
                         noSubentities: true,
                         noContextMenu: true,
+                        noBacklinks: true,
                     },
                 }}
             />
@@ -287,6 +289,7 @@ export function DetailedNoteBlock({
             false,
             false,
             callbacks.subsId,
+            [],
         );
     };
     const textInput: any = React.useRef();
@@ -387,6 +390,90 @@ export function DetailedNoteBlock({
         };
     }, [JSON.stringify(subentities.map((el: any) => el.uid).sort()), data.uid, componentId]);
 
+    const checkReferences = React.useCallback(
+        (matchOnly?: boolean) => {
+            const newContent = textInput.current.textContent;
+            const caret = document.getSelection()?.anchorOffset as number;
+            // Check if inside a reference block
+
+            let hasMatch = false;
+            hasMatch =
+                inlineTextSearch(
+                    textInput.current.textContent,
+                    textInput,
+                    caret,
+                    async (match: any, newName: string, newUid: string) => {
+                        const parents = getParentsAndReferences(data['~_value'], data['unigraph.origin'] || [])[0].map(
+                            (el: any) => ({ uid: el.uid }),
+                        );
+                        if (!data._hide) parents.push({ uid: data.uid });
+                        const newStr = `${newContent?.slice?.(0, match.index)}[[${newName}]]${newContent?.slice?.(
+                            match.index + match[0].length,
+                        )}`;
+                        // console.log(newName, newUid, newStr, newContent);
+                        // This is an ADDITION operation
+                        // console.log(data);
+                        const semChildren = data?._value;
+                        // inputDebounced.cancel();
+                        textInput.current.textContent = newStr;
+                        resetEdited();
+                        setCaret(document, textInput.current.firstChild, match.index + newName.length + 4);
+                        await window.unigraph.updateObject(
+                            data.uid,
+                            {
+                                _value: {
+                                    text: { _value: { _value: { '_value.%': newStr } } },
+                                    children: {
+                                        '_value[': [
+                                            {
+                                                _index: {
+                                                    '_value.#i': semChildren?.children?.['_value[']?.length || 0,
+                                                },
+                                                _key: `[[${newName}]]`,
+                                                _value: {
+                                                    'dgraph.type': ['Interface'],
+                                                    type: { 'unigraph.id': '$/schema/interface/semantic' },
+                                                    _hide: true,
+                                                    _value: { uid: newUid },
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            },
+                            true,
+                            false,
+                            callbacks.subsId,
+                            parents,
+                        );
+                        window.unigraph.getState('global/searchPopup').setValue({ show: false });
+                    },
+                    undefined,
+                    matchOnly,
+                ) || hasMatch;
+            hasMatch =
+                inlineObjectSearch(
+                    textInput.current.textContent,
+                    textInput,
+                    caret,
+                    async (match: any, newName: string, newUid: string) => {
+                        callbacks['replace-child-with-uid'](newUid);
+                        await callbacks['add-child']();
+                        window.unigraph.getState('global/searchPopup').setValue({ show: false });
+                        setTimeout(() => {
+                            callbacks['focus-next-dfs-node'](data, editorContext, 0);
+                        }, 500);
+                    },
+                    false,
+                    matchOnly,
+                ) || hasMatch;
+            if (!hasMatch) {
+                window.unigraph.getState('global/searchPopup').setValue({ show: false });
+            }
+        },
+        [callbacks, componentId, data, editorContext, resetEdited],
+    );
+
     React.useEffect(() => {
         const dataText = data.get('text').as('primitive');
         if (dataText && options?.viewId && !callbacks.isEmbed)
@@ -403,14 +490,14 @@ export function DetailedNoteBlock({
         if (focused) {
             const setCaretFn = () => {
                 let tail;
-                const focusedState = window.unigraph.getState('global/focused').value;
+                const focusedState2 = window.unigraph.getState('global/focused').value;
                 const el = textInput.current?.firstChild || textInput.current;
-                if (focusedState.tail) tail = el.textContent.length;
-                if (focusedState.newData) {
-                    el.textContent = focusedState.newData;
-                    delete focusedState.newData;
+                if (focusedState2.tail) tail = el.textContent.length;
+                if (focusedState2.newData) {
+                    el.textContent = focusedState2.newData;
+                    delete focusedState2.newData;
                 }
-                setCaret(document, el, tail || focusedState.caret);
+                setCaret(document, el, tail || focusedState2.caret);
             };
             if (!isEditing) {
                 setIsEditing(true);
@@ -422,6 +509,15 @@ export function DetailedNoteBlock({
             }
         }
     }, [focused]);
+
+    React.useEffect(() => {
+        const fn = (state: any) => {
+            if (state.component !== componentId) return;
+            checkReferences(true);
+        };
+        window.unigraph.getState('global/focused').subscribe(fn);
+        return () => window.unigraph.getState('global/focused').unsubscribe(fn);
+    }, [componentId, checkReferences]);
 
     React.useEffect(() => {
         if (focused) {
@@ -487,6 +583,7 @@ export function DetailedNoteBlock({
                                 uid: data?.uid,
                                 caret: finalCaretPos,
                                 type: '$/schema/note_block',
+                                component: componentId,
                             });
                         }}
                         onBlur={(ev) => {
@@ -589,7 +686,7 @@ export function DetailedNoteBlock({
                                         });
                                     }
                                 }
-
+                                setFocusedCaret();
                                 return event;
                             }}
                             onInput={(ev) => {
@@ -598,111 +695,7 @@ export function DetailedNoteBlock({
                                     !edited.current
                                 )
                                     edited.current = true;
-                                const newContent = ev.currentTarget.textContent;
-                                const caret = document.getSelection()?.anchorOffset as number;
-                                // Check if inside a reference block
-
-                                let hasMatch = false;
-                                hasMatch =
-                                    inlineTextSearch(
-                                        textInput.current.textContent,
-                                        textInput,
-                                        caret,
-                                        async (match: any, newName: string, newUid: string) => {
-                                            const parents = getParentsAndReferences(
-                                                data['~_value'],
-                                                data['unigraph.origin'] || [],
-                                            )[0].map((el: any) => ({
-                                                uid: el.uid,
-                                            }));
-                                            if (!data._hide)
-                                                parents.push({
-                                                    uid: data.uid,
-                                                });
-                                            const newStr = `${newContent?.slice?.(
-                                                0,
-                                                match.index,
-                                            )}[[${newName}]]${newContent?.slice?.(match.index + match[0].length)}`;
-                                            // console.log(newName, newUid, newStr, newContent);
-                                            // This is an ADDITION operation
-                                            // console.log(data);
-                                            const semChildren = data?._value;
-                                            // inputDebounced.cancel();
-                                            textInput.current.textContent = newStr;
-                                            resetEdited();
-                                            if (textInput.current.firstChild) {
-                                                setCaret(
-                                                    document,
-                                                    textInput.current.firstChild,
-                                                    match.index + newName.length + 4,
-                                                );
-                                            } else {
-                                                setCaret(document, textInput.current, match.index + newName.length + 4);
-                                            }
-                                            await window.unigraph.updateObject(
-                                                data.uid,
-                                                {
-                                                    _value: {
-                                                        text: {
-                                                            _value: {
-                                                                _value: {
-                                                                    '_value.%': newStr,
-                                                                },
-                                                            },
-                                                        },
-                                                        children: {
-                                                            '_value[': [
-                                                                {
-                                                                    _index: {
-                                                                        '_value.#i':
-                                                                            semChildren?.children?.['_value[']
-                                                                                ?.length || 0,
-                                                                    },
-                                                                    _key: `[[${newName}]]`,
-                                                                    _value: {
-                                                                        'dgraph.type': ['Interface'],
-                                                                        type: {
-                                                                            'unigraph.id':
-                                                                                '$/schema/interface/semantic',
-                                                                        },
-                                                                        _hide: true,
-                                                                        _value: {
-                                                                            uid: newUid,
-                                                                        },
-                                                                    },
-                                                                },
-                                                            ],
-                                                        },
-                                                    },
-                                                },
-                                                true,
-                                                false,
-                                                callbacks.subsId,
-                                                parents,
-                                            );
-                                            window.unigraph.getState('global/searchPopup').setValue({ show: false });
-                                        },
-                                    ) || hasMatch;
-                                hasMatch =
-                                    inlineObjectSearch(
-                                        textInput.current.textContent,
-                                        textInput,
-                                        caret,
-                                        async (match: any, newName: string, newUid: string) => {
-                                            callbacks['replace-child-with-uid'](newUid);
-                                            await callbacks['add-child']();
-                                            window.unigraph.getState('global/searchPopup').setValue({ show: false });
-                                            setTimeout(() => {
-                                                callbacks['focus-next-dfs-node'](data, editorContext, 0);
-                                            }, 500);
-                                        },
-                                        undefined,
-                                        false,
-                                    ) || hasMatch;
-                                if (!hasMatch) {
-                                    window.unigraph.getState('global/searchPopup').setValue({ show: false });
-                                }
-
+                                checkReferences();
                                 onNoteInput(inputDebounced, ev);
                             }}
                             onKeyUp={setFocusedCaret}
@@ -716,11 +709,9 @@ export function DetailedNoteBlock({
                                             ev.preventDefault();
                                             edited.current = false;
                                             inputDebounced.current.cancel();
-                                            callbacks['split-child']?.bind(
-                                                null,
-                                                getCurrentText() || data.get('text').as('primitive'),
-                                                caret,
-                                            )();
+                                            const currentText = getCurrentText() || data.get('text').as('primitive');
+                                            callbacks['split-child']?.(currentText, caret);
+                                            setCurrentText(currentText.slice(caret));
                                         }
                                         break;
 
@@ -1051,24 +1042,45 @@ export const getSubentities = (data: any) => {
     return [subentities, otherChildren];
 };
 
-export const ReferenceNoteView = ({ data, callbacks }: any) => {
+export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
     const [subentities, otherChildren] = getSubentities(data);
 
-    const [pathNames, setPathNames] = React.useState([]);
-    const [refObject, setRefObject] = React.useState({});
+    const [pathNames, setPathNames] = React.useState<any[]>([]);
+    const [refObjects, setRefObjects] = React.useState([{}]);
 
     React.useEffect(() => {
         removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
-        const [targetObj, path] = findUid(data, callbacks?.context?.uid);
-        const refinedPath = path.filter(
-            (el: any) => !['$/schema/subentity', '$/schema/interface/semantic'].includes(el?.type?.['unigraph.id']),
-        );
-        setRefObject(refinedPath[refinedPath.length - 2]);
+        let targetObj = data;
+        const paths = [];
+        let its = 0;
+        while (its < 1000) {
+            let path;
+            its += 1;
+            [targetObj, path] = findUid(data, callbacks?.context?.uid);
+            if (targetObj?.uid) delete targetObj.uid;
+            else break;
+            paths.push(path);
+        }
+        const refinedPaths = paths
+            .map((path) =>
+                path.filter(
+                    (el: any) =>
+                        !['$/schema/subentity', '$/schema/interface/semantic'].includes(el?.type?.['unigraph.id']),
+                ),
+            )
+            .filter(
+                (path) =>
+                    path.filter((el: any) => el?.type?.['unigraph.id'] === '$/schema/note_block' && el?._hide !== true)
+                        .length <= 2,
+            );
+        setRefObjects(refinedPaths.map((refinedPath) => refinedPath[refinedPath.length - 2]));
         setPathNames(
-            refinedPath
-                .map((el: any) => new UnigraphObject(el)?.get('text')?.as('primitive'))
-                .filter(Boolean)
-                .slice(0, -2),
+            refinedPaths.map((refinedPath: any) =>
+                refinedPath
+                    .map((el: any) => new UnigraphObject(el)?.get('text')?.as('primitive'))
+                    .filter(Boolean)
+                    .slice(0, noChildren ? undefined : -2),
+            ),
         );
     }, []);
 
@@ -1102,28 +1114,36 @@ export const ReferenceNoteView = ({ data, callbacks }: any) => {
                         }}
                     />
                 </Typography>
-                <Typography style={{ color: 'gray' }}>{pathNames.join(' > ')}</Typography>
-                <div style={{ marginLeft: '16px' }}>
-                    <OutlineComponent isChildren>
-                        <AutoDynamicView
-                            object={refObject}
-                            noClickthrough
-                            noSubentities
-                            components={{
-                                '$/schema/note_block': {
-                                    view: DetailedNoteBlock,
-                                    query: noteQuery,
-                                },
-                                '$/schema/view': {
-                                    view: ViewViewDetailed,
-                                },
-                            }}
-                            attributes={{
-                                isChildren: true,
-                            }}
-                        />
-                    </OutlineComponent>
-                </div>
+                {refObjects?.map((refObject: any, index: number) => (
+                    <div style={{ marginBottom: '16px' }}>
+                        <Typography style={{ color: 'gray' }}>{pathNames[index]?.join(' > ')}</Typography>
+                        <div style={{ marginLeft: '16px' }}>
+                            {noChildren ? (
+                                []
+                            ) : (
+                                <OutlineComponent isChildren>
+                                    <AutoDynamicView
+                                        object={refObject}
+                                        noClickthrough
+                                        noSubentities
+                                        components={{
+                                            '$/schema/note_block': {
+                                                view: DetailedNoteBlock,
+                                                query: noteQuery,
+                                            },
+                                            '$/schema/view': {
+                                                view: ViewViewDetailed,
+                                            },
+                                        }}
+                                        attributes={{
+                                            isChildren: true,
+                                        }}
+                                    />
+                                </OutlineComponent>
+                            )}
+                        </div>
+                    </div>
+                ))}
             </div>
             <div>
                 {otherChildren.map((el: any) => (
@@ -1133,3 +1153,7 @@ export const ReferenceNoteView = ({ data, callbacks }: any) => {
         </div>
     );
 };
+
+export const NoChildrenReferenceNoteView = ({ data, callbacks }: any) => (
+    <ReferenceNoteView data={data} callbacks={callbacks} noChildren />
+);

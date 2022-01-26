@@ -2,6 +2,7 @@ import { Typography } from '@material-ui/core';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
+import { getRandomId } from 'unigraph-dev-common/lib/utils/utils';
 import { DynamicViewRenderer } from '../../global.d';
 import { TabContext } from '../../utils';
 import { ObjectEditor } from '../ObjectEditor/ObjectEditor';
@@ -21,18 +22,46 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
     const [loadedObj, setLoadedObj] = React.useState<any>(false);
     const [subsId, setSubsId] = React.useState(getRandomInt());
 
+    const tabContext = React.useContext(TabContext);
+
     const [DynamicViewsDetailed, setDynamicViewsDetailed] = React.useState({
         ...window.unigraph.getState('registry/dynamicViewDetailed').value,
         ...(components || {}),
     });
 
-    React.useEffect(() => {
-        window.unigraph
-            .getState('registry/dynamicViewDetailed')
-            .subscribe((newIts) => setDynamicViewsDetailed({ ...newIts, ...(components || {}) }));
-    }, []);
+    const [componentId, setComponentId] = React.useState(getRandomId());
+    const [isFocused, setIsFocused] = React.useState(
+        window.unigraph.getState('global/focused').value.uid === object?.uid && tabContext.isVisible(),
+    );
 
-    const tabContext = React.useContext(TabContext);
+    React.useEffect(() => {
+        const cbDVD = (newIts: any) => setDynamicViewsDetailed({ ...newIts, ...(components || {}) });
+        window.unigraph.getState('registry/dynamicViewDetailed').subscribe(cbDVD);
+
+        let hasFocus = false;
+        const cbfoc = (foc: any) => {
+            if (foc.uid === object?.uid && tabContext.isVisible() && !foc?.component?.length) {
+                hasFocus = true;
+                window.unigraph.getState('global/focused').value.component = componentId;
+            }
+            if (
+                foc.uid === object?.uid &&
+                tabContext.isVisible() &&
+                window.unigraph.getState('global/focused').value.component === componentId
+            )
+                setIsFocused(true);
+            else setIsFocused(false);
+
+            return function cleanup() {
+                window.unigraph.getState('registry/dynamicViewDetailed').unsubscribe(cbDVD);
+                if (hasFocus) {
+                    const focused = window.unigraph.getState('global/focused');
+                    focused.setValue({ ...focused.value, component: '' });
+                }
+            };
+        };
+        window.unigraph.getState('global/focused').subscribe(cbfoc);
+    }, []);
 
     React.useEffect(() => {
         const newSubs = getRandomInt();
@@ -94,6 +123,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
                                 },
                                 context,
                                 ...(attributes || {}),
+                                focused: isFocused,
                             })
                         }
                     </TabContext.Consumer>
