@@ -546,7 +546,7 @@ export function processAutorefUnigraphId(orig: any) {
             case "object":
                 if (Array.isArray(current)) {
                     current.forEach(e => recurse(e));
-                } else {
+                } else if (current !== undefined && current !== null) {
                     const kv = Object.entries(current);
                     kv.forEach(([key, value]) => {
                         if (key === "unigraph.id") {
