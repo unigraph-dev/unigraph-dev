@@ -4,7 +4,7 @@
     "description": "",
     "main": "dist/index.js",
     "engines": {
-        "node": ">=16.0.0",
+        "node": ">=16.13.0",
         "npm": "^8.1.2"
     },
     "scripts": {
@@ -22,17 +22,17 @@
         "@types/express-ws": "^3.0.0",
         "@types/google-protobuf": "^3.7.3",
         "@types/lodash": "^4.14.165",
-        "@types/node": "^12.11",
+        "@types/node": "^16.11.7",
         "@types/node-cron": "^2.0.3",
-        "typescript": "^4.2.2"
+        "typescript": "^4.5.4"
     },
     "dependencies": {
         "@babel/core": "^7.14.8",
         "@babel/preset-react": "^7.14.5",
         "@mozilla/readability": "^0.4.1",
+        "@tsconfig/node16": "^1.0.2",
         "@types/async-lock": "^1.1.2",
-        "@types/node-fetch": "^2.5.8",
-        "abort-controller": "^3.0.0",
+        "@types/node-fetch": "^2.5.12",
         "async-lock": "^1.2.8",
         "dgraph-js": "^20.3.1",
         "express": "^4.17.1",
@@ -45,7 +45,7 @@
         "luxon": "^2.0.2",
         "mailparser": "^3.2.0",
         "node-cron": "^3.0.0",
-        "node-fetch": "^2.6.1",
+        "node-fetch": "^2.6.7",
         "oauth": "^0.9.15",
         "rrule": "^2.6.8",
         "rss-parser": "^3.12.0",

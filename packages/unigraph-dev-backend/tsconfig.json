@@ -1,8 +1,11 @@
 {
-    "compilerOptions": {
+      "$schema": "https://json.schemastore.org/tsconfig",
+      "display": "Node 16",
+      "compilerOptions": {
         "baseUrl": ".",
         "esModuleInterop": true,
-        "lib": ["ESNext", "WebWorker"],
+    	"forceConsistentCasingInFileNames": true,
+        "lib": ["es2021", "WebWorker"],
         "module": "CommonJS",
         "moduleResolution": "node",
         "outDir": "dist",
@@ -10,9 +13,10 @@
             "@/*": ["./src/*"]
         },
         "resolveJsonModule": true,
+        "skipLibCheck": true,
         "sourceMap": true,
         "strict": true,
-        "target": "ES2017",
+        "target": "es2021",
         "typeRoots": ["src/custom.d.ts", "node_modules/@types"]
     },
     "include": ["src"]

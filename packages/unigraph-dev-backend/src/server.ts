@@ -15,7 +15,7 @@ import fetch from 'node-fetch';
 import _, { uniqueId } from 'lodash';
 import { Unigraph } from 'unigraph-dev-common/lib/types/unigraph';
 import stringify from 'json-stable-stringify';
-import DgraphClient from './dgraphClient';
+import DgraphClient, { UUIDRange } from './dgraphClient';
 import {
     EventAddNotification,
     EventAddUnigraphPackage,
@@ -131,8 +131,8 @@ export default async function startServer(client: DgraphClient) {
 
     const checkLeasedUid = async () => {
         if (serverStates?.leasedUids?.length < 8192) {
-            const lease = await dgraphClient.leaseUids(8192);
-            for (let i = parseInt(lease.startId, 10); i < parseInt(lease.endId, 10); i += 1) {
+            const uuidRange: UUIDRange = await dgraphClient.leaseUids(8192);
+            for (let i = parseInt(uuidRange.startId, 10); i < parseInt(uuidRange.endId, 10); i += 1) {
                 serverStates.leasedUids.push(`0x${i.toString(16)}`);
             }
         }

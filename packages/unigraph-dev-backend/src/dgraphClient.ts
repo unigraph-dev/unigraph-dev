@@ -1,6 +1,7 @@
 import AsyncLock from 'async-lock';
 import dgraph, { DgraphClient as ActualDgraphClient, DgraphClientStub, Operation, Mutation, Check } from 'dgraph-js';
 import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import dns from 'dns';
 import fetch from 'node-fetch';
 import { getAsyncLock, withLock } from './asyncManager';
 import { perfLogStartDbTransaction, perfLogAfterDbTransaction } from './logging';
@@ -10,6 +11,12 @@ export type UnigraphUpsert = {
     queries: string[];
     mutations: any[];
     appends: any[];
+};
+
+export type UUIDRange = {
+    startId: string;
+    endId: string;
+    readOnly: string;
 };
 
 // eslint-disable-next-line inclusive-language/use-inclusive-words
@@ -46,14 +53,16 @@ export default class DgraphClient {
         this.txnlock = getAsyncLock();
     }
 
-    async leaseUids(num = 256) {
+    async leaseUids(num = 256): Promise<UUIDRange> {
+        // Make DNS lookups return results in the same order that a system resolver or
+        // DNS server would wrt IPv4 vs IPv6 addresses.
+        dns.setDefaultResultOrder('verbatim');
         const res = await fetch(`http://${this.connectionUri}:${this.ports.zero}/assign?what=uids&num=${num}`);
         if (res.status !== 200) {
             console.log(res);
             throw new Error(`Could not lease ${num} uids from Dgraph`);
         }
-        const json = await res.json();
-        return json;
+        return (await res.json()) as Promise<UUIDRange>;
     }
 
     async getStatus() {

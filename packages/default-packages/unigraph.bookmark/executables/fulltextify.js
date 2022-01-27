@@ -1,7 +1,6 @@
 const { Readability, isProbablyReaderable } = require('@mozilla/readability');
 const { JSDOM } = require('jsdom');
 const fetch = require('node-fetch');
-const AbortController = require('abort-controller');
 
 const controller = new AbortController();
 const timeout = setTimeout(() => {

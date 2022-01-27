@@ -36,7 +36,7 @@
         "diff": "lerna diff"
     },
     "engines": {
-        "node": ">=16.0.0",
+        "node": ">=16.13.0",
         "npm": "^8.1.2"
     },
     "devDependencies": {
@@ -64,7 +64,7 @@
         "prettier": "^2.5.1",
         "run-script-os": "^1.1.6",
         "ts-jest": "^26.5.2",
-        "typescript": "^4.2.2"
+        "typescript": "^4.5.4"
     },
     "dependencies": {
         "eslint-plugin-inclusive-language": "^2.2.0",
