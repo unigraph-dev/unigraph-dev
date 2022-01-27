@@ -571,14 +571,17 @@ export function DetailedNoteBlock({
 
     const copyOrCutHandler = React.useCallback(
         (ev, elindex, isCut) => {
-            ev.preventDefault();
-            const clipboardData = copyChildToClipboard(data, editorContext, elindex, isCut);
-            window.unigraph
-                .getState('temp/clipboardItems')
-                .setValue((val: any) => (Array.isArray(val) ? [...val, clipboardData] : [clipboardData]));
-            return setClipboardHandler;
+            if (window.unigraph.getState('global/selected').value.length > 0) {
+                ev.preventDefault();
+                const clipboardData = copyChildToClipboard(data, editorContext, elindex, isCut);
+                window.unigraph
+                    .getState('temp/clipboardItems')
+                    .setValue((val: any) => (Array.isArray(val) ? [...val, clipboardData] : [clipboardData]));
+                return setClipboardHandler;
+            }
+            return false;
         },
-        [data, editorContext],
+        [data, editorContext, componentId],
     );
 
     const onPasteHandler = React.useCallback(
@@ -595,7 +598,7 @@ export function DetailedNoteBlock({
                 const unigraphHtml = parseUnigraphHtml(paste);
                 if (unigraphHtml) {
                     const entities = Array.from(unigraphHtml.body.children[0].children).map((el) => el.id);
-                    console.log(entities);
+                    callbacks['add-children'](entities, getCurrentText().length ? 0 : -1);
                 } else {
                     const mdresult = htmlToMarkdown(paste);
                     const lines = mdresult.split('\n\n');
@@ -614,7 +617,7 @@ export function DetailedNoteBlock({
 
                     if (lines.length > 1) {
                         const newLines = lines.slice(1);
-                        callbacks['add-children'](newLines);
+                        callbacks['add-children'](newLines, getCurrentText().length ? 0 : -1);
                     }
                 }
 
@@ -1072,6 +1075,15 @@ export function DetailedNoteBlock({
                                                         },
                                                         'focus-last-dfs-node': focusLastDFSNode,
                                                         'focus-next-dfs-node': focusNextDFSNode,
+                                                        'add-children': (its: string[], indexx?: number) =>
+                                                            indexx
+                                                                ? addChildren(
+                                                                      data,
+                                                                      editorContext,
+                                                                      elindex + indexx,
+                                                                      its,
+                                                                  )
+                                                                : addChildren(data, editorContext, elindex, its),
                                                         context: data,
                                                         isEmbed: true,
                                                         isChildren: true,
