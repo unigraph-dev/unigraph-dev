@@ -25,6 +25,7 @@ import {
     unsplitChild,
     replaceChildWithUid,
     addChildren,
+    permanentlyDeleteBlock,
 } from './commands';
 import { onUnigraphContextMenu } from '../../components/ObjectView/DefaultObjectContextMenu';
 import { noteQuery, noteQueryDetailed } from './noteQuery';
@@ -475,10 +476,11 @@ export function DetailedNoteBlock({
                     caret,
                     async (match: any, newName: string, newUid: string) => {
                         callbacks['replace-child-with-uid'](newUid);
-                        await callbacks['add-child']();
                         window.unigraph.getState('global/searchPopup').setValue({ show: false });
+                        callbacks['focus-next-dfs-node'](data, editorContext, 0);
                         setTimeout(() => {
-                            callbacks['focus-next-dfs-node'](data, editorContext, 0);
+                            // callbacks['add-child']();
+                            permanentlyDeleteBlock(data);
                         }, 500);
                     },
                     false,
@@ -492,7 +494,7 @@ export function DetailedNoteBlock({
     );
 
     React.useEffect(() => {
-        const dataText = data.get('text').as('primitive');
+        const dataText = data.get('text')?.as('primitive');
         if (dataText && options?.viewId && !callbacks.isEmbed)
             window.layoutModel.doAction(Actions.renameTab(options.viewId, `Note: ${dataText}`));
         if (getCurrentText() !== dataText && !edited.current) {
@@ -501,7 +503,7 @@ export function DetailedNoteBlock({
         } else if ((getCurrentText() === dataText && edited.current) || getCurrentText() === '') {
             resetEdited();
         }
-    }, [data.get('text').as('primitive'), isEditing]);
+    }, [data.get('text')?.as('primitive'), isEditing]);
 
     React.useEffect(() => {
         if (focused) {
@@ -548,13 +550,13 @@ export function DetailedNoteBlock({
                 splitChild: () => {
                     const sel = document.getSelection();
                     const caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
-                    callbacks['split-child'](getCurrentText() || data.get('text').as('primitive'), caret);
+                    callbacks['split-child'](getCurrentText() || data.get('text')?.as('primitive'), caret);
                 },
                 indentChild: callbacks['indent-child'],
                 unindentChild: callbacks['unindent-child-in-parent'],
             });
         }
-    }, [data.get('text').as('primitive'), focused]);
+    }, [data.get('text')?.as('primitive'), focused]);
 
     React.useEffect(commandFn, [command]);
 
@@ -714,6 +716,7 @@ export function DetailedNoteBlock({
                                     !edited.current
                                 )
                                     edited.current = true;
+                                console.log('hiya');
                                 checkReferences();
                                 onNoteInput(inputDebounced, ev);
                             }}
@@ -749,11 +752,9 @@ export function DetailedNoteBlock({
                                         // console.log(caret, document.getSelection()?.type)
                                         if (caret === 0 && document.getSelection()?.type === 'Caret') {
                                             ev.preventDefault();
-                                            // inputDebounced.cancel();
+                                            inputDebounced.current.cancel();
                                             edited.current = false;
-                                            setCommand(() =>
-                                                callbacks['unsplit-child'].bind(null, textInput.current.textContent),
-                                            );
+                                            callbacks['unsplit-child'](textInput.current.textContent);
                                         } else if (
                                             getCurrentText()[caret - 1] === '[' &&
                                             getCurrentText()[caret] === ']'
@@ -824,9 +825,27 @@ export function DetailedNoteBlock({
                                                 middle = middle.slice(0, middle.length - 1);
                                                 end = ' ';
                                             }
-                                            document.execCommand('insertText', false, `[${middle}]${end}`);
-                                            // console.log(caret, document.getSelection(), middle)
+                                            // document.execCommand('insertText', false, `[${middle}]${end}`);
+                                            textInput.current.textContent = `${getCurrentText().slice(
+                                                0,
+                                                caret,
+                                            )}[${middle}]${end}${getCurrentText().slice(
+                                                caret + (middle + end).length,
+                                            )}`;
                                             setCaret(document, textInput.current.firstChild, caret + 1, middle.length);
+                                            textInput.current.dispatchEvent(
+                                                new Event('input', {
+                                                    bubbles: true,
+                                                    cancelable: true,
+                                                }),
+                                            );
+                                        }
+                                        break;
+
+                                    case 221: // right bracket
+                                        if (!ev.shiftKey && textInput.current.textContent[caret] === ']') {
+                                            ev.preventDefault();
+                                            setCaret(document, textInput.current.firstChild, caret + 1);
                                         }
                                         break;
 
@@ -840,9 +859,26 @@ export function DetailedNoteBlock({
                                                 middle = middle.slice(0, middle.length - 1);
                                                 end = ' ';
                                             }
-                                            document.execCommand('insertText', false, `(${middle})${end}`);
-                                            // console.log(caret, document.getSelection(), middle)
+                                            textInput.current.textContent = `${getCurrentText().slice(
+                                                0,
+                                                caret,
+                                            )}(${middle})${end}${getCurrentText().slice(
+                                                caret + (middle + end).length,
+                                            )}`;
                                             setCaret(document, textInput.current.firstChild, caret + 1, middle.length);
+                                            textInput.current.dispatchEvent(
+                                                new Event('input', {
+                                                    bubbles: true,
+                                                    cancelable: true,
+                                                }),
+                                            );
+                                        }
+                                        break;
+
+                                    case 48: // 0 or parenthesis
+                                        if (ev.shiftKey && textInput.current.textContent[caret] === ')') {
+                                            ev.preventDefault();
+                                            setCaret(document, textInput.current.firstChild, caret + 1);
                                         }
                                         break;
 

@@ -201,7 +201,6 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
     let prevIndex = -1;
     const parents = getParents(data);
     if (!data._hide) parents.push({ uid: data.uid });
-    removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
     const delAt = children?.reduce((prev: any[], el: any, elindex: any) => {
         if (el?._value?.type?.['unigraph.id'] === '$/schema/subentity') {
@@ -212,6 +211,8 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
         }
         return prev;
     }, 0);
+    const childParents = children[delAt]?._value?._value?.['~_value'].length;
+    removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     // console.log(index, children[delAt]?._value?._value?._value?.children?.['_value[']);
     // Index = 0 if current block doesn't have children, merge with parent
     // Index > 0 and last DFS is last item, should merge with previous
@@ -369,23 +370,28 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
         });
     } else return false;
 
-    setTimeout(() => {
-        window.unigraph.deleteObject(
-            [
-                children[delAt].uid,
-                children[delAt]._value.uid,
-                children[delAt]._value._value.uid,
-                children[delAt]._value._value._value.uid,
-                children[delAt]._value._value._value.text.uid,
-                children[delAt]._value._value._value.text._value.uid,
-                children[delAt]._value._value._value.text._value._value.uid,
-            ] as any,
-            true,
-        );
-        window.unigraph.touch(getParents(data).map((el) => el.uid));
-    }, 1000);
+    if (childParents <= 1) {
+        setTimeout(() => {
+            permanentlyDeleteBlock(children[delAt]._value._value, [children[delAt].uid, children[delAt]._value.uid]);
+            window.unigraph.touch(getParents(data).map((el) => el.uid));
+        }, 1000);
+    }
 
     return true;
+};
+
+export const permanentlyDeleteBlock = (data: any, otherUids?: any[]) => {
+    window.unigraph.deleteObject(
+        [
+            data.uid,
+            data._value.uid,
+            data._value.text.uid,
+            data._value.text._value.uid,
+            data._value.text._value._value.uid,
+            ...(otherUids || []),
+        ] as any,
+        true,
+    );
 };
 
 export const indentChild = (data: any, context: NoteEditorContext, index: number, parent?: number) => {
@@ -693,7 +699,7 @@ export const replaceChildWithUid = async (data: any, context: NoteEditorContext,
     }, []);
     await window.unigraph.updateObject(
         data?._value?.uid,
-        { ...data._value, children: { _displayAs: data?._value?.children?._displayAs, '_value[': newChildren } },
+        { children: { _displayAs: data?._value?.children?._displayAs, '_value[': newChildren } },
         false,
         false,
         context.callbacks.subsId,
