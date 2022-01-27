@@ -179,20 +179,16 @@ function initSelect() {
         });
         window.dragselect.subscribe(
             'dragmove',
-            _.throttle(
-                ({ items, item, event }: any) => {
-                    const distance = window.dragselect.getCursorPositionDifference();
-                    if (
-                        (Math.abs(distance.x) > 5 || Math.abs(distance.y) > 5) &&
-                        (document.getSelection()?.type === 'Caret' || items.length > 1)
-                    ) {
-                        document.body.classList.add('in-multiselect');
-                        if (document.getSelection()?.type !== 'Caret') document.getSelection()?.removeAllRanges();
-                    }
-                },
-                150,
-                { leading: true },
-            ),
+            _.throttle(({ items, item, event }: any) => {
+                const distance = window.dragselect.getCursorPositionDifference();
+                if (
+                    (Math.abs(distance.x) > 5 || Math.abs(distance.y) > 5) &&
+                    (document.getSelection()?.type === 'Caret' || items.length > 1)
+                ) {
+                    document.body.classList.add('in-multiselect');
+                    if (document.getSelection()?.type !== 'Caret') document.getSelection()?.removeAllRanges();
+                }
+            }, 150),
         );
     }
 }
