@@ -1,8 +1,8 @@
 import { Button, Typography } from '@material-ui/core';
 import React from 'react';
-import { Controlled as CodeMirror } from 'react-codemirror2';
+import Editor, { loader } from '@monaco-editor/react';
 
-require('codemirror/lib/codemirror.css');
+loader.config({ paths: { vs: './vendor/monaco-editor_at_0.31.1/' } });
 
 const templateRequests = {
     'get-all-objects-with-id': `{
@@ -29,29 +29,32 @@ export default function Request() {
     const [code, setCode]: [string, any] = React.useState('// Your request here...');
 
     return (
-        <div>
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', height: '100%' }}>
             <Typography variant="h4">Do a request!</Typography>
-            <CodeMirror
-                value={code}
-                onBeforeChange={(editor: any, data: any, value: string) => {
-                    setCode(value);
-                }}
-                onChange={(editor: any, data: any, value: string) => false}
-                options={{ lineNumbers: true, mode: 'javascript' }}
-            />
-            <Button
-                onClick={() => {
-                    window.unigraph.backendConnection.current?.send(code);
-                }}
-            >
-                Send to server
-            </Button>
-            <p>Templates: </p>
-            <Button onClick={() => setCode(templateRequests['get-all-objects-with-id'])}>
-                Get all objects with ID
-            </Button>
-            <Button onClick={() => setCode(templateRequests['get-status'])}>Get server status</Button>
-            <Button onClick={() => setCode(templateRequests['subscribe-all'])}>Subscribe to all changes</Button>
+            <div style={{ flexGrow: 1, width: '100%' }}>
+                <Editor
+                    defaultLanguage="javascript"
+                    path="request.json"
+                    value={code}
+                    // eslint-disable-next-line react/jsx-no-bind
+                    onChange={setCode}
+                />
+            </div>
+            <div>
+                <Button
+                    onClick={() => {
+                        window.unigraph.backendConnection.current?.send(code);
+                    }}
+                >
+                    Send to server
+                </Button>
+                <p>Templates: </p>
+                <Button onClick={() => setCode(templateRequests['get-all-objects-with-id'])}>
+                    Get all objects with ID
+                </Button>
+                <Button onClick={() => setCode(templateRequests['get-status'])}>Get server status</Button>
+                <Button onClick={() => setCode(templateRequests['subscribe-all'])}>Subscribe to all changes</Button>
+            </div>
         </div>
     );
 }
