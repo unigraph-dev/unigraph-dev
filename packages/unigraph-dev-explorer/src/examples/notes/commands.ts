@@ -1,7 +1,6 @@
 /* eslint-disable no-plusplus */
 import _ from 'lodash';
 import { buildUnigraphEntity, byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
-import { YearSelection } from '@material-ui/pickers/views/Year/YearView';
 import { dfs, removeAllPropsFromObj } from '../../utils';
 import { parseTodoObject } from '../todo/parseTodoObject';
 import { NoteEditorContext } from './types';
@@ -33,6 +32,8 @@ export const addChild = (data: any, context: NoteEditorContext, index?: number) 
 };
 
 export const addChildren = (data: any, context: NoteEditorContext, index: number, children: string[]) => {
+    let uidMode = false;
+    if (children.filter((el) => el.startsWith('0x')).length === children.length) uidMode = true;
     if (typeof index === 'undefined') index = (getSemanticChildren(data)?.['_value[']?.length || 0) - 1;
     const parents = getParents(data);
     if (!data._hide) parents.push({ uid: data.uid });
@@ -40,9 +41,8 @@ export const addChildren = (data: any, context: NoteEditorContext, index: number
     window.unigraph.updateObject(
         data._value.uid,
         {
-            ...(data?._value?.children || {}),
-            uid: undefined,
             children: {
+                _displayAs: data?._value?.children?._displayAs,
                 '_value[': [
                     ...(data?._value?.children?.['_value['] || []).map((el: any) => ({
                         uid: el.uid,
@@ -60,22 +60,24 @@ export const addChildren = (data: any, context: NoteEditorContext, index: number
                                 'unigraph.id': '$/schema/subentity',
                             },
                             'dgraph.type': 'Entity',
-                            _value: {
-                                ...(buildUnigraphEntity as any)(
-                                    {
-                                        text: {
-                                            type: { 'unigraph.id': '$/schema/markdown' },
-                                            _value: el,
-                                        },
-                                    },
-                                    '$/schema/note_block',
-                                    (window.unigraph as any).getSchemaMap(),
-                                    undefined,
-                                    { globalStates: { nextUid: 100000 * i } },
-                                ),
-                                _hide: true,
-                                uid: i === children.length - 1 ? myUid : undefined,
-                            },
+                            _value: uidMode
+                                ? { uid: el }
+                                : {
+                                      ...(buildUnigraphEntity as any)(
+                                          {
+                                              text: {
+                                                  type: { 'unigraph.id': '$/schema/markdown' },
+                                                  _value: el,
+                                              },
+                                          },
+                                          '$/schema/note_block',
+                                          (window.unigraph as any).getSchemaMap(),
+                                          undefined,
+                                          { globalStates: { nextUid: 100000 * i } },
+                                      ),
+                                      _hide: true,
+                                      uid: i === children.length - 1 ? myUid : undefined,
+                                  },
                             _updatedAt: new Date().toISOString(),
                             _createdAt: new Date().toISOString(),
                             _hide: true,
@@ -92,7 +94,7 @@ export const addChildren = (data: any, context: NoteEditorContext, index: number
         false,
         context.callbacks.subsId,
         parents,
-        true,
+        !uidMode,
     );
     focusUid(myUid);
 };
@@ -194,6 +196,94 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
     window.unigraph.touch(parents.map((el) => el.uid));
     if (toDelete.length)
         window.unigraph.deleteItemFromArray(toDelete[0], toDelete[1], toDelete[2], context.callbacks.subsId);
+};
+
+const getAllChildren = (data: any) => {
+    const children = (data?.['_value['] || []).sort(byElementIndex);
+    if (children.length > 0) {
+        return children
+            .map((el: any) => ({
+                content: el?._value?._value?._value?.text?._value?._value?.['_value.%'],
+                children: getAllChildren(el?._value?._value?._value?.children),
+                type: el?._value?.type?.['unigraph.id'],
+            }))
+            .filter((el: any) => el.type === '$/schema/subentity');
+    }
+    return [];
+};
+
+export const copyChildToClipboard = (data: any, context: NoteEditorContext, index: number, cut = false) => {
+    let currSubentity = -1;
+    const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
+    let cutItem;
+    children?.forEach((el: any, elindex: any) => {
+        if (el?._value?.type?.['unigraph.id'] === '$/schema/subentity' && ++currSubentity === index) {
+            cutItem = {
+                uid: el?._value?._value?.uid,
+                content: el?._value?._value?._value?.text?._value?._value?.['_value.%'],
+                index: currSubentity,
+                children: getAllChildren(el?._value?._value?._value?.children),
+            };
+        }
+    });
+    if (cut) deleteChild(data, context, index);
+    return cutItem;
+};
+
+export const deleteChild = (data: any, context: NoteEditorContext, index: number, permanent = false) => {
+    const delState = window.unigraph.getState(`temp/deleteChildren/${data.uid}`);
+    if (!delState.value) delState.value = [];
+    delState.value.push(index);
+    setTimeout(() => {
+        if (delState.value) {
+            deleteChildren(
+                data,
+                context,
+                delState.value.sort((a: any, b: any) => a - b),
+                permanent,
+            );
+            delState.value = undefined;
+        }
+    }, 0);
+};
+
+export const deleteChildren = (data: any, context: NoteEditorContext, index: number[], permanent = false) => {
+    let currSubentity = -1;
+    let deleted = 0;
+    const parents = getParents(data);
+    const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
+    const toDel: any[] = [];
+    const newChildren = children?.reduce((prev: any[], el: any, elindex: any) => {
+        if (el?._value?.type?.['unigraph.id'] === '$/schema/subentity') {
+            currSubentity++;
+            if (index.includes(currSubentity)) {
+                deleted += 1;
+                toDel.push(el);
+                return prev;
+            }
+            return [...prev, { uid: el.uid, _index: { '_value.#i': elindex - deleted } }];
+        }
+        return [...prev, { uid: el.uid }];
+    }, []);
+    window.unigraph.updateObject(
+        data?._value?.uid,
+        { children: { _displayAs: data?._value?.children?._displayAs, '_value[': newChildren } },
+        false,
+        false,
+        context.callbacks.subsId,
+        parents,
+        true,
+    );
+    focusUid({ uid: data.uid }, -1);
+
+    setTimeout(() => {
+        toDel.forEach((el) => {
+            if (permanent && el?._value?._value?.['~_value'].length <= 1) {
+                permanentlyDeleteBlock(el._value._value, [el.uid, el._value.uid]);
+            }
+        });
+    }, 1000);
+    window.unigraph.touch(getParents(data).map((ell) => ell.uid));
 };
 
 export const unsplitChild = async (data: any, context: NoteEditorContext, index: number, currString: string) => {
