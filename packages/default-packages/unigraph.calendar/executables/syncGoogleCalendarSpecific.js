@@ -1,5 +1,3 @@
-/* eslint @typescript-eslint/no-var-requires: "off" */
-
 const { RRule, rrulestr } = require('rrule');
 const { DateTime } = require('luxon');
 const _ = require('lodash/fp');
@@ -25,7 +23,10 @@ const sync = async (calendar, cal, syncToken) => {
     let nextPageToken;
     let nextSyncToken;
     const items = [];
+    let i = 0;
     while (hasNext) {
+        console.log(`sync iteration ${i}`);
+        i += 1;
         // eslint-disable-next-line no-await-in-loop
         const resp = await calendar.events.list({
             calendarId: cal._value.id['_value.%'],
@@ -38,7 +39,7 @@ const sync = async (calendar, cal, syncToken) => {
             if (resp.data.nextSyncToken) nextSyncToken = resp.data.nextSyncToken;
         } else nextPageToken = resp.data.nextPageToken;
     }
-    // items.slice(items.length - 101);
+    items.slice(items.length - 101);
     return { items, nextSyncToken };
 };
 
@@ -55,7 +56,6 @@ const parseRecurrence = (start, end, rrule, timezone) => {
             startDate.getSeconds(),
         ),
     );
-    // const rule = new RRule(options);
     const ruleOrSet = rrulestrFixed(rrule, { dtstart: startDateUTC });
     const diff = endDate.getTime() - startDate.getTime();
     const utcStarts = ruleOrSet.all().map((date) => {
@@ -143,11 +143,12 @@ const deletePrevRecurrences = async (uids) => {
             _.has(['_value', 'recurrence_rules', 'uid'], prevFrames) &&
             _.prop(['_value', 'recurrence', '_value['], prevFrames)
         ) {
+            console.log('deletePrevRecurrences', prevFrames);
             await unigraph.deleteObject(_.prop(['_value', 'recurrence_rules', 'uid'], prevFrames), true);
             await unigraph.deleteItemFromArray(
                 prevFrames._value.recurrence.uid,
                 prevFrames._value.recurrence['_value['].map(_.prop('uid')),
-                uid,
+                prevFrames.uid ?? null,
                 [],
             );
         }
@@ -183,23 +184,29 @@ const makeRecurrenceObj = (ev) => {
 
 const makeRecurrentEventObj = (calUid, ev) => {
     const recurrenceObj = makeRecurrenceObj(ev);
+    console.log('makeRecurrentEventObj', { calUid, ev, recurrenceObj });
     return makeEventObj(calUid, ev, recurrenceObj);
 };
 
 const syncGoogleCalendarSpecific = async () => {
-    const calUid = context.params.uid;
+    const calUid = context?.params?.uid;
+    console.log('syncGoogleCalendarSpecific 0.25', {
+        calUid,
+    });
     const { calendar } = context;
     const cal = await unigraph.getObject(calUid);
-
     const syncToken = cal._value?.sync_token?.['_value.%'] || undefined;
     // const syncToken = undefined;
     const { items, nextSyncToken } = await sync(calendar, cal, syncToken);
-
     const itemSlice = items;
 
-    // Process the changes, looping through all the events one by one
-    // if (cal['_value'].id?.['_value.%'] !== "c_5le2cv45o72utfkh4bcntpj2f4@group.calendar.google.com") return;
-    // const toAdd = [];
+    console.log('syncGoogleCalendarSpecific 0.5', {
+        itemsLen: items.length,
+        calUid,
+        syncToken,
+        nextSyncToken,
+    });
+
     // find cancelled events
     // TODO: not just, 20, the whole thing
     const cancelledEventQueries = itemSlice
@@ -208,10 +215,7 @@ const syncGoogleCalendarSpecific = async () => {
         .map(queryFromEventId);
     const cancelledEventObjs = await unigraph.getQueries(cancelledEventQueries);
     // Delete cancelled events existing in the unigraph db
-    const cancelledEventUids = cancelledEventObjs
-        // .map((obj) => obj?.[0]?.[0]?.uid)
-        .map((obj) => obj?.[0]?.uid)
-        .filter(_.negate(_.isNil));
+    const cancelledEventUids = cancelledEventObjs.map(_.prop(['0', 'uid'])).filter(_.negate(_.isNil));
     cancelledEventUids.forEach(unigraph.deleteObject);
     // TODO: process these single instances as well (when ev.recurringEventId exists)
     const confirmedEventsNonRecurring = itemSlice
@@ -222,31 +226,30 @@ const syncGoogleCalendarSpecific = async () => {
         .filter(_.prop('recurrence'))
         .map((ev) => queryFromEventId(ev.id));
 
-    // const objsWithRecurrence = await Promise.all(
-    //     eventsWithRecurrence.map((ev) => unigraph.getQueries([queryFromEventId(ev.id)])),
-    // );
-    const objsWithRecurrence = await unigraph.getQueries(eventsWithRecurrenceQueries);
+    const objsWithRecurrenceResults = await unigraph.getQueries(eventsWithRecurrenceQueries);
     // delete previous recurrences
-    objsWithRecurrence
-        .map((obj) => obj?.[0]?.uid)
-        // .map((obj) => obj?.[0]?.[0]?.uid)
-        .filter(_.negate(_.isNil));
-    // .forEach(deletePrevRecurrences);
+    const objsWithRecurrence = objsWithRecurrenceResults.map(_.prop(['0', 'uid'])).filter(_.negate(_.isNil));
     deletePrevRecurrences(objsWithRecurrence);
 
-    const toAdd = confirmedEventsNonRecurring
-        .filter(_.negate(_.isNil))
-        // .map(inspect('toAdd'))
-        .map(_.curry(makeRecurrentEventObj)(calUid));
+    console.log('syncGoogleCalendarSpecific 1', {
+        objsWithRecurrenceLen: objsWithRecurrence.length,
+        confirmedEventsNonRecurringLen: confirmedEventsNonRecurring.length,
+        cancelledEventUidsLen: cancelledEventUids.length,
+        itemSliceLen: itemSlice.length,
+    });
+    const toAdd = confirmedEventsNonRecurring.filter(_.negate(_.isNil)).map(_.curry(makeRecurrentEventObj)(calUid));
 
     if (toAdd.length > 0) {
         await unigraph.addObject(toAdd, '$/schema/calendar_event');
+        console.log('added', { toAddLen: toAdd.length, ...toAdd[0].name });
     }
     if (syncToken !== nextSyncToken) {
+        console.log('updating nextSyncToken', { syncToken, nextSyncToken });
         await unigraph.updateObject(calUid, {
             sync_token: nextSyncToken,
         });
     }
+    console.log('finished syncGoogleCalendarSpecific \n');
 };
-
+console.log('syncGoogleCalendarSpecific 0');
 await syncGoogleCalendarSpecific();
