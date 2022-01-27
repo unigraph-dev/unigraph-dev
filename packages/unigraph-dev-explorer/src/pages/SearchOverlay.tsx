@@ -1,23 +1,18 @@
-import { Card, Divider, InputBase, TextField, Typography } from '@material-ui/core';
+import { Card, InputBase, Typography } from '@material-ui/core';
 import _ from 'lodash';
 import React from 'react';
 import { AppState } from 'unigraph-dev-common/lib/types/unigraph';
 import { buildUnigraphEntity } from 'unigraph-dev-common/lib/utils/entityUtils';
-import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
+import { buildGraph, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { AutoDynamicView } from '../components/ObjectView/AutoDynamicView';
-import { DynamicObjectListView } from '../components/ObjectView/DynamicObjectListView';
 import { inlineTextSearch } from '../components/UnigraphCore/InlineSearchPopup';
 import { parseQuery } from '../components/UnigraphCore/UnigraphSearch';
-import { isElectron, setCaret } from '../utils';
+import { isElectron } from '../utils';
 
 const groups = [
     {
         title: 'Add an item',
         key: 'adder',
-    },
-    {
-        title: 'Search Unigraph',
-        key: 'search',
     },
     {
         title: 'Commands',
@@ -134,13 +129,10 @@ function AdderComponent({ input, setInput, open, setClose, callback, summonerToo
 export function SearchOverlay({ open, setClose, callback, summonerTooltip, defaultValue }: any) {
     const [input, setInput] = React.useState(defaultValue || '');
     const [parsed, setParsed] = React.useState<any>({});
-    const [query, setQuery] = React.useState<any[]>([]);
 
     const [entries, setEntries] = React.useState<any[]>([]);
 
-    const [results, setResults] = React.useState<any[]>([]);
-    const [entities, setEntities] = React.useState<string[]>([]);
-    const [response, setResponse] = React.useState(false);
+    const [entities, setEntities] = React.useState<any[]>([]);
     const [commands, setCommands] = React.useState<any[]>([]);
     const [finalCommands, setFinalCommands] = React.useState<any[]>([]);
     const [selectedIndex, setSelectedIndex] = React.useState(0);
@@ -148,16 +140,11 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
     const tf = React.useRef<HTMLDivElement | null>(null);
 
     React.useEffect(() => {
-        window.unigraph.getState('registry/commands').subscribe((res) => {
-            if (parsed.type !== 'command') {
-                setCommands(res);
-            }
-        });
-    });
+        setCommands(window.unigraph.getState('registry/commands').value);
+    }, []);
 
     React.useEffect(() => {
         tf.current?.focus();
-        console.log('open', open);
     }, [open]);
 
     React.useEffect(() => {
@@ -165,31 +152,22 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
     }, defaultValue);
 
     React.useEffect(() => {
-        console.log(input);
-        if (input.startsWith('?')) {
-            const newQuery = input.slice(1);
-            setParsed({
-                type: 'query',
-                value: newQuery,
-            });
-            setEntries([]);
-            setEntities([]);
-        } else {
-            if (parsed.type === 'command' && input === '') {
-                setCommands(window.unigraph.getState('registry/commands').value);
-            }
-            setParsed({
-                type: input === '' ? '' : 'command',
-                value: input,
-            });
-            setEntries([]);
-            setEntities([]);
+        if (parsed.type === 'command' && input === '') {
+            setCommands(window.unigraph.getState('registry/commands').value);
         }
+        setParsed({
+            type: input === '' ? '' : 'command',
+            value: input,
+        });
+        setEntries([]);
+        setEntities([]);
+
         setSelectedIndex(0);
     }, [input]);
 
     React.useEffect(() => {
         const displayCommands = groups
+            .filter((grp: any) => commands.filter((el: any) => el.group === grp.key).length > 0)
             .map((grp: any) => [
                 {
                     type: 'group',
@@ -213,21 +191,45 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
                                 <Typography style={{ color: 'gray' }}>{el.about}</Typography>
                             </div>
                         ),
+                        dontClose: el.dontClose,
                     })),
             ])
             .flat();
+        displayCommands.push(
+            { type: 'group', element: <Typography style={{ color: 'gray' }}>Search results</Typography> },
+            ...(entities[0] === null
+                ? [
+                      {
+                          type: 'command',
+                          element: <Typography>No results</Typography>,
+                      },
+                  ]
+                : buildGraph(entities as any[])
+                      .slice(0, 20)
+                      .map((datael: any) => ({
+                          type: 'command',
+                          element: (
+                              <AutoDynamicView
+                                  object={datael}
+                                  noClickthrough={false}
+                                  style={{
+                                      cursor: 'pointer',
+                                      display: 'flex',
+                                  }}
+                              />
+                          ),
+                      }))),
+        );
         displayCommands
             .filter((el) => el.type === 'command')
             .forEach((el, index) => {
                 Object.assign(el, { index });
             });
         setFinalCommands(displayCommands);
-    }, [commands]);
+    }, [commands, entities]);
 
     React.useEffect(() => {
-        if (parsed?.type === 'query') {
-            setQuery(parseQuery(parsed?.value));
-        } else if (parsed?.type === 'command') {
+        if (parsed?.type === 'command') {
             // list all commands
             const commandsVal = window.unigraph.getState('registry/commands').value;
             setCommands(
@@ -240,20 +242,16 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
 
     const search = React.useMemo(
         () =>
-            _.debounce((newQuery: any[]) => {
-                setResponse(false);
+            _.debounce((newQuery) => {
                 if (newQuery.length) {
                     window.unigraph
-                        .getSearchResults(newQuery, 'metadata', 3, {
+                        .getSearchResults(parseQuery(newQuery) as any, 'metadata', 2, {
                             noPrimitives: true,
                         })
                         .then((res) => {
-                            // setResults(res.results.reverse());
-                            setEntities(res.entities);
-                            setResponse(true);
+                            setEntities(res.entities?.length > 0 ? res.entities : [null]);
                         });
                 } else {
-                    setResults([]);
                     setEntities([]);
                 }
             }, 200),
@@ -261,8 +259,8 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
     );
 
     React.useEffect(() => {
-        search(query);
-    }, [query]);
+        search(input);
+    }, [input]);
 
     const defaultEl = (
         <div>
@@ -275,14 +273,12 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
                     setInput(ev.target.value);
                 }}
                 onKeyDown={(ev) => {
-                    console.log(ev);
                     if (ev.key === 'ArrowDown') {
-                        console.log(ev);
-                        setSelectedIndex((idx) => idx + 1);
+                        if (selectedIndex < finalCommands.filter((el: any) => el.type === 'command').length - 1)
+                            setSelectedIndex((idx) => idx + 1);
                     } else if (ev.key === 'ArrowUp') {
-                        setSelectedIndex((idx) => idx - 1);
+                        if (selectedIndex > 0) setSelectedIndex((idx) => idx - 1);
                     } else if (ev.key === 'Enter') {
-                        console.log(document.getElementById('omnibarItem_current') as any);
                         (document.getElementById('omnibarItem_current')?.children[0] as any)?.click();
                     } else return;
                     ev.preventDefault();
@@ -293,7 +289,6 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
             <div>
                 {summonerTooltip ? <Typography>{summonerTooltip}</Typography> : []}
                 {entries}
-                {entities.length > 0 ? <DynamicObjectListView items={entities} context={null} buildGraph noBar /> : []}
                 {parsed?.type === 'command' || parsed?.type === ''
                     ? finalCommands.map((el) => (
                           <div
@@ -303,6 +298,13 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
                                   borderRadius: '8px',
                               }}
                               id={`omnibarItem_${el.index === selectedIndex ? 'current' : ''}`}
+                              onClickCapture={(ev: any) => {
+                                  if (!el.dontClose) {
+                                      setTimeout(() => {
+                                          setClose(true);
+                                      }, 100);
+                                  }
+                              }}
                           >
                               {el.element}
                           </div>
@@ -312,7 +314,7 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
             </div>
         </div>
     );
-    console.log(window.unigraph.getState('registry/quickAdder').value[input.substr(1, input.indexOf(' ') - 1)]);
+    // console.log(window.unigraph.getState('registry/quickAdder').value[input.substr(1, input.indexOf(' ') - 1)]);
     return input.startsWith?.('+') &&
         window.unigraph.getState('registry/quickAdder').value[input.substr(1, input.indexOf(' ') - 1)] ? (
         <AdderComponent
@@ -339,7 +341,7 @@ export function SearchOverlayPopover({ open, setClose, noShadow }: any) {
     const [searchEnabled, setSearchEnabled] = React.useState(false);
     const [summonerState, setSummonerState] = React.useState<Partial<OmnibarSummonerType>>({});
     const overlay = React.useRef(null);
-    console.log(open, searchEnabled);
+    // console.log(open, searchEnabled);
 
     const omnibarSummoner: AppState<Partial<OmnibarSummonerType>> = window.unigraph.getState('global/omnibarSummoner');
 
@@ -408,15 +410,19 @@ export function SearchOverlayPopover({ open, setClose, noShadow }: any) {
                 display: searchEnabled ? 'block' : 'none',
             }}
         >
-            <SearchOverlay
-                open={searchEnabled}
-                callback={summonerState.callback}
-                summonerTooltip={summonerState.tooltip}
-                defaultValue={summonerState.defaultValue}
-                setClose={() => {
-                    setSearchEnabled(false);
-                }}
-            />
+            {searchEnabled ? (
+                <SearchOverlay
+                    open={searchEnabled}
+                    callback={summonerState.callback}
+                    summonerTooltip={summonerState.tooltip}
+                    defaultValue={summonerState.defaultValue}
+                    setClose={() => {
+                        setSearchEnabled(false);
+                    }}
+                />
+            ) : (
+                []
+            )}
         </Card>
     );
 }
