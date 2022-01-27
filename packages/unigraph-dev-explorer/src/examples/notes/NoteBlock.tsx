@@ -122,7 +122,15 @@ export function PlaceholderNoteBlock({ callbacks }: any) {
     );
 }
 
-export function OutlineComponent({ children, collapsed, setCollapsed, isChildren, createBelow }: any) {
+export function OutlineComponent({
+    children,
+    collapsed,
+    setCollapsed,
+    isChildren,
+    createBelow,
+    displayAs,
+    parentDisplayAs,
+}: any) {
     return (
         <div
             style={{
@@ -146,31 +154,39 @@ export function OutlineComponent({ children, collapsed, setCollapsed, isChildren
             >
                 V
             </div>
-            <div
-                style={{
-                    height: 'calc(100% + 4px)',
-                    width: '1px',
-                    backgroundColor: 'gray',
-                    position: 'absolute',
-                    left: '-12px',
-                    display: isChildren ? '' : 'none',
-                }}
-            />
-            <FiberManualRecord
-                style={{
-                    fontSize: '0.5rem',
-                    marginLeft: '8px',
-                    marginRight: '8px',
-                    ...(collapsed
-                        ? {
-                              borderRadius: '4px',
-                              color: 'lightgray',
-                              backgroundColor: 'black',
-                          }
-                        : {}),
-                }}
-            />
-            <div style={{ flexGrow: 1 }}>{children}</div>
+            {displayAs === 'outliner' ? (
+                <>
+                    <div
+                        style={{
+                            height: 'calc(100% + 4px)',
+                            width: '1px',
+                            backgroundColor: 'gray',
+                            position: 'absolute',
+                            left: '-12px',
+                            display: parentDisplayAs === 'outliner' ? '' : 'none',
+                        }}
+                    />
+                    <FiberManualRecord
+                        style={{
+                            fontSize: '0.5rem',
+                            marginLeft: '8px',
+                            marginRight: '8px',
+                            ...(collapsed
+                                ? {
+                                      borderRadius: '4px',
+                                      color: 'lightgray',
+                                      backgroundColor: 'black',
+                                  }
+                                : {}),
+                        }}
+                    />
+                </>
+            ) : (
+                []
+            )}
+            <div style={{ flexGrow: 1, marginLeft: displayAs === 'outliner' || !parentDisplayAs ? '' : '24px' }}>
+                {children}
+            </div>
         </div>
     );
 }
@@ -266,6 +282,7 @@ export function DetailedNoteBlock({
     focused,
     index,
     componentId,
+    displayAs,
 }: any) {
     // eslint-disable-next-line no-bitwise
     isChildren |= callbacks?.isChildren;
@@ -363,7 +380,7 @@ export function DetailedNoteBlock({
                 {
                     uid: data.uid,
                     componentId,
-                    children: subentities.map((el: any) => el.uid),
+                    children: isCollapsed ? [] : subentities.map((el: any) => el.uid),
                     type: data?.type?.['unigraph.id'],
                     root: !isChildren,
                 },
@@ -388,7 +405,7 @@ export function DetailedNoteBlock({
         return function cleanup() {
             inputDebounced.current.flush();
         };
-    }, [JSON.stringify(subentities.map((el: any) => el.uid).sort()), data.uid, componentId]);
+    }, [JSON.stringify(subentities.map((el: any) => el.uid).sort()), data.uid, componentId, isCollapsed]);
 
     const checkReferences = React.useCallback(
         (matchOnly?: boolean) => {
@@ -540,6 +557,8 @@ export function DetailedNoteBlock({
     }, [data.get('text').as('primitive'), focused]);
 
     React.useEffect(commandFn, [command]);
+
+    const childrenDisplayAs = data?._value?.children?._displayAs || 'outliner';
 
     return (
         <NoteViewPageWrapper isRoot={!isChildren}>
@@ -908,6 +927,8 @@ export function DetailedNoteBlock({
                                                 createBelow={() => {
                                                     addChild(data, editorContext, elindex);
                                                 }}
+                                                displayAs={childrenDisplayAs}
+                                                parentDisplayAs={displayAs}
                                             >
                                                 <AutoDynamicView
                                                     noDrag
@@ -978,6 +999,7 @@ export function DetailedNoteBlock({
                                                     attributes={{
                                                         isChildren: true,
                                                         isCollapsed: isCol,
+                                                        displayAs: childrenDisplayAs,
                                                         setCollapsed: (val: boolean) => {
                                                             setIsChildrenCollapsed({
                                                                 ...isChildrenCollapsed,
@@ -1005,7 +1027,11 @@ export function DetailedNoteBlock({
                                     })}
                             </DragandDrop>
                         ) : (
-                            <OutlineComponent isChildren={isChildren}>
+                            <OutlineComponent
+                                isChildren={isChildren}
+                                displayAs={data?._value?.children?._displayAs || 'outliner'}
+                                parentDisplayAs={displayAs}
+                            >
                                 <PlaceholderNoteBlock
                                     callbacks={{
                                         'add-child': () => noteBlockCommands['add-child'](data, editorContext),

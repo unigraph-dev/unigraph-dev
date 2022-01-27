@@ -23,7 +23,7 @@ import { ExpandMore, Save } from '@material-ui/icons';
 import { Actions } from 'flexlayout-react';
 import { useEffectOnce } from 'react-use';
 
-loader.config({ paths: { vs: './vendor/monaco-editor_at_0.23.0/min/vs' } });
+loader.config({ paths: { vs: './vendor/monaco-editor_at_0.31.1/' } });
 
 const unigraphDecl: string =
     // eslint-disable-next-line import/no-webpack-loader-syntax

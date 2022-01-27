@@ -56,22 +56,12 @@ window.reloadCommands = () => {
                     setInput(`+${k} `);
                 },
                 group: 'adder',
+                dontClose: true,
             };
         })
         .filter(Boolean);
 
-    const searchCommand = {
-        name: '?<search query> : search Unigraph',
-        about: 'Search Unigraph',
-        onClick: (ev: any, setInput: any) => {
-            ev.stopPropagation();
-            ev.preventDefault();
-            setInput('?');
-        },
-        group: 'search',
-    };
-
-    commandsState.setValue([...adderCommands, searchCommand, ...pageCommands]);
+    commandsState.setValue([...adderCommands, ...pageCommands]);
 };
 
 /**

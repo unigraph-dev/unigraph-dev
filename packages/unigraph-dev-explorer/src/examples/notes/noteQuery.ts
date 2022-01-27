@@ -34,6 +34,7 @@ const getQuery: (depth: number) => string = (depth: number) => {
             }
             children {
                 uid
+                <_displayAs>
                 <_value[> {
                     uid
                     <_index> { uid <_value.#i> }

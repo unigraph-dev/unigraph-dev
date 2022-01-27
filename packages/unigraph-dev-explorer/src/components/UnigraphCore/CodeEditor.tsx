@@ -8,8 +8,6 @@ import {
     ListItemText,
     MenuItem,
     Select,
-    Tab,
-    Tabs,
     TextField,
 } from '@material-ui/core';
 import React from 'react';
@@ -69,17 +67,18 @@ export function CodeEditor({ id }: any) {
     const [execPackages, setExecPackages]: any = React.useState([]);
     const [currentUid, setCurrentUid]: any = React.useState('');
 
-    const [currentTab, setCurrentTab]: any = React.useState(0);
-
-    const currentView = (
-        <DetailedObjectView
-            uid={currentUid}
-            id={id}
-            components={{
-                '$/schema/executable': { view: ExecutableCodeEditor },
-            }}
-            callbacks={{ isEmbed: true }}
-        />
+    const currentView = React.useMemo(
+        () => (
+            <DetailedObjectView
+                uid={currentUid}
+                id={id}
+                components={{
+                    '$/schema/executable': { view: ExecutableCodeEditor },
+                }}
+                callbacks={{ isEmbed: true }}
+            />
+        ),
+        [currentUid, id],
     );
 
     const [isUserCollapseOpen, setIsUserCollapseOpen] = React.useState(false);

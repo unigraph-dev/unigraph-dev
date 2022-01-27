@@ -1,6 +1,7 @@
 /* eslint-disable no-plusplus */
 import _ from 'lodash';
 import { buildUnigraphEntity, byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { YearSelection } from '@material-ui/pickers/views/Year/YearView';
 import { dfs, removeAllPropsFromObj } from '../../utils';
 import { parseTodoObject } from '../todo/parseTodoObject';
 import { NoteEditorContext } from './types';
@@ -39,6 +40,8 @@ export const addChildren = (data: any, context: NoteEditorContext, index: number
     window.unigraph.updateObject(
         data._value.uid,
         {
+            ...(data?._value?.children || {}),
+            uid: undefined,
             children: {
                 '_value[': [
                     ...(data?._value?.children?.['_value['] || []).map((el: any) => ({
@@ -181,7 +184,7 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
     // console.log(newChildren)
     window.unigraph.updateObject(
         data?._value?.uid,
-        { children: { '_value[': newChildren } },
+        { children: { _displayAs: data?._value?.children?._displayAs, '_value[': newChildren } },
         false,
         false,
         context.callbacks.subsId,
@@ -234,7 +237,7 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
         ];
         window.unigraph.updateObject(
             data?._value?.uid,
-            { children: { '_value[': newChildren } },
+            { children: { _displayAs: data?._value?.children?._displayAs, '_value[': newChildren } },
             false,
             false,
             context.callbacks.subsId,
@@ -282,9 +285,7 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
                         _value: { uid: data?._value?.text?._value?._value?.uid, '_value.%': newText },
                     },
                 },
-                children: {
-                    '_value[': newChildren,
-                },
+                children: { _displayAs: data?._value?.children?._displayAs, '_value[': newChildren },
             },
             false,
             false,
@@ -353,7 +354,7 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
         ];
         window.unigraph.updateObject(
             data?._value?.uid,
-            { children: { '_value[': newChildren } },
+            { children: { _displayAs: data?._value?.children?._displayAs, '_value[': newChildren } },
             false,
             false,
             context.callbacks.subsId,
@@ -485,7 +486,7 @@ export const indentChildren = (data: any, context: NoteEditorContext, index: num
     const finalChildren = newChildren.filter((el: any) => el !== undefined);
     window.unigraph.updateObject(
         data?._value?.uid,
-        { children: { '_value[': finalChildren } },
+        { children: { _displayAs: data?._value?.children?._displayAs, '_value[': finalChildren } },
         false,
         false,
         context.callbacks.subsId,
@@ -588,7 +589,7 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
     }, []);
     await window.unigraph.updateObject(
         data?._value?.uid,
-        { ...data._value, children: { '_value[': newChildren } },
+        { ...data._value, children: { _displayAs: data?._value?.children?._displayAs, '_value[': newChildren } },
         false,
         false,
         context.callbacks.subsId,
@@ -662,7 +663,7 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
     stubConverted.uid = newUid[0];
     await window.unigraph.updateObject(
         data?._value?.uid,
-        { ...data._value, children: { '_value[': newChildren } },
+        { ...data._value, children: { _displayAs: data?._value?.children?._displayAs, '_value[': newChildren } },
         false,
         false,
         context.callbacks.subsId,
@@ -692,10 +693,22 @@ export const replaceChildWithUid = async (data: any, context: NoteEditorContext,
     }, []);
     await window.unigraph.updateObject(
         data?._value?.uid,
-        { ...data._value, children: { '_value[': newChildren } },
+        { ...data._value, children: { _displayAs: data?._value?.children?._displayAs, '_value[': newChildren } },
         false,
         false,
         context.callbacks.subsId,
     );
     window.unigraph.touch(getParents(data).map((el) => el.uid));
+};
+
+export const setChildrenDisplayAs = async (data: any, callbacks: any, mode: string) => {
+    await window.unigraph.updateObject(
+        data?._value?.uid,
+        { children: { uid: data?._value?.children?.uid, _displayAs: mode } },
+        true,
+        false,
+        callbacks.subsId,
+        [],
+        true,
+    );
 };
