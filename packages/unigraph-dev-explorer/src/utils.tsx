@@ -67,7 +67,7 @@ export const DataContextWrapper = ({ children, contextUid, contextData, parents,
                 ];
             },
         };
-    }, [contextUid, contextData?.uid, viewType, expandedChildren, JSON.stringify((parents || []).sort?.())]);
+    }, [contextUid, contextData?.uid, viewType, expandedChildren, JSON.stringify(parents?.sort?.())]);
 
     return <DataContext.Provider value={dataContext}>{children}</DataContext.Provider>;
 };
@@ -86,7 +86,7 @@ export const getComponentFromPage = (location: string, params: any = {}) => {
 };
 
 export const setCaret = (document: Document, element: any, pos: number, length?: number) => {
-    // console.log(element, pos, length);
+    console.log(element, pos, length);
     const range = document.createRange();
     const sel = document.getSelection();
     const maxLen = element.textContent.length < pos ? element.textContent.length : pos;
