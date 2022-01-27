@@ -4,8 +4,10 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { getRandomId } from 'unigraph-dev-common/lib/utils/utils';
 import { DynamicViewRenderer } from '../../global.d';
-import { TabContext } from '../../utils';
+import { subscribeToBacklinks } from '../../unigraph-react';
+import { DataContext, DataContextWrapper, TabContext } from '../../utils';
 import { ObjectEditor } from '../ObjectEditor/ObjectEditor';
+import { getParentsAndReferences } from './backlinksUtils';
 import { isStub } from './utils';
 
 export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
@@ -22,6 +24,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
     const [loadedObj, setLoadedObj] = React.useState<any>(false);
     const [subsId, setSubsId] = React.useState(getRandomInt());
 
+    const dataContext = React.useContext(DataContext);
     const tabContext = React.useContext(TabContext);
 
     const [DynamicViewsDetailed, setDynamicViewsDetailed] = React.useState({
@@ -33,6 +36,27 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
     const [isFocused, setIsFocused] = React.useState(
         window.unigraph.getState('global/focused').value.uid === object?.uid && tabContext.isVisible(),
     );
+
+    const [totalParents, setTotalParents] = React.useState<string[] | undefined>();
+
+    React.useEffect(() => {
+        if (object?.uid?.startsWith('0x')) {
+            const cb = (newBacklinks: any) => {
+                const [pars, refs] = getParentsAndReferences(
+                    newBacklinks['~_value'],
+                    newBacklinks['unigraph.origin'],
+                    object.uid,
+                );
+                setTotalParents([...(pars || []).map((el) => el.uid), ...(refs || []).map((el) => el.uid)]);
+            };
+            subscribeToBacklinks(object.uid, cb);
+            return function cleanup() {
+                subscribeToBacklinks(object.uid, cb, true);
+            };
+        }
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        return () => {};
+    }, [object?.uid, JSON.stringify(dataContext?.getParents(true)?.sort())]);
 
     React.useEffect(() => {
         const cbDVD = (newIts: any) => setDynamicViewsDetailed({ ...newIts, ...(components || {}) });
@@ -106,28 +130,36 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
                     </div>
                 )}
             >
-                <div style={{ display: 'contents' }} id={`object-view-${object.uid}`}>
-                    <TabContext.Consumer>
-                        {({ viewId, setTitle }) =>
-                            React.createElement(DynamicViewsDetailed[object.type['unigraph.id']].view, {
-                                data: isObjectStub ? loadedObj : object,
-                                callbacks: {
-                                    viewId,
-                                    setTitle,
-                                    ...(callbacks || {}),
-                                },
-                                options: {
-                                    viewId,
-                                    setTitle,
-                                    ...(options || {}),
-                                },
-                                context,
-                                ...(attributes || {}),
-                                focused: isFocused,
-                            })
-                        }
-                    </TabContext.Consumer>
-                </div>
+                <DataContextWrapper
+                    contextUid={object.uid}
+                    contextData={isObjectStub ? loadedObj : object}
+                    parents={totalParents}
+                    viewType="$/schema/dynamic_view_detailed"
+                    expandedChildren
+                >
+                    <div style={{ display: 'contents' }} id={`object-view-${object.uid}`}>
+                        <TabContext.Consumer>
+                            {({ viewId, setTitle }) =>
+                                React.createElement(DynamicViewsDetailed[object.type['unigraph.id']].view, {
+                                    data: isObjectStub ? loadedObj : object,
+                                    callbacks: {
+                                        viewId,
+                                        setTitle,
+                                        ...(callbacks || {}),
+                                    },
+                                    options: {
+                                        viewId,
+                                        setTitle,
+                                        ...(options || {}),
+                                    },
+                                    context,
+                                    ...(attributes || {}),
+                                    focused: isFocused,
+                                })
+                            }
+                        </TabContext.Consumer>
+                    </div>
+                </DataContextWrapper>
             </ErrorBoundary>
         );
     }

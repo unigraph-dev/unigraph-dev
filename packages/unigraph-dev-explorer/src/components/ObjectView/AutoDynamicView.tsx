@@ -158,8 +158,8 @@ export function AutoDynamicView({
     }, [shortcuts]);
 
     React.useEffect(() => {
-        if (object?.uid?.startsWith('0x') && shouldGetBacklinks && dataContext.parents !== undefined) {
-            // console.log(dataContext.getParents(true));
+        if (object?.uid?.startsWith('0x') && shouldGetBacklinks) {
+            // console.log(object?.uid, dataContext.getParents(true));
             const cb = (newBacklinks: any) => {
                 const [pars, refs] = getParentsAndReferences(
                     newBacklinks['~_value'],
@@ -189,7 +189,7 @@ export function AutoDynamicView({
     React.useEffect(() => {
         const newSubs = getRandomInt();
         if (isObjectStub) {
-            console.log(tabContext);
+            // console.log(tabContext);
             if (subsId) tabContext.unsubscribe(subsId);
             let query = DynamicViews[object.type?.['unigraph.id']]?.query?.(object.uid);
             if (!query) {
