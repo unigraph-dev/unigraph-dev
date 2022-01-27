@@ -38,10 +38,10 @@ export const shortcutToString = (shortcut: KeyboardEvent | Shortcut) =>
         shortcut.shiftKey ? 'shift+' : ''
     }${shortcut.key}`;
 
-const shortcutHandler = (ev: KeyboardEvent) => {
+const shortcutHandler = (ev: KeyboardEvent, specialEvent?: string) => {
     if (ev.location !== 1 && ev.location !== 2) {
         // not modifier keys
-        const keyStr = shortcutToString(ev);
+        const keyStr = specialEvent || shortcutToString(ev);
 
         // now we check if there's a registered shortcut for this key
         const dict = window.unigraph.getState('global/keyboardShortcuts').value;
@@ -58,8 +58,13 @@ const shortcutHandler = (ev: KeyboardEvent) => {
             }
             if (hasComponents.length > 0) {
                 const matchingComponents = hasComponents.map((el: string) => dict[keyStr][el]).filter(Boolean);
+                const retFns: any[] = [];
                 matchingComponents.forEach((callback: any) => {
-                    callback(ev);
+                    const ret = callback(ev);
+                    if (typeof ret === 'function') retFns.push(ret);
+                });
+                retFns.forEach((fn: any) => {
+                    fn(ev);
                 });
                 console.log(`ran ${matchingComponents.length} callbacks`);
             }
@@ -69,6 +74,7 @@ const shortcutHandler = (ev: KeyboardEvent) => {
 
 export const initKeyboardShortcuts = () => {
     document.addEventListener('keydown', shortcutHandler);
-
+    document.addEventListener('cut', (ev: any) => shortcutHandler(ev, 'oncut'));
+    document.addEventListener('copy', (ev: any) => shortcutHandler(ev, 'oncopy'));
     return true;
 };

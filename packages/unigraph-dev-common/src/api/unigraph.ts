@@ -193,6 +193,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 setValue: undefined as any,
             };
             state.setValue = (newValue: any, flush?: boolean) => {
+                if (typeof newValue === 'function') newValue = newValue(state.value);
                 const changed = newValue !== state.value;
                 state.value = newValue;
                 if (changed || flush) state.subscribers.forEach((sub) => sub(state.value));
