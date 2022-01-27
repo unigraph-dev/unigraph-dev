@@ -414,6 +414,27 @@ export function AutoDynamicView({
                         borderRadius: isSelected || isDragging ? '12px' : '',
                     }}
                     key={`object-view-${object?.uid}`}
+                    onClickCapture={(ev) => {
+                        if (isMultiSelectKeyPressed(ev)) {
+                            ev.stopPropagation();
+                            selectUid(componentId, false);
+                        }
+                    }}
+                    onClick={(ev) => {
+                        if (!noClickthrough && canClickthrough) {
+                            typeof onClick === 'function'
+                                ? onClick(ev)
+                                : (() => {
+                                      ev.stopPropagation();
+                                      ev.preventDefault();
+                                      window.wsnavigator(
+                                          `/library/object?uid=${object?.uid}&viewer=${'dynamic-view-detailed'}&type=${
+                                              object?.type?.['unigraph.id']
+                                          }`,
+                                      );
+                                  })();
+                        }
+                    }}
                 >
                     <div
                         id={`object-view-${object?.uid}`}
@@ -440,29 +461,6 @@ export function AutoDynamicView({
                                           componentId,
                                       })
                         }
-                        onClickCapture={(ev) => {
-                            if (isMultiSelectKeyPressed(ev)) {
-                                ev.stopPropagation();
-                                selectUid(componentId, false);
-                            }
-                        }}
-                        onClick={(ev) => {
-                            if (!noClickthrough && canClickthrough) {
-                                typeof onClick === 'function'
-                                    ? onClick(ev)
-                                    : (() => {
-                                          ev.stopPropagation();
-                                          ev.preventDefault();
-                                          window.wsnavigator(
-                                              `/library/object?uid=${
-                                                  object?.uid
-                                              }&viewer=${'dynamic-view-detailed'}&type=${
-                                                  object?.type?.['unigraph.id']
-                                              }`,
-                                          );
-                                      })();
-                            }
-                        }}
                         {...(attributes || {})}
                         ref={attach}
                     >

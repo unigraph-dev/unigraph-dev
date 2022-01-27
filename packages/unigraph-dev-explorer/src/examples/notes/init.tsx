@@ -8,6 +8,7 @@ import {
     registerContextMenuItems,
     registerQuickAdder,
 } from '../../unigraph-react';
+import { setChildrenDisplayAs } from './commands';
 import { NoteBlock, DetailedNoteBlock } from './NoteBlock';
 import { noteQuery, noteQueryDetailed, journalQuery, journalQueryDetailed } from './noteQuery';
 
@@ -99,5 +100,19 @@ export const init = () => {
                 Convert note as TODO
             </MenuItem>
         ),
+        (uid: any, object: any, handleClose: any, callbacks: any) => {
+            // outliner, paragraph, numbered
+            const displayAs = object?._value?.children?._displayAs || 'outliner';
+            return (
+                <MenuItem
+                    onClick={() => {
+                        handleClose();
+                        setChildrenDisplayAs(object, callbacks, displayAs === 'outliner' ? 'paragraph' : 'outliner');
+                    }}
+                >
+                    Display children as bullets/paragraphs
+                </MenuItem>
+            );
+        },
     ]);
 };
