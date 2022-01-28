@@ -80,6 +80,7 @@ export function createExecutableCache(
 export function buildExecutable(exec: Executable, context: ExecContext, unigraph: Unigraph, states: any): any {
     function wrapExecutable(fn: any) {
         if (typeof fn === 'function') {
+            // TODO: after using a proper logger, context.showConsole should give console.log for all children as well
             return async () => {
                 const execId = getRandomInt();
                 states.addRunningExecutable({
@@ -95,7 +96,6 @@ export function buildExecutable(exec: Executable, context: ExecContext, unigraph
         }
         return fn;
     }
-
     if (
         Object.keys(environmentRunners).includes(exec.env) &&
         (!exec.concurrency ||
@@ -143,6 +143,7 @@ export type ExecContext = {
     package?: PackageDeclaration;
     /** Definition of the executable */
     definition: Executable;
+    showConsole?: boolean;
     /** A function that send events */
     send?: any;
     [x: string]: any;
@@ -158,11 +159,22 @@ export const runEnvRoutineJs: ExecRunner = (src, context, unigraph) => {
     // const fn = () => eval(src);
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     const AsyncFunction = Object.getPrototypeOf(async () => false).constructor;
+    const logs: any[] = [];
+    const scopedConsole = context.showConsole
+        ? {
+              ...console,
+              log: (...params: any[]) => {
+                  console.log(...params);
+                  logs.push(...params);
+              },
+          }
+        : console;
     const fn = new AsyncFunction(
         'require',
         'unpad',
         'context',
         'unigraph',
+        'console',
         'UnigraphObject',
         `try {${src}
 } catch (e) {
@@ -172,20 +184,36 @@ export const runEnvRoutineJs: ExecRunner = (src, context, unigraph) => {
             content: "Error was: " + e.toString() + e.stack }
         )
     }`,
-    ).bind(this, require, unpad, context, unigraph, UnigraphObject);
+    ).bind(this, require, unpad, context, unigraph, scopedConsole, UnigraphObject);
 
-    return fn;
+    return !context.showConsole
+        ? fn
+        : async () => ({
+              _return: await fn(),
+              _logs: logs,
+          });
 };
 
 export const runEnvLambdaJs: ExecRunner = (src, context, unigraph) => {
     // const fn = () => eval(src);
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     const AsyncFunction = Object.getPrototypeOf(async () => false).constructor;
+    const logs: any[] = [];
+    const scopedConsole = context.showConsole
+        ? {
+              ...console,
+              log: (...params: any[]) => {
+                  console.log(...params);
+                  logs.push(...params);
+              },
+          }
+        : console;
     const fn = new AsyncFunction(
         'require',
         'unpad',
         'context',
         'unigraph',
+        'console',
         `try {
         return ${src}
 } catch (e) {
@@ -195,9 +223,14 @@ export const runEnvLambdaJs: ExecRunner = (src, context, unigraph) => {
             content: "Error was: " + e.toString() + e.stack }
         )
     }`,
-    ).bind(this, require, unpad, context, unigraph);
+    ).bind(this, require, unpad, context, unigraph, scopedConsole);
 
-    return fn;
+    return !context.showConsole
+        ? fn
+        : async () => ({
+              _return: await fn(),
+              _logs: logs,
+          });
 };
 
 export const runEnvReactJSX: ExecRunner = (src, context, unigraph) => {
