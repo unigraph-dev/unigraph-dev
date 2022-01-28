@@ -53,12 +53,7 @@ import {
     Subscription,
     UnigraphUpsert,
 } from './custom.d';
-import {
-    addUnigraphPackage,
-    checkOrCreateDefaultDataModel,
-    createPackageCache,
-    createSchemaCache,
-} from './datamodelManager';
+import { checkOrCreateDefaultDataModel, createSchemaCache } from './datamodelManager';
 import { Cache } from './caches';
 import {
     createSubscriptionLocal,
@@ -81,6 +76,7 @@ import { createExecutableCache } from './executableManager';
 import { getLocalUnigraphAPI } from './localUnigraphApi';
 import { addNotification } from './notifications';
 import { perfLogAfterDbTransaction, perfLogStartDbTransaction, perfLogStartPreprocessing } from './logging';
+import { createPackageCache, addUnigraphPackage } from './packageManager';
 
 const PORT = 3001;
 const PORT_HTTP = 4001;
