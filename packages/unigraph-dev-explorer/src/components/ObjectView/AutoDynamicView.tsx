@@ -282,6 +282,16 @@ export function AutoDynamicView({
         [isDragging, drag],
     );
 
+    const onClickCaptureHandler = React.useCallback(
+        (ev) => {
+            if (isMultiSelectKeyPressed(ev)) {
+                ev.stopPropagation();
+                selectUid(componentId, false);
+            }
+        },
+        [componentId],
+    );
+
     const BacklinkComponent = React.useMemo(
         () => (
             <div
@@ -332,6 +342,7 @@ export function AutoDynamicView({
                               registerBoundingBox: (el: any) => {
                                   el.dataset.component = componentId;
                                   window.dragselect.addSelectables([el]);
+                                  el.addEventListener('pointerup', onClickCaptureHandler);
                               },
                           }
                         : {}),
@@ -414,12 +425,7 @@ export function AutoDynamicView({
                         borderRadius: isSelected || isDragging ? '12px' : '',
                     }}
                     key={`object-view-${object?.uid}`}
-                    onClickCapture={(ev) => {
-                        if (isMultiSelectKeyPressed(ev)) {
-                            ev.stopPropagation();
-                            selectUid(componentId, false);
-                        }
-                    }}
+                    onClickCapture={customBoundingBox ? () => undefined : onClickCaptureHandler}
                     onClick={(ev) => {
                         if (!noClickthrough && canClickthrough) {
                             typeof onClick === 'function'

@@ -13,7 +13,7 @@ export type AppState<T = any> = {
     subscribers: ((newValue: T) => any)[];
     subscribe: (fn: (newValue: T) => any) => any;
     unsubscribe: (fn: (newValue: T) => any) => any;
-    setValue: (newValue: T, flush?: boolean) => any;
+    setValue: (newValue: T | ((oldValue: T) => T), flush?: boolean) => any;
 };
 
 export type UnigraphSchemaDeclaration = {

@@ -26,6 +26,8 @@ import {
     replaceChildWithUid,
     addChildren,
     permanentlyDeleteBlock,
+    deleteChild,
+    copyChildToClipboard,
 } from './commands';
 import { onUnigraphContextMenu } from '../../components/ObjectView/DefaultObjectContextMenu';
 import { noteQuery, noteQueryDetailed } from './noteQuery';
@@ -35,6 +37,7 @@ import { removeAllPropsFromObj, scrollIntoViewIfNeeded, selectUid, setCaret, Tab
 import { DragandDrop } from '../../components/ObjectView/DragandDrop';
 import { inlineObjectSearch, inlineTextSearch } from '../../components/UnigraphCore/InlineSearchPopup';
 import { htmlToMarkdown } from '../semantic/Markdown';
+import { formatSimpleClipboardItems, parseUnigraphHtml, setClipboardHandler } from '../../clipboardUtils';
 
 export function NoteBlock({ data, inline }: any) {
     const [parents, references] = getParentsAndReferences(
@@ -558,6 +561,301 @@ export function DetailedNoteBlock({
         }
     }, [data.get('text')?.as('primitive'), focused]);
 
+    const onBlurHandler = React.useCallback(() => {
+        setIsEditing(false);
+        inputDebounced.current.flush();
+        if (focused) {
+            window.unigraph.getState('global/focused').setValue({ uid: '', caret: 0, type: '' });
+        }
+    }, [focused]);
+
+    const copyOrCutHandler = React.useCallback(
+        (ev, elindex, isCut) => {
+            if (window.unigraph.getState('global/selected').value.length > 0) {
+                ev.preventDefault();
+                const clipboardData = copyChildToClipboard(data, editorContext, elindex, isCut);
+                window.unigraph
+                    .getState('temp/clipboardItems')
+                    .setValue((val: any) => (Array.isArray(val) ? [...val, clipboardData] : [clipboardData]));
+                return setClipboardHandler;
+            }
+            return false;
+        },
+        [data, editorContext, componentId],
+    );
+
+    const onPasteHandler = React.useCallback(
+        (event) => {
+            const paste = (event.clipboardData || (window as any).clipboardData).getData('text/html');
+
+            const img = event.clipboardData.items[0];
+
+            if (paste.length > 0) {
+                const selection = window.getSelection();
+                if (!selection?.rangeCount) return false;
+                selection?.deleteFromDocument();
+
+                const unigraphHtml = parseUnigraphHtml(paste);
+                if (unigraphHtml) {
+                    const entities = Array.from(unigraphHtml.body.children[0].children).map((el) => el.id);
+                    callbacks['add-children'](entities, getCurrentText().length ? 0 : -1);
+                } else {
+                    const mdresult = htmlToMarkdown(paste);
+                    const lines = mdresult.split('\n\n');
+
+                    if (selection.getRangeAt(0).startContainer.nodeName === 'BR') {
+                        textInput.current.textContent += lines[0];
+                        setCaret(document, textInput.current.firstChild, textInput.current.textContent.length);
+                    } else {
+                        selection.getRangeAt(0).insertNode(document.createTextNode(lines[0]));
+                        selection.collapseToEnd();
+                    }
+
+                    edited.current = true;
+                    inputDebounced.current(textInput.current.textContent);
+                    inputDebounced.current.flush();
+
+                    if (lines.length > 1) {
+                        const newLines = lines.slice(1);
+                        callbacks['add-children'](newLines, getCurrentText().length ? 0 : -1);
+                    }
+                }
+
+                event.preventDefault();
+            } else if (img.type.indexOf('image') === 0) {
+                const blob = img.getAsFile();
+                if (blob) {
+                    event.preventDefault();
+
+                    blobToBase64(blob).then((base64: string) => {
+                        const selection = window.getSelection();
+                        if (!selection?.rangeCount) return false;
+                        selection?.deleteFromDocument();
+
+                        const res = `![${blob.name || 'image'}](${base64})`;
+
+                        if (selection.getRangeAt(0).startContainer.nodeName === 'BR') {
+                            textInput.current.textContent += res;
+                            setCaret(document, textInput.current.firstChild, textInput.current.textContent.length);
+                        } else {
+                            selection.getRangeAt(0).insertNode(document.createTextNode(res));
+                            selection.collapseToEnd();
+                        }
+
+                        edited.current = true;
+                        inputDebounced.current(textInput.current.textContent);
+                        inputDebounced.current.flush();
+                        return false;
+                    });
+                }
+            }
+            setFocusedCaret();
+            return event;
+        },
+        [callbacks],
+    );
+
+    const onInputHandler = React.useCallback((ev) => {
+        if (ev.currentTarget.textContent !== data.get('text').as('primitive') && !edited.current) edited.current = true;
+        checkReferences();
+        onNoteInput(inputDebounced, ev);
+    }, []);
+
+    const onKeyDownHandler = React.useCallback(
+        (ev) => {
+            const sel = document.getSelection();
+            const caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
+            switch (ev.keyCode) {
+                case 65: // "a" key
+                    if (
+                        ev.ctrlKey ||
+                        (ev.metaKey &&
+                            sel?.getRangeAt(0)?.startOffset === 0 &&
+                            sel?.getRangeAt(0)?.endOffset === textInput.current?.textContent?.length)
+                    ) {
+                        ev.preventDefault();
+                        selectUid(componentId);
+                        onBlurHandler();
+                    }
+                    break;
+
+                case 13: // enter
+                    if (!ev.shiftKey && !ev.ctrlKey) {
+                        ev.preventDefault();
+                        edited.current = false;
+                        inputDebounced.current.cancel();
+                        const currentText = getCurrentText() || data.get('text').as('primitive');
+                        callbacks['split-child']?.(currentText, caret);
+                        setCurrentText(currentText.slice(caret));
+                    }
+                    break;
+
+                case 9: // tab
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    inputDebounced.current.flush();
+                    if (ev.shiftKey) {
+                        setCommand(() => callbacks['unindent-child-in-parent']?.bind(null));
+                    } else {
+                        setCommand(() => callbacks['indent-child']?.bind(null));
+                    }
+                    break;
+
+                case 8: // backspace
+                    // console.log(caret, document.getSelection()?.type)
+                    if (caret === 0 && document.getSelection()?.type === 'Caret') {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        inputDebounced.current.cancel();
+                        edited.current = false;
+                        callbacks['unsplit-child'](textInput.current.textContent);
+                    } else if (getCurrentText()[caret - 1] === '[' && getCurrentText()[caret] === ']') {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        const tc = getCurrentText();
+                        const el = textInput.current.firstChild;
+                        el.textContent = tc.slice(0, caret - 1) + tc.slice(caret + 1);
+                        setCaret(document, el, caret - 1);
+                    }
+                    break;
+
+                case 37: // left arrow
+                    if (caret === 0) {
+                        ev.preventDefault();
+                        inputDebounced.current.flush();
+                        callbacks['focus-last-dfs-node'](data, editorContext, 0, -1);
+                    }
+                    break;
+
+                case 39: // right arrow
+                    if (caret === getCurrentText().length) {
+                        ev.preventDefault();
+                        inputDebounced.current.flush();
+                        callbacks['focus-next-dfs-node'](data, editorContext, 0, 0);
+                    }
+                    break;
+
+                case 38: // up arrow
+                    // console.log(document.getSelection()?.focusOffset);
+                    // ev.preventDefault();
+                    inputDebounced.current.flush();
+                    // setCommand(() =>
+                    //    callbacks['focus-last-dfs-node'].bind(null, data, editorContext, 0),
+                    // );
+                    requestAnimationFrame(() => {
+                        if (document.getSelection()?.focusOffset === 0) {
+                            if (ev.shiftKey) {
+                                selectUid(componentId, false);
+                            }
+                            callbacks['focus-last-dfs-node'](data, editorContext, 0);
+                        }
+                    });
+                    return;
+
+                case 40: // down arrow
+                    inputDebounced.current.flush();
+                    requestAnimationFrame(() => {
+                        if (
+                            (document.getSelection()?.focusOffset || 0) >=
+                            (textInput.current?.textContent?.trim()?.length || 0)
+                        ) {
+                            if (ev.shiftKey) {
+                                selectUid(componentId, false);
+                            }
+                            callbacks['focus-next-dfs-node'](data, editorContext, 0);
+                        }
+                    });
+                    return;
+
+                case 219: // left bracket
+                    if (!ev.shiftKey) {
+                        ev.preventDefault();
+                        // console.log(document.getSelection())
+                        let middle = document.getSelection()?.toString() || '';
+                        let end = '';
+                        if (middle.endsWith(' ')) {
+                            middle = middle.slice(0, middle.length - 1);
+                            end = ' ';
+                        }
+                        // document.execCommand('insertText', false, `[${middle}]${end}`);
+                        textInput.current.textContent = `${getCurrentText().slice(
+                            0,
+                            caret,
+                        )}[${middle}]${end}${getCurrentText().slice(caret + (middle + end).length)}`;
+                        setCaret(document, textInput.current.firstChild, caret + 1, middle.length);
+                        textInput.current.dispatchEvent(
+                            new Event('input', {
+                                bubbles: true,
+                                cancelable: true,
+                            }),
+                        );
+                    }
+                    break;
+
+                case 221: // right bracket
+                    if (!ev.shiftKey && textInput.current.textContent[caret] === ']') {
+                        ev.preventDefault();
+                        setCaret(document, textInput.current.firstChild, caret + 1);
+                    }
+                    break;
+
+                case 57: // 9 or parenthesis
+                    if (ev.shiftKey) {
+                        ev.preventDefault();
+                        // console.log(document.getSelection())
+                        let middle = document.getSelection()?.toString() || '';
+                        let end = '';
+                        if (middle.endsWith(' ')) {
+                            middle = middle.slice(0, middle.length - 1);
+                            end = ' ';
+                        }
+                        textInput.current.textContent = `${getCurrentText().slice(
+                            0,
+                            caret,
+                        )}(${middle})${end}${getCurrentText().slice(caret + (middle + end).length)}`;
+                        setCaret(document, textInput.current.firstChild, caret + 1, middle.length);
+                        textInput.current.dispatchEvent(
+                            new Event('input', {
+                                bubbles: true,
+                                cancelable: true,
+                            }),
+                        );
+                    }
+                    break;
+
+                case 48: // 0 or parenthesis
+                    if (ev.shiftKey && textInput.current.textContent[caret] === ')') {
+                        ev.preventDefault();
+                        setCaret(document, textInput.current.firstChild, caret + 1);
+                    }
+                    break;
+
+                default:
+                    // console.log(ev);
+                    break;
+            }
+        },
+        [callbacks, componentId, data, editorContext, onBlurHandler],
+    );
+
+    const onPointerUpHandler = React.useCallback(
+        (ev) => {
+            if (!isEditing) {
+                setIsEditing(true);
+            }
+            const caretPos = Number((ev.target as HTMLElement).getAttribute('markdownPos') || -1);
+            (ev.target as HTMLElement).removeAttribute('markdownPos');
+            const finalCaretPos = caretPos === -1 ? textInput.current?.textContent?.length : caretPos;
+            window.unigraph.getState('global/focused').setValue({
+                uid: data?.uid,
+                caret: finalCaretPos,
+                type: '$/schema/note_block',
+                component: componentId,
+            });
+        },
+        [componentId, data?.uid, isEditing],
+    );
+
     React.useEffect(commandFn, [command]);
 
     const childrenDisplayAs = data?._value?.children?._displayAs || 'outliner';
@@ -593,27 +891,8 @@ export function DetailedNoteBlock({
                     <div
                         key="editor-frame"
                         ref={editorRef}
-                        onPointerUp={(ev) => {
-                            if (!isEditing) {
-                                setIsEditing(true);
-                            }
-                            const caretPos = Number((ev.target as HTMLElement).getAttribute('markdownPos') || -1);
-                            (ev.target as HTMLElement).removeAttribute('markdownPos');
-                            const finalCaretPos = caretPos === -1 ? textInput.current?.textContent?.length : caretPos;
-                            window.unigraph.getState('global/focused').setValue({
-                                uid: data?.uid,
-                                caret: finalCaretPos,
-                                type: '$/schema/note_block',
-                                component: componentId,
-                            });
-                        }}
-                        onBlur={(ev) => {
-                            setIsEditing(false);
-                            inputDebounced.current.flush();
-                            if (focused) {
-                                window.unigraph.getState('global/focused').setValue({ uid: '', caret: 0, type: '' });
-                            }
-                        }}
+                        onPointerUp={onPointerUpHandler}
+                        onBlur={onBlurHandler}
                         style={{ width: '100%', display: 'flex', cursor: 'text' }}
                     >
                         {isChildren && data._hide !== true ? (
@@ -640,253 +919,11 @@ export function DetailedNoteBlock({
                             }}
                             suppressContentEditableWarning
                             ref={textInput}
-                            onPaste={(event) => {
-                                const paste = (event.clipboardData || (window as any).clipboardData).getData(
-                                    'text/html',
-                                );
-
-                                const img = event.clipboardData.items[0];
-
-                                if (paste.length > 0) {
-                                    const selection = window.getSelection();
-                                    if (!selection?.rangeCount) return false;
-                                    selection?.deleteFromDocument();
-
-                                    const mdresult = htmlToMarkdown(paste);
-                                    const lines = mdresult.split('\n\n');
-
-                                    if (selection.getRangeAt(0).startContainer.nodeName === 'BR') {
-                                        textInput.current.textContent += lines[0];
-                                        setCaret(
-                                            document,
-                                            textInput.current.firstChild,
-                                            textInput.current.textContent.length,
-                                        );
-                                    } else {
-                                        selection.getRangeAt(0).insertNode(document.createTextNode(lines[0]));
-                                        selection.collapseToEnd();
-                                    }
-
-                                    edited.current = true;
-                                    inputDebounced.current(textInput.current.textContent);
-                                    inputDebounced.current.flush();
-
-                                    if (lines.length > 1) {
-                                        const newLines = lines.slice(1);
-                                        callbacks['add-children'](newLines);
-                                    }
-                                    event.preventDefault();
-                                } else if (img.type.indexOf('image') === 0) {
-                                    const blob = img.getAsFile();
-                                    if (blob) {
-                                        event.preventDefault();
-
-                                        blobToBase64(blob).then((base64: string) => {
-                                            const selection = window.getSelection();
-                                            if (!selection?.rangeCount) return false;
-                                            selection?.deleteFromDocument();
-
-                                            const res = `![${blob.name || 'image'}](${base64})`;
-
-                                            if (selection.getRangeAt(0).startContainer.nodeName === 'BR') {
-                                                textInput.current.textContent += res;
-                                                setCaret(
-                                                    document,
-                                                    textInput.current.firstChild,
-                                                    textInput.current.textContent.length,
-                                                );
-                                            } else {
-                                                selection.getRangeAt(0).insertNode(document.createTextNode(res));
-                                                selection.collapseToEnd();
-                                            }
-
-                                            edited.current = true;
-                                            inputDebounced.current(textInput.current.textContent);
-                                            inputDebounced.current.flush();
-                                            return false;
-                                        });
-                                    }
-                                }
-                                setFocusedCaret();
-                                return event;
-                            }}
-                            onInput={(ev) => {
-                                if (
-                                    ev.currentTarget.textContent !== data.get('text').as('primitive') &&
-                                    !edited.current
-                                )
-                                    edited.current = true;
-                                console.log('hiya');
-                                checkReferences();
-                                onNoteInput(inputDebounced, ev);
-                            }}
+                            onPaste={onPasteHandler}
+                            onInput={onInputHandler}
                             onKeyUp={setFocusedCaret}
                             onClick={setFocusedCaret}
-                            onKeyDown={(ev) => {
-                                const sel = document.getSelection();
-                                const caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
-                                switch (ev.keyCode) {
-                                    case 13: // enter
-                                        if (!ev.shiftKey && !ev.ctrlKey) {
-                                            ev.preventDefault();
-                                            edited.current = false;
-                                            inputDebounced.current.cancel();
-                                            const currentText = getCurrentText() || data.get('text').as('primitive');
-                                            callbacks['split-child']?.(currentText, caret);
-                                            setCurrentText(currentText.slice(caret));
-                                        }
-                                        break;
-
-                                    case 9: // tab
-                                        ev.preventDefault();
-                                        ev.stopPropagation();
-                                        inputDebounced.current.flush();
-                                        if (ev.shiftKey) {
-                                            setCommand(() => callbacks['unindent-child-in-parent']?.bind(null));
-                                        } else {
-                                            setCommand(() => callbacks['indent-child']?.bind(null));
-                                        }
-                                        break;
-
-                                    case 8: // backspace
-                                        // console.log(caret, document.getSelection()?.type)
-                                        if (caret === 0 && document.getSelection()?.type === 'Caret') {
-                                            ev.preventDefault();
-                                            inputDebounced.current.cancel();
-                                            edited.current = false;
-                                            callbacks['unsplit-child'](textInput.current.textContent);
-                                        } else if (
-                                            getCurrentText()[caret - 1] === '[' &&
-                                            getCurrentText()[caret] === ']'
-                                        ) {
-                                            ev.preventDefault();
-                                            const tc = getCurrentText();
-                                            const el = textInput.current.firstChild;
-                                            el.textContent = tc.slice(0, caret - 1) + tc.slice(caret + 1);
-                                            setCaret(document, el, caret - 1);
-                                        }
-                                        break;
-
-                                    case 37: // left arrow
-                                        if (caret === 0) {
-                                            ev.preventDefault();
-                                            inputDebounced.current.flush();
-                                            callbacks['focus-last-dfs-node'](data, editorContext, 0, -1);
-                                        }
-                                        break;
-
-                                    case 39: // right arrow
-                                        if (caret === getCurrentText().length) {
-                                            ev.preventDefault();
-                                            inputDebounced.current.flush();
-                                            callbacks['focus-next-dfs-node'](data, editorContext, 0, 0);
-                                        }
-                                        break;
-
-                                    case 38: // up arrow
-                                        // console.log(document.getSelection()?.focusOffset);
-                                        // ev.preventDefault();
-                                        inputDebounced.current.flush();
-                                        // setCommand(() =>
-                                        //    callbacks['focus-last-dfs-node'].bind(null, data, editorContext, 0),
-                                        // );
-                                        requestAnimationFrame(() => {
-                                            if (document.getSelection()?.focusOffset === 0) {
-                                                if (ev.shiftKey) {
-                                                    selectUid(componentId, false);
-                                                }
-                                                callbacks['focus-last-dfs-node'](data, editorContext, 0);
-                                            }
-                                        });
-                                        return;
-
-                                    case 40: // down arrow
-                                        inputDebounced.current.flush();
-                                        requestAnimationFrame(() => {
-                                            if (
-                                                (document.getSelection()?.focusOffset || 0) >=
-                                                (textInput.current?.textContent?.trim()?.length || 0)
-                                            ) {
-                                                if (ev.shiftKey) {
-                                                    selectUid(componentId, false);
-                                                }
-                                                callbacks['focus-next-dfs-node'](data, editorContext, 0);
-                                            }
-                                        });
-                                        return;
-
-                                    case 219: // left bracket
-                                        if (!ev.shiftKey) {
-                                            ev.preventDefault();
-                                            // console.log(document.getSelection())
-                                            let middle = document.getSelection()?.toString() || '';
-                                            let end = '';
-                                            if (middle.endsWith(' ')) {
-                                                middle = middle.slice(0, middle.length - 1);
-                                                end = ' ';
-                                            }
-                                            // document.execCommand('insertText', false, `[${middle}]${end}`);
-                                            textInput.current.textContent = `${getCurrentText().slice(
-                                                0,
-                                                caret,
-                                            )}[${middle}]${end}${getCurrentText().slice(
-                                                caret + (middle + end).length,
-                                            )}`;
-                                            setCaret(document, textInput.current.firstChild, caret + 1, middle.length);
-                                            textInput.current.dispatchEvent(
-                                                new Event('input', {
-                                                    bubbles: true,
-                                                    cancelable: true,
-                                                }),
-                                            );
-                                        }
-                                        break;
-
-                                    case 221: // right bracket
-                                        if (!ev.shiftKey && textInput.current.textContent[caret] === ']') {
-                                            ev.preventDefault();
-                                            setCaret(document, textInput.current.firstChild, caret + 1);
-                                        }
-                                        break;
-
-                                    case 57: // 9 or parenthesis
-                                        if (ev.shiftKey) {
-                                            ev.preventDefault();
-                                            // console.log(document.getSelection())
-                                            let middle = document.getSelection()?.toString() || '';
-                                            let end = '';
-                                            if (middle.endsWith(' ')) {
-                                                middle = middle.slice(0, middle.length - 1);
-                                                end = ' ';
-                                            }
-                                            textInput.current.textContent = `${getCurrentText().slice(
-                                                0,
-                                                caret,
-                                            )}(${middle})${end}${getCurrentText().slice(
-                                                caret + (middle + end).length,
-                                            )}`;
-                                            setCaret(document, textInput.current.firstChild, caret + 1, middle.length);
-                                            textInput.current.dispatchEvent(
-                                                new Event('input', {
-                                                    bubbles: true,
-                                                    cancelable: true,
-                                                }),
-                                            );
-                                        }
-                                        break;
-
-                                    case 48: // 0 or parenthesis
-                                        if (ev.shiftKey && textInput.current.textContent[caret] === ')') {
-                                            ev.preventDefault();
-                                            setCaret(document, textInput.current.firstChild, caret + 1);
-                                        }
-                                        break;
-
-                                    default:
-                                        // console.log(ev);
-                                        break;
-                                }
-                            }}
+                            onKeyDown={onKeyDownHandler}
                         >
                             <br />
                         </Typography>
@@ -1002,6 +1039,26 @@ export function DetailedNoteBlock({
                                                             ev.preventDefault();
                                                             convertChildToTodo(data, editorContext, elindex);
                                                         },
+                                                        Backspace: (ev: any) => {
+                                                            if (
+                                                                window.unigraph.getState('global/selected').value
+                                                                    .length > 0
+                                                            ) {
+                                                                ev.preventDefault();
+                                                                deleteChild(data, editorContext, elindex);
+                                                            }
+                                                        },
+                                                        'ctrl+Backspace': (ev: any) => {
+                                                            if (
+                                                                window.unigraph.getState('global/selected').value
+                                                                    .length > 0
+                                                            ) {
+                                                                ev.preventDefault();
+                                                                deleteChild(data, editorContext, elindex, true);
+                                                            }
+                                                        },
+                                                        oncopy: (ev: any) => copyOrCutHandler(ev, elindex, false),
+                                                        oncut: (ev: any) => copyOrCutHandler(ev, elindex, true),
                                                     }}
                                                     callbacks={{
                                                         'get-view-id': () => options?.viewId, // only used at root
@@ -1018,6 +1075,15 @@ export function DetailedNoteBlock({
                                                         },
                                                         'focus-last-dfs-node': focusLastDFSNode,
                                                         'focus-next-dfs-node': focusNextDFSNode,
+                                                        'add-children': (its: string[], indexx?: number) =>
+                                                            indexx
+                                                                ? addChildren(
+                                                                      data,
+                                                                      editorContext,
+                                                                      elindex + indexx,
+                                                                      its,
+                                                                  )
+                                                                : addChildren(data, editorContext, elindex, its),
                                                         context: data,
                                                         isEmbed: true,
                                                         isChildren: true,
