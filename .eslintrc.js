@@ -8,6 +8,7 @@ module.exports = {
         'eslint:recommended',
         'react-app',
         'plugin:@typescript-eslint/recommended',
+        'plugin:lodash-fp/recommended',
         'plugin:import/errors',
         'plugin:import/warnings',
         'plugin:import/typescript',
@@ -52,5 +53,6 @@ module.exports = {
         'react/react-in-jsx-scope': 'off', // unnecessary for new jsx transpilation
         'jsx-a11y/no-static-element-interactions': 'off', // disable for now
         'jsx-a11y/click-events-have-key-events': 'off', // disable for now
+        'lodash-fp/use-fp': 'off', // regular lodash is used sometime
     },
 };
