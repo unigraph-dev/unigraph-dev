@@ -38,8 +38,7 @@ const sync = async (calendar, cal, syncToken) => {
             if (resp.data.nextSyncToken) nextSyncToken = resp.data.nextSyncToken;
         } else nextPageToken = resp.data.nextPageToken;
     }
-    items.slice(items.length - 101);
-    return { items, nextSyncToken };
+    return { items: items.slice(items.length - 101), nextSyncToken };
 };
 
 const parseRecurrence = (start, end, rrule, timezone) => {
@@ -80,10 +79,6 @@ const queryFromEventId = (evid) => `(func: uid(evs)) @cascade {
         <_value.%>
       }
   }
-}
-
-var(func: eq(<unigraph.id>, "$/schema/calendar_event")) {
-  <~type> { evs as uid }
 }`;
 
 const toEod = (date) => {
@@ -193,6 +188,7 @@ const syncGoogleCalendarSpecific = async () => {
     // const syncToken = undefined;
     const { items, nextSyncToken } = await sync(calendar, cal, syncToken);
     const itemSlice = items;
+    console.log(itemSlice);
 
     // find cancelled events
     // TODO: not just, 20, the whole thing
@@ -200,7 +196,14 @@ const syncGoogleCalendarSpecific = async () => {
         .filter(_.propEq('status', 'cancelled'))
         .map(_.prop('id'))
         .map(queryFromEventId);
-    const cancelledEventObjs = await unigraph.getQueries(cancelledEventQueries);
+    const cancelledEventObjs = await unigraph.getQueries(
+        cancelledEventQueries,
+        undefined,
+        undefined,
+        `var(func: eq(<unigraph.id>, "$/schema/calendar_event")) {
+  <~type> { evs as uid }
+}`,
+    );
     // Delete cancelled events existing in the unigraph db
     const cancelledEventUids = cancelledEventObjs.map(_.prop(['0', 'uid'])).filter(_.negate(_.isNil));
     cancelledEventUids.forEach(unigraph.deleteObject);
@@ -213,7 +216,14 @@ const syncGoogleCalendarSpecific = async () => {
         .filter(_.prop('recurrence'))
         .map((ev) => queryFromEventId(ev.id));
 
-    const objsWithRecurrenceResults = await unigraph.getQueries(eventsWithRecurrenceQueries);
+    const objsWithRecurrenceResults = await unigraph.getQueries(
+        eventsWithRecurrenceQueries,
+        undefined,
+        undefined,
+        `var(func: eq(<unigraph.id>, "$/schema/calendar_event")) {
+  <~type> { evs as uid }
+}`,
+    );
     // delete previous recurrences
     const objsWithRecurrence = objsWithRecurrenceResults.map(_.prop(['0', 'uid'])).filter(_.negate(_.isNil));
     deletePrevRecurrences(objsWithRecurrence);
