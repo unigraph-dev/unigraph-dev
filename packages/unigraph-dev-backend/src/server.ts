@@ -639,7 +639,7 @@ export default async function startServer(client: DgraphClient) {
             },
 
             "run_executable": async function (event: EventRunExecutable, ws: IWebsocket) {
-                localApi.runExecutable(event.uid, event.params, {send: (it: string) => {ws.send(it)}}, undefined, event.bypassCache)
+                localApi.runExecutable(event.uid, event.params, {send: (it: string) => {ws.send(it)}, ...event.context}, undefined, event.bypassCache)
                     .then((ret: any) => ws.send(makeResponse(event, true, {returns: ret})));
         },
 

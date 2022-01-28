@@ -154,7 +154,7 @@ export function ExecutableCodeEditor({ data, options }: any) {
                 width: '100%',
                 display: 'flex',
                 flexDirection: 'column',
-                height: 'calc(100vh - 75px)',
+                height: '100%',
             }}
         >
             <div style={{ display: 'flex' }}>
@@ -251,7 +251,7 @@ export function ExecutableCodeEditor({ data, options }: any) {
                     <Save />
                 </IconButton>
             </div>
-            <div style={{ flexGrow: 1 }}>
+            <div style={{ flexGrow: 1, height: '100%' }}>
                 <Editor
                     defaultLanguage="javascript"
                     beforeMount={(monaco) => {

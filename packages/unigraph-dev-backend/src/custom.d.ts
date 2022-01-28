@@ -262,6 +262,7 @@ declare type EventRunExecutable = {
     "uid": string,
     params: any,
     bypassCache?: boolean,
+    context?: any
 }
 
 declare type EventAddNotification = {

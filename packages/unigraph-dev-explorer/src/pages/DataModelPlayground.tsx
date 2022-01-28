@@ -56,7 +56,7 @@ export default function DataModelPlayground() {
             <div style={{ display: 'flex', width: '100%', flexGrow: 1 }}>
                 <div style={{ flexGrow: 1, width: '50%' }}>
                     <Editor
-                        defaultLanguage="javascript"
+                        defaultLanguage="json"
                         path="before.json"
                         value={origData}
                         // eslint-disable-next-line react/jsx-no-bind
@@ -65,7 +65,7 @@ export default function DataModelPlayground() {
                 </div>
                 <div style={{ flexGrow: 1, width: '50%' }}>
                     <Editor
-                        defaultLanguage="javascript"
+                        defaultLanguage="json"
                         path="after.json"
                         value={processedData}
                         // eslint-disable-next-line react/jsx-no-bind

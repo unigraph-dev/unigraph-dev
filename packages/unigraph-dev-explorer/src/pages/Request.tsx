@@ -33,7 +33,7 @@ export default function Request() {
             <Typography variant="h4">Do a request!</Typography>
             <div style={{ flexGrow: 1, width: '100%' }}>
                 <Editor
-                    defaultLanguage="javascript"
+                    defaultLanguage="json"
                     path="request.json"
                     value={code}
                     // eslint-disable-next-line react/jsx-no-bind

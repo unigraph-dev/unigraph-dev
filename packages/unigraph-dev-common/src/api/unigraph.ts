@@ -588,7 +588,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                         }
                     } else reject(response);
                 };
-                sendEvent(connection, 'run_executable', { uid, params: params || {}, bypassCache }, id);
+                sendEvent(connection, 'run_executable', { uid, params: params || {}, bypassCache, context }, id);
             }),
         getNamespaceMapUid: (name) => {
             throw Error('Not implemented');
