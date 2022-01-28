@@ -661,12 +661,42 @@ export function DetailedNoteBlock({
         onNoteInput(inputDebounced, ev);
     }, []);
 
+    const closeScopeCharDict: { [key: string]: string } = {
+        '[': ']',
+        '(': ')',
+        '"': '"',
+        "'": "'",
+        '`': '`',
+        // '{':'}',
+    };
+    const handleOpenScopedChar = (ev: KeyboardEvent, caret: number) => {
+        ev.preventDefault();
+        // console.log(document.getSelection())
+        let middle = document.getSelection()?.toString() || ''; // eslint-disable-line no-case-declarations
+        let end = ''; // eslint-disable-line no-case-declarations
+        if (middle.endsWith(' ')) {
+            middle = middle.slice(0, middle.length - 1);
+            end = ' ';
+        }
+        // document.execCommand('insertText', false, `[${middle}]${end}`);
+        textInput.current.textContent = `${getCurrentText().slice(0, caret)}${ev.key}${middle}${
+            closeScopeCharDict[ev.key]
+        }${end}${getCurrentText().slice(caret + (middle + end).length)}`;
+        setCaret(document, textInput.current.firstChild, caret + 1, middle.length);
+        textInput.current.dispatchEvent(
+            new Event('input', {
+                bubbles: true,
+                cancelable: true,
+            }),
+        );
+    };
+
     const onKeyDownHandler = React.useCallback(
         (ev) => {
             const sel = document.getSelection();
             const caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
-            switch (ev.keyCode) {
-                case 65: // "a" key
+            switch (ev.key) {
+                case 'a': // "a" key
                     if (
                         ev.ctrlKey ||
                         (ev.metaKey &&
@@ -679,7 +709,7 @@ export function DetailedNoteBlock({
                     }
                     break;
 
-                case 13: // enter
+                case 'Enter': // enter
                     if (!ev.shiftKey && !ev.ctrlKey) {
                         ev.preventDefault();
                         edited.current = false;
@@ -690,7 +720,7 @@ export function DetailedNoteBlock({
                     }
                     break;
 
-                case 9: // tab
+                case 'Tab': // tab
                     ev.preventDefault();
                     ev.stopPropagation();
                     inputDebounced.current.flush();
@@ -701,7 +731,7 @@ export function DetailedNoteBlock({
                     }
                     break;
 
-                case 8: // backspace
+                case 'Backspace': // backspace
                     // console.log(caret, document.getSelection()?.type)
                     if (caret === 0 && document.getSelection()?.type === 'Caret') {
                         ev.preventDefault();
@@ -719,7 +749,7 @@ export function DetailedNoteBlock({
                     }
                     break;
 
-                case 37: // left arrow
+                case 'ArrowLeft': // left arrow
                     if (caret === 0) {
                         ev.preventDefault();
                         inputDebounced.current.flush();
@@ -727,7 +757,7 @@ export function DetailedNoteBlock({
                     }
                     break;
 
-                case 39: // right arrow
+                case 'ArrowRight': // right arrow
                     if (caret === getCurrentText().length) {
                         ev.preventDefault();
                         inputDebounced.current.flush();
@@ -735,7 +765,7 @@ export function DetailedNoteBlock({
                     }
                     break;
 
-                case 38: // up arrow
+                case 'ArrowUp': // up arrow
                     // console.log(document.getSelection()?.focusOffset);
                     // ev.preventDefault();
                     inputDebounced.current.flush();
@@ -752,7 +782,7 @@ export function DetailedNoteBlock({
                     });
                     return;
 
-                case 40: // down arrow
+                case 'ArrowDown': // down arrow
                     inputDebounced.current.flush();
                     requestAnimationFrame(() => {
                         if (
@@ -767,63 +797,22 @@ export function DetailedNoteBlock({
                     });
                     return;
 
-                case 219: // left bracket
-                    if (!ev.shiftKey) {
-                        ev.preventDefault();
-                        // console.log(document.getSelection())
-                        let middle = document.getSelection()?.toString() || '';
-                        let end = '';
-                        if (middle.endsWith(' ')) {
-                            middle = middle.slice(0, middle.length - 1);
-                            end = ' ';
-                        }
-                        // document.execCommand('insertText', false, `[${middle}]${end}`);
-                        textInput.current.textContent = `${getCurrentText().slice(
-                            0,
-                            caret,
-                        )}[${middle}]${end}${getCurrentText().slice(caret + (middle + end).length)}`;
-                        setCaret(document, textInput.current.firstChild, caret + 1, middle.length);
-                        textInput.current.dispatchEvent(
-                            new Event('input', {
-                                bubbles: true,
-                                cancelable: true,
-                            }),
-                        );
-                    }
+                case '(':
+                case '[':
+                case '"':
+                case "'":
+                case '`':
+                    handleOpenScopedChar(ev, caret);
                     break;
 
-                case 221: // right bracket
+                case ']': // right bracket
                     if (!ev.shiftKey && textInput.current.textContent[caret] === ']') {
                         ev.preventDefault();
                         setCaret(document, textInput.current.firstChild, caret + 1);
                     }
                     break;
 
-                case 57: // 9 or parenthesis
-                    if (ev.shiftKey) {
-                        ev.preventDefault();
-                        // console.log(document.getSelection())
-                        let middle = document.getSelection()?.toString() || '';
-                        let end = '';
-                        if (middle.endsWith(' ')) {
-                            middle = middle.slice(0, middle.length - 1);
-                            end = ' ';
-                        }
-                        textInput.current.textContent = `${getCurrentText().slice(
-                            0,
-                            caret,
-                        )}(${middle})${end}${getCurrentText().slice(caret + (middle + end).length)}`;
-                        setCaret(document, textInput.current.firstChild, caret + 1, middle.length);
-                        textInput.current.dispatchEvent(
-                            new Event('input', {
-                                bubbles: true,
-                                cancelable: true,
-                            }),
-                        );
-                    }
-                    break;
-
-                case 48: // 0 or parenthesis
+                case ')': // 0 or parenthesis
                     if (ev.shiftKey && textInput.current.textContent[caret] === ')') {
                         ev.preventDefault();
                         setCaret(document, textInput.current.firstChild, caret + 1);
