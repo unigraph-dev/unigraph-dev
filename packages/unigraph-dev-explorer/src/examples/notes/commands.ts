@@ -301,7 +301,7 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
         }
         return prev;
     }, 0);
-    const childParents = children[delAt]?._value?._value?.['~_value'].length;
+    const numChildParents = children[delAt]?._value?._value?.['~_value'].length;
     removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     // console.log(index, children[delAt]?._value?._value?._value?.children?.['_value[']);
     // Index = 0 if current block doesn't have children, merge with parent
@@ -460,7 +460,8 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
         });
     } else return false;
 
-    if (childParents <= 1) {
+    // const numChildParents = childParentArray ? childParentArray.length : 0;
+    if (numChildParents <= 1) {
         setTimeout(() => {
             permanentlyDeleteBlock(children[delAt]._value._value, [children[delAt].uid, children[delAt]._value.uid]);
             window.unigraph.touch(getParents(data).map((el) => el.uid));
