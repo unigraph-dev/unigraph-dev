@@ -305,3 +305,17 @@ declare type EventTouch = {
     id: number,
     uids: string[] | string
 }
+
+declare type EventDisablePackage = {
+    type: 'event',
+    event: 'disable_package',
+    packageName: string
+    id: number
+}
+
+declare type EventEnablePackage = {
+    type: 'event',
+    event: 'enable_package',
+    packageName: string
+    id: number
+}

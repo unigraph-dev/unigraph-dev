@@ -412,5 +412,7 @@ export interface Unigraph<TT = WebSocket | false> {
      */
     touch(uids: string[] | string): any;
     leaseUid?(): string;
+    disablePackage?(packageName: string): any;
+    enablePackage?(packageName: string): any;
 }
 /** End of unigraph interface */ // Don't remove this line - needed for Monaco to work

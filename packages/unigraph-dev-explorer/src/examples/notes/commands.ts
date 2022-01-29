@@ -301,7 +301,7 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
         }
         return prev;
     }, 0);
-    const childParents = children[delAt]?._value?._value?.['~_value'].length;
+    const childParents = children[delAt]?._value?._value?.['~_value']?.length;
     removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     // console.log(index, children[delAt]?._value?._value?._value?.children?.['_value[']);
     // Index = 0 if current block doesn't have children, merge with parent

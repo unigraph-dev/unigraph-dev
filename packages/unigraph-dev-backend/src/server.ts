@@ -25,6 +25,8 @@ import {
     EventDeleteItemFromArray,
     EventDeleteRelation,
     EventDeleteUnigraphObject,
+    EventDisablePackage,
+    EventEnablePackage,
     EventEnsureUnigraphPackage,
     EventEnsureUnigraphSchema,
     EventExportObjects,
@@ -53,12 +55,7 @@ import {
     Subscription,
     UnigraphUpsert,
 } from './custom.d';
-import {
-    addUnigraphPackage,
-    checkOrCreateDefaultDataModel,
-    createPackageCache,
-    createSchemaCache,
-} from './datamodelManager';
+import { checkOrCreateDefaultDataModel, createSchemaCache } from './datamodelManager';
 import { Cache } from './caches';
 import {
     createSubscriptionLocal,
@@ -81,6 +78,7 @@ import { createExecutableCache } from './executableManager';
 import { getLocalUnigraphAPI } from './localUnigraphApi';
 import { addNotification } from './notifications';
 import { perfLogAfterDbTransaction, perfLogStartDbTransaction, perfLogStartPreprocessing } from './logging';
+import { createPackageCache, addUnigraphPackage, disablePackage, enablePackage } from './packageManager';
 
 const PORT = 3001;
 const PORT_HTTP = 4001;
@@ -688,6 +686,20 @@ export default async function startServer(client: DgraphClient) {
         "lease_uid": function (event: any, ws: IWebsocket, connId) {
             serverStates.clientLeasedUids[connId] = _.difference(serverStates.clientLeasedUids[connId], [event.uid]);
             checkLeasedUid();
+        },
+
+        "disable_package": async function (event: EventDisablePackage, ws: IWebsocket) {
+            const res = await disablePackage(client, serverStates, event.packageName)
+                .catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
+            callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches});
+            ws.send(makeResponse(event, true, {result: res}))
+        },
+         
+        "enable_package": async function (event: EventEnablePackage, ws: IWebsocket) {
+            const res = await enablePackage(client, serverStates, event.packageName)
+                .catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
+            callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches});
+            ws.send(makeResponse(event, true, {result: res}))
         }
     };
 

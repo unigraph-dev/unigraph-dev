@@ -1,6 +1,5 @@
 /* eslint-disable no-nested-ternary */
 import _ from 'lodash';
-import { resourceLimits } from 'worker_threads';
 import stringify from 'json-stable-stringify';
 import { Query, QueryObject, QueryType } from 'unigraph-dev-common/lib/types/unigraph';
 import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
