@@ -2,6 +2,7 @@ import { PackageDeclaration } from 'unigraph-dev-common/lib/types/packages';
 import { unpad, processAutorefUnigraphId, buildUnigraphEntity } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { insertsToUpsert } from 'unigraph-dev-common/lib/utils/txnWrapper';
 import { getRefQueryUnigraphId } from 'unigraph-dev-common/lib/utils/utils';
+import dgraph from 'dgraph-js';
 import DgraphClient from './dgraphClient';
 import { Cache } from './caches';
 
@@ -237,3 +238,56 @@ export const purgeOldVersions = (client: DgraphClient, states: any, pkg: Package
         }
     });
 };
+
+/**
+ * Disables a package from Unigraph.
+ *
+ * @param client
+ * @param states
+ * @param pkgName
+ */
+export const disablePackage = async (client: DgraphClient, states: any, pkgName: string, enable = false) => {
+    // First, get all data in the database for this package
+    const pkgContent = (
+        await client.queryDgraph(`query {
+    q(func: between(<unigraph.id>, "$/package/${pkgName}/", "$/package/${pkgName}0")) {
+            uid
+            <unigraph.id>
+    }}`)
+    )[0];
+    const shorthandRefs = pkgContent
+        .map((el: any) => {
+            const struct = el['unigraph.id'].split('/');
+            // A sample struct would be ['$', 'package', '<pkgName>', '<version>', 'schema', '<schemaName>']
+            if (struct[4] && struct[5] && ['schema', 'executable', 'entity'].includes(struct[4])) {
+                return { from: `$/${struct[4]}/${struct[5]}`, to: el.uid };
+            }
+            return undefined;
+        })
+        .filter(Boolean);
+
+    // Now we should remove/restore all shorthand references and set package content to be hidden/shown
+    const deleteNquads = new dgraph.Mutation();
+    deleteNquads.setDelNquads(
+        shorthandRefs.map((el: any) => `<${states.namespaceMap.uid}> <${el.from}> * .`).join('\n'),
+    );
+    const setNquads = new dgraph.Mutation();
+    setNquads.setSetNquads(
+        shorthandRefs.map((el: any) => `<${states.namespaceMap.uid}> <${el.from}> <${el.to}> .`).join('\n'),
+    );
+    const hideNquads = new dgraph.Mutation();
+    hideNquads.setSetNquads(
+        pkgContent.map((el: any) => `<${el.uid}> <_hide> "${enable ? 'false' : 'true'}" .`).join('\n'),
+    );
+    const result = await client.createDgraphUpsert({
+        query: false,
+        mutations: [enable ? setNquads : deleteNquads, hideNquads],
+    });
+    states.caches.schemas.updateNow();
+    states.caches.packages.updateNow();
+    states.caches.executables.updateNow();
+    return result;
+};
+
+export const enablePackage = async (client: DgraphClient, states: any, pkgName: string) =>
+    disablePackage(client, states, pkgName, true);

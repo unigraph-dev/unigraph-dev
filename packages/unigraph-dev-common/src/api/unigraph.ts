@@ -673,6 +673,24 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             sendEvent(connection, 'lease_uid', { uid: leased });
             return leased;
         },
+        disablePackage: (packageName: string) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success && response.results) resolve(response.results);
+                    else reject(response);
+                };
+                sendEvent(connection, 'disable_package', { packageName }, id);
+            }),
+        enablePackage: (packageName: string) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success && response.results) resolve(response.results);
+                    else reject(response);
+                };
+                sendEvent(connection, 'enable_package', { packageName }, id);
+            }),
     };
 
     return api;

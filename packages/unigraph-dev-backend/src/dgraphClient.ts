@@ -306,7 +306,7 @@ export default class DgraphClient {
   async getSchemas() {
     return this.queryData<any[]>(`
     query findByName() {
-      entities(func: eq(dgraph.type, "Type")) @recurse {
+      entities(func: eq(dgraph.type, "Type")) @filter(NOT eq(<_hide>, true)) @recurse {
         uid
         unigraph.id
         _definition
@@ -320,7 +320,7 @@ export default class DgraphClient {
   async getSchemasFromTable() {
     const res = (await this.queryDgraph(`
       query findByName() {
-        entities(func: uid(uu)) @filter(NOT type(Named)) @recurse {
+        entities(func: uid(uu)) @filter(NOT type(Named) AND (NOT eq(<_hide>, true))) @recurse {
           uid
           unigraph.id
           _definition
@@ -364,7 +364,7 @@ export default class DgraphClient {
   async getExecutables() {
     return this.queryData<any[]>(`
     query findByName() {
-      entities(func: eq(dgraph.type, "Executable")) @recurse {
+      entities(func: eq(dgraph.type, "Executable")) @filter(NOT eq(<_hide>, true)) @recurse {
         uid
         unigraph.id
         _definition
