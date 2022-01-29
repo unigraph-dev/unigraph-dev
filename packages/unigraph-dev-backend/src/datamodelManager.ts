@@ -68,7 +68,7 @@ export function createSchemaCache(client: DgraphClient): Cache<any> {
         cache.data = newdata || [];
         // Remove all non-schema objects items first
         Object.entries(cache.data).forEach(([k, v]: any) => {
-            if (k.startsWith('$/schema/interface/')) {
+            if (k.startsWith('$/schema/interface/') && v?._definition) {
                 const defn = v._definition as ComposerUnionInstance;
                 // console.log(k, v, defn);
                 defn._parameters._definitions = [];
