@@ -12,7 +12,7 @@ export function AppLibrary() {
         tabContext.subscribeToType(
             '$/schema/view',
             (views: any) => {
-                setTotalViews(views);
+                setTotalViews(views.filter((el: any) => el['unigraph.id']?.length > 0));
             },
             viewId,
         );

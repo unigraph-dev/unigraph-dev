@@ -48,6 +48,12 @@
                 "editable": true,
                 "name": "Set emails as read"
             }
+        ],
+        "entities": [
+            {
+                "id": "email_view",
+                "src": "entities/email_view.json"
+            }
         ]
     }
 }

@@ -30,6 +30,10 @@
             {
                 "id": "add_note_context_menu",
                 "src": "entities/add_note_context_menu.json"
+            },
+            {
+                "id": "notes_view",
+                "src": "entities/notes_view.json"
             }
         ],
         "executables": [

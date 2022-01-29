@@ -1,0 +1,7 @@
+{
+    "type": { "unigraph.id": "$/schema/view" },
+    "env": "react-explorer",
+    "name": "Calendar",
+    "icon": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' style='width:24px;height:24px' viewBox='0 0 24 24'%3E%3Cpath fill='currentColor' d='M19,4H18V2H16V4H8V2H6V4H5C3.89,4 3,4.9 3,6V20A2,2 0 0,0 5,22H19A2,2 0 0,0 21,20V6A2,2 0 0,0 19,4M19,20H5V10H19V20M19,8H5V6H19V8M12,13H17V18H12V13Z' /%3E%3C/svg%3E",
+    "view": "/pages/calendar"
+}
