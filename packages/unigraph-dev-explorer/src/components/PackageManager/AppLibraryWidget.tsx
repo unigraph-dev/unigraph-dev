@@ -1,20 +1,9 @@
-import { Grid, Typography } from '@material-ui/core';
+import { Grid, ListItemIcon, Typography } from '@material-ui/core';
 import Icon from '@mdi/react';
-import {
-    mdiViewDashboardOutline,
-    mdiFeatureSearchOutline,
-    mdiRss,
-    mdiAppsBox,
-    mdiEmailOpenMultipleOutline,
-    mdiCalendarOutline,
-    mdiCalendarClockOutline,
-    mdiInboxOutline,
-    mdiBookmarkMultipleOutline,
-    mdiCheckboxMarkedCirclePlusOutline,
-    mdiNoteMultipleOutline,
-    mdiTrello,
-} from '@mdi/js';
-import { NavigationContext } from '../../utils';
+import { mdiFeatureSearchOutline, mdiAppsBox, mdiInboxOutline, mdiViewQuiltOutline } from '@mdi/js';
+import React from 'react';
+import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import { TabContext } from '../../utils';
 
 type AppShortcutProps = {
     avatar: React.ReactElement<any>;
@@ -40,74 +29,58 @@ export function AppShortcut({ avatar, address, text }: AppShortcutProps) {
 }
 
 export function AllApps() {
+    const [totalViews, setTotalViews] = React.useState([]);
+    const tabContext = React.useContext(TabContext);
+    React.useEffect(() => {
+        const viewId = getRandomInt();
+
+        tabContext.subscribeToType(
+            '$/schema/view',
+            (views: any) => {
+                setTotalViews(views.filter((el: any) => el['unigraph.id']?.length > 0));
+            },
+            viewId,
+        );
+
+        return function cleanup() {
+            tabContext.unsubscribe(viewId);
+        };
+    }, []);
+
     return (
         <Grid container spacing={2}>
-            <Grid item xs={3}>
-                <AppShortcut avatar={<Icon path={mdiViewDashboardOutline} size={1} />} address="/today" text="Today" />
-            </Grid>
-            <Grid item xs={3}>
+            <Grid item xs={3} lg={2}>
                 <AppShortcut
                     avatar={<Icon path={mdiFeatureSearchOutline} size={1} />}
                     address="/search"
                     text="Search"
                 />
             </Grid>
-            <Grid item xs={3}>
-                <AppShortcut
-                    avatar={<Icon path={mdiCheckboxMarkedCirclePlusOutline} size={1} />}
-                    address="/examples/todo"
-                    text="Todo List"
-                />
-            </Grid>
-            <Grid item xs={3}>
-                <AppShortcut
-                    avatar={<Icon path={mdiNoteMultipleOutline} size={1} />}
-                    address="/notes-list"
-                    text="Notes"
-                />
-            </Grid>
-            <Grid item xs={3}>
-                <AppShortcut
-                    avatar={<Icon path={mdiBookmarkMultipleOutline} size={1} />}
-                    address="/examples/bookmarks"
-                    text="Bookmarks"
-                />
-            </Grid>
-            <Grid item xs={3}>
-                <AppShortcut
-                    avatar={<Icon path={mdiRss} size={1} />}
-                    address="/examples/rss_reader"
-                    text="RSS Reader"
-                />
-            </Grid>
-            <Grid item xs={3}>
+            <Grid item xs={3} lg={2}>
                 <AppShortcut avatar={<Icon path={mdiInboxOutline} size={1} />} address="/inbox" text="Inbox" />
             </Grid>
-            <Grid item xs={3}>
-                <AppShortcut
-                    avatar={<Icon path={mdiEmailOpenMultipleOutline} size={1} />}
-                    address="/email"
-                    text="Email"
-                />
-            </Grid>
-            <Grid item xs={3}>
-                <AppShortcut
-                    avatar={<Icon path={mdiCalendarClockOutline} size={1} />}
-                    address="/current-events"
-                    text="Current Events"
-                />
-            </Grid>
-            <Grid item xs={3}>
-                <AppShortcut avatar={<Icon path={mdiCalendarOutline} size={1} />} address="/calendar" text="Calendar" />
-            </Grid>
-            <Grid item xs={3}>
-                <AppShortcut
-                    avatar={<Icon path={mdiTrello} size={1} />}
-                    address="/$/executable/kanban-list-view"
-                    text="Kanban"
-                />
-            </Grid>
-            <Grid item xs={3}>
+            {totalViews.map((el: any) => (
+                <Grid item xs={3} lg={2}>
+                    <AppShortcut
+                        avatar={
+                            el?._value?.icon ? (
+                                <ListItemIcon
+                                    style={{
+                                        minWidth: '24px',
+                                        minHeight: '24px',
+                                        backgroundImage: `url("${el?._value?.icon?._value?.['_value.%']}")`,
+                                    }}
+                                />
+                            ) : (
+                                <Icon path={mdiViewQuiltOutline} size={1} />
+                            )
+                        }
+                        address={`/${el?._value?.view?._value?.uid || el?._value?.view?.['_value.%']?.slice(7)}`}
+                        text={el?.get('name')?.as('primitive')}
+                    />
+                </Grid>
+            ))}
+            <Grid item xs={3} lg={2}>
                 <AppShortcut avatar={<Icon path={mdiAppsBox} size={1} />} address="/app-library" text="All Apps" />
             </Grid>
         </Grid>

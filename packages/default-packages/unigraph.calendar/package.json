@@ -65,6 +65,18 @@
             {
                 "id": "home_section_upcoming_events",
                 "src": "entities/home_section_upcoming_events.json"
+            },
+            {
+                "id": "calendar_view",
+                "src": "entities/calendar_view.json"
+            },
+            {
+                "id": "current_events_view",
+                "src": "entities/current_events_view.json"
+            },
+            {
+                "id": "today_view",
+                "src": "entities/today_view.json"
             }
         ]
     }

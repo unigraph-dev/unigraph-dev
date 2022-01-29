@@ -1,0 +1,7 @@
+{
+    "type": { "unigraph.id": "$/schema/view" },
+    "env": "react-explorer",
+    "name": "Today",
+    "icon": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' style='width:24px;height:24px' viewBox='0 0 24 24'%3E%3Cpath fill='currentColor' d='M19,5V7H15V5H19M9,5V11H5V5H9M19,13V19H15V13H19M9,17V19H5V17H9M21,3H13V9H21V3M11,3H3V13H11V3M21,11H13V21H21V11M11,15H3V21H11V15Z' /%3E%3C/svg%3E",
+    "view": "/pages/today"
+}
