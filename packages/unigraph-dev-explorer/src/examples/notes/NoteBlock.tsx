@@ -1127,19 +1127,6 @@ export function DetailedNoteBlock({
                                                         },
                                                     }}
                                                     recursive
-                                                    style={
-                                                        el.type?.['unigraph.id'] === '$/schema/note_block'
-                                                            ? {}
-                                                            : {
-                                                                  border: 'lightgray',
-                                                                  borderStyle: 'solid',
-                                                                  borderWidth: 'thin',
-                                                                  margin: '2px',
-                                                                  borderRadius: '8px',
-                                                                  maxWidth: 'fit-content',
-                                                                  padding: '4px',
-                                                              }
-                                                    }
                                                 />
                                             </OutlineComponent>
                                         );
