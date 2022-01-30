@@ -565,6 +565,10 @@ export function getLocalUnigraphAPI(
                 query: false,
                 mutations: [updater],
             });
+            callHooks(states.hooks, 'after_object_changed', {
+                subscriptions: states.subscriptions,
+                caches: states.caches,
+            });
             return result;
         },
         addBacklinks: async (fromUids, toUids) => {
@@ -579,6 +583,10 @@ export function getLocalUnigraphAPI(
             const result = await client.createDgraphUpsert({
                 query: false,
                 mutations: [updater],
+            });
+            callHooks(states.hooks, 'after_object_changed', {
+                subscriptions: states.subscriptions,
+                caches: states.caches,
             });
             return result;
         },
