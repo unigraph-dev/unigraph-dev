@@ -44,6 +44,20 @@ export function findUid(object: any, uid: string, path?: any[]) {
     return [undefined, currentPath];
 }
 
+export function findAllUids(object: any, uid: string) {
+    let currentResult = true;
+    const allResults: any[] = [];
+    while (currentResult !== undefined && currentResult !== null) {
+        const res = findUid(object, uid);
+        if (res[0] !== undefined && res[0] !== null && res[0].uid) {
+            allResults.push([res[0].uid, res[0], res[1]]);
+            delete res[0].uid;
+        }
+        [currentResult] = res;
+    }
+    return allResults.map((el) => [Object.assign(el[1], { uid: el[0] }), el[2]]);
+}
+
 export function assignUids(object: any, totalLeases: string[], usedLeases: string[], blankMap: any) {
     if (typeof object === 'object' && object) {
         if (Array.isArray(object)) {

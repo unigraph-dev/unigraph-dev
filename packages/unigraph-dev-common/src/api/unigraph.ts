@@ -11,6 +11,7 @@ import {
     augmentStubs,
     base64ToBlob,
     buildGraph,
+    findAllUids,
     findUid,
     getCircularReplacer,
     isJsonString,
@@ -447,9 +448,12 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
 
                         // Merge updater object with existing one
                         const newObj = JSON.parse(JSON.stringify(subResults[subId], getCircularReplacer()));
-                        const [changeLoc] = findUid(newObj, uid);
-                        deepMerge(changeLoc, JSON.parse(JSON.stringify(newObject)));
-                        augmentStubs(changeLoc, subResults[subId]);
+                        const clonedNewObject = JSON.parse(JSON.stringify(newObject));
+                        const changeLocs = findAllUids(newObj, uid);
+                        changeLocs.forEach(([loc, path]) => {
+                            deepMerge(loc, clonedNewObject);
+                            augmentStubs(loc, subResults[subId]);
+                        });
                         subResults[subId] = newObj;
                         setTimeout(() => {
                             // console.log(newObj);
