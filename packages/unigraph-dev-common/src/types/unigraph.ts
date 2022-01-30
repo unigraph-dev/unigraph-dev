@@ -246,7 +246,7 @@ export interface Unigraph<TT = WebSocket | false> {
     /**
      * Updates objects simply using the SPO triplet format.
      */
-    updateTriplets(triplets: any[], subIds?: any[] | any): any;
+    updateTriplets(triplets: any[], isDelete?: boolean, subIds?: any[] | any): any;
     /**
      * Updates an existing object by its UID and describing the new object.
      *
@@ -414,5 +414,22 @@ export interface Unigraph<TT = WebSocket | false> {
     leaseUid?(): string;
     disablePackage?(packageName: string): any;
     enablePackage?(packageName: string): any;
+    /**
+     * Recalculates backlinks from a set of objects, to a set of children.
+     *
+     * This is done by fetching everything of the given fromUids and see if they still lead to the toUids.
+     * If not, the backlink is removed.
+     *
+     * @param fromUids A list of objects to fetch.
+     * @param toUids
+     * @param depth
+     */
+    recalculateBacklinks(fromUids: string[], toUids: string[], depth?: number): any;
+    /**
+     * Adds a list of fromUids (parents) to backlinks (unigraph.origin) of toUids (children).
+     * @param fromUids
+     * @param toUids
+     */
+    addBacklinks(fromUids: string[], toUids: string[]): any;
 }
 /** End of unigraph interface */ // Don't remove this line - needed for Monaco to work
