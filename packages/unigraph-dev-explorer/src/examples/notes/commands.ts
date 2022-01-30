@@ -646,8 +646,11 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
     const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
     let delUidPar = '';
     let delUidChild = '';
+    const recalcBacklinkUids: string[] = [];
+    const recalcParents = [...parents.map((el) => el.uid)];
     const newChildren = children.reduce((prev: any[], curr: any) => {
         if (curr?._value?.type?.['unigraph.id'] === '$/schema/subentity' && ++currSubentity === parent) {
+            recalcParents.push(curr._value._value.uid);
             isCompleted = true;
             let currChildSubentity = -1;
             let childIsCompleted = 0;
@@ -663,6 +666,9 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
                         _index: { '_value.#i': curr._index['_value.#i'] + targetChild.length + 1 },
                     });
                     delUidChild = ccurr.uid;
+                    const childrenUids = [ccurr._value.uid, ccurr._value._value.uid];
+                    getAllChildren(ccurr._value._value._value.children, childrenUids);
+                    recalcBacklinkUids.push(...childrenUids);
                     childIsCompleted += 1;
                     return cprev;
                 }
@@ -715,6 +721,11 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
         parents,
         true,
     );
+    if (recalcBacklinkUids.length >= 1) {
+        setTimeout(() => {
+            window.unigraph.recalculateBacklinks(recalcParents, recalcBacklinkUids);
+        }, 1000);
+    }
     window.unigraph.touch(parents.map((el) => el.uid));
     context.edited.current = true;
     // context.setCommand(() => () => focusUid(newChildren[parent + 1]._value._value.uid));
