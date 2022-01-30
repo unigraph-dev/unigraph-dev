@@ -224,9 +224,14 @@ export function AutoDynamicView({
             dataContext: dataContext.contextUid,
             removeFromContext: callbacks?.removeFromContext,
         },
-        collect: (monitor) => ({
-            isDragging: !!monitor.isDragging(),
-        }),
+        collect: (monitor) => {
+            if (monitor.isDragging() && window.dragselect) {
+                window.dragselect.break();
+            }
+            return {
+                isDragging: !!monitor.isDragging(),
+            };
+        },
     }));
 
     const [, drop] = useDrop(() => ({
