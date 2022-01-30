@@ -17,6 +17,7 @@ import { Unigraph } from 'unigraph-dev-common/lib/types/unigraph';
 import stringify from 'json-stable-stringify';
 import DgraphClient from './dgraphClient';
 import {
+    EventAddBacklinks,
     EventAddNotification,
     EventAddUnigraphPackage,
     EventCreateDataByJson,
@@ -39,6 +40,7 @@ import {
     EventImportObjects,
     EventProxyFetch,
     EventQueryByStringWithVars,
+    EventRecalculateBacklinks,
     EventReorderItemInArray,
     EventResponser,
     EventRunExecutable,
@@ -477,7 +479,7 @@ export default async function startServer(client: DgraphClient) {
         },
 
         "update_spo": function (event: EventUpdateSPO, ws: IWebsocket) {
-            localApi.updateTriplets(event.objects).then((_: any) => {
+            localApi.updateTriplets(event.objects, event.isDelete, event.subIds).then((_: any) => {
                 callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches, subIds: event.subIds, ofUpdate: event.id})
                 ws.send(makeResponse(event, true))
             }).catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
@@ -699,6 +701,18 @@ export default async function startServer(client: DgraphClient) {
             const res = await enablePackage(client, serverStates, event.packageName)
                 .catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
             callHooks(serverStates.hooks, "after_object_changed", {subscriptions: serverStates.subscriptions, caches: caches});
+            ws.send(makeResponse(event, true, {result: res}))
+        },
+
+        "recalculate_backlinks": async function (event: EventRecalculateBacklinks, ws: IWebsocket) {
+            const res = await serverStates.localApi.recalculateBacklinks(event.fromUids, event.toUids, event.depth)
+                .catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
+            ws.send(makeResponse(event, true, {result: res}))
+        },
+
+        "add_backlinks": async function (event: EventAddBacklinks, ws: IWebsocket) {
+            const res = await serverStates.localApi.addBacklinks(event.fromUids, event.toUids)
+                .catch((e: any) => ws.send(makeResponse(event, false, {"error": e.toString()})));
             ws.send(makeResponse(event, true, {result: res}))
         }
     };

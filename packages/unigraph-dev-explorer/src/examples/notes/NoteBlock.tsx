@@ -598,7 +598,12 @@ export function DetailedNoteBlock({
                 const unigraphHtml = parseUnigraphHtml(paste);
                 if (unigraphHtml) {
                     const entities = Array.from(unigraphHtml.body.children[0].children).map((el) => el.id);
+                    const childrenEntities = Array.from(unigraphHtml.body.children[0].children)
+                        .map((el) => el.getAttribute('children-uids')?.split(','))
+                        .flat();
                     callbacks['add-children'](entities, getCurrentText().length ? 0 : -1);
+                    // console.log(childrenEntities);
+                    callbacks['add-parent-backlinks'](childrenEntities);
                 } else {
                     const mdresult = htmlToMarkdown(paste);
                     const lines = mdresult.split('\n\n');
@@ -1084,6 +1089,18 @@ export function DetailedNoteBlock({
                                                                       its,
                                                                   )
                                                                 : addChildren(data, editorContext, elindex, its),
+                                                        'add-parent-backlinks': (childrenUids: string[]) => {
+                                                            const parents = getParentsAndReferences(
+                                                                data['~_value'],
+                                                                (data['unigraph.origin'] || []).filter(
+                                                                    (ell: any) => ell.uid !== data.uid,
+                                                                ),
+                                                            )[0]
+                                                                .map((ell: any) => ell?.uid)
+                                                                .filter(Boolean);
+                                                            if (!data._hide) parents.push(data.uid);
+                                                            window.unigraph.addBacklinks(parents, childrenUids);
+                                                        },
                                                         context: data,
                                                         isEmbed: true,
                                                         isChildren: true,

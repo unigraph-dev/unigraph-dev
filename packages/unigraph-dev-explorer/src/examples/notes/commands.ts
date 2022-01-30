@@ -198,15 +198,19 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
         window.unigraph.deleteItemFromArray(toDelete[0], toDelete[1], toDelete[2], context.callbacks.subsId);
 };
 
-const getAllChildren = (data: any) => {
+const getAllChildren = (data: any, childrenUids: string[]) => {
     const children = (data?.['_value['] || []).sort(byElementIndex);
     if (children.length > 0) {
         return children
-            .map((el: any) => ({
-                content: el?._value?._value?._value?.text?._value?._value?.['_value.%'],
-                children: getAllChildren(el?._value?._value?._value?.children),
-                type: el?._value?.type?.['unigraph.id'],
-            }))
+            .map((el: any) => {
+                if (el?._value?.type?.['unigraph.id'] === '$/schema/subentity' || el?._key)
+                    childrenUids.push(el?._value?.uid, el?._value?._value?.uid);
+                return {
+                    content: el?._value?._value?._value?.text?._value?._value?.['_value.%'],
+                    children: el?._key ? [] : getAllChildren(el?._value?._value?._value?.children, childrenUids),
+                    type: el?._value?.type?.['unigraph.id'],
+                };
+            })
             .filter((el: any) => el.type === '$/schema/subentity');
     }
     return [];
@@ -218,11 +222,13 @@ export const copyChildToClipboard = (data: any, context: NoteEditorContext, inde
     let cutItem;
     children?.forEach((el: any, elindex: any) => {
         if (el?._value?.type?.['unigraph.id'] === '$/schema/subentity' && ++currSubentity === index) {
+            const childrenUids: string[] = [el?._value?.uid, el?._value?._value?.uid];
             cutItem = {
                 uid: el?._value?._value?.uid,
+                childrenUids,
                 content: el?._value?._value?._value?.text?._value?._value?.['_value.%'],
                 index: currSubentity,
-                children: getAllChildren(el?._value?._value?._value?.children),
+                children: getAllChildren(el?._value?._value?._value?.children, childrenUids),
             };
         }
     });
@@ -231,9 +237,26 @@ export const copyChildToClipboard = (data: any, context: NoteEditorContext, inde
 };
 
 export const deleteChild = (data: any, context: NoteEditorContext, index: number, permanent = false) => {
+    let currSubentity = -1;
     const delState = window.unigraph.getState(`temp/deleteChildren/${data.uid}`);
     if (!delState.value) delState.value = [];
     delState.value.push(index);
+    const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
+    const parents = getParents(data);
+    const totalChildrenToCheck: string[] = [];
+    children?.forEach((el: any, elindex: any) => {
+        if (el?._value?.type?.['unigraph.id'] === '$/schema/subentity' && ++currSubentity === index) {
+            const childrenUids: string[] = [el?._value?.uid, el?._value?._value?.uid];
+            getAllChildren(el?._value?._value?._value?.children, childrenUids);
+            totalChildrenToCheck.push(...childrenUids);
+        }
+    });
+    setTimeout(() => {
+        window.unigraph.recalculateBacklinks(
+            parents.map((el) => el.uid),
+            totalChildrenToCheck,
+        );
+    }, 1000);
     setTimeout(() => {
         if (delState.value) {
             deleteChildren(
@@ -623,8 +646,11 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
     const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
     let delUidPar = '';
     let delUidChild = '';
+    const recalcBacklinkUids: string[] = [];
+    const recalcParents = [...parents.map((el) => el.uid)];
     const newChildren = children.reduce((prev: any[], curr: any) => {
         if (curr?._value?.type?.['unigraph.id'] === '$/schema/subentity' && ++currSubentity === parent) {
+            recalcParents.push(curr._value._value.uid);
             isCompleted = true;
             let currChildSubentity = -1;
             let childIsCompleted = 0;
@@ -640,6 +666,9 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
                         _index: { '_value.#i': curr._index['_value.#i'] + targetChild.length + 1 },
                     });
                     delUidChild = ccurr.uid;
+                    const childrenUids = [ccurr._value.uid, ccurr._value._value.uid];
+                    getAllChildren(ccurr._value._value._value.children, childrenUids);
+                    recalcBacklinkUids.push(...childrenUids);
                     childIsCompleted += 1;
                     return cprev;
                 }
@@ -692,6 +721,11 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
         parents,
         true,
     );
+    if (recalcBacklinkUids.length >= 1) {
+        setTimeout(() => {
+            window.unigraph.recalculateBacklinks(recalcParents, recalcBacklinkUids);
+        }, 1000);
+    }
     window.unigraph.touch(parents.map((el) => el.uid));
     context.edited.current = true;
     // context.setCommand(() => () => focusUid(newChildren[parent + 1]._value._value.uid));
