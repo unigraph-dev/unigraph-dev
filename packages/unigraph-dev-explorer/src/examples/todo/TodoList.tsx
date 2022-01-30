@@ -1,5 +1,5 @@
-import { Button, Checkbox, Chip, ListItemText, TextField, Typography } from '@material-ui/core';
-import { CalendarToday, PriorityHigh } from '@material-ui/icons';
+import { Button, Checkbox, Chip, ListItemText, TextField, Typography, Fab } from '@material-ui/core';
+import { CalendarToday, PriorityHigh, Add as AddIcon } from '@material-ui/icons';
 import React, { useState } from 'react';
 import { pkg as todoPackage } from 'unigraph-dev-common/lib/data/unigraph.todo.pkg';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
@@ -32,6 +32,19 @@ function TodoListBody({ data }: { data: ATodoList[] }) {
                 defaultFilter="only-incomplete"
                 compact
             />
+            <Fab
+                aria-label="add"
+                style={{ position: 'absolute', right: '16px', bottom: '16px' }}
+                onClick={() => {
+                    window.unigraph.getState('global/omnibarSummoner').setValue({
+                        show: true,
+                        tooltip: 'Add a todo item',
+                        defaultValue: '+todo ',
+                    });
+                }}
+            >
+                <AddIcon />
+            </Fab>
         </div>
     );
 }
