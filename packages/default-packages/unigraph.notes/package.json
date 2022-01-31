@@ -20,6 +20,10 @@
             {
                 "id": "interface/textual",
                 "src": "schemas/textual.json"
+            },
+            {
+                "id": "embed_block",
+                "src": "schemas/embed_block.json"
             }
         ],
         "entities": [

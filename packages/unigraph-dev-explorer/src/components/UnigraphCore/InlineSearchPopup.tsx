@@ -87,7 +87,7 @@ export function InlineSearch() {
                 (ev: any) => {
                     ev.preventDefault();
                     ev.stopPropagation();
-                    state.onSelected?.(el.name, el.uid);
+                    state.onSelected?.(el.name, el.uid, el.type);
                 },
             ]),
         ]);

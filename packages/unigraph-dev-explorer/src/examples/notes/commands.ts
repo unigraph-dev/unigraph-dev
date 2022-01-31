@@ -13,7 +13,7 @@ export const focusUid = (obj: any, tailOrCaret?: number) => {
     window.unigraph.getState('global/focused').setValue({
         uid: obj?.startsWith?.('0x') ? obj : obj.uid,
         caret: tailOrCaret !== undefined && tailOrCaret >= 0 ? tailOrCaret : focusState?.caret || 0,
-        type: '$/schema/note_block',
+        type: obj?.type || '$/schema/note_block',
         tail: tailOrCaret === -1 || (tailOrCaret === undefined && focusState?.tail ? focusState.tail : undefined),
         component: obj?.componentId || '',
     });
@@ -740,14 +740,18 @@ export const focusNextDFSNode = (data: any, context: NoteEditorContext, index: n
 };
 
 export const getLastDFSNode = (data: any, context: NoteEditorContext, index: number) => {
-    const orderedNodes = dfs(context.nodesState.value).filter((el) => el.type === '$/schema/note_block');
+    const orderedNodes = dfs(context.nodesState.value).filter((el) =>
+        ['$/schema/note_block', '$/schema/embed_block'].includes((el as any).type),
+    );
     const newIndex = orderedNodes.findIndex((el) => el.uid === data.uid) - 1;
     if (orderedNodes[newIndex] && !orderedNodes[newIndex].root) return orderedNodes[newIndex];
     return { uid: '' };
 };
 
 export const getNextDFSNode = (data: any, context: NoteEditorContext, index: number) => {
-    const orderedNodes = dfs(context.nodesState.value).filter((el) => el.type === '$/schema/note_block');
+    const orderedNodes = dfs(context.nodesState.value).filter((el) =>
+        ['$/schema/note_block', '$/schema/embed_block'].includes((el as any).type),
+    );
     const newIndex = orderedNodes.findIndex((el) => el.uid === data.uid) + 1;
     if (orderedNodes[newIndex] && !orderedNodes[newIndex].root) return orderedNodes[newIndex];
     return { uid: '' };
@@ -769,10 +773,17 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
             const newel = {
                 _index: { '_value.#i': elindex },
                 _value: {
-                    'dgraph.type': ['Entity'],
-                    type: { 'unigraph.id': '$/schema/subentity' },
-                    _hide: true,
-                    _value: stubConverted,
+                    uid: el._value.uid,
+                    _value: {
+                        uid: el._value._value.uid,
+                        type: { 'unigraph.id': '$/schema/embed_block' },
+                        _value: {
+                            uid: el._value._value._value.uid,
+                            content: {
+                                _value: stubConverted,
+                            },
+                        },
+                    },
                 },
             };
             textIt = el._value._value._value.text._value._value['_value.%'];
@@ -800,6 +811,44 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
         parents,
     );
     window.unigraph.touch(parents.map((el) => el.uid));
+};
+
+export const replaceChildWithEmbedUid = async (data: any, context: NoteEditorContext, index: number, uid: string) => {
+    // console.log(index);
+    let currSubentity = -1;
+    const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
+    const newChildren = children?.reduce((prev: any[], el: any, elindex: any) => {
+        if (el?._value?.type?.['unigraph.id'] === '$/schema/subentity' && ++currSubentity === index) {
+            /* something something */
+            const newel = {
+                uid: el.uid,
+                _value: {
+                    // subentity
+                    uid: el._value.uid,
+                    _value: {
+                        uid: el._value._value.uid,
+                        type: { 'unigraph.id': '$/schema/embed_block' },
+                        _value: {
+                            uid: el._value._value._value.uid,
+                            content: {
+                                _value: { uid },
+                            },
+                        },
+                    },
+                },
+            };
+            return [...prev, newel];
+        }
+        return [...prev, { uid: el.uid }];
+    }, []);
+    await window.unigraph.updateObject(
+        data?._value?.uid,
+        { children: { _displayAs: data?._value?.children?._displayAs, '_value[': newChildren } },
+        false,
+        false,
+        context.callbacks.subsId,
+    );
+    window.unigraph.touch(getParents(data).map((el) => el.uid));
 };
 
 export const replaceChildWithUid = async (data: any, context: NoteEditorContext, index: number, uid: string) => {
