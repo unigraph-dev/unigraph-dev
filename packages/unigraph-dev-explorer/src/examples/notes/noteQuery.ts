@@ -32,6 +32,13 @@ const getQuery: (depth: number) => string = (depth: number) => {
                     uid type { <unigraph.id> }
                 }
             }
+            content {
+                uid
+                _value {
+                    uid
+                    type { <unigraph.id> }
+                }
+            }
             children {
                 uid
                 <_displayAs>
