@@ -47,7 +47,7 @@ export const formatSimpleClipboardItems = (items: SimpleClipboardItem[]) => {
 export const parseUnigraphHtml = (html: string) => {
     const parser = new DOMParser();
     const htmldoc = parser.parseFromString(html, 'text/html');
-    return htmldoc.body.children[0].children[0].className === 'unigraph-entity' ? htmldoc : null;
+    return htmldoc.body.children?.[0]?.children?.[0]?.className === 'unigraph-entity' ? htmldoc : null;
 };
 
 export const setClipboardHandler = (evv: ClipboardEvent) => {

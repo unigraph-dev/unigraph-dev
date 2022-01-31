@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable no-param-reassign */
-import { Typography } from '@material-ui/core';
+import { Typography, TextareaAutosize, makeStyles } from '@material-ui/core';
 import React, { FormEvent } from 'react';
 import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
 import _ from 'lodash';
@@ -194,11 +194,10 @@ export function OutlineComponent({
         </div>
     );
 }
-
-const setFocusedCaret = () => {
-    const sel = document.getSelection();
-    const caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
+const setFocusedCaret = (textInput: any) => {
+    const caret = textInput.current.selectionStart as number;
     const state = window.unigraph.getState('global/focused');
+    console.log('setFocusedCaret', { caret, state });
     state.setValue({ ...state.value, caret });
 };
 
@@ -262,7 +261,6 @@ function NoteViewPageWrapper({ children, isRoot }: any) {
 }
 
 function NoteViewTextWrapper({ children, semanticChildren, isRoot, onContextMenu, callbacks, isEditing }: any) {
-    // console.log(callbacks.BacklinkComponent);
     return (
         <div
             style={{ display: 'flex', alignItems: 'center' }}
@@ -275,6 +273,15 @@ function NoteViewTextWrapper({ children, semanticChildren, isRoot, onContextMenu
         </div>
     );
 }
+
+const useStyles = makeStyles((theme) => ({
+    noteTextarea: {
+        ...theme.typography.body1,
+        border: 'none',
+        outline: 'none',
+        width: '100%',
+    },
+}));
 
 export function DetailedNoteBlock({
     data,
@@ -313,14 +320,11 @@ export function DetailedNoteBlock({
             [],
         );
     };
-    const textInput: any = React.useRef();
+    const textInput: any = React.useRef(); // refers to textarea elements
     /** Reference for HTML Element for list of children */
     const editorRef = React.useRef<any>();
     const inputDebounced = React.useRef(_.debounce(inputter, 333));
-    const setCurrentText = (text: string) => {
-        textInput.current.innerText = text;
-    };
-    const getCurrentText = () => textInput.current.innerText;
+    const [currentText, setCurrentText] = React.useState('');
     const edited = React.useRef(false);
     const [isEditing, setIsEditing] = React.useState(
         window.unigraph.getState('global/focused').value?.uid === data.uid,
@@ -404,7 +408,6 @@ export function DetailedNoteBlock({
             'uid',
         );
         nodesState.setValue(newNodes);
-        // if (!isChildren) console.log(getParentsAndReferences(data['~_value'], (data['unigraph.origin'] || []).filter((el: any) => el.uid !== data.uid)))
 
         return function cleanup() {
             inputDebounced.current.flush();
@@ -413,14 +416,15 @@ export function DetailedNoteBlock({
 
     const checkReferences = React.useCallback(
         (matchOnly?: boolean) => {
-            const newContent = textInput.current.innerText;
-            const caret = document.getSelection()?.anchorOffset as number;
+            // const currentText = textInput.current.innerText;
+            // const caret = document.getSelection()?.anchorOffset as number;
+            const caret = textInput.current.selectionStart;
             // Check if inside a reference block
 
             let hasMatch = false;
             hasMatch =
                 inlineTextSearch(
-                    textInput.current.innerText,
+                    currentText,
                     textInput,
                     caret,
                     async (match: any, newName: string, newUid: string) => {
@@ -428,17 +432,14 @@ export function DetailedNoteBlock({
                             (el: any) => ({ uid: el.uid }),
                         );
                         if (!data._hide) parents.push({ uid: data.uid });
-                        const newStr = `${newContent?.slice?.(0, match.index)}[[${newName}]]${newContent?.slice?.(
+                        const newStr = `${currentText?.slice?.(0, match.index)}[[${newName}]]${currentText?.slice?.(
                             match.index + match[0].length,
                         )}`;
-                        // console.log(newName, newUid, newStr, newContent);
-                        // This is an ADDITION operation
-                        // console.log(data);
                         const semChildren = data?._value;
-                        // inputDebounced.cancel();
-                        textInput.current.innerText = newStr;
+                        setCurrentText(newStr);
                         resetEdited();
-                        setCaret(document, textInput.current.firstChild, match.index + newName.length + 4);
+                        // setCaret(document, textInput.current.firstChild, match.index + newName.length + 4);
+                        setCaret(document, textInput.current, match.index + newName.length + 4);
                         await window.unigraph.updateObject(
                             data.uid,
                             {
@@ -474,7 +475,7 @@ export function DetailedNoteBlock({
                 ) || hasMatch;
             hasMatch =
                 inlineObjectSearch(
-                    textInput.current.innerText,
+                    currentText,
                     textInput,
                     caret,
                     async (match: any, newName: string, newUid: string) => {
@@ -500,59 +501,31 @@ export function DetailedNoteBlock({
         const dataText = data.get('text')?.as('primitive');
         if (dataText && options?.viewId && !callbacks.isEmbed)
             window.layoutModel.doAction(Actions.renameTab(options.viewId, `Note: ${dataText}`));
-        if (getCurrentText() !== dataText && !edited.current) {
+        if (currentText !== dataText && !edited.current) {
             setCurrentText(dataText);
             if (isEditing && dataText === '') textInput.current.appendChild(document.createElement('br'));
-        } else if ((getCurrentText() === dataText && edited.current) || getCurrentText() === '') {
+        } else if ((currentText === dataText && edited.current) || currentText === '') {
             resetEdited();
         }
     }, [data.get('text')?.as('primitive'), isEditing]);
 
-    const getFocusedTextElAndPos = (el: any, _pos: number) => {
-        const pos = _pos || el.innerText.length;
-        if (el?.firstChild) {
-            // if a node has children, it's probably multiline,
-            // we take into account the linebreaks that show up as len 0,
-            // should check for instance of <br> but this will do for now
-            const lens = [...el.childNodes].map((node) => node.textContent?.length || 0).map((x) => (x === 0 ? 1 : x));
-            // find index of the line that contains the caret
-            const findCaretLineIndex = (acc: number, cur: number, i: number, arr: number[]) => {
-                if (pos <= acc + cur) {
-                    arr.splice(0);
-                    return i;
-                }
-                return acc + cur;
-            };
-            const line = [...lens].reduce(findCaretLineIndex, 0);
-            const textEl = el.childNodes[line];
-            // find the index of the character in the line
-            const linePos = pos - lens.slice(0, line).reduce((a, b) => a + b, 0);
-            return { textEl, linePos };
-        }
-        return { textEl: el, linePos: pos };
-    };
-
     React.useEffect(() => {
         if (focused) {
             const setCaretFn = () => {
-                let tail;
+                textInput.current.focus();
                 const focusedState2 = window.unigraph.getState('global/focused').value;
-                const { textEl, linePos } = getFocusedTextElAndPos(
-                    textInput.current,
-                    focusedState2.tail || focusedState2.caret,
-                );
+                console.log('setCaretFn', { focusedState2, textInput: textInput.current });
                 if (focusedState2.newData) {
-                    textEl.innerText = focusedState2.newData;
+                    setCurrentText(focusedState2.newData);
                     delete focusedState2.newData;
                 }
-                setCaret(document, textEl, linePos);
-                // setCaret(document, textEl, linePos || focusedState2.caret);
+                const pos = focusedState2.tail ? currentText.length : focusedState2.caret ?? currentText.length;
+                setCaret(document, textInput.current, pos);
             };
             if (!isEditing) {
                 setIsEditing(true);
                 setTimeout(setCaretFn, 0);
             } else {
-                textInput.current.focus();
                 setCaretFn();
                 handlePotentialResize();
             }
@@ -578,9 +551,8 @@ export function DetailedNoteBlock({
         if (focused) {
             window.unigraph.getState('global/focused/actions').setValue({
                 splitChild: () => {
-                    const sel = document.getSelection();
-                    const caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
-                    callbacks['split-child'](getCurrentText() || data.get('text')?.as('primitive'), caret);
+                    const caret = textInput.current.selectionStart;
+                    callbacks['split-child'](currentText || data.get('text')?.as('primitive'), caret);
                 },
                 indentChild: callbacks['indent-child'],
                 unindentChild: callbacks['unindent-child-in-parent'],
@@ -619,37 +591,41 @@ export function DetailedNoteBlock({
 
             if (paste.length > 0) {
                 const selection = window.getSelection();
-                if (!selection?.rangeCount) return false;
-                selection?.deleteFromDocument();
+                // What's this for?
+                // if (!selection?.rangeCount) return false;
+
+                //  deleting selection: needed in textarea?
+                // selection?.deleteFromDocument();
+                // if(textInput.current.selectionStart !== textInput.current.selectionEnd){
+                //     setCurrentText()
+                // }
 
                 const unigraphHtml = parseUnigraphHtml(paste);
+
                 if (unigraphHtml) {
                     const entities = Array.from(unigraphHtml.body.children[0].children).map((el) => el.id);
-                    callbacks['add-children'](entities, getCurrentText().length ? 0 : -1);
+                    callbacks['add-children'](entities, currentText.length ? 0 : -1);
                 } else {
                     const mdresult = htmlToMarkdown(paste);
                     const lines = mdresult.split('\n\n');
 
-                    if (selection.getRangeAt(0).startContainer.nodeName === 'BR') {
-                        textInput.current.innerText += lines[0];
-                        setCaret(document, textInput.current.firstChild, textInput.current.innerText.length);
-                    } else {
-                        selection.getRangeAt(0).insertNode(document.createTextNode(lines[0]));
-                        selection.collapseToEnd();
-                    }
+                    // if (selection.getRangeAt(0).startContainer.nodeName === 'BR') {
+                    // why checking BR? Why should we create a new block?
+                    setCurrentText(currentText + lines[0]);
+                    setCaret(document, textInput.current, currentText.length);
 
                     edited.current = true;
-                    inputDebounced.current(textInput.current.innerText);
+                    inputDebounced.current(currentText);
                     inputDebounced.current.flush();
 
-                    if (lines.length > 1) {
-                        const newLines = lines.slice(1);
-                        callbacks['add-children'](newLines, getCurrentText().length ? 0 : -1);
-                    }
+                    // if (lines.length > 1) {
+                    //     const newLines = lines.slice(1);
+                    //     callbacks['add-children'](newLines, currentText.length ? 0 : -1);
+                    // }
                 }
 
                 event.preventDefault();
-            } else if (img.type.indexOf('image') === 0) {
+            } else if (img?.type?.indexOf('image') === 0) {
                 const blob = img.getAsFile();
                 if (blob) {
                     event.preventDefault();
@@ -662,31 +638,25 @@ export function DetailedNoteBlock({
                         const res = `![${blob.name || 'image'}](${base64})`;
 
                         if (selection.getRangeAt(0).startContainer.nodeName === 'BR') {
-                            textInput.current.innerText += res;
-                            setCaret(document, textInput.current.firstChild, textInput.current.innerText.length);
+                            setCurrentText(currentText + res);
+                            setCaret(document, textInput.current, currentText.length);
                         } else {
                             selection.getRangeAt(0).insertNode(document.createTextNode(res));
                             selection.collapseToEnd();
                         }
 
                         edited.current = true;
-                        inputDebounced.current(textInput.current.innerText);
+                        inputDebounced.current(currentText);
                         inputDebounced.current.flush();
                         return false;
                     });
                 }
             }
-            setFocusedCaret();
+            setFocusedCaret(textInput);
             return event;
         },
         [callbacks],
     );
-
-    const onInputHandler = React.useCallback((ev) => {
-        if (ev.currentTarget.innerText !== data.get('text').as('primitive') && !edited.current) edited.current = true;
-        checkReferences();
-        onNoteInput(inputDebounced, ev);
-    }, []);
 
     const closeScopeCharDict: { [key: string]: string } = {
         '[': ']',
@@ -694,22 +664,25 @@ export function DetailedNoteBlock({
         '"': '"',
         "'": "'",
         '`': '`',
+        $: '$',
         // '{':'}',
     };
-    const handleOpenScopedChar = (ev: KeyboardEvent, caret: number) => {
+    const handleOpenScopedChar = (ev: KeyboardEvent) => {
         ev.preventDefault();
-        // console.log(document.getSelection())
-        let middle = document.getSelection()?.toString() || ''; // eslint-disable-line no-case-declarations
+        const startPos: number = textInput.current.selectionStart;
+        const endPos: number = textInput.current.selectionEnd;
+        let middle = currentText.substring(startPos, endPos) || ''; // eslint-disable-line no-case-declarations
         let end = ''; // eslint-disable-line no-case-declarations
         if (middle.endsWith(' ')) {
             middle = middle.slice(0, middle.length - 1);
             end = ' ';
         }
-        // document.execCommand('insertText', false, `[${middle}]${end}`);
-        textInput.current.innerText = `${getCurrentText().slice(0, caret)}${ev.key}${middle}${
-            closeScopeCharDict[ev.key]
-        }${end}${getCurrentText().slice(caret + (middle + end).length)}`;
-        setCaret(document, textInput.current.firstChild, caret + 1, middle.length);
+        setCurrentText(
+            `${currentText.slice(0, startPos)}${ev.key}${middle}${closeScopeCharDict[ev.key]}${end}${currentText.slice(
+                startPos + (middle + end).length,
+            )}`,
+        );
+        setCaret(document, textInput.current, startPos + 1, middle.length);
         textInput.current.dispatchEvent(
             new Event('input', {
                 bubbles: true,
@@ -718,17 +691,16 @@ export function DetailedNoteBlock({
         );
     };
 
-    const onKeyDownHandler = React.useCallback(
+    const onKeyDownHandlerTA = React.useCallback(
         (ev) => {
-            const sel = document.getSelection();
-            const caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
+            const caret = textInput.current.selectionStart;
             switch (ev.key) {
                 case 'a': // "a" key
                     if (
                         ev.ctrlKey ||
                         (ev.metaKey &&
-                            sel?.getRangeAt(0)?.startOffset === 0 &&
-                            sel?.getRangeAt(0)?.endOffset === textInput.current?.innerText?.length)
+                            textInput.current.selectionStart === 0 &&
+                            textInput.current.selectionEnd === currentText.length)
                     ) {
                         ev.preventDefault();
                         selectUid(componentId);
@@ -741,9 +713,9 @@ export function DetailedNoteBlock({
                         ev.preventDefault();
                         edited.current = false;
                         inputDebounced.current.cancel();
-                        const currentText = getCurrentText() || data.get('text').as('primitive');
-                        callbacks['split-child']?.(currentText, caret);
-                        setCurrentText(currentText.slice(caret));
+                        const text = currentText || data.get('text').as('primitive');
+                        callbacks['split-child']?.(text, caret);
+                        setCurrentText(text.slice(caret));
                     }
                     break;
 
@@ -760,24 +732,25 @@ export function DetailedNoteBlock({
 
                 case 'Backspace': // backspace
                     // console.log(caret, document.getSelection()?.type)
-                    if (caret === 0 && document.getSelection()?.type === 'Caret') {
+                    if (
+                        textInput.current.selectionStart === 0 &&
+                        textInput.current.selectionStart === textInput.current.selectionEnd
+                    ) {
                         ev.preventDefault();
                         ev.stopPropagation();
                         inputDebounced.current.cancel();
                         edited.current = false;
-                        callbacks['unsplit-child'](textInput.current.innerText);
-                    } else if (getCurrentText()[caret - 1] === '[' && getCurrentText()[caret] === ']') {
+                        callbacks['unsplit-child'](currentText);
+                    } else if (currentText[caret - 1] === '[' && currentText[caret] === ']') {
                         ev.preventDefault();
                         ev.stopPropagation();
-                        const tc = getCurrentText();
-                        const el = textInput.current.firstChild;
-                        el.innerText = tc.slice(0, caret - 1) + tc.slice(caret + 1);
-                        setCaret(document, el, caret - 1);
+                        setCurrentText(currentText.slice(0, caret - 1) + currentText.slice(caret + 1));
+                        setCaret(document, textInput.current, caret - 1);
                     }
                     break;
 
                 case 'ArrowLeft': // left arrow
-                    if (caret === 0) {
+                    if (textInput.current.selectionStart === 0) {
                         ev.preventDefault();
                         inputDebounced.current.flush();
                         callbacks['focus-last-dfs-node'](data, editorContext, 0, -1);
@@ -785,7 +758,7 @@ export function DetailedNoteBlock({
                     break;
 
                 case 'ArrowRight': // right arrow
-                    if (caret === getCurrentText().length) {
+                    if (textInput.current.selectionStart === currentText.length) {
                         ev.preventDefault();
                         inputDebounced.current.flush();
                         callbacks['focus-next-dfs-node'](data, editorContext, 0, 0);
@@ -795,33 +768,30 @@ export function DetailedNoteBlock({
                 case 'ArrowUp': // up arrow
                     // console.log(document.getSelection()?.focusOffset);
                     // ev.preventDefault();
-                    inputDebounced.current.flush();
                     // setCommand(() =>
                     //    callbacks['focus-last-dfs-node'].bind(null, data, editorContext, 0),
                     // );
-                    requestAnimationFrame(() => {
-                        if (document.getSelection()?.focusOffset === 0) {
-                            if (ev.shiftKey) {
-                                selectUid(componentId, false);
-                            }
-                            callbacks['focus-last-dfs-node'](data, editorContext, 0);
+                    if (textInput.current.selectionStart === 0) {
+                        inputDebounced.current.flush();
+                        if (ev.shiftKey) {
+                            selectUid(componentId, false);
                         }
-                    });
+                        callbacks['focus-last-dfs-node'](data, editorContext, 0);
+                    }
+                    // requestAnimationFrame(() => {
+                    // });
                     return;
 
                 case 'ArrowDown': // down arrow
-                    inputDebounced.current.flush();
-                    requestAnimationFrame(() => {
-                        if (
-                            (document.getSelection()?.focusOffset || 0) >=
-                            (textInput.current?.innerText?.trim()?.length || 0)
-                        ) {
-                            if (ev.shiftKey) {
-                                selectUid(componentId, false);
-                            }
-                            callbacks['focus-next-dfs-node'](data, editorContext, 0);
+                    if ((textInput.current.selectionStart || 0) >= (currentText.trim()?.length || 0)) {
+                        inputDebounced.current.flush();
+                        if (ev.shiftKey) {
+                            selectUid(componentId, false);
                         }
-                    });
+                        callbacks['focus-next-dfs-node'](data, editorContext, 0);
+                    }
+                    // requestAnimationFrame(() => {
+                    // });
                     return;
 
                 case '(':
@@ -829,20 +799,21 @@ export function DetailedNoteBlock({
                 case '"':
                 case "'":
                 case '`':
-                    handleOpenScopedChar(ev, caret);
+                case '$':
+                    handleOpenScopedChar(ev);
                     break;
 
                 case ']': // right bracket
-                    if (!ev.shiftKey && textInput.current.innerText[caret] === ']') {
+                    if (!ev.shiftKey && currentText[caret] === ']') {
                         ev.preventDefault();
-                        setCaret(document, textInput.current.firstChild, caret + 1);
+                        setCaret(document, textInput.current, caret + 1);
                     }
                     break;
 
                 case ')': // 0 or parenthesis
-                    if (ev.shiftKey && textInput.current.innerText[caret] === ')') {
+                    if (ev.shiftKey && currentText[caret] === ')') {
                         ev.preventDefault();
-                        setCaret(document, textInput.current.firstChild, caret + 1);
+                        setCaret(document, textInput.current, caret + 1);
                     }
                     break;
 
@@ -862,12 +833,14 @@ export function DetailedNoteBlock({
             const caretPos = Number((ev.target as HTMLElement).getAttribute('markdownPos') || -1);
             (ev.target as HTMLElement).removeAttribute('markdownPos');
             const finalCaretPos = caretPos === -1 ? ev?.target?.innerText?.length : caretPos;
-            window.unigraph.getState('global/focused').setValue({
+            const newFocused = {
                 uid: data?.uid,
                 caret: finalCaretPos,
                 type: '$/schema/note_block',
                 component: componentId,
-            });
+            };
+            console.log('onPointerUpHandler', { caretPos, ev, data, newFocused });
+            window.unigraph.getState('global/focused').setValue(newFocused);
         },
         [componentId, data?.uid, isEditing],
     );
@@ -875,6 +848,7 @@ export function DetailedNoteBlock({
     React.useEffect(commandFn, [command]);
 
     const childrenDisplayAs = data?._value?.children?._displayAs || 'outliner';
+    const classes = useStyles();
 
     return (
         <NoteViewPageWrapper isRoot={!isChildren}>
@@ -924,25 +898,31 @@ export function DetailedNoteBlock({
                             </div>
                         ) : (
                             []
+                            // [<br />]
                         )}
-                        <Typography
-                            variant={isChildren || callbacks.isEmbed ? 'body1' : 'h4'}
-                            contentEditable
+
+                        <TextareaAutosize
+                            className={classes.noteTextarea}
                             style={{
                                 outline: '0px solid transparent',
                                 minWidth: '16px',
                                 display: isEditing ? '' : 'none',
                             }}
-                            suppressContentEditableWarning
                             ref={textInput}
+                            value={currentText}
+                            onChange={(event) => {
+                                const newText = event.target.value;
+                                setCurrentText(newText);
+                                inputDebounced.current(newText);
+                            }}
+                            onKeyDown={onKeyDownHandlerTA}
                             onPaste={onPasteHandler}
-                            onInput={onInputHandler}
-                            onKeyUp={setFocusedCaret}
-                            onClick={setFocusedCaret}
-                            onKeyDown={onKeyDownHandler}
-                        >
-                            <br />
-                        </Typography>
+                            onKeyUp={() => setFocusedCaret(textInput)}
+                            onClick={() => setFocusedCaret(textInput)}
+                        />
+                        {/* <br /> */}
+                        {/* </textarea> */}
+                        {/* <br /> */}
                         <AutoDynamicView
                             object={data.get('text')?._value?._value}
                             attributes={{

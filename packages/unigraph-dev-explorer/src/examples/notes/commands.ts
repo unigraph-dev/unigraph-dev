@@ -10,13 +10,15 @@ export const focusUid = (obj: any, tailOrCaret?: number) => {
     // console.log(document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]);
     // (document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]?.children[0] as any)?.click();
     const focusState = window.unigraph.getState('global/focused').value;
-    window.unigraph.getState('global/focused').setValue({
+    const newFocused = {
         uid: obj?.startsWith?.('0x') ? obj : obj.uid,
         caret: tailOrCaret !== undefined && tailOrCaret >= 0 ? tailOrCaret : focusState?.caret || 0,
         type: '$/schema/note_block',
         tail: tailOrCaret === -1 || (tailOrCaret === undefined && focusState?.tail ? focusState.tail : undefined),
         component: obj?.componentId || '',
-    });
+    };
+    console.log('focusUid', { obj, focusState, tailOrCaret, newFocused });
+    window.unigraph.getState('global/focused').setValue(newFocused);
 };
 
 const getParents = (data: any) =>
@@ -301,7 +303,7 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
         }
         return prev;
     }, 0);
-    const numChildParents = children[delAt]?._value?._value?.['~_value'].length;
+    const numChildParents = children[delAt]?._value?._value?.['~_value']?.length;
     removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     // console.log(index, children[delAt]?._value?._value?._value?.children?.['_value[']);
     // Index = 0 if current block doesn't have children, merge with parent
