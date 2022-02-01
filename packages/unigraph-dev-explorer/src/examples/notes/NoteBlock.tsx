@@ -93,12 +93,6 @@ const persistCollapsedNodes = (nodes: any) => {
     window.localStorage.setItem('noteblockCollapsedByUid', JSON.stringify({ ...localState, ...nodes }));
 };
 
-const onNoteInput = (inputDebounced: any, event: FormEvent<HTMLSpanElement>) => {
-    const newInput = event.currentTarget.innerText;
-
-    inputDebounced.current(newInput);
-};
-
 const noteBlockCommands = {
     'add-child': addChild,
     'add-children': addChildren,
@@ -325,6 +319,21 @@ export function DetailedNoteBlock({
     const editorRef = React.useRef<any>();
     const inputDebounced = React.useRef(_.debounce(inputter, 333));
     const [currentText, setCurrentText] = React.useState('');
+    // const handleTextAreaChange = (event) => {
+    //     console.log('onChange', { event });
+    //     const newText = event.target.value;
+    //     setCurrentText(newText);
+    //     inputDebounced.current(newText);
+    // }
+    // const changeCurrentText = (val: string) => {
+    //     const event = new Event('change', {
+    //         bubbles: true,
+    //         cancelable: true,
+    //     });
+    //     // event.detail = { oldValue: currentText, newValue: val };
+    //     setCurrentText(val);
+    //     textInput.current.dispatchEvent(event);
+    // };
     const edited = React.useRef(false);
     const [isEditing, setIsEditing] = React.useState(
         window.unigraph.getState('global/focused').value?.uid === data.uid,
@@ -381,6 +390,9 @@ export function DetailedNoteBlock({
             callbacks.registerBoundingBox(editorRef.current);
         }
     }, []);
+    React.useEffect(() => {
+        inputDebounced.current(currentText);
+    }, [currentText]);
 
     React.useEffect(() => {
         const newNodes = _.unionBy(
@@ -669,6 +681,7 @@ export function DetailedNoteBlock({
     };
     const handleOpenScopedChar = (ev: KeyboardEvent) => {
         ev.preventDefault();
+        ev.stopPropagation();
         const startPos: number = textInput.current.selectionStart;
         const endPos: number = textInput.current.selectionEnd;
         let middle = currentText.substring(startPos, endPos) || ''; // eslint-disable-line no-case-declarations
@@ -682,6 +695,7 @@ export function DetailedNoteBlock({
                 startPos + (middle + end).length,
             )}`,
         );
+        console.log('handleOpenScopedChar', { textInput: textInput.current, startPos });
         setCaret(document, textInput.current, startPos + 1, middle.length);
         textInput.current.dispatchEvent(
             new Event('input', {
@@ -910,14 +924,10 @@ export function DetailedNoteBlock({
                             }}
                             ref={textInput}
                             value={currentText}
-                            onChange={(event) => {
-                                const newText = event.target.value;
-                                setCurrentText(newText);
-                                inputDebounced.current(newText);
-                            }}
+                            onChange={(event) => setCurrentText(event.target.value)}
                             onKeyDown={onKeyDownHandlerTA}
                             onPaste={onPasteHandler}
-                            onKeyUp={() => setFocusedCaret(textInput)}
+                            // onKeyUp={() => setFocusedCaret(textInput)}
                             onClick={() => setFocusedCaret(textInput)}
                         />
                         {/* <br /> */}
