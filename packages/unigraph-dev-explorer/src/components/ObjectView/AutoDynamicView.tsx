@@ -133,7 +133,7 @@ export function AutoDynamicView({
             window.unigraph.getState('registry/dynamicViewDetailed').unsubscribe(cb2);
             window.unigraph.getState('global/selected').unsubscribe(cbsel);
             window.unigraph.getState('global/focused').unsubscribe(cbfoc);
-            window.dragselect?.removeSelectables([viewElRef]);
+            if (viewElRef) window.dragselect?.removeSelectables([viewElRef]);
             if (hasFocus) {
                 const focused = window.unigraph.getState('global/focused');
                 focused.setValue({ ...focused.value, component: '' });
@@ -213,7 +213,7 @@ export function AutoDynamicView({
             };
         }
         return () => {};
-    }, [object?.uid]);
+    }, [object?.uid, isObjectStub, DynamicViews, object?.type]);
 
     const [{ isDragging }, drag] = useDrag(() => ({
         type: object?.type?.['unigraph.id'] || '$/schema/any',
@@ -224,9 +224,14 @@ export function AutoDynamicView({
             dataContext: dataContext.contextUid,
             removeFromContext: callbacks?.removeFromContext,
         },
-        collect: (monitor) => ({
-            isDragging: !!monitor.isDragging(),
-        }),
+        collect: (monitor) => {
+            if (monitor.isDragging() && window.dragselect) {
+                window.dragselect.break();
+            }
+            return {
+                isDragging: !!monitor.isDragging(),
+            };
+        },
     }));
 
     const [, drop] = useDrop(() => ({
@@ -264,13 +269,13 @@ export function AutoDynamicView({
 
     const attach = React.useCallback(
         (domElement) => {
-            if (domElement && object.uid && recursive) {
+            if (domElement && object?.uid && recursive) {
                 const ids = dataContext.getParents();
                 if (ids.includes(object?.uid) && !inline) {
                     // recursive - deal with it somehow
                     setIsRecursion(true);
                 } else setIsRecursion(false);
-            } else if (!object.uid) {
+            } else if (!object?.uid) {
                 setIsRecursion(false);
             }
 
@@ -411,7 +416,7 @@ export function AutoDynamicView({
             )}
         >
             <DataContextWrapper
-                contextUid={object.uid}
+                contextUid={object?.uid}
                 contextData={getObject()}
                 parents={totalParents}
                 viewType="$/schema/dynamic_view"

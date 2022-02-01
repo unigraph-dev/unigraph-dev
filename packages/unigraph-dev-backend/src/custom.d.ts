@@ -62,6 +62,7 @@ declare type EventUpdateSPO = {
     type: 'event',
     event: 'update_spo',
     objects: string[],
+    isDelete?: boolean,
     subIds: any[] | any,
     id: number
 }
@@ -304,4 +305,35 @@ declare type EventTouch = {
     event: 'touch',
     id: number,
     uids: string[] | string
+}
+
+declare type EventDisablePackage = {
+    type: 'event',
+    event: 'disable_package',
+    packageName: string
+    id: number
+}
+
+declare type EventEnablePackage = {
+    type: 'event',
+    event: 'enable_package',
+    packageName: string
+    id: number
+}
+
+declare type EventRecalculateBacklinks = {
+    type: 'event',
+    event: 'recalculate_backlinks',
+    id: number,
+    fromUids: string[],
+    toUids: string[],
+    depth?: number
+}
+
+declare type EventAddBacklinks = {
+    type: 'event',
+    event: 'add_backlinks',
+    id: number,
+    fromUids: string[],
+    toUids: string[],
 }

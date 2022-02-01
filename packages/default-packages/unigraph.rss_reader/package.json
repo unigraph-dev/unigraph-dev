@@ -44,6 +44,12 @@
                 "editable": true,
                 "name": "Export RSS feeds to OPML"
             }
+        ],
+        "entities": [
+            {
+                "id": "rss_reader_view",
+                "src": "entities/rss_reader_view.json"
+            }
         ]
     }
 }

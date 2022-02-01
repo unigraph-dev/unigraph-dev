@@ -2,6 +2,7 @@ export type SimpleClipboardItem = {
     uid?: string;
     content: any;
     children: SimpleClipboardItem[];
+    childrenUids?: string[];
 };
 
 const generateHtmlChildren = (item: SimpleClipboardItem): string => {
@@ -26,9 +27,9 @@ export const formatSimpleClipboardItems = (items: SimpleClipboardItem[]) => {
         'text/html': `<ul>${items
             .map(
                 (el) =>
-                    `<li id="${el.uid}" class="unigraph-entity">${el.content}<ul>${el.children
-                        .map(generateHtmlChildren)
-                        .join('')}</ul></li>`,
+                    `<li id="${el.uid}" class="unigraph-entity" children-uids="${(el.childrenUids || []).join(',')}">${
+                        el.content
+                    }<ul>${el.children.map(generateHtmlChildren).join('')}</ul></li>`,
             )
             .join('')}</ul>`,
         'text/plain': `${items

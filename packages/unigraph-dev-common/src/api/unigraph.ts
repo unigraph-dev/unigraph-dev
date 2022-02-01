@@ -11,6 +11,7 @@ import {
     augmentStubs,
     base64ToBlob,
     buildGraph,
+    findAllUids,
     findUid,
     getCircularReplacer,
     isJsonString,
@@ -423,9 +424,9 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
         deleteObject: (uid, permanent?) => {
             sendEvent(connection, 'delete_unigraph_object', { uid, permanent });
         },
-        updateTriplets: (objects, subIds?) => {
+        updateTriplets: (objects, isDelete, subIds) => {
             // TODO: This is very useless, should be removed once we get something better
-            sendEvent(connection, 'update_spo', { objects, subIds });
+            sendEvent(connection, 'update_spo', { objects, isDelete, subIds });
         },
         updateObject: (uid, newObject, upsert = true, pad = true, subIds, origin, eagarlyUpdate) =>
             new Promise((resolve, reject) => {
@@ -447,9 +448,12 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
 
                         // Merge updater object with existing one
                         const newObj = JSON.parse(JSON.stringify(subResults[subId], getCircularReplacer()));
-                        const [changeLoc] = findUid(newObj, uid);
-                        deepMerge(changeLoc, JSON.parse(JSON.stringify(newObject)));
-                        augmentStubs(changeLoc, subResults[subId]);
+                        const clonedNewObject = JSON.parse(JSON.stringify(newObject));
+                        const changeLocs = findAllUids(newObj, uid);
+                        changeLocs.forEach(([loc, path]) => {
+                            deepMerge(loc, clonedNewObject);
+                            augmentStubs(loc, subResults[subId]);
+                        });
                         subResults[subId] = newObj;
                         setTimeout(() => {
                             // console.log(newObj);
@@ -673,6 +677,42 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             sendEvent(connection, 'lease_uid', { uid: leased });
             return leased;
         },
+        disablePackage: (packageName: string) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success && response.results) resolve(response.results);
+                    else reject(response);
+                };
+                sendEvent(connection, 'disable_package', { packageName }, id);
+            }),
+        enablePackage: (packageName: string) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success && response.results) resolve(response.results);
+                    else reject(response);
+                };
+                sendEvent(connection, 'enable_package', { packageName }, id);
+            }),
+        recalculateBacklinks: (fromUids, toUids, depth) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success && response.results) resolve(response.results);
+                    else reject(response);
+                };
+                sendEvent(connection, 'recalculate_backlinks', { fromUids, toUids, depth }, id);
+            }),
+        addBacklinks: (fromUids, toUids) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success && response.results) resolve(response.results);
+                    else reject(response);
+                };
+                sendEvent(connection, 'add_backlinks', { fromUids, toUids }, id);
+            }),
     };
 
     return api;

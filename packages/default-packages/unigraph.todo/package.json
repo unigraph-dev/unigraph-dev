@@ -14,6 +14,10 @@
             {
                 "id": "add_follow_up_context_menu",
                 "src": "entities/add_follow_up_context_menu.json"
+            },
+            {
+                "id": "todo_view",
+                "src": "entities/todo_view.json"
             }
         ],
         "executables": [
