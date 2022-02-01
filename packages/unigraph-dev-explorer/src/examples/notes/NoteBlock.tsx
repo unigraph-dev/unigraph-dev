@@ -393,9 +393,24 @@ export function DetailedNoteBlock({
             callbacks.registerBoundingBox(editorRef.current);
         }
     }, []);
+
+    const onDataChangedHandler = React.useCallback(() => {
+        const dataText = data.get('text')?.as('primitive');
+        if (dataText && options?.viewId && !callbacks.isEmbed)
+            window.layoutModel.doAction(Actions.renameTab(options.viewId, `Note: ${dataText}`));
+        if (currentText !== dataText && !edited.current) {
+            setCurrentText(dataText);
+            if (isEditing && dataText === '') textInput.current.appendChild(document.createElement('br'));
+        } else if ((currentText === dataText && edited.current) || currentText === '') {
+            resetEdited();
+        }
+    }, [data.get('text')?.as('primitive'), isEditing, currentText]);
+    React.useEffect(onDataChangedHandler, [data.get('text')?.as('primitive'), isEditing]);
     React.useEffect(() => {
         inputDebounced.current(currentText);
-    }, [currentText]);
+        if (currentText !== '' && edited.current === false && currentText !== data.get('text')?.as('primitive'))
+            edited.current = true;
+    }, [currentText, data.get('text')?.as('primitive')]);
 
     React.useEffect(() => {
         const newNodes = _.unionBy(
@@ -516,20 +531,8 @@ export function DetailedNoteBlock({
                 window.unigraph.getState('global/searchPopup').setValue({ show: false });
             }
         },
-        [callbacks, componentId, data, data.uid, data?._value?.children?.uid, editorContext, resetEdited],
+        [callbacks, componentId, data, data.uid, data?._value?.children?.uid, editorContext, resetEdited, currentText],
     );
-
-    React.useEffect(() => {
-        const dataText = data.get('text')?.as('primitive');
-        if (dataText && options?.viewId && !callbacks.isEmbed)
-            window.layoutModel.doAction(Actions.renameTab(options.viewId, `Note: ${dataText}`));
-        if (currentText !== dataText && !edited.current) {
-            setCurrentText(dataText);
-            if (isEditing && dataText === '') textInput.current.appendChild(document.createElement('br'));
-        } else if ((currentText === dataText && edited.current) || currentText === '') {
-            resetEdited();
-        }
-    }, [data.get('text')?.as('primitive'), isEditing]);
 
     React.useEffect(() => {
         if (focused) {
@@ -580,7 +583,7 @@ export function DetailedNoteBlock({
                 unindentChild: callbacks['unindent-child-in-parent'],
             });
         }
-    }, [data.get('text')?.as('primitive'), focused]);
+    }, [data.get('text')?.as('primitive'), focused, currentText]);
 
     const onBlurHandler = React.useCallback(() => {
         setIsEditing(false);
@@ -682,7 +685,7 @@ export function DetailedNoteBlock({
             setFocusedCaret(textInput);
             return event;
         },
-        [callbacks],
+        [callbacks, currentText],
     );
 
     const closeScopeCharDict: { [key: string]: string } = {
@@ -694,31 +697,34 @@ export function DetailedNoteBlock({
         $: '$',
         // '{':'}',
     };
-    const handleOpenScopedChar = (ev: KeyboardEvent) => {
-        ev.preventDefault();
-        ev.stopPropagation();
-        const startPos: number = textInput.current.selectionStart;
-        const endPos: number = textInput.current.selectionEnd;
-        let middle = currentText.substring(startPos, endPos) || ''; // eslint-disable-line no-case-declarations
-        let end = ''; // eslint-disable-line no-case-declarations
-        if (middle.endsWith(' ')) {
-            middle = middle.slice(0, middle.length - 1);
-            end = ' ';
-        }
-        setCurrentText(
-            `${currentText.slice(0, startPos)}${ev.key}${middle}${closeScopeCharDict[ev.key]}${end}${currentText.slice(
-                startPos + (middle + end).length,
-            )}`,
-        );
-        console.log('handleOpenScopedChar', { textInput: textInput.current, startPos });
-        setCaret(document, textInput.current, startPos + 1, middle.length);
-        textInput.current.dispatchEvent(
-            new Event('input', {
-                bubbles: true,
-                cancelable: true,
-            }),
-        );
-    };
+    const handleOpenScopedChar = React.useCallback(
+        (ev: KeyboardEvent) => {
+            ev.preventDefault();
+            ev.stopPropagation();
+            const startPos: number = textInput.current.selectionStart;
+            const endPos: number = textInput.current.selectionEnd;
+            let middle = currentText.substring(startPos, endPos) || ''; // eslint-disable-line no-case-declarations
+            let end = ''; // eslint-disable-line no-case-declarations
+            if (middle.endsWith(' ')) {
+                middle = middle.slice(0, middle.length - 1);
+                end = ' ';
+            }
+            setCurrentText(
+                `${currentText.slice(0, startPos)}${ev.key}${middle}${
+                    closeScopeCharDict[ev.key]
+                }${end}${currentText.slice(startPos + (middle + end).length)}`,
+            );
+            console.log('handleOpenScopedChar', { textInput: textInput.current, startPos });
+            setCaret(document, textInput.current, startPos + 1, middle.length);
+            textInput.current.dispatchEvent(
+                new Event('input', {
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+        },
+        [currentText],
+    );
     // const onInputHandler = React.useCallback(
     //     (ev) => {
     //         if (ev.currentTarget.textContent !== data.get('text').as('primitive') && !edited.current)
@@ -804,32 +810,27 @@ export function DetailedNoteBlock({
                     break;
 
                 case 'ArrowUp': // up arrow
-                    // console.log(document.getSelection()?.focusOffset);
-                    // ev.preventDefault();
-                    // setCommand(() =>
-                    //    callbacks['focus-last-dfs-node'].bind(null, data, editorContext, 0),
-                    // );
-                    if (textInput.current.selectionStart === 0) {
-                        inputDebounced.current.flush();
-                        if (ev.shiftKey) {
-                            selectUid(componentId, false);
+                    requestAnimationFrame(() => {
+                        if (textInput.current.selectionStart === 0) {
+                            inputDebounced.current.flush();
+                            if (ev.shiftKey) {
+                                selectUid(componentId, false);
+                            }
+                            callbacks['focus-last-dfs-node'](data, editorContext, 0);
                         }
-                        callbacks['focus-last-dfs-node'](data, editorContext, 0);
-                    }
-                    // requestAnimationFrame(() => {
-                    // });
+                    });
                     return;
 
                 case 'ArrowDown': // down arrow
-                    if ((textInput.current.selectionStart || 0) >= (currentText.trim()?.length || 0)) {
-                        inputDebounced.current.flush();
-                        if (ev.shiftKey) {
-                            selectUid(componentId, false);
+                    requestAnimationFrame(() => {
+                        if ((textInput.current.selectionStart || 0) >= (currentText.trim()?.length || 0)) {
+                            inputDebounced.current.flush();
+                            if (ev.shiftKey) {
+                                selectUid(componentId, false);
+                            }
+                            callbacks['focus-next-dfs-node'](data, editorContext, 0);
                         }
-                        callbacks['focus-next-dfs-node'](data, editorContext, 0);
-                    }
-                    // requestAnimationFrame(() => {
-                    // });
+                    });
                     return;
 
                 case '(':
@@ -860,7 +861,7 @@ export function DetailedNoteBlock({
                     break;
             }
         },
-        [callbacks, componentId, data, editorContext, onBlurHandler],
+        [callbacks, componentId, data, editorContext, onBlurHandler, currentText, handleOpenScopedChar],
     );
 
     const onPointerUpHandler = React.useCallback(
@@ -944,6 +945,7 @@ export function DetailedNoteBlock({
                             style={{
                                 outline: '0px solid transparent',
                                 minWidth: '16px',
+                                padding: '0px',
                                 display: isEditing ? '' : 'none',
                             }}
                             ref={textInput}
