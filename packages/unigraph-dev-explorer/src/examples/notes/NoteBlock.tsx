@@ -48,6 +48,17 @@ const closeScopeCharDict: { [key: string]: string } = {
     $: '$',
     // '{':'}',
 };
+
+const isCaretAtFirstLine = (text: string, caret: number): boolean => {
+    const lines = text.split('\n');
+    const line = lines[0];
+    return caret <= line.trim().length;
+};
+const isCaretAtLastLine = (text: string, caret: number): boolean => {
+    const lines = text.split('\n');
+    const lastLine = lines[lines.length - 1];
+    return caret >= text.length - lastLine.length;
+};
 const caretFromLastLine = (text: string, _caret: number) => {
     // get position of caret in last line
     const lines = text.split('\n');
@@ -297,17 +308,16 @@ const useStyles = makeStyles((theme) => ({
         width: '100%',
     },
 }));
-const setFocusedCaret = (textInput: any) => {
+const setFocusedCaret = (textInputEl: any) => {
     let caret;
-    console.log('setFocusedCaret', { textInput });
-    if (textInput.current?.selectionStart) {
-        caret = textInput.selectionStart;
+    if (textInputEl.selectionStart !== undefined) {
+        caret = textInputEl.selectionStart;
     } else {
         const sel = document.getSelection();
         caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
     }
     const state = window.unigraph.getState('global/focused');
-    console.log('setFocusedCaret', { state, caret });
+    console.log('setFocusedCaret', { state, textInputEl, selectionStart: textInputEl?.selectionStart, caret });
     state.setValue({ ...state.value, caret });
 };
 
@@ -348,7 +358,6 @@ export function DetailedNoteBlock({
             [],
         );
     };
-    const searchMenuPlace: any = React.useRef();
     const textInput: any = React.useRef();
     /** Reference for HTML Element for list of children */
     const editorRef = React.useRef<any>();
@@ -362,8 +371,6 @@ export function DetailedNoteBlock({
 
         const event = new Event('change', { bubbles: true });
         textInput.current.dispatchEvent(event);
-
-        // textInput.current.value = text;
     };
     const getCurrentText = () => textInput.current.value;
     const edited = React.useRef(false);
@@ -616,8 +623,10 @@ export function DetailedNoteBlock({
                 splitChild: () => {
                     // const sel = document.getSelection();
                     // const caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
-                    const caret = textInput.current.selectionStart;
-                    callbacks['split-child'](getCurrentText() || data.get('text')?.as('primitive'), caret);
+                    callbacks['split-child'](
+                        getCurrentText() || data.get('text')?.as('primitive'),
+                        textInput.current.selectionStart,
+                    );
                 },
                 indentChild: callbacks['indent-child'],
                 unindentChild: callbacks['unindent-child-in-parent'],
@@ -662,19 +671,27 @@ export function DetailedNoteBlock({
                 const unigraphHtml = parseUnigraphHtml(paste);
                 if (unigraphHtml) {
                     const entities = Array.from(unigraphHtml.body.children[0].children).map((el) => el.id);
+                    const childrenEntities = Array.from(unigraphHtml.body.children[0].children)
+                        .map((el) => el.getAttribute('children-uids')?.split(','))
+                        .flat();
                     callbacks['add-children'](entities, getCurrentText().length ? 0 : -1);
+                    // console.log(childrenEntities);
+                    callbacks['add-parent-backlinks'](childrenEntities);
                 } else {
                     const mdresult = htmlToMarkdown(paste);
                     const lines = mdresult.split('\n\n');
 
-                    if (selection.getRangeAt(0).startContainer.nodeName === 'BR') {
-                        // textInput.current.textContent += lines[0];
-                        setCurrentText(getCurrentText() + lines[0]);
-                        setCaret(document, textInput.current, getCurrentText().length);
-                    } else {
-                        selection.getRangeAt(0).insertNode(document.createTextNode(lines[0]));
-                        selection.collapseToEnd();
-                    }
+                    // why checking BR? Why should we create a new block?
+                    // if (selection.getRangeAt(0).startContainer.nodeName === 'BR') {
+                    //     // textInput.current.textContent += lines[0];
+                    //     setCurrentText(getCurrentText() + lines[0]);
+                    //     setCaret(document, textInput.current, getCurrentText().length);
+                    // } else {
+                    //     selection.getRangeAt(0).insertNode(document.createTextNode(lines[0]));
+                    //     selection.collapseToEnd();
+                    // }
+                    setCurrentText(getCurrentText() + lines[0]);
+                    setCaret(document, textInput.current, getCurrentText().length);
 
                     edited.current = true;
                     inputDebounced.current(getCurrentText());
@@ -772,7 +789,7 @@ export function DetailedNoteBlock({
                     break;
 
                 case 'Enter': // enter
-                    if (!ev.shiftKey && !ev.ctrlKey) {
+                    if (!ev.shiftKey && !ev.ctrlKey && !ev.metaKey) {
                         ev.preventDefault();
                         edited.current = false;
                         inputDebounced.current.cancel();
@@ -829,14 +846,20 @@ export function DetailedNoteBlock({
                     break;
 
                 case 'ArrowUp': // up arrow
-                    // console.log(document.getSelection()?.focusOffset);
+                    console.log('ArrowUp', { caret, textInput: textInput.current, currentText: getCurrentText() });
                     // ev.preventDefault();
                     inputDebounced.current.flush();
                     // setCommand(() =>
                     //    callbacks['focus-last-dfs-node'].bind(null, data, editorContext, 0),
                     // );
                     requestAnimationFrame(() => {
-                        if (textInput.current.selectionStart === 0) {
+                        // if (caret === 0 ) {
+                        if (isCaretAtFirstLine(getCurrentText(), caret)) {
+                            console.log('ArrowUp move', {
+                                caret,
+                                textInput: textInput.current,
+                                currentText: getCurrentText(),
+                            });
                             // if (document.getSelection()?.focusOffset === 0) {
                             if (ev.shiftKey) {
                                 selectUid(componentId, false);
@@ -853,7 +876,8 @@ export function DetailedNoteBlock({
                     // });
                     inputDebounced.current.flush();
                     requestAnimationFrame(() => {
-                        if ((textInput.current.selectionStart || 0) >= (getCurrentText().trim()?.length || 0)) {
+                        // if ((caret || 0) >= (getCurrentText().trim()?.length || 0)) {
+                        if (isCaretAtLastLine(getCurrentText(), caret)) {
                             // if ((document.getSelection()?.focusOffset || 0) >= (getCurrentText().trim()?.length || 0)) {
                             if (ev.shiftKey) {
                                 selectUid(componentId, false);
