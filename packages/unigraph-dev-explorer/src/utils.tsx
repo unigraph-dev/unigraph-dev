@@ -86,35 +86,29 @@ export const getComponentFromPage = (location: string, params: any = {}) => {
 };
 
 export const setCaret = (document: Document, element: any, pos: number, length?: number) => {
-    console.log('setCaret', { textContent: element.textContent, pos });
-    element.selectionStart = element.textContent.length < pos ? element.textContent.length : pos;
-    if (length) {
-        element.selectionEnd = element.selectionStart + length;
-    } else {
-        element.selectionEnd = element.selectionStart;
-    }
+    console.log(element, pos, length);
+    // const range = document.createRange();
+    // const sel = document.getSelection();
+    // // const maxLen = element.textContent.length < pos ? element.textContent.length : pos;
+    // const maxLen = element.value.length < pos ? element.value.length : pos;
+    // range.setStart(element, maxLen);
+    // if (length) {
+    //     range.setEnd(element, length + maxLen);
+    // } else {
+    //     range.collapse(true);
+    // }
+    const maxLen = element.value.length < pos ? element.value.length : pos;
+    element.setSelectionRange(maxLen, maxLen + (length || 0));
+
+    // sel?.removeAllRanges();
+    // sel?.addRange(range);
 };
 
 export const getCaret = (ev: PointerEvent) => {
     if (document.caretRangeFromPoint) {
-        // if this function is defined
-        const range = document.caretRangeFromPoint(ev.clientX, ev.clientY);
-        const totalSiblings = range?.startContainer?.parentElement?.childNodes.length ?? 0;
-        if (range && totalSiblings > 1) {
-            // if we're in a multiline element, get the offset withing the element accounting for all the lines
-            const lineEl = range?.startContainer;
-            const lineIndex = Array.prototype.indexOf.call(lineEl?.parentElement?.childNodes, lineEl);
-            const lineLengths = Array.from((range.startContainer.parentElement as HTMLElement).childNodes)
-                .slice(0, lineIndex)
-                .map((x) => x?.textContent?.length)
-                .filter((x) => x);
-            const offset = (lineLengths as number[]).reduce((a, b) => a + b, 0) + (range?.startOffset ?? 0);
-            return offset;
-        }
-
         return document.caretRangeFromPoint(ev.clientX, ev.clientY)?.startOffset;
     }
-    // window.getSelection() can't ddetect line
+    // return window.getSelection()?.anchorOffset;
     return window.getSelection()?.anchorOffset;
 };
 

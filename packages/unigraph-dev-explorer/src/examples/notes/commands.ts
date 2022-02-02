@@ -6,18 +6,18 @@ import { parseTodoObject } from '../todo/parseTodoObject';
 import { NoteEditorContext } from './types';
 import { getParentsAndReferences } from '../../components/ObjectView/backlinksUtils';
 
-export const focusUid = (obj: any, tailOrCaret?: number) => {
+export const focusUid = (obj: any, goingUp: boolean, caret: number) => {
     // console.log(document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]);
     // (document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]?.children[0] as any)?.click();
     const focusState = window.unigraph.getState('global/focused').value;
     const newFocused = {
         uid: obj?.startsWith?.('0x') ? obj : obj.uid,
-        caret: tailOrCaret !== undefined && tailOrCaret >= 0 ? tailOrCaret : focusState?.caret || 0,
+        caret: caret !== undefined ? caret : focusState?.caret || 0, // if -1, means carret at the end of next block
         type: obj?.type || '$/schema/note_block',
-        tail: tailOrCaret === -1 || (tailOrCaret === undefined && focusState?.tail ? focusState.tail : undefined),
+        tail: goingUp || (goingUp === undefined && focusState?.tail ? focusState.tail : undefined),
         component: obj?.componentId || '',
     };
-    console.log('focusUid', { obj, focusState, tailOrCaret, newFocused });
+    console.log('focusUid', { obj, focusState, caret, newFocused });
     window.unigraph.getState('global/focused').setValue(newFocused);
 };
 
@@ -734,15 +734,15 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
     // context.setCommand(() => () => focusUid(newChildren[parent + 1]._value._value.uid));
 };
 
-export const focusLastDFSNode = (data: any, context: NoteEditorContext, index: number, tailOrCaret?: number) => {
-    focusUid(getLastDFSNode(data, context, index), tailOrCaret);
+export const focusLastDFSNode = (data: any, context: NoteEditorContext, goingUp?: boolean, caret?: number) => {
+    focusUid(getLastDFSNode(data, context), goingUp, caret);
 };
 
-export const focusNextDFSNode = (data: any, context: NoteEditorContext, index: number, tailOrCaret?: number) => {
-    focusUid(getNextDFSNode(data, context, index), tailOrCaret);
+export const focusNextDFSNode = (data: any, context: NoteEditorContext, goingUp?: boolean, caret?: number) => {
+    focusUid(getNextDFSNode(data, context), goingUp, caret);
 };
 
-export const getLastDFSNode = (data: any, context: NoteEditorContext, index: number) => {
+export const getLastDFSNode = (data: any, context: NoteEditorContext) => {
     const orderedNodes = dfs(context.nodesState.value).filter((el) =>
         ['$/schema/note_block', '$/schema/embed_block'].includes((el as any).type),
     );
@@ -751,7 +751,7 @@ export const getLastDFSNode = (data: any, context: NoteEditorContext, index: num
     return { uid: '' };
 };
 
-export const getNextDFSNode = (data: any, context: NoteEditorContext, index: number) => {
+export const getNextDFSNode = (data: any, context: NoteEditorContext) => {
     const orderedNodes = dfs(context.nodesState.value).filter((el) =>
         ['$/schema/note_block', '$/schema/embed_block'].includes((el as any).type),
     );
