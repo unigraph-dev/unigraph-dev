@@ -906,7 +906,7 @@ export function DetailedNoteBlock({
             }
             const caretPos = Number((ev.target as HTMLElement).getAttribute('markdownPos') || -1);
             (ev.target as HTMLElement).removeAttribute('markdownPos');
-            const finalCaretPos = caretPos === -1 ? textInput.current?.textContent?.length : caretPos;
+            const finalCaretPos = caretPos === -1 ? getCurrentText().length : caretPos;
             window.unigraph.getState('global/focused').setValue({
                 uid: data?.uid,
                 caret: finalCaretPos,
