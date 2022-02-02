@@ -6,7 +6,7 @@ import { parseTodoObject } from '../todo/parseTodoObject';
 import { NoteEditorContext } from './types';
 import { getParentsAndReferences } from '../../components/ObjectView/backlinksUtils';
 
-export const focusUid = (obj: any, goingUp: boolean, caret: number) => {
+export const focusUid = (obj: any, goingUp?: boolean, caret?: number) => {
     // console.log(document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]);
     // (document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]?.children[0] as any)?.click();
     const focusState = window.unigraph.getState('global/focused').value;
@@ -299,7 +299,7 @@ export const deleteChildren = (data: any, context: NoteEditorContext, index: num
         parents,
         true,
     );
-    focusUid({ uid: data.uid }, -1);
+    focusUid({ uid: data.uid }, true, -1);
 
     setTimeout(() => {
         toDel.forEach((el) => {
@@ -360,7 +360,7 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
             parents,
             true,
         );
-        focusLastDFSNode({ uid: children[delAt]._value._value.uid }, context, index, -1);
+        focusLastDFSNode({ uid: children[delAt]._value._value.uid }, context, true, -1);
     } else if (
         index === 0 &&
         !(children[delAt]?._value?._value?._value?.children?.['_value['] || []).filter(
@@ -410,14 +410,14 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
             true,
         );
         window.unigraph.getState('global/focused').setValue({
-            uid: getLastDFSNode({ uid: children[delAt]._value._value.uid }, context, index).uid,
+            uid: getLastDFSNode({ uid: children[delAt]._value._value.uid }, context).uid,
             caret: oldCaret || 0,
             type: '$/schema/note_block',
             newData: newText,
         });
     } else if (
         index > 0 &&
-        getLastDFSNode({ uid: children[delAt]._value._value.uid }, context, index).uid ===
+        getLastDFSNode({ uid: children[delAt]._value._value.uid }, context).uid ===
             children[prevIndex]?._value?._value?.uid
     ) {
         // Merge with previous
@@ -478,7 +478,7 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
             true,
         );
         window.unigraph.getState('global/focused').setValue({
-            uid: getLastDFSNode({ uid: children[delAt]._value._value.uid }, context, index).uid,
+            uid: getLastDFSNode({ uid: children[delAt]._value._value.uid }, context).uid,
             caret: oldText.length || 0,
             type: '$/schema/note_block',
             newData: newText,
