@@ -189,6 +189,9 @@ export function AutoDynamicView({
     }, [object?.uid, shouldGetBacklinks, DynamicViews, JSON.stringify(dataContext?.getParents(true)?.sort())]);
 
     React.useEffect(() => {
+        if (!isObjectStub) setLoadedObj(object);
+    }, [object]);
+    React.useEffect(() => {
         const newSubs = getRandomInt();
         if (isObjectStub) {
             // console.log(tabContext);
