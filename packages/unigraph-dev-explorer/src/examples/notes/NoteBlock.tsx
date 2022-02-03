@@ -317,7 +317,6 @@ const setFocusedCaret = (textInputEl: any) => {
         caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
     }
     const state = window.unigraph.getState('global/focused');
-    console.log('setFocusedCaret', { state, textInputEl, selectionStart: textInputEl?.selectionStart, caret });
     state.setValue({ ...state.value, caret });
 };
 
@@ -567,7 +566,7 @@ export function DetailedNoteBlock({
         // set caret when focus changes
         if (focused) {
             const setCaretFn = () => {
-                textInput.current.focus();
+                textInput?.current?.focus();
                 let caret;
                 const focusedState2 = window.unigraph.getState('global/focused').value;
                 // const el = textInput.current?.firstChild || textInput.current;
@@ -585,10 +584,9 @@ export function DetailedNoteBlock({
                     setCurrentText(focusedState2.newData);
                     delete focusedState2.newData;
                 }
-                //
+                // last caret might be coming from a longer line, or as -1
                 caret = caret || _.min([_.max([focusedState2.caret, 0]), getCurrentText().length]);
 
-                console.log('setCaretFn', { focusedState2, isEditing });
                 setCaret(document, textInput.current, caret);
             };
             if (!isEditing) {
@@ -796,6 +794,7 @@ export function DetailedNoteBlock({
                         const currentText = getCurrentText() || data.get('text').as('primitive');
                         callbacks['split-child']?.(currentText, caret);
                         setCurrentText(currentText.slice(caret));
+                        setCaret(document, textInput.current, 0);
                     }
                     break;
 
@@ -846,7 +845,6 @@ export function DetailedNoteBlock({
                     break;
 
                 case 'ArrowUp': // up arrow
-                    console.log('ArrowUp', { caret, textInput: textInput.current, currentText: getCurrentText() });
                     // ev.preventDefault();
                     inputDebounced.current.flush();
                     // setCommand(() =>
@@ -855,11 +853,6 @@ export function DetailedNoteBlock({
                     requestAnimationFrame(() => {
                         // if (caret === 0 ) {
                         if (isCaretAtFirstLine(getCurrentText(), caret)) {
-                            console.log('ArrowUp move', {
-                                caret,
-                                textInput: textInput.current,
-                                currentText: getCurrentText(),
-                            });
                             // if (document.getSelection()?.focusOffset === 0) {
                             if (ev.shiftKey) {
                                 selectUid(componentId, false);
@@ -1116,7 +1109,6 @@ export function DetailedNoteBlock({
                                                         },
                                                         Tab: (ev: any) => {
                                                             ev.preventDefault();
-                                                            console.log(data, elindex);
                                                             indentChild(data, editorContext, elindex);
                                                         },
                                                         'ctrl+Enter': (ev: any) => {

@@ -17,7 +17,6 @@ export const focusUid = (obj: any, goingUp?: boolean, caret?: number) => {
         tail: goingUp || (goingUp === undefined && focusState?.tail ? focusState.tail : undefined),
         component: obj?.componentId || '',
     };
-    console.log('focusUid', { obj, focusState, caret, newFocused });
     window.unigraph.getState('global/focused').setValue(newFocused);
 };
 
@@ -40,6 +39,11 @@ export const addChildren = (data: any, context: NoteEditorContext, index: number
     const parents = getParents(data);
     if (!data._hide) parents.push({ uid: data.uid });
     const myUid = (window.unigraph as any).leaseUid();
+    console.log('addChildren', {
+        data,
+        "data?._value?.children?.['_value[']": data?._value?.children?.['_value['],
+        index,
+    });
     window.unigraph.updateObject(
         data._value.uid,
         {
@@ -185,7 +189,6 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
             ];
         return [...prev, { uid: el.uid }];
     }, []);
-    // console.log(newChildren)
     window.unigraph.updateObject(
         data?._value?.uid,
         { children: { _displayAs: data?._value?.children?._displayAs, '_value[': newChildren } },

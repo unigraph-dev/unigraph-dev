@@ -86,22 +86,8 @@ export const getComponentFromPage = (location: string, params: any = {}) => {
 };
 
 export const setCaret = (document: Document, element: any, pos: number, length?: number) => {
-    console.log(element, pos, length);
-    // const range = document.createRange();
-    // const sel = document.getSelection();
-    // // const maxLen = element.textContent.length < pos ? element.textContent.length : pos;
-    // const maxLen = element.value.length < pos ? element.value.length : pos;
-    // range.setStart(element, maxLen);
-    // if (length) {
-    //     range.setEnd(element, length + maxLen);
-    // } else {
-    //     range.collapse(true);
-    // }
     const maxLen = element.value.length < pos ? element.value.length : pos;
     element.setSelectionRange(maxLen, maxLen + (length || 0));
-
-    // sel?.removeAllRanges();
-    // sel?.addRange(range);
 };
 
 // export const getCaret = (ev: PointerEvent) => {
