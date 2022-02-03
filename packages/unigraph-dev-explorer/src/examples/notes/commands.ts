@@ -757,14 +757,14 @@ export const getNextDFSNode = (data: any, context: NoteEditorContext, index: num
     return { uid: '' };
 };
 
-export const convertChildToTodo = async (data: any, context: NoteEditorContext, index: number) => {
+export const convertChildToTodo = async (data: any, context: NoteEditorContext, index: number, currentText: string) => {
     const parents = getParents(data);
     if (!data._hide) parents.push({ uid: data.uid });
     removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     // console.log(index);
     let currSubentity = -1;
     const stubConverted: any = { _value: { uid: '' } };
-    let textIt = '';
+    let textIt = currentText || '';
     let refs: any[] = [];
     const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
     const newChildren = children?.reduce((prev: any[], el: any, elindex: any) => {
@@ -784,7 +784,7 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
                     },
                 },
             };
-            textIt = el._value._value._value.text._value._value['_value.%'];
+            if (!textIt.length) textIt = el._value._value._value.text._value._value['_value.%'];
             refs =
                 el._value._value._value?.children?.['_value[']
                     ?.filter?.((it: any) => it._key)

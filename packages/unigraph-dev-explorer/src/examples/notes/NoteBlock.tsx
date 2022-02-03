@@ -710,6 +710,7 @@ export function DetailedNoteBlock({
                         ev.preventDefault();
                         edited.current = false;
                         inputDebounced.current.cancel();
+                        callbacks['convert-child-to-todo']?.(getCurrentText());
                     }
                     break;
 
@@ -1062,10 +1063,6 @@ export function DetailedNoteBlock({
                                                             ev.preventDefault();
                                                             console.log(data, elindex);
                                                             indentChild(data, editorContext, elindex);
-                                                        },
-                                                        'ctrl+Enter': (ev: any) => {
-                                                            ev.preventDefault();
-                                                            convertChildToTodo(data, editorContext, elindex);
                                                         },
                                                         Backspace: (ev: any) => {
                                                             if (
@@ -1520,10 +1517,6 @@ export function DetailedEmbedBlock({
                                                             ev.preventDefault();
                                                             console.log(data, elindex);
                                                             indentChild(data, editorContext, elindex);
-                                                        },
-                                                        'ctrl+Enter': (ev: any) => {
-                                                            ev.preventDefault();
-                                                            convertChildToTodo(data, editorContext, elindex);
                                                         },
                                                         Backspace: (ev: any) => {
                                                             if (
