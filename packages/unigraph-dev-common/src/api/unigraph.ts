@@ -446,27 +446,32 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                         assignUids(newObject, caches.uid_lease, usedUids, {});
                         exhaustedLeases.push(...usedUids);
 
-                        // Merge updater object with existing one
-                        const newObj = JSON.parse(JSON.stringify(subResults[subId], getCircularReplacer()));
-                        const clonedNewObject = JSON.parse(JSON.stringify(newObject));
-                        const changeLocs = findAllUids(newObj, uid);
-                        changeLocs.forEach(([loc, path]) => {
-                            deepMerge(loc, clonedNewObject);
-                            augmentStubs(loc, subResults[subId]);
-                        });
-                        subResults[subId] = newObj;
-                        setTimeout(() => {
-                            // console.log(newObj);
-                            subscriptions[subId](newObj);
-                        }, 0);
-
-                        // Record state changes
-                        if (subFakeUpdates[subId] === undefined) subFakeUpdates[subId] = [id];
-                        else subFakeUpdates[subId].push(id);
+                        api.sendFakeUpdate?.(subId, newObject, id);
                     }
                 }
                 sendEvent(connection, 'update_object', { uid, newObject, upsert, pad, id, subIds, origin, usedUids });
             }),
+        sendFakeUpdate: (subId, updater, eventId) => {
+            // Merge updater object with existing one
+            const newObj = JSON.parse(JSON.stringify(subResults[subId], getCircularReplacer()));
+            const clonedNewObject = JSON.parse(JSON.stringify(updater));
+            const changeLocs = findAllUids(newObj, updater.uid);
+            changeLocs.forEach(([loc, path]) => {
+                deepMerge(loc, clonedNewObject);
+                augmentStubs(loc, subResults[subId]);
+            });
+            subResults[subId] = newObj;
+            setTimeout(() => {
+                // console.log(newObj);
+                subscriptions[subId](newObj);
+            }, 0);
+
+            // Record state changes
+            if (eventId) {
+                if (subFakeUpdates[subId] === undefined) subFakeUpdates[subId] = [eventId];
+                else subFakeUpdates[subId].push(eventId);
+            }
+        },
         deleteRelation: (uid, relation) => {
             sendEvent(connection, 'delete_relation', { uid, relation });
         },

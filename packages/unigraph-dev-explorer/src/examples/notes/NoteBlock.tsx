@@ -574,7 +574,7 @@ export function DetailedNoteBlock({
     const onBlurHandler = React.useCallback(() => {
         setIsEditing(false);
         inputDebounced.current.flush();
-        if (focused) {
+        if (focused && window.unigraph.getState('global/focused').value.component === componentId) {
             window.unigraph.getState('global/focused').setValue({ uid: '', caret: 0, type: '' });
         }
     }, [focused]);
@@ -710,6 +710,7 @@ export function DetailedNoteBlock({
                         ev.preventDefault();
                         edited.current = false;
                         inputDebounced.current.cancel();
+                        callbacks['convert-child-to-todo']?.(getCurrentText());
                     }
                     break;
 
@@ -1063,10 +1064,6 @@ export function DetailedNoteBlock({
                                                             console.log(data, elindex);
                                                             indentChild(data, editorContext, elindex);
                                                         },
-                                                        'ctrl+Enter': (ev: any) => {
-                                                            ev.preventDefault();
-                                                            convertChildToTodo(data, editorContext, elindex);
-                                                        },
                                                         Backspace: (ev: any) => {
                                                             if (
                                                                 window.unigraph.getState('global/selected').value
@@ -1283,7 +1280,7 @@ export function DetailedEmbedBlock({
     const onBlurHandler = React.useCallback(() => {
         // setIsEditing(false);
         // inputDebounced.current.flush();
-        if (focused) {
+        if (focused && window.unigraph.getState('global/focused').value.component === componentId) {
             window.unigraph.getState('global/focused').setValue({ uid: '', caret: 0, type: '' });
         }
     }, [focused]);
@@ -1322,9 +1319,9 @@ export function DetailedEmbedBlock({
                     ev.stopPropagation();
                     // inputDebounced.current.flush();
                     if (ev.shiftKey) {
-                        setCommand(() => callbacks['unindent-child-in-parent']?.bind(null));
+                        callbacks['unindent-child-in-parent']?.();
                     } else {
-                        setCommand(() => callbacks['indent-child']?.bind(null));
+                        callbacks['indent-child']?.();
                     }
                     break;
 
@@ -1397,23 +1394,17 @@ export function DetailedEmbedBlock({
                         style={{
                             width: '100%',
                             display: 'flex',
+                            outline: 'none',
                             cursor: 'text',
+                            ...(focused
+                                ? {
+                                      border: '1px solid #00bfff',
+                                      margin: '-1px',
+                                      borderRadius: '4px',
+                                  }
+                                : {}),
                         }}
                     >
-                        {isChildren && data._hide !== true ? (
-                            <div
-                                style={{ display: 'contents' }}
-                                onClick={() => {
-                                    window.wsnavigator(
-                                        `/library/object?uid=${data.uid}&type=${data?.type?.['unigraph.id']}`,
-                                    );
-                                }}
-                            >
-                                <Icon path={mdiNoteOutline} size={0.8} style={{ opacity: 0.54, marginRight: '4px' }} />
-                            </div>
-                        ) : (
-                            []
-                        )}
                         <AutoDynamicView
                             object={data.get('content')?._value}
                             attributes={{
@@ -1526,10 +1517,6 @@ export function DetailedEmbedBlock({
                                                             ev.preventDefault();
                                                             console.log(data, elindex);
                                                             indentChild(data, editorContext, elindex);
-                                                        },
-                                                        'ctrl+Enter': (ev: any) => {
-                                                            ev.preventDefault();
-                                                            convertChildToTodo(data, editorContext, elindex);
                                                         },
                                                         Backspace: (ev: any) => {
                                                             if (
