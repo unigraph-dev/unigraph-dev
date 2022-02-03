@@ -815,6 +815,9 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
         },
     });
 
+    const focusedState = window.unigraph.getState('global/focused');
+    focusedState.setValue({ ...focusedState.value, component: undefined });
+
     stubConverted._value = { uid: todoObj.uid };
     await window.unigraph.addObject(todoObj, '$/schema/todo');
     // eslint-disable-next-line prefer-destructuring
