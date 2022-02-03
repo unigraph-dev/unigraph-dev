@@ -431,5 +431,12 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param toUids
      */
     addBacklinks(fromUids: string[], toUids: string[]): any;
+    /**
+     * Sends a fake update to the UI with the updater object for the client.
+     * @param subId subscription ID to send the update to
+     * @param updater a padded object that contains an UID, which is contained in the subscription result.
+     * @param eventId the eventId that's attached to this update. Used to signify the most recent fake update, any update before this will not be triggered.
+     */
+    sendFakeUpdate?(subId: any, updater: any, eventId?: any): any;
 }
 /** End of unigraph interface */ // Don't remove this line - needed for Monaco to work

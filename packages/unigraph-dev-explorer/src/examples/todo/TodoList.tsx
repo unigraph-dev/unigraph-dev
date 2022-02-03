@@ -195,7 +195,65 @@ const tt = () => (
 
 export const init = () => {
     const description = 'Add a new Todo object';
-    registerDynamicViews({ '$/schema/todo': TodoItem });
+    registerDynamicViews({
+        '$/schema/todo': {
+            view: TodoItem,
+            query: (uid: string) => `
+            (func: uid(${uid})) {
+                uid
+                type { <unigraph.id> }
+                dgraph.type
+                <_hide>
+                <_value> {
+                    name {
+                        uid _value {
+                            dgraph.type uid
+                            type { <unigraph.id> }
+                            _value { dgraph.type uid type { <unigraph.id> } <_value.%> }
+                        }
+                    }
+                    done { <_value.!> }
+                    priority { <_value.#i> }
+                    time_frame {
+                        uid _value {
+                            dgraph.type uid type { <unigraph.id> }
+                            _value {
+                                start {
+                                    uid _value {
+                                        dgraph.type uid
+                                        type { <unigraph.id> }
+                                        _value { datetime { <_value.%dt> } timezone { <_value.%> } }
+                                    }
+                                }
+                                end {
+                                    uid _value {
+                                        dgraph.type uid
+                                        type { <unigraph.id> }
+                                        _value { datetime { <_value.%dt> } timezone { <_value.%> } }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    children {
+                        <_value[> {
+                            uid _key _index {<_value.#i> uid}
+                            _value {
+                                dgraph.type uid type { <unigraph.id> }
+                                _value {
+                                    dgraph.type uid type { <unigraph.id> }
+                                    _value {
+                                        uid name { uid <_value.%> }
+                                        color { uid _value { <_value.%> dgraph.type uid type { <unigraph.id> } } }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }`,
+        },
+    });
     registerQuickAdder({
         todo: {
             adder: quickAdder,

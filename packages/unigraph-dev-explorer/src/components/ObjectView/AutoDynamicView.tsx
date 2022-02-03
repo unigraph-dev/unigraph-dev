@@ -45,6 +45,8 @@ export function AutoDynamicView({
     if (!callbacks) callbacks = {};
     allowSubentity = allowSubentity === true;
 
+    if (object.constructor.name !== 'UnigraphObject') object = new UnigraphObject(object);
+
     const shouldGetBacklinks = !excludableTypes.includes(object?.type?.['unigraph.id']) && !inline;
     const [backlinks, setBacklinks] = React.useState<any>([]);
     const [totalParents, setTotalParents] = React.useState<string[] | undefined>();
@@ -186,6 +188,9 @@ export function AutoDynamicView({
         return () => {};
     }, [object?.uid, shouldGetBacklinks, DynamicViews, JSON.stringify(dataContext?.getParents(true)?.sort())]);
 
+    React.useEffect(() => {
+        if (!isObjectStub) setLoadedObj(object);
+    }, [object]);
     React.useEffect(() => {
         const newSubs = getRandomInt();
         if (isObjectStub) {

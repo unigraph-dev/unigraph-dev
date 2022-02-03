@@ -1,6 +1,6 @@
 /* eslint-disable no-plusplus */
 import _ from 'lodash';
-import { buildUnigraphEntity, byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { buildUnigraphEntity, byElementIndex, clearEmpties } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { dfs, removeAllPropsFromObj } from '../../utils';
 import { parseTodoObject } from '../todo/parseTodoObject';
 import { NoteEditorContext } from './types';
@@ -302,7 +302,7 @@ export const deleteChildren = (data: any, context: NoteEditorContext, index: num
         parents,
         true,
     );
-    focusUid({ uid: data.uid }, true, -1);
+    focusLastDFSNode({ uid: toDel[0]._value._value.uid }, context, true, -1);
 
     setTimeout(() => {
         toDel.forEach((el) => {
@@ -763,14 +763,14 @@ export const getNextDFSNode = (data: any, context: NoteEditorContext) => {
     return { uid: '' };
 };
 
-export const convertChildToTodo = async (data: any, context: NoteEditorContext, index: number) => {
+export const convertChildToTodo = async (data: any, context: NoteEditorContext, index: number, currentText: string) => {
     const parents = getParents(data);
     if (!data._hide) parents.push({ uid: data.uid });
     removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     // console.log(index);
     let currSubentity = -1;
-    const stubConverted = { uid: '' };
-    let textIt = '';
+    const stubConverted: any = { _value: { uid: '' } };
+    let textIt = currentText || '';
     let refs: any[] = [];
     const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
     const newChildren = children?.reduce((prev: any[], el: any, elindex: any) => {
@@ -785,14 +785,12 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
                         type: { 'unigraph.id': '$/schema/embed_block' },
                         _value: {
                             uid: el._value._value._value.uid,
-                            content: {
-                                _value: stubConverted,
-                            },
+                            content: stubConverted,
                         },
                     },
                 },
             };
-            textIt = el._value._value._value.text._value._value['_value.%'];
+            if (!textIt.length) textIt = el._value._value._value.text._value._value['_value.%'];
             refs =
                 el._value._value._value?.children?.['_value[']
                     ?.filter?.((it: any) => it._key)
@@ -805,12 +803,33 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
         return [...prev, { uid: el.uid }];
     }, []);
     // console.log(textIt, newChildren, )
-    const newUid = await window.unigraph.addObject(parseTodoObject(textIt, refs), '$/schema/todo');
+    const schemas = await window.unigraph.getSchemas();
+    const todoObj = parseTodoObject(textIt, refs);
+    todoObj.uid = window.unigraph.leaseUid?.();
+    clearEmpties(todoObj);
+    console.log(todoObj);
+    const paddedObj = buildUnigraphEntity(JSON.parse(JSON.stringify(todoObj)), '$/schema/todo', schemas);
+    stubConverted._value = paddedObj;
+
+    // send fake update now
+    window.unigraph.sendFakeUpdate?.(context.callbacks.subsId, {
+        uid: data?._value?.uid,
+        children: {
+            _displayAs: data?._value?.children?._displayAs,
+            '_value[': newChildren,
+            uid: window.unigraph.leaseUid?.(),
+        },
+    });
+
+    const focusedState = window.unigraph.getState('global/focused');
+    focusedState.setValue({ ...focusedState.value, component: undefined });
+
+    stubConverted._value = { uid: todoObj.uid };
+    await window.unigraph.addObject(todoObj, '$/schema/todo');
     // eslint-disable-next-line prefer-destructuring
-    stubConverted.uid = newUid[0];
     await window.unigraph.updateObject(
         data?._value?.uid,
-        { ...data._value, children: { _displayAs: data?._value?.children?._displayAs, '_value[': newChildren } },
+        { children: { _displayAs: data?._value?.children?._displayAs, '_value[': newChildren } },
         false,
         false,
         context.callbacks.subsId,
