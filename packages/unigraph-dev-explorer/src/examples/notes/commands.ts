@@ -814,7 +814,7 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
             uid: window.unigraph.leaseUid?.(),
         },
     });
-    /*
+
     stubConverted._value = { uid: todoObj.uid };
     await window.unigraph.addObject(todoObj, '$/schema/todo');
     // eslint-disable-next-line prefer-destructuring
@@ -826,7 +826,7 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
         context.callbacks.subsId,
         parents,
     );
-    window.unigraph.touch(parents.map((el) => el.uid)); */
+    window.unigraph.touch(parents.map((el) => el.uid));
 };
 
 export const replaceChildWithEmbedUid = async (data: any, context: NoteEditorContext, index: number, uid: string) => {
