@@ -151,10 +151,10 @@ const getCallbacks = (callbacks: any, data: any, editorContext: any, elindex: an
     },
     'focus-last-dfs-node': focusLastDFSNode,
     'focus-next-dfs-node': focusNextDFSNode,
-    'add-children': (its: string[], indexx?: number) =>
+    'add-children': (its: string[], indexx?: number, changeValue?: string | false) =>
         indexx
-            ? addChildren(data, editorContext, elindex + indexx, its)
-            : addChildren(data, editorContext, elindex, its),
+            ? addChildren(data, editorContext, elindex + indexx, its, changeValue)
+            : addChildren(data, editorContext, elindex, its, changeValue),
     'add-parent-backlinks': (childrenUids: string[]) => {
         const parents = getParentsAndReferences(
             data['~_value'],
@@ -520,7 +520,7 @@ export function DetailedNoteBlock({
     if (!callbacks?.viewId) callbacks = { ...(callbacks || {}), viewId: getRandomInt() };
     const [subentities, otherChildren] = getSubentities(data);
     const [command, setCommand] = React.useState<() => any | undefined>();
-    const inputter = (text: string, eagarlyUpdate = false) => {
+    const inputter = (text: string) => {
         if (data?._value?.children?.['_value[']) {
             const deadLinks: any = [];
             data._value.children['_value['].forEach((el: any) => {
@@ -528,7 +528,7 @@ export function DetailedNoteBlock({
             });
             if (deadLinks.length) window.unigraph.deleteItemFromArray(data._value.children.uid, deadLinks, data.uid);
         }
-        if (eagarlyUpdate) edited.current = true;
+
         return window.unigraph.updateObject(
             data.get('text')._value._value.uid,
             {
@@ -538,7 +538,6 @@ export function DetailedNoteBlock({
             false,
             callbacks.subsId,
             [],
-            eagarlyUpdate,
         );
     };
     const textInput: any = React.useRef();
@@ -816,7 +815,6 @@ export function DetailedNoteBlock({
                     callbacks['split-child'](
                         getCurrentText() || data.get('text')?.as('primitive'),
                         textInput.current.selectionStart,
-                        inputter,
                     );
                 },
                 indentChild: callbacks['indent-child'],
@@ -875,12 +873,13 @@ export function DetailedNoteBlock({
                     document.execCommand('insertText', false, lines[0]);
 
                     edited.current = true;
-                    inputDebounced.current(getCurrentText());
-                    inputDebounced.current.flush();
 
                     if (lines.length > 1) {
                         const newLines = lines.slice(1);
-                        callbacks['add-children'](newLines);
+                        callbacks['add-children'](newLines, undefined, getCurrentText());
+                    } else {
+                        inputDebounced.current(getCurrentText());
+                        inputDebounced.current.flush();
                     }
                 }
 
@@ -973,7 +972,7 @@ export function DetailedNoteBlock({
                         edited.current = false;
                         inputDebounced.current.cancel();
                         const currentText = getCurrentText() || data.get('text').as('primitive');
-                        callbacks['split-child']?.(currentText, caret, inputter);
+                        callbacks['split-child']?.(currentText, caret);
                         // setCurrentText(currentText.slice(caret));
                         setCaretPostRender(0);
                     } else if (ev.ctrlKey || ev.metaKey) {
