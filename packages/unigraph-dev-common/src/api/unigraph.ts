@@ -453,12 +453,15 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             }),
         sendFakeUpdate: (subId, updater, eventId) => {
             // Merge updater object with existing one
+            // console.log('subId0', JSON.parse(JSON.stringify(subResults[subId])));
             const newObj = JSON.parse(JSON.stringify(subResults[subId], getCircularReplacer()));
+            const newObj2 = JSON.parse(JSON.stringify(newObj));
             const clonedNewObject = JSON.parse(JSON.stringify(updater));
             const changeLocs = findAllUids(newObj, updater.uid);
             changeLocs.forEach(([loc, path]) => {
                 deepMerge(loc, clonedNewObject);
-                augmentStubs(loc, subResults[subId]);
+                // console.log('subId', JSON.parse(JSON.stringify(subResults[subId])));
+                augmentStubs(loc, newObj2);
             });
             subResults[subId] = newObj;
             setTimeout(() => {
