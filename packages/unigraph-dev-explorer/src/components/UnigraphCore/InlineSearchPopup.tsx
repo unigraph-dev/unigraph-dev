@@ -190,7 +190,6 @@ export const inlineTextSearch = (
     let hasMatch = false;
     const placeholder = /\[\[([^[\]]*)\]\]/g;
     for (let match: any; (match = placeholder.exec(newText)) !== null; ) {
-        console.log(match.index + 2, caret, placeholder.lastIndex - 2, matchOnly);
         if (match.index + 2 <= caret && placeholder.lastIndex - 2 >= caret) {
             hasMatch = true;
             // inputDebounced.cancel();

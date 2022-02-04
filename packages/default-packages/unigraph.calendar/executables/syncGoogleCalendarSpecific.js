@@ -185,8 +185,7 @@ const syncGoogleCalendarSpecific = async () => {
     const { calendar } = context;
     const cal = await unigraph.getObject(calUid);
     const syncToken = cal._value?.sync_token?.['_value.%'] || undefined;
-    // const syncToken = undefined;
-    const { items, nextSyncToken } = await sync(calendar, cal, syncToken);
+    const { items, nextSyncToken } = await syncDebug(calendar, cal, syncToken);
     const itemSlice = items;
     console.log(itemSlice);
 
@@ -214,7 +213,8 @@ const syncGoogleCalendarSpecific = async () => {
 
     const eventsWithRecurrenceQueries = confirmedEventsNonRecurring
         .filter(_.prop('recurrence'))
-        .map((ev) => queryFromEventId(ev.id));
+        .map(_.prop('id'))
+        .map(queryFromEventId);
 
     const objsWithRecurrenceResults = await unigraph.getQueries(
         eventsWithRecurrenceQueries,
@@ -227,7 +227,6 @@ const syncGoogleCalendarSpecific = async () => {
     // delete previous recurrences
     const objsWithRecurrence = objsWithRecurrenceResults.map(_.prop(['0', 'uid'])).filter(_.negate(_.isNil));
     deletePrevRecurrences(objsWithRecurrence);
-
     const toAdd = confirmedEventsNonRecurring.filter(_.negate(_.isNil)).map(_.curry(makeRecurrentEventObj)(calUid));
 
     if (toAdd.length > 0) {

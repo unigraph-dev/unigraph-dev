@@ -6,17 +6,18 @@ import { parseTodoObject } from '../todo/parseTodoObject';
 import { NoteEditorContext } from './types';
 import { getParentsAndReferences } from '../../components/ObjectView/backlinksUtils';
 
-export const focusUid = (obj: any, tailOrCaret?: number) => {
+export const focusUid = (obj: any, goingUp?: boolean, caret?: number) => {
     // console.log(document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]);
     // (document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]?.children[0] as any)?.click();
     const focusState = window.unigraph.getState('global/focused').value;
-    window.unigraph.getState('global/focused').setValue({
+    const newFocused = {
         uid: obj?.startsWith?.('0x') ? obj : obj.uid,
-        caret: tailOrCaret !== undefined && tailOrCaret >= 0 ? tailOrCaret : focusState?.caret || 0,
+        caret: caret !== undefined ? caret : focusState?.caret || 0, // if -1, means carret at the end of next block
         type: obj?.type || '$/schema/note_block',
-        tail: tailOrCaret === -1 || (tailOrCaret === undefined && focusState?.tail ? focusState.tail : undefined),
+        tail: goingUp || (goingUp === undefined && focusState?.tail ? focusState.tail : undefined),
         component: obj?.componentId || '',
-    });
+    };
+    window.unigraph.getState('global/focused').setValue(newFocused);
 };
 
 const getParents = (data: any) =>
@@ -25,19 +26,40 @@ const getParents = (data: any) =>
     }));
 
 export const getSemanticChildren = (data: any) => data?._value?.children;
+export const getSubentities = (data: any) =>
+    (getSemanticChildren(data)?.['_value['] || []).filter(
+        (el: any) => el?._value?.type?.['unigraph.id'] === '$/schema/subentity',
+    );
 
-export const addChild = (data: any, context: NoteEditorContext, index?: number) => {
+export const addChild = (
+    data: any,
+    context: NoteEditorContext,
+    index?: number,
+    changeValue: false | string = false,
+) => {
     if (typeof index === 'undefined') index = (getSemanticChildren(data)?.['_value[']?.length || 0) - 1;
-    return addChildren(data, context, index, ['']);
+    return addChildren(data, context, index, [''], changeValue);
 };
 
-export const addChildren = (data: any, context: NoteEditorContext, index: number, children: string[]) => {
+export const addChildren = (
+    data: any,
+    context: NoteEditorContext,
+    index: number,
+    children: string[],
+    changeValue?: false | string,
+) => {
     let uidMode = false;
     if (children.filter((el) => el.startsWith('0x')).length === children.length) uidMode = true;
     if (typeof index === 'undefined') index = (getSemanticChildren(data)?.['_value[']?.length || 0) - 1;
+    else index = getSubentities(data).sort(byElementIndex)[index]?._index?.['_value.#i'] || 0;
     const parents = getParents(data);
     if (!data._hide) parents.push({ uid: data.uid });
     const myUid = (window.unigraph as any).leaseUid();
+    console.log('addChildren', {
+        data,
+        "data?._value?.children?.['_value[']": data?._value?.children?.['_value['],
+        index,
+    });
     window.unigraph.updateObject(
         data._value.uid,
         {
@@ -53,6 +75,29 @@ export const addChildren = (data: any, context: NoteEditorContext, index: number
                                     ? el._index['_value.#i'] + children.length
                                     : el._index['_value.#i'],
                         },
+                        ...(changeValue && el._index?.['_value.#i'] === index
+                            ? {
+                                  _value: {
+                                      uid: el._value.uid,
+                                      _value: {
+                                          uid: el._value._value.uid,
+                                          _value: {
+                                              uid: el._value._value._value.uid,
+                                              text: {
+                                                  uid: el?._value?._value?._value?.text?.uid,
+                                                  _value: {
+                                                      uid: el?._value?._value?._value?.text?._value?.uid,
+                                                      _value: {
+                                                          uid: el?._value?._value?._value?.text?._value?._value?.uid,
+                                                          '_value.%': changeValue,
+                                                      },
+                                                  },
+                                              },
+                                          },
+                                      },
+                                  },
+                              }
+                            : {}),
                     })),
                     ...children.map((el: string, i: number) => ({
                         _value: {
@@ -101,6 +146,14 @@ export const addChildren = (data: any, context: NoteEditorContext, index: number
 
 export const splitChild = (data: any, context: NoteEditorContext, index: number, oldtext: string, at: number) => {
     // console.log(JSON.stringify([data, index, at], null, 4))
+    console.log(getSubentities(data).sort(byElementIndex)[index]?._value?._value);
+    if (
+        oldtext.slice(at) === '' &&
+        !getSubentities(getSubentities(data).sort(byElementIndex)[index]?._value?._value).length
+    ) {
+        addChild(data, context, index, oldtext);
+        return;
+    }
     const parents = getParents(data);
     if (!data._hide) parents.push({ uid: data.uid });
     let currSubentity = -1;
@@ -183,7 +236,6 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
             ];
         return [...prev, { uid: el.uid }];
     }, []);
-    // console.log(newChildren)
     window.unigraph.updateObject(
         data?._value?.uid,
         { children: { _displayAs: data?._value?.children?._displayAs, '_value[': newChildren } },
@@ -297,7 +349,7 @@ export const deleteChildren = (data: any, context: NoteEditorContext, index: num
         parents,
         true,
     );
-    focusLastDFSNode({ uid: toDel[0]._value._value.uid }, context, index[0], -1);
+    focusLastDFSNode({ uid: toDel[0]._value._value.uid }, context, true, -1);
 
     setTimeout(() => {
         toDel.forEach((el) => {
@@ -324,7 +376,7 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
         }
         return prev;
     }, 0);
-    const childParents = children[delAt]?._value?._value?.['~_value']?.length;
+    const numChildParents = children[delAt]?._value?._value?.['~_value']?.length;
     removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     // console.log(index, children[delAt]?._value?._value?._value?.children?.['_value[']);
     // Index = 0 if current block doesn't have children, merge with parent
@@ -358,7 +410,7 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
             parents,
             true,
         );
-        focusLastDFSNode({ uid: children[delAt]._value._value.uid }, context, index, -1);
+        focusLastDFSNode({ uid: children[delAt]._value._value.uid }, context, true, -1);
     } else if (
         index === 0 &&
         !(children[delAt]?._value?._value?._value?.children?.['_value['] || []).filter(
@@ -408,14 +460,14 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
             true,
         );
         window.unigraph.getState('global/focused').setValue({
-            uid: getLastDFSNode({ uid: children[delAt]._value._value.uid }, context, index).uid,
+            uid: getLastDFSNode({ uid: children[delAt]._value._value.uid }, context).uid,
             caret: oldCaret || 0,
             type: '$/schema/note_block',
             newData: newText,
         });
     } else if (
         index > 0 &&
-        getLastDFSNode({ uid: children[delAt]._value._value.uid }, context, index).uid ===
+        getLastDFSNode({ uid: children[delAt]._value._value.uid }, context).uid ===
             children[prevIndex]?._value?._value?.uid
     ) {
         // Merge with previous
@@ -476,14 +528,15 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
             true,
         );
         window.unigraph.getState('global/focused').setValue({
-            uid: getLastDFSNode({ uid: children[delAt]._value._value.uid }, context, index).uid,
+            uid: getLastDFSNode({ uid: children[delAt]._value._value.uid }, context).uid,
             caret: oldText.length || 0,
             type: '$/schema/note_block',
             newData: newText,
         });
     } else return false;
 
-    if (childParents <= 1) {
+    // const numChildParents = childParentArray ? childParentArray.length : 0;
+    if (numChildParents <= 1) {
         setTimeout(() => {
             permanentlyDeleteBlock(children[delAt]._value._value, [children[delAt].uid, children[delAt]._value.uid]);
             window.unigraph.touch(getParents(data).map((el) => el.uid));
@@ -731,15 +784,15 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
     // context.setCommand(() => () => focusUid(newChildren[parent + 1]._value._value.uid));
 };
 
-export const focusLastDFSNode = (data: any, context: NoteEditorContext, index: number, tailOrCaret?: number) => {
-    focusUid(getLastDFSNode(data, context, index), tailOrCaret);
+export const focusLastDFSNode = (data: any, context: NoteEditorContext, goingUp?: boolean, caret?: number) => {
+    focusUid(getLastDFSNode(data, context), goingUp, caret);
 };
 
-export const focusNextDFSNode = (data: any, context: NoteEditorContext, index: number, tailOrCaret?: number) => {
-    focusUid(getNextDFSNode(data, context, index), tailOrCaret);
+export const focusNextDFSNode = (data: any, context: NoteEditorContext, goingUp?: boolean, caret?: number) => {
+    focusUid(getNextDFSNode(data, context), goingUp, caret);
 };
 
-export const getLastDFSNode = (data: any, context: NoteEditorContext, index: number) => {
+export const getLastDFSNode = (data: any, context: NoteEditorContext) => {
     const orderedNodes = dfs(context.nodesState.value).filter((el) =>
         ['$/schema/note_block', '$/schema/embed_block'].includes((el as any).type),
     );
@@ -748,7 +801,7 @@ export const getLastDFSNode = (data: any, context: NoteEditorContext, index: num
     return { uid: '' };
 };
 
-export const getNextDFSNode = (data: any, context: NoteEditorContext, index: number) => {
+export const getNextDFSNode = (data: any, context: NoteEditorContext) => {
     const orderedNodes = dfs(context.nodesState.value).filter((el) =>
         ['$/schema/note_block', '$/schema/embed_block'].includes((el as any).type),
     );
@@ -771,6 +824,7 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
         if (el?._value?.type?.['unigraph.id'] === '$/schema/subentity' && ++currSubentity === index) {
             /* something something */
             const newel = {
+                uid: el.uid,
                 _index: { '_value.#i': elindex },
                 _value: {
                     uid: el._value.uid,

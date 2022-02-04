@@ -135,6 +135,7 @@ export function augmentStubs(objWithStubs: any, origObj: any) {
             if (Array.isArray(curr)) {
                 curr.forEach((el) => recurseObj(el, seen));
             } else {
+                // console.log('looking ', curr.uid, curr);
                 if (curr.uid && seen.includes(curr.uid)) return;
                 if (curr.uid) seen = [...seen, curr.uid];
                 Object.keys(curr).forEach((el) => {
@@ -146,7 +147,12 @@ export function augmentStubs(objWithStubs: any, origObj: any) {
                     Object.keys(curr).length <= 2 &&
                     _.difference(Object.keys(uidDict[curr.uid]), Object.keys(curr)).length > 0
                 ) {
-                    Object.assign(curr, uidDict[curr.uid], JSON.parse(JSON.stringify(curr)));
+                    // console.log('applied ', curr.uid, { dict: uidDict[curr.uid], curr });
+                    Object.assign(
+                        curr,
+                        JSON.parse(JSON.stringify(uidDict[curr.uid])),
+                        JSON.parse(JSON.stringify(curr)),
+                    );
                 }
             }
         }

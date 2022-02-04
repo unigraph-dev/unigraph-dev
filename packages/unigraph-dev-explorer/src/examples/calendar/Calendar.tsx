@@ -141,6 +141,12 @@ const queryDatedWithinMonth = (year: number, month: number) => {
     return queryDatedWithinTimeRange(start, end);
 };
 
+const queryDatedWithinYear = (year: number, month: number) => {
+    const start = new Date(year, month, 1).toJSON();
+    const end = new Date(year + 1, month, 0).toJSON();
+    return queryDatedWithinTimeRange(start, end);
+};
+
 const datedToBigCalendarEvent = (datedObj: any): any => {
     const bigCalendarEventByType: any = {
         '$/schema/todo': (datedObjX: any) => {
@@ -185,7 +191,7 @@ export function Calendar() {
         const id = getRandomInt();
         const today = new Date();
         tabContext.subscribeToQuery(
-            queryDatedWithinMonth(today.getFullYear(), today.getMonth()),
+            queryDatedWithinYear(today.getFullYear(), today.getMonth()),
             (res: any) => {
                 const graphRes = buildGraph(res);
                 setCurrentEvents(graphRes.map(datedToBigCalendarEvent).filter((x) => x));

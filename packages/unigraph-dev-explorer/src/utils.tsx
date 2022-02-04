@@ -86,25 +86,25 @@ export const getComponentFromPage = (location: string, params: any = {}) => {
 };
 
 export const setCaret = (document: Document, element: any, pos: number, length?: number) => {
-    console.log(element, pos, length);
-    const range = document.createRange();
-    const sel = document.getSelection();
-    const maxLen = element.textContent.length < pos ? element.textContent.length : pos;
-    range.setStart(element, maxLen);
-    if (length) {
-        range.setEnd(element, length + maxLen);
-    } else {
-        range.collapse(true);
-    }
-
-    sel?.removeAllRanges();
-    sel?.addRange(range);
+    const maxLen = element.value.length < pos ? element.value.length : pos;
+    element.setSelectionRange(maxLen, maxLen + (length || 0));
 };
+
+// export const getCaret = (ev: PointerEvent) => {
+//     if (document.caretRangeFromPoint) {
+//         return document.caretRangeFromPoint(ev.clientX, ev.clientY)?.startOffset;
+//     }
+//     console.log('getCaret', ev);
+//     // return window.getSelection()?.anchorOffset;
+//     return window.getSelection()?.anchorOffset;
+// };
 
 export const getCaret = (ev: PointerEvent) => {
     if (document.caretRangeFromPoint) {
+        // if this function is defined
         return document.caretRangeFromPoint(ev.clientX, ev.clientY)?.startOffset;
     }
+    // window.getSelection() can't ddetect line
     return window.getSelection()?.anchorOffset;
 };
 
