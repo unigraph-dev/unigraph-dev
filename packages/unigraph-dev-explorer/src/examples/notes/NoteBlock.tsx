@@ -28,22 +28,22 @@ import {
     permanentlyDeleteBlock,
     deleteChild,
     copyChildToClipboard,
+    replaceChildWithEmbedUid,
 } from './commands';
 import { onUnigraphContextMenu } from '../../components/ObjectView/DefaultObjectContextMenu';
 import { noteQuery, noteQueryDetailed } from './noteQuery';
 import { getParentsAndReferences } from '../../components/ObjectView/backlinksUtils';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
-import { removeAllPropsFromObj, scrollIntoViewIfNeeded, selectUid, setCaret, TabContext } from '../../utils';
+import { getCaret, removeAllPropsFromObj, scrollIntoViewIfNeeded, selectUid, setCaret, TabContext } from '../../utils';
 import { DragandDrop } from '../../components/ObjectView/DragandDrop';
 import { inlineObjectSearch, inlineTextSearch } from '../../components/UnigraphCore/InlineSearchPopup';
 import { htmlToMarkdown } from '../semantic/Markdown';
-import { formatSimpleClipboardItems, parseUnigraphHtml, setClipboardHandler } from '../../clipboardUtils';
+import { parseUnigraphHtml, setClipboardHandler } from '../../clipboardUtils';
 
 const closeScopeCharDict: { [key: string]: string } = {
     '[': ']',
     '(': ')',
     '"': '"',
-    "'": "'",
     '`': '`',
     $: '$',
     // '{':'}',
@@ -136,9 +136,11 @@ const noteBlockCommands = {
     'unsplit-child': unsplitChild,
     'split-child': splitChild,
     'indent-child': indentChild,
+    'delete-child': deleteChild,
     'unindent-child': unindentChild,
     'convert-child-to-todo': convertChildToTodo,
     'replace-child-with-uid': replaceChildWithUid,
+    'replace-child-with-embed-uid': replaceChildWithEmbedUid,
 };
 
 export function PlaceholderNoteBlock({ callbacks }: any) {
@@ -440,7 +442,10 @@ export function DetailedNoteBlock({
                     root: !isChildren,
                 },
                 ...subentities
-                    .filter((el: any) => el?.type?.['unigraph.id'] !== '$/schema/note_block')
+                    .filter(
+                        (el: any) =>
+                            !['$/schema/note_block', '$/schema/embed_block'].includes(el.type?.['unigraph.id']),
+                    )
                     .map((el: any) => {
                         const [subs] = getSubentities(el);
                         return {
@@ -531,14 +536,18 @@ export function DetailedNoteBlock({
                     getCurrentText(),
                     textInput,
                     caret,
-                    async (match: any, newName: string, newUid: string) => {
-                        callbacks['replace-child-with-uid'](newUid);
+                    async (match: any, newName: string, newUid: string, newType: string) => {
+                        if (newType !== '$/schema/note_block') {
+                            callbacks['replace-child-with-embed-uid'](newUid);
+                        } else {
+                            callbacks['replace-child-with-uid'](newUid);
+                            setTimeout(() => {
+                                // callbacks['add-child']();
+                                permanentlyDeleteBlock(data);
+                            }, 500);
+                        }
                         window.unigraph.getState('global/searchPopup').setValue({ show: false });
                         callbacks['focus-next-dfs-node'](data, editorContext, 0);
-                        setTimeout(() => {
-                            // callbacks['add-child']();
-                            permanentlyDeleteBlock(data);
-                        }, 500);
                     },
                     false,
                     matchOnly,
@@ -547,7 +556,7 @@ export function DetailedNoteBlock({
                 window.unigraph.getState('global/searchPopup').setValue({ show: false });
             }
         },
-        [callbacks, componentId, data, editorContext, resetEdited],
+        [callbacks, componentId, data, data.uid, data?._value?.children?.uid, editorContext, resetEdited],
     );
 
     React.useEffect(() => {
@@ -737,13 +746,16 @@ export function DetailedNoteBlock({
         [callbacks],
     );
 
-    const onInputHandler = React.useCallback((ev) => {
-        // if (ev.currentTarget.textContent !== data.get('text').as('primitive') && !edited.current) edited.current = true;
-        // console.log('handling Input', ev);
-        if (ev.target.value !== data.get('text').as('primitive') && !edited.current) edited.current = true;
-        checkReferences();
-        inputDebounced.current(ev.target.value);
-    }, []);
+    const onInputHandler = React.useCallback(
+        (ev) => {
+            // if (ev.currentTarget.textContent !== data.get('text').as('primitive') && !edited.current) edited.current = true;
+            // console.log('handling Input', ev);
+            if (ev.target.value !== data.get('text').as('primitive') && !edited.current) edited.current = true;
+            checkReferences();
+            inputDebounced.current(ev.target.value);
+        },
+        [checkReferences, data],
+    );
 
     const handleOpenScopedChar = React.useCallback((ev: KeyboardEvent) => {
         ev.preventDefault();
@@ -857,7 +869,8 @@ export function DetailedNoteBlock({
                     // );
                     requestAnimationFrame(() => {
                         // if (caret === 0 ) {
-                        if (isCaretAtFirstLine(getCurrentText(), caret)) {
+                        const newCaret = textInput.current.selectionStart;
+                        if (newCaret === 0) {
                             // if (document.getSelection()?.focusOffset === 0) {
                             if (ev.shiftKey) {
                                 selectUid(componentId, false);
@@ -874,8 +887,9 @@ export function DetailedNoteBlock({
                     // });
                     inputDebounced.current.flush();
                     requestAnimationFrame(() => {
+                        const newCaret = textInput.current.selectionStart;
                         // if ((caret || 0) >= (getCurrentText().trim()?.length || 0)) {
-                        if (isCaretAtLastLine(getCurrentText(), caret)) {
+                        if ((newCaret || 0) >= (getCurrentText().trim()?.length || 0)) {
                             // if ((document.getSelection()?.focusOffset || 0) >= (getCurrentText().trim()?.length || 0)) {
                             if (ev.shiftKey) {
                                 selectUid(componentId, false);
@@ -963,7 +977,7 @@ export function DetailedNoteBlock({
                         .map((el: any) => (
                             <AutoDynamicView
                                 object={
-                                    el.type?.['unigraph.id'] === '$/schema/note_block'
+                                    ['$/schema/note_block', '$/schema/embed_block'].includes(el.type?.['unigraph.id'])
                                         ? el
                                         : { uid: el.uid, type: el.type }
                                 }
@@ -1092,13 +1106,18 @@ export function DetailedNoteBlock({
                                                     allowSubentity
                                                     customBoundingBox
                                                     noClickthrough
-                                                    noSubentities={el.type?.['unigraph.id'] === '$/schema/note_block'}
-                                                    noBacklinks={el.type?.['unigraph.id'] === '$/schema/note_block'}
-                                                    subentityExpandByDefault={
-                                                        !(el.type?.['unigraph.id'] === '$/schema/note_block')
-                                                    }
+                                                    noSubentities={[
+                                                        '$/schema/note_block',
+                                                        '$/schema/embed_block',
+                                                    ].includes(el.type?.['unigraph.id'])}
+                                                    noBacklinks={[
+                                                        '$/schema/note_block',
+                                                        '$/schema/embed_block',
+                                                    ].includes(el.type?.['unigraph.id'])}
                                                     object={
-                                                        el.type?.['unigraph.id'] === '$/schema/note_block'
+                                                        ['$/schema/note_block', '$/schema/embed_block'].includes(
+                                                            el.type?.['unigraph.id'],
+                                                        )
                                                             ? el
                                                             : {
                                                                   uid: el.uid,
@@ -1161,6 +1180,18 @@ export function DetailedNoteBlock({
                                                                       its,
                                                                   )
                                                                 : addChildren(data, editorContext, elindex, its),
+                                                        'add-parent-backlinks': (childrenUids: string[]) => {
+                                                            const parents = getParentsAndReferences(
+                                                                data['~_value'],
+                                                                (data['unigraph.origin'] || []).filter(
+                                                                    (ell: any) => ell.uid !== data.uid,
+                                                                ),
+                                                            )[0]
+                                                                .map((ell: any) => ell?.uid)
+                                                                .filter(Boolean);
+                                                            if (!data._hide) parents.push(data.uid);
+                                                            window.unigraph.addBacklinks(parents, childrenUids);
+                                                        },
                                                         context: data,
                                                         isEmbed: true,
                                                         isChildren: true,
@@ -1173,6 +1204,10 @@ export function DetailedNoteBlock({
                                                         },
                                                         '$/schema/view': {
                                                             view: ViewViewDetailed,
+                                                        },
+                                                        '$/schema/embed_block': {
+                                                            view: DetailedEmbedBlock,
+                                                            query: noteQuery,
                                                         },
                                                     }}
                                                     attributes={{
@@ -1335,8 +1370,8 @@ export function DetailedEmbedBlock({
         (ev) => {
             const sel = document.getSelection();
             const caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
-            switch (ev.keyCode) {
-                case 13: // enter
+            switch (ev.key) {
+                case 'Enter': // enter
                     if (!ev.shiftKey && !ev.ctrlKey && !ev.metaKey) {
                         ev.preventDefault();
                         callbacks['add-child']();
@@ -1345,12 +1380,12 @@ export function DetailedEmbedBlock({
                     }
                     break;
 
-                case 8: // backspace
+                case 'Backspace': // backspace
                     // console.log(caret, document.getSelection()?.type)
                     callbacks['delete-child']();
                     break;
 
-                case 9: // tab
+                case 'Tab': // tab
                     ev.preventDefault();
                     ev.stopPropagation();
                     // inputDebounced.current.flush();
@@ -1361,18 +1396,18 @@ export function DetailedEmbedBlock({
                     }
                     break;
 
-                case 37: // left arrow
-                case 38: // up arrow
+                case 'ArrowLeft': // left arrow
+                case 'ArrowUp': // up arrow
                     ev.preventDefault();
                     // inputDebounced.current.flush();
-                    callbacks['focus-last-dfs-node'](data, editorContext, 0, -1);
+                    callbacks['focus-last-dfs-node'](data, editorContext, true, -1);
                     break;
 
-                case 39: // right arrow
-                case 40: // down arrow
+                case 'ArrowRight': // right arrow
+                case 'ArrowDown': // down arrow
                     ev.preventDefault();
                     // inputDebounced.current.flush();
-                    callbacks['focus-next-dfs-node'](data, editorContext, 0, 0);
+                    callbacks['focus-next-dfs-node'](data, editorContext, false, 0);
                     break;
 
                 default:
@@ -1538,13 +1573,8 @@ export function DetailedEmbedBlock({
                                                         )
                                                             ? el
                                                             : {
-                                                                  border: 'lightgray',
-                                                                  borderStyle: 'solid',
-                                                                  borderWidth: 'thin',
-                                                                  margin: '2px',
-                                                                  borderRadius: '8px',
-                                                                  maxWidth: 'fit-content',
-                                                                  padding: '4px',
+                                                                  uid: el.uid,
+                                                                  type: el.type,
                                                               }
                                                     }
                                                     index={elindex}
@@ -1721,8 +1751,11 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
             )
             .filter(
                 (path) =>
-                    path.filter((el: any) => el?.type?.['unigraph.id'] === '$/schema/note_block' && el?._hide !== true)
-                        .length <= 2,
+                    path.filter(
+                        (el: any) =>
+                            ['$/schema/note_block', '$/schema/embed_block'].includes(el?.type?.['unigraph.id']) &&
+                            el?._hide !== true,
+                    ).length <= 2,
             );
         setRefObjects(refinedPaths.map((refinedPath) => refinedPath[refinedPath.length - 2]));
         setPathNames(
