@@ -169,16 +169,29 @@ export function AutoDynamicView({
                     object.uid,
                 );
                 // console.log(object.uid, getParents(viewEl.current));
-                setBacklinks(
-                    [pars, refs].map((it) =>
-                        it.filter(
-                            (el) =>
-                                Object.keys(DynamicViews).includes(el?.type?.['unigraph.id']) &&
-                                ![...dataContext.getParents(true), callbacks?.context?.uid].includes(el.uid),
-                        ),
+                const processedBacklinks: any = [pars, refs].map((it) =>
+                    it.filter(
+                        (el) =>
+                            Object.keys(DynamicViews).includes(el?.type?.['unigraph.id']) &&
+                            ![...dataContext.getParents(true), callbacks?.context?.uid].includes(el.uid),
                     ),
                 );
-                setTotalParents([...(pars || []).map((el) => el.uid), ...(refs || []).map((el) => el.uid)]);
+                setBacklinks((oldBacklinks: any) => {
+                    if (
+                        JSON.stringify(oldBacklinks[0]?.map((el: any) => el.uid).sort()) !==
+                            JSON.stringify(processedBacklinks[0]?.map((el: any) => el.uid).sort()) ||
+                        JSON.stringify(oldBacklinks[1]?.map((el: any) => el.uid).sort()) !==
+                            JSON.stringify(processedBacklinks[1]?.map((el: any) => el.uid).sort())
+                    ) {
+                        return processedBacklinks;
+                    }
+                    return oldBacklinks;
+                });
+                setTotalParents((oldParents: any) => {
+                    const newParents = [...(pars || []).map((el) => el.uid), ...(refs || []).map((el) => el.uid)];
+                    if (JSON.stringify(oldParents?.sort()) !== JSON.stringify(newParents?.sort())) return newParents;
+                    return oldParents;
+                });
             };
             subscribeToBacklinks(object.uid, cb);
             return function cleanup() {
@@ -186,14 +199,21 @@ export function AutoDynamicView({
             };
         }
         return () => {};
-    }, [object?.uid, shouldGetBacklinks, DynamicViews, JSON.stringify(dataContext?.getParents(true)?.sort())]);
+    }, [
+        object?.uid,
+        shouldGetBacklinks,
+        JSON.stringify(Object.keys(DynamicViews).sort()),
+        JSON.stringify(dataContext?.getParents(true)?.sort()),
+    ]);
 
     React.useEffect(() => {
         if (!isObjectStub) setLoadedObj(object);
-    }, [object]);
+    }, [object, isObjectStub]);
+    const uidRef = React.useRef(undefined);
     React.useEffect(() => {
         const newSubs = getRandomInt();
-        if (isObjectStub) {
+        if (isObjectStub && object?.uid !== uidRef.current) {
+            uidRef.current = object?.uid;
             // console.log(tabContext);
             if (subsId) tabContext.unsubscribe(subsId);
             let query = DynamicViews[object.type?.['unigraph.id']]?.query?.(object.uid);
@@ -213,9 +233,10 @@ export function AutoDynamicView({
                 { noExpand: true },
             );
             setSubsId(newSubs);
-            return function cleanup() {
-                tabContext.unsubscribe(newSubs);
-            };
+        }
+        if (!isObjectStub) {
+            uidRef.current = undefined;
+            tabContext.unsubscribe(newSubs);
         }
         return () => {};
     }, [object?.uid, isObjectStub, DynamicViews, object?.type]);
@@ -303,31 +324,30 @@ export function AutoDynamicView({
     );
 
     const BacklinkComponent = React.useMemo(
-        () => (
-            <div
-                style={{
-                    display:
-                        shouldGetBacklinks &&
-                        dataContext.parents !== undefined &&
-                        (backlinks?.[1]?.length || (!noParents && backlinks?.[0]?.length > 0))
-                            ? ''
-                            : 'none',
-                    marginLeft: 'auto',
-                    background: 'lightgray',
-                    padding: '2px 6px',
-                    borderRadius: '6px',
-                    whiteSpace: 'nowrap',
-                    cursor: 'pointer',
-                }}
-                onClick={(ev) => {
-                    ev.stopPropagation();
-                    ev.preventDefault();
-                    window.wsnavigator(`/library/backlink?uid=${object?.uid}`);
-                }}
-            >
-                {(noParents ? 0 : backlinks?.[0]?.length || 0) + (backlinks?.[1]?.length || 0)}
-            </div>
-        ),
+        () =>
+            shouldGetBacklinks &&
+            dataContext.parents !== undefined &&
+            (backlinks?.[1]?.length || (!noParents && backlinks?.[0]?.length > 0)) ? (
+                <div
+                    style={{
+                        marginLeft: 'auto',
+                        background: 'lightgray',
+                        padding: '2px 6px',
+                        borderRadius: '6px',
+                        whiteSpace: 'nowrap',
+                        cursor: 'pointer',
+                    }}
+                    onClick={(ev) => {
+                        ev.stopPropagation();
+                        ev.preventDefault();
+                        window.wsnavigator(`/library/backlink?uid=${object?.uid}`);
+                    }}
+                >
+                    {(noParents ? 0 : backlinks?.[0]?.length || 0) + (backlinks?.[1]?.length || 0)}
+                </div>
+            ) : (
+                []
+            ),
         [noParents, backlinks[0]?.length, backlinks[1]?.length, dataContext.parents === undefined, shouldGetBacklinks],
     );
 
