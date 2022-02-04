@@ -1188,7 +1188,11 @@ export function DetailedNoteBlock({
                             onClick={() => setFocusedCaret(textInput.current)}
                         />
                         <AutoDynamicView
-                            object={data.get('text')?._value?._value}
+                            object={
+                                edited.current
+                                    ? { ...data.get('text')?._value?._value, '_value.%': getCurrentText() }
+                                    : data.get('text')?._value?._value
+                            }
                             attributes={{
                                 isHeading: !(isChildren || callbacks.isEmbed),
                             }}

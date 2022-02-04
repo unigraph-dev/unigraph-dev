@@ -51,7 +51,7 @@ export const addChildren = (
     let uidMode = false;
     if (children.filter((el) => el.startsWith('0x')).length === children.length) uidMode = true;
     if (typeof index === 'undefined') index = (getSemanticChildren(data)?.['_value[']?.length || 0) - 1;
-    else index = getSubentities(data).sort(byElementIndex)[index]?._index?.['_value.#i'];
+    else index = getSubentities(data).sort(byElementIndex)[index]?._index?.['_value.#i'] || 0;
     const parents = getParents(data);
     if (!data._hide) parents.push({ uid: data.uid });
     const myUid = (window.unigraph as any).leaseUid();
