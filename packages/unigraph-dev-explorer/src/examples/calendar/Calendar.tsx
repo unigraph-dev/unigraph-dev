@@ -2,16 +2,18 @@ import { Avatar, Typography } from '@material-ui/core';
 import React from 'react';
 import { buildGraph, getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import Sugar from 'sugar';
-import { fromPairs, flow, curry, mergeWith, sortBy, reverse } from 'lodash/fp';
+import { unionBy, isString } from 'lodash/fp';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { AnyAaaaRecord } from 'dns';
-import { Calendar as BigCalendar, DateLocalizer, momentLocalizer, stringOrDate } from 'react-big-calendar';
+import { Calendar as BigCalendar, DateLocalizer, momentLocalizer, stringOrDate, View } from 'react-big-calendar';
 import moment from 'moment';
+import {} from 'lodash';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { getDateAsUTC, TabContext } from '../../utils';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { CurrentEvents } from './CurrentEvents';
 
 export function CalendarEvent({ data, callbacks, inline }: any) {
     const CalendarColor = (
@@ -83,67 +85,58 @@ export function TimeFrame({ data, callbacks }: any) {
 }
 
 const queryDatedWithinTimeRange = (start: string, end: string) => {
-    return `calendarObjs(func: uid(calendarUids)) @filter(type(Entity) AND (NOT type(Deleted)) AND (NOT eq(<_hide>, true))) @recurse(depth:8){ 
-            uid
-            <unigraph.id> 
-            expand(_userpredicate_) 
+    return `calendarObjs(func: uid(calendarObjs)) @filter(type(Entity) AND (NOT type(Deleted)) AND (NOT eq(<_hide>, true))) @recurse(depth:8){ 
+        uid
+        <unigraph.id> 
+        expand(_userpredicate_) 
+    }
+   timepoints(func: eq(<unigraph.id>, "$/schema/time_point")) {
+        <~type> {
+            timepointUids as uid
         }
-        var(func: eq(<unigraph.id>, "$/schema/time_point")) {
-            <~type> {
-                timepointUids as uid
-            }
+    }
+    # get timepoint uids with datetime value var
+    timepointsInRange as var(func: uid(timepointUids) )@cascade{
+      _value {
+        # datetime {
+        datetime @filter(ge(<_value.%dt>, "${start}") AND le(<_value.%dt>, "${end}")) {
+          # datetime_datetime as <_value.%dt>
+          <_value.%dt>
         }
-        # get timepoint uids with datetime value var
-        var(func: uid(timepointUids) )@cascade{
-          uid
-          _value {
-            datetime @filter(le(<_value.%dt>, "${end}") AND ge(<_value.%dt>, "${start}")) {
-              datetime_datetime as <_value.%dt>
-            }
-            _value_datetime:_value_datetime as min(val(datetime_datetime))
-          }					
-          
-          timepoint_datetime:timepoint_datetime as min(val(_value_datetime))
-          
+      }					 
+    }
+            # objects that reference timepoints. Found through timepoint's backlinks in unigraph.origin     
+            findTimedObjects(func: uid(timepointsInRange)){ 
+      <unigraph.origin>{
+                    timedObjs as uid
         }
-        
-        # get sorted uids of dated objects connected to timepoints
-        var(func: uid(timepointUids) ,orderasc:val(timepoint_datetime))@cascade{
-          uid
-          _value {
-            datetime{	
-              <_value.%dt>
-            }
-          }					
-          
-          <unigraph.origin>  {
-              datedObjUids as uid
-          } 
-        }
-          
-          
-        # get uids of dated objects that aren't timepoints or timeframes
-        calendarUids as var(func: uid(datedObjUids)) @cascade{ 
-          uid
-          type @filter(NOT (eq(<unigraph.id>, "$/schema/time_point") OR eq(<unigraph.id>, "$/schema/time_frame") )) @cascade {
-            <unigraph.id>
-          }
-          _value
-        }  
+    }  
+
+      
+    # Get uids of dated objects that aren't timepoints or timeframes. E.g. events and daily notes
+    calendarObjs as var(func: uid(timedObjs)) @cascade{ 
+      type @filter(NOT (eq(<unigraph.id>, "$/schema/time_point") OR eq(<unigraph.id>, "$/schema/time_frame") )) @cascade {
+        <unigraph.id>
+      }
+    }  
         
         
         `;
 };
 
+const queryDatedWithinYear = (year: number, month: number) => {
+    const start = new Date(year, month, 1).toJSON();
+    const end = new Date(year + 1, month, 0).toJSON();
+    return queryDatedWithinTimeRange(start, end);
+};
 const queryDatedWithinMonth = (year: number, month: number) => {
     const start = new Date(year, month, 1).toJSON();
     const end = new Date(year, month + 1, 0).toJSON();
     return queryDatedWithinTimeRange(start, end);
 };
-
-const queryDatedWithinYear = (year: number, month: number) => {
-    const start = new Date(year, month, 1).toJSON();
-    const end = new Date(year + 1, month, 0).toJSON();
+const queryDatedWithinWeek = (year: number, month: number, date: number) => {
+    const start = new Date(year, month, date - 7).toJSON();
+    const end = new Date(year, month, date + 7).toJSON();
     return queryDatedWithinTimeRange(start, end);
 };
 
@@ -183,18 +176,37 @@ const unigraphBigCalendarEventComponent = ({ event, ...props }: any) => {
     return <AutoDynamicView object={new UnigraphObject(event.unigraphObj)} inline callbacks={{ noDate: true }} />;
 };
 
+const getCurrentWeekStart = (today: Date) => {
+    return new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay());
+};
+const getCurrentWeekEnd = (today: Date) => {
+    return new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay() + 6);
+};
 export function Calendar() {
     const [currentEvents, setCurrentEvents] = React.useState<any>([]);
     const [localizer, _] = React.useState<DateLocalizer>(() => momentLocalizer(moment));
+    const [currentView, setCurrentView] = React.useState<View | undefined>('week');
+    const [viewRange, setViewRange] = React.useState<{ start: Date; end: Date }>({
+        start: getCurrentWeekStart(new Date()),
+        end: getCurrentWeekEnd(new Date()),
+    });
     const tabContext = React.useContext(TabContext);
+    const addToCurrentEvents = React.useCallback(
+        (newEvents: any[]) => {
+            setCurrentEvents(unionBy('unigraphObj.uid', newEvents, currentEvents));
+        },
+
+        [currentEvents],
+    );
+
     React.useEffect(() => {
         const id = getRandomInt();
-        const today = new Date();
         tabContext.subscribeToQuery(
-            queryDatedWithinYear(today.getFullYear(), today.getMonth()),
+            queryDatedWithinTimeRange(viewRange.start?.toJSON(), viewRange.end?.toJSON()),
             (res: any) => {
                 const graphRes = buildGraph(res);
-                setCurrentEvents(graphRes.map(datedToBigCalendarEvent).filter((x) => x));
+                console.log('new calendar things', { res, graphRes, viewRange, currentEvents });
+                addToCurrentEvents(graphRes.map(datedToBigCalendarEvent).filter((x) => x));
             },
             id,
             { metadataOnly: true },
@@ -203,7 +215,30 @@ export function Calendar() {
         return function cleanup() {
             tabContext.unsubscribe(id);
         };
-    }, []);
+    }, [viewRange]);
+
+    const onRangeChange: (range: Date[] | { start: stringOrDate; end: stringOrDate }, view: View | undefined) => void =
+        React.useCallback(
+            async (range: any, view: any) => {
+                // check if range has dates or strings
+                setCurrentView(view);
+                let startDate: Date;
+                let endDate: Date;
+                if (range.length && range[0] instanceof Date) {
+                    startDate = (range as Date[])?.[0];
+                    endDate = (range as Date[])?.[range.length - 1];
+                } else if (isString(range.start)) {
+                    startDate = new Date(range.start);
+                    endDate = new Date(range.end);
+                } else {
+                    startDate = range.start as Date;
+                    endDate = range.end as Date;
+                }
+                setViewRange({ start: startDate, end: endDate });
+            },
+
+            [],
+        );
 
     return (
         localizer && (
@@ -216,6 +251,8 @@ export function Calendar() {
                 eventPropGetter={(event: any, start: stringOrDate, end: stringOrDate, isSelected: boolean) => ({
                     style: { backgroundColor: '#fff', color: 'black', border: '1px', borderColor: 'black' },
                 })}
+                defaultView={currentView}
+                onRangeChange={onRangeChange}
             />
         )
     );
