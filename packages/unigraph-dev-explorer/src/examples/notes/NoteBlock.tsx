@@ -382,6 +382,13 @@ export function DetailedNoteBlock({
         `${options?.viewId || callbacks?.viewId || callbacks['get-view-id']()}/nodes`,
         [],
     );
+    const [caretPostRender, setCaretPostRender] = React.useState<number | undefined>(undefined);
+    const fulfillCaretPostRender = React.useCallback(() => {
+        if (caretPostRender !== undefined) {
+            setCaret(document, textInput.current, caretPostRender);
+            setCaretPostRender(undefined);
+        }
+    }, [caretPostRender]);
     const editorContext = {
         edited,
         setCommand,
@@ -565,11 +572,12 @@ export function DetailedNoteBlock({
             window.layoutModel.doAction(Actions.renameTab(options.viewId, `Note: ${dataText}`));
         if (getCurrentText() !== dataText && !edited.current) {
             setCurrentText(dataText);
-            if (isEditing && dataText === '') textInput.current.appendChild(document.createElement('br'));
         } else if ((getCurrentText() === dataText && edited.current) || getCurrentText() === '') {
             resetEdited();
         }
-    }, [data.get('text')?.as('primitive'), isEditing]);
+
+        if (!edited.current) fulfillCaretPostRender();
+    }, [data.get('text')?.as('primitive'), isEditing, fulfillCaretPostRender]);
 
     React.useEffect(() => {
         // set caret when focus changes
@@ -688,17 +696,7 @@ export function DetailedNoteBlock({
                     const mdresult = htmlToMarkdown(paste);
                     const lines = mdresult.split('\n\n');
 
-                    // why checking BR? Why should we create a new block?
-                    // if (selection.getRangeAt(0).startContainer.nodeName === 'BR') {
-                    //     // textInput.current.textContent += lines[0];
-                    //     setCurrentText(getCurrentText() + lines[0]);
-                    //     setCaret(document, textInput.current, getCurrentText().length);
-                    // } else {
-                    //     selection.getRangeAt(0).insertNode(document.createTextNode(lines[0]));
-                    //     selection.collapseToEnd();
-                    // }
-                    setCurrentText(getCurrentText() + lines[0]);
-                    setCaret(document, textInput.current, getCurrentText().length);
+                    document.execCommand('insertText', false, lines[0]);
 
                     edited.current = true;
                     inputDebounced.current(getCurrentText());
@@ -706,7 +704,7 @@ export function DetailedNoteBlock({
 
                     if (lines.length > 1) {
                         const newLines = lines.slice(1);
-                        callbacks['add-children'](newLines, getCurrentText().length ? 0 : -1);
+                        callbacks['add-children'](newLines);
                     }
                 }
 
@@ -723,15 +721,8 @@ export function DetailedNoteBlock({
 
                         const res = `![${blob.name || 'image'}](${base64})`;
 
-                        if (selection.getRangeAt(0).startContainer.nodeName === 'BR') {
-                            // textInput.current.textContent += res;
-                            setCurrentText(getCurrentText() + res);
-                            // setCaret(document, textInput.current, getCurrentText().length);
-                            setCaret(document, textInput.current, getCurrentText().length);
-                        } else {
-                            selection.getRangeAt(0).insertNode(document.createTextNode(res));
-                            selection.collapseToEnd();
-                        }
+                        selection.getRangeAt(0).insertNode(document.createTextNode(res));
+                        selection.collapseToEnd();
 
                         edited.current = true;
                         inputDebounced.current(getCurrentText());
@@ -805,8 +796,8 @@ export function DetailedNoteBlock({
                         inputDebounced.current.cancel();
                         const currentText = getCurrentText() || data.get('text').as('primitive');
                         callbacks['split-child']?.(currentText, caret);
-                        setCurrentText(currentText.slice(caret));
-                        setCaret(document, textInput.current, 0);
+                        // setCurrentText(currentText.slice(caret));
+                        setCaretPostRender(0);
                     } else if (ev.ctrlKey || ev.metaKey) {
                         ev.preventDefault();
                         edited.current = false;
@@ -862,35 +853,28 @@ export function DetailedNoteBlock({
                     break;
 
                 case 'ArrowUp': // up arrow
-                    // ev.preventDefault();
+                    textInput.current.style['caret-color'] = 'transparent';
                     inputDebounced.current.flush();
-                    // setCommand(() =>
-                    //    callbacks['focus-last-dfs-node'].bind(null, data, editorContext, 0),
-                    // );
                     requestAnimationFrame(() => {
-                        // if (caret === 0 ) {
                         const newCaret = textInput.current.selectionStart;
                         if (newCaret === 0) {
-                            // if (document.getSelection()?.focusOffset === 0) {
                             if (ev.shiftKey) {
                                 selectUid(componentId, false);
                             }
                             callbacks['focus-last-dfs-node'](data, editorContext, true, caret);
                         }
+                        setTimeout(() => {
+                            textInput.current.style['caret-color'] = '';
+                        }, 0);
                     });
                     return;
 
                 case 'ArrowDown': // down arrow
-                    // console.log('ArrowDown', {
-                    //     selectionStart: textInput.current.selectionStart,
-                    //     getCurrentText: getCurrentText(),
-                    // });
+                    textInput.current.style['caret-color'] = 'transparent';
                     inputDebounced.current.flush();
                     requestAnimationFrame(() => {
                         const newCaret = textInput.current.selectionStart;
-                        // if ((caret || 0) >= (getCurrentText().trim()?.length || 0)) {
                         if ((newCaret || 0) >= (getCurrentText().trim()?.length || 0)) {
-                            // if ((document.getSelection()?.focusOffset || 0) >= (getCurrentText().trim()?.length || 0)) {
                             if (ev.shiftKey) {
                                 selectUid(componentId, false);
                             }
@@ -899,6 +883,9 @@ export function DetailedNoteBlock({
                             const caretInLine = caretFromLastLine(getCurrentText(), caret);
                             callbacks['focus-next-dfs-node'](data, editorContext, false, caretInLine);
                         }
+                        setTimeout(() => {
+                            textInput.current.style['caret-color'] = '';
+                        }, 0);
                     });
                     return;
                 case '(':
@@ -1013,6 +1000,7 @@ export function DetailedNoteBlock({
                                 minWidth: '16px',
                                 padding: '0px',
                                 display: isEditing ? '' : 'none',
+                                resize: 'none',
                             }}
                             ref={textInput}
                             // value={currentText}
