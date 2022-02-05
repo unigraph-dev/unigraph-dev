@@ -60,12 +60,16 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
                 newData.uid,
                 {
                     _value: {
-                        done: { '_value.!': newData.get('done')['_value.!'] },
+                        uid: newData._value.uid,
+                        done: { uid: newData._value.done.uid, '_value.!': newData.get('done')['_value.!'] },
                     },
                     _hide: newData.get('done')['_value.!'],
                 },
-                true,
                 false,
+                false,
+                callbacks?.subsId,
+                undefined,
+                true,
             );
         },
     };
@@ -205,6 +209,7 @@ export const init = () => {
                 dgraph.type
                 <_hide>
                 <_value> {
+                    uid
                     name {
                         uid _value {
                             dgraph.type uid
@@ -212,7 +217,7 @@ export const init = () => {
                             _value { dgraph.type uid type { <unigraph.id> } <_value.%> }
                         }
                     }
-                    done { <_value.!> }
+                    done { uid <_value.!> }
                     priority { <_value.#i> }
                     time_frame {
                         uid _value {

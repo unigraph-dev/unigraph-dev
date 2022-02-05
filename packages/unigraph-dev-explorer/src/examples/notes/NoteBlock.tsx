@@ -28,37 +28,27 @@ import {
     permanentlyDeleteBlock,
     deleteChild,
     copyChildToClipboard,
+    replaceChildWithEmbedUid,
 } from './commands';
 import { onUnigraphContextMenu } from '../../components/ObjectView/DefaultObjectContextMenu';
 import { noteQuery, noteQueryDetailed } from './noteQuery';
 import { getParentsAndReferences } from '../../components/ObjectView/backlinksUtils';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
-import { removeAllPropsFromObj, scrollIntoViewIfNeeded, selectUid, setCaret, TabContext } from '../../utils';
+import { getCaret, removeAllPropsFromObj, scrollIntoViewIfNeeded, selectUid, setCaret, TabContext } from '../../utils';
 import { DragandDrop } from '../../components/ObjectView/DragandDrop';
 import { inlineObjectSearch, inlineTextSearch } from '../../components/UnigraphCore/InlineSearchPopup';
 import { htmlToMarkdown } from '../semantic/Markdown';
-import { formatSimpleClipboardItems, parseUnigraphHtml, setClipboardHandler } from '../../clipboardUtils';
+import { parseUnigraphHtml, setClipboardHandler } from '../../clipboardUtils';
 
 const closeScopeCharDict: { [key: string]: string } = {
     '[': ']',
     '(': ')',
     '"': '"',
-    "'": "'",
     '`': '`',
     $: '$',
     // '{':'}',
 };
 
-const isCaretAtFirstLine = (text: string, caret: number): boolean => {
-    const lines = text.split('\n');
-    const line = lines[0];
-    return caret <= line.trim().length;
-};
-const isCaretAtLastLine = (text: string, caret: number): boolean => {
-    const lines = text.split('\n');
-    const lastLine = lines[lines.length - 1];
-    return caret >= text.length - lastLine.length;
-};
 const caretFromLastLine = (text: string, _caret: number) => {
     // get position of caret in last line
     const lines = text.split('\n');
@@ -75,6 +65,197 @@ const caretToLastLine = (text: string, _caret: number) => {
     const caretInLine = _caret + (text.length - lastLineLength);
     return caretInLine;
 };
+
+const childrenComponents = {
+    '$/schema/note_block': {
+        view: DetailedNoteBlock,
+        query: noteQuery,
+    },
+    '$/schema/view': {
+        view: ViewViewDetailed,
+    },
+    '$/schema/embed_block': {
+        view: DetailedEmbedBlock,
+        query: noteQuery,
+    },
+};
+
+const BlockChild = ({ elindex, shortcuts, displayAs, isCollapsed, setCollapsed, callbacks, el }: any) => (
+    <AutoDynamicView
+        noDrag
+        noContextMenu
+        compact
+        allowSubentity
+        customBoundingBox
+        noClickthrough
+        noSubentities={['$/schema/note_block', '$/schema/embed_block'].includes(el.type?.['unigraph.id'])}
+        noBacklinks={['$/schema/note_block', '$/schema/embed_block'].includes(el.type?.['unigraph.id'])}
+        object={
+            ['$/schema/note_block', '$/schema/embed_block'].includes(el.type?.['unigraph.id'])
+                ? el
+                : {
+                      uid: el.uid,
+                      type: el.type,
+                  }
+        }
+        index={elindex}
+        expandedChildren
+        shortcuts={shortcuts}
+        callbacks={callbacks}
+        components={childrenComponents}
+        attributes={{
+            isChildren: true,
+            isCollapsed,
+            displayAs,
+            setCollapsed,
+        }}
+        recursive
+    />
+);
+
+const getShortcuts = (data: any, editorContext: any, elindex: any, copyOrCutHandler: any, callbacks: any) => ({
+    'shift+Tab': (ev: any) => {
+        ev.preventDefault();
+        callbacks['unindent-child']?.(elindex);
+    },
+    Tab: (ev: any) => {
+        ev.preventDefault();
+        indentChild(data, editorContext, elindex);
+    },
+    Backspace: (ev: any) => {
+        if (window.unigraph.getState('global/selected').value.length > 0) {
+            ev.preventDefault();
+            deleteChild(data, editorContext, elindex);
+        }
+    },
+    'ctrl+Backspace': (ev: any) => {
+        if (window.unigraph.getState('global/selected').value.length > 0) {
+            ev.preventDefault();
+            deleteChild(data, editorContext, elindex, true);
+        }
+    },
+    oncopy: (ev: any) => copyOrCutHandler(ev, elindex, false),
+    oncut: (ev: any) => copyOrCutHandler(ev, elindex, true),
+});
+
+const getCallbacks = (callbacks: any, data: any, editorContext: any, elindex: any) => ({
+    ...callbacks,
+    ...Object.fromEntries(
+        Object.entries(noteBlockCommands).map(([k, v]: any) => [
+            k,
+            (...args: any[]) => v(data, editorContext, elindex, ...args),
+        ]),
+    ),
+    'unindent-child-in-parent': () => {
+        callbacks['unindent-child']?.(elindex);
+    },
+    'focus-last-dfs-node': focusLastDFSNode,
+    'focus-next-dfs-node': focusNextDFSNode,
+    'add-children': (its: string[], indexx?: number, changeValue?: string | false) =>
+        indexx
+            ? addChildren(data, editorContext, elindex + indexx, its, changeValue)
+            : addChildren(data, editorContext, elindex, its, changeValue),
+    'add-parent-backlinks': (childrenUids: string[]) => {
+        const parents = getParentsAndReferences(
+            data['~_value'],
+            (data['unigraph.origin'] || []).filter((ell: any) => ell.uid !== data.uid),
+        )[0]
+            .map((ell: any) => ell?.uid)
+            .filter(Boolean);
+        if (!data._hide) parents.push(data.uid);
+        window.unigraph.addBacklinks(parents, childrenUids);
+    },
+    context: data,
+    isEmbed: true,
+    isChildren: true,
+    parentEditorContext: editorContext,
+});
+
+const BlockChildren = ({
+    isCollapsed,
+    isChildren,
+    subentities,
+    tabContext,
+    data,
+    isChildrenCollapsed,
+    setIsChildrenCollapsed,
+    editorContext,
+    displayAs,
+    childrenDisplayAs,
+    callbacks,
+    copyOrCutHandler,
+}: any) =>
+    !(isCollapsed === true) ? (
+        <div style={{ width: '100%' }}>
+            {subentities.length || isChildren ? (
+                <DragandDrop
+                    dndContext={tabContext.viewId}
+                    listId={data?.uid}
+                    arrayId={data?._value?.children?.uid}
+                    style={{
+                        position: 'absolute',
+                        height: '6px',
+                        marginTop: '-3px',
+                        marginBottom: '1px',
+                        zIndex: 999,
+                    }}
+                >
+                    {subentities.map((el: any, elindex: any) => {
+                        const isCol = isChildrenCollapsed[el.uid];
+                        return (
+                            <OutlineComponent
+                                key={el.uid}
+                                isChildren={isChildren}
+                                collapsed={isCol}
+                                setCollapsed={(val: boolean) => {
+                                    setIsChildrenCollapsed({
+                                        ...isChildrenCollapsed,
+                                        [el.uid]: val,
+                                    });
+                                }}
+                                createBelow={() => {
+                                    addChild(data, editorContext, elindex);
+                                }}
+                                displayAs={childrenDisplayAs}
+                                parentDisplayAs={displayAs}
+                            >
+                                <BlockChild
+                                    el={el}
+                                    elindex={elindex}
+                                    editorContext={editorContext}
+                                    callbacks={getCallbacks(callbacks, data, editorContext, elindex)}
+                                    shortcuts={getShortcuts(data, editorContext, elindex, copyOrCutHandler, callbacks)}
+                                    isCollapsed={isCol}
+                                    setCollapsed={(val: boolean) => {
+                                        setIsChildrenCollapsed({
+                                            ...isChildrenCollapsed,
+                                            [el.uid]: val,
+                                        });
+                                    }}
+                                    displayAs={childrenDisplayAs}
+                                />
+                            </OutlineComponent>
+                        );
+                    })}
+                </DragandDrop>
+            ) : (
+                <OutlineComponent
+                    isChildren={isChildren}
+                    displayAs={data?._value?.children?._displayAs || 'outliner'}
+                    parentDisplayAs={displayAs}
+                >
+                    <PlaceholderNoteBlock
+                        callbacks={{
+                            'add-child': () => noteBlockCommands['add-child'](data, editorContext),
+                        }}
+                    />
+                </OutlineComponent>
+            )}
+        </div>
+    ) : (
+        // eslint-disable-next-line react/jsx-no-useless-fragment
+        <></>
+    );
 
 export function NoteBlock({ data, inline }: any) {
     const [parents, references] = getParentsAndReferences(
@@ -136,9 +317,11 @@ const noteBlockCommands = {
     'unsplit-child': unsplitChild,
     'split-child': splitChild,
     'indent-child': indentChild,
+    'delete-child': deleteChild,
     'unindent-child': unindentChild,
     'convert-child-to-todo': convertChildToTodo,
     'replace-child-with-uid': replaceChildWithUid,
+    'replace-child-with-embed-uid': replaceChildWithEmbedUid,
 };
 
 export function PlaceholderNoteBlock({ callbacks }: any) {
@@ -376,10 +559,14 @@ export function DetailedNoteBlock({
     const [isEditing, setIsEditing] = React.useState(
         window.unigraph.getState('global/focused').value?.uid === data.uid,
     );
-    const nodesState = window.unigraph.addState(
-        `${options?.viewId || callbacks?.viewId || callbacks['get-view-id']()}/nodes`,
-        [],
-    );
+    const nodesState = window.unigraph.addState(`${options?.viewId || callbacks?.viewId}/nodes`, []);
+    const [caretPostRender, setCaretPostRender] = React.useState<number | undefined>(undefined);
+    const fulfillCaretPostRender = React.useCallback(() => {
+        if (caretPostRender !== undefined) {
+            setCaret(document, textInput.current, caretPostRender);
+            setCaretPostRender(undefined);
+        }
+    }, [caretPostRender]);
     const editorContext = {
         edited,
         setCommand,
@@ -440,7 +627,10 @@ export function DetailedNoteBlock({
                     root: !isChildren,
                 },
                 ...subentities
-                    .filter((el: any) => el?.type?.['unigraph.id'] !== '$/schema/note_block')
+                    .filter(
+                        (el: any) =>
+                            !['$/schema/note_block', '$/schema/embed_block'].includes(el.type?.['unigraph.id']),
+                    )
                     .map((el: any) => {
                         const [subs] = getSubentities(el);
                         return {
@@ -456,10 +646,6 @@ export function DetailedNoteBlock({
         );
         nodesState.setValue(newNodes);
         // if (!isChildren) console.log(getParentsAndReferences(data['~_value'], (data['unigraph.origin'] || []).filter((el: any) => el.uid !== data.uid)))
-
-        return function cleanup() {
-            inputDebounced.current.flush();
-        };
     }, [JSON.stringify(subentities.map((el: any) => el.uid).sort()), data.uid, componentId, isCollapsed]);
 
     const checkReferences = React.useCallback(
@@ -531,14 +717,18 @@ export function DetailedNoteBlock({
                     getCurrentText(),
                     textInput,
                     caret,
-                    async (match: any, newName: string, newUid: string) => {
-                        callbacks['replace-child-with-uid'](newUid);
+                    async (match: any, newName: string, newUid: string, newType: string) => {
+                        if (newType !== '$/schema/note_block') {
+                            callbacks['replace-child-with-embed-uid'](newUid);
+                        } else {
+                            callbacks['replace-child-with-uid'](newUid);
+                            setTimeout(() => {
+                                // callbacks['add-child']();
+                                permanentlyDeleteBlock(data);
+                            }, 500);
+                        }
                         window.unigraph.getState('global/searchPopup').setValue({ show: false });
                         callbacks['focus-next-dfs-node'](data, editorContext, 0);
-                        setTimeout(() => {
-                            // callbacks['add-child']();
-                            permanentlyDeleteBlock(data);
-                        }, 500);
                     },
                     false,
                     matchOnly,
@@ -547,7 +737,7 @@ export function DetailedNoteBlock({
                 window.unigraph.getState('global/searchPopup').setValue({ show: false });
             }
         },
-        [callbacks, componentId, data, editorContext, resetEdited],
+        [callbacks, componentId, data, data.uid, data?._value?.children?.uid, editorContext, resetEdited],
     );
 
     React.useEffect(() => {
@@ -556,11 +746,12 @@ export function DetailedNoteBlock({
             window.layoutModel.doAction(Actions.renameTab(options.viewId, `Note: ${dataText}`));
         if (getCurrentText() !== dataText && !edited.current) {
             setCurrentText(dataText);
-            if (isEditing && dataText === '') textInput.current.appendChild(document.createElement('br'));
         } else if ((getCurrentText() === dataText && edited.current) || getCurrentText() === '') {
             resetEdited();
         }
-    }, [data.get('text')?.as('primitive'), isEditing]);
+
+        if (!edited.current) fulfillCaretPostRender();
+    }, [data.get('text')?.as('primitive'), isEditing, fulfillCaretPostRender]);
 
     React.useEffect(() => {
         // set caret when focus changes
@@ -679,25 +870,16 @@ export function DetailedNoteBlock({
                     const mdresult = htmlToMarkdown(paste);
                     const lines = mdresult.split('\n\n');
 
-                    // why checking BR? Why should we create a new block?
-                    // if (selection.getRangeAt(0).startContainer.nodeName === 'BR') {
-                    //     // textInput.current.textContent += lines[0];
-                    //     setCurrentText(getCurrentText() + lines[0]);
-                    //     setCaret(document, textInput.current, getCurrentText().length);
-                    // } else {
-                    //     selection.getRangeAt(0).insertNode(document.createTextNode(lines[0]));
-                    //     selection.collapseToEnd();
-                    // }
-                    setCurrentText(getCurrentText() + lines[0]);
-                    setCaret(document, textInput.current, getCurrentText().length);
+                    document.execCommand('insertText', false, lines[0]);
 
                     edited.current = true;
-                    inputDebounced.current(getCurrentText());
-                    inputDebounced.current.flush();
 
                     if (lines.length > 1) {
                         const newLines = lines.slice(1);
-                        callbacks['add-children'](newLines, getCurrentText().length ? 0 : -1);
+                        callbacks['add-children'](newLines, undefined, getCurrentText());
+                    } else {
+                        inputDebounced.current(getCurrentText());
+                        inputDebounced.current.flush();
                     }
                 }
 
@@ -714,15 +896,8 @@ export function DetailedNoteBlock({
 
                         const res = `![${blob.name || 'image'}](${base64})`;
 
-                        if (selection.getRangeAt(0).startContainer.nodeName === 'BR') {
-                            // textInput.current.textContent += res;
-                            setCurrentText(getCurrentText() + res);
-                            // setCaret(document, textInput.current, getCurrentText().length);
-                            setCaret(document, textInput.current, getCurrentText().length);
-                        } else {
-                            selection.getRangeAt(0).insertNode(document.createTextNode(res));
-                            selection.collapseToEnd();
-                        }
+                        selection.getRangeAt(0).insertNode(document.createTextNode(res));
+                        selection.collapseToEnd();
 
                         edited.current = true;
                         inputDebounced.current(getCurrentText());
@@ -737,13 +912,18 @@ export function DetailedNoteBlock({
         [callbacks],
     );
 
-    const onInputHandler = React.useCallback((ev) => {
-        // if (ev.currentTarget.textContent !== data.get('text').as('primitive') && !edited.current) edited.current = true;
-        // console.log('handling Input', ev);
-        if (ev.target.value !== data.get('text').as('primitive') && !edited.current) edited.current = true;
-        checkReferences();
-        inputDebounced.current(ev.target.value);
-    }, []);
+    const onInputHandler = React.useCallback(
+        (ev) => {
+            // if (ev.currentTarget.textContent !== data.get('text').as('primitive') && !edited.current) edited.current = true;
+            // console.log('handling Input', ev);
+            if (ev.target.value !== data.get('text').as('primitive')) {
+                if (!edited.current) edited.current = true;
+                checkReferences();
+                inputDebounced.current(ev.target.value);
+            }
+        },
+        [checkReferences, data],
+    );
 
     const handleOpenScopedChar = React.useCallback((ev: KeyboardEvent) => {
         ev.preventDefault();
@@ -793,8 +973,8 @@ export function DetailedNoteBlock({
                         inputDebounced.current.cancel();
                         const currentText = getCurrentText() || data.get('text').as('primitive');
                         callbacks['split-child']?.(currentText, caret);
-                        setCurrentText(currentText.slice(caret));
-                        setCaret(document, textInput.current, 0);
+                        // setCurrentText(currentText.slice(caret));
+                        setCaretPostRender(0);
                     } else if (ev.ctrlKey || ev.metaKey) {
                         ev.preventDefault();
                         edited.current = false;
@@ -850,33 +1030,28 @@ export function DetailedNoteBlock({
                     break;
 
                 case 'ArrowUp': // up arrow
-                    // ev.preventDefault();
+                    textInput.current.style['caret-color'] = 'transparent';
                     inputDebounced.current.flush();
-                    // setCommand(() =>
-                    //    callbacks['focus-last-dfs-node'].bind(null, data, editorContext, 0),
-                    // );
                     requestAnimationFrame(() => {
-                        // if (caret === 0 ) {
-                        if (isCaretAtFirstLine(getCurrentText(), caret)) {
-                            // if (document.getSelection()?.focusOffset === 0) {
+                        const newCaret = textInput.current.selectionStart;
+                        if (newCaret === 0) {
                             if (ev.shiftKey) {
                                 selectUid(componentId, false);
                             }
                             callbacks['focus-last-dfs-node'](data, editorContext, true, caret);
                         }
+                        setTimeout(() => {
+                            textInput.current.style['caret-color'] = '';
+                        }, 0);
                     });
                     return;
 
                 case 'ArrowDown': // down arrow
-                    // console.log('ArrowDown', {
-                    //     selectionStart: textInput.current.selectionStart,
-                    //     getCurrentText: getCurrentText(),
-                    // });
+                    textInput.current.style['caret-color'] = 'transparent';
                     inputDebounced.current.flush();
                     requestAnimationFrame(() => {
-                        // if ((caret || 0) >= (getCurrentText().trim()?.length || 0)) {
-                        if (isCaretAtLastLine(getCurrentText(), caret)) {
-                            // if ((document.getSelection()?.focusOffset || 0) >= (getCurrentText().trim()?.length || 0)) {
+                        const newCaret = textInput.current.selectionStart;
+                        if ((newCaret || 0) >= (getCurrentText().trim()?.length || 0)) {
                             if (ev.shiftKey) {
                                 selectUid(componentId, false);
                             }
@@ -885,12 +1060,14 @@ export function DetailedNoteBlock({
                             const caretInLine = caretFromLastLine(getCurrentText(), caret);
                             callbacks['focus-next-dfs-node'](data, editorContext, false, caretInLine);
                         }
+                        setTimeout(() => {
+                            textInput.current.style['caret-color'] = '';
+                        }, 0);
                     });
                     return;
                 case '(':
                 case '[':
                 case '"':
-                case "'":
                 case '`':
                 case '$':
                     // handleOpenScopedChar(ev);
@@ -963,7 +1140,7 @@ export function DetailedNoteBlock({
                         .map((el: any) => (
                             <AutoDynamicView
                                 object={
-                                    el.type?.['unigraph.id'] === '$/schema/note_block'
+                                    ['$/schema/note_block', '$/schema/embed_block'].includes(el.type?.['unigraph.id'])
                                         ? el
                                         : { uid: el.uid, type: el.type }
                                 }
@@ -999,6 +1176,7 @@ export function DetailedNoteBlock({
                                 minWidth: '16px',
                                 padding: '0px',
                                 display: isEditing ? '' : 'none',
+                                resize: 'none',
                             }}
                             ref={textInput}
                             // value={currentText}
@@ -1010,7 +1188,11 @@ export function DetailedNoteBlock({
                             onClick={() => setFocusedCaret(textInput.current)}
                         />
                         <AutoDynamicView
-                            object={data.get('text')?._value?._value}
+                            object={
+                                edited.current
+                                    ? { ...data.get('text')?._value?._value, '_value.%': getCurrentText() }
+                                    : data.get('text')?._value?._value
+                            }
                             attributes={{
                                 isHeading: !(isChildren || callbacks.isEmbed),
                             }}
@@ -1048,167 +1230,20 @@ export function DetailedNoteBlock({
                 ) : (
                     []
                 )}
-                {!(isCollapsed === true) ? (
-                    <div style={{ width: '100%' }}>
-                        {subentities.length || isChildren ? (
-                            <DragandDrop
-                                dndContext={tabContext.viewId}
-                                listId={data?.uid}
-                                arrayId={data?._value?.children?.uid}
-                                style={{
-                                    position: 'absolute',
-                                    height: '6px',
-                                    marginTop: '-3px',
-                                    marginBottom: '1px',
-                                    zIndex: 999,
-                                }}
-                            >
-                                {subentities
-                                    .map((el: any) => new UnigraphObject(el))
-                                    // .filter((el) => (el as any)?.type?.['unigraph.id'])
-                                    .map((el: any, elindex: any) => {
-                                        const isCol = isChildrenCollapsed[el.uid];
-                                        return (
-                                            <OutlineComponent
-                                                key={el.uid}
-                                                isChildren={isChildren}
-                                                collapsed={isCol}
-                                                setCollapsed={(val: boolean) => {
-                                                    setIsChildrenCollapsed({
-                                                        ...isChildrenCollapsed,
-                                                        [el.uid]: val,
-                                                    });
-                                                }}
-                                                createBelow={() => {
-                                                    addChild(data, editorContext, elindex);
-                                                }}
-                                                displayAs={childrenDisplayAs}
-                                                parentDisplayAs={displayAs}
-                                            >
-                                                <AutoDynamicView
-                                                    noDrag
-                                                    noContextMenu
-                                                    compact
-                                                    allowSubentity
-                                                    customBoundingBox
-                                                    noClickthrough
-                                                    noSubentities={el.type?.['unigraph.id'] === '$/schema/note_block'}
-                                                    noBacklinks={el.type?.['unigraph.id'] === '$/schema/note_block'}
-                                                    subentityExpandByDefault={
-                                                        !(el.type?.['unigraph.id'] === '$/schema/note_block')
-                                                    }
-                                                    object={
-                                                        el.type?.['unigraph.id'] === '$/schema/note_block'
-                                                            ? el
-                                                            : {
-                                                                  uid: el.uid,
-                                                                  type: el.type,
-                                                              }
-                                                    }
-                                                    index={elindex}
-                                                    expandedChildren
-                                                    shortcuts={{
-                                                        'shift+Tab': (ev: any) => {
-                                                            ev.preventDefault();
-                                                            callbacks['unindent-child']?.(elindex);
-                                                        },
-                                                        Tab: (ev: any) => {
-                                                            ev.preventDefault();
-                                                            indentChild(data, editorContext, elindex);
-                                                        },
-                                                        Backspace: (ev: any) => {
-                                                            if (
-                                                                window.unigraph.getState('global/selected').value
-                                                                    .length > 0
-                                                            ) {
-                                                                ev.preventDefault();
-                                                                deleteChild(data, editorContext, elindex);
-                                                            }
-                                                        },
-                                                        'ctrl+Backspace': (ev: any) => {
-                                                            if (
-                                                                window.unigraph.getState('global/selected').value
-                                                                    .length > 0
-                                                            ) {
-                                                                ev.preventDefault();
-                                                                deleteChild(data, editorContext, elindex, true);
-                                                            }
-                                                        },
-                                                        oncopy: (ev: any) => copyOrCutHandler(ev, elindex, false),
-                                                        oncut: (ev: any) => copyOrCutHandler(ev, elindex, true),
-                                                    }}
-                                                    callbacks={{
-                                                        'get-view-id': () => options?.viewId, // only used at root
-                                                        ...callbacks,
-                                                        ...Object.fromEntries(
-                                                            Object.entries(noteBlockCommands).map(([k, v]: any) => [
-                                                                k,
-                                                                (...args: any[]) =>
-                                                                    v(data, editorContext, elindex, ...args),
-                                                            ]),
-                                                        ),
-                                                        'unindent-child-in-parent': () => {
-                                                            callbacks['unindent-child']?.(elindex);
-                                                        },
-                                                        'focus-last-dfs-node': focusLastDFSNode,
-                                                        'focus-next-dfs-node': focusNextDFSNode,
-                                                        'add-children': (its: string[], indexx?: number) =>
-                                                            indexx
-                                                                ? addChildren(
-                                                                      data,
-                                                                      editorContext,
-                                                                      elindex + indexx,
-                                                                      its,
-                                                                  )
-                                                                : addChildren(data, editorContext, elindex, its),
-                                                        context: data,
-                                                        isEmbed: true,
-                                                        isChildren: true,
-                                                        parentEditorContext: editorContext,
-                                                    }}
-                                                    components={{
-                                                        '$/schema/note_block': {
-                                                            view: DetailedNoteBlock,
-                                                            query: noteQuery,
-                                                        },
-                                                        '$/schema/view': {
-                                                            view: ViewViewDetailed,
-                                                        },
-                                                    }}
-                                                    attributes={{
-                                                        isChildren: true,
-                                                        isCollapsed: isCol,
-                                                        displayAs: childrenDisplayAs,
-                                                        setCollapsed: (val: boolean) => {
-                                                            setIsChildrenCollapsed({
-                                                                ...isChildrenCollapsed,
-                                                                [el.uid]: val,
-                                                            });
-                                                        },
-                                                    }}
-                                                    recursive
-                                                />
-                                            </OutlineComponent>
-                                        );
-                                    })}
-                            </DragandDrop>
-                        ) : (
-                            <OutlineComponent
-                                isChildren={isChildren}
-                                displayAs={data?._value?.children?._displayAs || 'outliner'}
-                                parentDisplayAs={displayAs}
-                            >
-                                <PlaceholderNoteBlock
-                                    callbacks={{
-                                        'add-child': () => noteBlockCommands['add-child'](data, editorContext),
-                                    }}
-                                />
-                            </OutlineComponent>
-                        )}
-                    </div>
-                ) : (
-                    []
-                )}
+                <BlockChildren
+                    isCollapsed={isCollapsed}
+                    isChildren={isChildren}
+                    subentities={subentities}
+                    tabContext={tabContext}
+                    data={data}
+                    isChildrenCollapsed={isChildrenCollapsed}
+                    setIsChildrenCollapsed={setIsChildrenCollapsed}
+                    editorContext={editorContext}
+                    displayAs={displayAs}
+                    childrenDisplayAs={childrenDisplayAs}
+                    callbacks={callbacks}
+                    copyOrCutHandler={copyOrCutHandler}
+                />
                 {!isChildren ? <ParentsAndReferences data={data} /> : []}
             </div>
         </NoteViewPageWrapper>
@@ -1233,10 +1268,7 @@ export function DetailedEmbedBlock({
     const [subentities, otherChildren] = getSubentities(data);
     const [command, setCommand] = React.useState<() => any | undefined>();
     const editorRef = React.useRef<any>();
-    const nodesState = window.unigraph.addState(
-        `${options?.viewId || callbacks?.viewId || callbacks['get-view-id']()}/nodes`,
-        [],
-    );
+    const nodesState = window.unigraph.addState(`${options?.viewId || callbacks?.viewId}/nodes`, []);
     const editorContext = {
         edited: undefined,
         setCommand,
@@ -1335,8 +1367,8 @@ export function DetailedEmbedBlock({
         (ev) => {
             const sel = document.getSelection();
             const caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
-            switch (ev.keyCode) {
-                case 13: // enter
+            switch (ev.key) {
+                case 'Enter': // enter
                     if (!ev.shiftKey && !ev.ctrlKey && !ev.metaKey) {
                         ev.preventDefault();
                         callbacks['add-child']();
@@ -1345,12 +1377,12 @@ export function DetailedEmbedBlock({
                     }
                     break;
 
-                case 8: // backspace
+                case 'Backspace': // backspace
                     // console.log(caret, document.getSelection()?.type)
                     callbacks['delete-child']();
                     break;
 
-                case 9: // tab
+                case 'Tab': // tab
                     ev.preventDefault();
                     ev.stopPropagation();
                     // inputDebounced.current.flush();
@@ -1361,18 +1393,18 @@ export function DetailedEmbedBlock({
                     }
                     break;
 
-                case 37: // left arrow
-                case 38: // up arrow
+                case 'ArrowLeft': // left arrow
+                case 'ArrowUp': // up arrow
                     ev.preventDefault();
                     // inputDebounced.current.flush();
-                    callbacks['focus-last-dfs-node'](data, editorContext, 0, -1);
+                    callbacks['focus-last-dfs-node'](data, editorContext, true, -1);
                     break;
 
-                case 39: // right arrow
-                case 40: // down arrow
+                case 'ArrowRight': // right arrow
+                case 'ArrowDown': // down arrow
                     ev.preventDefault();
                     // inputDebounced.current.flush();
-                    callbacks['focus-next-dfs-node'](data, editorContext, 0, 0);
+                    callbacks['focus-next-dfs-node'](data, editorContext, false, 0);
                     break;
 
                 default:
@@ -1480,194 +1512,20 @@ export function DetailedEmbedBlock({
                 ) : (
                     []
                 )}
-                {!(isCollapsed === true) ? (
-                    <div style={{ width: '100%' }}>
-                        {subentities.length || isChildren ? (
-                            <DragandDrop
-                                dndContext={tabContext.viewId}
-                                listId={data?.uid}
-                                arrayId={data?._value?.children?.uid}
-                                style={{
-                                    position: 'absolute',
-                                    height: '6px',
-                                    marginTop: '-3px',
-                                    marginBottom: '1px',
-                                    zIndex: 999,
-                                }}
-                            >
-                                {subentities
-                                    .map((el: any) => new UnigraphObject(el))
-                                    // .filter((el) => (el as any)?.type?.['unigraph.id'])
-                                    .map((el: any, elindex: any) => {
-                                        const isCol = isChildrenCollapsed[el.uid];
-                                        return (
-                                            <OutlineComponent
-                                                key={el.uid}
-                                                isChildren={isChildren}
-                                                collapsed={isCol}
-                                                setCollapsed={(val: boolean) => {
-                                                    setIsChildrenCollapsed({
-                                                        ...isChildrenCollapsed,
-                                                        [el.uid]: val,
-                                                    });
-                                                }}
-                                                createBelow={() => {
-                                                    addChild(data, editorContext, elindex);
-                                                }}
-                                                displayAs={childrenDisplayAs}
-                                                parentDisplayAs={displayAs}
-                                            >
-                                                <AutoDynamicView
-                                                    noDrag
-                                                    noContextMenu
-                                                    compact
-                                                    allowSubentity
-                                                    customBoundingBox
-                                                    noClickthrough
-                                                    noSubentities={[
-                                                        '$/schema/note_block',
-                                                        '$/schema/embed_block',
-                                                    ].includes(el.type?.['unigraph.id'])}
-                                                    noBacklinks={[
-                                                        '$/schema/note_block',
-                                                        '$/schema/embed_block',
-                                                    ].includes(el.type?.['unigraph.id'])}
-                                                    object={
-                                                        ['$/schema/note_block', '$/schema/embed_block'].includes(
-                                                            el.type?.['unigraph.id'],
-                                                        )
-                                                            ? el
-                                                            : {
-                                                                  border: 'lightgray',
-                                                                  borderStyle: 'solid',
-                                                                  borderWidth: 'thin',
-                                                                  margin: '2px',
-                                                                  borderRadius: '8px',
-                                                                  maxWidth: 'fit-content',
-                                                                  padding: '4px',
-                                                              }
-                                                    }
-                                                    index={elindex}
-                                                    expandedChildren
-                                                    shortcuts={{
-                                                        'shift+Tab': (ev: any) => {
-                                                            ev.preventDefault();
-                                                            callbacks['unindent-child']?.(elindex);
-                                                        },
-                                                        Tab: (ev: any) => {
-                                                            ev.preventDefault();
-                                                            console.log(data, elindex);
-                                                            indentChild(data, editorContext, elindex);
-                                                        },
-                                                        Backspace: (ev: any) => {
-                                                            if (
-                                                                window.unigraph.getState('global/selected').value
-                                                                    .length > 0
-                                                            ) {
-                                                                ev.preventDefault();
-                                                                deleteChild(data, editorContext, elindex);
-                                                            }
-                                                        },
-                                                        'ctrl+Backspace': (ev: any) => {
-                                                            if (
-                                                                window.unigraph.getState('global/selected').value
-                                                                    .length > 0
-                                                            ) {
-                                                                ev.preventDefault();
-                                                                deleteChild(data, editorContext, elindex, true);
-                                                            }
-                                                        },
-                                                        oncopy: (ev: any) => copyOrCutHandler(ev, elindex, false),
-                                                        oncut: (ev: any) => copyOrCutHandler(ev, elindex, true),
-                                                    }}
-                                                    callbacks={{
-                                                        'get-view-id': () => options?.viewId, // only used at root
-                                                        ...callbacks,
-                                                        ...Object.fromEntries(
-                                                            Object.entries(noteBlockCommands).map(([k, v]: any) => [
-                                                                k,
-                                                                (...args: any[]) =>
-                                                                    v(data, editorContext, elindex, ...args),
-                                                            ]),
-                                                        ),
-                                                        'unindent-child-in-parent': () => {
-                                                            callbacks['unindent-child']?.(elindex);
-                                                        },
-                                                        'focus-last-dfs-node': focusLastDFSNode,
-                                                        'focus-next-dfs-node': focusNextDFSNode,
-                                                        'add-children': (its: string[], indexx?: number) =>
-                                                            indexx
-                                                                ? addChildren(
-                                                                      data,
-                                                                      editorContext,
-                                                                      elindex + indexx,
-                                                                      its,
-                                                                  )
-                                                                : addChildren(data, editorContext, elindex, its),
-                                                        'add-parent-backlinks': (childrenUids: string[]) => {
-                                                            const parents = getParentsAndReferences(
-                                                                data['~_value'],
-                                                                (data['unigraph.origin'] || []).filter(
-                                                                    (ell: any) => ell.uid !== data.uid,
-                                                                ),
-                                                            )[0]
-                                                                .map((ell: any) => ell?.uid)
-                                                                .filter(Boolean);
-                                                            if (!data._hide) parents.push(data.uid);
-                                                            window.unigraph.addBacklinks(parents, childrenUids);
-                                                        },
-                                                        context: data,
-                                                        isEmbed: true,
-                                                        isChildren: true,
-                                                        parentEditorContext: editorContext,
-                                                    }}
-                                                    components={{
-                                                        '$/schema/note_block': {
-                                                            view: DetailedNoteBlock,
-                                                            query: noteQuery,
-                                                        },
-                                                        '$/schema/view': {
-                                                            view: ViewViewDetailed,
-                                                        },
-                                                        '$/schema/embed_block': {
-                                                            view: DetailedEmbedBlock,
-                                                            query: noteQuery,
-                                                        },
-                                                    }}
-                                                    attributes={{
-                                                        isChildren: true,
-                                                        isCollapsed: isCol,
-                                                        displayAs: childrenDisplayAs,
-                                                        setCollapsed: (val: boolean) => {
-                                                            setIsChildrenCollapsed({
-                                                                ...isChildrenCollapsed,
-                                                                [el.uid]: val,
-                                                            });
-                                                        },
-                                                    }}
-                                                    recursive
-                                                />
-                                            </OutlineComponent>
-                                        );
-                                    })}
-                            </DragandDrop>
-                        ) : (
-                            <OutlineComponent
-                                isChildren={isChildren}
-                                displayAs={data?._value?.children?._displayAs || 'outliner'}
-                                parentDisplayAs={displayAs}
-                            >
-                                <PlaceholderNoteBlock
-                                    callbacks={{
-                                        'add-child': () => noteBlockCommands['add-child'](data, editorContext),
-                                    }}
-                                />
-                            </OutlineComponent>
-                        )}
-                    </div>
-                ) : (
-                    []
-                )}
+                <BlockChildren
+                    isCollapsed={isCollapsed}
+                    isChildren={isChildren}
+                    subentities={subentities}
+                    tabContext={tabContext}
+                    data={data}
+                    isChildrenCollapsed={isChildrenCollapsed}
+                    setIsChildrenCollapsed={setIsChildrenCollapsed}
+                    editorContext={editorContext}
+                    displayAs={displayAs}
+                    childrenDisplayAs={childrenDisplayAs}
+                    callbacks={callbacks}
+                    copyOrCutHandler={copyOrCutHandler}
+                />
                 {!isChildren ? <ParentsAndReferences data={data} /> : []}
             </div>
         </NoteViewPageWrapper>
@@ -1721,8 +1579,11 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
             )
             .filter(
                 (path) =>
-                    path.filter((el: any) => el?.type?.['unigraph.id'] === '$/schema/note_block' && el?._hide !== true)
-                        .length <= 2,
+                    path.filter(
+                        (el: any) =>
+                            ['$/schema/note_block', '$/schema/embed_block'].includes(el?.type?.['unigraph.id']) &&
+                            el?._hide !== true,
+                    ).length <= 2,
             );
         setRefObjects(refinedPaths.map((refinedPath) => refinedPath[refinedPath.length - 2]));
         setPathNames(
@@ -1777,15 +1638,7 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
                                         object={refObject}
                                         noClickthrough
                                         noSubentities
-                                        components={{
-                                            '$/schema/note_block': {
-                                                view: DetailedNoteBlock,
-                                                query: noteQuery,
-                                            },
-                                            '$/schema/view': {
-                                                view: ViewViewDetailed,
-                                            },
-                                        }}
+                                        components={childrenComponents}
                                         attributes={{
                                             isChildren: true,
                                         }}

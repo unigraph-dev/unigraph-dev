@@ -26,16 +26,32 @@ const getParents = (data: any) =>
     }));
 
 export const getSemanticChildren = (data: any) => data?._value?.children;
+export const getSubentities = (data: any) =>
+    (getSemanticChildren(data)?.['_value['] || []).filter(
+        (el: any) => el?._value?.type?.['unigraph.id'] === '$/schema/subentity',
+    );
 
-export const addChild = (data: any, context: NoteEditorContext, index?: number) => {
+export const addChild = (
+    data: any,
+    context: NoteEditorContext,
+    index?: number,
+    changeValue: false | string = false,
+) => {
     if (typeof index === 'undefined') index = (getSemanticChildren(data)?.['_value[']?.length || 0) - 1;
-    return addChildren(data, context, index, ['']);
+    return addChildren(data, context, index, [''], changeValue);
 };
 
-export const addChildren = (data: any, context: NoteEditorContext, index: number, children: string[]) => {
+export const addChildren = (
+    data: any,
+    context: NoteEditorContext,
+    index: number,
+    children: string[],
+    changeValue?: false | string,
+) => {
     let uidMode = false;
     if (children.filter((el) => el.startsWith('0x')).length === children.length) uidMode = true;
     if (typeof index === 'undefined') index = (getSemanticChildren(data)?.['_value[']?.length || 0) - 1;
+    else index = getSubentities(data).sort(byElementIndex)[index]?._index?.['_value.#i'] || 0;
     const parents = getParents(data);
     if (!data._hide) parents.push({ uid: data.uid });
     const myUid = (window.unigraph as any).leaseUid();
@@ -59,6 +75,29 @@ export const addChildren = (data: any, context: NoteEditorContext, index: number
                                     ? el._index['_value.#i'] + children.length
                                     : el._index['_value.#i'],
                         },
+                        ...(changeValue && el._index?.['_value.#i'] === index
+                            ? {
+                                  _value: {
+                                      uid: el._value.uid,
+                                      _value: {
+                                          uid: el._value._value.uid,
+                                          _value: {
+                                              uid: el._value._value._value.uid,
+                                              text: {
+                                                  uid: el?._value?._value?._value?.text?.uid,
+                                                  _value: {
+                                                      uid: el?._value?._value?._value?.text?._value?.uid,
+                                                      _value: {
+                                                          uid: el?._value?._value?._value?.text?._value?._value?.uid,
+                                                          '_value.%': changeValue,
+                                                      },
+                                                  },
+                                              },
+                                          },
+                                      },
+                                  },
+                              }
+                            : {}),
                     })),
                     ...children.map((el: string, i: number) => ({
                         _value: {
@@ -107,6 +146,14 @@ export const addChildren = (data: any, context: NoteEditorContext, index: number
 
 export const splitChild = (data: any, context: NoteEditorContext, index: number, oldtext: string, at: number) => {
     // console.log(JSON.stringify([data, index, at], null, 4))
+    console.log(getSubentities(data).sort(byElementIndex)[index]?._value?._value);
+    if (
+        oldtext.slice(at) === '' &&
+        !getSubentities(getSubentities(data).sort(byElementIndex)[index]?._value?._value).length
+    ) {
+        addChild(data, context, index, oldtext);
+        return;
+    }
     const parents = getParents(data);
     if (!data._hide) parents.push({ uid: data.uid });
     let currSubentity = -1;
@@ -777,6 +824,7 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
         if (el?._value?.type?.['unigraph.id'] === '$/schema/subentity' && ++currSubentity === index) {
             /* something something */
             const newel = {
+                uid: el.uid,
                 _index: { '_value.#i': elindex },
                 _value: {
                     uid: el._value.uid,
