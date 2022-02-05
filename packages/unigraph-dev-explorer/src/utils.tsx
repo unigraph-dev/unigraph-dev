@@ -32,6 +32,10 @@ export const TabContext = React.createContext({
     },
 });
 
+export const isDeveloperMode = () => {
+    return window.unigraph.getState('settings/developerMode').value;
+};
+
 type DataContextType = {
     contextUid: string;
     contextData?: any;
@@ -543,4 +547,8 @@ export function getDateAsUTC(input: any) {
     const date = new Date(input);
     const utc = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
     return utc;
+}
+
+export function typeHasDetailedView(type: string) {
+    return Object.keys(window.unigraph.getState('registry/dynamicViewDetailed').value).includes(type);
 }
