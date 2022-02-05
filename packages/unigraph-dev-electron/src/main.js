@@ -248,6 +248,10 @@ app.whenReady().then(() => {
             }),
         );
         windows.map((el) => el.on('hide', (event) => {}));
+        mainWindow.webContents.on('will-navigate', function (e, url) {
+            e.preventDefault();
+            shell.openExternal(url);
+        });
         mainWindow.webContents.setWindowOpenHandler(({ url }) => {
             // open url in a browser and prevent default
             if (!url.includes('popout_page.html')) {

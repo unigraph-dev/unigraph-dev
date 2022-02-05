@@ -1428,8 +1428,11 @@ export function DetailedEmbedBlock({
                 <NoteViewTextWrapper
                     isRoot={!isChildren}
                     isEditing={false}
-                    onContextMenu={(event: any) =>
-                        onUnigraphContextMenu(event, data, undefined, { ...callbacks, componentId })
+                    onContextMenu={
+                        isChildren
+                            ? () => {}
+                            : (event: any) =>
+                                  onUnigraphContextMenu(event, data, undefined, { ...callbacks, componentId })
                     }
                     callbacks={callbacks}
                     semanticChildren={buildGraph(otherChildren)
@@ -1479,7 +1482,7 @@ export function DetailedEmbedBlock({
                                 isHeading: !(isChildren || callbacks.isEmbed),
                             }}
                             noDrag
-                            noContextMenu
+                            noDrop
                             inline
                             noClickthrough
                             callbacks={{
