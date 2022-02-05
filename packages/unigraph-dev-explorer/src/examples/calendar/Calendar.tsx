@@ -37,10 +37,10 @@ export function CalendarEvent({ data, callbacks, inline }: any) {
             <div>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                     {inline ? CalendarColor : []}
-                    <Typography variant="body1" style={{ marginRight: '8px' }}>
+                    <Typography variant="body1" style={{ marginRight: '8px', fontSize: inline ? '1em' : '' }}>
                         <strong>{data.get('name').as('primitive')}</strong>
                     </Typography>
-                    <Typography variant="body2" style={{ color: 'gray' }}>
+                    <Typography variant="body2" style={{ color: 'gray', fontSize: inline ? '1em' : '' }}>
                         {data.get('location').as('primitive')}
                     </Typography>
                 </div>
@@ -62,7 +62,7 @@ export function CalendarEvent({ data, callbacks, inline }: any) {
                         ? data._value.children['_value['].map((it: any) => (
                               <AutoDynamicView
                                   object={new UnigraphObject(it._value)}
-                                  callbacks={callbacks}
+                                  callbacks={{ callbacks }}
                                   inline
                                   style={{ verticalAlign: 'middle' }}
                               />
@@ -187,7 +187,13 @@ const datedToBigCalendarEvents = (datedObj: DatedObject): CalendarViewEvent[] =>
 };
 
 const unigraphBigCalendarEventComponent = ({ event, ...props }: any) => {
-    return <AutoDynamicView object={new UnigraphObject(event.unigraphObj)} inline callbacks={{ noDate: true }} />;
+    return (
+        <AutoDynamicView
+            object={new UnigraphObject(event.unigraphObj)}
+            inline
+            callbacks={{ noDate: true, isEmbed: true }}
+        />
+    );
 };
 
 const getCurrentWeekStart = (today: Date) => {
@@ -274,6 +280,9 @@ export function Calendar() {
                 events={currentEvents}
                 startAccessor="start"
                 endAccessor="end"
+                step={15}
+                timeslots={2}
+                scrollToTime={new Date(1970, 1, 1, 7, 0, 0)}
                 components={{ event: unigraphBigCalendarEventComponent }}
                 eventPropGetter={(event: any, start: stringOrDate, end: stringOrDate, isSelected: boolean) => ({
                     style: { backgroundColor: '#fff', color: 'black', border: '1px', borderColor: 'black' },

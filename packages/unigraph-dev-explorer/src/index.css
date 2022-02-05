@@ -33,3 +33,7 @@ span.wikilink:hover {
 .bottom-48 {
   height: calc(100% - 48px) !important;
 }
+
+.rbc-event-label {
+  display: none !important;
+}
