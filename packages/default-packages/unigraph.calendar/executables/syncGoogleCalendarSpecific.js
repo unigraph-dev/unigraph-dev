@@ -40,7 +40,6 @@ const sync = async (calendar, unigraphCalendar, syncToken) => {
     }
     // console.log('sync', { itemsLen: items.length, i });
     return { items, nextSyncToken };
-    // return { items: items.slice(items.length - 101), nextSyncToken };
 };
 
 const parseRecurrence = (start, end, rrule, timezone) => {
@@ -201,7 +200,6 @@ const expandRecurrences = (evObj) => {
                 recurrence: undefined,
             };
         });
-        // console.log('1 expandedRecurrences', events[0]);
         return events;
     }
     return [evObj];
@@ -218,6 +216,7 @@ const syncGoogleCalendarSpecific = async () => {
     const unigraphCalendar = await unigraph.getObject(calendarUid);
     // console.log('syncGoogleCalendarSpecific', { calendarUid, calendar, unigraphCalendar });
     const syncToken = unigraphCalendar._value?.sync_token?.['_value.%'] || undefined;
+    // Uncomment to debug:
     // const syncToken = undefined;
     const { items, nextSyncToken } = await sync(calendar, unigraphCalendar, syncToken);
 

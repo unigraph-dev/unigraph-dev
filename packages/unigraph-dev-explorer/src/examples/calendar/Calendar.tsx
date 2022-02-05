@@ -155,7 +155,6 @@ const calendarEventToBigCalendarEvent = (datedObj: CalendarEventUni): CalendarVi
 
 const recurrentCalendarEventToBigCalendarEvents = (datedObj: DatedObject): CalendarViewEvent[] => {
     const timeframes = datedObj.get('recurrence')?.['_value['];
-    console.log({ timeframes });
     if (timeframes?.length) {
         return buildGraph(timeframes).map((timeframe: any, i: number) => {
             return {
@@ -202,7 +201,6 @@ const compareCalendarViewEvents = (a: CalendarViewEvent, b: CalendarViewEvent) =
     const sameRecurrence =
         has('recurrenceIndex', a) && has('recurrenceIndex', b) ? a.recurrenceIndex === b.recurrenceIndex : true;
     const sameUid = a.unigraphObj.uid === b.unigraphObj.uid;
-    // console.log('compareCalendarViewEvents', { a, b, sameRecurrence, sameUid });
     return sameRecurrence && sameUid;
 };
 
@@ -218,7 +216,6 @@ export function Calendar() {
     const addToCurrentEvents = React.useCallback(
         (newEvents: CalendarViewEvent[]) => {
             const updatedCurrentEvents = unionWith(compareCalendarViewEvents, newEvents, currentEvents);
-            console.log({ newEvents, currentEvents, updatedCurrentEvents });
             setCurrentEvents(updatedCurrentEvents);
         },
 
