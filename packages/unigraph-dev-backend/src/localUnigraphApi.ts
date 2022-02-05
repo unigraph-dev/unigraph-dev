@@ -159,8 +159,9 @@ export function getLocalUnigraphAPI(
             const res = await client.queryData(query);
             return res;
         },
-        getObject: async (uid: any, options: any) => {
-            if (typeof uid === 'string' && uid.startsWith('$/')) {
+        getObject: async (uidOrName: any, options: any) => {
+            let uid = uidOrName;
+            if (typeof uidOrName === 'string' && uidOrName.startsWith('$/')) {
                 // Is named entity
                 uid = states.namespaceMap[uid].uid;
             }

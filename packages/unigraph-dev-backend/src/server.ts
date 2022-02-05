@@ -31,6 +31,7 @@ import {
     EventEnsureUnigraphPackage,
     EventEnsureUnigraphSchema,
     EventExportObjects,
+    EventGetObject,
     EventGetPackages,
     EventGetQueries,
     EventGetSchemas,
@@ -357,9 +358,9 @@ export default async function startServer(client: DgraphClient) {
                 .then((res: any) => ws.send(makeResponse(event, true)));
         },
 
-        async get_object(event: EventSubscribeObject, ws: IWebsocket) {
+        async get_object(event: EventGetObject, ws: IWebsocket) {
             serverStates.localApi
-                .getObject(event.uid, { ws, connId: event.connId }, event.id, event.options || {})
+                .getObject(event.uidOrName, { ws, connId: event.connId }, event.id, event.options || {})
                 .then((res: any) => {
                     console.log('get_object', res);
                     ws.send(makeResponse(event, true, { result: res }));

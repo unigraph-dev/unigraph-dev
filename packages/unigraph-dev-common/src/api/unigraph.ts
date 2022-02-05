@@ -408,15 +408,15 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             delete subscriptions[id];
             delete subResults[id];
         },
-        getObject: (uid, options) =>
+        getObject: (uidOrName, options) =>
             new Promise((resolve, reject) => {
                 const id = getRandomInt();
                 callbacks[id] = (response: any) => {
-                    console.log('getObject', response);
+                    // console.log('getObject', response);
                     if (response.success) resolve(response.results);
                     else reject(response);
                 };
-                sendEvent(connection, 'get_object', { uid, options, id });
+                sendEvent(connection, 'get_object', { uidOrName, options, id });
             }),
         addObject: (object, schema) =>
             new Promise((resolve, reject) => {

@@ -107,6 +107,18 @@ declare type EventQueryByStringWithVars = {
     id: number;
 };
 
+declare type EventGetObject = {
+    type: 'event';
+    event: 'get_object';
+    id: number | string;
+    uidOrName: string;
+    connId: string;
+    noExpand?: boolean;
+    options?: {
+        queryAsType: string | undefined;
+    };
+};
+
 declare type EventSubscribeObject = {
     type: 'event';
     event: 'subscribe_to_object';
