@@ -70,13 +70,6 @@ export default function DrawerRouter() {
                     <ListItemText primary="Library" />
                 </ListItem>
 
-                <ListItem button onClick={() => window.wsnavigator('/object-editor')}>
-                    <ListItemIcon>
-                        <Icon path={mdiPencilBoxMultipleOutline} size={1} />
-                    </ListItemIcon>
-                    <ListItemText primary="Object Editor" />
-                </ListItem>
-
                 <ListItem button onClick={() => window.wsnavigator('/trash')}>
                     <ListItemIcon>
                         <Icon path={mdiDeleteOutline} size={1} />
@@ -110,6 +103,12 @@ export default function DrawerRouter() {
                         {' '}
                         Developer Tools{' '}
                     </ListSubheader>
+                    <ListItem button onClick={() => window.wsnavigator('/object-editor')}>
+                        <ListItemIcon>
+                            <Icon path={mdiPencilBoxMultipleOutline} size={1} />
+                        </ListItemIcon>
+                        <ListItemText primary="Object Editor" />
+                    </ListItem>
                     <ListItem button onClick={() => window.wsnavigator('/code-editor')}>
                         <ListItemIcon>
                             <Icon path={mdiXml} size={1} />
