@@ -515,9 +515,9 @@ export function DetailedNoteBlock({
     componentId,
     displayAs,
 }: any) {
+    const tabContext = React.useContext(TabContext);
     // eslint-disable-next-line no-bitwise
     isChildren |= callbacks?.isChildren;
-    if (!callbacks?.viewId) callbacks = { ...(callbacks || {}), viewId: getRandomInt() };
     const [subentities, otherChildren] = getSubentities(data);
     const [command, setCommand] = React.useState<() => any | undefined>();
     const inputter = (text: string) => {
@@ -559,7 +559,7 @@ export function DetailedNoteBlock({
     const [isEditing, setIsEditing] = React.useState(
         window.unigraph.getState('global/focused').value?.uid === data.uid,
     );
-    const nodesState = window.unigraph.addState(`${options?.viewId || callbacks?.viewId}/nodes`, []);
+    const nodesState = window.unigraph.addState(`${tabContext.viewId}/nodes`, []);
     const [caretPostRender, setCaretPostRender] = React.useState<number | undefined>(undefined);
     const fulfillCaretPostRender = React.useCallback(() => {
         if (caretPostRender !== undefined) {
@@ -573,7 +573,6 @@ export function DetailedNoteBlock({
         callbacks,
         nodesState,
     };
-    const tabContext = React.useContext(TabContext);
 
     const handlePotentialResize = () => {
         const listener = () => {
@@ -742,8 +741,8 @@ export function DetailedNoteBlock({
 
     React.useEffect(() => {
         const dataText = data.get('text')?.as('primitive');
-        if (dataText && options?.viewId && !callbacks.isEmbed)
-            window.layoutModel.doAction(Actions.renameTab(options.viewId, `Note: ${dataText}`));
+        if (dataText && tabContext.viewId && !callbacks.isEmbed)
+            window.layoutModel.doAction(Actions.renameTab(tabContext.viewId as any, `Note: ${dataText}`));
         if (getCurrentText() !== dataText && !edited.current) {
             setCurrentText(dataText);
         } else if ((getCurrentText() === dataText && edited.current) || getCurrentText() === '') {
@@ -1639,6 +1638,7 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
                                 <OutlineComponent isChildren>
                                     <AutoDynamicView
                                         object={refObject}
+                                        callbacks={{ isEmbed: true }}
                                         noClickthrough
                                         noSubentities
                                         components={childrenComponents}
