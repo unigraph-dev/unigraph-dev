@@ -13,7 +13,7 @@ import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { getDateAsUTC, TabContext } from '../../utils';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { CalendarViewEvent } from './calendar-types';
+import { CalendarViewEvent, TodoUni, CalendarEventUni, JournalUni, DatedObject } from './calendar-types';
 
 export function CalendarEvent({ data, callbacks, inline }: any) {
     const CalendarColor = (
@@ -124,12 +124,7 @@ const queryDatedWithinTimeRange = (start: string, end: string) => {
         `;
 };
 
-type Todo_Uni = any;
-type CalendarEvent_Uni = any;
-type Journal_Uni = any;
-type DatedObject = Todo_Uni | CalendarEvent_Uni | Journal_Uni;
-
-const todoToBigCalendarEvent = (datedObj: Todo_Uni): CalendarViewEvent => {
+const todoToBigCalendarEvent = (datedObj: TodoUni): CalendarViewEvent => {
     return {
         title: datedObj.get('name').as('primitive'),
         start: new Date(datedObj.get('time_frame/start/datetime').as('primitive')),
@@ -139,7 +134,7 @@ const todoToBigCalendarEvent = (datedObj: Todo_Uni): CalendarViewEvent => {
     };
 };
 
-const journalToBigCalendarEvent = (datedObj: Journal_Uni): CalendarViewEvent => {
+const journalToBigCalendarEvent = (datedObj: JournalUni): CalendarViewEvent => {
     return {
         title: datedObj.get('note/text').as('primitive'),
         start: getDateAsUTC(datedObj.get('date/datetime').as('primitive')),
@@ -149,7 +144,7 @@ const journalToBigCalendarEvent = (datedObj: Journal_Uni): CalendarViewEvent => 
     };
 };
 
-const calendarEventToBigCalendarEvent = (datedObj: CalendarEvent_Uni): CalendarViewEvent => {
+const calendarEventToBigCalendarEvent = (datedObj: CalendarEventUni): CalendarViewEvent => {
     return {
         title: datedObj.get('name').as('primitive'),
         start: new Date(datedObj.get('time_frame/start/datetime').as('primitive')),
