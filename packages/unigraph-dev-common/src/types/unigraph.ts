@@ -309,7 +309,7 @@ export interface Unigraph<TT = WebSocket | false> {
     /** Gets a list of schemas. */
     getSchemas(schemas?: string[] | undefined, resolve?: boolean): Promise<Record<string, SchemaDgraph>>;
     getObject?(
-        uidOrName: string,
+        uid: string,
         options?: {
             queryAsType?: string | undefined;
         },
