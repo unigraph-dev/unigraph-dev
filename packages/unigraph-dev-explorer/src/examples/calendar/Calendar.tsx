@@ -2,7 +2,7 @@ import { Avatar, Typography } from '@material-ui/core';
 import React from 'react';
 import { buildGraph, getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import Sugar from 'sugar';
-import { unionBy, isString } from 'lodash/fp';
+import { unionBy, isString, has, flow, propEq, unionWith } from 'lodash/fp';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { AnyAaaaRecord } from 'dns';
 import { Calendar as BigCalendar, DateLocalizer, momentLocalizer, stringOrDate, View } from 'react-big-calendar';
@@ -13,7 +13,7 @@ import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { getDateAsUTC, TabContext } from '../../utils';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-import { CurrentEvents } from './CurrentEvents';
+import { CalendarViewEvent } from './calendar-types';
 
 export function CalendarEvent({ data, callbacks, inline }: any) {
     const CalendarColor = (
@@ -124,52 +124,72 @@ const queryDatedWithinTimeRange = (start: string, end: string) => {
         `;
 };
 
-const queryDatedWithinYear = (year: number, month: number) => {
-    const start = new Date(year, month, 1).toJSON();
-    const end = new Date(year + 1, month, 0).toJSON();
-    return queryDatedWithinTimeRange(start, end);
-};
-const queryDatedWithinMonth = (year: number, month: number) => {
-    const start = new Date(year, month, 1).toJSON();
-    const end = new Date(year, month + 1, 0).toJSON();
-    return queryDatedWithinTimeRange(start, end);
-};
-const queryDatedWithinWeek = (year: number, month: number, date: number) => {
-    const start = new Date(year, month, date - 7).toJSON();
-    const end = new Date(year, month, date + 7).toJSON();
-    return queryDatedWithinTimeRange(start, end);
+type Todo_Uni = any;
+type CalendarEvent_Uni = any;
+type Journal_Uni = any;
+type DatedObject = Todo_Uni | CalendarEvent_Uni | Journal_Uni;
+
+const todoToBigCalendarEvent = (datedObj: Todo_Uni): CalendarViewEvent => {
+    return {
+        title: datedObj.get('name').as('primitive'),
+        start: new Date(datedObj.get('time_frame/start/datetime').as('primitive')),
+        end: new Date(datedObj.get('time_frame/end/datetime').as('primitive')),
+        allDay: true,
+        unigraphObj: datedObj,
+    };
 };
 
-const datedToBigCalendarEvent = (datedObj: any): any => {
-    const bigCalendarEventByType: any = {
-        '$/schema/todo': (datedObjX: any) => {
-            return {
-                title: datedObjX.get('name').as('primitive'),
-                start: new Date(datedObjX.get('time_frame/start/datetime').as('primitive')),
-                end: new Date(datedObjX.get('time_frame/end/datetime').as('primitive')),
-                allDay: true,
-                unigraphObj: datedObjX,
-            };
-        },
-        '$/schema/calendar_event': (datedObjX: any) => {
-            return {
-                title: datedObjX.get('name').as('primitive'),
-                start: new Date(datedObjX.get('time_frame/start/datetime').as('primitive')),
-                end: new Date(datedObjX.get('time_frame/end/datetime').as('primitive')),
-                unigraphObj: datedObjX,
-            };
-        },
-        '$/schema/journal': (datedObjX: any) => {
-            return {
-                title: datedObjX.get('note/text').as('primitive'),
-                start: getDateAsUTC(datedObjX.get('date/datetime').as('primitive')),
-                end: getDateAsUTC(datedObjX.get('date/datetime').as('primitive')),
-                allDay: true,
-                unigraphObj: datedObjX,
-            };
-        },
+const journalToBigCalendarEvent = (datedObj: Journal_Uni): CalendarViewEvent => {
+    return {
+        title: datedObj.get('note/text').as('primitive'),
+        start: getDateAsUTC(datedObj.get('date/datetime').as('primitive')),
+        end: getDateAsUTC(datedObj.get('date/datetime').as('primitive')),
+        allDay: true,
+        unigraphObj: datedObj,
     };
-    return bigCalendarEventByType[datedObj.getType()](datedObj);
+};
+
+const calendarEventToBigCalendarEvent = (datedObj: CalendarEvent_Uni): CalendarViewEvent => {
+    return {
+        title: datedObj.get('name').as('primitive'),
+        start: new Date(datedObj.get('time_frame/start/datetime').as('primitive')),
+        end: new Date(datedObj.get('time_frame/end/datetime').as('primitive')),
+        unigraphObj: datedObj,
+    };
+};
+
+const recurrentCalendarEventToBigCalendarEvents = (datedObj: DatedObject): CalendarViewEvent[] => {
+    const timeframes = datedObj.get('recurrence')?.['_value['];
+    console.log({ timeframes });
+    if (timeframes?.length) {
+        return buildGraph(timeframes).map((timeframe: any, i: number) => {
+            return {
+                title: datedObj.get('name').as('primitive'),
+                start: new Date(timeframe.get('start/datetime').as('primitive')),
+                end: new Date(timeframe.get('end/datetime').as('primitive')),
+                recurrenceIndex: i,
+                unigraphObj: datedObj,
+            };
+        });
+    }
+    return [calendarEventToBigCalendarEvent(datedObj)];
+};
+
+const wrapInArray = (obj: any) => {
+    if (obj) {
+        return [obj];
+    }
+    return [];
+};
+
+const datedToBigCalendarEvents = (datedObj: DatedObject): CalendarViewEvent[] => {
+    const bigCalendarEventsByType: any = {
+        '$/schema/todo': flow(todoToBigCalendarEvent, wrapInArray),
+        '$/schema/journal': flow(journalToBigCalendarEvent, wrapInArray),
+        '$/schema/calendar_event': recurrentCalendarEventToBigCalendarEvents,
+        // '$/schema/calendar_event': flow(calendarEventToBigCalendarEvent, wrapInArray),
+    };
+    return bigCalendarEventsByType[datedObj.getType()](datedObj);
 };
 
 const unigraphBigCalendarEventComponent = ({ event, ...props }: any) => {
@@ -182,8 +202,17 @@ const getCurrentWeekStart = (today: Date) => {
 const getCurrentWeekEnd = (today: Date) => {
     return new Date(today.getFullYear(), today.getMonth(), today.getDate() - today.getDay() + 6);
 };
+
+const compareCalendarViewEvents = (a: CalendarViewEvent, b: CalendarViewEvent) => {
+    const sameRecurrence =
+        has('recurrenceIndex', a) && has('recurrenceIndex', b) ? a.recurrenceIndex === b.recurrenceIndex : true;
+    const sameUid = a.unigraphObj.uid === b.unigraphObj.uid;
+    // console.log('compareCalendarViewEvents', { a, b, sameRecurrence, sameUid });
+    return sameRecurrence && sameUid;
+};
+
 export function Calendar() {
-    const [currentEvents, setCurrentEvents] = React.useState<any>([]);
+    const [currentEvents, setCurrentEvents] = React.useState<CalendarViewEvent[]>([]);
     const [localizer, _] = React.useState<DateLocalizer>(() => momentLocalizer(moment));
     const [currentView, setCurrentView] = React.useState<View | undefined>('week');
     const [viewRange, setViewRange] = React.useState<{ start: Date; end: Date }>({
@@ -192,8 +221,10 @@ export function Calendar() {
     });
     const tabContext = React.useContext(TabContext);
     const addToCurrentEvents = React.useCallback(
-        (newEvents: any[]) => {
-            setCurrentEvents(unionBy('unigraphObj.uid', newEvents, currentEvents));
+        (newEvents: CalendarViewEvent[]) => {
+            const updatedCurrentEvents = unionWith(compareCalendarViewEvents, newEvents, currentEvents);
+            console.log({ newEvents, currentEvents, updatedCurrentEvents });
+            setCurrentEvents(updatedCurrentEvents);
         },
 
         [currentEvents],
@@ -204,9 +235,13 @@ export function Calendar() {
         tabContext.subscribeToQuery(
             queryDatedWithinTimeRange(viewRange.start?.toJSON(), viewRange.end?.toJSON()),
             (res: any) => {
-                const graphRes = buildGraph(res);
-                console.log('new calendar things', { res, graphRes, viewRange, currentEvents });
-                addToCurrentEvents(graphRes.map(datedToBigCalendarEvent).filter((x) => x));
+                const graphRes = buildGraph(res) as DatedObject[];
+                addToCurrentEvents(
+                    graphRes
+                        .map(datedToBigCalendarEvents)
+                        .flat()
+                        .filter((x) => x),
+                );
             },
             id,
             { metadataOnly: true },
