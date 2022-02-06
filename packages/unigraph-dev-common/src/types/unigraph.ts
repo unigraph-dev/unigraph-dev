@@ -308,6 +308,13 @@ export interface Unigraph<TT = WebSocket | false> {
     getReferenceables(key?: string | undefined, asMapWithContent?: boolean | undefined): Promise<any>;
     /** Gets a list of schemas. */
     getSchemas(schemas?: string[] | undefined, resolve?: boolean): Promise<Record<string, SchemaDgraph>>;
+    /**
+     * Gets an object with the given UID or name from Unigraph.
+     * If the object is updated, you will not be notified.
+     *
+     * @param uidOrName either the UID of the object or its name (such as `$/entity/example`).
+     * @param options Options for the query.
+     */
     getObject?(
         uidOrName: string,
         options?: {
