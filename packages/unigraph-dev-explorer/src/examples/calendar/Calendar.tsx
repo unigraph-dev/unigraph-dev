@@ -2,9 +2,7 @@ import { Avatar, Typography } from '@material-ui/core';
 import React from 'react';
 import { buildGraph, getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import Sugar from 'sugar';
-import { unionBy, isString, has, flow, propEq, unionWith } from 'lodash/fp';
-import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
-import { AnyAaaaRecord } from 'dns';
+import { unionBy, isString, has, flow, propEq, curry, unionWith } from 'lodash/fp';
 import { Calendar as BigCalendar, DateLocalizer, momentLocalizer, stringOrDate, View } from 'react-big-calendar';
 import moment from 'moment';
 import {} from 'lodash';
@@ -29,46 +27,83 @@ export function CalendarEvent({ data, callbacks, inline }: any) {
             </Avatar>
         </div>
     );
-
-    return (
-        <div style={{ display: 'flex' }}>
-            {inline ? [] : CalendarColor}
-
-            <div>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                    {inline ? CalendarColor : []}
-                    <Typography variant="body1" style={{ marginRight: '8px', fontSize: inline ? '1em' : '' }}>
-                        <strong>{data.get('name').as('primitive')}</strong>
-                    </Typography>
-                    <Typography variant="body2" style={{ color: 'gray', fontSize: inline ? '1em' : '' }}>
-                        {data.get('location').as('primitive')}
-                    </Typography>
-                </div>
-                <AutoDynamicView
-                    object={new UnigraphObject(data.get('time_frame')._value)}
-                    callbacks={callbacks}
-                    options={{ noDrag: true, noDrop: true, noContextMenu: true, inline: true }}
-                />
-                <div
-                    style={{
-                        display: data?._value?.children?.['_value[']?.map ? '' : 'none',
-                        marginTop: '4px',
-                    }}
-                >
-                    {data?._value?.children?.['_value[']?.map
-                        ? data._value.children['_value['].map((it: any) => (
-                              <AutoDynamicView
-                                  object={new UnigraphObject(it._value)}
-                                  callbacks={{ callbacks }}
-                                  options={{ inline: true }}
-                                  style={{ verticalAlign: 'middle' }}
-                              />
-                          ))
-                        : []}
+    //
+    const renderInline = () => {
+        return (
+            <div style={{ display: 'flex' }}>
+                <div>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        {CalendarColor}
+                        <Typography variant="body1" style={{ marginRight: '8px' }}>
+                            {data.get('name').as('primitive')}
+                        </Typography>
+                        <Typography variant="body2" style={{ color: 'gray' }}>
+                            {data.get('location').as('primitive')}
+                        </Typography>
+                    </div>
+                    <div
+                        style={{
+                            display: data?._value?.children?.['_value[']?.map ? '' : 'none',
+                            marginTop: '0px',
+                        }}
+                    >
+                        {data?._value?.children?.['_value[']?.map
+                            ? data._value.children['_value['].map((it: any) => (
+                                  <AutoDynamicView
+                                      object={new UnigraphObject(it._value)}
+                                      callbacks={callbacks}
+                                      inline
+                                      style={{ verticalAlign: 'middle' }}
+                                  />
+                              ))
+                            : []}
+                    </div>
                 </div>
             </div>
-        </div>
-    );
+        );
+    };
+
+    const render = () => {
+        return (
+            <div style={{ display: 'flex' }}>
+                {CalendarColor}
+                <div>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <Typography variant="body1" style={{ marginRight: '8px' }}>
+                            <strong>{data.get('name').as('primitive')}</strong>
+                        </Typography>
+                        <Typography variant="body2" style={{ color: 'gray' }}>
+                            {data.get('location').as('primitive')}
+                        </Typography>
+                    </div>
+                    <AutoDynamicView
+                        object={new UnigraphObject(data.get('time_frame')._value)}
+                        callbacks={callbacks}
+                        options={{ noDrag: true, noDrop: true, noContextMenu: true, inline: true }}
+                    />
+                    <div
+                        style={{
+                            display: data?._value?.children?.['_value[']?.map ? '' : 'none',
+                            marginTop: '4px',
+                        }}
+                    >
+                        {data?._value?.children?.['_value[']?.map
+                            ? data._value.children['_value['].map((it: any) => (
+                                  <AutoDynamicView
+                                      object={new UnigraphObject(it._value)}
+                                      callbacks={callbacks}
+                                      options={{ inline: true }}
+                                      style={{ verticalAlign: 'middle' }}
+                                  />
+                              ))
+                            : []}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    return inline ? renderInline() : render();
 }
 
 export function TimeFrame({ data, callbacks }: any) {
@@ -102,8 +137,8 @@ const queryDatedWithinTimeRange = (start: string, end: string) => {
         }
       }					 
     }
-            # objects that reference timepoints. Found through timepoint's backlinks in unigraph.origin     
-            findTimedObjects(func: uid(timepointsInRange)){ 
+    # objects that reference timepoints. Found through timepoint's backlinks in unigraph.origin     
+    findTimedObjects(func: uid(timepointsInRange)){ 
       <unigraph.origin>{
                     timedObjs as uid
         }
@@ -115,10 +150,7 @@ const queryDatedWithinTimeRange = (start: string, end: string) => {
       type @filter(NOT (eq(<unigraph.id>, "$/schema/time_point") OR eq(<unigraph.id>, "$/schema/time_frame") )) @cascade {
         <unigraph.id>
       }
-    }  
-        
-        
-        `;
+    }`;
 };
 
 const todoToBigCalendarEvent = (datedObj: TodoUni): CalendarViewEvent => {
@@ -150,21 +182,36 @@ const calendarEventToBigCalendarEvent = (datedObj: CalendarEventUni): CalendarVi
     };
 };
 
-const recurrentCalendarEventToBigCalendarEvents = (datedObj: DatedObject): CalendarViewEvent[] => {
-    const timeframes = datedObj.get('recurrence')?.['_value['];
-    if (timeframes?.length) {
-        return buildGraph(timeframes).map((timeframe: any, i: number) => {
-            return {
-                title: datedObj.get('name').as('primitive'),
-                start: new Date(timeframe.get('start/datetime').as('primitive')),
-                end: new Date(timeframe.get('end/datetime').as('primitive')),
-                recurrenceIndex: i,
-                unigraphObj: datedObj,
-            };
-        });
-    }
-    return [calendarEventToBigCalendarEvent(datedObj)];
-};
+type CalendarViewRange = { start: Date; end: Date };
+
+const recurrentCalendarEventToBigCalendarEventsInRange = curry(
+    (range: CalendarViewRange | null, datedObj: DatedObject): CalendarViewEvent[] => {
+        const timeframes = datedObj.get('recurrence')?.['_value['];
+        if (timeframes?.length) {
+            return buildGraph(timeframes)
+                .filter((timeframe) => {
+                    // filter not in our view time range
+                    if (!range) {
+                        return true;
+                    }
+                    const afterStart = new Date(timeframe.get('end/datetime').as('primitive')) >= range.start;
+                    const beforeEnd = new Date(timeframe.get('start/datetime').as('primitive')) <= range.end;
+                    return afterStart && beforeEnd;
+                })
+                .map((timeframe: any) => {
+                    return {
+                        title: datedObj.get('name').as('primitive'),
+                        start: new Date(timeframe.get('start/datetime').as('primitive')),
+                        end: new Date(timeframe.get('end/datetime').as('primitive')),
+                        unigraphObj: datedObj,
+                    };
+                });
+        }
+        return [calendarEventToBigCalendarEvent(datedObj)];
+    },
+);
+
+// const recurrentCalendarEventToBigCalendarEvents = recurrentCalendarEventToBigCalendarEventsInRange(null);
 
 const wrapInArray = (obj: any) => {
     if (obj) {
@@ -173,15 +220,19 @@ const wrapInArray = (obj: any) => {
     return [];
 };
 
-const datedToBigCalendarEvents = (datedObj: DatedObject): CalendarViewEvent[] => {
-    const bigCalendarEventsByType: any = {
-        '$/schema/todo': flow(todoToBigCalendarEvent, wrapInArray),
-        '$/schema/journal': flow(journalToBigCalendarEvent, wrapInArray),
-        '$/schema/calendar_event': recurrentCalendarEventToBigCalendarEvents,
-        // '$/schema/calendar_event': flow(calendarEventToBigCalendarEvent, wrapInArray),
-    };
-    return bigCalendarEventsByType[datedObj.getType()](datedObj);
-};
+const datedToBigCalendarEventsInRange = curry(
+    (range: CalendarViewRange | null, datedObj: DatedObject): CalendarViewEvent[] => {
+        const bigCalendarEventsByType: any = {
+            '$/schema/todo': flow(todoToBigCalendarEvent, wrapInArray),
+            '$/schema/journal': flow(journalToBigCalendarEvent, wrapInArray),
+            '$/schema/calendar_event': recurrentCalendarEventToBigCalendarEventsInRange(range),
+            // '$/schema/calendar_event': flow(calendarEventToBigCalendarEvent, wrapInArray),
+        };
+        return bigCalendarEventsByType[datedObj.getType()](datedObj);
+    },
+);
+
+// const datedToBigCalendarEvents = datedToBigCalendarEventsInRange(null);
 
 const unigraphBigCalendarEventComponent = ({ event, ...props }: any) => {
     return (
@@ -201,17 +252,16 @@ const getCurrentWeekEnd = (today: Date) => {
 };
 
 const compareCalendarViewEvents = (a: CalendarViewEvent, b: CalendarViewEvent) => {
-    const sameRecurrence =
-        has('recurrenceIndex', a) && has('recurrenceIndex', b) ? a.recurrenceIndex === b.recurrenceIndex : true;
+    const sameStart = `${a.start}` === `${b.start}`;
     const sameUid = a.unigraphObj.uid === b.unigraphObj.uid;
-    return sameRecurrence && sameUid;
+    return sameUid && sameStart;
 };
 
 export function Calendar() {
     const [currentEvents, setCurrentEvents] = React.useState<CalendarViewEvent[]>([]);
     const [localizer, _] = React.useState<DateLocalizer>(() => momentLocalizer(moment));
     const [currentView, setCurrentView] = React.useState<View | undefined>('week');
-    const [viewRange, setViewRange] = React.useState<{ start: Date; end: Date }>({
+    const [viewRange, setViewRange] = React.useState<CalendarViewRange>({
         start: getCurrentWeekStart(new Date()),
         end: getCurrentWeekEnd(new Date()),
     });
@@ -219,6 +269,14 @@ export function Calendar() {
     const addToCurrentEvents = React.useCallback(
         (newEvents: CalendarViewEvent[]) => {
             const updatedCurrentEvents = unionWith(compareCalendarViewEvents, newEvents, currentEvents);
+            // console.log('updatedCurrentEvents', {
+            //     updatedCurrentEventsLen: updatedCurrentEvents.length,
+            //     newEventsLen: newEvents.length,
+            //     currentEventsLen: currentEvents.length,
+            //     newEvents,
+            //     currentEvents,
+            //     updatedCurrentEvents,
+            // });
             setCurrentEvents(updatedCurrentEvents);
         },
 
@@ -233,7 +291,7 @@ export function Calendar() {
                 const graphRes = buildGraph(res) as DatedObject[];
                 addToCurrentEvents(
                     graphRes
-                        .map(datedToBigCalendarEvents)
+                        .map(datedToBigCalendarEventsInRange(viewRange))
                         .flat()
                         .filter((x) => x),
                 );

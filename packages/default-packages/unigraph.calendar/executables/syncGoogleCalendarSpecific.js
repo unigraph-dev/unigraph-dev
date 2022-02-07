@@ -8,12 +8,29 @@ const inspect = _.curry((msg, x) => {
     return x;
 });
 
+const patchInfiniteRecurrence = (rrule) => {
+    // split by "\n", find line with "FREQ=", if no "UNTIL=", split by ";", find segment with "FREQ=" and add UNTIL 25 years from now, join back
+    const lines = rrule.split('\n');
+    const freqIndex = lines.findIndex((line) => line.includes('FREQ='));
+    const untilIndex = lines.findIndex((line) => line.includes('UNTIL='));
+    if (untilIndex === -1) {
+        const segment = lines[freqIndex].split(';');
+        const untilSegment = segment.find((seg) => seg.includes('FREQ='));
+        const until = new Date();
+        until.setFullYear(until.getFullYear() + 10);
+        const newUntilSegment = `UNTIL=${new Sugar.Date(until).format('{yyyy}{MM}{dd}T{HH}{mm}{ss}Z').raw}`;
+        segment[segment.indexOf(untilSegment)] = newUntilSegment;
+        lines[freqIndex] = segment.join(';');
+    }
+    return lines.join('\n');
+};
+
 const rrulestrFixed = (rrule, options = {}) => {
     let timeStr = '';
     if (options.dtstart && !rrule.includes('DTSTART')) {
         timeStr = `DTSTART:${new Sugar.Date(options.dtstart).format('{yyyy}{MM}{dd}T{HH}{mm}{ss}Z').raw}\n`;
     }
-    return rrulestr(timeStr + rrule, options);
+    return rrulestr(timeStr + patchInfiniteRecurrence(rrule), options);
 };
 
 // Full sync: fetch 50 events per page until exhausted all events
@@ -31,6 +48,7 @@ const sync = async (calendar, unigraphCalendar, syncToken) => {
             calendarId: unigraphCalendar._value.id['_value.%'],
             pageToken: nextPageToken,
             syncToken,
+            singleEvents: false,
         });
         items.push(...resp.data.items);
         if (!resp.data.nextPageToken) {
@@ -219,6 +237,8 @@ const syncGoogleCalendarSpecific = async () => {
     // Uncomment to debug:
     // const syncToken = undefined;
     const { items, nextSyncToken } = await sync(calendar, unigraphCalendar, syncToken);
+    // const { items, nextSyncToken } = await syncDebug(calendar, unigraphCalendar, syncToken);
+    console.log('items', { itemsLen: items.length });
 
     // DEBUG: delete all events
     // items.filter(_.propEq('status', 'cancelled')).map(_.prop('id')).map(queryFromEventId)
@@ -244,9 +264,9 @@ const syncGoogleCalendarSpecific = async () => {
         .filter(_.propEq('status', 'confirmed'))
         .filter((ev) => !ev.recurringEventId);
 
-    // console.log('confirmedEventsNonRecurring', {
-    //     confirmedEventsNonRecurringLen: confirmedEventsNonRecurring.length,
-    // });
+    console.log('confirmedEventsNonRecurring', {
+        confirmedEventsNonRecurringLen: confirmedEventsNonRecurring.length,
+    });
 
     const queriesForEventsWithRecurrence = confirmedEventsNonRecurring
         .filter(_.has('recurrence'))
@@ -263,12 +283,12 @@ const syncGoogleCalendarSpecific = async () => {
         }`,
         )
         .then((res) => res.map(_.prop(['0', 'uid'])).filter((x) => x));
-    // console.log('objsWithRecurrence', { objsWithRecurrenceLen: objsWithRecurrence.length });
+    console.log('objsWithRecurrence', { objsWithRecurrenceLen: objsWithRecurrence.length });
 
     const toAdd = confirmedEventsNonRecurring.filter((x) => x).map(makeRecurrentEventObj(calendarUid));
     // .map(expandRecurrences)
     // .flat();
-    // console.log('toAdd', { toAddLen: toAdd.length });
+    console.log('toAdd', { toAddLen: toAdd.length });
 
     // SIDE-EFFECT: delete previous recurrences
     deletePrevRecurrences(objsWithRecurrence);
