@@ -27,7 +27,7 @@ export function CalendarEvent({ data, callbacks, inline }: any) {
             </Avatar>
         </div>
     );
-
+    //
     const renderInline = () => {
         return (
             <div style={{ display: 'flex' }}>

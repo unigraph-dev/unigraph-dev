@@ -717,7 +717,7 @@ export function DetailedNoteBlock({
                     textInput,
                     caret,
                     async (match: any, newName: string, newUid: string, newType: string) => {
-                        if (newType !== '$/schema/note_block') {
+                        if (!['$/schema/note_block', '$/schema/embed_block'].includes(newType)) {
                             callbacks['replace-child-with-embed-uid'](newUid);
                         } else {
                             callbacks['replace-child-with-uid'](newUid);

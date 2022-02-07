@@ -24,6 +24,7 @@ export function InlineSearch() {
                     })
                     .then((res: any) => {
                         const results = res.entities
+                            .filter((el: any) => el.type['unigraph.id'] !== '$/schema/embed_block')
                             .map((el: any) => ({
                                 name: new UnigraphObject(el['unigraph.indexes']?.name || {}).as('primitive'),
                                 uid: el.uid,
@@ -57,8 +58,8 @@ export function InlineSearch() {
                     console.log('Yo');
                     ev.preventDefault();
                     ev.stopPropagation();
-                    el.onSelected(state.search!).then((newUid: string) => {
-                        state.onSelected?.(state.search!, newUid);
+                    el.onSelected(state.search!).then(([newUid, newType]: [string, string]) => {
+                        state.onSelected?.(state.search!, newUid, newType);
                     });
                 },
             ]),
@@ -94,7 +95,8 @@ export function InlineSearch() {
     }, [searchResults, state]);
 
     React.useEffect(() => {
-        if (searchResults.length > 0) setCurrentAction((ca: number) => Math.max(ca, (state.default || []).length));
+        if (searchResults.length > 0 && searchResults[0]?.name.toLowerCase().includes(state.search?.toLowerCase()))
+            setCurrentAction((ca: number) => Math.max(ca, (state.default || []).length));
     }, [searchResults, (state.default || []).length]);
 
     React.useEffect(() => {

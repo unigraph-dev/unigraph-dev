@@ -292,11 +292,11 @@ export const copyChildToClipboard = (data: any, context: NoteEditorContext, inde
             };
         }
     });
-    if (cut) deleteChild(data, context, index);
+    if (cut) deleteChild(data, context, index, false);
     return cutItem;
 };
 
-export const deleteChild = (data: any, context: NoteEditorContext, index: number, permanent = false) => {
+export const deleteChild = (data: any, context: NoteEditorContext, index: number, permanent = true) => {
     let currSubentity = -1;
     const delState = window.unigraph.getState(`temp/deleteChildren/${data.uid}`);
     if (!delState.value) delState.value = [];
@@ -334,7 +334,7 @@ export const deleteChild = (data: any, context: NoteEditorContext, index: number
     }, 0);
 };
 
-export const deleteChildren = (data: any, context: NoteEditorContext, index: number[], permanent = false) => {
+export const deleteChildren = (data: any, context: NoteEditorContext, index: number[], permanent = true) => {
     let currSubentity = -1;
     let deleted = 0;
     const parents = getParents(data);
