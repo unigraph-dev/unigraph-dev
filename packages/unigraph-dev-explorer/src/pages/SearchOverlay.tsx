@@ -7,7 +7,7 @@ import { buildGraph, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils'
 import { AutoDynamicView } from '../components/ObjectView/AutoDynamicView';
 import { inlineTextSearch } from '../components/UnigraphCore/InlineSearchPopup';
 import { parseQuery } from '../components/UnigraphCore/UnigraphSearch';
-import { isElectron } from '../utils';
+import { isElectron, typeHasDynamicView } from '../utils';
 
 const groups = [
     {
@@ -249,7 +249,17 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
                             noPrimitives: true,
                         })
                         .then((res) => {
-                            setEntities(res.entities?.length > 0 ? res.entities : [null]);
+                            setEntities(
+                                res.entities?.length > 0
+                                    ? res.entities.filter(
+                                          (el) =>
+                                              typeHasDynamicView(el?.type?.['unigraph.id']) &&
+                                              !['$/schema/markdown', '$/schema/subentity'].includes(
+                                                  el?.type?.['unigraph.id'],
+                                              ),
+                                      )
+                                    : [null],
+                            );
                         });
                 } else {
                     setEntities([]);
