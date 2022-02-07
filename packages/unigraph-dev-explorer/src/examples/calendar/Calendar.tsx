@@ -243,7 +243,13 @@ const datedToBigCalendarEventsInRange = curry(
 // const datedToBigCalendarEvents = datedToBigCalendarEventsInRange(null);
 
 const unigraphBigCalendarEventComponent = ({ event, ...props }: any) => {
-    return <AutoDynamicView object={new UnigraphObject(event.unigraphObj)} inline callbacks={{ noDate: true }} />;
+    return (
+        <AutoDynamicView
+            object={new UnigraphObject(event.unigraphObj)}
+            inline
+            callbacks={{ noDate: true, isEmbed: true }}
+        />
+    );
 };
 
 const getCurrentWeekStart = (today: Date) => {
@@ -331,6 +337,9 @@ export function Calendar() {
                 events={currentEvents}
                 startAccessor="start"
                 endAccessor="end"
+                step={15}
+                timeslots={2}
+                scrollToTime={new Date(1970, 1, 1, 7, 0, 0)}
                 components={{ event: unigraphBigCalendarEventComponent }}
                 eventPropGetter={(event: any, start: stringOrDate, end: stringOrDate, isSelected: boolean) => ({
                     style: { backgroundColor: '#fff', color: 'black', border: '1px', borderColor: 'black' },

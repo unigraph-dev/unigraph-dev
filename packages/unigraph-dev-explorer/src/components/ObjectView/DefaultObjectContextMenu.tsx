@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable no-shadow */
 import { ListItemIcon, ListItemText, Menu, MenuItem } from '@material-ui/core';
 import _ from 'lodash';
@@ -17,55 +18,70 @@ import {
     mdiBookOutline,
 } from '@mdi/js';
 import { AutoDynamicViewCallbacks, ContextMenuGenerator } from '../../types/ObjectView.d';
-import { isMultiSelectKeyPressed, runClientExecutable, selectUid } from '../../utils';
+import {
+    isDeveloperMode,
+    isMultiSelectKeyPressed,
+    runClientExecutable,
+    selectUid,
+    typeHasDetailedView,
+} from '../../utils';
 
 export const defaultContextMenu: Array<ContextMenuGenerator> = [
-    (uid, object, handleClose, callbacks) => (
-        <MenuItem
-            style={{ paddingTop: '2px', paddingBottom: '2px' }}
-            onClick={() => {
-                handleClose();
-                window.wsnavigator(
-                    `/library/object?uid=${uid}&viewer=${'dynamic-view-detailed'}&type=${
-                        object?.type?.['unigraph.id']
-                    }`,
-                );
-            }}
-        >
-            <ListItemIcon style={{ minWidth: '32px' }}>
-                <Icon path={mdiViewDayOutline} size={0.8} />
-            </ListItemIcon>
-            <ListItemText>View object with its default</ListItemText>
-        </MenuItem>
-    ),
-    (uid, object, handleClose, callbacks) => (
-        <MenuItem
-            style={{ paddingTop: '2px', paddingBottom: '2px' }}
-            onClick={() => {
-                handleClose();
-                window.wsnavigator(`/library/object?uid=${uid}&viewer=${'json-tree'}`);
-            }}
-        >
-            <ListItemIcon style={{ minWidth: '32px' }}>
-                <Icon path={mdiFileTreeOutline} size={0.8} />
-            </ListItemIcon>
-            <ListItemText>View object with JSON tree viewer</ListItemText>
-        </MenuItem>
-    ),
-    (uid, object, handleClose, callbacks) => (
-        <MenuItem
-            style={{ paddingTop: '2px', paddingBottom: '2px' }}
-            onClick={() => {
-                handleClose();
-                window.wsnavigator(`/object-editor?uid=${uid}`);
-            }}
-        >
-            <ListItemIcon style={{ minWidth: '32px' }}>
-                <Icon path={mdiVectorPolylineEdit} size={0.8} />
-            </ListItemIcon>
-            <ListItemText>View object with rich object editor</ListItemText>
-        </MenuItem>
-    ),
+    (uid, object, handleClose, callbacks) =>
+        typeHasDetailedView(object?.type?.['unigraph.id']) ? (
+            <MenuItem
+                style={{ paddingTop: '2px', paddingBottom: '2px' }}
+                onClick={() => {
+                    handleClose();
+                    window.wsnavigator(
+                        `/library/object?uid=${uid}&viewer=${'dynamic-view-detailed'}&type=${
+                            object?.type?.['unigraph.id']
+                        }`,
+                    );
+                }}
+            >
+                <ListItemIcon style={{ minWidth: '32px' }}>
+                    <Icon path={mdiViewDayOutline} size={0.8} />
+                </ListItemIcon>
+                <ListItemText>View object details</ListItemText>
+            </MenuItem>
+        ) : (
+            <></>
+        ),
+    (uid, object, handleClose, callbacks) =>
+        isDeveloperMode() ? (
+            <MenuItem
+                style={{ paddingTop: '2px', paddingBottom: '2px' }}
+                onClick={() => {
+                    handleClose();
+                    window.wsnavigator(`/library/object?uid=${uid}&viewer=${'json-tree'}`);
+                }}
+            >
+                <ListItemIcon style={{ minWidth: '32px' }}>
+                    <Icon path={mdiFileTreeOutline} size={0.8} />
+                </ListItemIcon>
+                <ListItemText>View object as JSON tree</ListItemText>
+            </MenuItem>
+        ) : (
+            <></>
+        ),
+    (uid, object, handleClose, callbacks) =>
+        isDeveloperMode() ? (
+            <MenuItem
+                style={{ paddingTop: '2px', paddingBottom: '2px' }}
+                onClick={() => {
+                    handleClose();
+                    window.wsnavigator(`/object-editor?uid=${uid}`);
+                }}
+            >
+                <ListItemIcon style={{ minWidth: '32px' }}>
+                    <Icon path={mdiVectorPolylineEdit} size={0.8} />
+                </ListItemIcon>
+                <ListItemText>Edit object in editor</ListItemText>
+            </MenuItem>
+        ) : (
+            <></>
+        ),
     (uid, object, handleClose, callbacks) => (
         <MenuItem
             style={{ paddingTop: '2px', paddingBottom: '2px' }}

@@ -56,7 +56,8 @@ totalItems.forEach((items, i) => {
             queries.push({ query: getQuery(item.link, `${i}_${index}`), item, feedId: i });
         }
     });
-    latests[i] = new Date(Math.max(...items.map((el) => new Date(el.isoDate).getTime() || 0))).toISOString();
+    const latestTs = Math.max(...items.map((el) => new Date(el.isoDate).getTime() || 0), 0) || new Date().getTime();
+    latests[i] = new Date(latestTs).toISOString();
 });
 
 console.log('All items loaded!');

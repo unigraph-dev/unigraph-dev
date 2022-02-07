@@ -256,7 +256,11 @@ const getAllChildren = (data: any, childrenUids: string[]) => {
         return children
             .map((el: any) => {
                 if (el?._value?.type?.['unigraph.id'] === '$/schema/subentity' || el?._key)
-                    childrenUids.push(el?._value?.uid, el?._value?._value?.uid);
+                    childrenUids.push(
+                        el?._value?.uid,
+                        el?._value?._value?.uid,
+                        el?._value?._value?._value?.content?._value?.uid,
+                    );
                 return {
                     content: el?._value?._value?._value?.text?._value?._value?.['_value.%'],
                     children: el?._key ? [] : getAllChildren(el?._value?._value?._value?.children, childrenUids),
@@ -274,13 +278,17 @@ export const copyChildToClipboard = (data: any, context: NoteEditorContext, inde
     let cutItem;
     children?.forEach((el: any, elindex: any) => {
         if (el?._value?.type?.['unigraph.id'] === '$/schema/subentity' && ++currSubentity === index) {
-            const childrenUids: string[] = [el?._value?.uid, el?._value?._value?.uid];
+            const childrenUids: string[] = [
+                el?._value?.uid,
+                el?._value?._value?.uid,
+                el?._value?._value?._value?.content?._value?.uid,
+            ];
             cutItem = {
                 uid: el?._value?._value?.uid,
                 childrenUids,
                 content: el?._value?._value?._value?.text?._value?._value?.['_value.%'],
                 index: currSubentity,
-                children: getAllChildren(el?._value?._value?._value?.children, childrenUids),
+                children: getAllChildren(el?._value?._value?._value?.children, childrenUids).filter(Boolean),
             };
         }
     });
@@ -298,9 +306,13 @@ export const deleteChild = (data: any, context: NoteEditorContext, index: number
     const totalChildrenToCheck: string[] = [];
     children?.forEach((el: any, elindex: any) => {
         if (el?._value?.type?.['unigraph.id'] === '$/schema/subentity' && ++currSubentity === index) {
-            const childrenUids: string[] = [el?._value?.uid, el?._value?._value?.uid];
+            const childrenUids: string[] = [
+                el?._value?.uid,
+                el?._value?._value?.uid,
+                el?._value?._value?._value?.content?._value?.uid,
+            ];
             getAllChildren(el?._value?._value?._value?.children, childrenUids);
-            totalChildrenToCheck.push(...childrenUids);
+            totalChildrenToCheck.push(...childrenUids.filter(Boolean));
         }
     });
     setTimeout(() => {
