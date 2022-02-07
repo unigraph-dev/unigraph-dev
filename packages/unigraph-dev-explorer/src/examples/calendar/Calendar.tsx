@@ -154,10 +154,7 @@ const queryDatedWithinTimeRange = (start: string, end: string) => {
       type @filter(NOT (eq(<unigraph.id>, "$/schema/time_point") OR eq(<unigraph.id>, "$/schema/time_frame") )) @cascade {
         <unigraph.id>
       }
-    }  
-        
-        
-        `;
+    }`;
 };
 
 const todoToBigCalendarEvent = (datedObj: TodoUni): CalendarViewEvent => {
@@ -205,12 +202,11 @@ const recurrentCalendarEventToBigCalendarEventsInRange = curry(
                     const beforeEnd = new Date(timeframe.get('start/datetime').as('primitive')) <= range.end;
                     return afterStart && beforeEnd;
                 })
-                .map((timeframe: any, i: number) => {
+                .map((timeframe: any) => {
                     return {
                         title: datedObj.get('name').as('primitive'),
                         start: new Date(timeframe.get('start/datetime').as('primitive')),
                         end: new Date(timeframe.get('end/datetime').as('primitive')),
-                        recurrenceIndex: i,
                         unigraphObj: datedObj,
                     };
                 });
@@ -260,10 +256,9 @@ const getCurrentWeekEnd = (today: Date) => {
 };
 
 const compareCalendarViewEvents = (a: CalendarViewEvent, b: CalendarViewEvent) => {
-    const sameRecurrence =
-        has('recurrenceIndex', a) && has('recurrenceIndex', b) ? a.recurrenceIndex === b.recurrenceIndex : true;
+    const sameStart = `${a.start}` === `${b.start}`;
     const sameUid = a.unigraphObj.uid === b.unigraphObj.uid;
-    return sameRecurrence && sameUid;
+    return sameUid && sameStart;
 };
 
 export function Calendar() {
@@ -278,7 +273,14 @@ export function Calendar() {
     const addToCurrentEvents = React.useCallback(
         (newEvents: CalendarViewEvent[]) => {
             const updatedCurrentEvents = unionWith(compareCalendarViewEvents, newEvents, currentEvents);
-            console.log('updatedCurrentEvents', { updatedCurrentEventsLen: updatedCurrentEvents.length });
+            // console.log('updatedCurrentEvents', {
+            //     updatedCurrentEventsLen: updatedCurrentEvents.length,
+            //     newEventsLen: newEvents.length,
+            //     currentEventsLen: currentEvents.length,
+            //     newEvents,
+            //     currentEvents,
+            //     updatedCurrentEvents,
+            // });
             setCurrentEvents(updatedCurrentEvents);
         },
 

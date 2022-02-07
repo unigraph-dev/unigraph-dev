@@ -3,7 +3,6 @@ import { UnigraphObject } from 'unigraph-dev-common/lib/types/unigraph';
 
 export interface CalendarViewEvent extends Event {
     unigraphObj: UnigraphObject;
-    recurrenceIndex?: number;
 }
 
 export type TodoUni = any;
