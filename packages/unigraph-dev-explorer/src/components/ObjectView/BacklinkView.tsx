@@ -8,6 +8,7 @@ import { DynamicObjectListView } from './DynamicObjectListView';
 const getQuery = (uid: string, forward?: boolean) => `(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted))) {
   uid
   <unigraph.id>
+  _hide
   type { <unigraph.id> }
 }
 var(func: uid(${uid})) {
@@ -16,7 +17,7 @@ var(func: uid(${uid})) {
   }
 }`;
 
-export function BacklinkView({ data, hideHeader, forward, callbacks, reverse, uid, titleBar }: any) {
+export function BacklinkView({ data, hideHeader, forward, callbacks, reverse, uid, titleBar = ' backlinks' }: any) {
     const [objects, setObjects]: [any[], any] = React.useState([]);
     const [id, setId] = React.useState(Date.now());
     if (callbacks?.isEmbed) hideHeader = true;
@@ -41,32 +42,27 @@ export function BacklinkView({ data, hideHeader, forward, callbacks, reverse, ui
     });
 
     return (
-        <>
-            <Typography gutterBottom variant="h4" style={{ display: hideHeader ? 'none' : 'unset' }}>
-                Backlinks of: {hideHeader || data?.get?.('name').as('primitive') || data?.uid || uid}
-            </Typography>
-            <DynamicObjectListView
-                items={objects}
-                titleBar={titleBar}
-                context={data || null}
-                itemRemover={(uids: any) => {
-                    if (!forward) {
-                        window.unigraph.deleteRelation(data?.uid || uid, {
-                            'unigraph.origin': uids.map((el: string) => ({
-                                uid: el,
-                            })),
-                        });
-                    } else {
-                        if (!Array.isArray(uids)) uids = [uids];
-                        uids.filter((el: any) => typeof el === 'string').forEach((el: any) =>
-                            window.unigraph.deleteRelation(el, {
-                                'unigraph.origin': { uid: data?.uid || uid },
-                            }),
-                        );
-                    }
-                }}
-                noRemover
-            />
-        </>
+        <DynamicObjectListView
+            items={objects}
+            titleBar={titleBar}
+            context={data || { uid }}
+            itemRemover={(uids: any) => {
+                if (!forward) {
+                    window.unigraph.deleteRelation(data?.uid || uid, {
+                        'unigraph.origin': uids.map((el: string) => ({
+                            uid: el,
+                        })),
+                    });
+                } else {
+                    if (!Array.isArray(uids)) uids = [uids];
+                    uids.filter((el: any) => typeof el === 'string').forEach((el: any) =>
+                        window.unigraph.deleteRelation(el, {
+                            'unigraph.origin': { uid: data?.uid || uid },
+                        }),
+                    );
+                }
+            }}
+            noRemover
+        />
     );
 }

@@ -159,6 +159,7 @@ const pages: Record<string, any> = {
     calendar: {
         constructor: (props: any) => <Calendar {...props} />,
         name: 'Calendar',
+        maximize: true,
     },
     today: {
         constructor: (props: any) => <TodayView {...props} />,

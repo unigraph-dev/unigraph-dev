@@ -20,6 +20,10 @@
             {
                 "id": "interface/textual",
                 "src": "schemas/textual.json"
+            },
+            {
+                "id": "embed_block",
+                "src": "schemas/embed_block.json"
             }
         ],
         "entities": [
@@ -30,6 +34,10 @@
             {
                 "id": "add_note_context_menu",
                 "src": "entities/add_note_context_menu.json"
+            },
+            {
+                "id": "notes_view",
+                "src": "entities/notes_view.json"
             }
         ],
         "executables": [

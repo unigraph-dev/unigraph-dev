@@ -32,6 +32,10 @@ export const TabContext = React.createContext({
     },
 });
 
+export const isDeveloperMode = () => {
+    return window.unigraph.getState('settings/developerMode').value;
+};
+
 type DataContextType = {
     contextUid: string;
     contextData?: any;
@@ -67,7 +71,7 @@ export const DataContextWrapper = ({ children, contextUid, contextData, parents,
                 ];
             },
         };
-    }, [contextUid, contextData?.uid, viewType, expandedChildren, JSON.stringify((parents || []).sort?.())]);
+    }, [contextUid, contextData?.uid, viewType, expandedChildren, JSON.stringify(parents?.sort?.())]);
 
     return <DataContext.Provider value={dataContext}>{children}</DataContext.Provider>;
 };
@@ -86,25 +90,25 @@ export const getComponentFromPage = (location: string, params: any = {}) => {
 };
 
 export const setCaret = (document: Document, element: any, pos: number, length?: number) => {
-    // console.log(element, pos, length);
-    const range = document.createRange();
-    const sel = document.getSelection();
-    const maxLen = element.textContent.length < pos ? element.textContent.length : pos;
-    range.setStart(element, maxLen);
-    if (length) {
-        range.setEnd(element, length + maxLen);
-    } else {
-        range.collapse(true);
-    }
-
-    sel?.removeAllRanges();
-    sel?.addRange(range);
+    const maxLen = element.value.length < pos ? element.value.length : pos;
+    element.setSelectionRange(maxLen, maxLen + (length || 0));
 };
+
+// export const getCaret = (ev: PointerEvent) => {
+//     if (document.caretRangeFromPoint) {
+//         return document.caretRangeFromPoint(ev.clientX, ev.clientY)?.startOffset;
+//     }
+//     console.log('getCaret', ev);
+//     // return window.getSelection()?.anchorOffset;
+//     return window.getSelection()?.anchorOffset;
+// };
 
 export const getCaret = (ev: PointerEvent) => {
     if (document.caretRangeFromPoint) {
+        // if this function is defined
         return document.caretRangeFromPoint(ev.clientX, ev.clientY)?.startOffset;
     }
+    // window.getSelection() can't ddetect line
     return window.getSelection()?.anchorOffset;
 };
 
@@ -543,4 +547,12 @@ export function getDateAsUTC(input: any) {
     const date = new Date(input);
     const utc = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
     return utc;
+}
+
+export function typeHasDetailedView(type: string) {
+    return Object.keys(window.unigraph.getState('registry/dynamicViewDetailed').value).includes(type);
+}
+
+export function typeHasDynamicView(type: string) {
+    return Object.keys(window.unigraph.getState('registry/dynamicView').value).includes(type);
 }

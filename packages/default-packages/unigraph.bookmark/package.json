@@ -37,6 +37,12 @@
                 "editable": true,
                 "name": "Called when bookmark is updated to process relevant information"
             }
+        ],
+        "entities": [
+            {
+                "id": "bookmarks_view",
+                "src": "entities/bookmarks_view.json"
+            }
         ]
     }
 }

@@ -11,6 +11,7 @@ import {
     augmentStubs,
     base64ToBlob,
     buildGraph,
+    findAllUids,
     findUid,
     getCircularReplacer,
     isJsonString,
@@ -193,6 +194,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 setValue: undefined as any,
             };
             state.setValue = (newValue: any, flush?: boolean) => {
+                if (typeof newValue === 'function') newValue = newValue(state.value);
                 const changed = newValue !== state.value;
                 state.value = newValue;
                 if (changed || flush) state.subscribers.forEach((sub) => sub(state.value));
@@ -406,6 +408,16 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             delete subscriptions[id];
             delete subResults[id];
         },
+        getObject: (uidOrName, options) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    // console.log('getObject', response);
+                    if (response.success) resolve(response.results);
+                    else reject(response);
+                };
+                sendEvent(connection, 'get_object', { uidOrName, options, id });
+            }),
         addObject: (object, schema) =>
             new Promise((resolve, reject) => {
                 const id = getRandomInt();
@@ -422,9 +434,9 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
         deleteObject: (uid, permanent?) => {
             sendEvent(connection, 'delete_unigraph_object', { uid, permanent });
         },
-        updateTriplets: (objects, subIds?) => {
+        updateTriplets: (objects, isDelete, subIds) => {
             // TODO: This is very useless, should be removed once we get something better
-            sendEvent(connection, 'update_spo', { objects, subIds });
+            sendEvent(connection, 'update_spo', { objects, isDelete, subIds });
         },
         updateObject: (uid, newObject, upsert = true, pad = true, subIds, origin, eagarlyUpdate) =>
             new Promise((resolve, reject) => {
@@ -444,24 +456,35 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                         assignUids(newObject, caches.uid_lease, usedUids, {});
                         exhaustedLeases.push(...usedUids);
 
-                        // Merge updater object with existing one
-                        const newObj = JSON.parse(JSON.stringify(subResults[subId], getCircularReplacer()));
-                        const [changeLoc] = findUid(newObj, uid);
-                        deepMerge(changeLoc, JSON.parse(JSON.stringify(newObject)));
-                        augmentStubs(changeLoc, subResults[subId]);
-                        subResults[subId] = newObj;
-                        setTimeout(() => {
-                            // console.log(newObj);
-                            subscriptions[subId](newObj);
-                        }, 0);
-
-                        // Record state changes
-                        if (subFakeUpdates[subId] === undefined) subFakeUpdates[subId] = [id];
-                        else subFakeUpdates[subId].push(id);
+                        api.sendFakeUpdate?.(subId, newObject, id);
                     }
                 }
                 sendEvent(connection, 'update_object', { uid, newObject, upsert, pad, id, subIds, origin, usedUids });
             }),
+        sendFakeUpdate: (subId, updater, eventId) => {
+            // Merge updater object with existing one
+            // console.log('subId0', JSON.parse(JSON.stringify(subResults[subId])));
+            const newObj = JSON.parse(JSON.stringify(subResults[subId], getCircularReplacer()));
+            const newObj2 = JSON.parse(JSON.stringify(newObj));
+            const clonedNewObject = JSON.parse(JSON.stringify(updater));
+            const changeLocs = findAllUids(newObj, updater.uid);
+            changeLocs.forEach(([loc, path]) => {
+                deepMerge(loc, clonedNewObject);
+                // console.log('subId', JSON.parse(JSON.stringify(subResults[subId])));
+                augmentStubs(loc, newObj2);
+            });
+            subResults[subId] = newObj;
+            setTimeout(() => {
+                // console.log(newObj);
+                subscriptions[subId](newObj);
+            }, 0);
+
+            // Record state changes
+            if (eventId) {
+                if (subFakeUpdates[subId] === undefined) subFakeUpdates[subId] = [eventId];
+                else subFakeUpdates[subId].push(eventId);
+            }
+        },
         deleteRelation: (uid, relation) => {
             sendEvent(connection, 'delete_relation', { uid, relation });
         },
@@ -587,7 +610,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                         }
                     } else reject(response);
                 };
-                sendEvent(connection, 'run_executable', { uid, params: params || {}, bypassCache }, id);
+                sendEvent(connection, 'run_executable', { uid, params: params || {}, bypassCache, context }, id);
             }),
         getNamespaceMapUid: (name) => {
             throw Error('Not implemented');
@@ -672,6 +695,42 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             sendEvent(connection, 'lease_uid', { uid: leased });
             return leased;
         },
+        disablePackage: (packageName: string) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success && response.results) resolve(response.results);
+                    else reject(response);
+                };
+                sendEvent(connection, 'disable_package', { packageName }, id);
+            }),
+        enablePackage: (packageName: string) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success && response.results) resolve(response.results);
+                    else reject(response);
+                };
+                sendEvent(connection, 'enable_package', { packageName }, id);
+            }),
+        recalculateBacklinks: (fromUids, toUids, depth) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success && response.results) resolve(response.results);
+                    else reject(response);
+                };
+                sendEvent(connection, 'recalculate_backlinks', { fromUids, toUids, depth }, id);
+            }),
+        addBacklinks: (fromUids, toUids) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success && response.results) resolve(response.results);
+                    else reject(response);
+                };
+                sendEvent(connection, 'add_backlinks', { fromUids, toUids }, id);
+            }),
     };
 
     return api;

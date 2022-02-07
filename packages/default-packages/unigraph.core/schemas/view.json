@@ -16,6 +16,12 @@
                 "_indexAs": "name"
             },
             {
+                "_key": "icon",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/icon_url" }
+                }
+            },
+            {
                 "_key": "maximize",
                 "_definition": {
                     "type": { "unigraph.id": "$/primitive/boolean" }

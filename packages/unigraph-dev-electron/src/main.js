@@ -254,8 +254,11 @@ app.whenReady().then(() => {
         });
         mainWindow.webContents.setWindowOpenHandler(({ url }) => {
             // open url in a browser and prevent default
-            shell.openExternal(url);
-            return { action: 'deny' };
+            if (!url.includes('popout_page.html')) {
+                shell.openExternal(url);
+                return { action: 'deny' };
+            }
+            return { action: 'allow' };
         });
     }, 0);
 });

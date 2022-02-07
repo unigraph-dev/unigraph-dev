@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 
 import { pkg as bookmarkPackage } from 'unigraph-dev-common/lib/data/unigraph.bookmark.pkg';
 
-import { ListItemText, ListItemIcon, Avatar, Typography } from '@material-ui/core';
-import { Description, Link, Public } from '@material-ui/icons';
+import { ListItemText, ListItemIcon, Avatar, Typography, Fab } from '@material-ui/core';
+import { Description, Link, Public, Add as AddIcon } from '@material-ui/icons';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { getExecutableId } from 'unigraph-dev-common/lib/api/unigraph';
 import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
@@ -62,9 +62,25 @@ export const createBookmark: (t: string, a?: boolean) => Promise<any> = (text: s
 
 function BookmarksBody({ data }: { data: ABookmark[] }) {
     const bookmarks = data;
-    const [newName, setNewName] = useState('');
 
-    return <DynamicObjectListView items={bookmarks} context={null} reverse defaultFilter="no-filter" />;
+    return (
+        <div>
+            <DynamicObjectListView items={bookmarks} context={null} reverse defaultFilter="no-filter" />
+            <Fab
+                aria-label="add"
+                style={{ position: 'absolute', right: '16px', bottom: '16px' }}
+                onClick={() => {
+                    window.unigraph.getState('global/omnibarSummoner').setValue({
+                        show: true,
+                        tooltip: 'Add a bookmark',
+                        defaultValue: '+bookmark ',
+                    });
+                }}
+            >
+                <AddIcon />
+            </Fab>
+        </div>
+    );
 }
 
 export const Bookmarks = withUnigraphSubscription(

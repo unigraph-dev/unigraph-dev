@@ -148,25 +148,30 @@ export function init(hostname?: string) {
 }
 
 function initSelect() {
+    const getSelected = (items: any[]) => {
+        const available = items
+            .map((el: any) => {
+                if (el.dataset?.component) {
+                    return el.dataset?.component;
+                }
+                return undefined;
+            })
+            .filter(Boolean);
+        const selectedUids = available.filter((el: string) => {
+            const elm = document.querySelector(`[data-component="${el}"]`);
+            if (!elm) return false;
+            const parents = getParents(elm);
+            if (_.intersection(parents, available).length > 0) return false;
+            return true;
+        });
+        return selectedUids;
+    };
+
     if (!isMobile()) {
         window.dragselect = new DragSelect({ autoScrollSpeed: 0.0001, draggability: false });
         window.dragselect.subscribe('callback', ({ items, event }: any) => {
             const distance = window.dragselect.getCursorPositionDifference();
-            const available = items
-                .map((el: any) => {
-                    if (el.dataset?.component) {
-                        return el.dataset?.component;
-                    }
-                    return undefined;
-                })
-                .filter(Boolean);
-            const selectedUids = available.filter((el: string) => {
-                const elm = document.querySelector(`[data-component="${el}"]`);
-                if (!elm) return false;
-                const parents = getParents(elm);
-                if (_.intersection(parents, available).length > 0) return false;
-                return true;
-            });
+            const selectedUids = getSelected(items);
             if (
                 Math.abs(distance.x) > 5 &&
                 Math.abs(distance.y) > 5 &&
@@ -177,17 +182,21 @@ function initSelect() {
             else if (!isMultiSelectKeyPressed(event)) window.unigraph.getState('global/selected').setValue([]);
             document.body.classList.remove('in-multiselect');
         });
-        window.dragselect.subscribe('dragmove', ({ items, item, event }: any) => {
-            const distance = window.dragselect.getCursorPositionDifference();
-            if (
-                Math.abs(distance.x) > 5 &&
-                Math.abs(distance.y) > 5 &&
-                (document.getSelection()?.type === 'Caret' || items.length > 1)
-            ) {
-                document.body.classList.add('in-multiselect');
-                if (document.getSelection()?.type !== 'Caret') document.getSelection()?.removeAllRanges();
-            }
-        });
+        window.dragselect.subscribe(
+            'dragmove',
+            _.throttle(({ items, item, event }: any) => {
+                const distance = window.dragselect.getCursorPositionDifference();
+                if (
+                    Math.abs(distance.x) > 5 &&
+                    Math.abs(distance.y) > 5 &&
+                    (document.getSelection()?.type === 'Caret' || getSelected(items).length > 1)
+                ) {
+                    console.log(getSelected(items).length);
+                    document.body.classList.add('in-multiselect');
+                    if (document.getSelection()?.type !== 'Caret') document.getSelection()?.removeAllRanges();
+                }
+            }, 150),
+        );
     }
 }
 

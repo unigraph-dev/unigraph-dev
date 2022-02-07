@@ -73,7 +73,7 @@ declare type SearchPopupState = {
     show: boolean;
     search?: string;
     hideHidden?: boolean;
-    onSelected?: (newName: string, newUid: string) => any;
+    onSelected?: (newName: string, newUid: string, newType?: string) => any;
     default: {
         label: (search: string) => string;
         onSelected: (search: string) => Promise<string>;

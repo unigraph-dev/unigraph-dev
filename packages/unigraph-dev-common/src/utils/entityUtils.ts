@@ -313,6 +313,8 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
         const localSchema = schemaMap[schemaName]._definition
         const unigraphId = raw?.['unigraph.id'];
         if (unigraphId) delete raw?.['unigraph.id'];
+        const rawUid = Object.keys(raw).length >= 2 && raw?.uid;
+        if (rawUid) delete raw?.uid;
         let timestamp: any = {}; let context: any = {};
         if (raw._createdAt || raw._updatedAt) {
             timestamp = {_createdAt: raw._createdAt, _updatedAt: raw._updatedAt};
@@ -338,6 +340,7 @@ export function buildUnigraphEntity (raw: Record<string, any>, schemaName = "any
         if (result.type?.['unigraph.id']?.startsWith('$/schema/interface')) result['dgraph.type'] = 'Interface'
         // @ts-ignore
         if (unigraphId) result['unigraph.id'] = unigraphId;
+        if (rawUid) result.uid = rawUid;
         if (schemaMap[schemaName]._hide) result['_hide'] = true;
         //console.log(JSON.stringify(result, null, 4));
         // @ts-ignore
@@ -360,7 +363,7 @@ export function makeQueryFragmentFromType(schemaName: string, schemaMap: Record<
 
     function makePart(localSchema: Definition | any, depth = 0, isRoot = false, uidOnly = false) {
         if (depth > maxDepth) return {};
-        let entries: any = {"uid": {}, "unigraph.id": {}, 'type': { "unigraph.id": {} }};
+        let entries: any = {"uid": {}, "unigraph.id": {}, 'type': { "unigraph.id": {} }, '_hide': {}};
         if (!localSchema?.type?.["unigraph.id"]) return {};
         let type = localSchema.type["unigraph.id"];
 

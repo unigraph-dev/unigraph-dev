@@ -98,10 +98,10 @@ export const makeSearchQuery = (
     searchOptions: any = {},
 ): string => {
     const qhops: string[] = [];
-    for (let i = 0; i < hops; i += 1) {
+    for (let i = 0; i < hops - 1; i += 1) {
         qhops.push(`qhops${(i + 1).toString()}(func: uid(uhops${i.toString()})) {
             <unigraph.origin> {
-                ${i === hops - 1 ? '' : `uhops${(i + 1).toString()} as `}uid
+                uhops${(i + 1).toString()} as uid
             }
         }`);
     }

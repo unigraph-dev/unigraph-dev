@@ -45,6 +45,8 @@ export function AutoDynamicView({
     if (!callbacks) callbacks = {};
     allowSubentity = allowSubentity === true;
 
+    if (object.constructor.name !== 'UnigraphObject') object = new UnigraphObject(object);
+
     const shouldGetBacklinks = !excludableTypes.includes(object?.type?.['unigraph.id']) && !inline;
     const [backlinks, setBacklinks] = React.useState<any>([]);
     const [totalParents, setTotalParents] = React.useState<string[] | undefined>();
@@ -133,7 +135,7 @@ export function AutoDynamicView({
             window.unigraph.getState('registry/dynamicViewDetailed').unsubscribe(cb2);
             window.unigraph.getState('global/selected').unsubscribe(cbsel);
             window.unigraph.getState('global/focused').unsubscribe(cbfoc);
-            window.dragselect?.removeSelectables([viewElRef]);
+            if (viewElRef) window.dragselect?.removeSelectables([viewElRef]);
             if (hasFocus) {
                 const focused = window.unigraph.getState('global/focused');
                 focused.setValue({ ...focused.value, component: '' });
@@ -158,8 +160,8 @@ export function AutoDynamicView({
     }, [shortcuts]);
 
     React.useEffect(() => {
-        if (object?.uid?.startsWith('0x') && shouldGetBacklinks && dataContext.parents !== undefined) {
-            // console.log(dataContext.getParents(true));
+        if (object?.uid?.startsWith('0x') && shouldGetBacklinks) {
+            // console.log(object?.uid, dataContext.getParents(true));
             const cb = (newBacklinks: any) => {
                 const [pars, refs] = getParentsAndReferences(
                     newBacklinks['~_value'],
@@ -167,16 +169,29 @@ export function AutoDynamicView({
                     object.uid,
                 );
                 // console.log(object.uid, getParents(viewEl.current));
-                setBacklinks(
-                    [pars, refs].map((it) =>
-                        it.filter(
-                            (el) =>
-                                Object.keys(DynamicViews).includes(el?.type?.['unigraph.id']) &&
-                                ![...dataContext.getParents(true), callbacks?.context?.uid].includes(el.uid),
-                        ),
+                const processedBacklinks: any = [pars, refs].map((it) =>
+                    it.filter(
+                        (el) =>
+                            Object.keys(DynamicViews).includes(el?.type?.['unigraph.id']) &&
+                            ![...dataContext.getParents(true), callbacks?.context?.uid].includes(el.uid),
                     ),
                 );
-                setTotalParents([...(pars || []).map((el) => el.uid), ...(refs || []).map((el) => el.uid)]);
+                setBacklinks((oldBacklinks: any) => {
+                    if (
+                        JSON.stringify(oldBacklinks[0]?.map((el: any) => el.uid).sort()) !==
+                            JSON.stringify(processedBacklinks[0]?.map((el: any) => el.uid).sort()) ||
+                        JSON.stringify(oldBacklinks[1]?.map((el: any) => el.uid).sort()) !==
+                            JSON.stringify(processedBacklinks[1]?.map((el: any) => el.uid).sort())
+                    ) {
+                        return processedBacklinks;
+                    }
+                    return oldBacklinks;
+                });
+                setTotalParents((oldParents: any) => {
+                    const newParents = [...(pars || []).map((el) => el.uid), ...(refs || []).map((el) => el.uid)];
+                    if (JSON.stringify(oldParents?.sort()) !== JSON.stringify(newParents?.sort())) return newParents;
+                    return oldParents;
+                });
             };
             subscribeToBacklinks(object.uid, cb);
             return function cleanup() {
@@ -184,12 +199,22 @@ export function AutoDynamicView({
             };
         }
         return () => {};
-    }, [object?.uid, shouldGetBacklinks, DynamicViews, JSON.stringify(dataContext?.getParents(true)?.sort())]);
+    }, [
+        object?.uid,
+        shouldGetBacklinks,
+        JSON.stringify(Object.keys(DynamicViews).sort()),
+        JSON.stringify(dataContext?.getParents(true)?.sort()),
+    ]);
 
     React.useEffect(() => {
+        if (!isObjectStub) setLoadedObj(object);
+    }, [object, isObjectStub]);
+    const uidRef = React.useRef(undefined);
+    React.useEffect(() => {
         const newSubs = getRandomInt();
-        if (isObjectStub) {
-            console.log(tabContext);
+        if (isObjectStub && object?.uid !== uidRef.current) {
+            uidRef.current = object?.uid;
+            // console.log(tabContext);
             if (subsId) tabContext.unsubscribe(subsId);
             let query = DynamicViews[object.type?.['unigraph.id']]?.query?.(object.uid);
             if (!query) {
@@ -208,12 +233,13 @@ export function AutoDynamicView({
                 { noExpand: true },
             );
             setSubsId(newSubs);
-            return function cleanup() {
-                tabContext.unsubscribe(newSubs);
-            };
+        }
+        if (!isObjectStub) {
+            uidRef.current = undefined;
+            tabContext.unsubscribe(newSubs);
         }
         return () => {};
-    }, [object?.uid]);
+    }, [object?.uid, isObjectStub, DynamicViews, object?.type]);
 
     const [{ isDragging }, drag] = useDrag(() => ({
         type: object?.type?.['unigraph.id'] || '$/schema/any',
@@ -224,9 +250,14 @@ export function AutoDynamicView({
             dataContext: dataContext.contextUid,
             removeFromContext: callbacks?.removeFromContext,
         },
-        collect: (monitor) => ({
-            isDragging: !!monitor.isDragging(),
-        }),
+        collect: (monitor) => {
+            if (monitor.isDragging() && window.dragselect) {
+                window.dragselect.break();
+            }
+            return {
+                isDragging: !!monitor.isDragging(),
+            };
+        },
     }));
 
     const [, drop] = useDrop(() => ({
@@ -264,13 +295,13 @@ export function AutoDynamicView({
 
     const attach = React.useCallback(
         (domElement) => {
-            if (domElement && object.uid && recursive) {
+            if (domElement && object?.uid && recursive) {
                 const ids = dataContext.getParents();
                 if (ids.includes(object?.uid) && !inline) {
                     // recursive - deal with it somehow
                     setIsRecursion(true);
                 } else setIsRecursion(false);
-            } else if (!object.uid) {
+            } else if (!object?.uid) {
                 setIsRecursion(false);
             }
 
@@ -282,32 +313,41 @@ export function AutoDynamicView({
         [isDragging, drag],
     );
 
+    const onClickCaptureHandler = React.useCallback(
+        (ev) => {
+            if (isMultiSelectKeyPressed(ev)) {
+                ev.stopPropagation();
+                selectUid(componentId, false);
+            }
+        },
+        [componentId],
+    );
+
     const BacklinkComponent = React.useMemo(
-        () => (
-            <div
-                style={{
-                    display:
-                        shouldGetBacklinks &&
-                        dataContext.parents !== undefined &&
-                        (backlinks?.[1]?.length || (!noParents && backlinks?.[0]?.length > 0))
-                            ? ''
-                            : 'none',
-                    marginLeft: 'auto',
-                    background: 'lightgray',
-                    padding: '2px 6px',
-                    borderRadius: '6px',
-                    whiteSpace: 'nowrap',
-                    cursor: 'pointer',
-                }}
-                onClick={(ev) => {
-                    ev.stopPropagation();
-                    ev.preventDefault();
-                    window.wsnavigator(`/library/backlink?uid=${object?.uid}`);
-                }}
-            >
-                {(noParents ? 0 : backlinks?.[0]?.length || 0) + (backlinks?.[1]?.length || 0)}
-            </div>
-        ),
+        () =>
+            shouldGetBacklinks &&
+            dataContext.parents !== undefined &&
+            (backlinks?.[1]?.length || (!noParents && backlinks?.[0]?.length > 0)) ? (
+                <div
+                    style={{
+                        marginLeft: 'auto',
+                        background: 'lightgray',
+                        padding: '2px 6px',
+                        borderRadius: '6px',
+                        whiteSpace: 'nowrap',
+                        cursor: 'pointer',
+                    }}
+                    onClick={(ev) => {
+                        ev.stopPropagation();
+                        ev.preventDefault();
+                        window.wsnavigator(`/library/backlink?uid=${object?.uid}`);
+                    }}
+                >
+                    {(noParents ? 0 : backlinks?.[0]?.length || 0) + (backlinks?.[1]?.length || 0)}
+                </div>
+            ) : (
+                []
+            ),
         [noParents, backlinks[0]?.length, backlinks[1]?.length, dataContext.parents === undefined, shouldGetBacklinks],
     );
 
@@ -332,6 +372,7 @@ export function AutoDynamicView({
                               registerBoundingBox: (el: any) => {
                                   el.dataset.component = componentId;
                                   window.dragselect.addSelectables([el]);
+                                  el.addEventListener('pointerup', onClickCaptureHandler);
                               },
                           }
                         : {}),
@@ -400,7 +441,7 @@ export function AutoDynamicView({
             )}
         >
             <DataContextWrapper
-                contextUid={object.uid}
+                contextUid={object?.uid}
                 contextData={getObject()}
                 parents={totalParents}
                 viewType="$/schema/dynamic_view"
@@ -414,12 +455,7 @@ export function AutoDynamicView({
                         borderRadius: isSelected || isDragging ? '12px' : '',
                     }}
                     key={`object-view-${object?.uid}`}
-                    onClickCapture={(ev) => {
-                        if (isMultiSelectKeyPressed(ev)) {
-                            ev.stopPropagation();
-                            selectUid(componentId, false);
-                        }
-                    }}
+                    onClickCapture={customBoundingBox ? () => undefined : onClickCaptureHandler}
                     onClick={(ev) => {
                         if (!noClickthrough && canClickthrough) {
                             typeof onClick === 'function'

@@ -44,6 +44,20 @@ export function findUid(object: any, uid: string, path?: any[]) {
     return [undefined, currentPath];
 }
 
+export function findAllUids(object: any, uid: string) {
+    let currentResult = true;
+    const allResults: any[] = [];
+    while (currentResult !== undefined && currentResult !== null) {
+        const res = findUid(object, uid);
+        if (res[0] !== undefined && res[0] !== null && res[0].uid) {
+            allResults.push([res[0].uid, res[0], res[1]]);
+            delete res[0].uid;
+        }
+        [currentResult] = res;
+    }
+    return allResults.map((el) => [Object.assign(el[1], { uid: el[0] }), el[2]]);
+}
+
 export function assignUids(object: any, totalLeases: string[], usedLeases: string[], blankMap: any) {
     if (typeof object === 'object' && object) {
         if (Array.isArray(object)) {
@@ -121,6 +135,7 @@ export function augmentStubs(objWithStubs: any, origObj: any) {
             if (Array.isArray(curr)) {
                 curr.forEach((el) => recurseObj(el, seen));
             } else {
+                // console.log('looking ', curr.uid, curr);
                 if (curr.uid && seen.includes(curr.uid)) return;
                 if (curr.uid) seen = [...seen, curr.uid];
                 Object.keys(curr).forEach((el) => {
@@ -132,7 +147,12 @@ export function augmentStubs(objWithStubs: any, origObj: any) {
                     Object.keys(curr).length <= 2 &&
                     _.difference(Object.keys(uidDict[curr.uid]), Object.keys(curr)).length > 0
                 ) {
-                    Object.assign(curr, uidDict[curr.uid], JSON.parse(JSON.stringify(curr)));
+                    // console.log('applied ', curr.uid, { dict: uidDict[curr.uid], curr });
+                    Object.assign(
+                        curr,
+                        JSON.parse(JSON.stringify(uidDict[curr.uid])),
+                        JSON.parse(JSON.stringify(curr)),
+                    );
                 }
             }
         }

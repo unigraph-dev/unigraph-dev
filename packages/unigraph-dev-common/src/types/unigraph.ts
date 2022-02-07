@@ -13,7 +13,7 @@ export type AppState<T = any> = {
     subscribers: ((newValue: T) => any)[];
     subscribe: (fn: (newValue: T) => any) => any;
     unsubscribe: (fn: (newValue: T) => any) => any;
-    setValue: (newValue: T, flush?: boolean) => any;
+    setValue: (newValue: T | ((oldValue: T) => T), flush?: boolean) => any;
 };
 
 export type UnigraphSchemaDeclaration = {
@@ -246,7 +246,7 @@ export interface Unigraph<TT = WebSocket | false> {
     /**
      * Updates objects simply using the SPO triplet format.
      */
-    updateTriplets(triplets: any[], subIds?: any[] | any): any;
+    updateTriplets(triplets: any[], isDelete?: boolean, subIds?: any[] | any): any;
     /**
      * Updates an existing object by its UID and describing the new object.
      *
@@ -308,6 +308,13 @@ export interface Unigraph<TT = WebSocket | false> {
     getReferenceables(key?: string | undefined, asMapWithContent?: boolean | undefined): Promise<any>;
     /** Gets a list of schemas. */
     getSchemas(schemas?: string[] | undefined, resolve?: boolean): Promise<Record<string, SchemaDgraph>>;
+    /**
+     * Gets an object with the given UID or name from Unigraph.
+     * If the object is updated, you will not be notified.
+     *
+     * @param uidOrName either the UID of the object or its name (such as `$/entity/example`).
+     * @param options Options for the query.
+     */
     getObject?(
         uidOrName: string,
         options?: {
@@ -412,5 +419,31 @@ export interface Unigraph<TT = WebSocket | false> {
      */
     touch(uids: string[] | string): any;
     leaseUid?(): string;
+    disablePackage?(packageName: string): any;
+    enablePackage?(packageName: string): any;
+    /**
+     * Recalculates backlinks from a set of objects, to a set of children.
+     *
+     * This is done by fetching everything of the given fromUids and see if they still lead to the toUids.
+     * If not, the backlink is removed.
+     *
+     * @param fromUids A list of objects to fetch.
+     * @param toUids
+     * @param depth
+     */
+    recalculateBacklinks(fromUids: string[], toUids: string[], depth?: number): any;
+    /**
+     * Adds a list of fromUids (parents) to backlinks (unigraph.origin) of toUids (children).
+     * @param fromUids
+     * @param toUids
+     */
+    addBacklinks(fromUids: string[], toUids: string[]): any;
+    /**
+     * Sends a fake update to the UI with the updater object for the client.
+     * @param subId subscription ID to send the update to
+     * @param updater a padded object that contains an UID, which is contained in the subscription result.
+     * @param eventId the eventId that's attached to this update. Used to signify the most recent fake update, any update before this will not be triggered.
+     */
+    sendFakeUpdate?(subId: any, updater: any, eventId?: any): any;
 }
 /** End of unigraph interface */ // Don't remove this line - needed for Monaco to work

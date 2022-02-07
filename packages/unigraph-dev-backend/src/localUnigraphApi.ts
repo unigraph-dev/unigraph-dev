@@ -159,8 +159,9 @@ export function getLocalUnigraphAPI(
             const res = await client.queryData(query);
             return res;
         },
-        getObject: async (uid: any, options: any) => {
-            if (typeof uid === 'string' && uid.startsWith('$/')) {
+        getObject: async (uidOrName: any, options: any) => {
+            let uid = uidOrName;
+            if (typeof uidOrName === 'string' && uidOrName.startsWith('$/')) {
                 // Is named entity
                 uid = states.namespaceMap[uid].uid;
             }
@@ -223,11 +224,12 @@ export function getLocalUnigraphAPI(
             });
         },
         // latertodo
-        updateTriplets: async (objects) => {
+        updateTriplets: async (objects, isDelete, subIds) => {
             if (Array.isArray(objects)) {
                 // is triplet
                 const updateTriplets = new dgraph.Mutation();
-                updateTriplets.setSetNquads(objects.join('\n'));
+                if (!isDelete) updateTriplets.setSetNquads(objects.join('\n'));
+                else updateTriplets.setDelNquads(objects.join('\n'));
                 const result = await client.createDgraphUpsert({
                     query: false,
                     mutations: [updateTriplets],
@@ -235,6 +237,7 @@ export function getLocalUnigraphAPI(
                 callHooks(states.hooks, 'after_object_changed', {
                     subscriptions: states.subscriptions,
                     caches: states.caches,
+                    subIds,
                 });
             }
         },
@@ -540,6 +543,51 @@ export function getLocalUnigraphAPI(
             const result = await client.createDgraphUpsert({
                 query: false,
                 mutations: [updater],
+            });
+            return result;
+        },
+        recalculateBacklinks: async (fromUids, toUids, depth = 50) => {
+            const queries = fromUids.map(
+                (el) => `(func: uid(${el})) @recurse(depth: ${depth}) {uid unigraph.id expand(_userpredicate_) }`,
+            );
+            const res: any[] = (await states.localApi.getQueries(queries)).map((el: any[]) => el[0]);
+            const toDel: string[] = [];
+            res.forEach((el: any) => {
+                const str = JSON.stringify(el);
+                toUids.forEach((it) => {
+                    if (!str.includes(`"${it}"`)) {
+                        toDel.push(`<${it}> <unigraph.origin> <${el.uid}> .`);
+                    }
+                });
+            });
+            const updater = new dgraph.Mutation();
+            updater.setDelNquads(toDel.join('\n'));
+            const result = await client.createDgraphUpsert({
+                query: false,
+                mutations: [updater],
+            });
+            callHooks(states.hooks, 'after_object_changed', {
+                subscriptions: states.subscriptions,
+                caches: states.caches,
+            });
+            return result;
+        },
+        addBacklinks: async (fromUids, toUids) => {
+            const toAdd: string[] = [];
+            fromUids.forEach((el) => {
+                toUids.forEach((it) => {
+                    toAdd.push(`<${it}> <unigraph.origin> <${el}> .`);
+                });
+            });
+            const updater = new dgraph.Mutation();
+            updater.setSetNquads(toAdd.join('\n'));
+            const result = await client.createDgraphUpsert({
+                query: false,
+                mutations: [updater],
+            });
+            callHooks(states.hooks, 'after_object_changed', {
+                subscriptions: states.subscriptions,
+                caches: states.caches,
             });
             return result;
         },

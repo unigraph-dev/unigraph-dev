@@ -1,6 +1,6 @@
-import { Button, Checkbox, Chip, ListItemText, TextField, Typography } from '@material-ui/core';
-import { CalendarToday, PriorityHigh } from '@material-ui/icons';
-import React, { useState } from 'react';
+import { Checkbox, Chip, ListItemText, Typography, Fab, Divider } from '@material-ui/core';
+import { CalendarToday, PriorityHigh, Add as AddIcon } from '@material-ui/icons';
+import React from 'react';
 import { pkg as todoPackage } from 'unigraph-dev-common/lib/data/unigraph.todo.pkg';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import Sugar from 'sugar';
@@ -32,11 +32,24 @@ function TodoListBody({ data }: { data: ATodoList[] }) {
                 defaultFilter="only-incomplete"
                 compact
             />
+            <Fab
+                aria-label="add"
+                style={{ position: 'absolute', right: '16px', bottom: '16px' }}
+                onClick={() => {
+                    window.unigraph.getState('global/omnibarSummoner').setValue({
+                        show: true,
+                        tooltip: 'Add a todo item',
+                        defaultValue: '+todo ',
+                    });
+                }}
+            >
+                <AddIcon />
+            </Fab>
         </div>
     );
 }
 
-export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline }) => {
+export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline, isEmbed }) => {
     // console.log(data);
     const unpadded: ATodoList = unpad(data);
     // console.log(unpadded)
@@ -47,87 +60,106 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
                 newData.uid,
                 {
                     _value: {
-                        done: { '_value.!': newData.get('done')['_value.!'] },
+                        uid: newData._value.uid,
+                        done: { uid: newData._value.done.uid, '_value.!': newData.get('done')['_value.!'] },
                     },
                     _hide: newData.get('done')['_value.!'],
                 },
-                true,
+                !newData._value.uid,
                 false,
+                callbacks?.subsId,
+                undefined,
+                true,
             );
         },
     };
+
+    const NameDisplay = React.useMemo(
+        () => (
+            <AutoDynamicView
+                object={data.get('name')._value._value}
+                noDrag
+                noDrop
+                noContextMenu
+                callbacks={{
+                    'get-semantic-properties': () => data,
+                }}
+            />
+        ),
+        [data],
+    );
+
+    const SecondaryDisplay = React.useMemo(
+        () => (
+            <>
+                {!unpadded.children?.map
+                    ? []
+                    : data?._value?.children?.['_value[']
+                          ?.filter((it: any) => !it._key)
+                          .map((it: any) => (
+                              <AutoDynamicView object={new UnigraphObject(it._value)} callbacks={callbacks} inline />
+                          ))}
+                {unpadded.priority > 0
+                    ? [<Chip size="small" icon={<PriorityHigh />} label={`Priority ${unpadded.priority}`} />]
+                    : []}
+                {unpadded.time_frame?.start?.datetime && new Date(unpadded.time_frame?.start?.datetime).getTime() !== 0
+                    ? [
+                          <Chip
+                              size="small"
+                              icon={<CalendarToday />}
+                              label={`Start: ${Sugar.Date.relative(new Date(unpadded.time_frame?.start?.datetime))}`}
+                          />,
+                      ]
+                    : []}
+                {unpadded.time_frame?.end?.datetime &&
+                new Date(unpadded.time_frame?.start?.datetime).getTime() !== maxDateStamp
+                    ? [
+                          <Chip
+                              size="small"
+                              icon={<CalendarToday />}
+                              label={`End: ${Sugar.Date.relative(new Date(unpadded.time_frame?.end?.datetime))}`}
+                          />,
+                      ]
+                    : []}
+            </>
+        ),
+        [unpadded, callbacks, data],
+    );
     // console.log(data.uid, unpadded)
     return (
         <div style={{ display: 'flex' }}>
             <Checkbox
+                size={callbacks.isEmbed ? 'small' : 'medium'}
+                style={{ padding: callbacks.isEmbed ? '2px' : '', marginRight: callbacks.isEmbed ? '4px' : '' }}
                 checked={unpadded.done}
                 onClick={(_) => {
                     data.get('done')['_value.!'] = !data.get('done')['_value.!'];
                     totalCallbacks.onUpdate(data);
                 }}
             />
-            <ListItemText
-                style={{ margin: compact ? '0px' : '', alignSelf: 'center' }}
-                primary={
-                    <AutoDynamicView
-                        object={data.get('name')._value._value}
-                        noDrag
-                        noDrop
-                        noContextMenu
-                        callbacks={{
-                            'get-semantic-properties': () => data,
-                        }}
-                    />
-                }
-                secondary={
-                    <div
-                        style={{
-                            display: 'flex',
-                            alignItems: 'baseline',
-                            flexWrap: 'wrap',
-                        }}
-                    >
-                        {!unpadded.children?.map
-                            ? []
-                            : data?._value?.children?.['_value[']
-                                  ?.filter((it: any) => !it._key)
-                                  .map((it: any) => (
-                                      <AutoDynamicView
-                                          object={new UnigraphObject(it._value)}
-                                          callbacks={callbacks}
-                                          inline
-                                      />
-                                  ))}
-                        {unpadded.priority > 0
-                            ? [<Chip size="small" icon={<PriorityHigh />} label={`Priority ${unpadded.priority}`} />]
-                            : []}
-                        {unpadded.time_frame?.start?.datetime &&
-                        new Date(unpadded.time_frame?.start?.datetime).getTime() !== 0
-                            ? [
-                                  <Chip
-                                      size="small"
-                                      icon={<CalendarToday />}
-                                      label={`Start: ${Sugar.Date.relative(
-                                          new Date(unpadded.time_frame?.start?.datetime),
-                                      )}`}
-                                  />,
-                              ]
-                            : []}
-                        {unpadded.time_frame?.end?.datetime &&
-                        new Date(unpadded.time_frame?.start?.datetime).getTime() !== maxDateStamp
-                            ? [
-                                  <Chip
-                                      size="small"
-                                      icon={<CalendarToday />}
-                                      label={`End: ${Sugar.Date.relative(
-                                          new Date(unpadded.time_frame?.end?.datetime),
-                                      )}`}
-                                  />,
-                              ]
-                            : []}
-                    </div>
-                }
-            />
+            {callbacks.isEmbed ? (
+                [
+                    NameDisplay,
+                    <Divider orientation="vertical" style={{ marginLeft: '4px', marginRight: '4px' }} />,
+                    SecondaryDisplay,
+                ]
+            ) : (
+                <ListItemText
+                    style={{ margin: compact ? '0px' : '', alignSelf: 'center' }}
+                    primary={NameDisplay}
+                    secondary={
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'baseline',
+                                flexWrap: 'wrap',
+                            }}
+                        >
+                            {SecondaryDisplay}
+                        </div>
+                    }
+                />
+            )}
         </div>
     );
 };
@@ -167,7 +199,66 @@ const tt = () => (
 
 export const init = () => {
     const description = 'Add a new Todo object';
-    registerDynamicViews({ '$/schema/todo': TodoItem });
+    registerDynamicViews({
+        '$/schema/todo': {
+            view: TodoItem,
+            query: (uid: string) => `
+            (func: uid(${uid})) {
+                uid
+                type { <unigraph.id> }
+                dgraph.type
+                <_hide>
+                <_value> {
+                    uid
+                    name {
+                        uid _value {
+                            dgraph.type uid
+                            type { <unigraph.id> }
+                            _value { dgraph.type uid type { <unigraph.id> } <_value.%> }
+                        }
+                    }
+                    done { uid <_value.!> }
+                    priority { <_value.#i> }
+                    time_frame {
+                        uid _value {
+                            dgraph.type uid type { <unigraph.id> }
+                            _value {
+                                start {
+                                    uid _value {
+                                        dgraph.type uid
+                                        type { <unigraph.id> }
+                                        _value { datetime { <_value.%dt> } timezone { <_value.%> } }
+                                    }
+                                }
+                                end {
+                                    uid _value {
+                                        dgraph.type uid
+                                        type { <unigraph.id> }
+                                        _value { datetime { <_value.%dt> } timezone { <_value.%> } }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    children {
+                        <_value[> {
+                            uid _key _index {<_value.#i> uid}
+                            _value {
+                                dgraph.type uid type { <unigraph.id> }
+                                _value {
+                                    dgraph.type uid type { <unigraph.id> }
+                                    _value {
+                                        uid name { uid <_value.%> }
+                                        color { uid _value { <_value.%> dgraph.type uid type { <unigraph.id> } } }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }`,
+        },
+    });
     registerQuickAdder({
         todo: {
             adder: quickAdder,

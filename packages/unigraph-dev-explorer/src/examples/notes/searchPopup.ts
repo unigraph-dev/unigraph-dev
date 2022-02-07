@@ -19,7 +19,7 @@ export const setSearchPopup = (boxRef: any, searchString: string, onSelected: an
                         '$/schema/note_block',
                     );
                     // console.log(newUid);
-                    return newUid[0];
+                    return [newUid[0], '$/schema/note_block'];
                 },
             },
             {
@@ -51,7 +51,7 @@ export const setSearchPopup = (boxRef: any, searchString: string, onSelected: an
                         },
                         '$/schema/note_block',
                     );
-                    return newTagUid[0];
+                    return [newTagUid[0], '$/schema/tag'];
                 },
             },
         ],
