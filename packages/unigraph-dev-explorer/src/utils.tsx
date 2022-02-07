@@ -552,3 +552,7 @@ export function getDateAsUTC(input: any) {
 export function typeHasDetailedView(type: string) {
     return Object.keys(window.unigraph.getState('registry/dynamicViewDetailed').value).includes(type);
 }
+
+export function typeHasDynamicView(type: string) {
+    return Object.keys(window.unigraph.getState('registry/dynamicView').value).includes(type);
+}
