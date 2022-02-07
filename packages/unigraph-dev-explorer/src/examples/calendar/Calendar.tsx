@@ -28,48 +28,86 @@ export function CalendarEvent({ data, callbacks, inline }: any) {
         </div>
     );
 
-    return (
-        <div style={{ display: 'flex' }}>
-            {inline ? [] : CalendarColor}
-
-            <div>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                    {inline ? CalendarColor : []}
-                    <Typography variant="body1" style={{ marginRight: '8px' }}>
-                        <strong>{data.get('name').as('primitive')}</strong>
-                    </Typography>
-                    <Typography variant="body2" style={{ color: 'gray' }}>
-                        {data.get('location').as('primitive')}
-                    </Typography>
-                </div>
-                <AutoDynamicView
-                    object={new UnigraphObject(data.get('time_frame')._value)}
-                    callbacks={callbacks}
-                    noDrag
-                    noDrop
-                    noContextMenu
-                    inline
-                />
-                <div
-                    style={{
-                        display: data?._value?.children?.['_value[']?.map ? '' : 'none',
-                        marginTop: '4px',
-                    }}
-                >
-                    {data?._value?.children?.['_value[']?.map
-                        ? data._value.children['_value['].map((it: any) => (
-                              <AutoDynamicView
-                                  object={new UnigraphObject(it._value)}
-                                  callbacks={callbacks}
-                                  inline
-                                  style={{ verticalAlign: 'middle' }}
-                              />
-                          ))
-                        : []}
+    const renderInline = () => {
+        return (
+            <div style={{ display: 'flex' }}>
+                <div>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        {CalendarColor}
+                        <Typography variant="body1" style={{ marginRight: '8px' }}>
+                            {data.get('name').as('primitive')}
+                        </Typography>
+                        <Typography variant="body2" style={{ color: 'gray' }}>
+                            {data.get('location').as('primitive')}
+                        </Typography>
+                    </div>
+                    <div
+                        style={{
+                            display: data?._value?.children?.['_value[']?.map ? '' : 'none',
+                            marginTop: '0px',
+                        }}
+                    >
+                        {data?._value?.children?.['_value[']?.map
+                            ? data._value.children['_value['].map((it: any) => (
+                                  <AutoDynamicView
+                                      object={new UnigraphObject(it._value)}
+                                      callbacks={callbacks}
+                                      inline
+                                      style={{ verticalAlign: 'middle' }}
+                                  />
+                              ))
+                            : []}
+                    </div>
                 </div>
             </div>
-        </div>
-    );
+        );
+    };
+
+    const render = () => {
+        return (
+            <div style={{ display: 'flex' }}>
+                {CalendarColor}
+                <div>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <Typography variant="body1" style={{ marginRight: '8px' }}>
+                            <strong>{data.get('name').as('primitive')}</strong>
+                        </Typography>
+                        <Typography variant="body2" style={{ color: 'gray' }}>
+                            {data.get('location').as('primitive')}
+                        </Typography>
+                    </div>
+
+                    <AutoDynamicView
+                        object={new UnigraphObject(data.get('time_frame')._value)}
+                        callbacks={callbacks}
+                        noDrag
+                        noDrop
+                        noContextMenu
+                        inline
+                    />
+                    <div
+                        style={{
+                            display: data?._value?.children?.['_value[']?.map ? '' : 'none',
+                            marginTop: '4px',
+                        }}
+                    >
+                        {data?._value?.children?.['_value[']?.map
+                            ? data._value.children['_value['].map((it: any) => (
+                                  <AutoDynamicView
+                                      object={new UnigraphObject(it._value)}
+                                      callbacks={callbacks}
+                                      inline
+                                      style={{ verticalAlign: 'middle' }}
+                                  />
+                              ))
+                            : []}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    return inline ? renderInline() : render();
 }
 
 export function TimeFrame({ data, callbacks }: any) {
@@ -181,7 +219,7 @@ const recurrentCalendarEventToBigCalendarEventsInRange = curry(
     },
 );
 
-const recurrentCalendarEventToBigCalendarEvents = recurrentCalendarEventToBigCalendarEventsInRange(null);
+// const recurrentCalendarEventToBigCalendarEvents = recurrentCalendarEventToBigCalendarEventsInRange(null);
 
 const wrapInArray = (obj: any) => {
     if (obj) {
@@ -202,7 +240,7 @@ const datedToBigCalendarEventsInRange = curry(
     },
 );
 
-const datedToBigCalendarEvents = datedToBigCalendarEventsInRange(null);
+// const datedToBigCalendarEvents = datedToBigCalendarEventsInRange(null);
 
 const unigraphBigCalendarEventComponent = ({ event, ...props }: any) => {
     return <AutoDynamicView object={new UnigraphObject(event.unigraphObj)} inline callbacks={{ noDate: true }} />;
