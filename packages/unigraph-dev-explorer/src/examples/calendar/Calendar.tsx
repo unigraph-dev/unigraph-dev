@@ -2,9 +2,7 @@ import { Avatar, Typography } from '@material-ui/core';
 import React from 'react';
 import { buildGraph, getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import Sugar from 'sugar';
-import { unionBy, isString, has, flow, propEq, unionWith } from 'lodash/fp';
-import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
-import { AnyAaaaRecord } from 'dns';
+import { unionBy, isString, has, flow, propEq, curry, unionWith } from 'lodash/fp';
 import { Calendar as BigCalendar, DateLocalizer, momentLocalizer, stringOrDate, View } from 'react-big-calendar';
 import moment from 'moment';
 import {} from 'lodash';
@@ -105,8 +103,8 @@ const queryDatedWithinTimeRange = (start: string, end: string) => {
         }
       }					 
     }
-            # objects that reference timepoints. Found through timepoint's backlinks in unigraph.origin     
-            findTimedObjects(func: uid(timepointsInRange)){ 
+    # objects that reference timepoints. Found through timepoint's backlinks in unigraph.origin     
+    findTimedObjects(func: uid(timepointsInRange)){ 
       <unigraph.origin>{
                     timedObjs as uid
         }
@@ -153,21 +151,37 @@ const calendarEventToBigCalendarEvent = (datedObj: CalendarEventUni): CalendarVi
     };
 };
 
-const recurrentCalendarEventToBigCalendarEvents = (datedObj: DatedObject): CalendarViewEvent[] => {
-    const timeframes = datedObj.get('recurrence')?.['_value['];
-    if (timeframes?.length) {
-        return buildGraph(timeframes).map((timeframe: any, i: number) => {
-            return {
-                title: datedObj.get('name').as('primitive'),
-                start: new Date(timeframe.get('start/datetime').as('primitive')),
-                end: new Date(timeframe.get('end/datetime').as('primitive')),
-                recurrenceIndex: i,
-                unigraphObj: datedObj,
-            };
-        });
-    }
-    return [calendarEventToBigCalendarEvent(datedObj)];
-};
+type CalendarViewRange = { start: Date; end: Date };
+
+const recurrentCalendarEventToBigCalendarEventsInRange = curry(
+    (range: CalendarViewRange | null, datedObj: DatedObject): CalendarViewEvent[] => {
+        const timeframes = datedObj.get('recurrence')?.['_value['];
+        if (timeframes?.length) {
+            return buildGraph(timeframes)
+                .filter((timeframe) => {
+                    // filter not in our view time range
+                    if (!range) {
+                        return true;
+                    }
+                    const afterStart = new Date(timeframe.get('end/datetime').as('primitive')) >= range.start;
+                    const beforeEnd = new Date(timeframe.get('start/datetime').as('primitive')) <= range.end;
+                    return afterStart && beforeEnd;
+                })
+                .map((timeframe: any, i: number) => {
+                    return {
+                        title: datedObj.get('name').as('primitive'),
+                        start: new Date(timeframe.get('start/datetime').as('primitive')),
+                        end: new Date(timeframe.get('end/datetime').as('primitive')),
+                        recurrenceIndex: i,
+                        unigraphObj: datedObj,
+                    };
+                });
+        }
+        return [calendarEventToBigCalendarEvent(datedObj)];
+    },
+);
+
+const recurrentCalendarEventToBigCalendarEvents = recurrentCalendarEventToBigCalendarEventsInRange(null);
 
 const wrapInArray = (obj: any) => {
     if (obj) {
@@ -176,15 +190,19 @@ const wrapInArray = (obj: any) => {
     return [];
 };
 
-const datedToBigCalendarEvents = (datedObj: DatedObject): CalendarViewEvent[] => {
-    const bigCalendarEventsByType: any = {
-        '$/schema/todo': flow(todoToBigCalendarEvent, wrapInArray),
-        '$/schema/journal': flow(journalToBigCalendarEvent, wrapInArray),
-        '$/schema/calendar_event': recurrentCalendarEventToBigCalendarEvents,
-        // '$/schema/calendar_event': flow(calendarEventToBigCalendarEvent, wrapInArray),
-    };
-    return bigCalendarEventsByType[datedObj.getType()](datedObj);
-};
+const datedToBigCalendarEventsInRange = curry(
+    (range: CalendarViewRange | null, datedObj: DatedObject): CalendarViewEvent[] => {
+        const bigCalendarEventsByType: any = {
+            '$/schema/todo': flow(todoToBigCalendarEvent, wrapInArray),
+            '$/schema/journal': flow(journalToBigCalendarEvent, wrapInArray),
+            '$/schema/calendar_event': recurrentCalendarEventToBigCalendarEventsInRange(range),
+            // '$/schema/calendar_event': flow(calendarEventToBigCalendarEvent, wrapInArray),
+        };
+        return bigCalendarEventsByType[datedObj.getType()](datedObj);
+    },
+);
+
+const datedToBigCalendarEvents = datedToBigCalendarEventsInRange(null);
 
 const unigraphBigCalendarEventComponent = ({ event, ...props }: any) => {
     return <AutoDynamicView object={new UnigraphObject(event.unigraphObj)} inline callbacks={{ noDate: true }} />;
@@ -208,7 +226,7 @@ export function Calendar() {
     const [currentEvents, setCurrentEvents] = React.useState<CalendarViewEvent[]>([]);
     const [localizer, _] = React.useState<DateLocalizer>(() => momentLocalizer(moment));
     const [currentView, setCurrentView] = React.useState<View | undefined>('week');
-    const [viewRange, setViewRange] = React.useState<{ start: Date; end: Date }>({
+    const [viewRange, setViewRange] = React.useState<CalendarViewRange>({
         start: getCurrentWeekStart(new Date()),
         end: getCurrentWeekEnd(new Date()),
     });
@@ -216,6 +234,7 @@ export function Calendar() {
     const addToCurrentEvents = React.useCallback(
         (newEvents: CalendarViewEvent[]) => {
             const updatedCurrentEvents = unionWith(compareCalendarViewEvents, newEvents, currentEvents);
+            console.log('updatedCurrentEvents', { updatedCurrentEventsLen: updatedCurrentEvents.length });
             setCurrentEvents(updatedCurrentEvents);
         },
 
@@ -230,7 +249,7 @@ export function Calendar() {
                 const graphRes = buildGraph(res) as DatedObject[];
                 addToCurrentEvents(
                     graphRes
-                        .map(datedToBigCalendarEvents)
+                        .map(datedToBigCalendarEventsInRange(viewRange))
                         .flat()
                         .filter((x) => x),
                 );
