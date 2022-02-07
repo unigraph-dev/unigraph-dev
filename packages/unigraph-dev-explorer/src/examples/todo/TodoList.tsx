@@ -65,7 +65,7 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
                     },
                     _hide: newData.get('done')['_value.!'],
                 },
-                false,
+                !newData._value.uid,
                 false,
                 callbacks?.subsId,
                 undefined,
