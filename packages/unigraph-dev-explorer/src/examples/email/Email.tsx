@@ -68,7 +68,11 @@ const EmailMessage: DynamicViewRenderer = ({ data, callbacks }) => {
             <ListItemText
                 primary={[
                     <strong>
-                        <AutoDynamicView object={fromPerson} callbacks={{ identifier: ider }} inline />
+                        <AutoDynamicView
+                            object={fromPerson}
+                            callbacks={{ identifier: ider }}
+                            options={{ inline: true }}
+                        />
                     </strong>,
                     <br />,
                     data?.get('name')?.as('primitive'),

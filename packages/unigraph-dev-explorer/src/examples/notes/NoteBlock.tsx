@@ -82,14 +82,17 @@ const childrenComponents = {
 
 const BlockChild = ({ elindex, shortcuts, displayAs, isCollapsed, setCollapsed, callbacks, el }: any) => (
     <AutoDynamicView
-        noDrag
-        noContextMenu
-        compact
-        allowSubentity
-        customBoundingBox
-        noClickthrough
-        noSubentities={['$/schema/note_block', '$/schema/embed_block'].includes(el.type?.['unigraph.id'])}
-        noBacklinks={['$/schema/note_block', '$/schema/embed_block'].includes(el.type?.['unigraph.id'])}
+        options={{
+            noDrag: true,
+            noContextMenu: true,
+            compact: true,
+            allowSubentity: true,
+            customBoundingBox: true,
+            noClickthrough: true,
+            expandedChildren: true,
+            noSubentities: ['$/schema/note_block', '$/schema/embed_block'].includes(el.type?.['unigraph.id']),
+            noBacklinks: ['$/schema/note_block', '$/schema/embed_block'].includes(el.type?.['unigraph.id']),
+        }}
         object={
             ['$/schema/note_block', '$/schema/embed_block'].includes(el.type?.['unigraph.id'])
                 ? el
@@ -99,7 +102,6 @@ const BlockChild = ({ elindex, shortcuts, displayAs, isCollapsed, setCollapsed, 
                   }
         }
         index={elindex}
-        expandedChildren
         shortcuts={shortcuts}
         callbacks={callbacks}
         components={childrenComponents}
@@ -109,7 +111,6 @@ const BlockChild = ({ elindex, shortcuts, displayAs, isCollapsed, setCollapsed, 
             displayAs,
             setCollapsed,
         }}
-        recursive
     />
 );
 
@@ -279,10 +280,7 @@ export function NoteBlock({ data, inline }: any) {
                     )}
                     <AutoDynamicView
                         object={data.get('text')?._value._value}
-                        noDrag
-                        noDrop
-                        inline
-                        noContextMenu
+                        options={{ noDrag: true, noDrop: true, inline: true, noContextMenu: true }}
                         callbacks={{
                             'get-semantic-properties': () => data,
                         }}
@@ -299,7 +297,7 @@ export function NoteBlock({ data, inline }: any) {
             </div>
             <div>
                 {otherChildren.map((el: any) => (
-                    <AutoDynamicView object={el} inline />
+                    <AutoDynamicView object={el} options={{ inline: true }} />
                 ))}
             </div>
         </div>
@@ -435,10 +433,12 @@ export function ParentsAndReferences({ data }: any) {
                     '$/schema/note_block': {
                         view: NoChildrenReferenceNoteView,
                         query: noteQueryDetailed,
-                        noClickthrough: true,
-                        noSubentities: true,
-                        noContextMenu: true,
-                        noBacklinks: true,
+                        options: {
+                            noClickthrough: true,
+                            noSubentities: true,
+                            noContextMenu: true,
+                            noBacklinks: true,
+                        },
                     },
                 }}
             />
@@ -453,10 +453,12 @@ export function ParentsAndReferences({ data }: any) {
                     '$/schema/note_block': {
                         view: ReferenceNoteView,
                         query: noteQueryDetailed,
-                        noClickthrough: true,
-                        noSubentities: true,
-                        noContextMenu: true,
-                        noBacklinks: true,
+                        options: {
+                            noClickthrough: true,
+                            noSubentities: true,
+                            noContextMenu: true,
+                            noBacklinks: true,
+                        },
                     },
                 }}
             />
@@ -1143,7 +1145,7 @@ export function DetailedNoteBlock({
                                         ? el
                                         : { uid: el.uid, type: el.type }
                                 }
-                                inline
+                                options={{ inline: true }}
                             />
                         ))}
                 >
@@ -1196,10 +1198,7 @@ export function DetailedNoteBlock({
                                 isHeading: !(isChildren || callbacks.isEmbed),
                             }}
                             style={{ display: isEditing ? 'none' : '' }}
-                            noDrag
-                            noContextMenu
-                            inline
-                            noClickthrough
+                            options={{ inline: true, noDrag: true, noContextMenu: true, noClickthrough: true }}
                             callbacks={{
                                 'get-semantic-properties': () => data,
                             }}
@@ -1443,7 +1442,7 @@ export function DetailedEmbedBlock({
                                         ? el
                                         : { uid: el.uid, type: el.type }
                                 }
-                                inline
+                                options={{ inline: true }}
                             />
                         ))}
                 >
@@ -1480,10 +1479,7 @@ export function DetailedEmbedBlock({
                             attributes={{
                                 isHeading: !(isChildren || callbacks.isEmbed),
                             }}
-                            noDrag
-                            noDrop
-                            inline
-                            noClickthrough
+                            options={{ inline: true, noDrag: true, noDrop: true, noClickthrough: true }}
                             callbacks={{
                                 'get-semantic-properties': () => data,
                                 isEmbed: true,
@@ -1619,10 +1615,7 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
                     )}
                     <AutoDynamicView
                         object={data.get('text')?._value._value}
-                        noDrag
-                        noDrop
-                        inline
-                        noContextMenu
+                        options={{ inline: true, noDrag: true, noDrop: true, noContextMenu: true }}
                         callbacks={{
                             'get-semantic-properties': () => data,
                         }}
@@ -1639,8 +1632,7 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
                                     <AutoDynamicView
                                         object={refObject}
                                         callbacks={{ isEmbed: true }}
-                                        noClickthrough
-                                        noSubentities
+                                        options={{ noClickthrough: true, noSubentities: true }}
                                         components={childrenComponents}
                                         attributes={{
                                             isChildren: true,
@@ -1654,7 +1646,7 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
             </div>
             <div>
                 {otherChildren.map((el: any) => (
-                    <AutoDynamicView object={el} inline />
+                    <AutoDynamicView object={el} options={{ inline: true }} />
                 ))}
             </div>
         </div>

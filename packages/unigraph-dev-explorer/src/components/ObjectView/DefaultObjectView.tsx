@@ -57,7 +57,9 @@ const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options, callba
 
     switch (options.viewer) {
         case 'dynamic-view':
-            FinalObjectViewer = <AutoDynamicView object={object} allowSubentity callbacks={callbacks} />;
+            FinalObjectViewer = (
+                <AutoDynamicView object={object} options={{ allowSubentity: true }} callbacks={callbacks} />
+            );
             break;
 
         case 'dynamic-view-detailed':

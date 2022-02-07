@@ -8,7 +8,7 @@ function TagList({ data }: any) {
     return (
         <div>
             {data.map((el: any) => (
-                <AutoDynamicView inline object={el} />
+                <AutoDynamicView options={{ inline: true }} object={el} />
             ))}
         </div>
     );

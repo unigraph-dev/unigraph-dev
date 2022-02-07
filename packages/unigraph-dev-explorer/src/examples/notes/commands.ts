@@ -678,7 +678,7 @@ export const indentChildren = (data: any, context: NoteEditorContext, index: num
         true,
     );
     window.unigraph.touch(parents.map((el) => el.uid));
-    context.edited.current = true;
+    if (context?.edited?.current) context.edited.current = true;
 
     // context.setCommand(() => () => focusUid(newUid._value.uid));
     // context.setCommand(() => noteBlockCommands['set-focus'].bind(this, data, {...context, childrenref: {current: context.childrenref.current.children[parent as number].children[0].children[0].children[1]}}, -1))
@@ -792,7 +792,7 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
         }, 1000);
     }
     window.unigraph.touch(parents.map((el) => el.uid));
-    context.edited.current = true;
+    if (context?.edited?.current) context.edited.current = true;
     // context.setCommand(() => () => focusUid(newChildren[parent + 1]._value._value.uid));
 };
 

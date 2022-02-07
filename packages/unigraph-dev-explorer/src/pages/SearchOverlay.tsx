@@ -47,9 +47,7 @@ function AdderComponent({ input, setInput, open, setClose, callback, summonerToo
                             >
                                 <AutoDynamicView
                                     object={new UnigraphObject(padded)}
-                                    noDrag
-                                    noDrop
-                                    noClickthrough
+                                    options={{ noDrag: true, noDrop: true, noClickthrough: true }}
                                     style={{
                                         border: 'gray',
                                         borderStyle: 'dashed',
@@ -211,7 +209,7 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
                           element: (
                               <AutoDynamicView
                                   object={datael}
-                                  noClickthrough={false}
+                                  options={{ noClickthrough: false }}
                                   style={{
                                       cursor: 'pointer',
                                       display: 'flex',

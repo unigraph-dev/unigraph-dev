@@ -14,7 +14,7 @@ import { noteQuery, noteQueryDetailed, journalQuery, journalQueryDetailed } from
 
 export const init = () => {
     registerDynamicViews({
-        '$/schema/note_block': { view: NoteBlock, query: noteQuery, noSubentities: true },
+        '$/schema/note_block': { view: NoteBlock, query: noteQuery, options: { noSubentities: true } },
     });
     registerDetailedDynamicViews({
         '$/schema/note_block': {
