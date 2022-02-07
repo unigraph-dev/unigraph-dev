@@ -7,6 +7,8 @@ import { DynamicViewRenderer } from '../../global.d';
 import { subscribeToBacklinks } from '../../unigraph-react';
 import { DataContext, DataContextWrapper, TabContext } from '../../utils';
 import { ObjectEditor } from '../ObjectEditor/ObjectEditor';
+import { useBacklinkDelegate } from './AutoDynamicView/BacklinkDelegate';
+import { useFocusDelegate } from './AutoDynamicView/FocusSelectionDelegate';
 import { getParentsAndReferences } from './backlinksUtils';
 import { isStub } from './utils';
 
@@ -24,7 +26,6 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
     const [loadedObj, setLoadedObj] = React.useState<any>(false);
     const [subsId, setSubsId] = React.useState(getRandomInt());
 
-    const dataContext = React.useContext(DataContext);
     const tabContext = React.useContext(TabContext);
 
     const [DynamicViewsDetailed, setDynamicViewsDetailed] = React.useState({
@@ -33,58 +34,18 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
     });
 
     const [componentId, setComponentId] = React.useState(getRandomId());
-    const [isFocused, setIsFocused] = React.useState(
-        window.unigraph.getState('global/focused').value.uid === object?.uid && tabContext.isVisible(),
-    );
 
-    const [totalParents, setTotalParents] = React.useState<string[] | undefined>();
-
-    React.useEffect(() => {
-        if (object?.uid?.startsWith('0x')) {
-            const cb = (newBacklinks: any) => {
-                const [pars, refs] = getParentsAndReferences(
-                    newBacklinks['~_value'],
-                    newBacklinks['unigraph.origin'],
-                    object.uid,
-                );
-                setTotalParents([...(pars || []).map((el) => el.uid), ...(refs || []).map((el) => el.uid)]);
-            };
-            subscribeToBacklinks(object.uid, cb);
-            return function cleanup() {
-                subscribeToBacklinks(object.uid, cb, true);
-            };
-        }
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        return () => {};
-    }, [object?.uid, JSON.stringify(dataContext?.getParents(true)?.sort())]);
+    const [isFocused, removeFocusOnUnmount] = useFocusDelegate(object?.uid, componentId);
+    const [totalParents] = useBacklinkDelegate(object?.uid, callbacks?.context?.uid, true, false);
 
     React.useEffect(() => {
         const cbDVD = (newIts: any) => setDynamicViewsDetailed({ ...newIts, ...(components || {}) });
         window.unigraph.getState('registry/dynamicViewDetailed').subscribe(cbDVD);
 
-        let hasFocus = false;
-        const cbfoc = (foc: any) => {
-            if (foc.uid === object?.uid && tabContext.isVisible() && !foc?.component?.length) {
-                hasFocus = true;
-                window.unigraph.getState('global/focused').value.component = componentId;
-            }
-            if (
-                foc.uid === object?.uid &&
-                tabContext.isVisible() &&
-                window.unigraph.getState('global/focused').value.component === componentId
-            )
-                setIsFocused(true);
-            else setIsFocused(false);
-
-            return function cleanup() {
-                window.unigraph.getState('registry/dynamicViewDetailed').unsubscribe(cbDVD);
-                if (hasFocus) {
-                    const focused = window.unigraph.getState('global/focused');
-                    focused.setValue({ ...focused.value, component: '' });
-                }
-            };
+        return function cleanup() {
+            window.unigraph.getState('registry/dynamicViewDetailed').unsubscribe(cbDVD);
+            (removeFocusOnUnmount as any)();
         };
-        window.unigraph.getState('global/focused').subscribe(cbfoc);
     }, []);
 
     React.useEffect(() => {

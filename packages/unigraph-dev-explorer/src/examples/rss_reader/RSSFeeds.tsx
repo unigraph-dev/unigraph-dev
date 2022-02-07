@@ -179,7 +179,10 @@ const RSSFeed: DynamicViewRenderer = ({ data, callbacks }) => {
     return (
         <div style={{ display: 'flex', width: '100%' }}>
             <div style={{ flexGrow: 1 }}>
-                <AutoDynamicView object={new UnigraphObject(data?._value?.site_info?._value)} noContextMenu inline />
+                <AutoDynamicView
+                    object={new UnigraphObject(data?._value?.site_info?._value)}
+                    options={{ inline: true, noContextMenu: true }}
+                />
             </div>
             <Typography
                 style={{

@@ -7,49 +7,54 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { useSwipeable } from 'react-swipeable';
 import { buildGraph, UnigraphObject, getRandomInt, getRandomId } from 'unigraph-dev-common/lib/utils/utils';
 import { AutoDynamicViewProps } from '../../types/ObjectView.d';
-import { subscribeToBacklinks } from '../../unigraph-react';
 import { DataContext, DataContextWrapper, isMobile, isMultiSelectKeyPressed, selectUid, TabContext } from '../../utils';
-import { getParentsAndReferences } from './backlinksUtils';
 import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import { StringObjectViewer } from './BasicObjectViews';
 import { excludableTypes } from './GraphView';
 import { getSubentities, isStub, SubentityDropAcceptor } from './utils';
 import { registerKeyboardShortcut, removeKeyboardShortcut } from '../../keyboardShortcuts';
+import { useFocusDelegate, useSelectionDelegate } from './AutoDynamicView/FocusSelectionDelegate';
+import { useBacklinkDelegate } from './AutoDynamicView/BacklinkDelegate';
 
 export function AutoDynamicView({
     object,
     callbacks,
     components,
     attributes,
-    inline,
-    allowSubentity,
-    allowSemantic = true,
+    options,
     style,
-    noDrag,
-    noDrop,
-    noContextMenu,
-    subentityExpandByDefault,
-    noBacklinks,
-    noSubentities,
-    noParents,
-    withParent,
-    compact,
-    noClickthrough,
     onClick,
-    recursive,
-    customBoundingBox,
     shortcuts,
-    expandedChildren,
     ...props
 }: AutoDynamicViewProps) {
+    const [DynamicViews, setDynamicViews] = React.useState({
+        ...window.unigraph.getState('registry/dynamicView').value,
+        ...(components || {}),
+    });
+
+    const finalOptions = { ...options, ...DynamicViews[object?.type?.['unigraph.id']]?.options };
+    const {
+        noDrag,
+        noDrop,
+        noContextMenu,
+        subentityExpandByDefault,
+        noBacklinks,
+        noSubentities,
+        noParents,
+        compact,
+        noClickthrough,
+        inline,
+        allowSubentity,
+        customBoundingBox,
+        allowSemantic = true,
+        expandedChildren,
+    } = finalOptions;
+
     if (!callbacks) callbacks = {};
-    allowSubentity = allowSubentity === true;
 
     if (object.constructor.name !== 'UnigraphObject') object = new UnigraphObject(object);
 
     const shouldGetBacklinks = !excludableTypes.includes(object?.type?.['unigraph.id']) && !inline;
-    const [backlinks, setBacklinks] = React.useState<any>([]);
-    const [totalParents, setTotalParents] = React.useState<string[] | undefined>();
 
     const dataContext = React.useContext(DataContext);
     const tabContext = React.useContext(TabContext);
@@ -61,30 +66,22 @@ export function AutoDynamicView({
     const [isRecursion, setIsRecursion] = React.useState<any>(false);
     const getObject = () => (isObjectStub ? loadedObj : object);
 
-    const [showSubentities, setShowSubentities] = React.useState(!!subentityExpandByDefault);
-
-    const [isSelected, setIsSelected] = React.useState(false);
-    const [isFocused, setIsFocused] = React.useState(
-        window.unigraph.getState('global/focused').value.uid === object?.uid && tabContext.isVisible(),
-    );
-
-    const [DynamicViews, setDynamicViews] = React.useState({
-        ...window.unigraph.getState('registry/dynamicView').value,
-        ...(components || {}),
-    });
     const [canClickthrough, setCanClickthrough] = React.useState(
         Object.keys(window.unigraph.getState('registry/dynamicViewDetailed').value).includes(
             getObject()?.type?.['unigraph.id'] || object?.type?.['unigraph.id'],
         ),
     );
 
-    noClickthrough = noClickthrough || DynamicViews[object?.type?.['unigraph.id']]?.noClickthrough;
-    noSubentities = noSubentities || DynamicViews[object?.type?.['unigraph.id']]?.noSubentities;
-    noDrag = noDrag || DynamicViews[object?.type?.['unigraph.id']]?.noDrag;
-    noDrop = noDrop || DynamicViews[object?.type?.['unigraph.id']]?.noDrop;
-    noContextMenu = noContextMenu || DynamicViews[object?.type?.['unigraph.id']]?.noContextMenu;
-    noBacklinks = noBacklinks || DynamicViews[object?.type?.['unigraph.id']]?.noBacklinks;
-    shortcuts = shortcuts || DynamicViews[object?.type?.['unigraph.id']]?.shortcuts;
+    const [showSubentities, setShowSubentities] = React.useState(!!subentityExpandByDefault);
+
+    const [isSelected] = useSelectionDelegate(object?.uid, componentId);
+    const [isFocused, removeFocusOnUnmount] = useFocusDelegate(object?.uid, componentId);
+    const [totalParents, BacklinkComponent] = useBacklinkDelegate(
+        object?.uid,
+        callbacks?.context?.uid,
+        shouldGetBacklinks,
+        noParents,
+    );
 
     const viewEl = React.useRef(null);
 
@@ -104,28 +101,6 @@ export function AutoDynamicView({
             );
         window.unigraph.getState('registry/dynamicViewDetailed').subscribe(cb2);
 
-        const cbsel = (sel: any) => {
-            if (sel?.includes?.(componentId)) setIsSelected(true);
-            else setIsSelected(false);
-        };
-        window.unigraph.getState('global/selected').subscribe(cbsel);
-
-        let hasFocus = false;
-        const cbfoc = (foc: any) => {
-            if (foc.uid === object?.uid && tabContext.isVisible() && !foc?.component?.length) {
-                hasFocus = true;
-                window.unigraph.getState('global/focused').value.component = componentId;
-            }
-            if (
-                foc.uid === object?.uid &&
-                tabContext.isVisible() &&
-                window.unigraph.getState('global/focused').value.component === componentId
-            )
-                setIsFocused(true);
-            else setIsFocused(false);
-        };
-        window.unigraph.getState('global/focused').subscribe(cbfoc);
-
         const viewElRef = viewEl.current;
         if (window.dragselect && !customBoundingBox && viewEl.current)
             window.dragselect.addSelectables([viewEl.current]);
@@ -133,13 +108,8 @@ export function AutoDynamicView({
         return function cleanup() {
             window.unigraph.getState('registry/dynamicView').unsubscribe(cb);
             window.unigraph.getState('registry/dynamicViewDetailed').unsubscribe(cb2);
-            window.unigraph.getState('global/selected').unsubscribe(cbsel);
-            window.unigraph.getState('global/focused').unsubscribe(cbfoc);
             if (viewElRef) window.dragselect?.removeSelectables([viewElRef]);
-            if (hasFocus) {
-                const focused = window.unigraph.getState('global/focused');
-                focused.setValue({ ...focused.value, component: '' });
-            }
+            (removeFocusOnUnmount as any)();
         };
     }, []);
 
@@ -158,53 +128,6 @@ export function AutoDynamicView({
             }
         };
     }, [shortcuts]);
-
-    React.useEffect(() => {
-        if (object?.uid?.startsWith('0x') && shouldGetBacklinks) {
-            // console.log(object?.uid, dataContext.getParents(true));
-            const cb = (newBacklinks: any) => {
-                const [pars, refs] = getParentsAndReferences(
-                    newBacklinks['~_value'],
-                    newBacklinks['unigraph.origin'],
-                    object.uid,
-                );
-                // console.log(object.uid, getParents(viewEl.current));
-                const processedBacklinks: any = [pars, refs].map((it) =>
-                    it.filter(
-                        (el) =>
-                            Object.keys(DynamicViews).includes(el?.type?.['unigraph.id']) &&
-                            ![...dataContext.getParents(true), callbacks?.context?.uid].includes(el.uid),
-                    ),
-                );
-                setBacklinks((oldBacklinks: any) => {
-                    if (
-                        JSON.stringify(oldBacklinks[0]?.map((el: any) => el.uid).sort()) !==
-                            JSON.stringify(processedBacklinks[0]?.map((el: any) => el.uid).sort()) ||
-                        JSON.stringify(oldBacklinks[1]?.map((el: any) => el.uid).sort()) !==
-                            JSON.stringify(processedBacklinks[1]?.map((el: any) => el.uid).sort())
-                    ) {
-                        return processedBacklinks;
-                    }
-                    return oldBacklinks;
-                });
-                setTotalParents((oldParents: any) => {
-                    const newParents = [...(pars || []).map((el) => el.uid), ...(refs || []).map((el) => el.uid)];
-                    if (JSON.stringify(oldParents?.sort()) !== JSON.stringify(newParents?.sort())) return newParents;
-                    return oldParents;
-                });
-            };
-            subscribeToBacklinks(object.uid, cb);
-            return function cleanup() {
-                subscribeToBacklinks(object.uid, cb, true);
-            };
-        }
-        return () => {};
-    }, [
-        object?.uid,
-        shouldGetBacklinks,
-        JSON.stringify(Object.keys(DynamicViews).sort()),
-        JSON.stringify(dataContext?.getParents(true)?.sort()),
-    ]);
 
     React.useEffect(() => {
         if (!isObjectStub) setLoadedObj(object);
@@ -295,7 +218,7 @@ export function AutoDynamicView({
 
     const attach = React.useCallback(
         (domElement) => {
-            if (domElement && object?.uid && recursive) {
+            if (domElement && object?.uid && expandedChildren) {
                 const ids = dataContext.getParents();
                 if (ids.includes(object?.uid) && !inline) {
                     // recursive - deal with it somehow
@@ -323,34 +246,6 @@ export function AutoDynamicView({
         [componentId],
     );
 
-    const BacklinkComponent = React.useMemo(
-        () =>
-            shouldGetBacklinks &&
-            dataContext.parents !== undefined &&
-            (backlinks?.[1]?.length || (!noParents && backlinks?.[0]?.length > 0)) ? (
-                <div
-                    style={{
-                        marginLeft: 'auto',
-                        background: 'lightgray',
-                        padding: '2px 6px',
-                        borderRadius: '6px',
-                        whiteSpace: 'nowrap',
-                        cursor: 'pointer',
-                    }}
-                    onClick={(ev) => {
-                        ev.stopPropagation();
-                        ev.preventDefault();
-                        window.wsnavigator(`/library/backlink?uid=${object?.uid}`);
-                    }}
-                >
-                    {(noParents ? 0 : backlinks?.[0]?.length || 0) + (backlinks?.[1]?.length || 0)}
-                </div>
-            ) : (
-                []
-            ),
-        [noParents, backlinks[0]?.length, backlinks[1]?.length, dataContext.parents === undefined, shouldGetBacklinks],
-    );
-
     const innerEl = React.useMemo(() => {
         if (
             isRecursion === false &&
@@ -363,8 +258,6 @@ export function AutoDynamicView({
                 data: getObject(),
                 ...props,
                 callbacks: {
-                    viewId: tabContext.viewId,
-                    setTitle: tabContext.setTitle,
                     ...(callbacks || {}),
                     ...(noBacklinks ? { BacklinkComponent } : {}),
                     ...(window.dragselect && customBoundingBox
@@ -407,7 +300,7 @@ export function AutoDynamicView({
         loadedObj,
         isFocused,
         subsId,
-        backlinks,
+        BacklinkComponent,
     ]);
 
     return (
@@ -530,8 +423,10 @@ export function AutoDynamicView({
                                                     ...(subsId ? { subsId } : {}),
                                                 }}
                                                 index={index}
-                                                noSubentities
-                                                noClickthrough={noClickthrough}
+                                                options={{
+                                                    noSubentities,
+                                                    noClickthrough,
+                                                }}
                                             />
                                         </li>
                                     ))}

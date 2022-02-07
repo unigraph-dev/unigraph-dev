@@ -154,7 +154,7 @@ export const BookmarkItem: DynamicViewRenderer = ({ data, callbacks }) => {
                               <AutoDynamicView
                                   object={new UnigraphObject(it._value)}
                                   callbacks={callbacks}
-                                  inline
+                                  options={{ inline: true }}
                                   style={{ verticalAlign: 'middle' }}
                               />
                           ))

@@ -76,14 +76,10 @@ export function CalendarEvent({ data, callbacks, inline }: any) {
                             {data.get('location').as('primitive')}
                         </Typography>
                     </div>
-
                     <AutoDynamicView
                         object={new UnigraphObject(data.get('time_frame')._value)}
                         callbacks={callbacks}
-                        noDrag
-                        noDrop
-                        noContextMenu
-                        inline
+                        options={{ noDrag: true, noDrop: true, noContextMenu: true, inline: true }}
                     />
                     <div
                         style={{
@@ -96,7 +92,7 @@ export function CalendarEvent({ data, callbacks, inline }: any) {
                                   <AutoDynamicView
                                       object={new UnigraphObject(it._value)}
                                       callbacks={callbacks}
-                                      inline
+                                      options={{ inline: true }}
                                       style={{ verticalAlign: 'middle' }}
                                   />
                               ))
@@ -242,7 +238,7 @@ const unigraphBigCalendarEventComponent = ({ event, ...props }: any) => {
     return (
         <AutoDynamicView
             object={new UnigraphObject(event.unigraphObj)}
-            inline
+            options={{ inline: true }}
             callbacks={{ noDate: true, isEmbed: true }}
         />
     );

@@ -11,39 +11,50 @@ export type AutoDynamicViewProps = {
     callbacks?: AutoDynamicViewCallbacks;
     components?: Record<string, { view: React.FC<any>; query?: (string) => string }>;
     attributes?: Record<string, any>;
-    inline?: boolean;
-    allowSubentity?: boolean;
-    allowSemantic?: boolean;
     style?: React.CSSProperties;
-    noDrag?: boolean;
-    noDrop?: boolean;
-    noContextMenu?: boolean;
-    noSubentities?: boolean;
-    noBacklinks?: boolean;
-    noParents?: boolean;
-    withParent?: boolean;
-    subentityExpandByDefault?: boolean;
-    compact?: boolean;
     index?: number;
-    noClickthrough?: boolean;
     onClick?: any;
-    recursive?: boolean;
     shortcuts?: any;
+    options?: DynamicViewOptions;
+};
+
+export type DynamicViewOptions = {
+    /** If set to true, AutoDynamicView will not navigate to detailed view even if it has one. */
+    noClickthrough?: boolean;
+    /** If set to true, AutoDynamicView will not display subentity & annotation. */
+    noSubentities?: boolean;
+    /** If set to true, AutoDynamicView will expand subentity & annotation by default. */
+    subentityExpandByDefault?: boolean;
+    /** If set to true, AutoDynamicView will not calculate backlinks. */
+    noBacklinks?: boolean;
+    /** If set to true, AutoDynamicView will not listen for context menu events. */
+    noContextMenu?: boolean;
+    /** If set to true, object will not be draggable. */
+    noDrag?: boolean;
+    /** If set to true, object will not be droppable. */
+    noDrop?: boolean;
+    /** If set to true, object will display with the inline variant with styling. */
+    inline?: boolean;
+    /** If set to true, AutoDynamicView will allow objects to be dropped as subentities. */
+    allowSubentity?: boolean;
+    /** If set to true, AutoDynamicView will allow objects to be dropped as semantic properties. */
+    allowSemantic?: boolean;
+    /** If set to true, AutoDynamicView will not consider parents of this view when calculating backlinks. */
+    noParents?: boolean;
+    /** If set to true, object will display with the compact variant. */
+    compact?: boolean;
+    /** If set to true, AutoDynamicView will use a custom bounding box to determine various things related (backlink display, draggability, etc), WIP */
     customBoundingBox?: boolean;
+    /** If set to true, AutoDynamicView will consider the object with children already displayed when considering recursion, etc, WIP */
     expandedChildren?: boolean;
 };
 
 export type DynamicViewRendererProps = {
     view: any;
     query: any;
-    noClickthrough?: boolean;
-    noSubentities?: boolean;
-    noBacklinks?: boolean;
-    noContextMenu?: boolean;
-    noDrag?: boolean;
-    noDrop?: boolean;
-    shortcuts?: any;
     onClick?: any;
+    shortcuts?: any;
+    options?: DynamicViewOptions;
 };
 
 export type ContextMenuGenerator = (

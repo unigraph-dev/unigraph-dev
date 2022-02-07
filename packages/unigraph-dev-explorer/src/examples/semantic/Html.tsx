@@ -10,6 +10,7 @@ import {
 } from '../../components/ObjectView/DefaultObjectContextMenu';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { DynamicViewRenderer } from '../../global.d';
+import { TabContext } from '../../utils';
 
 const makeCSS = (style: Style) => `body {
         line-height: ${style.text.lineHeight};
@@ -119,6 +120,8 @@ export function HtmlStyleChooser({ style, onStyleChange, data, context, callback
 }
 
 export const Html: DynamicViewRenderer = ({ data, context, callbacks }) => {
+    const tabContext = React.useContext(TabContext);
+
     const frm = React.useRef(null);
     const userStyle = React.useRef(null);
     const [style, setStyle] = React.useState<Style>({
@@ -190,7 +193,7 @@ export const Html: DynamicViewRenderer = ({ data, context, callbacks }) => {
                     callbacks={{
                         getDocument: () => frm,
                         closeTab: () => {
-                            window.closeTab(callbacks.viewId);
+                            window.closeTab(tabContext.viewId);
                         },
                     }}
                 />

@@ -79,8 +79,7 @@ export const Tweet: DynamicViewRenderer = ({ data, callbacks }) => {
                         data?._value?.children?.['_value['] || [],
                     )}
                     callbacks={{ namespaceLink: nslnk }}
-                    noContextMenu
-                    withParent
+                    options={{ noContextMenu: true }}
                 />
                 <div>
                     {(data?._value?.children?.['_value['] || []).map((el: any) => {
@@ -97,13 +96,7 @@ export const Tweet: DynamicViewRenderer = ({ data, callbacks }) => {
                                 />
                             );
                         }
-                        return (
-                            <AutoDynamicView
-                                object={new UnigraphObject(elObj)}
-                                withParent
-                                callbacks={{ context: data }}
-                            />
-                        );
+                        return <AutoDynamicView object={new UnigraphObject(elObj)} callbacks={{ context: data }} />;
                     })}
                 </div>
             </div>
@@ -151,6 +144,6 @@ const TwitterUser = ({ data, callbacks }: any) => (
 );
 
 export const init = () => {
-    registerDynamicViews({ '$/schema/tweet': { view: Tweet, noSubentities: true } });
+    registerDynamicViews({ '$/schema/tweet': { view: Tweet, options: { noSubentities: true } } });
     registerDynamicViews({ '$/schema/twitter_user': TwitterUser });
 };

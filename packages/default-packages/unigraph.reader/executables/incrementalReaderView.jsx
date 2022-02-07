@@ -17,6 +17,6 @@ return (
             <p>{data._value.percent['_value.#i']}%</p>
             <p>&gt;&gt;</p>
         </div>
-        <AutoDynamicView object={new UnigraphObject(data._value.context._value)} noClickthrough />
+        <AutoDynamicView object={new UnigraphObject(data._value.context._value)} options={{ noClickthrough: true }} />
     </div>
 );

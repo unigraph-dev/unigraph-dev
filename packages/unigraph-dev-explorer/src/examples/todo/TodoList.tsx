@@ -78,9 +78,7 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
         () => (
             <AutoDynamicView
                 object={data.get('name')._value._value}
-                noDrag
-                noDrop
-                noContextMenu
+                options={{ noDrag: true, noDrop: true, noContextMenu: true }}
                 callbacks={{
                     'get-semantic-properties': () => data,
                 }}
@@ -97,7 +95,11 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
                     : data?._value?.children?.['_value[']
                           ?.filter((it: any) => !it._key)
                           .map((it: any) => (
-                              <AutoDynamicView object={new UnigraphObject(it._value)} callbacks={callbacks} inline />
+                              <AutoDynamicView
+                                  object={new UnigraphObject(it._value)}
+                                  callbacks={callbacks}
+                                  options={{ inline: true }}
+                              />
                           ))}
                 {unpadded.priority > 0
                     ? [<Chip size="small" icon={<PriorityHigh />} label={`Priority ${unpadded.priority}`} />]

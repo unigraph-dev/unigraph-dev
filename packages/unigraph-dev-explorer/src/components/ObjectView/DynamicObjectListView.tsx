@@ -118,10 +118,9 @@ function DynamicListItem({
                 <ClearAll />
             </ListItemIcon>
             <AutoDynamicView
-                compact={compact}
+                options={{ compact }}
                 object={new UnigraphObject(item)}
                 components={components}
-                withParent={!!listUid}
                 callbacks={{
                     ...callbacks,
                     context,
