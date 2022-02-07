@@ -9,7 +9,8 @@ import {
     registerQuickAdder,
 } from '../../unigraph-react';
 import { setChildrenDisplayAs } from './commands';
-import { NoteBlock, DetailedNoteBlock } from './NoteBlock';
+import { DetailedNoteBlock } from './NoteBlock';
+import { NoteBlock } from './NoteBlockViews';
 import { noteQuery, noteQueryDetailed, journalQuery, journalQueryDetailed } from './noteQuery';
 
 export const init = () => {
