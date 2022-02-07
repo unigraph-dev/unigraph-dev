@@ -258,8 +258,6 @@ export function AutoDynamicView({
                 data: getObject(),
                 ...props,
                 callbacks: {
-                    viewId: tabContext.viewId,
-                    setTitle: tabContext.setTitle,
                     ...(callbacks || {}),
                     ...(noBacklinks ? { BacklinkComponent } : {}),
                     ...(window.dragselect && customBoundingBox

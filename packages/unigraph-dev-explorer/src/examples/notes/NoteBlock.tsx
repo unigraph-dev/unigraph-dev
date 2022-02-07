@@ -1260,20 +1260,19 @@ export function DetailedEmbedBlock({
     componentId,
     displayAs,
 }: any) {
+    const tabContext = React.useContext(TabContext);
     // eslint-disable-next-line no-bitwise
     isChildren |= callbacks?.isChildren;
-    if (!callbacks?.viewId) callbacks = { ...(callbacks || {}), viewId: getRandomInt() };
     const [subentities, otherChildren] = getSubentities(data);
     const [command, setCommand] = React.useState<() => any | undefined>();
     const editorRef = React.useRef<any>();
-    const nodesState = window.unigraph.addState(`${options?.viewId || callbacks?.viewId}/nodes`, []);
+    const nodesState = window.unigraph.addState(`${options?.viewId || tabContext.viewId}/nodes`, []);
     const editorContext = {
         edited: undefined,
         setCommand,
         callbacks,
         nodesState,
     };
-    const tabContext = React.useContext(TabContext);
 
     const [isChildrenCollapsed, _setIsChildrenCollapsed] = React.useState<any>(
         Object.fromEntries(
