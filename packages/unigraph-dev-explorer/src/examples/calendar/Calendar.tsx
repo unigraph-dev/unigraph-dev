@@ -52,7 +52,7 @@ export function CalendarEvent({ data, callbacks, inline }: any) {
                                   <AutoDynamicView
                                       object={new UnigraphObject(it._value)}
                                       callbacks={callbacks}
-                                      inline
+                                      options={{ inline: true }}
                                       style={{ verticalAlign: 'middle' }}
                                   />
                               ))
