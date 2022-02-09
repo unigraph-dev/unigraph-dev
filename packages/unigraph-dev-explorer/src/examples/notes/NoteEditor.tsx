@@ -53,23 +53,44 @@ const changesForOpenScopedMarkdownLink = (scope: ScopeForAutoComplete, ev: Keybo
     };
 };
 
-export const useNoteEditor: (...args: any) => [any, (text: string) => void, () => string] = (
+export const useNoteEditor: (...args: any) => [any, (text: string) => void, () => string, () => void, any] = (
     isEditing: boolean,
     setIsEditing: any,
     edited: any,
     focused: boolean,
-    textInputRef: any,
     data: any,
     callbacks: any,
-    inputDebounced: any,
     componentId: any,
     editorContext: any,
     resetEdited: any,
-    onBlurHandler: any,
     setCommand: any,
 ) => {
     const classes = useStyles();
     const tabContext = React.useContext(TabContext);
+
+    const inputter = (text: string) => {
+        if (data?._value?.children?.['_value[']) {
+            const deadLinks: any = [];
+            data._value.children['_value['].forEach((el: any) => {
+                if (el && el._key && !text.includes(el._key)) deadLinks.push(el.uid);
+            });
+            if (deadLinks.length) window.unigraph.deleteItemFromArray(data._value.children.uid, deadLinks, data.uid);
+        }
+
+        return window.unigraph.updateObject(
+            data.get('text')._value._value.uid,
+            {
+                '_value.%': text,
+            },
+            false,
+            false,
+            callbacks.subsId,
+            [],
+        );
+    };
+
+    const inputDebounced = React.useRef(_.debounce(inputter, 333));
+    const textInputRef: any = React.useRef();
 
     const handlePotentialResize = () => {
         const listener = () => {
@@ -239,6 +260,11 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
         [callbacks, componentId, data, data.uid, data?._value?.children?.uid, editorContext, resetEdited],
     );
 
+    const onBlur = React.useCallback(() => {
+        setIsEditing(false);
+        inputDebounced.current.flush();
+    }, []);
+
     React.useEffect(() => {
         const fn = (state: any) => {
             if (state.component !== componentId) return;
@@ -401,69 +427,6 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
         [],
     );
 
-    // const handleOpenScopedChar = React.useCallback((ev: KeyboardEvent) => {
-    //     ev.preventDefault();
-    //     // console.log(document.getSelection())
-    //     const caret = textInputRef.current.selectionStart;
-    //     let middle = document.getSelection()?.toString() || '';
-    //     let end = '';
-    //     if (middle.endsWith(' ')) {
-    //         middle = middle.slice(0, middle.length - 1);
-    //         end = ' ';
-    //     }
-    //     // document.execCommand('insertText', false, `[${middle}]${end}`);
-    //     setCurrentText(
-    //         `${getCurrentText().slice(0, caret)}${ev.key}${middle}${
-    //             closeScopeCharDict[ev.key]
-    //         }${end}${getCurrentText().slice(caret + (middle + end).length)}`,
-    //     );
-    //     // setCaret(document, textInput.current, caret + 1, middle.length);
-    //     setCaret(document, textInputRef.current, caret + 1, middle.length);
-    //     textInputRef.current.dispatchEvent(
-    //         new Event('change', {
-    //             bubbles: true,
-    //             cancelable: true,
-    //         }),
-    //     );
-    // }, []);
-
-    // const handleOpenScopedMarkdownLink = React.useCallback((ev: KeyboardEvent) => {
-    //     ev.preventDefault();
-    //     ev.stopPropagation();
-    //     // console.log(document.getSelection())
-    //     const caret = textInputRef.current.selectionStart;
-    //     let middle = document.getSelection()?.toString() || '';
-    //     let end = '';
-    //     if (middle.endsWith(' ')) {
-    //         middle = middle.slice(0, middle.length - 1);
-    //         end = ' ';
-    //     }
-    //     if (isUrl(middle)) {
-    //         setCurrentText(
-    //             `${getCurrentText().slice(0, caret)}[](${middle})${end}${getCurrentText().slice(
-    //                 caret + (middle + end).length,
-    //             )}`,
-    //         );
-    //         setCaret(document, textInputRef.current, caret - 2);
-    //     } else {
-    //         setCurrentText(
-    //             `${getCurrentText().slice(0, caret)}[${middle}]()${end}${getCurrentText().slice(
-    //                 caret + (middle + end).length,
-    //             )}`,
-    //         );
-    //         setCaret(document, textInputRef.current, caret + middle.length + 3);
-    //     }
-
-    //     // setCaret(document, textInput.current, caret + 1, middle.length);
-    //     // setCaret(document, textInputRef.current, caret + 1, middle.length);
-    //     textInputRef.current.dispatchEvent(
-    //         new Event('change', {
-    //             bubbles: true,
-    //             cancelable: true,
-    //         }),
-    //     );
-    // }, []);
-
     const onKeyDownHandler = React.useCallback(
         (ev) => {
             const caret = textInputRef.current.selectionStart;
@@ -475,10 +438,11 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                     ) {
                         ev.preventDefault();
                         selectUid(componentId);
-                        onBlurHandler();
+                        window.unigraph.getState('global/focused').setValue({ uid: '', caret: 0, type: '' });
                     }
                     break;
-                case 'k': // "a" key
+
+                case 'k': // "k" key
                     if (ev.ctrlKey || ev.metaKey) {
                         handleOpenScopedMarkdownLink(ev);
                     }
@@ -613,7 +577,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                     break;
             }
         },
-        [callbacks, componentId, data, editorContext, onBlurHandler, handleOpenScopedChar],
+        [callbacks, componentId, data, editorContext, handleOpenScopedChar],
     );
 
     return [
@@ -637,5 +601,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
         />,
         setCurrentText,
         getCurrentText,
+        onBlur,
+        textInputRef,
     ];
 };
