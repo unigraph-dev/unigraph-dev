@@ -11,7 +11,7 @@ import { DynamicObjectListView } from '../../components/ObjectView/DynamicObject
 import { registerDetailedDynamicViews, registerDynamicViews, withUnigraphSubscription } from '../../unigraph-react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { AutoDynamicViewDetailed } from '../../components/ObjectView/AutoDynamicViewDetailed';
-import { isInboxPushModeSoft } from './EmailSettings';
+import { shouldMirrorEmailInbox } from './EmailSettings';
 
 type AEmail = {
     name: string;
@@ -33,7 +33,7 @@ const EmailListBody: React.FC<{ data: any[] }> = ({ data }) => (
 
 const EmailMessageDetailed: DynamicViewRenderer = ({ data, callbacks }) => {
     useEffect(() => {
-        if (!isInboxPushModeSoft()) {
+        if (shouldMirrorEmailInbox()) {
             window.unigraph.runExecutable('$/executable/modify-emails-labels', {
                 uids: [data.uid],
                 removeLabelIds: ['UNREAD'],
@@ -99,19 +99,19 @@ const EmailMessage: DynamicViewRenderer = ({ data, callbacks }) => {
     );
 };
 
-const defaultEmailSettings = { emailSoftInboxPushMode: false };
+const defaultEmailSettings = { mirrorEmailInbox: true };
 export const init = () => {
     const emailSettings = getOrInitLocalStorage('emailSettings', defaultEmailSettings);
-    const emailSoftInboxPushMode = window.unigraph.addState(
-        'settings/email/emailSoftInboxPushMode',
-        emailSettings.emailSoftInboxPushMode ?? false,
+    const mirrorEmailInbox = window.unigraph.addState(
+        'settings/email/mirrorEmailInbox',
+        emailSettings.mirrorEmailInbox ?? true,
     );
-    emailSoftInboxPushMode.subscribe((val: boolean) => {
+    mirrorEmailInbox.subscribe((val: boolean) => {
         window.localStorage.setItem(
             'emailSettings',
             JSON.stringify({
                 ...JSON.parse(window.localStorage.getItem('emailSettings')!),
-                emailSoftInboxPushMode: val,
+                mirrorEmailInbox: val,
             }),
         );
     });

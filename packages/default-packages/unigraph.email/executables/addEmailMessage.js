@@ -95,11 +95,10 @@ for (let i = 0; i < toAddChunks.length; i += 1) {
     }
 }
 console.log('addEmailMessage');
-const isSoftPushMode = unigraph.getState('settings/email/emailSoftInboxPushMode').value;
-console.log({ isSoftPushMode });
+const mirrorEmailInbox = unigraph.getState('settings/email/mirrorEmailInbox').value;
 uids.forEach((el, index) => {
     // if (!readMask[index] && el) inboxEls.push(el);
-    const shouldPushEl = (isSoftPushMode ? !readMask[index] : inboxMask[index]) && el;
+    const shouldPushEl = (mirrorEmailInbox ? inboxMask[index] : !readMask[index]) && el;
     if (shouldPushEl) inboxEls.push(el);
 });
 

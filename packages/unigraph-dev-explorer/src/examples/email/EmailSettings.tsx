@@ -5,16 +5,16 @@ import { pkg } from 'unigraph-dev-common/lib/data/unigraph.email.pkg';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { TabContext } from '../../utils';
 
-export const isInboxPushModeSoft = () => window.unigraph.getState('settings/email/emailSoftInboxPushMode').value;
+export const shouldMirrorEmailInbox = () => window.unigraph.getState('settings/email/mirrorEmailInbox').value;
 
 export function EmailSettings({}) {
     const [loaded, setLoaded] = React.useState(false);
     const [account, setAccount] = React.useState<any>({});
     const tabContext = React.useContext(TabContext);
 
-    const emailSoftInboxPushModeState = window.unigraph.getState('settings/email/emailSoftInboxPushMode');
-    const [emailSoftInboxPushMode, setEmailInboxPushMode] = React.useState(emailSoftInboxPushModeState.value);
-    emailSoftInboxPushModeState.subscribe((newState: boolean) => {
+    const mirrorEmailInboxState = window.unigraph.getState('settings/email/mirrorEmailInbox');
+    const [mirrorEmailInbox, setEmailInboxPushMode] = React.useState(mirrorEmailInboxState.value);
+    mirrorEmailInboxState.subscribe((newState: boolean) => {
         setEmailInboxPushMode(newState);
     });
 
@@ -81,19 +81,19 @@ export function EmailSettings({}) {
             <List>
                 <ListItem button onClick={(e) => false} key="email-inbox-push-mode">
                     <ListItemText
-                        id="switch-list-label-email-soft-inbox-push-mode"
-                        primary="Email Soft Inbox Push Mode"
-                        secondary="Enable soft inbox push mode. (Removing from Unigraph Inbox marks email as read at origin, reading in Unigraph has no effect)"
+                        id="switch-list-label-mirror-email-inbos"
+                        primary="Mirror email inbox"
+                        secondary="Disabling makes it so that removing emails from Unigraph inbox doesn't remove them from gmail inbox, only sets them as read."
                     />
                     <ListItemSecondaryAction>
                         <Switch
                             edge="end"
                             onChange={(e) => {
-                                emailSoftInboxPushModeState.setValue(!emailSoftInboxPushMode);
+                                mirrorEmailInboxState.setValue(!mirrorEmailInbox);
                             }}
-                            checked={emailSoftInboxPushMode}
+                            checked={mirrorEmailInbox}
                             inputProps={{
-                                'aria-labelledby': 'switch-list-label-email-soft-inbox-push-mode',
+                                'aria-labelledby': 'switch-list-label-mirror-email-inbos',
                             }}
                         />
                     </ListItemSecondaryAction>

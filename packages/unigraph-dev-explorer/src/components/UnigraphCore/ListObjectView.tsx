@@ -1,4 +1,4 @@
-import { isInboxPushModeSoft } from '../../examples/email/EmailSettings';
+import { shouldMirrorEmailInbox } from '../../examples/email/EmailSettings';
 import { DynamicObjectListView } from '../ObjectView/DynamicObjectListView';
 
 /** Dependent on the specific definition of object!! */
@@ -51,7 +51,7 @@ export function ListObjectView({ data, callbacks, ...attributes }: any) {
                             if (emails.length) {
                                 window.unigraph.runExecutable('$/executable/modify-emails-labels', {
                                     uids: emails.map((el) => el.uid),
-                                    removeLabelIds: isInboxPushModeSoft() ? ['UNREAD'] : ['INBOX'],
+                                    removeLabelIds: shouldMirrorEmailInbox() ? ['INBOX'] : ['UNREAD'],
                                     addLabelIds: [],
                                 });
                             }
