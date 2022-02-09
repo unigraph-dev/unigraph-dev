@@ -2,7 +2,7 @@ import { makeStyles, TextareaAutosize } from '@material-ui/core';
 import { Actions } from 'flexlayout-react';
 import _ from 'lodash';
 import React from 'react';
-import { blobToBase64 } from 'unigraph-dev-common/lib/utils/utils';
+import { blobToBase64, isUrl } from 'unigraph-dev-common/lib/utils/utils';
 import { parseUnigraphHtml } from '../../clipboardUtils';
 import { getParentsAndReferences } from '../../components/ObjectView/backlinksUtils';
 import { inlineTextSearch, inlineObjectSearch } from '../../components/UnigraphCore/InlineSearchPopup';
@@ -19,6 +19,39 @@ const useStyles = makeStyles((theme) => ({
         width: '100%',
     },
 }));
+
+type ScopeForAutoComplete = { currentText: string; caret: number; middle: string; end: string };
+type ChangesForAutoComplete = { newText: string; newCaret: number; newCaretOffset: number };
+type GetChangesForAutoComplete = (scope: ScopeForAutoComplete, ev: KeyboardEvent) => ChangesForAutoComplete;
+
+const changesForOpenScopedChar = (scope: ScopeForAutoComplete, ev: KeyboardEvent): ChangesForAutoComplete => {
+    const { currentText, caret, middle, end } = scope;
+    return {
+        newText: `${currentText.slice(0, caret)}${ev.key}${middle}${
+            closeScopeCharDict[ev.key]
+        }${end}${currentText.slice(caret + (middle + end).length)}`,
+        newCaret: caret + 1,
+        newCaretOffset: middle.length,
+    };
+};
+const changesForOpenScopedMarkdownLink = (scope: ScopeForAutoComplete, ev: KeyboardEvent): ChangesForAutoComplete => {
+    const { currentText, caret, middle, end } = scope;
+
+    if (isUrl(middle)) {
+        return {
+            newText: `${currentText.slice(0, caret)}[](${middle})${end}${currentText.slice(
+                caret + (middle + end).length,
+            )}`,
+            newCaret: caret + 1,
+            newCaretOffset: 0,
+        };
+    }
+    return {
+        newText: `${currentText.slice(0, caret)}[${middle}]()${end}${currentText.slice(caret + (middle + end).length)}`,
+        newCaret: caret + middle.length + 3,
+        newCaretOffset: 0,
+    };
+};
 
 export const useNoteEditor: (...args: any) => [any, (text: string) => void, () => string] = (
     isEditing: boolean,
@@ -140,12 +173,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                         const newStr = `${newContent?.slice?.(0, match.index)}[[${newName}]]${newContent?.slice?.(
                             match.index + match[0].length,
                         )}`;
-                        // console.log(newName, newUid, newStr, newContent);
-                        // This is an ADDITION operation
-                        // console.log(data);
                         const semChildren = data?._value;
-                        // inputDebounced.cancel();
-                        // textInput.current.textContent = newStr;
                         setCurrentText(newStr);
                         resetEdited();
                         setCaret(document, textInputRef.current, match.index + newName.length + 4);
@@ -233,13 +261,43 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
         [checkReferences, data],
     );
 
+    const pasteLinkIntoSelection = React.useCallback((url: string) => {
+        // console.log(document.getSelection())
+        const caret = textInputRef.current.selectionStart;
+        let middle = document.getSelection()?.toString() || '';
+        let end = '';
+        if (middle.endsWith(' ')) {
+            middle = middle.slice(0, middle.length - 1);
+            end = ' ';
+        }
+        setCurrentText(
+            `${getCurrentText().slice(0, caret)}[${middle}](${url})${end}${getCurrentText().slice(
+                caret + (middle + end).length,
+            )}`,
+        );
+        setCaret(document, textInputRef.current, caret + middle.length + url.length + 4);
+
+        textInputRef.current.dispatchEvent(
+            new Event('change', {
+                bubbles: true,
+                cancelable: true,
+            }),
+        );
+    }, []);
+
     const onPasteHandler = React.useCallback(
         (event) => {
             const paste = (event.clipboardData || (window as any).clipboardData).getData('text/html');
 
             const img = event.clipboardData.items[0];
-
-            if (paste.length > 0) {
+            const text = event.clipboardData.getData('text');
+            if (isUrl(text)) {
+                // Notion-style paste url into selection
+                const selection = window.getSelection();
+                if (!selection?.rangeCount) return false;
+                pasteLinkIntoSelection(text);
+                event.preventDefault();
+            } else if (paste.length > 0) {
                 const selection = window.getSelection();
                 if (!selection?.rangeCount) return false;
                 selection?.deleteFromDocument();
@@ -299,31 +357,112 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
         [callbacks],
     );
 
-    const handleOpenScopedChar = React.useCallback((ev: KeyboardEvent) => {
-        ev.preventDefault();
-        // console.log(document.getSelection())
-        const caret = textInputRef.current.selectionStart;
-        let middle = document.getSelection()?.toString() || '';
-        let end = '';
-        if (middle.endsWith(' ')) {
-            middle = middle.slice(0, middle.length - 1);
-            end = ' ';
-        }
-        // document.execCommand('insertText', false, `[${middle}]${end}`);
-        setCurrentText(
-            `${getCurrentText().slice(0, caret)}${ev.key}${middle}${
-                closeScopeCharDict[ev.key]
-            }${end}${getCurrentText().slice(caret + (middle + end).length)}`,
-        );
-        // setCaret(document, textInput.current, caret + 1, middle.length);
-        setCaret(document, textInputRef.current, caret + 1, middle.length);
-        textInputRef.current.dispatchEvent(
-            new Event('change', {
-                bubbles: true,
-                cancelable: true,
-            }),
-        );
-    }, []);
+    const handleScopedAutoComplete = React.useCallback(
+        (changeTextAndCaret: GetChangesForAutoComplete, ev: KeyboardEvent) => {
+            ev.preventDefault();
+            // console.log(document.getSelection())
+            const caret = textInputRef.current.selectionStart;
+            let middle = document.getSelection()?.toString() || '';
+            let end = '';
+            if (middle.endsWith(' ')) {
+                middle = middle.slice(0, middle.length - 1);
+                end = ' ';
+            }
+            // document.execCommand('insertText', false, `[${middle}]${end}`);
+            const { newText, newCaret, newCaretOffset } = changeTextAndCaret(
+                { currentText: getCurrentText(), caret, middle, end },
+                ev,
+            );
+            console.log('handleScopedAutoComplete', { newText, newCaret, newCaretOffset });
+            setCurrentText(newText);
+            setCaret(document, textInputRef.current, newCaret, newCaretOffset);
+            // setCurrentText(
+            //     `${getCurrentText().slice(0, caret)}${ev.key}${middle}${
+            //         closeScopeCharDict[ev.key]
+            //     }${end}${getCurrentText().slice(caret + (middle + end).length)}`,
+            // );
+            // // setCaret(document, textInput.current, caret + 1, middle.length);
+            // setCaret(document, textInputRef.current, caret + 1, middle.length);
+            textInputRef.current.dispatchEvent(
+                new Event('change', {
+                    bubbles: true,
+                    cancelable: true,
+                }),
+            );
+        },
+        [],
+    );
+    const handleOpenScopedChar = React.useCallback(
+        (ev: KeyboardEvent) => handleScopedAutoComplete(changesForOpenScopedChar, ev),
+        [],
+    );
+    const handleOpenScopedMarkdownLink = React.useCallback(
+        (ev: KeyboardEvent) => handleScopedAutoComplete(changesForOpenScopedMarkdownLink, ev),
+        [],
+    );
+
+    // const handleOpenScopedChar = React.useCallback((ev: KeyboardEvent) => {
+    //     ev.preventDefault();
+    //     // console.log(document.getSelection())
+    //     const caret = textInputRef.current.selectionStart;
+    //     let middle = document.getSelection()?.toString() || '';
+    //     let end = '';
+    //     if (middle.endsWith(' ')) {
+    //         middle = middle.slice(0, middle.length - 1);
+    //         end = ' ';
+    //     }
+    //     // document.execCommand('insertText', false, `[${middle}]${end}`);
+    //     setCurrentText(
+    //         `${getCurrentText().slice(0, caret)}${ev.key}${middle}${
+    //             closeScopeCharDict[ev.key]
+    //         }${end}${getCurrentText().slice(caret + (middle + end).length)}`,
+    //     );
+    //     // setCaret(document, textInput.current, caret + 1, middle.length);
+    //     setCaret(document, textInputRef.current, caret + 1, middle.length);
+    //     textInputRef.current.dispatchEvent(
+    //         new Event('change', {
+    //             bubbles: true,
+    //             cancelable: true,
+    //         }),
+    //     );
+    // }, []);
+
+    // const handleOpenScopedMarkdownLink = React.useCallback((ev: KeyboardEvent) => {
+    //     ev.preventDefault();
+    //     ev.stopPropagation();
+    //     // console.log(document.getSelection())
+    //     const caret = textInputRef.current.selectionStart;
+    //     let middle = document.getSelection()?.toString() || '';
+    //     let end = '';
+    //     if (middle.endsWith(' ')) {
+    //         middle = middle.slice(0, middle.length - 1);
+    //         end = ' ';
+    //     }
+    //     if (isUrl(middle)) {
+    //         setCurrentText(
+    //             `${getCurrentText().slice(0, caret)}[](${middle})${end}${getCurrentText().slice(
+    //                 caret + (middle + end).length,
+    //             )}`,
+    //         );
+    //         setCaret(document, textInputRef.current, caret - 2);
+    //     } else {
+    //         setCurrentText(
+    //             `${getCurrentText().slice(0, caret)}[${middle}]()${end}${getCurrentText().slice(
+    //                 caret + (middle + end).length,
+    //             )}`,
+    //         );
+    //         setCaret(document, textInputRef.current, caret + middle.length + 3);
+    //     }
+
+    //     // setCaret(document, textInput.current, caret + 1, middle.length);
+    //     // setCaret(document, textInputRef.current, caret + 1, middle.length);
+    //     textInputRef.current.dispatchEvent(
+    //         new Event('change', {
+    //             bubbles: true,
+    //             cancelable: true,
+    //         }),
+    //     );
+    // }, []);
 
     const onKeyDownHandler = React.useCallback(
         (ev) => {
@@ -337,6 +476,11 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                         ev.preventDefault();
                         selectUid(componentId);
                         onBlurHandler();
+                    }
+                    break;
+                case 'k': // "a" key
+                    if (ev.ctrlKey || ev.metaKey) {
+                        handleOpenScopedMarkdownLink(ev);
                     }
                     break;
 
