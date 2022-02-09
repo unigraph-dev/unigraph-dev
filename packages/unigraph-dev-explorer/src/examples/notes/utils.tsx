@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { getParentsAndReferences } from '../../components/ObjectView/backlinksUtils';
 import {
     addChild,
@@ -127,4 +128,23 @@ export const setFocusedCaret = (textInputEl: any) => {
     }
     const state = window.unigraph.getState('global/focused');
     state.setValue({ ...state.value, caret });
+};
+
+export const getSubentities = (data: any) => {
+    let subentities: any;
+    let otherChildren: any;
+    if (!data?._value?.children?.['_value[']) {
+        [subentities, otherChildren] = [[], []];
+    } else {
+        [subentities, otherChildren] = data?._value?.children?.['_value['].sort(byElementIndex).reduce(
+            (prev: any, el: any) => {
+                if (el?._value?.type?.['unigraph.id'] !== '$/schema/subentity' && !el._key)
+                    return [prev[0], [...prev[1], el._value]];
+                if (!el._key) return [[...prev[0], el?._value._value], prev[1]];
+                return prev;
+            },
+            [[], []],
+        ) || [[], []];
+    }
+    return [subentities, otherChildren];
 };
