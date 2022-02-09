@@ -6,6 +6,7 @@ import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 import React from 'react';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 
 export const NavigationContext = React.createContext<(location: string) => any>((location: string) => ({}));
 
@@ -556,3 +557,11 @@ export function typeHasDetailedView(type: string) {
 export function typeHasDynamicView(type: string) {
     return Object.keys(window.unigraph.getState('registry/dynamicView').value).includes(type);
 }
+
+export const getOrInitLocalStorage = (key: string, defaultValue: any) => {
+    if (!isJsonString(window.localStorage.getItem(key))) {
+        window.localStorage.setItem(key, JSON.stringify(defaultValue));
+        return defaultValue;
+    }
+    return JSON.parse(window.localStorage.getItem(key) || '');
+};

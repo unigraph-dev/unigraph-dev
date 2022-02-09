@@ -42,11 +42,11 @@
                 "concurrency": 1
             },
             {
-                "id": "set-emails-as-read",
+                "id": "modify-emails-labels",
                 "env": "routine/js",
-                "src": "executables/setEmailsAsRead.js",
+                "src": "executables/modifyEmailsLabels.js",
                 "editable": true,
-                "name": "Set emails as read"
+                "name": "Add or remove labels from emails" 
             }
         ],
         "entities": [

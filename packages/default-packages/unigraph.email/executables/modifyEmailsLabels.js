@@ -1,4 +1,4 @@
-const { uids } = context.params;
+const { uids, addLabelIds, removeLabelIds } = context.params;
 const { google } = require('googleapis');
 
 const gmailClientId = unigraph.getSecret('google', 'client_id');
@@ -59,6 +59,7 @@ if (account?.uid) {
     await gmail.users.messages.batchModify({
         userId: 'me',
         ids: mids,
-        removeLabelIds: ['UNREAD'],
+        addLabelIds,
+        removeLabelIds,
     });
 }

@@ -1,16 +1,17 @@
 import { Avatar, ListItem as div, ListItemAvatar, ListItemText } from '@material-ui/core';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { pkg as emailPackage } from 'unigraph-dev-common/lib/data/unigraph.email.pkg';
 import { byUpdatedAt, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import Sugar from 'sugar';
 import { Link } from '@material-ui/icons';
 import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { DynamicViewRenderer } from '../../global.d';
-import { getComponentFromPage } from '../../utils';
+import { getComponentFromPage, getOrInitLocalStorage } from '../../utils';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
 import { registerDetailedDynamicViews, registerDynamicViews, withUnigraphSubscription } from '../../unigraph-react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { AutoDynamicViewDetailed } from '../../components/ObjectView/AutoDynamicViewDetailed';
+import { isInboxPushModeSoft } from './EmailSettings';
 
 type AEmail = {
     name: string;
@@ -31,6 +32,15 @@ const EmailListBody: React.FC<{ data: any[] }> = ({ data }) => (
 );
 
 const EmailMessageDetailed: DynamicViewRenderer = ({ data, callbacks }) => {
+    useEffect(() => {
+        if (!isInboxPushModeSoft()) {
+            window.unigraph.runExecutable('$/executable/modify-emails-labels', {
+                uids: [data.uid],
+                removeLabelIds: ['UNREAD'],
+                addLabelIds: [],
+            });
+        }
+    }, []);
     return (
         <AutoDynamicViewDetailed
             callbacks={{ ...callbacks, context: data }}
@@ -89,7 +99,23 @@ const EmailMessage: DynamicViewRenderer = ({ data, callbacks }) => {
     );
 };
 
+const defaultEmailSettings = { emailSoftInboxPushMode: false };
 export const init = () => {
+    const emailSettings = getOrInitLocalStorage('emailSettings', defaultEmailSettings);
+    const emailSoftInboxPushMode = window.unigraph.addState(
+        'settings/email/emailSoftInboxPushMode',
+        emailSettings.emailSoftInboxPushMode ?? false,
+    );
+    emailSoftInboxPushMode.subscribe((val: boolean) => {
+        window.localStorage.setItem(
+            'emailSettings',
+            JSON.stringify({
+                ...JSON.parse(window.localStorage.getItem('emailSettings')!),
+                emailSoftInboxPushMode: val,
+            }),
+        );
+    });
+
     registerDynamicViews({ '$/schema/email_message': EmailMessage });
     registerDetailedDynamicViews({
         '$/schema/email_message': EmailMessageDetailed,
