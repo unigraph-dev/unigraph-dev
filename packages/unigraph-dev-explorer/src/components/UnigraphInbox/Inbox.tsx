@@ -13,7 +13,6 @@ export function Inbox() {
             const myBadge = new Badger({});
             setOnUpdate(() => (data: any) => {
                 const badgeCount = data?._value?.children?.['_value[']?.length || undefined;
-                console.log(badgeCount);
                 myBadge.value = badgeCount;
             });
         }
@@ -26,7 +25,7 @@ export function Inbox() {
                 _stub: true,
                 type: { 'unigraph.id': '$/schema/list' },
             }}
-            attributes={{ removeOnEnter: true }}
+            attributes={{ removeOnEnter: false }}
             onLoad={onUpdate}
         />
     );
