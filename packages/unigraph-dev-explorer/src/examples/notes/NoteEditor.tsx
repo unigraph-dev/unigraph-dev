@@ -30,14 +30,6 @@ const changesForOpenScopedChar = (
 ): ChangesForAutoComplete => {
     const isChar = (c: string) => c !== ' ' && c !== '\n' && c !== '\t' && c !== undefined;
     const shouldNotOpen = middle.length === 0 && isChar(currentText?.[caret]);
-    console.log('changesForOpenScopedChar', {
-        currentText,
-        caret,
-        middle,
-        end,
-        shouldNotOpen,
-        curChar: currentText?.[caret],
-    });
     return {
         newText: `${currentText.slice(0, caret)}${ev.key}${middle}${
             shouldNotOpen ? '' : closeScopeCharDict[ev.key]
@@ -262,8 +254,6 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
 
     const onInputHandler = React.useCallback(
         (ev) => {
-            // if (ev.currentTarget.textContent !== data.get('text').as('primitive') && !edited.current) edited.current = true;
-            // console.log('handling Input', ev);
             if (ev.target.value !== data.get('text').as('primitive')) {
                 if (!edited.current) edited.current = true;
                 checkReferences();
@@ -274,7 +264,6 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
     );
 
     const pasteLinkIntoSelection = React.useCallback((url: string) => {
-        // console.log(document.getSelection())
         const caret = textInputRef.current.selectionStart;
         let middle = document.getSelection()?.toString() || '';
         let end = '';
@@ -451,7 +440,6 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                     break;
 
                 case 'Backspace': // backspace
-                    // console.log(caret, document.getSelection()?.type)
                     if (caret === 0 && document.getSelection()?.type === 'Caret') {
                         ev.preventDefault();
                         ev.stopPropagation();
@@ -462,8 +450,6 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                         ev.preventDefault();
                         ev.stopPropagation();
                         const tc = getCurrentText();
-                        // const el = textInput.current;
-                        // el.textContent = tc.slice(0, caret - 1) + tc.slice(caret + 1);
                         setCurrentText(tc.slice(0, caret - 1) + tc.slice(caret + 1));
                         setCaret(document, textInputRef.current, caret - 1);
                     }
@@ -547,7 +533,6 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                     break;
 
                 default:
-                    // console.log(ev);
                     break;
             }
         },
