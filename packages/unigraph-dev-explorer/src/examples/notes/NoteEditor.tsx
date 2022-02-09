@@ -57,23 +57,44 @@ const changesForOpenScopedMarkdownLink = (scope: ScopeForAutoComplete, ev: Keybo
     };
 };
 
-export const useNoteEditor: (...args: any) => [any, (text: string) => void, () => string] = (
+export const useNoteEditor: (...args: any) => [any, (text: string) => void, () => string, () => void, any] = (
     isEditing: boolean,
     setIsEditing: any,
     edited: any,
     focused: boolean,
-    textInputRef: any,
     data: any,
     callbacks: any,
-    inputDebounced: any,
     componentId: any,
     editorContext: any,
     resetEdited: any,
-    onBlurHandler: any,
     setCommand: any,
 ) => {
     const classes = useStyles();
     const tabContext = React.useContext(TabContext);
+
+    const inputter = (text: string) => {
+        if (data?._value?.children?.['_value[']) {
+            const deadLinks: any = [];
+            data._value.children['_value['].forEach((el: any) => {
+                if (el && el._key && !text.includes(el._key)) deadLinks.push(el.uid);
+            });
+            if (deadLinks.length) window.unigraph.deleteItemFromArray(data._value.children.uid, deadLinks, data.uid);
+        }
+
+        return window.unigraph.updateObject(
+            data.get('text')._value._value.uid,
+            {
+                '_value.%': text,
+            },
+            false,
+            false,
+            callbacks.subsId,
+            [],
+        );
+    };
+
+    const inputDebounced = React.useRef(_.debounce(inputter, 333));
+    const textInputRef: any = React.useRef();
 
     const handlePotentialResize = () => {
         const listener = () => {
@@ -243,6 +264,11 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
         [callbacks, componentId, data, data.uid, data?._value?.children?.uid, editorContext, resetEdited],
     );
 
+    const onBlur = React.useCallback(() => {
+        setIsEditing(false);
+        inputDebounced.current.flush();
+    }, []);
+
     React.useEffect(() => {
         const fn = (state: any) => {
             if (state.component !== componentId) return;
@@ -402,10 +428,11 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                     ) {
                         ev.preventDefault();
                         selectUid(componentId);
-                        onBlurHandler();
+                        window.unigraph.getState('global/focused').setValue({ uid: '', caret: 0, type: '' });
                     }
                     break;
-                case 'k': // "a" key
+
+                case 'k': // "k" key
                     if (ev.ctrlKey || ev.metaKey) {
                         handleOpenScopedMarkdownLink(ev);
                     }
@@ -536,7 +563,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                     break;
             }
         },
-        [callbacks, componentId, data, editorContext, onBlurHandler, handleOpenScopedChar],
+        [callbacks, componentId, data, editorContext, handleOpenScopedChar],
     );
 
     return [
@@ -560,5 +587,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
         />,
         setCurrentText,
         getCurrentText,
+        onBlur,
+        textInputRef,
     ];
 };
