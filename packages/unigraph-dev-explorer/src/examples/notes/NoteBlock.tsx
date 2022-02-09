@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable no-param-reassign */
-import { makeStyles, TextareaAutosize, Typography } from '@material-ui/core';
+import { Typography } from '@material-ui/core';
 import React from 'react';
-import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
 import _ from 'lodash';
-import { blobToBase64, buildGraph, findUid, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
-import { Actions } from 'flexlayout-react';
+import { buildGraph, findUid, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { FiberManualRecord, MoreVert } from '@material-ui/icons';
 import stringify from 'json-stable-stringify';
 import { mdiClockOutline, mdiNoteOutline } from '@mdi/js';
@@ -14,26 +12,15 @@ import Sugar from 'sugar';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { ViewViewDetailed } from '../../components/ObjectView/DefaultObjectView';
 
-import { addChild, permanentlyDeleteBlock, copyChildToClipboard } from './commands';
+import { addChild, copyChildToClipboard } from './commands';
 import { onUnigraphContextMenu } from '../../components/ObjectView/DefaultObjectContextMenu';
 import { noteQuery, noteQueryDetailed } from './noteQuery';
 import { getParentsAndReferences } from '../../components/ObjectView/backlinksUtils';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
-import { removeAllPropsFromObj, scrollIntoViewIfNeeded, selectUid, setCaret, TabContext } from '../../utils';
+import { removeAllPropsFromObj, scrollIntoViewIfNeeded, TabContext } from '../../utils';
 import { DragandDrop } from '../../components/ObjectView/DragandDrop';
-import { inlineObjectSearch, inlineTextSearch } from '../../components/UnigraphCore/InlineSearchPopup';
-import { htmlToMarkdown } from '../semantic/Markdown';
-import { parseUnigraphHtml, setClipboardHandler } from '../../clipboardUtils';
-import {
-    getCallbacks,
-    getShortcuts,
-    noteBlockCommands,
-    persistCollapsedNodes,
-    caretToLastLine,
-    closeScopeCharDict,
-    caretFromLastLine,
-    setFocusedCaret,
-} from './utils';
+import { setClipboardHandler } from '../../clipboardUtils';
+import { getCallbacks, getSubentities, getShortcuts, noteBlockCommands, persistCollapsedNodes } from './utils';
 import { PlaceholderNoteBlock } from './NoteBlockViews';
 import { useNoteEditor } from './NoteEditor';
 
@@ -318,56 +305,37 @@ function NoteViewTextWrapper({ children, semanticChildren, isRoot, onContextMenu
     );
 }
 
-export function DetailedNoteBlock({
+export function DetailedOutlinerBlock({
     data,
     isChildren,
     callbacks,
-    options,
     isCollapsed,
     setCollapsed,
     focused,
     index,
     componentId,
     displayAs,
+    noteEditorProps,
+    onFocus,
+    onPointerUp,
+    onKeyDown,
+    editorFrameStyle,
+    beforeEditor,
+    customView,
 }: any) {
     const tabContext = React.useContext(TabContext);
     // eslint-disable-next-line no-bitwise
     isChildren |= callbacks?.isChildren;
     const [subentities, otherChildren] = getSubentities(data);
     const [command, setCommand] = React.useState<() => any | undefined>();
-    const inputter = (text: string) => {
-        if (data?._value?.children?.['_value[']) {
-            const deadLinks: any = [];
-            data._value.children['_value['].forEach((el: any) => {
-                if (el && el._key && !text.includes(el._key)) deadLinks.push(el.uid);
-            });
-            if (deadLinks.length) window.unigraph.deleteItemFromArray(data._value.children.uid, deadLinks, data.uid);
-        }
-
-        return window.unigraph.updateObject(
-            data.get('text')._value._value.uid,
-            {
-                '_value.%': text,
-            },
-            false,
-            false,
-            callbacks.subsId,
-            [],
-        );
-    };
-    const textInput: any = React.useRef();
-    /** Reference for HTML Element for list of children */
     const editorRef = React.useRef<any>();
-    const inputDebounced = React.useRef(_.debounce(inputter, 333));
-
     const edited = React.useRef(false);
     const [isEditing, setIsEditing] = React.useState(
-        window.unigraph.getState('global/focused').value?.uid === data.uid,
+        noteEditorProps ? window.unigraph.getState('global/focused').value?.uid === data.uid : false,
     );
     const nodesState = window.unigraph.addState(`${tabContext.viewId}/nodes`, []);
-
     const editorContext = {
-        edited,
+        edited: noteEditorProps ? edited : undefined,
         setCommand,
         callbacks,
         nodesState,
@@ -380,29 +348,28 @@ export function DetailedNoteBlock({
         });
     };
 
+    const [NoteEditorInner, setCurrentText, getCurrentText, onBlur, textInput] =
+        noteEditorProps?.(
+            isEditing,
+            setIsEditing,
+            edited,
+            focused,
+            data,
+            callbacks,
+            componentId,
+            editorContext,
+            resetEdited,
+            setCommand,
+        ) || [];
+
     const onBlurHandler = React.useCallback(() => {
-        setIsEditing(false);
-        inputDebounced.current.flush();
+        // setIsEditing(false);
+        // inputDebounced.current.flush();
+        if (onBlur) onBlur();
         if (focused && window.unigraph.getState('global/focused').value.component === componentId) {
             window.unigraph.getState('global/focused').setValue({ uid: '', caret: 0, type: '' });
         }
     }, [focused]);
-
-    const [NoteEditorInner, setCurrentText, getCurrentText] = useNoteEditor(
-        isEditing,
-        setIsEditing,
-        edited,
-        focused,
-        textInput,
-        data,
-        callbacks,
-        inputDebounced,
-        componentId,
-        editorContext,
-        resetEdited,
-        onBlurHandler,
-        setCommand,
-    );
 
     const commandFn = () => {
         if (edited.current !== true && command) {
@@ -458,26 +425,16 @@ export function DetailedNoteBlock({
             'uid',
         );
         nodesState.setValue(newNodes);
-        // if (!isChildren) console.log(getParentsAndReferences(data['~_value'], (data['unigraph.origin'] || []).filter((el: any) => el.uid !== data.uid)))
     }, [JSON.stringify(subentities.map((el: any) => el.uid).sort()), data.uid, componentId, isCollapsed]);
 
     React.useEffect(() => {
-        // set caret when focus changes
-        if (focused) {
-            window.unigraph.getState('global/focused/actions').setValue({
-                splitChild: () => {
-                    // const sel = document.getSelection();
-                    // const caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
-                    callbacks['split-child'](getCurrentText(), textInput.current.selectionStart);
-                },
-                indentChild: callbacks['indent-child'],
-                unindentChild: callbacks['unindent-child-in-parent'],
-            });
+        if (focused && onFocus) {
+            onFocus(isEditing, setIsEditing, getCurrentText, textInput, edited, editorRef, editorContext);
         }
     }, [focused]);
 
     React.useEffect(() => {
-        if (focused) {
+        if (focused && textInput?.current) {
             scrollIntoViewIfNeeded(textInput.current);
         }
     }, [data.uid, index, focused]);
@@ -495,24 +452,6 @@ export function DetailedNoteBlock({
             return false;
         },
         [data, editorContext, componentId],
-    );
-
-    const onPointerUpHandler = React.useCallback(
-        (ev) => {
-            if (!isEditing) {
-                setIsEditing(true);
-            }
-            const caretPos = Number((ev.target as HTMLElement).getAttribute('markdownPos') || -1);
-            (ev.target as HTMLElement).removeAttribute('markdownPos');
-            const finalCaretPos = caretPos === -1 ? getCurrentText().length : caretPos;
-            window.unigraph.getState('global/focused').setValue({
-                uid: data?.uid,
-                caret: finalCaretPos,
-                type: '$/schema/note_block',
-                component: componentId,
-            });
-        },
-        [componentId, data?.uid, isEditing],
     );
 
     React.useEffect(commandFn, [command]);
@@ -550,40 +489,50 @@ export function DetailedNoteBlock({
                     <div
                         key="editor-frame"
                         ref={editorRef}
-                        onPointerUp={onPointerUpHandler}
+                        tabIndex={textInput?.current ? undefined : -1}
+                        onPointerUp={(ev) =>
+                            onPointerUp(
+                                ev,
+                                isEditing,
+                                setIsEditing,
+                                getCurrentText,
+                                textInput,
+                                edited,
+                                editorRef,
+                                editorContext,
+                            )
+                        }
                         onBlur={onBlurHandler}
-                        style={{ width: '100%', display: 'flex', cursor: 'text' }}
+                        onKeyDown={(ev) =>
+                            onKeyDown?.(
+                                ev,
+                                isEditing,
+                                setIsEditing,
+                                getCurrentText,
+                                textInput,
+                                edited,
+                                editorRef,
+                                editorContext,
+                            )
+                        }
+                        style={{
+                            width: '100%',
+                            display: 'flex',
+                            cursor: 'text',
+                            ...(editorFrameStyle || {}),
+                        }}
                     >
-                        {isChildren && data._hide !== true ? (
-                            <div
-                                style={{ display: 'contents' }}
-                                onClick={() => {
-                                    window.wsnavigator(
-                                        `/library/object?uid=${data.uid}&type=${data?.type?.['unigraph.id']}`,
-                                    );
-                                }}
-                            >
-                                <Icon path={mdiNoteOutline} size={0.8} style={{ opacity: 0.54, marginRight: '4px' }} />
-                            </div>
-                        ) : (
-                            []
-                        )}
+                        {beforeEditor}
                         {NoteEditorInner}
-                        <AutoDynamicView
-                            object={
-                                edited.current
-                                    ? { ...data.get('text')?._value?._value, '_value.%': getCurrentText() }
-                                    : data.get('text')?._value?._value
-                            }
-                            attributes={{
-                                isHeading: !(isChildren || callbacks.isEmbed),
-                            }}
-                            style={{ display: isEditing ? 'none' : '' }}
-                            options={{ inline: true, noDrag: true, noContextMenu: true, noClickthrough: true }}
-                            callbacks={{
-                                'get-semantic-properties': () => data,
-                            }}
-                        />
+                        {customView(
+                            isEditing,
+                            setIsEditing,
+                            getCurrentText,
+                            textInput,
+                            edited,
+                            editorRef,
+                            editorContext,
+                        )}
                         <Typography
                             style={{
                                 display: isEditing || !isCollapsed ? 'none' : '',
@@ -629,7 +578,7 @@ export function DetailedNoteBlock({
     );
 }
 
-export function DetailedEmbedBlock({
+export function DetailedNoteBlock({
     data,
     isChildren,
     callbacks,
@@ -641,131 +590,127 @@ export function DetailedEmbedBlock({
     componentId,
     displayAs,
 }: any) {
-    const tabContext = React.useContext(TabContext);
-    // eslint-disable-next-line no-bitwise
-    isChildren |= callbacks?.isChildren;
-    const [subentities, otherChildren] = getSubentities(data);
-    const [command, setCommand] = React.useState<() => any | undefined>();
-    const editorRef = React.useRef<any>();
-    const edited = React.useRef(false);
-    const [isEditing, setIsEditing] = React.useState(false);
-    const nodesState = window.unigraph.addState(`${tabContext.viewId}/nodes`, []);
-    const editorContext = {
-        edited: undefined,
-        setCommand,
-        callbacks,
-        nodesState,
-    };
-
-    const onBlurHandler = React.useCallback(() => {
-        // setIsEditing(false);
-        // inputDebounced.current.flush();
-        if (focused && window.unigraph.getState('global/focused').value.component === componentId) {
-            window.unigraph.getState('global/focused').setValue({ uid: '', caret: 0, type: '' });
-        }
-    }, [focused]);
-
-    const commandFn = () => {
-        if (edited.current !== true && command) {
-            command();
-            setCommand(undefined);
-        }
-    };
-
-    const [isChildrenCollapsed, _setIsChildrenCollapsed] = React.useState<any>(
-        Object.fromEntries(
-            Object.entries(JSON.parse(window.localStorage.getItem('noteblockCollapsedByUid') || '{}')).filter(
-                ([key, value]: any) => subentities.map((el: any) => el.uid).includes(key),
-            ),
-        ),
-    );
-    const setIsChildrenCollapsed = (newCollapsed: any) => {
-        persistCollapsedNodes(newCollapsed);
-        _setIsChildrenCollapsed(newCollapsed);
-    };
-
-    React.useEffect(() => {
-        if (callbacks?.registerBoundingBox) {
-            callbacks.registerBoundingBox(editorRef.current);
-        }
-    }, []);
-
-    React.useEffect(() => {
-        const newNodes = _.unionBy(
-            [
-                {
-                    uid: data.uid,
-                    componentId,
-                    children: isCollapsed ? [] : subentities.map((el: any) => el.uid),
-                    type: data?.type?.['unigraph.id'],
-                    root: !isChildren,
-                },
-                ...subentities
-                    .filter(
-                        (el: any) =>
-                            !['$/schema/note_block', '$/schema/embed_block'].includes(el.type?.['unigraph.id']),
-                    )
-                    .map((el: any) => {
-                        const [subs] = getSubentities(el);
-                        return {
-                            uid: el.uid,
-                            children: subs.map((ell: any) => ell.uid),
-                            type: el?.type?.['unigraph.id'],
-                            root: false,
-                        };
-                    }),
-            ],
-            nodesState.value,
-            'uid',
-        );
-        nodesState.setValue(newNodes);
-    }, [JSON.stringify(subentities.map((el: any) => el.uid).sort()), data.uid, componentId, isCollapsed]);
-
-    React.useEffect(() => {
-        if (focused) {
-            // TODO: focus the main thing
-            editorRef.current.focus();
-        }
-    }, [focused]);
-
-    React.useEffect(() => {
-        if (focused) {
-            window.unigraph.getState('global/focused/actions').setValue({
-                splitChild: () => {
-                    callbacks['add-child']();
-                },
-                indentChild: callbacks['indent-child'],
-                unindentChild: callbacks['unindent-child-in-parent'],
-            });
-        }
-    }, [focused]);
-
-    React.useEffect(() => {
-        if (focused) {
-            // scrollIntoViewIfNeeded(textInput.current);
-        }
-    }, [data.uid, index, focused]);
-
-    const copyOrCutHandler = React.useCallback(
-        (ev, elindex, isCut) => {
-            if (window.unigraph.getState('global/selected').value.length > 0) {
-                ev.preventDefault();
-                const clipboardData = copyChildToClipboard(data, editorContext, elindex, isCut);
-                window.unigraph
-                    .getState('temp/clipboardItems')
-                    .setValue((val: any) => (Array.isArray(val) ? [...val, clipboardData] : [clipboardData]));
-                return setClipboardHandler;
-            }
-            return false;
-        },
-        [data, editorContext, componentId],
-    );
-
     const onPointerUpHandler = React.useCallback(
-        (ev) => {
-            // if (!isEditing) {
-            //     setIsEditing(true);
-            // }
+        (
+            ev,
+            isEditing: any,
+            setIsEditing: any,
+            getCurrentText: any,
+            textInput: any,
+            edited: any,
+            editorRef: any,
+            editorContext: any,
+        ) => {
+            if (!isEditing) {
+                setIsEditing(true);
+            }
+            const caretPos = Number((ev.target as HTMLElement).getAttribute('markdownPos') || -1);
+            (ev.target as HTMLElement).removeAttribute('markdownPos');
+            const finalCaretPos = caretPos === -1 ? getCurrentText().length : caretPos;
+            window.unigraph.getState('global/focused').setValue({
+                uid: data?.uid,
+                caret: finalCaretPos,
+                type: '$/schema/note_block',
+                component: componentId,
+            });
+        },
+        [componentId, data?.uid],
+    );
+
+    const customView = React.useCallback(
+        (
+            isEditing: any,
+            setIsEditing: any,
+            getCurrentText: any,
+            textInput: any,
+            edited: any,
+            editorRef: any,
+            editorContext: any,
+        ) => (
+            <AutoDynamicView
+                object={
+                    edited.current
+                        ? { ...data.get('text')?._value?._value, '_value.%': getCurrentText() }
+                        : data.get('text')?._value?._value
+                }
+                attributes={{
+                    isHeading: !(isChildren || callbacks.isEmbed),
+                }}
+                style={{ display: isEditing ? 'none' : '' }}
+                options={{ inline: true, noDrag: true, noContextMenu: true, noClickthrough: true }}
+                callbacks={{
+                    'get-semantic-properties': () => data,
+                }}
+            />
+        ),
+        [data, isChildren, callbacks.isEmbed],
+    );
+
+    return (
+        <DetailedOutlinerBlock
+            data={data}
+            isChildren={isChildren}
+            callbacks={callbacks}
+            options={options}
+            isCollapsed={isCollapsed}
+            setCollapsed={setCollapsed}
+            focused={focused}
+            index={index}
+            componentId={componentId}
+            displayAs={displayAs}
+            noteEditorProps={useNoteEditor}
+            onFocus={(
+                isEditing: any,
+                setIsEditing: any,
+                getCurrentText: any,
+                textInput: any,
+                edited: any,
+                editorRef: any,
+                editorContext: any,
+            ) => {
+                window.unigraph.getState('global/focused/actions').setValue({
+                    splitChild: () => {
+                        // const sel = document.getSelection();
+                        // const caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
+                        callbacks['split-child'](getCurrentText(), textInput.current.selectionStart);
+                    },
+                    indentChild: callbacks['indent-child'],
+                    unindentChild: callbacks['unindent-child-in-parent'],
+                });
+            }}
+            onPointerUp={onPointerUpHandler}
+            beforeEditor={
+                isChildren && data._hide !== true ? (
+                    <div
+                        style={{ display: 'contents' }}
+                        onClick={() => {
+                            window.wsnavigator(`/library/object?uid=${data.uid}&type=${data?.type?.['unigraph.id']}`);
+                        }}
+                    >
+                        <Icon path={mdiNoteOutline} size={0.8} style={{ opacity: 0.54, marginRight: '4px' }} />
+                    </div>
+                ) : (
+                    []
+                )
+            }
+            customView={customView}
+        />
+    );
+}
+
+export function DetailedEmbedBlock({
+    data,
+    isChildren,
+    callbacks,
+    isCollapsed,
+    setCollapsed,
+    focused,
+    index,
+    componentId,
+    displayAs,
+}: any) {
+    const onPointerUpHandler = React.useCallback(
+        (ev, isEditing, setIsEditing, getCurrentText, textInput) => {
             window.unigraph.getState('global/focused').setValue({
                 ...window.unigraph.getState('global/focused').value,
                 uid: data?.uid,
@@ -773,11 +718,20 @@ export function DetailedEmbedBlock({
                 component: componentId,
             });
         },
-        [componentId, data?.uid, isEditing],
+        [componentId, data?.uid],
     );
 
     const onKeyDownHandler = React.useCallback(
-        (ev) => {
+        (
+            ev,
+            isEditing: any,
+            setIsEditing: any,
+            getCurrentText: any,
+            textInput: any,
+            edited: any,
+            editorRef: any,
+            editorContext: any,
+        ) => {
             const sel = document.getSelection();
             const caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
             switch (ev.key) {
@@ -789,12 +743,10 @@ export function DetailedEmbedBlock({
                         ev.preventDefault();
                     }
                     break;
-
                 case 'Backspace': // backspace
                     // console.log(caret, document.getSelection()?.type)
                     callbacks['delete-child']();
                     break;
-
                 case 'Tab': // tab
                     ev.preventDefault();
                     ev.stopPropagation();
@@ -805,154 +757,96 @@ export function DetailedEmbedBlock({
                         callbacks['indent-child']?.();
                     }
                     break;
-
                 case 'ArrowLeft': // left arrow
                 case 'ArrowUp': // up arrow
                     ev.preventDefault();
                     // inputDebounced.current.flush();
                     callbacks['focus-last-dfs-node'](data, editorContext, true, -1);
                     break;
-
                 case 'ArrowRight': // right arrow
                 case 'ArrowDown': // down arrow
                     ev.preventDefault();
                     // inputDebounced.current.flush();
                     callbacks['focus-next-dfs-node'](data, editorContext, false, 0);
                     break;
-
                 default:
                     // console.log(ev);
                     break;
             }
         },
-        [callbacks, componentId, data, editorContext, onBlurHandler],
+        [callbacks, componentId, data],
     );
 
-    const childrenDisplayAs = data?._value?.children?._displayAs || 'outliner';
+    const customView = React.useCallback(
+        (
+            isEditing: any,
+            setIsEditing: any,
+            getCurrentText: any,
+            textInput: any,
+            edited: any,
+            editorRef: any,
+            editorContext: any,
+        ) => (
+            <AutoDynamicView
+                object={data.get('content')?._value}
+                attributes={{
+                    isHeading: !(isChildren || callbacks.isEmbed),
+                }}
+                options={{ inline: true, noDrag: true, noDrop: true, noClickthrough: true }}
+                callbacks={{
+                    'get-semantic-properties': () => data,
+                    isEmbed: true,
+                }}
+            />
+        ),
+        [data, isChildren, callbacks.isEmbed],
+    );
 
     return (
-        <NoteViewPageWrapper isRoot={!isChildren}>
-            <div
-                style={{
-                    width: '100%',
-                    ...(!isChildren ? { overflow: 'hidden' } : {}),
-                }}
-            >
-                <NoteViewTextWrapper
-                    isRoot={!isChildren}
-                    isEditing={isEditing}
-                    onContextMenu={(event: any) =>
-                        onUnigraphContextMenu(event, data, undefined, { ...callbacks, componentId })
-                    }
-                    callbacks={callbacks}
-                    semanticChildren={buildGraph(otherChildren)
-                        .filter((el: any) => el.type)
-                        .map((el: any) => (
-                            <AutoDynamicView
-                                object={
-                                    ['$/schema/note_block', '$/schema/embed_block'].includes(el.type?.['unigraph.id'])
-                                        ? el
-                                        : { uid: el.uid, type: el.type }
-                                }
-                                options={{ inline: true }}
-                            />
-                        ))}
-                >
-                    <div
-                        key="editor-frame"
-                        ref={editorRef}
-                        tabIndex={-1}
-                        onPointerUp={onPointerUpHandler}
-                        onBlur={onBlurHandler}
-                        onKeyDown={onKeyDownHandler}
-                        style={{
-                            width: '100%',
-                            display: 'flex',
-                            outline: 'none',
-                            cursor: 'text',
-                            ...(focused
-                                ? {
-                                      border: '1px solid #00bfff',
-                                      margin: '-1px',
-                                      borderRadius: '4px',
-                                  }
-                                : {}),
-                        }}
-                    >
-                        <AutoDynamicView
-                            object={data.get('content')?._value}
-                            attributes={{
-                                isHeading: !(isChildren || callbacks.isEmbed),
-                            }}
-                            options={{ inline: true, noDrag: true, noDrop: true, noClickthrough: true }}
-                            callbacks={{
-                                'get-semantic-properties': () => data,
-                                isEmbed: true,
-                            }}
-                        />
-                        <Typography
-                            style={{
-                                display: isEditing || !isCollapsed ? 'none' : '',
-                                marginLeft: '6px',
-                                color: 'gray',
-                                cursor: 'pointer',
-                            }}
-                            onClick={(ev) => {
-                                ev.preventDefault();
-                                ev.stopPropagation();
-                                setCollapsed(false);
-                            }}
-                        >{`(${subentities.length})`}</Typography>
-                    </div>
-                </NoteViewTextWrapper>
-                {!isChildren && !callbacks.isEmbed ? (
-                    <div style={{ marginTop: '4px', marginBottom: '12px', display: 'flex', color: 'gray' }}>
-                        <Icon path={mdiClockOutline} size={0.8} style={{ marginRight: '4px' }} />
-                        {`${new Date(data._updatedAt || 0).toLocaleString()} (${Sugar.Date.relative(
-                            new Date(data._updatedAt || 0),
-                        )})`}
-                    </div>
-                ) : (
-                    []
-                )}
-                <BlockChildren
-                    isCollapsed={isCollapsed}
-                    isChildren={isChildren}
-                    subentities={subentities}
-                    tabContext={tabContext}
-                    data={data}
-                    isChildrenCollapsed={isChildrenCollapsed}
-                    setIsChildrenCollapsed={setIsChildrenCollapsed}
-                    editorContext={editorContext}
-                    displayAs={displayAs}
-                    childrenDisplayAs={childrenDisplayAs}
-                    callbacks={callbacks}
-                    copyOrCutHandler={copyOrCutHandler}
-                />
-                {!isChildren ? <ParentsAndReferences data={data} /> : []}
-            </div>
-        </NoteViewPageWrapper>
+        <DetailedOutlinerBlock
+            data={data}
+            isChildren={isChildren}
+            callbacks={callbacks}
+            isCollapsed={isCollapsed}
+            setCollapsed={setCollapsed}
+            focused={focused}
+            index={index}
+            componentId={componentId}
+            displayAs={displayAs}
+            onFocus={(
+                isEditing: any,
+                setIsEditing: any,
+                getCurrentText: any,
+                textInput: any,
+                edited: any,
+                editorRef: any,
+                editorContext: any,
+            ) => {
+                editorRef.current.focus();
+                window.unigraph.getState('global/focused/actions').setValue({
+                    splitChild: () => {
+                        callbacks['add-child']();
+                    },
+                    indentChild: callbacks['indent-child'],
+                    unindentChild: callbacks['unindent-child-in-parent'],
+                });
+            }}
+            onPointerUp={onPointerUpHandler}
+            onKeyDown={onKeyDownHandler}
+            editorFrameStyle={
+                focused
+                    ? {
+                          border: '1px solid #00bfff',
+                          margin: '-1px',
+                          outline: 'none',
+                          borderRadius: '4px',
+                      }
+                    : { outline: 'none' }
+            }
+            customView={customView}
+        />
     );
 }
-
-export const getSubentities = (data: any) => {
-    let subentities: any;
-    let otherChildren: any;
-    if (!data?._value?.children?.['_value[']) {
-        [subentities, otherChildren] = [[], []];
-    } else {
-        [subentities, otherChildren] = data?._value?.children?.['_value['].sort(byElementIndex).reduce(
-            (prev: any, el: any) => {
-                if (el?._value?.type?.['unigraph.id'] !== '$/schema/subentity' && !el._key)
-                    return [prev[0], [...prev[1], el._value]];
-                if (!el._key) return [[...prev[0], el?._value._value], prev[1]];
-                return prev;
-            },
-            [[], []],
-        ) || [[], []];
-    }
-    return [subentities, otherChildren];
-};
 
 export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
     const [subentities, otherChildren] = getSubentities(data);
