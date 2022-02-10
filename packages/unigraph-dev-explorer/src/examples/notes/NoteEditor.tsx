@@ -29,7 +29,9 @@ const changesForOpenScopedChar = (
     ev: KeyboardEvent,
 ): ChangesForAutoComplete => {
     const isChar = (c: string) => c !== ' ' && c !== '\n' && c !== '\t' && c !== undefined;
-    const shouldNotOpen = middle.length === 0 && isChar(currentText?.[caret]);
+    const nextChar = currentText?.[caret];
+    const shouldNotOpen = middle.length === 0 && isChar(nextChar) && nextChar !== closeScopeCharDict[ev.key];
+
     return {
         newText: `${currentText.slice(0, caret)}${ev.key}${middle}${
             shouldNotOpen ? '' : closeScopeCharDict[ev.key]
@@ -446,7 +448,10 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                         inputDebounced.current.cancel();
                         edited.current = false;
                         callbacks['unsplit-child'](getCurrentText());
-                    } else if (getCurrentText()[caret - 1] === '[' && getCurrentText()[caret] === ']') {
+                    } else if (
+                        Object.keys(closeScopeCharDict).includes(getCurrentText()[caret - 1]) &&
+                        getCurrentText()[caret] === closeScopeCharDict[getCurrentText()[caret - 1]]
+                    ) {
                         ev.preventDefault();
                         ev.stopPropagation();
                         const tc = getCurrentText();
@@ -518,16 +523,13 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                     break;
 
                 case ']': // right bracket
-                    if (!ev.shiftKey && getCurrentText()[caret] === ']') {
+                case ')':
+                case '"':
+                case '`':
+                case '$':
+                    if (!ev.shiftKey && getCurrentText()[caret] === ev.key) {
                         ev.preventDefault();
                         // setCaret(document, textInput.current, caret + 1);
-                        setCaret(document, textInputRef.current, caret + 1);
-                    }
-                    break;
-
-                case ')': // 0 or parenthesis
-                    if (ev.shiftKey && getCurrentText()[caret] === ')') {
-                        ev.preventDefault();
                         setCaret(document, textInputRef.current, caret + 1);
                     }
                     break;
