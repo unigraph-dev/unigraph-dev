@@ -6,16 +6,24 @@ import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { TabContext } from '../../utils';
 
 export const shouldMirrorEmailInbox = () => window.unigraph.getState('settings/email/mirrorEmailInbox').value;
+export const shouldRemoveEmailOnReadState = () => window.unigraph.getState('settings/email/removeEmailOnRead').value;
 
 export function EmailSettings({}) {
     const [loaded, setLoaded] = React.useState(false);
     const [account, setAccount] = React.useState<any>({});
     const tabContext = React.useContext(TabContext);
 
+    // TODO abstract this into a react hook
     const mirrorEmailInboxState = window.unigraph.getState('settings/email/mirrorEmailInbox');
     const [mirrorEmailInbox, setEmailInboxPushMode] = React.useState(mirrorEmailInboxState.value);
     mirrorEmailInboxState.subscribe((newState: boolean) => {
         setEmailInboxPushMode(newState);
+    });
+
+    const removeEmailOnReadState = window.unigraph.getState('settings/email/removeEmailOnRead');
+    const [removeEmailOnRead, setRemoveEmailOnRead] = React.useState(removeEmailOnReadState.value);
+    removeEmailOnReadState.subscribe((newState: boolean) => {
+        setRemoveEmailOnRead(newState);
     });
 
     useEffectOnce(() => {
@@ -79,9 +87,9 @@ export function EmailSettings({}) {
                 FUll sync Gmail inbox
             </Button>
             <List>
-                <ListItem button onClick={(e) => false} key="email-inbox-push-mode">
+                <ListItem button onClick={(e) => false} key="mirror-email-inbox">
                     <ListItemText
-                        id="switch-list-label-mirror-email-inbos"
+                        id="switch-list-label-mirror-email-inbox"
                         primary="Mirror email inbox"
                         secondary="Disabling makes it so that removing emails from Unigraph inbox doesn't remove them from gmail inbox, only sets them as read."
                     />
@@ -93,7 +101,26 @@ export function EmailSettings({}) {
                             }}
                             checked={mirrorEmailInbox}
                             inputProps={{
-                                'aria-labelledby': 'switch-list-label-mirror-email-inbos',
+                                'aria-labelledby': 'switch-list-label-mirror-email-inbox',
+                            }}
+                        />
+                    </ListItemSecondaryAction>
+                </ListItem>
+                <ListItem button onClick={(e) => false} key="remove-email-onread">
+                    <ListItemText
+                        id="switch-list-label-remove-email-onread"
+                        primary="Remove items from Unigraph inbox on Read"
+                        secondary='Not just emails, any Inbox item. If "Mirror email inbox" is enabled, will also remove emails from inbox at the origin.'
+                    />
+                    <ListItemSecondaryAction>
+                        <Switch
+                            edge="end"
+                            onChange={(e) => {
+                                removeEmailOnReadState.setValue(!removeEmailOnRead);
+                            }}
+                            checked={removeEmailOnRead}
+                            inputProps={{
+                                'aria-labelledby': 'switch-list-label-remove-email-onread',
                             }}
                         />
                     </ListItemSecondaryAction>

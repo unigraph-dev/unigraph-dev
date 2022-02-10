@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { pkg as emailPackage } from 'unigraph-dev-common/lib/data/unigraph.email.pkg';
 import { byUpdatedAt, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import Sugar from 'sugar';
-import { Link } from '@material-ui/icons';
+import { Link, StarRateTwoTone } from '@material-ui/icons';
 import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { DynamicViewRenderer } from '../../global.d';
 import { getComponentFromPage, getOrInitLocalStorage } from '../../utils';
@@ -99,22 +99,43 @@ const EmailMessage: DynamicViewRenderer = ({ data, callbacks }) => {
     );
 };
 
-const defaultEmailSettings = { mirrorEmailInbox: true };
-export const init = () => {
-    const emailSettings = getOrInitLocalStorage('emailSettings', defaultEmailSettings);
-    const mirrorEmailInbox = window.unigraph.addState(
-        'settings/email/mirrorEmailInbox',
-        emailSettings.mirrorEmailInbox ?? true,
-    );
-    mirrorEmailInbox.subscribe((val: boolean) => {
+const coupleStateAndLocalStorageObj = (
+    stateName: string,
+    localStorageAreaName: string,
+    localStorageName: string,
+    defaultVal: any,
+) => {
+    // TODO: abstract this better. explorer/src/init.ts uses this pattern too
+    // localStorageAreaName is the name of an JSON object in localStorage,
+    // localStorageName is an attribute of that object
+    const state = window.unigraph.addState(stateName, defaultVal);
+    state.subscribe((val: boolean) => {
         window.localStorage.setItem(
-            'emailSettings',
+            localStorageAreaName,
             JSON.stringify({
-                ...JSON.parse(window.localStorage.getItem('emailSettings')!),
-                mirrorEmailInbox: val,
+                ...JSON.parse(window.localStorage.getItem(localStorageAreaName)!),
+                [localStorageName]: val,
             }),
         );
     });
+};
+
+const defaultEmailSettings = { mirrorEmailInbox: true, removeEmailOnRead: false };
+export const init = () => {
+    const emailSettings = getOrInitLocalStorage('emailSettings', defaultEmailSettings);
+
+    coupleStateAndLocalStorageObj(
+        'settings/email/mirrorEmailInbox',
+        'emailSettings',
+        'mirrorEmailInbox',
+        emailSettings.mirrorEmailInbox ?? true,
+    );
+    coupleStateAndLocalStorageObj(
+        'settings/email/removeEmailOnRead',
+        'emailSettings',
+        'removeEmailOnRead',
+        emailSettings.removeEmailOnRead ?? false,
+    );
 
     registerDynamicViews({ '$/schema/email_message': EmailMessage });
     registerDetailedDynamicViews({
