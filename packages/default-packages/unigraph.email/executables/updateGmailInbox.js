@@ -110,8 +110,6 @@ if (account?.uid) {
     const uidsToInbox = msgResps.map(isInOriginInbox).filter((el) => el !== undefined);
     const uidsToRemoveInbox = msgResps.map(_.negate(isInOriginInbox)).filter((el) => el !== undefined);
 
-    uidsToDelete.forEach(unigraph.deleteObject);
-
     // TODO: remove or hide deleted msgs
 
     // Do not insert drafts to Unigraph
@@ -129,20 +127,21 @@ if (account?.uid) {
             })),
         });
     }
-    console.log({
-        newMsgRespsLen: newMsgResps.length,
-        newMsgResps: newMsgResps.map((el) => el.data.labelIds),
-        uidsToRemoveInbox: uidsToRemoveInbox.length,
-        uidsToInbox: uidsToInbox.length,
-        uidsToDeleteLen: uidsToDelete.length,
-        uidsToDelete,
-    });
+    // console.log({
+    //     newMsgRespsLen: newMsgResps.length,
+    //     newMsgResps: newMsgResps.map((el) => el.data.labelIds),
+    //     uidsToRemoveInbox: uidsToRemoveInbox.length,
+    //     uidsToInbox: uidsToInbox.length,
+    //     uidsToDeleteLen: uidsToDelete.length,
+    //     uidsToDelete,
+    // });
     await unigraph.runExecutable('$/executable/add-item-to-list', {
         where: '$/entity/inbox',
         item: uidsToInbox.reverse(),
     });
     await unigraph.runExecutable('$/executable/delete-item-from-list', {
         where: '$/entity/inbox',
-        item: uidsToRemoveInbox,
+        item: [...uidsToRemoveInbox, ...uidsToDelete],
     });
+    uidsToDelete.forEach(unigraph.deleteObject);
 }
