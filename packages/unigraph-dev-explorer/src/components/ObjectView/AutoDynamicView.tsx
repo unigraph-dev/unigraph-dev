@@ -15,6 +15,7 @@ import { getSubentities, isStub, SubentityDropAcceptor } from './utils';
 import { registerKeyboardShortcut, removeKeyboardShortcut } from '../../keyboardShortcuts';
 import { useFocusDelegate, useSelectionDelegate } from './AutoDynamicView/FocusSelectionDelegate';
 import { useBacklinkDelegate } from './AutoDynamicView/BacklinkDelegate';
+import { useSubscriptionDelegate } from './AutoDynamicView/SubscriptionDelegate';
 
 export function AutoDynamicView({
     object,
@@ -59,16 +60,17 @@ export function AutoDynamicView({
     const dataContext = React.useContext(DataContext);
     const tabContext = React.useContext(TabContext);
 
-    const isObjectStub = isStub(object);
-    const [loadedObj, setLoadedObj] = React.useState<any>(false);
-    const [subsId, setSubsId] = React.useState(0);
     const [componentId, setComponentId] = React.useState(getRandomId());
     const [isRecursion, setIsRecursion] = React.useState<any>(false);
-    const getObject = () => (isObjectStub ? loadedObj : object);
+    const [getObject, subsId] = useSubscriptionDelegate(
+        object?.uid,
+        DynamicViews[object?.type?.['unigraph.id']],
+        object,
+    );
 
     const [canClickthrough, setCanClickthrough] = React.useState(
         Object.keys(window.unigraph.getState('registry/dynamicViewDetailed').value).includes(
-            getObject()?.type?.['unigraph.id'] || object?.type?.['unigraph.id'],
+            object?.type?.['unigraph.id'],
         ),
     );
 
@@ -128,41 +130,6 @@ export function AutoDynamicView({
             }
         };
     }, [shortcuts]);
-
-    React.useEffect(() => {
-        if (!isObjectStub) setLoadedObj(object);
-    }, [object, isObjectStub]);
-    const uidRef = React.useRef(undefined);
-    React.useEffect(() => {
-        const newSubs = getRandomInt();
-        if (isObjectStub && object?.uid !== uidRef.current) {
-            uidRef.current = object?.uid;
-            // console.log(tabContext);
-            if (subsId) tabContext.unsubscribe(subsId);
-            let query = DynamicViews[object.type?.['unigraph.id']]?.query?.(object.uid);
-            if (!query) {
-                query = `(func: uid(${object.uid})) @recurse {
-                uid
-                unigraph.id
-                expand(_userpredicate_)
-              }`;
-            }
-            tabContext.subscribeToQuery(
-                query,
-                (objects: any[]) => {
-                    setLoadedObj(buildGraph(objects)[0]);
-                },
-                newSubs,
-                { noExpand: true },
-            );
-            setSubsId(newSubs);
-        }
-        if (!isObjectStub) {
-            uidRef.current = undefined;
-            tabContext.unsubscribe(newSubs);
-        }
-        return () => {};
-    }, [object?.uid, isObjectStub, DynamicViews, object?.type]);
 
     const [{ isDragging }, drag] = useDrag(() => ({
         type: object?.type?.['unigraph.id'] || '$/schema/any',
@@ -290,18 +257,7 @@ export function AutoDynamicView({
             );
         }
         return '';
-    }, [
-        isRecursion,
-        object,
-        callbacks,
-        attributes,
-        DynamicViews,
-        isObjectStub,
-        loadedObj,
-        isFocused,
-        subsId,
-        BacklinkComponent,
-    ]);
+    }, [isRecursion, object, callbacks, attributes, DynamicViews, getObject, isFocused, BacklinkComponent]);
 
     return (
         <ErrorBoundary
