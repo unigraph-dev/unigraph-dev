@@ -3,7 +3,7 @@ import { mdiNoteOutline } from '@mdi/js';
 import { Icon } from '@mdi/react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { getParentsAndReferences } from '../../components/ObjectView/backlinksUtils';
-import { getSubentities } from './commands';
+import { getSubentities } from './utils';
 
 export function NoteBlock({ data, inline }: any) {
     const [parents, references] = getParentsAndReferences(
