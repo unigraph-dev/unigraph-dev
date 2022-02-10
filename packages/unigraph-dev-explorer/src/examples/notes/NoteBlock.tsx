@@ -23,6 +23,8 @@ import { setClipboardHandler } from '../../clipboardUtils';
 import { getCallbacks, getSubentities, getShortcuts, noteBlockCommands, persistCollapsedNodes } from './utils';
 import { PlaceholderNoteBlock } from './NoteBlockViews';
 import { useNoteEditor } from './NoteEditor';
+import todoItemPlugin from './contrib/todoItem';
+import { useSubscriptionDelegate } from '../../components/ObjectView/AutoDynamicView/SubscriptionDelegate';
 
 const childrenComponents = {
     '$/schema/note_block': {
@@ -51,14 +53,7 @@ const BlockChild = ({ elindex, shortcuts, displayAs, isCollapsed, setCollapsed, 
             noSubentities: ['$/schema/note_block', '$/schema/embed_block'].includes(el.type?.['unigraph.id']),
             noBacklinks: ['$/schema/note_block', '$/schema/embed_block'].includes(el.type?.['unigraph.id']),
         }}
-        object={
-            ['$/schema/note_block', '$/schema/embed_block'].includes(el.type?.['unigraph.id'])
-                ? el
-                : {
-                      uid: el.uid,
-                      type: el.type,
-                  }
-        }
+        object={el}
         index={elindex}
         shortcuts={shortcuts}
         callbacks={callbacks}
@@ -322,6 +317,8 @@ export function DetailedOutlinerBlock({
     editorFrameStyle,
     beforeEditor,
     customView,
+    pullText,
+    pushText,
 }: any) {
     const tabContext = React.useContext(TabContext);
     // eslint-disable-next-line no-bitwise
@@ -349,18 +346,23 @@ export function DetailedOutlinerBlock({
     };
 
     const [NoteEditorInner, setCurrentText, getCurrentText, onBlur, textInput] =
-        noteEditorProps?.(
-            isEditing,
-            setIsEditing,
-            edited,
-            focused,
-            data,
-            callbacks,
-            componentId,
-            editorContext,
-            resetEdited,
-            setCommand,
-        ) || [];
+        (pullText &&
+            pushText &&
+            noteEditorProps?.(
+                pullText,
+                pushText,
+                isEditing,
+                setIsEditing,
+                edited,
+                focused,
+                data,
+                callbacks,
+                componentId,
+                editorContext,
+                resetEdited,
+                setCommand,
+            )) ||
+        [];
 
     const onBlurHandler = React.useCallback(() => {
         // setIsEditing(false);
@@ -490,8 +492,11 @@ export function DetailedOutlinerBlock({
                         key="editor-frame"
                         ref={editorRef}
                         tabIndex={textInput?.current ? undefined : -1}
-                        onPointerUp={(ev) =>
-                            onPointerUp(
+                        onPointerUp={(ev) => {
+                            if (textInput?.current && !isEditing) {
+                                setIsEditing(true);
+                            }
+                            return onPointerUp(
                                 ev,
                                 isEditing,
                                 setIsEditing,
@@ -500,8 +505,8 @@ export function DetailedOutlinerBlock({
                                 edited,
                                 editorRef,
                                 editorContext,
-                            )
-                        }
+                            );
+                        }}
                         onBlur={onBlurHandler}
                         onKeyDown={(ev) =>
                             onKeyDown?.(
@@ -601,9 +606,6 @@ export function DetailedNoteBlock({
             editorRef: any,
             editorContext: any,
         ) => {
-            if (!isEditing) {
-                setIsEditing(true);
-            }
             const caretPos = Number((ev.target as HTMLElement).getAttribute('markdownPos') || -1);
             (ev.target as HTMLElement).removeAttribute('markdownPos');
             const finalCaretPos = caretPos === -1 ? getCurrentText().length : caretPos;
@@ -658,6 +660,19 @@ export function DetailedNoteBlock({
             index={index}
             componentId={componentId}
             displayAs={displayAs}
+            pullText={() => data.get('text')?.as('primitive')}
+            pushText={(text: string) => {
+                return window.unigraph.updateObject(
+                    new UnigraphObject(data).get('text')._value._value.uid,
+                    {
+                        '_value.%': text,
+                    },
+                    false,
+                    false,
+                    callbacks.subsId,
+                    [],
+                );
+            }}
             noteEditorProps={useNoteEditor}
             onFocus={(
                 isEditing: any,
@@ -711,15 +726,32 @@ export function DetailedEmbedBlock({
 }: any) {
     const onPointerUpHandler = React.useCallback(
         (ev, isEditing, setIsEditing, getCurrentText, textInput) => {
+            const caretPos = Number((ev.target as HTMLElement).getAttribute('markdownPos') || -1);
+            (ev.target as HTMLElement).removeAttribute('markdownPos');
+            const finalCaretPos = caretPos === -1 ? getCurrentText().length : caretPos;
             window.unigraph.getState('global/focused').setValue({
                 ...window.unigraph.getState('global/focused').value,
                 uid: data?.uid,
-                type: '$/schema/note_block',
+                type: '$/schema/embed_block',
                 component: componentId,
+                caret: finalCaretPos,
             });
         },
         [componentId, data?.uid],
     );
+
+    const [getObject, subsId] = useSubscriptionDelegate(
+        data.get('content')?._value?.uid,
+        window.unigraph.getState('registry/dynamicView').value?.[data.get('content')?._value?.type?.['unigraph.id']],
+        data.get('content')?._value,
+    );
+
+    const editor: any = {};
+    if (data.get('content')?._value?.type?.['unigraph.id'] === '$/schema/todo') {
+        editor.hook = useNoteEditor;
+        editor.pullText = todoItemPlugin.pullText.bind(null, getObject());
+        editor.pushText = todoItemPlugin.pushText.bind(null, subsId, getObject());
+    }
 
     const onKeyDownHandler = React.useCallback(
         (
@@ -786,20 +818,22 @@ export function DetailedEmbedBlock({
             edited: any,
             editorRef: any,
             editorContext: any,
-        ) => (
-            <AutoDynamicView
-                object={data.get('content')?._value}
-                attributes={{
-                    isHeading: !(isChildren || callbacks.isEmbed),
-                }}
-                options={{ inline: true, noDrag: true, noDrop: true, noClickthrough: true }}
-                callbacks={{
-                    'get-semantic-properties': () => data,
-                    isEmbed: true,
-                }}
-            />
-        ),
-        [data, isChildren, callbacks.isEmbed],
+        ) =>
+            isEditing ? undefined : (
+                <AutoDynamicView
+                    object={getObject()}
+                    attributes={{
+                        isHeading: !(isChildren || callbacks.isEmbed),
+                    }}
+                    options={{ inline: true, noDrag: true, noDrop: true, noClickthrough: true }}
+                    callbacks={{
+                        'get-semantic-properties': () => data,
+                        isEmbed: true,
+                        subsId,
+                    }}
+                />
+            ),
+        [data, isChildren, callbacks.isEmbed, getObject],
     );
 
     return (
@@ -813,6 +847,9 @@ export function DetailedEmbedBlock({
             index={index}
             componentId={componentId}
             displayAs={displayAs}
+            noteEditorProps={editor.hook}
+            pullText={editor.pullText}
+            pushText={editor.pushText}
             onFocus={(
                 isEditing: any,
                 setIsEditing: any,
@@ -822,7 +859,7 @@ export function DetailedEmbedBlock({
                 editorRef: any,
                 editorContext: any,
             ) => {
-                editorRef.current.focus();
+                if (!editor.hook) editorRef.current.focus();
                 window.unigraph.getState('global/focused/actions').setValue({
                     splitChild: () => {
                         callbacks['add-child']();
@@ -832,7 +869,7 @@ export function DetailedEmbedBlock({
                 });
             }}
             onPointerUp={onPointerUpHandler}
-            onKeyDown={onKeyDownHandler}
+            onKeyDown={editor.hook ? undefined : onKeyDownHandler}
             editorFrameStyle={
                 focused
                     ? {

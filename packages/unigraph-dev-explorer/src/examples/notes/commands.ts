@@ -191,7 +191,8 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
             el._index['_value.#i'] = elindex + 1;
             el._value._hide = true;
             el._value._value._hide = true;
-            el._value._value._value.text._value._value['_value.%'] = oldtext.slice(at);
+            const loc = el._value._value._value.text || el._value._value._value.name;
+            loc._value._value['_value.%'] = oldtext.slice(at);
             // distribute references accordingly
             if (el?._value?._value?._value?.children?.['_value[']) {
                 const oldChildren = el._value._value._value.children;

@@ -60,6 +60,8 @@ const changesForOpenScopedMarkdownLink = (scope: ScopeForAutoComplete, ev: Keybo
 };
 
 export const useNoteEditor: (...args: any) => [any, (text: string) => void, () => string, () => void, any] = (
+    pullText: any,
+    pushText: any,
     isEditing: boolean,
     setIsEditing: any,
     edited: any,
@@ -74,7 +76,8 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
     const classes = useStyles();
     const tabContext = React.useContext(TabContext);
 
-    const inputter = (text: string) => {
+    const inputterRef = React.useRef<any>();
+    inputterRef.current = (text: string) => {
         if (data?._value?.children?.['_value[']) {
             const deadLinks: any = [];
             data._value.children['_value['].forEach((el: any) => {
@@ -83,19 +86,10 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
             if (deadLinks.length) window.unigraph.deleteItemFromArray(data._value.children.uid, deadLinks, data.uid);
         }
 
-        return window.unigraph.updateObject(
-            data.get('text')._value._value.uid,
-            {
-                '_value.%': text,
-            },
-            false,
-            false,
-            callbacks.subsId,
-            [],
-        );
+        return pushText(text);
     };
 
-    const inputDebounced = React.useRef(_.debounce(inputter, 333));
+    const inputDebounced = React.useRef(_.debounce((...args) => inputterRef.current(...args), 333));
     const textInputRef: any = React.useRef();
 
     const handlePotentialResize = () => {
@@ -117,7 +111,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
     }, [caretPostRender]);
 
     React.useEffect(() => {
-        const dataText = data.get('text')?.as('primitive');
+        const dataText = pullText();
         if (dataText && tabContext.viewId && !callbacks.isEmbed)
             window.layoutModel.doAction(Actions.renameTab(tabContext.viewId as any, `Note: ${dataText}`));
         if (getCurrentText() !== dataText && !edited.current) {
@@ -127,7 +121,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
         }
 
         if (!edited.current) fulfillCaretPostRender();
-    }, [data.get('text')?.as('primitive'), isEditing, fulfillCaretPostRender]);
+    }, [data, pullText, isEditing, fulfillCaretPostRender]);
 
     React.useEffect(() => {
         // set caret when focus changes
@@ -202,13 +196,13 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                         )}`;
                         const semChildren = data?._value;
                         setCurrentText(newStr);
-                        resetEdited();
+                        edited.current = true;
+                        // resetEdited();
                         setCaret(document, textInputRef.current, match.index + newName.length + 4);
                         await window.unigraph.updateObject(
                             data.uid,
                             {
                                 _value: {
-                                    text: { _value: { _value: { '_value.%': newStr } } },
                                     children: {
                                         '_value[': [
                                             {
@@ -282,13 +276,13 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
 
     const onInputHandler = React.useCallback(
         (ev) => {
-            if (ev.target.value !== data.get('text').as('primitive')) {
+            if (ev.target.value !== pullText()) {
                 if (!edited.current) edited.current = true;
                 checkReferences();
                 inputDebounced.current(ev.target.value);
             }
         },
-        [checkReferences, data],
+        [checkReferences, data, pullText],
     );
 
     const pasteLinkIntoSelection = React.useCallback((url: string) => {
@@ -445,7 +439,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                         ev.preventDefault();
                         edited.current = false;
                         inputDebounced.current.cancel();
-                        const currentText = getCurrentText() || data.get('text').as('primitive');
+                        const currentText = getCurrentText() || pullText();
                         callbacks['split-child']?.(currentText, caret);
                         // setCurrentText(currentText.slice(caret));
                         setCaretPostRender(0);
@@ -565,7 +559,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                     break;
             }
         },
-        [callbacks, componentId, data, editorContext, handleOpenScopedChar],
+        [callbacks, componentId, data, editorContext, handleOpenScopedChar, pullText],
     );
 
     return [
