@@ -134,7 +134,9 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
                 size={callbacks.isEmbed ? 'small' : 'medium'}
                 style={{ padding: callbacks.isEmbed ? '2px' : '', marginRight: callbacks.isEmbed ? '4px' : '' }}
                 checked={unpadded.done}
-                onClick={(_) => {
+                onPointerUp={(ev) => {
+                    ev.preventDefault();
+                    ev.stopPropagation();
                     data.get('done')['_value.!'] = !data.get('done')['_value.!'];
                     totalCallbacks.onUpdate(data);
                 }}
