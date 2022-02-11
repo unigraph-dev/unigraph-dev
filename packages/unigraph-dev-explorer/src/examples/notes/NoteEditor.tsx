@@ -18,8 +18,8 @@ const classes = {
     noteTextarea: `${PREFIX}-noteTextarea`,
 };
 
-const Root = styled(TextareaAutosize)(({ theme }) => ({
-    [`& .${classes.noteTextarea}`]: {
+const TextareaAutosizeStyled = styled(TextareaAutosize)(({ theme }) => ({
+    [`&.${classes.noteTextarea}`]: {
         ...theme.typography.body1,
         border: 'none',
         outline: 'none',
@@ -570,7 +570,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
     );
 
     return [
-        <TextareaAutosize
+        <TextareaAutosizeStyled
             className={classes.noteTextarea}
             style={{
                 outline: '0px solid transparent',
