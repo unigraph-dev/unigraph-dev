@@ -1,8 +1,7 @@
 import { createBrowserHistory } from 'history';
+import { styled, ThemeProvider, Theme, StyledEngineProvider, createTheme } from '@mui/material/styles';
 import 'typeface-roboto';
-import { ThemeProvider, Theme, StyledEngineProvider, createTheme } from '@mui/material/styles';
-
-import makeStyles from '@mui/styles/makeStyles';
+import '@mui/styles';
 
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -12,35 +11,46 @@ import { InlineSearch } from './components/UnigraphCore/InlineSearchPopup';
 import { SearchOverlayPopover } from './pages/SearchOverlay';
 import { MobileBar } from './components/UnigraphCore/MobileBar';
 
-declare module '@mui/styles/defaultTheme' {
-    // eslint-disable-next-line @typescript-eslint/no-empty-interface
-    interface DefaultTheme extends Theme {}
-}
+const PREFIX = 'App';
 
-const providedTheme = createTheme();
-// TODO: custom theme
-const useStyles = makeStyles((theme) => ({
-    root: {
+const classes = {
+    root: `${PREFIX}-root`,
+    appBar: `${PREFIX}-appBar`,
+    toolbar: `${PREFIX}-toolbar`,
+    content: `${PREFIX}-content`,
+};
+
+const StyledStyledEngineProvider = styled(StyledEngineProvider)(({ theme }) => ({
+    [`& .${classes.root}`]: {
         display: 'flex',
         height: '100vh',
     },
-    appBar: {
+
+    [`& .${classes.appBar}`]: {
         width: '100vw',
         zIndex: theme.zIndex.drawer + 1,
     },
+
     // necessary for content to be below app bar
-    toolbar: {
+    [`& .${classes.toolbar}`]: {
         minHeight: '48px !important',
     },
-    content: {
+
+    [`& .${classes.content}`]: {
         flexGrow: 1,
         backgroundColor: theme.palette.background.default,
         padding: theme.spacing(3),
     },
 }));
 
+declare module '@mui/styles/defaultTheme' {
+    // eslint-disable-next-line @typescript-eslint/no-empty-interface
+    interface DefaultTheme extends Theme {}
+}
+
+const providedTheme = createTheme();
+
 function AppToWrap() {
-    const classes = useStyles();
     const history = createBrowserHistory();
     const componentPathName = new URLSearchParams(window.location.search).get('pageName');
     const config = getParameters(window.location.search.replace('?', ''));
@@ -65,11 +75,11 @@ function AppToWrap() {
 
 function App() {
     return (
-        <StyledEngineProvider injectFirst>
+        <StyledStyledEngineProvider injectFirst>
             <ThemeProvider theme={providedTheme}>
                 <AppToWrap />
             </ThemeProvider>
-        </StyledEngineProvider>
+        </StyledStyledEngineProvider>
     );
 }
 

@@ -14,7 +14,7 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
-import makeStyles from '@mui/styles/makeStyles';
+import { styled } from '@mui/material/styles';
 import _ from 'lodash';
 import React from 'react';
 import { useEffectOnce } from 'react-use';
@@ -31,13 +31,20 @@ import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
 import { getDynamicViews } from '../../unigraph-react';
 import { TabContext } from '../../utils';
 
-const useStyles = makeStyles({
-    editorFrame: {
+const PREFIX = 'ObjectEditor';
+
+const classes = {
+    editorFrame: `${PREFIX}-editorFrame`,
+    editorColumn: `${PREFIX}-editorColumn`,
+};
+
+const Root = styled('div')({
+    [`& .${classes.editorFrame}`]: {
         padding: '12px',
         margin: '8px',
         borderRadius: '12px',
     },
-    editorColumn: {},
+    [`& .${classes.editorColumn}`]: {},
 });
 
 const defaultNewValues: any = {
@@ -55,7 +62,7 @@ const getMetadata = (localObject: any) =>
         .filter((el) => el !== undefined);
 function MetadataDisplay({ metadata }: any) {
     return metadata.length ? (
-        <div>
+        <Root>
             <Typography>Metadata:</Typography>
             {metadata.map((el: any) => (
                 <div style={{ display: 'flex' }}>
@@ -63,7 +70,7 @@ function MetadataDisplay({ metadata }: any) {
                     <Typography style={{ color: 'gray' }}>{JSON.stringify(el[1])}</Typography>
                 </div>
             ))}
-        </div>
+        </Root>
     ) : (
         <span />
     );
@@ -82,7 +89,7 @@ const TypedObjectPartEditor: any = {
             localSchema._properties.map((el: any) => el._key),
         );
         const metadata = getMetadata(localObject);
-        const classes = useStyles();
+
         const [selectedNewProp, setSelectedNewProp] = React.useState<any>();
         const [currentInputObjValue, setCurrentInputObjValue] = React.useState<any>();
         const [viewOrEdit, setViewOrEdit] = React.useState<any>(
@@ -214,7 +221,7 @@ const TypedObjectPartEditor: any = {
     '$/composer/Union': ({ localSchema, localObject, setLocalObject, schemaMap }: any) => {
         if (Object.keys(localObject._value || {}).length === 1 && !localObject._value.type) return 'Deleted object';
         const currentUnionType = localObject._value?.type?.['unigraph.id'] || 'Primitive';
-        const classes = useStyles();
+
         return (
             <Paper variant="outlined" className={classes.editorFrame}>
                 <Typography>
@@ -237,7 +244,6 @@ const TypedObjectPartEditor: any = {
         );
     },
     '$/composer/Array': ({ localSchema, localObject, setLocalObject, schemaMap }: any) => {
-        const classes = useStyles();
         const metadata = getMetadata(localObject);
         const elementSchema = localSchema._parameters._element;
         return (
@@ -398,7 +404,7 @@ const TypedObjectPartEditor: any = {
         const [viewOrEdit, setViewOrEdit] = React.useState<any>(
             getDynamicViews().includes(localObject.type?.['unigraph.id']) ? 'view' : 'edit',
         );
-        const classes = useStyles();
+
         const definition =
             localSchema === '$/schema/any'
                 ? schemaMap[
@@ -531,7 +537,6 @@ export function ObjectEditorSelector({ currentUid, setCurrentUid, style }: any) 
 function ObjectEditorBody({ currentObject, setCurrentObject, schemaMap }: any) {
     const currentSchema =
         currentObject.type['_value[']?.[0]?._definition || schemaMap[currentObject.type['unigraph.id']]._definition;
-    const classes = useStyles();
 
     return (
         <div style={{ display: 'flex' }}>

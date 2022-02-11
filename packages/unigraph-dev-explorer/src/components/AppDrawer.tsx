@@ -1,11 +1,12 @@
 import React from 'react';
 
+import { styled } from '@mui/material/styles';
+
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import makeStyles from '@mui/styles/makeStyles';
 import { Comment, CompareArrows } from '@mui/icons-material';
 import { ListSubheader } from '@mui/material';
 import Icon from '@mdi/react';
@@ -21,28 +22,34 @@ import {
 } from '@mdi/js';
 import { FavoriteBar } from './UnigraphCore/FavoriteBar';
 
-const useStyles = makeStyles((theme) => ({
-    drawer: {
+const PREFIX = 'AppDrawer';
+
+const classes = {
+    drawer: `${PREFIX}-drawer`,
+    drawerPaper: `${PREFIX}-drawerPaper`,
+};
+
+const StyledDrawer = styled(Drawer)(({ theme }) => ({
+    [`&.${classes.drawer}`]: {
         width: '100%',
         height: '100%',
         overflow: 'auto',
         flexShrink: 0,
     },
-    drawerPaper: {
+
+    [`& .${classes.drawerPaper}`]: {
         width: '100%',
         border: 'none',
     },
 }));
 
 export default function DrawerRouter() {
-    const classes = useStyles();
-
     const devState = window.unigraph.getState('settings/developerMode');
     const [devMode, setDevMode] = React.useState(devState.value);
     devState.subscribe((newState: boolean) => setDevMode(newState));
 
     return (
-        <Drawer
+        <StyledDrawer
             className={classes.drawer}
             variant="permanent"
             classes={{
@@ -134,6 +141,6 @@ export default function DrawerRouter() {
                 </ListSubheader>
                 <FavoriteBar />
             </List>
-        </Drawer>
+        </StyledDrawer>
     );
 }

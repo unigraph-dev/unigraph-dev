@@ -18,7 +18,7 @@ import {
     Divider,
     Autocomplete,
 } from '@mui/material';
-import makeStyles from '@mui/styles/makeStyles';
+import { styled } from '@mui/material/styles';
 import { ExpandMore, ClearAll, InboxOutlined } from '@mui/icons-material';
 import _ from 'lodash';
 import React from 'react';
@@ -33,6 +33,19 @@ import { AutoDynamicView } from './AutoDynamicView';
 import { DataContext, DataContextWrapper, isMobile, TabContext } from '../../utils';
 import { setupInfiniteScrolling } from './infiniteScrolling';
 import { DragandDrop } from './DragandDrop';
+
+const PREFIX = 'DynamicObjectListView';
+
+const classes = {
+    content: `${PREFIX}-content`,
+};
+
+const Root = styled('div')(({ theme }) => ({
+    [`& .${classes.content}`]: {
+        width: '100%',
+        overflow: 'auto',
+    },
+}));
 
 type Group = {
     name: string;
@@ -334,7 +347,7 @@ function MultiTypeDescriptor({
     return itemGroups.length > 1 ? (
         <>
             <Divider variant="middle" orientation="vertical" style={{ height: 'auto' }} />
-            <div style={{ whiteSpace: 'nowrap', display: 'flex' }}>
+            <Root style={{ whiteSpace: 'nowrap', display: 'flex' }}>
                 {itemGroups.map((el, index) => (
                     <TabButton isSelected={selectedTab === el.name} onClick={() => setSelectedTab(el.name)}>
                         <div
@@ -357,19 +370,12 @@ function MultiTypeDescriptor({
                         <Typography style={{ marginRight: '8px' }}>{el.items.length}</Typography>
                     </TabButton>
                 ))}
-            </div>
+            </Root>
         </>
     ) : (
         <span />
     );
 }
-
-const useStyles = makeStyles((theme) => ({
-    content: {
-        width: '100%',
-        overflow: 'auto',
-    },
-}));
 
 export function TabButton({ children, isSelected, onClick }: any) {
     return (
@@ -425,8 +431,6 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
     components,
     itemAdder,
 }) => {
-    const classes = useStyles();
-
     const tabContext = React.useContext(TabContext);
 
     const [optionsOpen, setOptionsOpen] = React.useState(false);
