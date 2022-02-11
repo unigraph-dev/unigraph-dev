@@ -172,7 +172,7 @@ export function CodeEditor({ id }: any) {
                                 <NewUserCode />
                                 <List style={{ overflow: 'auto' }}>
                                     {userExecContent.map((it: any) => (
-                                        <ListItem key={it.uid} selected={currentUid === it.uid}>
+                                        <ListItem button key={it.uid} selected={currentUid === it.uid}>
                                             <AutoDynamicView
                                                 object={it}
                                                 onClick={() => {
@@ -187,10 +187,14 @@ export function CodeEditor({ id }: any) {
                             {execPackages.map((el: string) => (
                                 <>
                                     <ListItem
+                                        button
                                         onClick={() => {
                                             setCurrentPackage(currentPackage === el ? '' : el);
                                         }}
-                                        style={{ cursor: 'pointer' }}
+                                        sx={{
+                                            cursor: 'pointer',
+                                            ...(currentPackage === el ? { backgroundColor: 'action.selected' } : {}),
+                                        }}
                                     >
                                         <ListItemText primary={el} />
                                         {currentPackage === el ? <ExpandLess /> : <ExpandMore />}
@@ -200,7 +204,7 @@ export function CodeEditor({ id }: any) {
                                             {execcontent
                                                 .filter((it: any) => it['unigraph.id']?.startsWith(el))
                                                 .map((it: any) => (
-                                                    <ListItem key={it.uid} selected={currentUid === it.uid}>
+                                                    <ListItem button key={it.uid} selected={currentUid === it.uid}>
                                                         <AutoDynamicView
                                                             object={it}
                                                             onClick={() => {
