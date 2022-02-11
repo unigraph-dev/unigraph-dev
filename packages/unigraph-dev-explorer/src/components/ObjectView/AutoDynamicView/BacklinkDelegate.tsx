@@ -42,7 +42,7 @@ export const useBacklinkDelegate = (
                     return oldBacklinks;
                 });
                 setTotalParents((oldParents: any) => {
-                    const newParents = [...(pars || []).map((el) => el.uid), ...(refs || []).map((el) => el.uid)];
+                    const newParents = [...(pars || []).map((el) => el.uid)];
                     if (JSON.stringify(oldParents?.sort()) !== JSON.stringify(newParents?.sort())) return newParents;
                     return oldParents;
                 });

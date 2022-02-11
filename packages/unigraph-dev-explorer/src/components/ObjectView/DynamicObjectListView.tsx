@@ -531,7 +531,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
             }}
             ref={drop}
         >
-            <DataContextWrapper contextUid={context?.uid} contextData={context} parents={[]}>
+            <DataContextWrapper contextUid={context?.uid} contextData={context} parents={[]} expandedChildren>
                 <div style={{ display: 'flex' }}>
                     {noBar ? (
                         []
