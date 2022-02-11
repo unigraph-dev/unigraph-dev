@@ -401,6 +401,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                     cancelable: true,
                 }),
             );
+            checkReferences();
         },
         [],
     );
