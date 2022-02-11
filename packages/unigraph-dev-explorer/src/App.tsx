@@ -1,6 +1,6 @@
 import { createBrowserHistory } from 'history';
 import 'typeface-roboto';
-import { makeStyles } from '@material-ui/core/styles';
+import { ThemeProvider, createMuiTheme, makeStyles } from '@material-ui/core/styles';
 
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -10,6 +10,7 @@ import { InlineSearch } from './components/UnigraphCore/InlineSearchPopup';
 import { SearchOverlayPopover } from './pages/SearchOverlay';
 import { MobileBar } from './components/UnigraphCore/MobileBar';
 
+const providedTheme = createMuiTheme();
 // TODO: custom theme
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -31,7 +32,7 @@ const useStyles = makeStyles((theme) => ({
     },
 }));
 
-function App() {
+function AppToWrap() {
     const classes = useStyles();
     const history = createBrowserHistory();
     const componentPathName = new URLSearchParams(window.location.search).get('pageName');
@@ -52,6 +53,14 @@ function App() {
                     : []}
             </DndProvider>
         </div>
+    );
+}
+
+function App() {
+    return (
+        <ThemeProvider theme={providedTheme}>
+            <AppToWrap />
+        </ThemeProvider>
     );
 }
 
