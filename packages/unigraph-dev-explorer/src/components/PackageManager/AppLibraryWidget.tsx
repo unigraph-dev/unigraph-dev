@@ -1,4 +1,4 @@
-import { Grid, ListItemIcon, Typography } from '@mui/material';
+import { Grid, ListItemIcon, Typography, Box } from '@mui/material';
 import Icon from '@mdi/react';
 import { mdiFeatureSearchOutline, mdiAppsBox, mdiInboxOutline, mdiViewQuiltOutline } from '@mdi/js';
 import React from 'react';
@@ -10,24 +10,34 @@ type AppShortcutProps = {
     address: string;
     text: string;
 };
+// "const" casting bc of TS type-widening: https://mui.com/system/the-sx-prop/#typescript-usage
+const appItemStyle = {
+    borderRadius: 4,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    p: '16px',
+    cursor: 'pointer',
+    '&:hover': { backgroundColor: 'action.hover' },
+} as const;
 
 export function AppShortcut({ avatar, address, text }: AppShortcutProps) {
     return (
-        <div
-            style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                padding: '16px',
-            }}
+        <Box
+            sx={appItemStyle}
+            // style={{
+            //     display: 'flex',
+            //     flexDirection: 'column',
+            //     alignItems: 'center',
+            //     padding: '16px',
+            // }}
             onClick={() => window.wsnavigator(address)}
         >
             {avatar}
             {text}
-        </div>
+        </Box>
     );
 }
-
 export function AllApps() {
     const [totalViews, setTotalViews] = React.useState([]);
     const tabContext = React.useContext(TabContext);
