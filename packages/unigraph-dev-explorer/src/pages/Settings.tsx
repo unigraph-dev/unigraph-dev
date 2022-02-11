@@ -13,7 +13,7 @@ import {
     Switch,
     TextField,
     Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 
 export default function Settings() {
     const [settings, setSettings] = React.useState(JSON.parse(window.localStorage.getItem('userSettings') || ''));

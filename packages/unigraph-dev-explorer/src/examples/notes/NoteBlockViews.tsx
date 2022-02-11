@@ -1,4 +1,4 @@
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import { mdiNoteOutline } from '@mdi/js';
 import { Icon } from '@mdi/react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';

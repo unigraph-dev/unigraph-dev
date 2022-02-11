@@ -1,4 +1,4 @@
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import { registerDetailedDynamicViews, registerDynamicViews, registerQuickAdder } from '../../unigraph-react';
 import { BacklinkView } from '../../components/ObjectView/BacklinkView';
 import { Html } from './Html';

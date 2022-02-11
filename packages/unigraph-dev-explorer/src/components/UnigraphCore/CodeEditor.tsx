@@ -10,13 +10,13 @@ import {
     MenuItem,
     Select,
     TextField,
-} from '@material-ui/core';
+} from '@mui/material';
 import React from 'react';
 import SplitterLayout from 'react-splitter-layout';
 import 'react-splitter-layout/lib/index.css';
 import { useEffectOnce } from 'react-use';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
-import { ExpandLess, ExpandMore } from '@material-ui/icons';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import _ from 'lodash';
 import Editor, { loader } from '@monaco-editor/react';
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';

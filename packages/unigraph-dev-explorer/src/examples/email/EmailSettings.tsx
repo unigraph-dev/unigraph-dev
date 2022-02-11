@@ -1,4 +1,4 @@
-import { Button, Typography } from '@material-ui/core';
+import { Button, Typography } from '@mui/material';
 import React, { useEffect } from 'react';
 import { useEffectOnce } from 'react-use';
 import { pkg } from 'unigraph-dev-common/lib/data/unigraph.email.pkg';

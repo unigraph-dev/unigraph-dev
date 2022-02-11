@@ -1,6 +1,8 @@
 import { createBrowserHistory } from 'history';
 import 'typeface-roboto';
-import { ThemeProvider, createMuiTheme, makeStyles } from '@material-ui/core/styles';
+import { ThemeProvider, Theme, StyledEngineProvider, createTheme } from '@mui/material/styles';
+
+import makeStyles from '@mui/styles/makeStyles';
 
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -10,7 +12,12 @@ import { InlineSearch } from './components/UnigraphCore/InlineSearchPopup';
 import { SearchOverlayPopover } from './pages/SearchOverlay';
 import { MobileBar } from './components/UnigraphCore/MobileBar';
 
-const providedTheme = createMuiTheme();
+declare module '@mui/styles/defaultTheme' {
+    // eslint-disable-next-line @typescript-eslint/no-empty-interface
+    interface DefaultTheme extends Theme {}
+}
+
+const providedTheme = createTheme();
 // TODO: custom theme
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -58,9 +65,11 @@ function AppToWrap() {
 
 function App() {
     return (
-        <ThemeProvider theme={providedTheme}>
-            <AppToWrap />
-        </ThemeProvider>
+        <StyledEngineProvider injectFirst>
+            <ThemeProvider theme={providedTheme}>
+                <AppToWrap />
+            </ThemeProvider>
+        </StyledEngineProvider>
     );
 }
 

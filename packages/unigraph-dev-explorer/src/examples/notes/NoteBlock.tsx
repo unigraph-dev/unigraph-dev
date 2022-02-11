@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable no-param-reassign */
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import React from 'react';
 import _ from 'lodash';
 import { buildGraph, findUid, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
-import { FiberManualRecord, MoreVert } from '@material-ui/icons';
+import { FiberManualRecord, MoreVert } from '@mui/icons-material';
 import stringify from 'json-stable-stringify';
 import { mdiClockOutline, mdiNoteOutline } from '@mdi/js';
 import { Icon } from '@mdi/react';

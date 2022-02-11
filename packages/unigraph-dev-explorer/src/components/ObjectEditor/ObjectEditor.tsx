@@ -7,14 +7,14 @@ import {
     FormControl,
     Grid,
     InputLabel,
-    makeStyles,
     MenuItem,
     Paper,
     Select,
     Switch,
     TextField,
     Typography,
-} from '@material-ui/core';
+} from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
 import _ from 'lodash';
 import React from 'react';
 import { useEffectOnce } from 'react-use';
@@ -22,7 +22,7 @@ import { SchemaDgraph } from 'unigraph-dev-common/lib/types/json-ts';
 import { typeMapUnigraph } from 'unigraph-dev-common/lib/types/consts';
 import DateTimePicker from '@mui/lab/DateTimePicker';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
-import { Add, Delete, Menu, Save } from '@material-ui/icons';
+import { Add, Delete, Menu, Save } from '@mui/icons-material';
 import { isJsonString, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { ReferenceableSelectorControlled } from '../ObjectView/ReferenceableSelector';
 import { BacklinkView } from '../ObjectView/BacklinkView';

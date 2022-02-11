@@ -8,12 +8,12 @@ import {
     ListItemText,
     TextField,
     Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import React from 'react';
 import { getExecutableId, UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 import { pkg as rssReaderPackage } from 'unigraph-dev-common/lib/data/unigraph.rss_reader.pkg';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
-import { Description, Link, OpenInBrowserOutlined } from '@material-ui/icons';
+import { Description, Link, OpenInBrowserOutlined } from '@mui/icons-material';
 import Sugar from 'sugar';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Icon from '@mdi/react';
@@ -73,7 +73,7 @@ const RSSItem: DynamicViewRenderer = ({ data, callbacks }) => {
         <>
             <ListItemIcon>
                 <Badge
-                    overlap="circle"
+                    overlap="circular"
                     anchorOrigin={{
                         vertical: 'bottom',
                         horizontal: 'right',

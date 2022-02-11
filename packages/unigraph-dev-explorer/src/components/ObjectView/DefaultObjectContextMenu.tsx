@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable no-shadow */
-import { ListItemIcon, ListItemText, Menu, MenuItem } from '@material-ui/core';
+import { ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material';
 import _ from 'lodash';
 import React from 'react';
 import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';

@@ -1,4 +1,4 @@
-import { Divider, ListItemText, ListItemIcon, MenuItem, Popover } from '@material-ui/core';
+import { Divider, ListItemText, ListItemIcon, MenuItem, Popover } from '@mui/material';
 import React from 'react';
 import { AppState } from 'unigraph-dev-common/lib/types/unigraph';
 import Icon from '@mdi/react';

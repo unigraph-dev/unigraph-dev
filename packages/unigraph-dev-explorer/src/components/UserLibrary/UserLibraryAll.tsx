@@ -1,4 +1,4 @@
-import { Card, Typography } from '@material-ui/core';
+import { Card, Typography } from '@mui/material';
 import _ from 'lodash';
 import React from 'react';
 import { useEffectOnce } from 'react-use';

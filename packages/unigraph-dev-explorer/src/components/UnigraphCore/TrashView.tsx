@@ -1,5 +1,5 @@
-import { Divider, ListItem, ListItemIcon, Typography } from '@material-ui/core';
-import { Delete } from '@material-ui/icons';
+import { Divider, ListItem, ListItemIcon, Typography } from '@mui/material';
+import { Delete } from '@mui/icons-material';
 import React from 'react';
 import { buildGraph, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { TabContext } from '../../utils';

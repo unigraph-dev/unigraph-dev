@@ -1,13 +1,13 @@
 import React from 'react';
 
-import Drawer from '@material-ui/core/Drawer';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
-import { makeStyles } from '@material-ui/core/styles';
-import { Comment, CompareArrows } from '@material-ui/icons';
-import { ListSubheader } from '@material-ui/core';
+import Drawer from '@mui/material/Drawer';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import makeStyles from '@mui/styles/makeStyles';
+import { Comment, CompareArrows } from '@mui/icons-material';
+import { ListSubheader } from '@mui/material';
 import Icon from '@mdi/react';
 import {
     mdiBookOpenOutline,

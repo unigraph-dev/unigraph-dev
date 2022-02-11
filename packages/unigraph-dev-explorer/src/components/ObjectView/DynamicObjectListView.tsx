@@ -16,10 +16,10 @@ import {
     TextField,
     Slide,
     Divider,
-    makeStyles,
-} from '@material-ui/core';
-import { ExpandMore, ClearAll, InboxOutlined } from '@material-ui/icons';
-import { Autocomplete } from '@material-ui/lab';
+    Autocomplete,
+} from '@mui/material';
+import makeStyles from '@mui/styles/makeStyles';
+import { ExpandMore, ClearAll, InboxOutlined } from '@mui/icons-material';
 import _ from 'lodash';
 import React from 'react';
 import { useDrop } from 'react-dnd';
@@ -647,6 +647,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                 style={{
                                     display: itemRemover === _.noop ? 'none' : '',
                                 }}
+                                size="large"
                             >
                                 <ClearAll />
                             </IconButton>
@@ -654,6 +655,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                 style={{
                                     display: canDrop && !noDrop && contextRef.current ? '' : 'none',
                                 }}
+                                size="large"
                             >
                                 <InboxOutlined />
                             </IconButton>

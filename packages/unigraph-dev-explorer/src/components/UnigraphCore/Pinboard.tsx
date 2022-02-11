@@ -1,6 +1,6 @@
 import ReactResizeDetector from 'react-resize-detector';
 import { Responsive as ResponsiveGridLayout } from 'react-grid-layout';
-import { MenuItem } from '@material-ui/core';
+import { MenuItem } from '@mui/material';
 import React from 'react';
 import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 import { registerDetailedDynamicViews } from '../../unigraph-react';

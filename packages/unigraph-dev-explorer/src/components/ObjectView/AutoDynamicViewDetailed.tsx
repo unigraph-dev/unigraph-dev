@@ -1,4 +1,4 @@
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';

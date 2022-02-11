@@ -12,7 +12,7 @@ import './workspace.css';
 import { Container, CssBaseline, ListItem, Popover, Typography } from '@mui/material';
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
-import { Menu, Details } from '@material-ui/icons';
+import { Menu, Details } from '@mui/icons-material';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 

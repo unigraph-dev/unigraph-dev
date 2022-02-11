@@ -1,4 +1,4 @@
-import { Grid, ListItemIcon, Typography } from '@material-ui/core';
+import { Grid, ListItemIcon, Typography } from '@mui/material';
 import Icon from '@mdi/react';
 import { mdiFeatureSearchOutline, mdiAppsBox, mdiInboxOutline, mdiViewQuiltOutline } from '@mdi/js';
 import React from 'react';

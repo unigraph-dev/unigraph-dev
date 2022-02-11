@@ -1,4 +1,4 @@
-import { Card, InputBase, Typography } from '@material-ui/core';
+import { Card, InputBase, Typography } from '@mui/material';
 import _ from 'lodash';
 import React from 'react';
 import { AppState } from 'unigraph-dev-common/lib/types/unigraph';
