@@ -4,12 +4,12 @@
 
 import React from 'react';
 
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import LocalizationProvider from '@mui/lab/LocalizationProvider';
 
 import FlexLayout, { Action, Actions, DockLocation, Model, Node, TabNode } from 'flexlayout-react';
 import 'flexlayout-react/style/light.css';
 import './workspace.css';
-import { Container, CssBaseline, ListItem, Popover, Typography } from '@material-ui/core';
+import { Container, CssBaseline, ListItem, Popover, Typography } from '@mui/material';
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { Menu, Details } from '@material-ui/icons';
@@ -17,6 +17,9 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import MomentUtils from '@date-io/moment';
+// or @mui/lab/Adapter{Dayjs,Luxon,Moment} or any valid date-io adapter
+// import AdapterDateFns from '@mui/lab/AdapterDateFns';
+import AdapterMoment from '@mui/lab/AdapterMoment';
 
 import Icon from '@mdi/react';
 import { mdiFormTextarea, mdiStarPlusOutline, mdiSync, mdiTagMultipleOutline } from '@mdi/js';
@@ -456,7 +459,7 @@ export function WorkSpace(this: any) {
     window.wsnavigator = workspaceNavigator.bind(this, model);
 
     return (
-        <MuiPickersUtilsProvider utils={MomentUtils}>
+        <LocalizationProvider dateAdapter={AdapterMoment}>
             <DndProvider backend={HTML5Backend}>
                 <div id="global-elements">
                     <SearchOverlayPopover />
@@ -627,6 +630,6 @@ export function WorkSpace(this: any) {
                     }}
                 />
             </DndProvider>
-        </MuiPickersUtilsProvider>
+        </LocalizationProvider>
     );
 }

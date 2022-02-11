@@ -20,7 +20,7 @@ import React from 'react';
 import { useEffectOnce } from 'react-use';
 import { SchemaDgraph } from 'unigraph-dev-common/lib/types/json-ts';
 import { typeMapUnigraph } from 'unigraph-dev-common/lib/types/consts';
-import { KeyboardDateTimePicker } from '@material-ui/pickers';
+import DateTimePicker from '@mui/lab/DateTimePicker';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { Add, Delete, Menu, Save } from '@material-ui/icons';
 import { isJsonString, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
@@ -349,11 +349,12 @@ const TypedObjectPartEditor: any = {
 
         return (
             <>
-                <KeyboardDateTimePicker
+                <DateTimePicker
                     onChange={setCurrentInputValue}
                     value={currentInputValue}
-                    format="yyyy/MM/DD HH:mm"
+                    inputFormat="yyyy/MM/DD HH:mm"
                     ampm={false}
+                    renderInput={(props) => <TextField label="datetime" helperText="enter a datetime" />}
                 />
                 <Save
                     onClick={() =>
