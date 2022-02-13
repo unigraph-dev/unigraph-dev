@@ -69,7 +69,8 @@ const editorPlugin = {
         const tags = (data._value?.children?.['_value['] || [])
             .filter((el: any) => el?._value?._value?.type?.['unigraph.id'] === '$/schema/tag')
             .map((tag: any) => `#${tag?._value?._value?._value?.name?.['_value.%']}`);
-        return `${new UnigraphObject(data).get('name')?.as('primitive')} ${tags.join(' ')}`;
+        const name = new UnigraphObject(data).get('name')?.as('primitive');
+        return name === undefined ? undefined : `${name} ${tags.join(' ')}`;
     },
     pushText: (subsId: any, data: any, text: string) => {
         // console.log(data);
