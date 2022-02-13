@@ -22,7 +22,6 @@ export const useSubscriptionDelegate: (...args: any) => [() => any, number] = (
     const uidRef = React.useRef(undefined);
     React.useEffect(() => {
         const newSubs = getRandomInt();
-        console.log(newSubs, isObjectStub);
         if (isObjectStub && object?.uid !== uidRef.current) {
             uidRef.current = object?.uid;
             // console.log(tabContext);
