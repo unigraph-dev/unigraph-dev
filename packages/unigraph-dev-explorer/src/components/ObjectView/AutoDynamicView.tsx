@@ -53,7 +53,7 @@ export function AutoDynamicView({
 
     if (!callbacks) callbacks = {};
 
-    if (object.constructor.name !== 'UnigraphObject') object = new UnigraphObject(object);
+    if (object?.constructor.name !== 'UnigraphObject') object = new UnigraphObject(object);
 
     const shouldGetBacklinks = !excludableTypes.includes(object?.type?.['unigraph.id']) && !inline;
 
