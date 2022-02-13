@@ -77,7 +77,7 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
     const NameDisplay = React.useMemo(
         () => (
             <AutoDynamicView
-                object={data.get('name')._value._value}
+                object={data.get('name')?._value?._value}
                 options={{ noDrag: true, noDrop: true, noContextMenu: true }}
                 callbacks={{
                     'get-semantic-properties': () => data,
