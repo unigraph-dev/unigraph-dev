@@ -28,11 +28,15 @@ export const setupInfiniteScrolling = (
         stateCallback(states.results);
     };
 
-    const onUserNext = () => {
+    const onUserNext = (updating: boolean) => {
         const [subsHead, chunksHead] = [states.currentSubs.length / chunk, states.chunks.length];
         if (subsHead < chunksHead) {
-            const toSub = states.chunks[subsHead];
-            states.currentSubs = [...states.currentSubs, ...toSub];
+            if (updating) {
+                states.currentSubs = states.currentSubs.filter((el) => uids.includes(el));
+            } else {
+                const toSub = states.chunks[subsHead];
+                states.currentSubs = [...states.currentSubs, ...toSub];
+            }
             tabContext.subscribe(
                 {
                     type: 'object',
@@ -51,8 +55,7 @@ export const setupInfiniteScrolling = (
         uids = newUids;
         states.chunks = _.chunk(uids, chunk);
         states.results = [];
-        states.currentSubs = [];
-        onUserNext();
+        onUserNext(true);
     };
 
     const onCleanup = () => {
