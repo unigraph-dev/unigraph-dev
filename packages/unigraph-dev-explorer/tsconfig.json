@@ -1,5 +1,8 @@
 {
-    "compilerOptions": {
+     "$schema": "https://json.schemastore.org/tsconfig",
+     "display": "Create React App",
+
+     "compilerOptions": {
         "target": "es5",
         "lib": ["dom", "dom.iterable", "esnext"],
         "allowJs": true,
