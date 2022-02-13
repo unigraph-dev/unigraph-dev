@@ -121,7 +121,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
         }
 
         if (!edited.current) fulfillCaretPostRender();
-    }, [data, pullText, isEditing, fulfillCaretPostRender]);
+    }, [data, pullText, isEditing, fulfillCaretPostRender, focused]);
 
     React.useEffect(() => {
         // set caret when focus changes
@@ -147,7 +147,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                 }
                 // last caret might be coming from a longer line, or as -1
                 caret = caret || _.min([_.max([focusedState2.caret, 0]), getCurrentText().length]);
-
+                console.log(caret, getCurrentText(), focusedState2);
                 setCaret(document, textInputRef.current, caret);
             };
             if (!isEditing) {
@@ -449,6 +449,9 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                         edited.current = false;
                         inputDebounced.current.cancel();
                         callbacks['convert-child-to-todo']?.(getCurrentText());
+                        window.unigraph
+                            .getState('global/focused')
+                            .setValue({ ...window.unigraph.getState('global/focused').value, tail: true, caret: -1 });
                     }
                     break;
 
