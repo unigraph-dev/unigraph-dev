@@ -319,6 +319,7 @@ export function DetailedOutlinerBlock({
     customView,
     pullText,
     pushText,
+    locateInlineChildren,
 }: any) {
     const tabContext = React.useContext(TabContext);
     // eslint-disable-next-line no-bitwise
@@ -351,6 +352,7 @@ export function DetailedOutlinerBlock({
             noteEditorProps?.(
                 pullText,
                 pushText,
+                locateInlineChildren || ((dd: any) => dd),
                 isEditing,
                 setIsEditing,
                 edited,
@@ -850,6 +852,7 @@ export function DetailedEmbedBlock({
             noteEditorProps={editor.hook}
             pullText={editor.pullText}
             pushText={editor.pushText}
+            locateInlineChildren={(dd: any) => dd?._value?.content?._value}
             onFocus={(
                 isEditing: any,
                 setIsEditing: any,

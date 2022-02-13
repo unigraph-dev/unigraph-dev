@@ -62,6 +62,7 @@ const changesForOpenScopedMarkdownLink = (scope: ScopeForAutoComplete, ev: Keybo
 export const useNoteEditor: (...args: any) => [any, (text: string) => void, () => string, () => void, any] = (
     pullText: any,
     pushText: any,
+    locateInlineChildren: any,
     isEditing: boolean,
     setIsEditing: any,
     edited: any,
@@ -200,7 +201,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                         // resetEdited();
                         setCaret(document, textInputRef.current, match.index + newName.length + 4);
                         await window.unigraph.updateObject(
-                            data.uid,
+                            locateInlineChildren(data).uid,
                             {
                                 _value: {
                                     children: {
