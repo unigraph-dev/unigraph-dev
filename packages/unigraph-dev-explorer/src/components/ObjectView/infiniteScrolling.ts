@@ -29,10 +29,13 @@ export const setupInfiniteScrolling = (
     };
 
     const onUserNext = (updating: boolean) => {
-        const [subsHead, chunksHead] = [states.currentSubs.length / chunk, states.chunks.length];
-        if (subsHead < chunksHead) {
+        const [subsHead, chunksHead] = [Math.floor(states.currentSubs.length / chunk), states.chunks.length];
+        if (updating || subsHead < chunksHead) {
             if (updating) {
-                states.currentSubs = states.currentSubs.filter((el) => uids.includes(el));
+                states.currentSubs = _.uniq([
+                    ...states.currentSubs.filter((el) => uids.includes(el)),
+                    ...(states.chunks[0] || []),
+                ]);
             } else {
                 const toSub = states.chunks[subsHead];
                 states.currentSubs = [...states.currentSubs, ...toSub];
