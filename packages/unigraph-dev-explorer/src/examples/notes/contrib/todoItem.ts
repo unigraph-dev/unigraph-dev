@@ -9,24 +9,14 @@ const wrapTagRef = (name: string) => {
         _value: {
             type: {
                 $ref: {
-                    query: [
-                        {
-                            key: 'unigraph.id',
-                            value: '$/schema/interface/semantic',
-                        },
-                    ],
+                    query: [{ key: 'unigraph.id', value: '$/schema/interface/semantic' }],
                 },
             },
             'dgraph.type': 'Interface',
             _value: {
                 type: {
                     $ref: {
-                        query: [
-                            {
-                                key: 'unigraph.id',
-                                value: '$/schema/tag',
-                            },
-                        ],
+                        query: [{ key: 'unigraph.id', value: '$/schema/tag' }],
                     },
                 },
                 'dgraph.type': 'Entity',
@@ -36,28 +26,18 @@ const wrapTagRef = (name: string) => {
                         uid: `_:link0${tagRefId}`,
                     },
                 },
-                _updatedAt: '2022-02-13T18:01:35.888Z',
-                _createdAt: '2022-02-13T18:01:35.888Z',
+                _updatedAt: new Date().toISOString(),
                 'unigraph.indexes': {
-                    name: {
-                        uid: `_:link0${tagRefId}`,
-                    },
+                    name: { uid: `_:link0${tagRefId}` },
                 },
                 $ref: {
                     query: [
-                        {
-                            key: 'name',
-                            value: name,
-                        },
-                        {
-                            key: 'type/unigraph.id',
-                            value: '$/schema/tag',
-                        },
+                        { key: 'name', value: name },
+                        { key: 'type/unigraph.id', value: '$/schema/tag' },
                     ],
                 },
             },
-            _updatedAt: '2022-02-13T18:01:35.890Z',
-            _createdAt: '2022-02-13T18:01:35.890Z',
+            _updatedAt: new Date().toISOString(),
             'unigraph.indexes': {},
         },
     };
