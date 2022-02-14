@@ -17,6 +17,7 @@ import {
     Slide,
     Divider,
     Autocomplete,
+    Box,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { ExpandMore, ClearAll, InboxOutlined } from '@mui/icons-material';
@@ -116,6 +117,7 @@ function DynamicListItem({
 }: any) {
     return (
         <ListItem
+            sx={{ '&:hover': { backgroundColor: 'action.hover' } }}
             style={{
                 ...(compact ? { paddingTop: '2px', paddingBottom: '2px' } : {}),
             }}
@@ -377,9 +379,9 @@ function MultiTypeDescriptor({
     );
 }
 
-export function TabButton({ children, isSelected, onClick }: any) {
+export function TabButton({ children, isSelected, onClick, sx }: any) {
     return (
-        <div
+        <Box
             style={{
                 cursor: 'pointer',
                 display: 'flex',
@@ -389,10 +391,11 @@ export function TabButton({ children, isSelected, onClick }: any) {
                 borderRadius: '8px',
                 ...(isSelected ? { backgroundColor: '#E9E9E9', borderRadius: '8px' } : {}),
             }}
+            sx={sx}
             onClick={onClick}
         >
             {children}
-        </div>
+        </Box>
     );
 }
 
