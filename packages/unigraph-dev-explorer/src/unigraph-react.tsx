@@ -119,6 +119,8 @@ export const registerContextMenuItems = (schema: string, items: any[]): void => 
 const refsMap = {
     '@mui/material': () => require('@mui/material'),
     '@mui/icons-material': () => require('@mui/icons-material'),
+    '@material-ui/core': () => require('@mui/material'),
+    '@material-ui/icons': () => require('@mui/icons-material'),
 };
 
 const buildRefs = (
