@@ -367,8 +367,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
 
                         const res = `![${blob.name || 'image'}](${base64})`;
 
-                        selection.getRangeAt(0).insertNode(document.createTextNode(res));
-                        selection.collapseToEnd();
+                        document.execCommand('insertText', false, res);
 
                         edited.current = true;
                         inputDebounced.current(getCurrentText());
