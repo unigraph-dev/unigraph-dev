@@ -563,3 +563,5 @@ export const hoverSx = {
     '&:hover': { backgroundColor: 'action.hover' },
     '&:active': { backgroundColor: 'action.selected' },
 };
+
+export const contextMenuItemStyle = { paddingTop: '8px', paddingBottom: '8px' };

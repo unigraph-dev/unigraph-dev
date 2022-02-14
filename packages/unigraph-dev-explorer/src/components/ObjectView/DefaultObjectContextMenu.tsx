@@ -19,6 +19,7 @@ import {
 } from '@mdi/js';
 import { AutoDynamicViewCallbacks, ContextMenuGenerator } from '../../types/ObjectView.d';
 import {
+    contextMenuItemStyle,
     isDeveloperMode,
     isMultiSelectKeyPressed,
     runClientExecutable,
@@ -30,7 +31,7 @@ export const defaultContextMenu: Array<ContextMenuGenerator> = [
     (uid, object, handleClose, callbacks) =>
         typeHasDetailedView(object?.type?.['unigraph.id']) ? (
             <MenuItem
-                style={{ paddingTop: '2px', paddingBottom: '2px' }}
+                style={contextMenuItemStyle}
                 onClick={() => {
                     handleClose();
                     window.wsnavigator(
@@ -51,7 +52,7 @@ export const defaultContextMenu: Array<ContextMenuGenerator> = [
     (uid, object, handleClose, callbacks) =>
         isDeveloperMode() ? (
             <MenuItem
-                style={{ paddingTop: '2px', paddingBottom: '2px' }}
+                style={contextMenuItemStyle}
                 onClick={() => {
                     handleClose();
                     window.wsnavigator(`/library/object?uid=${uid}&viewer=${'json-tree'}`);
@@ -68,7 +69,7 @@ export const defaultContextMenu: Array<ContextMenuGenerator> = [
     (uid, object, handleClose, callbacks) =>
         isDeveloperMode() ? (
             <MenuItem
-                style={{ paddingTop: '2px', paddingBottom: '2px' }}
+                style={contextMenuItemStyle}
                 onClick={() => {
                     handleClose();
                     window.wsnavigator(`/object-editor?uid=${uid}`);
@@ -84,7 +85,7 @@ export const defaultContextMenu: Array<ContextMenuGenerator> = [
         ),
     (uid, object, handleClose, callbacks) => (
         <MenuItem
-            style={{ paddingTop: '2px', paddingBottom: '2px' }}
+            style={contextMenuItemStyle}
             onClick={() => {
                 handleClose();
                 window.unigraph.runExecutable('$/executable/add-item-to-list', {
@@ -101,7 +102,7 @@ export const defaultContextMenu: Array<ContextMenuGenerator> = [
     ),
     (uid, object, handleClose, callbacks) => (
         <MenuItem
-            style={{ paddingTop: '2px', paddingBottom: '2px' }}
+            style={contextMenuItemStyle}
             onClick={() => {
                 handleClose();
                 window.unigraph.runExecutable('$/executable/add-item-to-list', {
@@ -118,7 +119,7 @@ export const defaultContextMenu: Array<ContextMenuGenerator> = [
     ),
     (uid, object, handleClose, callbacks) => (
         <MenuItem
-            style={{ paddingTop: '2px', paddingBottom: '2px' }}
+            style={contextMenuItemStyle}
             onClick={() => {
                 handleClose();
                 window.wsnavigator(`/library/backlink?uid=${uid}`);
@@ -132,7 +133,7 @@ export const defaultContextMenu: Array<ContextMenuGenerator> = [
     ),
     (uid, object, handleClose, callbacks) => (
         <MenuItem
-            style={{ paddingTop: '2px', paddingBottom: '2px' }}
+            style={contextMenuItemStyle}
             onClick={() => {
                 handleClose();
                 window.unigraph.deleteObject(uid);
@@ -146,7 +147,7 @@ export const defaultContextMenu: Array<ContextMenuGenerator> = [
     ),
     (uid, object, handleClose, callbacks) => (
         <MenuItem
-            style={{ paddingTop: '2px', paddingBottom: '0px' }}
+            style={{ paddingTop: '8px', paddingBottom: '0px' }}
             onClick={() => {
                 handleClose();
                 window.wsnavigator(`/graph?uid=${uid}`);
@@ -163,7 +164,7 @@ export const defaultContextMenu: Array<ContextMenuGenerator> = [
 export const defaultContextContextMenu: Array<ContextMenuGenerator> = [
     (uid, object, handleClose, callbacks) => (
         <MenuItem
-            style={{ paddingTop: '2px', paddingBottom: '2px' }}
+            style={contextMenuItemStyle}
             onClick={() => {
                 handleClose();
                 callbacks?.removeFromContext?.();
@@ -177,7 +178,7 @@ export const defaultContextContextMenu: Array<ContextMenuGenerator> = [
     ),
     (uid, object, handleClose, callbacks) => (
         <MenuItem
-            style={{ paddingTop: '2px', paddingBottom: '2px' }}
+            style={contextMenuItemStyle}
             onClick={() => {
                 handleClose();
                 callbacks?.removeFromContext?.('left');
@@ -330,10 +331,7 @@ export const onUnigraphContextMenu = (
                         function (uid: string, object: any, onfire: () => any, callbacks?: any, contextUid?: string) {
                             return (
                                 <MenuItem
-                                    style={{
-                                        paddingTop: '2px',
-                                        paddingBottom: '2px',
-                                    }}
+                                    style={contextMenuItemStyle}
                                     onClick={() => {
                                         onfire();
                                         onDynamicContextMenu(el, uid, object, callbacks, contextUid);
