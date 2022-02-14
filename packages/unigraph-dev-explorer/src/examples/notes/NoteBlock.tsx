@@ -191,7 +191,7 @@ export function OutlineComponent({
                         style={{
                             height: 'calc(100% + 4px)',
                             width: '1px',
-                            backgroundColor: 'gray',
+                            backgroundColor: 'lightgray',
                             position: 'absolute',
                             left: '-12px',
                             display: parentDisplayAs === 'outliner' ? '' : 'none',
@@ -202,6 +202,8 @@ export function OutlineComponent({
                             fontSize: '0.5rem',
                             marginLeft: '8px',
                             marginRight: '8px',
+                            top: '8px',
+                            position: 'absolute',
                             ...(collapsed
                                 ? {
                                       borderRadius: '4px',
@@ -215,7 +217,7 @@ export function OutlineComponent({
             ) : (
                 []
             )}
-            <div style={{ flexGrow: 1, marginLeft: displayAs === 'outliner' || !parentDisplayAs ? '' : '24px' }}>
+            <div style={{ flexGrow: 1, marginLeft: displayAs === 'outliner' || !parentDisplayAs ? '24px' : '24px' }}>
                 {children}
             </div>
         </div>
@@ -530,7 +532,6 @@ export function DetailedOutlinerBlock({
                         }}
                     >
                         {beforeEditor}
-                        {NoteEditorInner}
                         {customView(
                             isEditing,
                             setIsEditing,
@@ -540,6 +541,7 @@ export function DetailedOutlinerBlock({
                             editorRef,
                             editorContext,
                         )}
+                        {NoteEditorInner}
                         <Typography
                             style={{
                                 display: isEditing || !isCollapsed ? 'none' : '',
@@ -821,7 +823,7 @@ export function DetailedEmbedBlock({
             editorRef: any,
             editorContext: any,
         ) =>
-            isEditing ? undefined : (
+            isEditing && !editor.hook ? undefined : (
                 <AutoDynamicView
                     object={getObject()}
                     attributes={{
@@ -832,6 +834,7 @@ export function DetailedEmbedBlock({
                         'get-semantic-properties': () => data,
                         isEmbed: true,
                         subsId,
+                        isEditing,
                     }}
                 />
             ),
