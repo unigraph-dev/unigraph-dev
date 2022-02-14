@@ -302,6 +302,7 @@ export function AutoDynamicView({
                         ...(inline ? {} : { width: '100%' }),
                         backgroundColor: isSelected || isDragging ? 'whitesmoke' : 'unset',
                         borderRadius: isSelected || isDragging ? '12px' : '',
+                        ...style,
                     }}
                     key={`object-view-${object?.uid}`}
                     onClickCapture={customBoundingBox ? () => undefined : onClickCaptureHandler}

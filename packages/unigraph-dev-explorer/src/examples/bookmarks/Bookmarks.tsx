@@ -113,7 +113,7 @@ export const BookmarkItem: DynamicViewRenderer = ({ data, callbacks }) => {
                 </Avatar>
             </ListItemIcon>
             <ListItemText>
-                <Typography>{name && name !== 'No title' ? name : data.get('url').as('primitive')}</Typography>
+                <Typography>{name && name !== 'No title' ? name : data.get('url')?.as('primitive')}</Typography>
                 <div
                     style={{
                         display: 'inline',

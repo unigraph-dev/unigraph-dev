@@ -132,7 +132,11 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
         <div style={{ display: 'flex' }}>
             <Checkbox
                 size={callbacks.isEmbed ? 'small' : 'medium'}
-                style={{ padding: callbacks.isEmbed ? '2px' : '', marginRight: callbacks.isEmbed ? '4px' : '' }}
+                style={{
+                    padding: callbacks.isEmbed ? '2px' : '',
+                    marginRight: callbacks.isEmbed ? '4px' : '',
+                    alignSelf: 'baseline',
+                }}
                 checked={unpadded.done}
                 onPointerUp={(ev) => {
                     ev.preventDefault();
@@ -141,29 +145,34 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
                     totalCallbacks.onUpdate(data);
                 }}
             />
-            {callbacks.isEmbed ? (
-                [
-                    NameDisplay,
-                    <Divider orientation="vertical" style={{ marginLeft: '4px', marginRight: '4px' }} />,
-                    SecondaryDisplay,
-                ]
-            ) : (
-                <ListItemText
-                    style={{ margin: compact ? '0px' : '', alignSelf: 'center' }}
-                    primary={NameDisplay}
-                    secondary={
-                        <div
-                            style={{
-                                display: 'flex',
-                                alignItems: 'baseline',
-                                flexWrap: 'wrap',
-                            }}
-                        >
-                            {SecondaryDisplay}
-                        </div>
-                    }
-                />
-            )}
+            {
+                // eslint-disable-next-line no-nested-ternary
+                callbacks.isEditing ? (
+                    []
+                ) : callbacks.isEmbed ? (
+                    [
+                        NameDisplay,
+                        <Divider orientation="vertical" style={{ marginLeft: '4px', marginRight: '4px' }} />,
+                        SecondaryDisplay,
+                    ]
+                ) : (
+                    <ListItemText
+                        style={{ margin: compact ? '0px' : '', alignSelf: 'center' }}
+                        primary={NameDisplay}
+                        secondary={
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'baseline',
+                                    flexWrap: 'wrap',
+                                }}
+                            >
+                                {SecondaryDisplay}
+                            </div>
+                        }
+                    />
+                )
+            }
         </div>
     );
 };
@@ -286,7 +295,8 @@ export const TodoList = withUnigraphSubscription(
                 subsId,
                 {
                     showHidden: true,
-                    queryAs: ' { uid type { <unigraph.id> } _hide _value { done { <_value.!> } } } ',
+                    queryAs:
+                        ' { uid type { <unigraph.id> } _updatedAt _createdAt _hide _value { done { <_value.!> } } } ',
                 },
             );
         },
