@@ -217,7 +217,7 @@ export function OutlineComponent({
             ) : (
                 []
             )}
-            <div style={{ flexGrow: 1, marginLeft: displayAs === 'outliner' || !parentDisplayAs ? '24px' : '24px' }}>
+            <div style={{ flexGrow: 1, marginLeft: displayAs !== 'outliner' && !parentDisplayAs ? '' : '24px' }}>
                 {children}
             </div>
         </div>

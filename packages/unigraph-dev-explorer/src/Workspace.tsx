@@ -362,7 +362,7 @@ export function WorkSpace(this: any) {
             setMaximize: (val: boolean) => false,
             isVisible: () =>
                 // @ts-expect-error: using private API
-                window.layoutModel.getNodeById(node._attributes.id).isVisible(),
+                window.layoutModel.getNodeById(node._attributes.id)?.isVisible(),
 
             subscribeToType: (name: any, callback: any, eventId?: any, options?: any) => {
                 const subsState = window.unigraph.getState(`tabs/${(node as any)._attributes.id}/subscriptions`);
