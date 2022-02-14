@@ -445,5 +445,11 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param eventId the eventId that's attached to this update. Used to signify the most recent fake update, any update before this will not be triggered.
      */
     sendFakeUpdate?(subId: any, updater: any, eventId?: any): any;
+    /**
+     * Gets the cached data from a given subscription ID.
+     * Obviously, only available in frontend.
+     * @param subId Subscription ID.
+     */
+    getDataFromSubscription?(subId: any): any;
 }
 /** End of unigraph interface */ // Don't remove this line - needed for Monaco to work

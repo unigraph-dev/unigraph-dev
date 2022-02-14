@@ -45,12 +45,13 @@ const wrapTagRef = (name: string) => {
 
 const editorPlugin = {
     type: '$/schema/todo',
-    pullText: (data: any) => {
+    pullText: (data: any, uid?: boolean) => {
+        if (uid) return data?._value?.name?._value?._value?.uid;
         const tags = (data._value?.children?.['_value['] || [])
             .filter((el: any) => el?._value?._value?.type?.['unigraph.id'] === '$/schema/tag')
             .map((tag: any) => `#${tag?._value?._value?._value?.name?.['_value.%']}`);
         const name = new UnigraphObject(data).get('name')?.as('primitive');
-        return name === undefined ? undefined : `${name} ${tags.join(' ')}`;
+        return name === undefined ? undefined : `${name}${tags.length ? ` ${tags.join(' ')}` : ''}`;
     },
     pushText: (subsId: any, data: any, text: string) => {
         // console.log(data);

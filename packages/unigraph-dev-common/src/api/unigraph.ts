@@ -731,6 +731,9 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 };
                 sendEvent(connection, 'add_backlinks', { fromUids, toUids }, id);
             }),
+        getDataFromSubscription: (subId) => {
+            return subResults[subId];
+        },
     };
 
     return api;

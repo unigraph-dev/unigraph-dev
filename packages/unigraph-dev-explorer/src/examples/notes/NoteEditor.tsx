@@ -9,6 +9,7 @@ import { inlineTextSearch, inlineObjectSearch } from '../../components/UnigraphC
 import { scrollIntoViewIfNeeded, selectUid, setCaret, TabContext } from '../../utils';
 import { htmlToMarkdown } from '../semantic/Markdown';
 import { permanentlyDeleteBlock } from './commands';
+import { addTextualCommand, applyCommand } from './history';
 import { caretFromLastLine, caretToLastLine, closeScopeCharDict, setFocusedCaret } from './utils';
 
 const useStyles = makeStyles((theme) => ({
@@ -73,10 +74,12 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
     editorContext: any,
     resetEdited: any,
     setCommand: any,
+    editorSubsId?: any,
 ) => {
     const classes = useStyles();
     const tabContext = React.useContext(TabContext);
 
+    const oldTextRef = React.useRef<string>();
     const inputterRef = React.useRef<any>();
     inputterRef.current = (text: string) => {
         if (data?._value?.children?.['_value[']) {
@@ -86,11 +89,21 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
             });
             if (deadLinks.length) window.unigraph.deleteItemFromArray(data._value.children.uid, deadLinks, data.uid);
         }
-
+        const textUid = pullText(true);
+        if (textUid.startsWith('0x') && oldTextRef.current !== undefined) {
+            const newHist = addTextualCommand(
+                editorContext.historyState.value,
+                editorSubsId || callbacks.subsId,
+                textUid,
+                oldTextRef.current,
+            );
+            editorContext.historyState.setValue(newHist);
+        }
+        oldTextRef.current = text;
         return pushText(text);
     };
 
-    const inputDebounced = React.useRef(_.debounce((...args) => inputterRef.current(...args), 333));
+    const inputDebounced = React.useRef(_.debounce((...args) => inputterRef.current(...args), 200));
     const textInputRef: any = React.useRef();
 
     const handlePotentialResize = () => {
@@ -113,6 +126,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
 
     React.useEffect(() => {
         const dataText = pullText();
+        oldTextRef.current = dataText;
         if (dataText !== undefined && tabContext.viewId && !callbacks.isEmbed)
             window.layoutModel.doAction(Actions.renameTab(tabContext.viewId as any, `Note: ${dataText}`));
         if (dataText !== undefined && getCurrentText() !== dataText && !edited.current) {
@@ -429,6 +443,18 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                         ev.preventDefault();
                         selectUid(componentId);
                         window.unigraph.getState('global/focused').setValue({ uid: '', caret: 0, type: '' });
+                    }
+                    break;
+
+                case 'z': // "z" key
+                    if (ev.ctrlKey || ev.metaKey) {
+                        ev.preventDefault();
+                        edited.current = false;
+                        if (ev.shiftKey) {
+                            editorContext.historyState.setValue(applyCommand(editorContext.historyState.value, true));
+                        } else {
+                            editorContext.historyState.setValue(applyCommand(editorContext.historyState.value));
+                        }
                     }
                     break;
 
