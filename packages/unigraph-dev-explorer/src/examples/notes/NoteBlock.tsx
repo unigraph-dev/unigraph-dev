@@ -191,7 +191,7 @@ export function OutlineComponent({
                         style={{
                             height: 'calc(100% + 4px)',
                             width: '1px',
-                            backgroundColor: 'gray',
+                            backgroundColor: 'lightgray',
                             position: 'absolute',
                             left: '-12px',
                             display: parentDisplayAs === 'outliner' ? '' : 'none',
