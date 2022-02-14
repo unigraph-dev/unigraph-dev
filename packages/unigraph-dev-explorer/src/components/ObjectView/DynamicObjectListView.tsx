@@ -31,7 +31,7 @@ import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { TransitionGroup } from 'react-transition-group';
 import { getDynamicViews } from '../../unigraph-react';
 import { AutoDynamicView } from './AutoDynamicView';
-import { DataContext, DataContextWrapper, isMobile, TabContext } from '../../utils';
+import { DataContext, DataContextWrapper, hoverSx, isMobile, TabContext } from '../../utils';
 import { setupInfiniteScrolling } from './infiniteScrolling';
 import { DragandDrop } from './DragandDrop';
 
@@ -117,7 +117,7 @@ function DynamicListItem({
 }: any) {
     return (
         <ListItem
-            sx={{ '&:hover': { backgroundColor: 'action.hover' } }}
+            sx={hoverSx}
             style={{
                 ...(compact ? { paddingTop: '2px', paddingBottom: '2px' } : {}),
             }}

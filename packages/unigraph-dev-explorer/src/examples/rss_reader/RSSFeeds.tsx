@@ -21,7 +21,7 @@ import { mdiRssBox } from '@mdi/js';
 import { registerDynamicViews, registerDetailedDynamicViews, withUnigraphSubscription } from '../../unigraph-react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { DynamicViewRenderer } from '../../global.d';
-import { download, upload, getComponentFromPage, TabContext, timeSince } from '../../utils';
+import { download, upload, getComponentFromPage, TabContext, timeSince, hoverSx } from '../../utils';
 import { Html } from '../semantic/Html';
 import { setupInfiniteScrolling } from '../../components/ObjectView/infiniteScrolling';
 
@@ -319,7 +319,7 @@ const RSSItemsListBody: React.FC<any> = ({ data, viewId }) => {
                 endMessage={[]}
             >
                 {(loadedItems || []).map((it: any) => (
-                    <ListItem button key={it.uid}>
+                    <ListItem sx={hoverSx} key={it.uid}>
                         <AutoDynamicView object={it} />
                     </ListItem>
                 ))}

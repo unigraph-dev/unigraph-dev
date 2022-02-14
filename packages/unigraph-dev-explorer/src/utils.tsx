@@ -556,3 +556,10 @@ export function typeHasDetailedView(type: string) {
 export function typeHasDynamicView(type: string) {
     return Object.keys(window.unigraph.getState('registry/dynamicView').value).includes(type);
 }
+
+export const hoverSx = {
+    // sx styles (mui v5) for when hovering over components
+    cursor: 'pointer',
+    '&:hover': { backgroundColor: 'action.hover' },
+    '&:active': { backgroundColor: 'action.selected' },
+};

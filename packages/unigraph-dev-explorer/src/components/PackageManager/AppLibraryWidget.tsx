@@ -3,7 +3,7 @@ import Icon from '@mdi/react';
 import { mdiFeatureSearchOutline, mdiAppsBox, mdiInboxOutline, mdiViewQuiltOutline } from '@mdi/js';
 import React from 'react';
 import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
-import { TabContext } from '../../utils';
+import { TabContext, hoverSx } from '../../utils';
 
 type AppShortcutProps = {
     avatar: React.ReactElement<any>;
@@ -17,22 +17,12 @@ const appItemStyle = {
     flexDirection: 'column',
     alignItems: 'center',
     p: '16px',
-    cursor: 'pointer',
-    '&:hover': { backgroundColor: 'action.hover' },
+    ...hoverSx,
 } as const;
 
 export function AppShortcut({ avatar, address, text }: AppShortcutProps) {
     return (
-        <Box
-            sx={appItemStyle}
-            // style={{
-            //     display: 'flex',
-            //     flexDirection: 'column',
-            //     alignItems: 'center',
-            //     padding: '16px',
-            // }}
-            onClick={() => window.wsnavigator(address)}
-        >
+        <Box sx={appItemStyle} onClick={() => window.wsnavigator(address)}>
             {avatar}
             {text}
         </Box>

@@ -23,7 +23,7 @@ import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import { ExecutableCodeEditor } from '../ObjectView/DefaultCodeEditor';
 import DetailedObjectView from '../UserLibrary/UserLibraryObject';
 import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
-import { TabContext } from '../../utils';
+import { hoverSx, TabContext } from '../../utils';
 
 loader.config({ paths: { vs: './vendor/monaco-editor_at_0.31.1/' } });
 
@@ -172,7 +172,7 @@ export function CodeEditor({ id }: any) {
                                 <NewUserCode />
                                 <List style={{ overflow: 'auto' }}>
                                     {userExecContent.map((it: any) => (
-                                        <ListItem button key={it.uid} selected={currentUid === it.uid}>
+                                        <ListItem sx={hoverSx} key={it.uid} selected={currentUid === it.uid}>
                                             <AutoDynamicView
                                                 object={it}
                                                 onClick={() => {
@@ -187,13 +187,12 @@ export function CodeEditor({ id }: any) {
                             {execPackages.map((el: string) => (
                                 <>
                                     <ListItem
-                                        button
                                         onClick={() => {
                                             setCurrentPackage(currentPackage === el ? '' : el);
                                         }}
                                         sx={{
-                                            cursor: 'pointer',
                                             ...(currentPackage === el ? { backgroundColor: 'action.selected' } : {}),
+                                            ...hoverSx,
                                         }}
                                     >
                                         <ListItemText primary={el} />
@@ -204,7 +203,11 @@ export function CodeEditor({ id }: any) {
                                             {execcontent
                                                 .filter((it: any) => it['unigraph.id']?.startsWith(el))
                                                 .map((it: any) => (
-                                                    <ListItem button key={it.uid} selected={currentUid === it.uid}>
+                                                    <ListItem
+                                                        sx={hoverSx}
+                                                        key={it.uid}
+                                                        selected={currentUid === it.uid}
+                                                    >
                                                         <AutoDynamicView
                                                             object={it}
                                                             onClick={() => {

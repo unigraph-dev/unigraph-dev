@@ -6,8 +6,7 @@ import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { styled } from '@mui/material/styles';
 import { DynamicObjectListView, TabButton } from '../ObjectView/DynamicObjectListView';
 import { getStatsQuery } from '../UnigraphCore/ConnectionWidget';
-
-const PREFIX = 'UserLibrary';
+import { hoverSx } from '../../utils';
 
 function MultiTypeDescriptor({ itemGroups, currentType, setCurrentType }: any) {
     return (
@@ -25,7 +24,7 @@ function MultiTypeDescriptor({ itemGroups, currentType, setCurrentType }: any) {
         >
             {itemGroups.map((el: any, index: any) => (
                 <TabButton
-                    sx={{ '&:hover': { backgroundColor: 'action.hover' } }}
+                    sx={hoverSx}
                     style={{ backgroundColor: 'red' }}
                     isSelected={currentType === el.name}
                     onClick={() => setCurrentType(el.name)}
