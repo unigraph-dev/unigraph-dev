@@ -217,7 +217,7 @@ export function OutlineComponent({
             ) : (
                 []
             )}
-            <div style={{ flexGrow: 1, marginLeft: displayAs === 'outliner' || !parentDisplayAs ? '24px' : '24px' }}>
+            <div style={{ flexGrow: 1, marginLeft: displayAs !== 'outliner' && !parentDisplayAs ? '' : '24px' }}>
                 {children}
             </div>
         </div>
@@ -231,7 +231,7 @@ export function ParentsAndReferences({ data }: any) {
     React.useEffect(() => {
         const [newPar, newRef]: any = getParentsAndReferences(
             data['~_value'],
-            (data['unigraph.origin'] || []).filter((el: any) => el.uid !== data.uid),
+            (data['unigraph.origin'] || []).filter((el: any) => el?.uid !== data?.uid),
         );
         if (stringify(parents) !== stringify(newPar)) setParents(newPar);
         if (stringify(references) !== stringify(newRef)) setReferences(newRef);
