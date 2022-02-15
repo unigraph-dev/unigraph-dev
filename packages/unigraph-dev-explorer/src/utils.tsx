@@ -565,3 +565,9 @@ export const hoverSx = {
 };
 
 export const contextMenuItemStyle = { paddingTop: '8px', paddingBottom: '8px' };
+export const globalTheme = {
+    palette: {
+        primary: { main: '#212121' },
+        secondary: { main: '#616161' },
+    },
+};

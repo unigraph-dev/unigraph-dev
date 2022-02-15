@@ -1,15 +1,20 @@
 import { createBrowserHistory } from 'history';
-import { styled, ThemeProvider, Theme, StyledEngineProvider, createTheme } from '@mui/material/styles';
+import { ThemeProvider, Theme, StyledEngineProvider, createTheme } from '@mui/material/styles';
 import 'typeface-roboto';
-import '@mui/styles';
+import { styled } from '@mui/styles';
 
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { getParameters, isElectron, NavigationContext } from './utils';
+import { getParameters, globalTheme, isElectron, NavigationContext } from './utils';
 import { ContextMenu } from './components/UnigraphCore/ContextMenu';
 import { InlineSearch } from './components/UnigraphCore/InlineSearchPopup';
 import { SearchOverlayPopover } from './pages/SearchOverlay';
 import { MobileBar } from './components/UnigraphCore/MobileBar';
+
+declare module '@mui/styles/defaultTheme' {
+    // eslint-disable-next-line @typescript-eslint/no-empty-interface
+    interface DefaultTheme extends Theme {}
+}
 
 const PREFIX = 'App';
 
@@ -43,12 +48,7 @@ const StyledStyledEngineProvider = styled(StyledEngineProvider)(({ theme }) => (
     },
 }));
 
-declare module '@mui/styles/defaultTheme' {
-    // eslint-disable-next-line @typescript-eslint/no-empty-interface
-    interface DefaultTheme extends Theme {}
-}
-
-const providedTheme = createTheme();
+const providedTheme = createTheme(globalTheme);
 
 function AppToWrap() {
     const history = createBrowserHistory();
