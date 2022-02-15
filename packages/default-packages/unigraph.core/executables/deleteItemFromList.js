@@ -15,4 +15,6 @@ if (destUidOrName.startsWith('$/entity')) {
 const destObj = await unigraph.getQueries([`(func: uid(${destUid})) {uid _value { children { uid } }}`]);
 const childrenUid = destObj[0][0]._value.children.uid;
 
+console.log('deleteItemFromList', { destUidOrName, sourceUid, destUid, childrenUid, destObj, childrenUid });
+
 await unigraph.deleteItemFromArray(childrenUid, sourceUid, destUid);

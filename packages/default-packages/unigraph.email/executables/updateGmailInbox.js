@@ -105,10 +105,11 @@ if (account?.uid) {
         (el) => el.data.labelIds?.includes('TRASH') || el.data.labelIds?.includes('SPAM'),
     );
     const isInOriginInbox = getOldUid((el) => el.data.labelIds?.includes('INBOX'));
+    const isNotInOriginInbox = getOldUid((el) => !el.data.labelIds?.includes('INBOX'));
 
     const uidsToDelete = msgResps.map(isInOriginTrash).filter((el) => el !== undefined);
     const uidsToInbox = msgResps.map(isInOriginInbox).filter((el) => el !== undefined);
-    const uidsToRemoveInbox = msgResps.map(_.negate(isInOriginInbox)).filter((el) => el !== undefined);
+    const uidsToRemoveInbox = msgResps.map(isNotInOriginInbox).filter((el) => el !== undefined);
 
     // TODO: remove or hide deleted msgs
 
@@ -127,17 +128,18 @@ if (account?.uid) {
             })),
         });
     }
-    // console.log({
-    //     newMsgRespsLen: newMsgResps.length,
-    //     newMsgResps: newMsgResps.map((el) => el.data.labelIds),
-    //     uidsToRemoveInbox: uidsToRemoveInbox.length,
-    //     uidsToInbox: uidsToInbox.length,
-    //     uidsToDeleteLen: uidsToDelete.length,
-    //     uidsToDelete,
-    // });
+    console.log({
+        newMsgRespsLen: newMsgResps.length,
+        newMsgResps: newMsgResps.map((el) => el.data.labelIds),
+        uidsToRemoveInbox: uidsToRemoveInbox.length,
+        uidsToInbox: uidsToInbox.length,
+        uidsToDeleteLen: uidsToDelete.length,
+        uidsToDelete,
+    });
     await unigraph.runExecutable('$/executable/add-item-to-list', {
         where: '$/entity/inbox',
-        item: uidsToInbox.reverse(),
+        item: uidsToInbox,
+        // item: uidsToInbox.reverse(),
     });
     await unigraph.runExecutable('$/executable/delete-item-from-list', {
         where: '$/entity/inbox',
