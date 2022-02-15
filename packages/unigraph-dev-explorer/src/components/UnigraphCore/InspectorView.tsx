@@ -1,4 +1,4 @@
-import { Divider, ListItemIcon, Typography } from '@material-ui/core';
+import { Divider, ListItemIcon, Typography } from '@mui/material';
 import { mdiCubeOutline, mdiDatabaseOutline, mdiTimelineClockOutline } from '@mdi/js';
 import Icon from '@mdi/react';
 import React from 'react';

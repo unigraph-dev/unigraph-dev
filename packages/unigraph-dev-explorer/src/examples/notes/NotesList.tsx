@@ -1,6 +1,6 @@
 import React from 'react';
-import { Fab } from '@material-ui/core';
-import { Add as AddIcon } from '@material-ui/icons';
+import { Fab } from '@mui/material';
+import { Add as AddIcon } from '@mui/icons-material';
 import { byUpdatedAt } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { withUnigraphSubscription } from '../../unigraph-react';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';

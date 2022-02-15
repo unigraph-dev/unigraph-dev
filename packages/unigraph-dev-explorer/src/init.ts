@@ -276,7 +276,7 @@ function initBacklinkManager() {
             currentResults = Object.fromEntries(
                 Object.entries(currentResults).filter((el) => currentObjects.includes(el[0])),
             );
-        }, 20),
+        }, 200),
     );
 }
 

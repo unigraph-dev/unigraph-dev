@@ -1,4 +1,4 @@
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
@@ -9,6 +9,7 @@ import { DataContext, DataContextWrapper, TabContext } from '../../utils';
 import { ObjectEditor } from '../ObjectEditor/ObjectEditor';
 import { useBacklinkDelegate } from './AutoDynamicView/BacklinkDelegate';
 import { useFocusDelegate } from './AutoDynamicView/FocusSelectionDelegate';
+import { useSubscriptionDelegate } from './AutoDynamicView/SubscriptionDelegate';
 import { getParentsAndReferences } from './backlinksUtils';
 import { isStub } from './utils';
 
@@ -22,10 +23,6 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
     onLoad,
     useFallback = true,
 }) => {
-    const isObjectStub = isStub(object);
-    const [loadedObj, setLoadedObj] = React.useState<any>(false);
-    const [subsId, setSubsId] = React.useState(getRandomInt());
-
     const tabContext = React.useContext(TabContext);
 
     const [DynamicViewsDetailed, setDynamicViewsDetailed] = React.useState({
@@ -48,38 +45,25 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
         };
     }, []);
 
+    const [getObject, subsId] = useSubscriptionDelegate(
+        object?.uid,
+        DynamicViewsDetailed[object?.type?.['unigraph.id']],
+        object,
+        onLoad,
+    );
     React.useEffect(() => {
-        const newSubs = getRandomInt();
-        if (isObjectStub && Object.keys(DynamicViewsDetailed).includes(object.type?.['unigraph.id'])) {
-            const query = DynamicViewsDetailed[object.type['unigraph.id']].query(object.uid);
-            tabContext.subscribeToQuery(
-                query,
-                (objects: any[]) => {
-                    setLoadedObj(objects[0]);
-                    if (typeof onLoad === 'function') onLoad(objects[0]);
-                },
-                newSubs,
-                { noExpand: true },
-            );
-            setSubsId(newSubs);
-        }
-
         if (Object.keys(DynamicViewsDetailed).includes(object?.type?.['unigraph.id']) && !callbacks?.isEmbed) {
             tabContext.setMaximize(DynamicViewsDetailed[object.type['unigraph.id']].maximize);
         }
-
-        return function cleanup() {
-            tabContext.unsubscribe(newSubs);
-        };
     }, [object]);
 
-    if (isObjectStub) callbacks = { ...callbacks, subsId };
+    if (subsId) callbacks = { ...callbacks, subsId };
 
     if (
         object?.type &&
         object.type['unigraph.id'] &&
         Object.keys(DynamicViewsDetailed).includes(object.type['unigraph.id']) &&
-        ((isObjectStub && loadedObj) || !isObjectStub)
+        getObject()
     ) {
         return (
             <ErrorBoundary
@@ -93,7 +77,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
             >
                 <DataContextWrapper
                     contextUid={object.uid}
-                    contextData={isObjectStub ? loadedObj : object}
+                    contextData={getObject()}
                     parents={totalParents}
                     viewType="$/schema/dynamic_view_detailed"
                     expandedChildren
@@ -102,7 +86,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
                         <TabContext.Consumer>
                             {({ viewId, setTitle }) =>
                                 React.createElement(DynamicViewsDetailed[object.type['unigraph.id']].view, {
-                                    data: isObjectStub ? loadedObj : object,
+                                    data: getObject(),
                                     callbacks: {
                                         viewId,
                                         setTitle,
@@ -125,7 +109,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
         );
     }
     if (useFallback) {
-        return object && ((isObjectStub && loadedObj) || !isObjectStub) ? <ObjectEditor uid={object?.uid} /> : <span />;
+        return object && getObject() ? <ObjectEditor uid={object?.uid} /> : <span />;
     }
     return <span />;
 };

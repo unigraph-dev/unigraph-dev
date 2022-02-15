@@ -1,4 +1,4 @@
-import { Divider, Popover, Typography } from '@material-ui/core';
+import { Divider, Popover, Typography } from '@mui/material';
 import React from 'react';
 import { AppState } from 'unigraph-dev-common/lib/types/unigraph';
 import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
@@ -82,7 +82,18 @@ export function InlineSearch() {
                     <Typography style={{ color: 'grey', marginLeft: '2px' }}>
                         {window.unigraph.getNamespaceMap?.()?.[el.type]?._name}
                     </Typography>
-                    <Divider variant="middle" orientation="vertical" style={{ height: '16px', alignSelf: 'center' }} />
+                    <Divider
+                        variant="middle"
+                        orientation="vertical"
+                        style={{
+                            height: '16px',
+                            alignSelf: 'center',
+                            marginLeft: '16px',
+                            marginRight: '16px',
+                            marginTop: '0px',
+                            marginBottom: '0px',
+                        }}
+                    />
                     <Typography variant="body1">{el.name}</Typography>
                 </div>,
                 (ev: any) => {

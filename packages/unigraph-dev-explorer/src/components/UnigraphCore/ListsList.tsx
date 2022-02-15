@@ -1,6 +1,6 @@
-import { Card, Grid, Typography } from '@material-ui/core';
+import { Card, Grid, Typography } from '@mui/material';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
-import { List } from '@material-ui/icons';
+import { List } from '@mui/icons-material';
 import { useDrop } from 'react-dnd';
 import { onUnigraphContextMenu } from '../ObjectView/DefaultObjectContextMenu';
 import { withUnigraphSubscription } from '../../unigraph-react';

@@ -8,12 +8,12 @@ import {
     ListItemText,
     TextField,
     Typography,
-} from '@material-ui/core';
+} from '@mui/material';
 import React from 'react';
 import { getExecutableId, UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 import { pkg as rssReaderPackage } from 'unigraph-dev-common/lib/data/unigraph.rss_reader.pkg';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
-import { Description, Link, OpenInBrowserOutlined } from '@material-ui/icons';
+import { Description, Link, OpenInBrowserOutlined } from '@mui/icons-material';
 import Sugar from 'sugar';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import Icon from '@mdi/react';
@@ -21,7 +21,7 @@ import { mdiRssBox } from '@mdi/js';
 import { registerDynamicViews, registerDetailedDynamicViews, withUnigraphSubscription } from '../../unigraph-react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { DynamicViewRenderer } from '../../global.d';
-import { download, upload, getComponentFromPage, TabContext, timeSince } from '../../utils';
+import { download, upload, getComponentFromPage, TabContext, timeSince, hoverSx } from '../../utils';
 import { Html } from '../semantic/Html';
 import { setupInfiniteScrolling } from '../../components/ObjectView/infiniteScrolling';
 
@@ -73,7 +73,7 @@ const RSSItem: DynamicViewRenderer = ({ data, callbacks }) => {
         <>
             <ListItemIcon>
                 <Badge
-                    overlap="circle"
+                    overlap="circular"
                     anchorOrigin={{
                         vertical: 'bottom',
                         horizontal: 'right',
@@ -319,7 +319,7 @@ const RSSItemsListBody: React.FC<any> = ({ data, viewId }) => {
                 endMessage={[]}
             >
                 {(loadedItems || []).map((it: any) => (
-                    <ListItem button key={it.uid}>
+                    <ListItem sx={hoverSx} key={it.uid}>
                         <AutoDynamicView object={it} />
                     </ListItem>
                 ))}

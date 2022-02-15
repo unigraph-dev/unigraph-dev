@@ -16,10 +16,11 @@ import {
     TextField,
     Slide,
     Divider,
-    makeStyles,
-} from '@material-ui/core';
-import { ExpandMore, ClearAll, InboxOutlined } from '@material-ui/icons';
-import { Autocomplete } from '@material-ui/lab';
+    Autocomplete,
+    Box,
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
+import { ExpandMore, ClearAll, InboxOutlined } from '@mui/icons-material';
 import _ from 'lodash';
 import React from 'react';
 import { useDrop } from 'react-dnd';
@@ -30,9 +31,22 @@ import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { TransitionGroup } from 'react-transition-group';
 import { getDynamicViews } from '../../unigraph-react';
 import { AutoDynamicView } from './AutoDynamicView';
-import { DataContext, DataContextWrapper, isMobile, TabContext } from '../../utils';
+import { DataContext, DataContextWrapper, hoverSx, isMobile, TabContext } from '../../utils';
 import { setupInfiniteScrolling } from './infiniteScrolling';
 import { DragandDrop } from './DragandDrop';
+
+const PREFIX = 'DynamicObjectListView';
+
+const classes = {
+    content: `${PREFIX}-content`,
+};
+
+const Root = styled('div')(({ theme }) => ({
+    [`& .${classes.content}`]: {
+        width: '100%',
+        overflow: 'auto',
+    },
+}));
 
 type Group = {
     name: string;
@@ -103,6 +117,7 @@ function DynamicListItem({
 }: any) {
     return (
         <ListItem
+            sx={hoverSx}
             style={{
                 ...(compact ? { paddingTop: '2px', paddingBottom: '2px' } : {}),
             }}
@@ -333,8 +348,18 @@ function MultiTypeDescriptor({
 
     return itemGroups.length > 1 ? (
         <>
-            <Divider variant="middle" orientation="vertical" style={{ height: 'auto' }} />
-            <div style={{ whiteSpace: 'nowrap', display: 'flex' }}>
+            <Divider
+                variant="middle"
+                orientation="vertical"
+                sx={{
+                    height: 'auto',
+                    marginLeft: '16px',
+                    marginRight: '16px',
+                    marginTop: '0px',
+                    marginBottom: '0px',
+                }}
+            />
+            <Root style={{ whiteSpace: 'nowrap', display: 'flex' }}>
                 {itemGroups.map((el, index) => (
                     <TabButton isSelected={selectedTab === el.name} onClick={() => setSelectedTab(el.name)}>
                         <div
@@ -357,23 +382,16 @@ function MultiTypeDescriptor({
                         <Typography style={{ marginRight: '8px' }}>{el.items.length}</Typography>
                     </TabButton>
                 ))}
-            </div>
+            </Root>
         </>
     ) : (
         <span />
     );
 }
 
-const useStyles = makeStyles((theme) => ({
-    content: {
-        width: '100%',
-        overflow: 'auto',
-    },
-}));
-
-export function TabButton({ children, isSelected, onClick }: any) {
+export function TabButton({ children, isSelected, onClick, sx }: any) {
     return (
-        <div
+        <Box
             style={{
                 cursor: 'pointer',
                 display: 'flex',
@@ -383,10 +401,11 @@ export function TabButton({ children, isSelected, onClick }: any) {
                 borderRadius: '8px',
                 ...(isSelected ? { backgroundColor: '#E9E9E9', borderRadius: '8px' } : {}),
             }}
+            sx={sx}
             onClick={onClick}
         >
             {children}
-        </div>
+        </Box>
     );
 }
 
@@ -425,8 +444,6 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
     components,
     itemAdder,
 }) => {
-    const classes = useStyles();
-
     const tabContext = React.useContext(TabContext);
 
     const [optionsOpen, setOptionsOpen] = React.useState(false);
@@ -531,7 +548,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
             }}
             ref={drop}
         >
-            <DataContextWrapper contextUid={context?.uid} contextData={context} parents={[]}>
+            <DataContextWrapper contextUid={context?.uid} contextData={context} parents={[]} expandedChildren>
                 <div style={{ display: 'flex' }}>
                     {noBar ? (
                         []
@@ -647,6 +664,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                 style={{
                                     display: itemRemover === _.noop ? 'none' : '',
                                 }}
+                                size="large"
                             >
                                 <ClearAll />
                             </IconButton>
@@ -654,6 +672,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                 style={{
                                     display: canDrop && !noDrop && contextRef.current ? '' : 'none',
                                 }}
+                                size="large"
                             >
                                 <InboxOutlined />
                             </IconButton>

@@ -1,4 +1,4 @@
-import { Button, FormControlLabel, Switch, Typography } from '@material-ui/core';
+import { Button, FormControlLabel, Switch, Typography } from '@mui/material';
 import React from 'react';
 import { useEffectOnce } from 'react-use';
 

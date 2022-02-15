@@ -10,20 +10,20 @@ import {
     MenuItem,
     Select,
     TextField,
-} from '@material-ui/core';
+} from '@mui/material';
 import React from 'react';
 import SplitterLayout from 'react-splitter-layout';
 import 'react-splitter-layout/lib/index.css';
 import { useEffectOnce } from 'react-use';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
-import { ExpandLess, ExpandMore } from '@material-ui/icons';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import _ from 'lodash';
 import Editor, { loader } from '@monaco-editor/react';
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import { ExecutableCodeEditor } from '../ObjectView/DefaultCodeEditor';
 import DetailedObjectView from '../UserLibrary/UserLibraryObject';
 import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
-import { TabContext } from '../../utils';
+import { hoverSx, TabContext } from '../../utils';
 
 loader.config({ paths: { vs: './vendor/monaco-editor_at_0.31.1/' } });
 
@@ -172,7 +172,7 @@ export function CodeEditor({ id }: any) {
                                 <NewUserCode />
                                 <List style={{ overflow: 'auto' }}>
                                     {userExecContent.map((it: any) => (
-                                        <ListItem key={it.uid} selected={currentUid === it.uid}>
+                                        <ListItem sx={hoverSx} key={it.uid} selected={currentUid === it.uid}>
                                             <AutoDynamicView
                                                 object={it}
                                                 onClick={() => {
@@ -190,7 +190,10 @@ export function CodeEditor({ id }: any) {
                                         onClick={() => {
                                             setCurrentPackage(currentPackage === el ? '' : el);
                                         }}
-                                        style={{ cursor: 'pointer' }}
+                                        sx={{
+                                            ...(currentPackage === el ? { backgroundColor: 'action.selected' } : {}),
+                                            ...hoverSx,
+                                        }}
                                     >
                                         <ListItemText primary={el} />
                                         {currentPackage === el ? <ExpandLess /> : <ExpandMore />}
@@ -200,7 +203,11 @@ export function CodeEditor({ id }: any) {
                                             {execcontent
                                                 .filter((it: any) => it['unigraph.id']?.startsWith(el))
                                                 .map((it: any) => (
-                                                    <ListItem key={it.uid} selected={currentUid === it.uid}>
+                                                    <ListItem
+                                                        sx={hoverSx}
+                                                        key={it.uid}
+                                                        selected={currentUid === it.uid}
+                                                    >
                                                         <AutoDynamicView
                                                             object={it}
                                                             onClick={() => {

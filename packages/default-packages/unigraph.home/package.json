@@ -30,7 +30,7 @@
                 "imports": [
                     {
                         "env": "npm",
-                        "package": "@material-ui/core",
+                        "package": "@mui/material",
                         "import": "Typography",
                         "as": "Typography"
                     }

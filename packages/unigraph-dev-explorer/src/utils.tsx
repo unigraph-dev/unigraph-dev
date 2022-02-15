@@ -565,3 +565,21 @@ export const getOrInitLocalStorage = (key: string, defaultValue: any) => {
     }
     return JSON.parse(window.localStorage.getItem(key) || '');
 };
+// sx styles (mui v5) for when hovering over components
+// cursor: 'pointer',
+
+export const hoverSx = {};
+// export const hoverSx = {
+//     '&:hover': { backgroundColor: 'action.hover' },
+//     '&:active': { backgroundColor: 'action.selected' },
+// };
+
+export const contextMenuItemStyle = {};
+// export const contextMenuItemStyle = { paddingTop: '8px', paddingBottom: '8px' };
+export const globalTheme = {};
+// export const globalTheme = {
+//     palette: {
+//         primary: { main: '#212121' },
+//         secondary: { main: '#616161' },
+//     },
+// };

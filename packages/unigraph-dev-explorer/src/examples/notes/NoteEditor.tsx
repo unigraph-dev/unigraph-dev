@@ -1,4 +1,5 @@
-import { makeStyles, TextareaAutosize } from '@material-ui/core';
+import { TextareaAutosize } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import { Actions } from 'flexlayout-react';
 import _ from 'lodash';
 import React from 'react';
@@ -11,8 +12,14 @@ import { htmlToMarkdown } from '../semantic/Markdown';
 import { permanentlyDeleteBlock } from './commands';
 import { caretFromLastLine, caretToLastLine, closeScopeCharDict, setFocusedCaret } from './utils';
 
-const useStyles = makeStyles((theme) => ({
-    noteTextarea: {
+const PREFIX = 'NoteEditor';
+
+const classes = {
+    noteTextarea: `${PREFIX}-noteTextarea`,
+};
+
+const TextareaAutosizeStyled = styled(TextareaAutosize)(({ theme }) => ({
+    [`&.${classes.noteTextarea}`]: {
         ...theme.typography.body1,
         border: 'none',
         outline: 'none',
@@ -24,11 +31,17 @@ type ScopeForAutoComplete = { currentText: string; caret: number; middle: string
 type ChangesForAutoComplete = { newText: string; newCaret: number; newCaretOffset: number };
 type GetChangesForAutoComplete = (scope: ScopeForAutoComplete, ev: KeyboardEvent) => ChangesForAutoComplete;
 
-const changesForOpenScopedChar = (scope: ScopeForAutoComplete, ev: KeyboardEvent): ChangesForAutoComplete => {
-    const { currentText, caret, middle, end } = scope;
+const changesForOpenScopedChar = (
+    { currentText, caret, middle, end }: ScopeForAutoComplete,
+    ev: KeyboardEvent,
+): ChangesForAutoComplete => {
+    const isChar = (c: string) => c !== ' ' && c !== '\n' && c !== '\t' && c !== undefined;
+    const nextChar = currentText?.[caret];
+    const shouldNotOpen = middle.length === 0 && isChar(nextChar) && nextChar !== closeScopeCharDict[ev.key];
+
     return {
         newText: `${currentText.slice(0, caret)}${ev.key}${middle}${
-            closeScopeCharDict[ev.key]
+            shouldNotOpen ? '' : closeScopeCharDict[ev.key]
         }${end}${currentText.slice(caret + (middle + end).length)}`,
         newCaret: caret + 1,
         newCaretOffset: middle.length,
@@ -54,6 +67,9 @@ const changesForOpenScopedMarkdownLink = (scope: ScopeForAutoComplete, ev: Keybo
 };
 
 export const useNoteEditor: (...args: any) => [any, (text: string) => void, () => string, () => void, any] = (
+    pullText: any,
+    pushText: any,
+    locateInlineChildren: any,
     isEditing: boolean,
     setIsEditing: any,
     edited: any,
@@ -65,10 +81,10 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
     resetEdited: any,
     setCommand: any,
 ) => {
-    const classes = useStyles();
     const tabContext = React.useContext(TabContext);
 
-    const inputter = (text: string) => {
+    const inputterRef = React.useRef<any>();
+    inputterRef.current = (text: string) => {
         if (data?._value?.children?.['_value[']) {
             const deadLinks: any = [];
             data._value.children['_value['].forEach((el: any) => {
@@ -77,19 +93,10 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
             if (deadLinks.length) window.unigraph.deleteItemFromArray(data._value.children.uid, deadLinks, data.uid);
         }
 
-        return window.unigraph.updateObject(
-            data.get('text')._value._value.uid,
-            {
-                '_value.%': text,
-            },
-            false,
-            false,
-            callbacks.subsId,
-            [],
-        );
+        return pushText(text);
     };
 
-    const inputDebounced = React.useRef(_.debounce(inputter, 333));
+    const inputDebounced = React.useRef(_.debounce((...args) => inputterRef.current(...args), 333));
     const textInputRef: any = React.useRef();
 
     const handlePotentialResize = () => {
@@ -111,17 +118,20 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
     }, [caretPostRender]);
 
     React.useEffect(() => {
-        const dataText = data.get('text')?.as('primitive');
-        if (dataText && tabContext.viewId && !callbacks.isEmbed)
+        const dataText = pullText();
+        if (dataText !== undefined && tabContext.viewId && !callbacks.isEmbed)
             window.layoutModel.doAction(Actions.renameTab(tabContext.viewId as any, `Note: ${dataText}`));
-        if (getCurrentText() !== dataText && !edited.current) {
+        if (dataText !== undefined && getCurrentText() !== dataText && !edited.current) {
             setCurrentText(dataText);
-        } else if ((getCurrentText() === dataText && edited.current) || getCurrentText() === '') {
+        } else if (
+            (dataText !== undefined && getCurrentText() === dataText && edited.current) ||
+            getCurrentText() === ''
+        ) {
             resetEdited();
         }
 
         if (!edited.current) fulfillCaretPostRender();
-    }, [data.get('text')?.as('primitive'), isEditing, fulfillCaretPostRender]);
+    }, [data, pullText, isEditing, fulfillCaretPostRender, focused]);
 
     React.useEffect(() => {
         // set caret when focus changes
@@ -147,7 +157,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                 }
                 // last caret might be coming from a longer line, or as -1
                 caret = caret || _.min([_.max([focusedState2.caret, 0]), getCurrentText().length]);
-
+                console.log(caret, getCurrentText(), focusedState2);
                 setCaret(document, textInputRef.current, caret);
             };
             if (!isEditing) {
@@ -196,13 +206,13 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                         )}`;
                         const semChildren = data?._value;
                         setCurrentText(newStr);
-                        resetEdited();
+                        edited.current = true;
+                        // resetEdited();
                         setCaret(document, textInputRef.current, match.index + newName.length + 4);
                         await window.unigraph.updateObject(
-                            data.uid,
+                            locateInlineChildren(data).uid,
                             {
                                 _value: {
-                                    text: { _value: { _value: { '_value.%': newStr } } },
                                     children: {
                                         '_value[': [
                                             {
@@ -276,19 +286,16 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
 
     const onInputHandler = React.useCallback(
         (ev) => {
-            // if (ev.currentTarget.textContent !== data.get('text').as('primitive') && !edited.current) edited.current = true;
-            // console.log('handling Input', ev);
-            if (ev.target.value !== data.get('text').as('primitive')) {
+            if (ev.target.value !== pullText()) {
                 if (!edited.current) edited.current = true;
                 checkReferences();
                 inputDebounced.current(ev.target.value);
             }
         },
-        [checkReferences, data],
+        [checkReferences, data, pullText],
     );
 
     const pasteLinkIntoSelection = React.useCallback((url: string) => {
-        // console.log(document.getSelection())
         const caret = textInputRef.current.selectionStart;
         let middle = document.getSelection()?.toString() || '';
         let end = '';
@@ -335,7 +342,6 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                         .map((el) => el.getAttribute('children-uids')?.split(','))
                         .flat();
                     callbacks['add-children'](entities, getCurrentText().length ? 0 : -1);
-                    // console.log(childrenEntities);
                     callbacks['add-parent-backlinks'](childrenEntities);
                 } else {
                     const mdresult = htmlToMarkdown(paste);
@@ -367,8 +373,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
 
                         const res = `![${blob.name || 'image'}](${base64})`;
 
-                        selection.getRangeAt(0).insertNode(document.createTextNode(res));
-                        selection.collapseToEnd();
+                        document.execCommand('insertText', false, res);
 
                         edited.current = true;
                         inputDebounced.current(getCurrentText());
@@ -386,7 +391,6 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
     const handleScopedAutoComplete = React.useCallback(
         (changeTextAndCaret: GetChangesForAutoComplete, ev: KeyboardEvent) => {
             ev.preventDefault();
-            // console.log(document.getSelection())
             const caret = textInputRef.current.selectionStart;
             let middle = document.getSelection()?.toString() || '';
             let end = '';
@@ -394,27 +398,19 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                 middle = middle.slice(0, middle.length - 1);
                 end = ' ';
             }
-            // document.execCommand('insertText', false, `[${middle}]${end}`);
             const { newText, newCaret, newCaretOffset } = changeTextAndCaret(
                 { currentText: getCurrentText(), caret, middle, end },
                 ev,
             );
-            console.log('handleScopedAutoComplete', { newText, newCaret, newCaretOffset });
             setCurrentText(newText);
             setCaret(document, textInputRef.current, newCaret, newCaretOffset);
-            // setCurrentText(
-            //     `${getCurrentText().slice(0, caret)}${ev.key}${middle}${
-            //         closeScopeCharDict[ev.key]
-            //     }${end}${getCurrentText().slice(caret + (middle + end).length)}`,
-            // );
-            // // setCaret(document, textInput.current, caret + 1, middle.length);
-            // setCaret(document, textInputRef.current, caret + 1, middle.length);
             textInputRef.current.dispatchEvent(
                 new Event('change', {
                     bubbles: true,
                     cancelable: true,
                 }),
             );
+            checkReferences();
         },
         [],
     );
@@ -453,7 +449,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                         ev.preventDefault();
                         edited.current = false;
                         inputDebounced.current.cancel();
-                        const currentText = getCurrentText() || data.get('text').as('primitive');
+                        const currentText = getCurrentText() || pullText();
                         callbacks['split-child']?.(currentText, caret);
                         // setCurrentText(currentText.slice(caret));
                         setCaretPostRender(0);
@@ -462,6 +458,9 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                         edited.current = false;
                         inputDebounced.current.cancel();
                         callbacks['convert-child-to-todo']?.(getCurrentText());
+                        window.unigraph
+                            .getState('global/focused')
+                            .setValue({ ...window.unigraph.getState('global/focused').value, tail: true, caret: -1 });
                     }
                     break;
 
@@ -477,19 +476,19 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                     break;
 
                 case 'Backspace': // backspace
-                    // console.log(caret, document.getSelection()?.type)
                     if (caret === 0 && document.getSelection()?.type === 'Caret') {
                         ev.preventDefault();
                         ev.stopPropagation();
                         inputDebounced.current.cancel();
                         edited.current = false;
                         callbacks['unsplit-child'](getCurrentText());
-                    } else if (getCurrentText()[caret - 1] === '[' && getCurrentText()[caret] === ']') {
+                    } else if (
+                        Object.keys(closeScopeCharDict).includes(getCurrentText()[caret - 1]) &&
+                        getCurrentText()[caret] === closeScopeCharDict[getCurrentText()[caret - 1]]
+                    ) {
                         ev.preventDefault();
                         ev.stopPropagation();
                         const tc = getCurrentText();
-                        // const el = textInput.current;
-                        // el.textContent = tc.slice(0, caret - 1) + tc.slice(caret + 1);
                         setCurrentText(tc.slice(0, caret - 1) + tc.slice(caret + 1));
                         setCaret(document, textInputRef.current, caret - 1);
                     }
@@ -558,30 +557,26 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                     break;
 
                 case ']': // right bracket
-                    if (!ev.shiftKey && getCurrentText()[caret] === ']') {
+                case ')':
+                case '"':
+                case '`':
+                case '$':
+                    if (!ev.shiftKey && getCurrentText()[caret] === ev.key) {
                         ev.preventDefault();
                         // setCaret(document, textInput.current, caret + 1);
                         setCaret(document, textInputRef.current, caret + 1);
                     }
                     break;
 
-                case ')': // 0 or parenthesis
-                    if (ev.shiftKey && getCurrentText()[caret] === ')') {
-                        ev.preventDefault();
-                        setCaret(document, textInputRef.current, caret + 1);
-                    }
-                    break;
-
                 default:
-                    // console.log(ev);
                     break;
             }
         },
-        [callbacks, componentId, data, editorContext, handleOpenScopedChar],
+        [callbacks, componentId, data, editorContext, handleOpenScopedChar, pullText],
     );
 
     return [
-        <TextareaAutosize
+        <TextareaAutosizeStyled
             className={classes.noteTextarea}
             style={{
                 outline: '0px solid transparent',

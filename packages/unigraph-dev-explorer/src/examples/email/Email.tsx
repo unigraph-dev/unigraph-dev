@@ -1,9 +1,9 @@
-import { Avatar, ListItem as div, ListItemAvatar, ListItemText } from '@material-ui/core';
+import { Avatar, ListItem as div, ListItemAvatar, ListItemText } from '@mui/material';
 import React, { useEffect } from 'react';
 import { pkg as emailPackage } from 'unigraph-dev-common/lib/data/unigraph.email.pkg';
 import { byUpdatedAt, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import Sugar from 'sugar';
-import { Link, StarRateTwoTone } from '@material-ui/icons';
+import { Link } from '@mui/icons-material';
 import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { DynamicViewRenderer } from '../../global.d';
 import { getComponentFromPage, getOrInitLocalStorage } from '../../utils';

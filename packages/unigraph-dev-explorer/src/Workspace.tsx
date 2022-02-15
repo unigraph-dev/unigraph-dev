@@ -4,27 +4,33 @@
 
 import React from 'react';
 
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import LocalizationProvider from '@mui/lab/LocalizationProvider';
 
 import FlexLayout, { Action, Actions, DockLocation, Model, Node, TabNode } from 'flexlayout-react';
 import 'flexlayout-react/style/light.css';
 import './workspace.css';
-import { Container, CssBaseline, ListItem, Popover, Typography } from '@material-ui/core';
+import { Container, CssBaseline, ListItem, Popover, Typography } from '@mui/material';
+import { ThemeProvider, Theme, StyledEngineProvider, createTheme } from '@mui/material/styles';
+
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
-import { Menu, Details } from '@material-ui/icons';
+import { Menu, Details } from '@mui/icons-material';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 
 import MomentUtils from '@date-io/moment';
+// or @mui/lab/Adapter{Dayjs,Luxon,Moment} or any valid date-io adapter
+// import AdapterDateFns from '@mui/lab/AdapterDateFns';
+import AdapterMoment from '@mui/lab/AdapterMoment';
 
 import Icon from '@mdi/react';
 import { mdiFormTextarea, mdiStarPlusOutline, mdiSync, mdiTagMultipleOutline } from '@mdi/js';
 import _ from 'lodash';
+import { styled } from '@mui/styles';
 import { components } from './pages';
 import { InlineSearch } from './components/UnigraphCore/InlineSearchPopup';
 import { ContextMenu } from './components/UnigraphCore/ContextMenu';
-import { getComponentFromPage, getParameters, isElectron, isSmallScreen, TabContext } from './utils';
+import { getComponentFromPage, getParameters, globalTheme, isElectron, isSmallScreen, TabContext } from './utils';
 import { SearchOverlayPopover } from './pages/SearchOverlay';
 import { MobileBar } from './components/UnigraphCore/MobileBar';
 
@@ -35,9 +41,24 @@ export function WorkspacePageComponent({ children, maximize, paddingTop, id, tab
     };
     const memoTabCtx = React.useMemo(() => tabCtx, [id]);
 
+    React.useEffect(() => {
+        console.log('WorkspacePageComponent.useEffect', {
+            id,
+            _maximize,
+            paddingTop,
+            padding: _maximize || !paddingTop ? '0px' : '12px',
+        });
+    }, [_maximize, paddingTop]);
     return (
         <TabContext.Provider value={memoTabCtx}>
-            <div style={{ width: '100%', height: '100%', overflow: 'auto' }}>
+            <div
+                style={{
+                    width: '100%',
+                    height: '100%',
+                    overflow: 'auto',
+                    paddingTop: _maximize || !paddingTop ? '0px' : '12px',
+                }}
+            >
                 <Container
                     maxWidth={_maximize ? false : 'lg'}
                     id={`workspaceContainer${id}`}
@@ -260,6 +281,8 @@ const setTitleOnRenderTab = (model: Model) => {
     document.title = finalTitle;
 };
 
+const providedTheme = createTheme(globalTheme);
+
 export function WorkSpace(this: any) {
     const json = {
         global: {
@@ -362,7 +385,7 @@ export function WorkSpace(this: any) {
             setMaximize: (val: boolean) => false,
             isVisible: () =>
                 // @ts-expect-error: using private API
-                window.layoutModel.getNodeById(node._attributes.id).isVisible(),
+                window.layoutModel.getNodeById(node._attributes.id)?.isVisible(),
 
             subscribeToType: (name: any, callback: any, eventId?: any, options?: any) => {
                 const subsState = window.unigraph.getState(`tabs/${(node as any)._attributes.id}/subscriptions`);
@@ -413,7 +436,7 @@ export function WorkSpace(this: any) {
                 tabCtx={tabCtx(node, config)}
             >
                 {node._attributes.floating ? (
-                    <div id="global-elements">
+                    <div id="global-elements" className="lol1">
                         <SearchOverlayPopover />
                         <ContextMenu />
                         <InlineSearch />
@@ -456,177 +479,181 @@ export function WorkSpace(this: any) {
     window.wsnavigator = workspaceNavigator.bind(this, model);
 
     return (
-        <MuiPickersUtilsProvider utils={MomentUtils}>
-            <DndProvider backend={HTML5Backend}>
-                <div id="global-elements">
-                    <SearchOverlayPopover />
-                    <ContextMenu />
-                    <InlineSearch />
-                    <MobileBar />
-                </div>
+        <StyledEngineProvider injectFirst>
+            <ThemeProvider theme={providedTheme}>
+                <LocalizationProvider dateAdapter={AdapterMoment}>
+                    <DndProvider backend={HTML5Backend}>
+                        <div id="global-elements" className="lol1">
+                            <SearchOverlayPopover />
+                            <ContextMenu />
+                            <InlineSearch />
+                            <MobileBar />
+                        </div>
 
-                <FlexLayout.Layout
-                    model={model}
-                    factory={factory}
-                    popoutURL="./popout_page.html"
-                    onAction={(action: Action) => {
-                        if (
-                            action.type === 'FlexLayout_SelectTab' &&
-                            window.localStorage.getItem('enableAnalytics') === 'true'
-                        ) {
-                            window.mixpanel?.track('selectTab', {
-                                component: (window.layoutModel.getNodeById(action.data.tabNode) as any)?._attributes
-                                    ?.component,
-                            });
-                        }
-                        return action;
-                    }}
-                    onRenderTab={(node: TabNode, renderValues: any) => {
-                        window.unigraph
-                            .getState(`tabs/${(node as any)._attributes.id}/isVisible`)
-                            .setValue(node.isVisible());
-                        setTitleOnRenderTab(model);
-                        const nodeId = node.getId();
-                        if (nodeId === 'app-drawer') {
-                            renderValues.content = (
-                                <Menu
-                                    style={{
-                                        verticalAlign: 'middle',
-                                        transform: 'rotate(90deg)',
-                                    }}
-                                    key="icon"
-                                />
-                            );
-                        }
-                        if (nodeId === 'inspector-pane') {
-                            renderValues.content = (
-                                <Details
-                                    style={{
-                                        verticalAlign: 'middle',
-                                        transform: 'rotate(270deg)',
-                                    }}
-                                    key="icon"
-                                />
-                            );
-                        }
-                        if (nodeId === 'category-pane') {
-                            renderValues.content = [
-                                <Icon
-                                    path={mdiTagMultipleOutline}
-                                    size={1}
-                                    style={{ verticalAlign: 'middle' }}
-                                    key="icon"
-                                />,
-                                <Typography
-                                    style={{
-                                        marginLeft: '4px',
-                                        display: 'inline',
-                                    }}
-                                >
-                                    {renderValues.content}
-                                </Typography>,
-                            ];
-                        }
-                        renderValues.buttons.push(<div id={`tabId${nodeId}`} key={`tabId${nodeId}`} />);
-                        setTimeout(() => {
-                            const el = document.getElementById(`tabId${nodeId}`);
+                        <FlexLayout.Layout
+                            model={model}
+                            factory={factory}
+                            popoutURL="./popout_page.html"
+                            onAction={(action: Action) => {
+                                if (
+                                    action.type === 'FlexLayout_SelectTab' &&
+                                    window.localStorage.getItem('enableAnalytics') === 'true'
+                                ) {
+                                    window.mixpanel?.track('selectTab', {
+                                        component: (window.layoutModel.getNodeById(action.data.tabNode) as any)
+                                            ?._attributes?.component,
+                                    });
+                                }
+                                return action;
+                            }}
+                            onRenderTab={(node: TabNode, renderValues: any) => {
+                                window.unigraph
+                                    .getState(`tabs/${(node as any)._attributes.id}/isVisible`)
+                                    .setValue(node.isVisible());
+                                setTitleOnRenderTab(model);
+                                const nodeId = node.getId();
+                                if (nodeId === 'app-drawer') {
+                                    renderValues.content = (
+                                        <Menu
+                                            style={{
+                                                verticalAlign: 'middle',
+                                                transform: 'rotate(90deg)',
+                                            }}
+                                            key="icon"
+                                        />
+                                    );
+                                }
+                                if (nodeId === 'inspector-pane') {
+                                    renderValues.content = (
+                                        <Details
+                                            style={{
+                                                verticalAlign: 'middle',
+                                                transform: 'rotate(270deg)',
+                                            }}
+                                            key="icon"
+                                        />
+                                    );
+                                }
+                                if (nodeId === 'category-pane') {
+                                    renderValues.content = [
+                                        <Icon
+                                            path={mdiTagMultipleOutline}
+                                            size={1}
+                                            style={{ verticalAlign: 'middle' }}
+                                            key="icon"
+                                        />,
+                                        <Typography
+                                            style={{
+                                                marginLeft: '4px',
+                                                display: 'inline',
+                                            }}
+                                        >
+                                            {renderValues.content}
+                                        </Typography>,
+                                    ];
+                                }
+                                renderValues.buttons.push(<div id={`tabId${nodeId}`} key={`tabId${nodeId}`} />);
+                                setTimeout(() => {
+                                    const el = document.getElementById(`tabId${nodeId}`);
 
-                            if (el && el.parentElement && node.isEnableClose()) {
-                                const fn = getMouseDownFn(nodeId);
-                                el.parentElement.removeEventListener('mousedown', fn);
-                                el.parentElement.addEventListener('mousedown', fn);
-                            }
-                        }, 0);
-                    }}
-                    onRenderTabSet={(tabSetNode, renderValues) => {
-                        if (tabSetNode.getType() === 'tabset') {
-                            renderValues.buttons.push(
-                                <span
-                                    onClick={async () => {
-                                        const node: TabNode = tabSetNode.getSelectedNode() as any;
-                                        if (node && node.getId() !== 'home') {
-                                            const config = node.getConfig();
-                                            if (config) {
-                                                delete config.undefine;
-                                                delete config.id;
-                                            }
-                                            const uid = await window.unigraph.addObject(
-                                                {
-                                                    name: node.getName(),
-                                                    env: 'react-explorer',
-                                                    view: node.getComponent(),
-                                                    props: JSON.stringify({
-                                                        config: config?.viewConfig || {},
-                                                    }),
-                                                    $context: {
-                                                        _hide: true,
-                                                    },
-                                                },
-                                                '$/schema/view',
-                                            );
-                                            await window.unigraph.runExecutable(
-                                                '$/package/unigraph.core/0.0.1/executable/add-item-to-list',
-                                                {
-                                                    item: uid[0],
-                                                    where: '$/entity/favorite_bar',
-                                                },
-                                            );
-                                        }
-                                    }}
-                                >
-                                    <Icon path={mdiStarPlusOutline} size={0.7} style={{ marginTop: '5px' }} />
-                                </span>,
-                            );
-                        } else if (tabSetNode.getId() === 'border_bottom') {
-                            renderValues.buttons.push(
-                                <MobileOmnibarIndicator />,
-                                <ExecutablesIndicator />,
-                                <ConnectionIndicator />,
-                            );
-                        }
-                        if (isElectron() && tabSetNode.getId() === 'border_left') {
-                            const getTopLeft = () =>
-                                Array.from(document.querySelectorAll('.flexlayout__tabset_tabbar_outer'))
-                                    .filter((el) => (el.parentElement || undefined)?.style?.top === '0px')
+                                    if (el && el.parentElement && node.isEnableClose()) {
+                                        const fn = getMouseDownFn(nodeId);
+                                        el.parentElement.removeEventListener('mousedown', fn);
+                                        el.parentElement.addEventListener('mousedown', fn);
+                                    }
+                                }, 0);
+                            }}
+                            onRenderTabSet={(tabSetNode, renderValues) => {
+                                if (tabSetNode.getType() === 'tabset') {
+                                    renderValues.buttons.push(
+                                        <span
+                                            onClick={async () => {
+                                                const node: TabNode = tabSetNode.getSelectedNode() as any;
+                                                if (node && node.getId() !== 'home') {
+                                                    const config = node.getConfig();
+                                                    if (config) {
+                                                        delete config.undefine;
+                                                        delete config.id;
+                                                    }
+                                                    const uid = await window.unigraph.addObject(
+                                                        {
+                                                            name: node.getName(),
+                                                            env: 'react-explorer',
+                                                            view: node.getComponent(),
+                                                            props: JSON.stringify({
+                                                                config: config?.viewConfig || {},
+                                                            }),
+                                                            $context: {
+                                                                _hide: true,
+                                                            },
+                                                        },
+                                                        '$/schema/view',
+                                                    );
+                                                    await window.unigraph.runExecutable(
+                                                        '$/package/unigraph.core/0.0.1/executable/add-item-to-list',
+                                                        {
+                                                            item: uid[0],
+                                                            where: '$/entity/favorite_bar',
+                                                        },
+                                                    );
+                                                }
+                                            }}
+                                        >
+                                            <Icon path={mdiStarPlusOutline} size={0.7} style={{ marginTop: '5px' }} />
+                                        </span>,
+                                    );
+                                } else if (tabSetNode.getId() === 'border_bottom') {
+                                    renderValues.buttons.push(
+                                        <MobileOmnibarIndicator />,
+                                        <ExecutablesIndicator />,
+                                        <ConnectionIndicator />,
+                                    );
+                                }
+                                if (isElectron() && tabSetNode.getId() === 'border_left') {
+                                    const getTopLeft = () =>
+                                        Array.from(document.querySelectorAll('.flexlayout__tabset_tabbar_outer'))
+                                            .filter((el) => (el.parentElement || undefined)?.style?.top === '0px')
 
-                                    .sort(
-                                        (a, b) =>
-                                            parseInt(
-                                                // @ts-expect-error: already checked for nullness above
-                                                a.parentElement.style.left,
-                                                10,
-                                            ) -
-                                            parseInt(
-                                                // @ts-expect-error: already checked for nullness above
-                                                b.parentElement.style.left,
-                                                10,
-                                            ),
-                                    )[0];
-                            const topLeft = getTopLeft();
-                            if (topLeft) {
-                                const isLeftOpen =
-                                    (model.getNodeById('border_left') as any)._attributes.selected === -1;
-                                window.requestAnimationFrame(() => {
-                                    const newTopLeft = getTopLeft();
-                                    if (isLeftOpen) newTopLeft.classList.add('topleft_bar_with_electron');
-                                    else newTopLeft.classList.remove('topleft_bar_with_electron');
-                                });
-                            }
-                        }
+                                            .sort(
+                                                (a, b) =>
+                                                    parseInt(
+                                                        // @ts-expect-error: already checked for nullness above
+                                                        a.parentElement.style.left,
+                                                        10,
+                                                    ) -
+                                                    parseInt(
+                                                        // @ts-expect-error: already checked for nullness above
+                                                        b.parentElement.style.left,
+                                                        10,
+                                                    ),
+                                            )[0];
+                                    const topLeft = getTopLeft();
+                                    if (topLeft) {
+                                        const isLeftOpen =
+                                            (model.getNodeById('border_left') as any)._attributes.selected === -1;
+                                        window.requestAnimationFrame(() => {
+                                            const newTopLeft = getTopLeft();
+                                            if (isLeftOpen) newTopLeft.classList.add('topleft_bar_with_electron');
+                                            else newTopLeft.classList.remove('topleft_bar_with_electron');
+                                        });
+                                    }
+                                }
 
-                        // renderValues.headerContent = <Button>Hi</Button>;
-                    }}
-                    classNameMapper={(name) => {
-                        if (
-                            isElectron() &&
-                            (name === 'flexlayout__tab_border_left' || name === 'flexlayout__border_left')
-                        ) {
-                            return `${name} ${name}_electron`;
-                        }
-                        return name;
-                    }}
-                />
-            </DndProvider>
-        </MuiPickersUtilsProvider>
+                                // renderValues.headerContent = <Button>Hi</Button>;
+                            }}
+                            classNameMapper={(name) => {
+                                if (
+                                    isElectron() &&
+                                    (name === 'flexlayout__tab_border_left' || name === 'flexlayout__border_left')
+                                ) {
+                                    return `${name} ${name}_electron`;
+                                }
+                                return name;
+                            }}
+                        />
+                    </DndProvider>
+                </LocalizationProvider>
+            </ThemeProvider>
+        </StyledEngineProvider>
     );
 }

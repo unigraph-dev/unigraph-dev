@@ -1,5 +1,5 @@
-import { Chip } from '@material-ui/core';
-import { LocalOffer } from '@material-ui/icons';
+import { Chip } from '@mui/material';
+import { LocalOffer } from '@mui/icons-material';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import Icon from '@mdi/react';
 import { mdiTagOutline } from '@mdi/js';
