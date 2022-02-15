@@ -1,4 +1,4 @@
-import { Card, Typography } from '@material-ui/core';
+import { Card, Typography } from '@mui/material';
 import React from 'react';
 import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 import { AutoDynamicViewDetailed } from '../components/ObjectView/AutoDynamicViewDetailed';

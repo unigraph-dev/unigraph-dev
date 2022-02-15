@@ -42,25 +42,25 @@
                 "imports": [
                     {
                         "env": "npm",
-                        "package": "@material-ui/core",
+                        "package": "@mui/material",
                         "import": "ListItemIcon",
                         "as": "ListItemIcon"
                     },
                     {
                         "env": "npm",
-                        "package": "@material-ui/core",
+                        "package": "@mui/material",
                         "import": "ListItemText",
                         "as": "ListItemText"
                     },
                     {
                         "env": "npm",
-                        "package": "@material-ui/core",
+                        "package": "@mui/material",
                         "import": "Typography",
                         "as": "Typography"
                     },
                     {
                         "env": "npm",
-                        "package": "@material-ui/core",
+                        "package": "@mui/material",
                         "import": "Avatar",
                         "as": "Avatar"
                     }
@@ -75,13 +75,13 @@
                 "imports": [
                     {
                         "env": "npm",
-                        "package": "@material-ui/core",
+                        "package": "@mui/material",
                         "import": "TextField",
                         "as": "TextField"
                     },
                     {
                         "env": "npm",
-                        "package": "@material-ui/core",
+                        "package": "@mui/material",
                         "import": "Button",
                         "as": "Button"
                     }
@@ -96,43 +96,43 @@
                 "imports": [
                     {
                         "env": "npm",
-                        "package": "@material-ui/core",
+                        "package": "@mui/material",
                         "import": "Typography",
                         "as": "Typography"
                     },
                     {
                         "env": "npm",
-                        "package": "@material-ui/core",
+                        "package": "@mui/material",
                         "import": "Card",
                         "as": "Card"
                     },
                     {
                         "env": "npm",
-                        "package": "@material-ui/core",
+                        "package": "@mui/material",
                         "import": "TextField",
                         "as": "TextField"
                     },
                     {
                         "env": "npm",
-                        "package": "@material-ui/core",
+                        "package": "@mui/material",
                         "import": "Button",
                         "as": "Button"
                     },
                     {
                         "env": "npm",
-                        "package": "@material-ui/core",
+                        "package": "@mui/material",
                         "import": "MenuItem",
                         "as": "MenuItem"
                     },
                     {
                         "env": "npm",
-                        "package": "@material-ui/icons",
+                        "package": "@mui/material/icons",
                         "import": "MoreVert",
                         "as": "MoreVert"
                     },
                     {
                         "env": "npm",
-                        "package": "@material-ui/core",
+                        "package": "@mui/material",
                         "import": "Grid",
                         "as": "Grid"
                     }

@@ -1,5 +1,4 @@
-import { Typography, FormControlLabel, Checkbox } from '@material-ui/core';
-import { Skeleton } from '@material-ui/lab';
+import { Typography, FormControlLabel, Checkbox, Skeleton } from '@mui/material';
 import React from 'react';
 import ReactJson, { InteractionProps } from 'react-json-view';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';

@@ -18,8 +18,8 @@ import {
     Select,
     TextField,
     Typography,
-} from '@material-ui/core';
-import { ExpandMore, Save } from '@material-ui/icons';
+} from '@mui/material';
+import { ExpandMore, Save } from '@mui/icons-material';
 import { Actions } from 'flexlayout-react';
 import { useEffectOnce } from 'react-use';
 
@@ -247,7 +247,7 @@ export function ExecutableCodeEditor({ data, options }: any) {
                         {previewComponent}
                     </AccordionDetails>
                 </Accordion>
-                <IconButton onClick={() => updateCode(currentCode)}>
+                <IconButton onClick={() => updateCode(currentCode)} size="large">
                     <Save />
                 </IconButton>
             </div>

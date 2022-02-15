@@ -1,4 +1,4 @@
-import { Button, FormControlLabel, Paper, Switch, Typography } from '@material-ui/core';
+import { Button, FormControlLabel, Paper, Switch, Typography } from '@mui/material';
 import React from 'react';
 import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { TabContext, upload } from '../../utils';

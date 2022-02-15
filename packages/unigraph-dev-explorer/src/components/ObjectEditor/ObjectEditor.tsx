@@ -1,28 +1,29 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable react-hooks/rules-of-hooks */ // Using maps as React functional components
 import {
+    Box,
     Button,
     Checkbox,
     Divider,
     FormControl,
     Grid,
     InputLabel,
-    makeStyles,
     MenuItem,
     Paper,
     Select,
     Switch,
     TextField,
     Typography,
-} from '@material-ui/core';
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
 import _ from 'lodash';
 import React from 'react';
 import { useEffectOnce } from 'react-use';
 import { SchemaDgraph } from 'unigraph-dev-common/lib/types/json-ts';
 import { typeMapUnigraph } from 'unigraph-dev-common/lib/types/consts';
-import { KeyboardDateTimePicker } from '@material-ui/pickers';
+import DateTimePicker from '@mui/lab/DateTimePicker';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
-import { Add, Delete, Menu, Save } from '@material-ui/icons';
+import { Add, Delete, Menu, Save } from '@mui/icons-material';
 import { isJsonString, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { ReferenceableSelectorControlled } from '../ObjectView/ReferenceableSelector';
 import { BacklinkView } from '../ObjectView/BacklinkView';
@@ -31,14 +32,11 @@ import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
 import { getDynamicViews } from '../../unigraph-react';
 import { TabContext } from '../../utils';
 
-const useStyles = makeStyles({
-    editorFrame: {
-        padding: '12px',
-        margin: '8px',
-        borderRadius: '12px',
-    },
-    editorColumn: {},
-});
+const editorFrameStyle = {
+    padding: '12px',
+    margin: '8px',
+    borderRadius: '12px',
+};
 
 const defaultNewValues: any = {
     '$/primitive/number': 0,
@@ -82,14 +80,14 @@ const TypedObjectPartEditor: any = {
             localSchema._properties.map((el: any) => el._key),
         );
         const metadata = getMetadata(localObject);
-        const classes = useStyles();
+
         const [selectedNewProp, setSelectedNewProp] = React.useState<any>();
         const [currentInputObjValue, setCurrentInputObjValue] = React.useState<any>();
         const [viewOrEdit, setViewOrEdit] = React.useState<any>(
             getDynamicViews().includes(localObject.type?.['unigraph.id']) ? 'view' : 'edit',
         );
         return (
-            <Paper variant="outlined" className={classes.editorFrame}>
+            <Paper variant="outlined" sx={editorFrameStyle}>
                 <div style={editorHeader}>
                     <Typography>
                         Object ID:
@@ -214,9 +212,9 @@ const TypedObjectPartEditor: any = {
     '$/composer/Union': ({ localSchema, localObject, setLocalObject, schemaMap }: any) => {
         if (Object.keys(localObject._value || {}).length === 1 && !localObject._value.type) return 'Deleted object';
         const currentUnionType = localObject._value?.type?.['unigraph.id'] || 'Primitive';
-        const classes = useStyles();
+
         return (
-            <Paper variant="outlined" className={classes.editorFrame}>
+            <Paper variant="outlined" sx={editorFrameStyle}>
                 <Typography>
                     Union type:
                     {localObject.type?.['unigraph.id'] || 'anonymous union'} - object type:
@@ -237,11 +235,10 @@ const TypedObjectPartEditor: any = {
         );
     },
     '$/composer/Array': ({ localSchema, localObject, setLocalObject, schemaMap }: any) => {
-        const classes = useStyles();
         const metadata = getMetadata(localObject);
         const elementSchema = localSchema._parameters._element;
         return (
-            <Paper variant="outlined" className={classes.editorFrame}>
+            <Paper variant="outlined" sx={editorFrameStyle}>
                 <div style={{ display: 'flex' }}>
                     <Typography>Array type</Typography>
                     <Add
@@ -349,11 +346,12 @@ const TypedObjectPartEditor: any = {
 
         return (
             <>
-                <KeyboardDateTimePicker
+                <DateTimePicker
                     onChange={setCurrentInputValue}
                     value={currentInputValue}
-                    format="yyyy/MM/DD HH:mm"
+                    inputFormat="yyyy/MM/DD HH:mm"
                     ampm={false}
+                    renderInput={(props) => <TextField label="datetime" helperText="enter a datetime" />}
                 />
                 <Save
                     onClick={() =>
@@ -397,7 +395,7 @@ const TypedObjectPartEditor: any = {
         const [viewOrEdit, setViewOrEdit] = React.useState<any>(
             getDynamicViews().includes(localObject.type?.['unigraph.id']) ? 'view' : 'edit',
         );
-        const classes = useStyles();
+
         const definition =
             localSchema === '$/schema/any'
                 ? schemaMap[
@@ -408,7 +406,7 @@ const TypedObjectPartEditor: any = {
                 : schemaMap[localSchema]._definition;
         // console.log(localSchema, localObject, definition)
         return (
-            <Paper variant="outlined" className={classes.editorFrame}>
+            <Paper variant="outlined" sx={editorFrameStyle}>
                 <div style={editorHeader}>
                     <Typography onClick={() => setShowReplacer(!showReplacer)} style={{ marginRight: '8px' }}>
                         Schema ref:
@@ -496,7 +494,7 @@ export function ObjectEditorSelector({ currentUid, setCurrentUid, style }: any) 
     });
 
     return (
-        <>
+        <Box sx={{ display: 'inline-flex', flexDirection: 'row', alignItems: 'center' }}>
             <TextField
                 onChange={(e) => {
                     setCurrentInputUid(e.target.value);
@@ -514,6 +512,7 @@ export function ObjectEditorSelector({ currentUid, setCurrentUid, style }: any) 
                     })
                 }
                 value={currentSchema?._definition?.type['unigraph.id']}
+                sx={{ width: '300px' }}
             />
             <Button
                 onClick={async () => {
@@ -523,14 +522,13 @@ export function ObjectEditorSelector({ currentUid, setCurrentUid, style }: any) 
             >
                 Create with schema
             </Button>
-        </>
+        </Box>
     );
 }
 
 function ObjectEditorBody({ currentObject, setCurrentObject, schemaMap }: any) {
     const currentSchema =
         currentObject.type['_value[']?.[0]?._definition || schemaMap[currentObject.type['unigraph.id']]._definition;
-    const classes = useStyles();
 
     return (
         <div style={{ display: 'flex' }}>
@@ -547,10 +545,10 @@ function ObjectEditorBody({ currentObject, setCurrentObject, schemaMap }: any) {
                 </Grid>
                 <Grid item xs={12} lg={4}>
                     <div>
-                        <Paper variant="outlined" className={classes.editorFrame}>
+                        <Paper variant="outlined" sx={editorFrameStyle}>
                             <BacklinkView data={currentObject} hideHeader titleBar=" backlinks" />
                         </Paper>
-                        <Paper variant="outlined" className={classes.editorFrame}>
+                        <Paper variant="outlined" sx={editorFrameStyle}>
                             <BacklinkView data={currentObject} hideHeader forward titleBar=" forward links" />
                         </Paper>
                     </div>

@@ -1,4 +1,4 @@
-import { List, ListItem, ListItemText, Typography } from '@material-ui/core';
+import { List, ListItem, ListItemText, Typography } from '@mui/material';
 import React from 'react';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import * as timeago from 'timeago.js';

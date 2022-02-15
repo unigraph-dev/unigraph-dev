@@ -1,5 +1,5 @@
-import { IconButton } from '@material-ui/core';
-import { MoreVert } from '@material-ui/icons';
+import { IconButton } from '@mui/material';
+import { MoreVert } from '@mui/icons-material';
 import React, { FC } from 'react';
 
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
@@ -50,6 +50,7 @@ const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options, callba
                     />,
                 );
             }}
+            size="large"
         >
             <MoreVert />
         </IconButton>

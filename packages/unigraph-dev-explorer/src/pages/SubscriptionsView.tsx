@@ -1,4 +1,4 @@
-import { Card, Typography } from '@material-ui/core';
+import { Card, Typography } from '@mui/material';
 import React from 'react';
 import Sugar from 'sugar';
 import { AutoDynamicView } from '../components/ObjectView/AutoDynamicView';

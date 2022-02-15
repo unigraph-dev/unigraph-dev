@@ -1,10 +1,10 @@
-import { Divider, ListItemText, ListItemIcon, MenuItem, Popover } from '@material-ui/core';
+import { Divider, ListItemText, ListItemIcon, MenuItem, Popover } from '@mui/material';
 import React from 'react';
 import { AppState } from 'unigraph-dev-common/lib/types/unigraph';
 import Icon from '@mdi/react';
 import { mdiCubeOutline, mdiDatabaseOutline } from '@mdi/js';
 import { ContextMenuState } from '../../global.d';
-import { deselectUid } from '../../utils';
+import { contextMenuItemStyle, deselectUid } from '../../utils';
 
 export function ContextMenu() {
     const ctxMenuState: AppState<Partial<ContextMenuState>> = window.unigraph.getState('global/contextMenu');
@@ -52,7 +52,7 @@ export function ContextMenu() {
                 }}
             >
                 <div>
-                    <MenuItem style={{ paddingTop: '2px', paddingBottom: '2px' }}>
+                    <MenuItem style={contextMenuItemStyle}>
                         <ListItemIcon style={{ minWidth: '32px' }}>
                             <Icon path={mdiCubeOutline} size={0.8} />
                         </ListItemIcon>
@@ -107,12 +107,7 @@ export function ContextMenu() {
                     {state.contextContextUid ? (
                         <>
                             <Divider />
-                            <MenuItem
-                                style={{
-                                    paddingTop: '2px',
-                                    paddingBottom: '2px',
-                                }}
-                            >
+                            <MenuItem style={contextMenuItemStyle}>
                                 <ListItemIcon style={{ minWidth: '32px' }}>
                                     <Icon path={mdiCubeOutline} size={0.8} />
                                 </ListItemIcon>

@@ -1,4 +1,4 @@
-import { MenuItem, Typography } from '@material-ui/core';
+import { MenuItem, Typography } from '@mui/material';
 import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { AutoDynamicViewDetailed } from '../../components/ObjectView/AutoDynamicViewDetailed';
 import { inlineRefsToChildren } from '../../components/UnigraphCore/InlineSearchPopup';

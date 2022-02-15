@@ -1,4 +1,4 @@
-import { Box, Typography } from '@material-ui/core';
+import { Box, Typography } from '@mui/material';
 
 export function TabPanel({ children, value, index, ...other }: any) {
     return (

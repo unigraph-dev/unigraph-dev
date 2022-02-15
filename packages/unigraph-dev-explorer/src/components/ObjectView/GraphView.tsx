@@ -4,7 +4,7 @@ import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/api/unigra
 import ForceGraph2D from 'react-force-graph-2d';
 import ReactResizeDetector from 'react-resize-detector';
 import _ from 'lodash';
-import { Checkbox, List, ListItem, Typography } from '@material-ui/core';
+import { Checkbox, List, ListItem, Typography } from '@mui/material';
 import { TabContext } from '../../utils';
 
 const queryNameIndex = `@filter(type(Entity) AND (NOT eq(<_propertyType>, "inheritance"))) {

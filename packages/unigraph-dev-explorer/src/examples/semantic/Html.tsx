@@ -1,6 +1,5 @@
-import { Button, ButtonGroup, Divider, IconButton } from '@material-ui/core';
-import { FormatLineSpacing, Menu } from '@material-ui/icons';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import { Button, ButtonGroup, Divider, IconButton, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import { FormatLineSpacing, Menu } from '@mui/icons-material';
 import _ from 'lodash';
 import React from 'react';
 import {
@@ -111,7 +110,7 @@ export function HtmlStyleChooser({ style, onStyleChange, data, context, callback
                 </ToggleButton>
             </ToggleButtonGroup>
             <ToggleButtonGroup>
-                <ToggleButton onClick={(event) => onUnigraphContextMenu(event, data, context)}>
+                <ToggleButton value="Menu" onClick={(event) => onUnigraphContextMenu(event, data, context)}>
                     <Menu />
                 </ToggleButton>
             </ToggleButtonGroup>
