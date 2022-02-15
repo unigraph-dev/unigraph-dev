@@ -1,4 +1,4 @@
-import { ListItemText } from '@material-ui/core';
+import { ListItemText } from '@mui/material';
 import React from 'react';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { DynamicViewRenderer } from '../../global.d';

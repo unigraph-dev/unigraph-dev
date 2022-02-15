@@ -1,33 +1,34 @@
-import { Grid, ListItemIcon, Typography } from '@material-ui/core';
+import { Grid, ListItemIcon, Typography, Box } from '@mui/material';
 import Icon from '@mdi/react';
 import { mdiFeatureSearchOutline, mdiAppsBox, mdiInboxOutline, mdiViewQuiltOutline } from '@mdi/js';
 import React from 'react';
 import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
-import { TabContext } from '../../utils';
+import { TabContext, hoverSx } from '../../utils';
 
 type AppShortcutProps = {
     avatar: React.ReactElement<any>;
     address: string;
     text: string;
 };
+// "const" casting bc of TS type-widening: https://mui.com/system/the-sx-prop/#typescript-usage
+const appItemStyle = {
+    borderRadius: 4,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    p: '16px',
+    cursor: 'pointer',
+    ...hoverSx,
+} as const;
 
 export function AppShortcut({ avatar, address, text }: AppShortcutProps) {
     return (
-        <div
-            style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                padding: '16px',
-            }}
-            onClick={() => window.wsnavigator(address)}
-        >
+        <Box sx={appItemStyle} onClick={() => window.wsnavigator(address)}>
             {avatar}
             {text}
-        </div>
+        </Box>
     );
 }
-
 export function AllApps() {
     const [totalViews, setTotalViews] = React.useState([]);
     const tabContext = React.useContext(TabContext);

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Typography } from '@material-ui/core';
+import { Typography } from '@mui/material';
 import Editor, { loader } from '@monaco-editor/react';
 import { buildUnigraphEntity, processAutoref } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { useEffectOnce } from 'react-use';

@@ -21,48 +21,48 @@
                 "imports": [
                     {
                         "env": "npm",
-                        "package": "@material-ui/core",
+                        "package": "@mui/material",
                         "import": "TextField",
                         "as": "TextField"
                     },
                     {
                         "env": "npm",
-                        "package": "@material-ui/core",
+                        "package": "@mui/material",
                         "import": "Button",
                         "as": "Button"
                     },
                     {
                         "env": "npm",
-                        "package": "@material-ui/core",
+                        "package": "@mui/material",
                         "import": "Typography",
                         "as": "Typography"
                     },
                     {
                         "env": "npm",
-                        "package": "@material-ui/core",
+                        "package": "@mui/material",
                         "import": "Card",
                         "as": "Card"
                     },
                     {
                         "env": "npm",
-                        "package": "@material-ui/core",
+                        "package": "@mui/material",
                         "import": "Select",
                         "as": "Select"
                     },
                     {
                         "env": "npm",
-                        "package": "@material-ui/core",
+                        "package": "@mui/material",
                         "import": "MenuItem",
                         "as": "MenuItem"
                     },
                     {
                         "env": "npm",
-                        "package": "@material-ui/icons",
+                        "package": "@mui/material/icons",
                         "as": "Icons"
                     },
                     {
                         "env": "npm",
-                        "package": "@material-ui/core",
+                        "package": "@mui/material",
                         "import": "Divider",
                         "as": "Divider"
                     }

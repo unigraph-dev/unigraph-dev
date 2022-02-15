@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 
 import { pkg as bookmarkPackage } from 'unigraph-dev-common/lib/data/unigraph.bookmark.pkg';
 
-import { ListItemText, ListItemIcon, Avatar, Typography, Fab } from '@material-ui/core';
-import { Description, Link, Public, Add as AddIcon } from '@material-ui/icons';
+import { ListItemText, ListItemIcon, Avatar, Typography, Fab } from '@mui/material';
+import { Description, Link, Public, Add as AddIcon } from '@mui/icons-material';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { getExecutableId } from 'unigraph-dev-common/lib/api/unigraph';
 import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';

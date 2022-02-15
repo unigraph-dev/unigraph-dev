@@ -1,6 +1,6 @@
-import { Badge, Avatar, Typography } from '@material-ui/core';
+import { Badge, Avatar, Typography } from '@mui/material';
 import Sugar from 'sugar';
-import { AddCircle, ArrowDownward, ArrowUpward, Chat, Image, Link, RemoveCircle } from '@material-ui/icons';
+import { AddCircle, ArrowDownward, ArrowUpward, Chat, Image, Link, RemoveCircle } from '@mui/icons-material';
 import React from 'react';
 import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
@@ -73,7 +73,7 @@ export const RedditPost: DynamicViewRenderer = ({ data, callbacks }) => {
                 }}
             >
                 <Badge
-                    overlap="circle"
+                    overlap="circular"
                     anchorOrigin={{
                         vertical: 'bottom',
                         horizontal: 'right',

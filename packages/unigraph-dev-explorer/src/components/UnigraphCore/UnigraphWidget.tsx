@@ -1,4 +1,4 @@
-import { Card } from '@material-ui/core';
+import { Card } from '@mui/material';
 
 export function UnigraphWidget({ children, style }: any) {
     return (

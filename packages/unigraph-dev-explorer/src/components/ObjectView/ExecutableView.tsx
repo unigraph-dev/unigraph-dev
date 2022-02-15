@@ -1,5 +1,5 @@
-import { ListItemIcon, ListItemText } from '@material-ui/core';
-import { PlayArrow, OpenInNew, TrendingFlat } from '@material-ui/icons';
+import { ListItemIcon, ListItemText } from '@mui/material';
+import { PlayArrow, OpenInNew, TrendingFlat } from '@mui/icons-material';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { DynamicViewRenderer } from '../../global.d';
 import { ExecutableCodeEditor } from './DefaultCodeEditor';

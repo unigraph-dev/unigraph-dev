@@ -1,4 +1,4 @@
-import { Avatar, Badge, Typography } from '@material-ui/core';
+import { Avatar, Badge, Typography } from '@mui/material';
 import Sugar from 'sugar';
 import React from 'react';
 import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
@@ -33,7 +33,7 @@ export const Tweet: DynamicViewRenderer = ({ data, callbacks }) => {
                 }}
             >
                 <Badge
-                    overlap="circle"
+                    overlap="circular"
                     anchorOrigin={{
                         vertical: 'bottom',
                         horizontal: 'right',
@@ -108,7 +108,7 @@ const TwitterUser = ({ data, callbacks }: any) => (
     <div style={{ display: 'flex' }}>
         <div style={{ alignSelf: 'center', marginRight: '16px' }}>
             <Badge
-                overlap="circle"
+                overlap="circular"
                 anchorOrigin={{
                     vertical: 'bottom',
                     horizontal: 'right',

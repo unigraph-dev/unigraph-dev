@@ -1,4 +1,5 @@
-import { makeStyles, TextareaAutosize } from '@material-ui/core';
+import { TextareaAutosize } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import { Actions } from 'flexlayout-react';
 import _ from 'lodash';
 import React from 'react';
@@ -11,8 +12,14 @@ import { htmlToMarkdown } from '../semantic/Markdown';
 import { permanentlyDeleteBlock } from './commands';
 import { caretFromLastLine, caretToLastLine, closeScopeCharDict, setFocusedCaret } from './utils';
 
-const useStyles = makeStyles((theme) => ({
-    noteTextarea: {
+const PREFIX = 'NoteEditor';
+
+const classes = {
+    noteTextarea: `${PREFIX}-noteTextarea`,
+};
+
+const TextareaAutosizeStyled = styled(TextareaAutosize)(({ theme }) => ({
+    [`&.${classes.noteTextarea}`]: {
         ...theme.typography.body1,
         border: 'none',
         outline: 'none',
@@ -74,7 +81,6 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
     resetEdited: any,
     setCommand: any,
 ) => {
-    const classes = useStyles();
     const tabContext = React.useContext(TabContext);
 
     const inputterRef = React.useRef<any>();
@@ -570,7 +576,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
     );
 
     return [
-        <TextareaAutosize
+        <TextareaAutosizeStyled
             className={classes.noteTextarea}
             style={{
                 outline: '0px solid transparent',
