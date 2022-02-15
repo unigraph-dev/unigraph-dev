@@ -1,6 +1,7 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable react-hooks/rules-of-hooks */ // Using maps as React functional components
 import {
+    Box,
     Button,
     Checkbox,
     Divider,
@@ -31,21 +32,11 @@ import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
 import { getDynamicViews } from '../../unigraph-react';
 import { TabContext } from '../../utils';
 
-const PREFIX = 'ObjectEditor';
-
-const classes = {
-    editorFrame: `${PREFIX}-editorFrame`,
-    editorColumn: `${PREFIX}-editorColumn`,
+const editorFrameStyle = {
+    padding: '12px',
+    margin: '8px',
+    borderRadius: '12px',
 };
-
-const Root = styled('div')({
-    [`& .${classes.editorFrame}`]: {
-        padding: '12px',
-        margin: '8px',
-        borderRadius: '12px',
-    },
-    [`& .${classes.editorColumn}`]: {},
-});
 
 const defaultNewValues: any = {
     '$/primitive/number': 0,
@@ -62,7 +53,7 @@ const getMetadata = (localObject: any) =>
         .filter((el) => el !== undefined);
 function MetadataDisplay({ metadata }: any) {
     return metadata.length ? (
-        <Root>
+        <div>
             <Typography>Metadata:</Typography>
             {metadata.map((el: any) => (
                 <div style={{ display: 'flex' }}>
@@ -70,7 +61,7 @@ function MetadataDisplay({ metadata }: any) {
                     <Typography style={{ color: 'gray' }}>{JSON.stringify(el[1])}</Typography>
                 </div>
             ))}
-        </Root>
+        </div>
     ) : (
         <span />
     );
@@ -96,7 +87,7 @@ const TypedObjectPartEditor: any = {
             getDynamicViews().includes(localObject.type?.['unigraph.id']) ? 'view' : 'edit',
         );
         return (
-            <Paper variant="outlined" className={classes.editorFrame}>
+            <Paper variant="outlined" sx={editorFrameStyle}>
                 <div style={editorHeader}>
                     <Typography>
                         Object ID:
@@ -223,7 +214,7 @@ const TypedObjectPartEditor: any = {
         const currentUnionType = localObject._value?.type?.['unigraph.id'] || 'Primitive';
 
         return (
-            <Paper variant="outlined" className={classes.editorFrame}>
+            <Paper variant="outlined" sx={editorFrameStyle}>
                 <Typography>
                     Union type:
                     {localObject.type?.['unigraph.id'] || 'anonymous union'} - object type:
@@ -247,7 +238,7 @@ const TypedObjectPartEditor: any = {
         const metadata = getMetadata(localObject);
         const elementSchema = localSchema._parameters._element;
         return (
-            <Paper variant="outlined" className={classes.editorFrame}>
+            <Paper variant="outlined" sx={editorFrameStyle}>
                 <div style={{ display: 'flex' }}>
                     <Typography>Array type</Typography>
                     <Add
@@ -415,7 +406,7 @@ const TypedObjectPartEditor: any = {
                 : schemaMap[localSchema]._definition;
         // console.log(localSchema, localObject, definition)
         return (
-            <Paper variant="outlined" className={classes.editorFrame}>
+            <Paper variant="outlined" sx={editorFrameStyle}>
                 <div style={editorHeader}>
                     <Typography onClick={() => setShowReplacer(!showReplacer)} style={{ marginRight: '8px' }}>
                         Schema ref:
@@ -503,7 +494,7 @@ export function ObjectEditorSelector({ currentUid, setCurrentUid, style }: any) 
     });
 
     return (
-        <>
+        <Box sx={{ display: 'inline-flex', flexDirection: 'row', alignItems: 'center' }}>
             <TextField
                 onChange={(e) => {
                     setCurrentInputUid(e.target.value);
@@ -521,6 +512,7 @@ export function ObjectEditorSelector({ currentUid, setCurrentUid, style }: any) 
                     })
                 }
                 value={currentSchema?._definition?.type['unigraph.id']}
+                sx={{ width: '300px' }}
             />
             <Button
                 onClick={async () => {
@@ -530,7 +522,7 @@ export function ObjectEditorSelector({ currentUid, setCurrentUid, style }: any) 
             >
                 Create with schema
             </Button>
-        </>
+        </Box>
     );
 }
 
@@ -553,10 +545,10 @@ function ObjectEditorBody({ currentObject, setCurrentObject, schemaMap }: any) {
                 </Grid>
                 <Grid item xs={12} lg={4}>
                     <div>
-                        <Paper variant="outlined" className={classes.editorFrame}>
+                        <Paper variant="outlined" sx={editorFrameStyle}>
                             <BacklinkView data={currentObject} hideHeader titleBar=" backlinks" />
                         </Paper>
-                        <Paper variant="outlined" className={classes.editorFrame}>
+                        <Paper variant="outlined" sx={editorFrameStyle}>
                             <BacklinkView data={currentObject} hideHeader forward titleBar=" forward links" />
                         </Paper>
                     </div>
