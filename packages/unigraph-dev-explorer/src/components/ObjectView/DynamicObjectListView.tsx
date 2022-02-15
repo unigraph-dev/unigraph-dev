@@ -348,7 +348,17 @@ function MultiTypeDescriptor({
 
     return itemGroups.length > 1 ? (
         <>
-            <Divider variant="middle" orientation="vertical" style={{ height: 'auto' }} />
+            <Divider
+                variant="middle"
+                orientation="vertical"
+                sx={{
+                    height: 'auto',
+                    marginLeft: '16px',
+                    marginRight: '16px',
+                    marginTop: '0px',
+                    marginBottom: '0px',
+                }}
+            />
             <Root style={{ whiteSpace: 'nowrap', display: 'flex' }}>
                 {itemGroups.map((el, index) => (
                     <TabButton isSelected={selectedTab === el.name} onClick={() => setSelectedTab(el.name)}>

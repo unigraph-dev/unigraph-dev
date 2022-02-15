@@ -82,7 +82,18 @@ export function InlineSearch() {
                     <Typography style={{ color: 'grey', marginLeft: '2px' }}>
                         {window.unigraph.getNamespaceMap?.()?.[el.type]?._name}
                     </Typography>
-                    <Divider variant="middle" orientation="vertical" style={{ height: '16px', alignSelf: 'center' }} />
+                    <Divider
+                        variant="middle"
+                        orientation="vertical"
+                        style={{
+                            height: '16px',
+                            alignSelf: 'center',
+                            marginLeft: '16px',
+                            marginRight: '16px',
+                            marginTop: '0px',
+                            marginBottom: '0px',
+                        }}
+                    />
                     <Typography variant="body1">{el.name}</Typography>
                 </div>,
                 (ev: any) => {

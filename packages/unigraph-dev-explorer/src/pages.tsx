@@ -147,6 +147,7 @@ const pages: Record<string, any> = {
     search: {
         constructor: (props: any) => <UnigraphSearch {...props} />,
         name: 'Search',
+        paddingTop: true,
     },
     'notes-list': {
         constructor: (props: any) => <NotesList {...props} />,

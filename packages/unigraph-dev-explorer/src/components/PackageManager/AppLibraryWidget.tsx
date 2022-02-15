@@ -17,6 +17,7 @@ const appItemStyle = {
     flexDirection: 'column',
     alignItems: 'center',
     p: '16px',
+    cursor: 'pointer',
     ...hoverSx,
 } as const;
 
