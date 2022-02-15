@@ -127,7 +127,7 @@ export const setFocusedCaret = (textInputEl: any) => {
         caret = _.min([sel?.anchorOffset, sel?.focusOffset]) as number;
     }
     const state = window.unigraph.getState('global/focused');
-    state.setValue({ ...state.value, caret });
+    if (!state.value.tail) state.setValue({ ...state.value, caret });
 };
 
 export const getSubentities = (data: any) => {

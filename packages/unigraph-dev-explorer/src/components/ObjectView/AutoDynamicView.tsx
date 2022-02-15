@@ -53,7 +53,7 @@ export function AutoDynamicView({
 
     if (!callbacks) callbacks = {};
 
-    if (object.constructor.name !== 'UnigraphObject') object = new UnigraphObject(object);
+    if (object?.constructor.name !== 'UnigraphObject') object = new UnigraphObject(object);
 
     const shouldGetBacklinks = !excludableTypes.includes(object?.type?.['unigraph.id']) && !inline;
 
@@ -302,6 +302,7 @@ export function AutoDynamicView({
                         ...(inline ? {} : { width: '100%' }),
                         backgroundColor: isSelected || isDragging ? 'whitesmoke' : 'unset',
                         borderRadius: isSelected || isDragging ? '12px' : '',
+                        ...style,
                     }}
                     key={`object-view-${object?.uid}`}
                     onClickCapture={customBoundingBox ? () => undefined : onClickCaptureHandler}

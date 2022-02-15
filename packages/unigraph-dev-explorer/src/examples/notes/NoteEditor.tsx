@@ -69,6 +69,7 @@ const changesForOpenScopedMarkdownLink = (scope: ScopeForAutoComplete, ev: Keybo
 export const useNoteEditor: (...args: any) => [any, (text: string) => void, () => string, () => void, any] = (
     pullText: any,
     pushText: any,
+    locateInlineChildren: any,
     isEditing: boolean,
     setIsEditing: any,
     edited: any,
@@ -118,16 +119,19 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
 
     React.useEffect(() => {
         const dataText = pullText();
-        if (dataText && tabContext.viewId && !callbacks.isEmbed)
+        if (dataText !== undefined && tabContext.viewId && !callbacks.isEmbed)
             window.layoutModel.doAction(Actions.renameTab(tabContext.viewId as any, `Note: ${dataText}`));
-        if (getCurrentText() !== dataText && !edited.current) {
+        if (dataText !== undefined && getCurrentText() !== dataText && !edited.current) {
             setCurrentText(dataText);
-        } else if ((getCurrentText() === dataText && edited.current) || getCurrentText() === '') {
+        } else if (
+            (dataText !== undefined && getCurrentText() === dataText && edited.current) ||
+            getCurrentText() === ''
+        ) {
             resetEdited();
         }
 
         if (!edited.current) fulfillCaretPostRender();
-    }, [data, pullText, isEditing, fulfillCaretPostRender]);
+    }, [data, pullText, isEditing, fulfillCaretPostRender, focused]);
 
     React.useEffect(() => {
         // set caret when focus changes
@@ -153,7 +157,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                 }
                 // last caret might be coming from a longer line, or as -1
                 caret = caret || _.min([_.max([focusedState2.caret, 0]), getCurrentText().length]);
-
+                console.log(caret, getCurrentText(), focusedState2);
                 setCaret(document, textInputRef.current, caret);
             };
             if (!isEditing) {
@@ -206,7 +210,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                         // resetEdited();
                         setCaret(document, textInputRef.current, match.index + newName.length + 4);
                         await window.unigraph.updateObject(
-                            data.uid,
+                            locateInlineChildren(data).uid,
                             {
                                 _value: {
                                     children: {
@@ -369,8 +373,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
 
                         const res = `![${blob.name || 'image'}](${base64})`;
 
-                        selection.getRangeAt(0).insertNode(document.createTextNode(res));
-                        selection.collapseToEnd();
+                        document.execCommand('insertText', false, res);
 
                         edited.current = true;
                         inputDebounced.current(getCurrentText());
@@ -455,6 +458,9 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                         edited.current = false;
                         inputDebounced.current.cancel();
                         callbacks['convert-child-to-todo']?.(getCurrentText());
+                        window.unigraph
+                            .getState('global/focused')
+                            .setValue({ ...window.unigraph.getState('global/focused').value, tail: true, caret: -1 });
                     }
                     break;
 

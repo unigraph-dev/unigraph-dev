@@ -830,12 +830,20 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
     // console.log(index);
     let currSubentity = -1;
     const stubConverted: any = { _value: { uid: '' } };
+    let todoUid = '';
     let textIt = currentText || '';
     let refs: any[] = [];
     const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
     const newChildren = children?.reduce((prev: any[], el: any, elindex: any) => {
         if (el?._value?.type?.['unigraph.id'] === '$/schema/subentity' && ++currSubentity === index) {
             /* something something */
+            if (
+                el._value._value.type['unigraph.id'] === '$/schema/embed_block' &&
+                el._value._value._value.content._value.type['unigraph.id'] === '$/schema/todo'
+            ) {
+                // Is already a todo, just toggle its completeness
+                todoUid = el._value._value._value.content._value.uid;
+            }
             const newel = {
                 uid: el.uid,
                 _index: { '_value.#i': elindex },
@@ -864,6 +872,7 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
         return [...prev, { uid: el.uid }];
     }, []);
     // console.log(textIt, newChildren, )
+    if (todoUid) return;
     const schemas = await window.unigraph.getSchemas();
     const todoObj = parseTodoObject(textIt, refs);
     todoObj.uid = window.unigraph.leaseUid?.();

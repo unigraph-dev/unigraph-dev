@@ -64,7 +64,7 @@ function BookmarksBody({ data }: { data: ABookmark[] }) {
     const bookmarks = data;
 
     return (
-        <div>
+        <div style={{ display: 'flex', height: '100%' }}>
             <DynamicObjectListView items={bookmarks} context={null} reverse defaultFilter="no-filter" />
             <Fab
                 aria-label="add"
@@ -113,7 +113,7 @@ export const BookmarkItem: DynamicViewRenderer = ({ data, callbacks }) => {
                 </Avatar>
             </ListItemIcon>
             <ListItemText>
-                <Typography>{name && name !== 'No title' ? name : data.get('url').as('primitive')}</Typography>
+                <Typography>{name && name !== 'No title' ? name : data.get('url')?.as('primitive')}</Typography>
                 <div
                     style={{
                         display: 'inline',

@@ -191,7 +191,7 @@ export function OutlineComponent({
                         style={{
                             height: 'calc(100% + 4px)',
                             width: '1px',
-                            backgroundColor: 'gray',
+                            backgroundColor: 'lightgray',
                             position: 'absolute',
                             left: '-12px',
                             display: parentDisplayAs === 'outliner' ? '' : 'none',
@@ -202,6 +202,8 @@ export function OutlineComponent({
                             fontSize: '0.5rem',
                             marginLeft: '8px',
                             marginRight: '8px',
+                            top: '8px',
+                            position: 'absolute',
                             ...(collapsed
                                 ? {
                                       borderRadius: '4px',
@@ -215,7 +217,7 @@ export function OutlineComponent({
             ) : (
                 []
             )}
-            <div style={{ flexGrow: 1, marginLeft: displayAs === 'outliner' || !parentDisplayAs ? '' : '24px' }}>
+            <div style={{ flexGrow: 1, marginLeft: displayAs !== 'outliner' && !parentDisplayAs ? '' : '24px' }}>
                 {children}
             </div>
         </div>
@@ -229,7 +231,7 @@ export function ParentsAndReferences({ data }: any) {
     React.useEffect(() => {
         const [newPar, newRef]: any = getParentsAndReferences(
             data['~_value'],
-            (data['unigraph.origin'] || []).filter((el: any) => el.uid !== data.uid),
+            (data['unigraph.origin'] || []).filter((el: any) => el?.uid !== data?.uid),
         );
         if (stringify(parents) !== stringify(newPar)) setParents(newPar);
         if (stringify(references) !== stringify(newRef)) setReferences(newRef);
@@ -319,6 +321,7 @@ export function DetailedOutlinerBlock({
     customView,
     pullText,
     pushText,
+    locateInlineChildren,
 }: any) {
     const tabContext = React.useContext(TabContext);
     // eslint-disable-next-line no-bitwise
@@ -351,6 +354,7 @@ export function DetailedOutlinerBlock({
             noteEditorProps?.(
                 pullText,
                 pushText,
+                locateInlineChildren || ((dd: any) => dd),
                 isEditing,
                 setIsEditing,
                 edited,
@@ -528,7 +532,6 @@ export function DetailedOutlinerBlock({
                         }}
                     >
                         {beforeEditor}
-                        {NoteEditorInner}
                         {customView(
                             isEditing,
                             setIsEditing,
@@ -538,6 +541,7 @@ export function DetailedOutlinerBlock({
                             editorRef,
                             editorContext,
                         )}
+                        {NoteEditorInner}
                         <Typography
                             style={{
                                 display: isEditing || !isCollapsed ? 'none' : '',
@@ -819,7 +823,7 @@ export function DetailedEmbedBlock({
             editorRef: any,
             editorContext: any,
         ) =>
-            isEditing ? undefined : (
+            isEditing && !editor.hook ? undefined : (
                 <AutoDynamicView
                     object={getObject()}
                     attributes={{
@@ -830,6 +834,7 @@ export function DetailedEmbedBlock({
                         'get-semantic-properties': () => data,
                         isEmbed: true,
                         subsId,
+                        isEditing,
                     }}
                 />
             ),
@@ -850,6 +855,7 @@ export function DetailedEmbedBlock({
             noteEditorProps={editor.hook}
             pullText={editor.pullText}
             pushText={editor.pushText}
+            locateInlineChildren={(dd: any) => dd?._value?.content?._value}
             onFocus={(
                 isEditing: any,
                 setIsEditing: any,
