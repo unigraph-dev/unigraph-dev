@@ -315,7 +315,7 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param uidOrName either the UID of the object or its name (such as `$/entity/example`).
      * @param options Options for the query.
      */
-    getObject?(
+    getObject(
         uidOrName: string,
         options?: {
             queryAsType?: string | undefined;

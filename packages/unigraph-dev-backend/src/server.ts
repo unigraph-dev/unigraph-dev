@@ -359,12 +359,10 @@ export default async function startServer(client: DgraphClient) {
         },
 
         async get_object(event: EventGetObject, ws: IWebsocket) {
-            serverStates.localApi
-                .getObject(event.uidOrName, { ws, connId: event.connId }, event.id, event.options || {})
-                .then((res: any) => {
-                    console.log('get_object', res);
-                    ws.send(makeResponse(event, true, { result: res }));
-                });
+            const results = await localApi
+                .getObject(event.uidOrName, event.options || {})
+                .catch((e: any) => ws.send(makeResponse(event, false, { error: e.toString() })));
+            ws.send(makeResponse(event, true, { results }));
         },
 
         subscribe_to_type(event: EventSubscribeType, ws: IWebsocket) {
