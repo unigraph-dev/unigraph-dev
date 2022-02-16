@@ -3,7 +3,7 @@
 import { Typography } from '@mui/material';
 import React from 'react';
 import _ from 'lodash';
-import { buildGraph, findUid, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
+import { buildGraph, findAllUids, findUid, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { FiberManualRecord, MoreVert } from '@mui/icons-material';
 import stringify from 'json-stable-stringify';
 import { mdiClockOutline, mdiNoteOutline } from '@mdi/js';
@@ -911,21 +911,14 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
 
     React.useEffect(() => {
         removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
-        let targetObj = data;
-        const paths = [];
-        let its = 0;
-        while (its < 1000) {
-            let path;
-            its += 1;
-            [targetObj, path] = findUid(data, callbacks?.context?.uid);
-            if (targetObj?.uid) delete targetObj.uid;
-            else break;
-            paths.push(path);
-        }
+        const targetObj = data;
+        const paths: any[] = findAllUids(data, callbacks?.context?.uid).map((el) => el[1]);
+        console.log(paths);
         const refinedPaths = paths
             .map((path) =>
                 path.filter(
                     (el: any) =>
+                        el?.type?.['unigraph.id'] &&
                         !['$/schema/subentity', '$/schema/interface/semantic'].includes(el?.type?.['unigraph.id']),
                 ),
             )

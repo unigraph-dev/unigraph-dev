@@ -17,26 +17,26 @@ function getPath(obj: any, path: string | string[]): any {
     }
 }
 
-export function findUid(object: any, uid: string, path?: any[]) {
+export function findUid(object: any, uid: string, path?: any[], seenPaths?: string[]) {
     const currentPath = [...(path || [])];
-    if (
-        object?.['dgraph.type'] === 'Entity' ||
-        object?.['dgraph.type']?.includes('Entity') ||
-        object?.type?.['unigraph.id']?.startsWith('$/schema')
-    ) {
+    if (object?.uid) {
         currentPath.push(object);
+    }
+    if (seenPaths?.includes(currentPath.map((el) => el.uid).join('/')) && object?.uid === uid) {
+        console.log(seenPaths, currentPath.map((el) => el.uid).join('/'));
+        return [undefined, currentPath];
     }
     if (object?.uid === uid) return [object, currentPath];
     if (typeof object === 'object' && object) {
         if (Array.isArray(object)) {
             for (const el of object) {
-                const result: any = findUid(el, uid, currentPath);
+                const result: any = findUid(el, uid, currentPath, seenPaths);
                 if (result[0]) return result;
             }
         } else {
             const keys = Object.keys(object);
             for (let i = 0; i < keys.length; i += 1) {
-                const result: any = findUid(object[keys[i]], uid, currentPath);
+                const result: any = findUid(object[keys[i]], uid, currentPath, seenPaths);
                 if (result[0]) return result;
             }
         }
@@ -48,10 +48,14 @@ export function findAllUids(object: any, uid: string) {
     let currentResult = true;
     const allResults: any[] = [];
     while (currentResult !== undefined && currentResult !== null) {
-        const res = findUid(object, uid);
+        const res = findUid(
+            object,
+            uid,
+            [],
+            allResults.map((el) => el[2].map((ell: any) => ell.uid).join('/')),
+        );
         if (res[0] !== undefined && res[0] !== null && res[0].uid) {
             allResults.push([res[0].uid, res[0], res[1]]);
-            delete res[0].uid;
         }
         [currentResult] = res;
     }
