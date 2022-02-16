@@ -90,12 +90,14 @@ if (account?.uid) {
 
         const msgIds = msgIdResps.map((el) => el.data.payload.headers[0].value);
 
-        const results = await unigraph.getQueries([
-            ...msgIds.map((el) => getQuery(el)),
+        const results = await unigraph.getQueries(
+            [...msgIds.map((el) => getQuery(el))],
+            false,
+            50,
             `var(func: eq(<unigraph.id>, "$/schema/email_message")) {
             <~type> { parIds as uid }
         }`,
-        ]);
+        );
         const pageMsg = messages.filter((el, index) => results[index].length === 0);
         const pageFullMsgs = await Promise.all(
             pageMsg.map((id) => gmail.users.messages.get({ userId: 'me', id, format: 'raw' })),

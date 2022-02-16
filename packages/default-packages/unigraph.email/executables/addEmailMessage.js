@@ -49,12 +49,14 @@ const dest = parsed.map((el) => {
 
 const results = dontCheckUnique
     ? dest.map((el) => [])
-    : await unigraph.getQueries([
-          ...dest.map((el) => getQuery(el.message_id)),
+    : await unigraph.getQueries(
+          [...dest.map((el) => getQuery(el.message_id))],
+          false,
+          50,
           `var(func: eq(<unigraph.id>, "$/schema/email_message")) {
-    <~type> { parIds as uid }
-}`,
-      ]);
+        <~type> { parIds as uid }
+    }`,
+      );
 
 const readMask = [];
 const inboxMask = [];
@@ -94,12 +96,16 @@ for (let i = 0; i < toAddChunks.length; i += 1) {
         console.log(e);
     }
 }
-console.log('addEmailMessage');
+
+const inboxEntries = await unigraph.getObject('$/entity/inbox').then((x) => x._value.children._value ?? []);
+const inboxEntryUids = inboxEntries.map((x) => x._value._value.uid);
+
 const mirrorEmailInbox = unigraph.getState('settings/email/mirrorEmailInbox').value;
 uids.forEach((el, index) => {
     // if (!readMask[index] && el) inboxEls.push(el);
-    const shouldPushEl = (mirrorEmailInbox ? inboxMask[index] : !readMask[index]) && el;
-    if (shouldPushEl) inboxEls.push(el);
+    const elShouldBeInbox = (mirrorEmailInbox ? inboxMask[index] : !readMask[index]) && el;
+    const elInInbox = inboxEntryUids.includes(el);
+    if (elShouldBeInbox && !elInInbox) inboxEls.push(el);
 });
 
 await unigraph.runExecutable('$/executable/add-item-to-list', {
