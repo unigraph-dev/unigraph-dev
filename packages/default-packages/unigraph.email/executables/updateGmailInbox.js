@@ -85,31 +85,39 @@ if (account?.uid) {
 
     const msgIds = msgIdResps.map((el) => el.data.payload.headers[0].value);
 
-    const results = await unigraph.getQueries([
-        ...msgIds.map((el) => getQuery(el)),
+    const results = await unigraph.getQueries(
+        [...msgIds.map((el) => getQuery(el))],
+        false,
+        50,
         `var(func: eq(<unigraph.id>, "$/schema/email_message")) {
         <~type> { parIds as uid }
     }`,
-    ]);
+    );
 
     const msgResps = await Promise.all(
         messages.map((id) => gmail.users.messages.get({ userId: 'me', id, format: 'raw' })),
     );
+    const inbox = await unigraph.getObject('$/entity/inbox');
+    const inboxEntries = inbox._value.children['_value['] ?? [];
+    const inboxEntryUids = inboxEntries.map((x) => x._value._value.uid);
 
     const getOldUid = _.curry((condition, el, index) => {
         const isCondition = condition(el);
         const isOld = results[index].length !== 0;
         return isCondition && isOld ? results[index]?.[0].uid : undefined;
     });
-    const isInOriginTrash = getOldUid(
+    const isOldAndInOriginTrash = getOldUid(
         (el) => el.data.labelIds?.includes('TRASH') || el.data.labelIds?.includes('SPAM'),
     );
-    const isInOriginInbox = getOldUid((el) => el.data.labelIds?.includes('INBOX'));
-    const isNotInOriginInbox = getOldUid((el) => !el.data.labelIds?.includes('INBOX'));
+    const isOldAndInOriginInbox = getOldUid((el) => el.data.labelIds?.includes('INBOX'));
+    const isOldAndNotInOriginInbox = getOldUid((el) => !el.data.labelIds?.includes('INBOX'));
 
-    const uidsToDelete = msgResps.map(isInOriginTrash).filter((el) => el !== undefined);
-    const uidsToInbox = msgResps.map(isInOriginInbox).filter((el) => el !== undefined);
-    const uidsToRemoveInbox = msgResps.map(isNotInOriginInbox).filter((el) => el !== undefined);
+    const uidsToDelete = msgResps.map(isOldAndInOriginTrash).filter((el) => el !== undefined);
+    const uidsToInbox = msgResps
+        .map(isOldAndInOriginInbox)
+        .filter((el) => el !== undefined)
+        .filter((x) => !inboxEntryUids.includes(x));
+    const uidsToRemoveInbox = msgResps.map(isOldAndNotInOriginInbox).filter((el) => el !== undefined);
 
     // TODO: remove or hide deleted msgs
 
@@ -128,18 +136,9 @@ if (account?.uid) {
             })),
         });
     }
-    console.log({
-        newMsgRespsLen: newMsgResps.length,
-        newMsgResps: newMsgResps.map((el) => el.data.labelIds),
-        uidsToRemoveInbox: uidsToRemoveInbox.length,
-        uidsToInbox: uidsToInbox.length,
-        uidsToDeleteLen: uidsToDelete.length,
-        uidsToDelete,
-    });
     await unigraph.runExecutable('$/executable/add-item-to-list', {
         where: '$/entity/inbox',
-        item: uidsToInbox,
-        // item: uidsToInbox.reverse(),
+        item: uidsToInbox.reverse(),
     });
     await unigraph.runExecutable('$/executable/delete-item-from-list', {
         where: '$/entity/inbox',

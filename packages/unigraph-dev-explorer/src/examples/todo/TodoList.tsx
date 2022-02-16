@@ -50,34 +50,11 @@ function TodoListBody({ data }: { data: ATodoList[] }) {
 }
 
 export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline, isEmbed }) => {
-    // console.log(data);
-    const unpadded: ATodoList = unpad(data);
-    // console.log(unpadded)
-    const totalCallbacks = {
-        ...(callbacks || {}),
-        onUpdate: (newData: Record<string, any>) => {
-            window.unigraph.updateObject(
-                newData.uid,
-                {
-                    _value: {
-                        uid: newData._value.uid,
-                        done: { uid: newData._value.done.uid, '_value.!': newData.get('done')['_value.!'] },
-                    },
-                    _hide: newData.get('done')['_value.!'],
-                },
-                !newData._value.uid,
-                false,
-                callbacks?.subsId,
-                undefined,
-                true,
-            );
-        },
-    };
-
     const NameDisplay = React.useMemo(
         () => (
             <AutoDynamicView
                 object={data.get('name')?._value?._value}
+                key="name"
                 options={{ noDrag: true, noDrop: true, noContextMenu: true }}
                 callbacks={{
                     'get-semantic-properties': () => data,
@@ -90,7 +67,7 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
     const SecondaryDisplay = React.useMemo(
         () => (
             <>
-                {!unpadded.children?.map
+                {!data?._value?.children?.['_value[']
                     ? []
                     : data?._value?.children?.['_value[']
                           ?.filter((it: any) => !it._key)
@@ -101,50 +78,89 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
                                   options={{ inline: true }}
                               />
                           ))}
-                {unpadded.priority > 0
-                    ? [<Chip size="small" icon={<PriorityHigh />} label={`Priority ${unpadded.priority}`} />]
-                    : []}
-                {unpadded.time_frame?.start?.datetime && new Date(unpadded.time_frame?.start?.datetime).getTime() !== 0
+                {data.get('priority')?.as('primitive') > 0
                     ? [
                           <Chip
                               size="small"
-                              icon={<CalendarToday />}
-                              label={`Start: ${Sugar.Date.relative(new Date(unpadded.time_frame?.start?.datetime))}`}
+                              icon={<PriorityHigh />}
+                              label={`Priority ${data.get('priority')?.as('primitive')}`}
                           />,
                       ]
                     : []}
-                {unpadded.time_frame?.end?.datetime &&
-                new Date(unpadded.time_frame?.start?.datetime).getTime() !== maxDateStamp
+                {data.get('time_frame/start/datetime')?.as('primitive') &&
+                new Date(data.get('time_frame/start/datetime')?.as('primitive')).getTime() !== 0
                     ? [
                           <Chip
                               size="small"
                               icon={<CalendarToday />}
-                              label={`End: ${Sugar.Date.relative(new Date(unpadded.time_frame?.end?.datetime))}`}
+                              label={`Start: ${Sugar.Date.relative(
+                                  new Date(data.get('time_frame/start/datetime')?.as('primitive')),
+                              )}`}
+                          />,
+                      ]
+                    : []}
+                {data.get('time_frame/end/datetime')?.as('primitive') &&
+                new Date(data.get('time_frame/end/datetime')?.as('primitive')).getTime() !== maxDateStamp
+                    ? [
+                          <Chip
+                              size="small"
+                              icon={<CalendarToday />}
+                              label={`End: ${Sugar.Date.relative(
+                                  new Date(data.get('time_frame/end/datetime')?.as('primitive')),
+                              )}`}
                           />,
                       ]
                     : []}
             </>
         ),
-        [unpadded, callbacks, data],
+        [callbacks, data],
     );
-    // console.log(data.uid, unpadded)
-    return (
-        <div style={{ display: 'flex' }}>
+
+    const onPointerUp = React.useCallback(
+        (ev) => {
+            ev.preventDefault();
+            ev.stopPropagation();
+            data.get('done')['_value.!'] = !data.get('done')['_value.!'];
+            window.unigraph.updateObject(
+                data.uid,
+                {
+                    _value: {
+                        uid: data._value.uid,
+                        done: { uid: data._value.done.uid, '_value.!': data.get('done')['_value.!'] },
+                    },
+                    _hide: data.get('done')['_value.!'],
+                },
+                !data._value.uid,
+                false,
+                callbacks?.subsId,
+                undefined,
+                true,
+            );
+        },
+        [data?.get('done')?.['_value.!'], callbacks?.subsId, data.uid],
+    );
+
+    const checkbox = React.useMemo(
+        () => (
             <Checkbox
                 size={callbacks.isEmbed ? 'small' : 'medium'}
+                key="checkbox"
                 style={{
                     padding: callbacks.isEmbed ? '2px' : '',
                     marginRight: callbacks.isEmbed ? '4px' : '',
                     alignSelf: 'baseline',
                 }}
-                checked={unpadded.done}
-                onPointerUp={(ev) => {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    data.get('done')['_value.!'] = !data.get('done')['_value.!'];
-                    totalCallbacks.onUpdate(data);
-                }}
+                checked={data.get('done')?.['_value.!']}
+                onPointerUp={onPointerUp}
             />
+        ),
+        [data.get('done')?.['_value.!'], callbacks.isEmbed, onPointerUp],
+    );
+
+    // console.log(data.uid, unpadded)
+    return (
+        <div style={{ display: 'flex' }}>
+            {checkbox}
             {
                 // eslint-disable-next-line no-nested-ternary
                 callbacks.isEditing ? (
@@ -152,13 +168,18 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
                 ) : callbacks.isEmbed ? (
                     [
                         NameDisplay,
-                        <Divider orientation="vertical" style={{ marginLeft: '4px', marginRight: '4px' }} />,
+                        <Divider
+                            orientation="vertical"
+                            style={{ marginLeft: '4px', marginRight: '4px' }}
+                            key="divider"
+                        />,
                         SecondaryDisplay,
                     ]
                 ) : (
                     <ListItemText
                         style={{ margin: compact ? '0px' : '', alignSelf: 'center' }}
                         primary={NameDisplay}
+                        key="name"
                         secondary={
                             <div
                                 style={{

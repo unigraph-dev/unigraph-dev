@@ -47,6 +47,8 @@ export type DynamicViewOptions = {
     customBoundingBox?: boolean;
     /** If set to true, AutoDynamicView will consider the object with children already displayed when considering recursion, etc, WIP */
     expandedChildren?: boolean;
+    /** If set to true, AutoDynamicView will always get backlinks for this object. */
+    shouldGetBacklinks?: boolean;
 };
 
 export type DynamicViewRendererProps = {
