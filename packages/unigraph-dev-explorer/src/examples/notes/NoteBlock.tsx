@@ -835,7 +835,13 @@ export function DetailedEmbedBlock({
                     attributes={{
                         isHeading: !(isChildren || callbacks.isEmbed),
                     }}
-                    options={{ inline: true, noDrag: true, noDrop: true, noClickthrough: true }}
+                    options={{
+                        inline: true,
+                        noDrag: true,
+                        noDrop: true,
+                        noClickthrough: true,
+                        shouldGetBacklinks: true,
+                    }}
                     callbacks={{
                         'get-semantic-properties': () => data,
                         isEmbed: true,

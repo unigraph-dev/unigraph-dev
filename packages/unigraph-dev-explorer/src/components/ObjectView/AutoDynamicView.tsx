@@ -55,7 +55,8 @@ export function AutoDynamicView({
 
     if (object?.constructor.name !== 'UnigraphObject') object = new UnigraphObject(object);
 
-    const shouldGetBacklinks = !excludableTypes.includes(object?.type?.['unigraph.id']) && !inline;
+    const shouldGetBacklinks =
+        finalOptions.shouldGetBacklinks || (!excludableTypes.includes(object?.type?.['unigraph.id']) && !inline);
 
     const dataContext = React.useContext(DataContext);
     const tabContext = React.useContext(TabContext);
