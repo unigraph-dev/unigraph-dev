@@ -51,7 +51,7 @@ export const useSubscriptionDelegate: (...args: any) => [() => any, number] = (
         }
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         return () => {};
-    }, [object?.uid, isObjectStub, objectView, object?.type]);
+    }, [object?.uid, isObjectStub, objectView]);
 
     return [getObject, subsId];
 };

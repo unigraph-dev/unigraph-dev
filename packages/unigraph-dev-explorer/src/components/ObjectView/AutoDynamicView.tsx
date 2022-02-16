@@ -134,45 +134,51 @@ export function AutoDynamicView({
         };
     }, [shortcuts]);
 
-    const [{ isDragging }, drag] = useDrag(() => ({
-        type: object?.type?.['unigraph.id'] || '$/schema/any',
-        item: {
-            uid: object?.uid,
-            itemType: object?.type?.['unigraph.id'],
-            dndContext: tabContext.viewId,
-            dataContext: dataContext.contextUid,
-            removeFromContext: callbacks?.removeFromContext,
-        },
-        collect: (monitor) => {
-            if (monitor.isDragging() && window.dragselect) {
-                window.dragselect.break();
-            }
-            return {
-                isDragging: !!monitor.isDragging(),
-            };
-        },
-    }));
+    const [{ isDragging }, drag] = useDrag(
+        () => ({
+            type: object?.type?.['unigraph.id'] || '$/schema/any',
+            item: {
+                uid: object?.uid,
+                itemType: object?.type?.['unigraph.id'],
+                dndContext: tabContext.viewId,
+                dataContext: dataContext.contextUid,
+                removeFromContext: callbacks?.removeFromContext,
+            },
+            collect: (monitor) => {
+                if (monitor.isDragging() && window.dragselect) {
+                    window.dragselect.break();
+                }
+                return {
+                    isDragging: !!monitor.isDragging(),
+                };
+            },
+        }),
+        [object?.type?.['unigraph.id'], object?.uid, tabContext.viewId, dataContext.contextUid],
+    );
 
-    const [, drop] = useDrop(() => ({
-        accept: window.unigraph.getState('referenceables/semantic_children').value,
-        drop: (item: { uid: string; itemType: string }, monitor) => {
-            if (!monitor.didDrop() && allowSemantic && !noDrop && item.uid !== object?.uid) {
-                window.unigraph.updateObject(object?.uid, {
-                    children: [
-                        {
-                            type: {
-                                'unigraph.id': '$/schema/interface/semantic',
+    const [, drop] = useDrop(
+        () => ({
+            accept: window.unigraph.getState('referenceables/semantic_children').value,
+            drop: (item: { uid: string; itemType: string }, monitor) => {
+                if (!monitor.didDrop() && allowSemantic && !noDrop && item.uid !== object?.uid) {
+                    window.unigraph.updateObject(object?.uid, {
+                        children: [
+                            {
+                                type: {
+                                    'unigraph.id': '$/schema/interface/semantic',
+                                },
+                                _value: {
+                                    type: { 'unigraph.id': item.itemType },
+                                    uid: item.uid,
+                                },
                             },
-                            _value: {
-                                type: { 'unigraph.id': item.itemType },
-                                uid: item.uid,
-                            },
-                        },
-                    ],
-                });
-            }
-        },
-    }));
+                        ],
+                    });
+                }
+            },
+        }),
+        [allowSemantic, noDrop, object?.uid],
+    );
 
     const handlers = useSwipeable({
         onSwipedRight: (eventData) =>
@@ -237,8 +243,7 @@ export function AutoDynamicView({
     const innerEl = React.useMemo(() => {
         if (
             isRecursion === false &&
-            object?.type &&
-            object.type['unigraph.id'] &&
+            object?.type?.['unigraph.id'] &&
             Object.keys(DynamicViews).includes(object.type['unigraph.id']) &&
             getObjectRef.current()
         ) {
