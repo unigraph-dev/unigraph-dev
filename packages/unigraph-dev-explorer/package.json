@@ -117,6 +117,7 @@
         "@types/react-router-dom": "^5.1.6",
         "@types/turndown": "^5.0.1",
         "@types/uuid": "^8.3.0",
+        "@welldone-software/why-did-you-render": "^6.2.3",
         "raw-loader": "^4.0.2"
     },
     "scripts": {
