@@ -18,7 +18,7 @@ export const useSubscriptionDelegate: (...args: any) => [() => any, number] = (
 
     React.useEffect(() => {
         if (!isObjectStub) setLoadedObj(object);
-    }, [object, isObjectStub]);
+    }, [isObjectStub]);
     const uidRef = React.useRef(undefined);
     React.useEffect(() => {
         const newSubs = getRandomInt();
@@ -45,6 +45,7 @@ export const useSubscriptionDelegate: (...args: any) => [() => any, number] = (
             setSubsId(newSubs);
         }
         if (!isObjectStub && uidRef.current !== undefined) {
+            setLoadedObj(object);
             uidRef.current = undefined;
             tabContext.unsubscribe(newSubs);
         }

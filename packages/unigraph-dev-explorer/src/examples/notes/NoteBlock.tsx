@@ -162,30 +162,9 @@ export function OutlineComponent({
     displayAs,
     parentDisplayAs,
 }: any) {
-    return (
-        <div
-            style={{
-                flex: '0 0 auto',
-                display: 'flex',
-                alignItems: 'baseline',
-                position: 'relative',
-            }}
-        >
-            <div
-                style={{ position: 'absolute', left: '-4px' }}
-                className="showOnHover"
-                onClick={() => setCollapsed(!collapsed)}
-            >
-                O
-            </div>
-            <div
-                style={{ position: 'absolute', left: '-4px', top: '8px' }}
-                className="showOnHover"
-                onClick={() => createBelow()}
-            >
-                V
-            </div>
-            {displayAs === 'outliner' ? (
+    const outlineHead = React.useMemo(
+        () =>
+            displayAs === 'outliner' ? (
                 <>
                     <div
                         style={{
@@ -216,7 +195,34 @@ export function OutlineComponent({
                 </>
             ) : (
                 []
-            )}
+            ),
+        [collapsed, displayAs, parentDisplayAs],
+    );
+
+    return (
+        <div
+            style={{
+                flex: '0 0 auto',
+                display: 'flex',
+                alignItems: 'baseline',
+                position: 'relative',
+            }}
+        >
+            <div
+                style={{ position: 'absolute', left: '-4px' }}
+                className="showOnHover"
+                onClick={() => setCollapsed(!collapsed)}
+            >
+                O
+            </div>
+            <div
+                style={{ position: 'absolute', left: '-4px', top: '8px' }}
+                className="showOnHover"
+                onClick={() => createBelow()}
+            >
+                V
+            </div>
+            {outlineHead}
             <div style={{ flexGrow: 1, marginLeft: displayAs !== 'outliner' && !parentDisplayAs ? '' : '24px' }}>
                 {children}
             </div>

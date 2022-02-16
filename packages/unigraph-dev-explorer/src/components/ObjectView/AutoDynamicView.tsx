@@ -62,11 +62,13 @@ export function AutoDynamicView({
 
     const [componentId, setComponentId] = React.useState(getRandomId());
     const [isRecursion, setIsRecursion] = React.useState<any>(false);
-    const [getObject, subsId] = useSubscriptionDelegate(
+    const [getObject_, subsId] = useSubscriptionDelegate(
         object?.uid,
         DynamicViews[object?.type?.['unigraph.id']],
         object,
     );
+    const getObjectRef = React.useRef<any>();
+    getObjectRef.current = getObject_;
 
     const [canClickthrough, setCanClickthrough] = React.useState(
         Object.keys(window.unigraph.getState('registry/dynamicViewDetailed').value).includes(
@@ -98,7 +100,7 @@ export function AutoDynamicView({
         const cb2 = (newIts: any) =>
             setCanClickthrough(
                 Object.keys(window.unigraph.getState('registry/dynamicViewDetailed').value).includes(
-                    getObject()?.type?.['unigraph.id'] || object?.type?.['unigraph.id'],
+                    getObjectRef.current()?.type?.['unigraph.id'] || object?.type?.['unigraph.id'],
                 ),
             );
         window.unigraph.getState('registry/dynamicViewDetailed').subscribe(cb2);
@@ -175,7 +177,7 @@ export function AutoDynamicView({
         onSwipedRight: (eventData) =>
             onUnigraphContextMenu(
                 { clientX: eventData.absX, clientY: eventData.absY } as any,
-                getObject(),
+                getObjectRef.current(),
                 contextEntity,
                 { ...callbacks, componentId },
             ),
@@ -213,31 +215,37 @@ export function AutoDynamicView({
         [componentId],
     );
 
+    const finalCallbacks = React.useMemo(() => {
+        // console.log('callbacks recreated, ', object?.uid);
+        return {
+            ...(callbacks || {}),
+            ...(noBacklinks ? { BacklinkComponent } : {}),
+            ...(window.dragselect && customBoundingBox
+                ? {
+                      registerBoundingBox: (el: any) => {
+                          el.dataset.component = componentId;
+                          window.dragselect.addSelectables([el]);
+                          el.addEventListener('pointerup', onClickCaptureHandler);
+                      },
+                  }
+                : {}),
+            ...(subsId ? { subsId } : {}),
+        };
+    }, [callbacks, noBacklinks, BacklinkComponent, customBoundingBox, componentId, subsId]);
+
     const innerEl = React.useMemo(() => {
         if (
             isRecursion === false &&
             object?.type &&
             object.type['unigraph.id'] &&
             Object.keys(DynamicViews).includes(object.type['unigraph.id']) &&
-            getObject()
+            getObjectRef.current()
         ) {
             return React.createElement(DynamicViews[object.type['unigraph.id']].view, {
-                data: getObject(),
+                data: getObjectRef.current(),
+                key: object?.uid,
                 ...props,
-                callbacks: {
-                    ...(callbacks || {}),
-                    ...(noBacklinks ? { BacklinkComponent } : {}),
-                    ...(window.dragselect && customBoundingBox
-                        ? {
-                              registerBoundingBox: (el: any) => {
-                                  el.dataset.component = componentId;
-                                  window.dragselect.addSelectables([el]);
-                                  el.addEventListener('pointerup', onClickCaptureHandler);
-                              },
-                          }
-                        : {}),
-                    ...(subsId ? { subsId } : {}),
-                },
+                callbacks: finalCallbacks,
                 ...(attributes || {}),
                 inline,
                 compact,
@@ -245,8 +253,8 @@ export function AutoDynamicView({
                 focused: isFocused,
             });
         }
-        if (isRecursion === false && object && getObject()) {
-            return <StringObjectViewer object={getObject()} />;
+        if (isRecursion === false && object && getObjectRef.current()) {
+            return <StringObjectViewer object={getObjectRef.current()} />;
         }
         if (isRecursion === true) {
             return (
@@ -257,7 +265,7 @@ export function AutoDynamicView({
             );
         }
         return '';
-    }, [isRecursion, object, callbacks, attributes, DynamicViews, getObject, isFocused, BacklinkComponent]);
+    }, [isRecursion, object, attributes, DynamicViews, isFocused, BacklinkComponent]);
 
     return (
         <ErrorBoundary
@@ -275,7 +283,7 @@ export function AutoDynamicView({
                         noContextMenu
                             ? () => false
                             : (event) =>
-                                  onUnigraphContextMenu(event, getObject(), contextEntity, {
+                                  onUnigraphContextMenu(event, getObjectRef.current(), contextEntity, {
                                       ...callbacks,
                                       componentId,
                                   })
@@ -291,7 +299,7 @@ export function AutoDynamicView({
         >
             <DataContextWrapper
                 contextUid={object?.uid}
-                contextData={getObject()}
+                contextData={getObjectRef.current()}
                 parents={totalParents}
                 viewType="$/schema/dynamic_view"
                 expandedChildren={expandedChildren || false}
@@ -342,7 +350,7 @@ export function AutoDynamicView({
                             noContextMenu
                                 ? () => false
                                 : (event) =>
-                                      onUnigraphContextMenu(event, getObject(), contextEntity, {
+                                      onUnigraphContextMenu(event, getObjectRef.current(), contextEntity, {
                                           ...callbacks,
                                           componentId,
                                       })
@@ -354,7 +362,7 @@ export function AutoDynamicView({
                         {noBacklinks ? [] : BacklinkComponent}
                     </div>
 
-                    {!noSubentities && getSubentities(getObject())?.length > 0 ? (
+                    {!noSubentities && getSubentities(getObjectRef.current())?.length > 0 ? (
                         <div style={{ width: '100%', paddingLeft: '12px' }}>
                             <Typography
                                 onClick={() => {
@@ -364,18 +372,18 @@ export function AutoDynamicView({
                                 style={{ color: 'gray' }}
                             >
                                 {!showSubentities ? '+ show ' : '- hide '}
-                                {`${getSubentities(getObject())?.length} subentities`}
+                                {`${getSubentities(getObjectRef.current())?.length} subentities`}
                             </Typography>
                             {showSubentities ? (
                                 <ul>
-                                    {getSubentities(getObject()).map((el: any, index: number) => (
+                                    {getSubentities(getObjectRef.current()).map((el: any, index: number) => (
                                         <li>
                                             <AutoDynamicView
                                                 object={new UnigraphObject(el._value)}
                                                 components={components}
                                                 callbacks={{
                                                     ...callbacks,
-                                                    context: getObject(),
+                                                    context: getObjectRef.current(),
                                                     index,
                                                     ...(subsId ? { subsId } : {}),
                                                 }}
@@ -395,7 +403,7 @@ export function AutoDynamicView({
                     ) : (
                         []
                     )}
-                    {allowSubentity && !noDrop ? <SubentityDropAcceptor uid={object?.uid} /> : []}
+                    <SubentityDropAcceptor uid={object?.uid} display={allowSubentity && !noDrop} />
                 </div>
             </DataContextWrapper>
         </ErrorBoundary>
