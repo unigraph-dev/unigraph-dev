@@ -3,7 +3,7 @@
 import { Typography } from '@mui/material';
 import React from 'react';
 import _ from 'lodash';
-import { buildGraph, findUid, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
+import { buildGraph, findAllUids, findUid, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { FiberManualRecord, MoreVert } from '@mui/icons-material';
 import stringify from 'json-stable-stringify';
 import { mdiClockOutline, mdiNoteOutline } from '@mdi/js';
@@ -162,30 +162,9 @@ export function OutlineComponent({
     displayAs,
     parentDisplayAs,
 }: any) {
-    return (
-        <div
-            style={{
-                flex: '0 0 auto',
-                display: 'flex',
-                alignItems: 'baseline',
-                position: 'relative',
-            }}
-        >
-            <div
-                style={{ position: 'absolute', left: '-4px' }}
-                className="showOnHover"
-                onClick={() => setCollapsed(!collapsed)}
-            >
-                O
-            </div>
-            <div
-                style={{ position: 'absolute', left: '-4px', top: '8px' }}
-                className="showOnHover"
-                onClick={() => createBelow()}
-            >
-                V
-            </div>
-            {displayAs === 'outliner' ? (
+    const outlineHead = React.useMemo(
+        () =>
+            displayAs === 'outliner' ? (
                 <>
                     <div
                         style={{
@@ -216,7 +195,34 @@ export function OutlineComponent({
                 </>
             ) : (
                 []
-            )}
+            ),
+        [collapsed, displayAs, parentDisplayAs],
+    );
+
+    return (
+        <div
+            style={{
+                flex: '0 0 auto',
+                display: 'flex',
+                alignItems: 'baseline',
+                position: 'relative',
+            }}
+        >
+            <div
+                style={{ position: 'absolute', left: '-4px' }}
+                className="showOnHover"
+                onClick={() => setCollapsed(!collapsed)}
+            >
+                O
+            </div>
+            <div
+                style={{ position: 'absolute', left: '-4px', top: '8px' }}
+                className="showOnHover"
+                onClick={() => createBelow()}
+            >
+                V
+            </div>
+            {outlineHead}
             <div style={{ flexGrow: 1, marginLeft: displayAs !== 'outliner' && !parentDisplayAs ? '' : '24px' }}>
                 {children}
             </div>
@@ -599,6 +605,9 @@ export function DetailedNoteBlock({
     componentId,
     displayAs,
 }: any) {
+    const dataRef = React.useRef<any>(data);
+    dataRef.current = data;
+
     const onPointerUpHandler = React.useCallback(
         (
             ev,
@@ -645,11 +654,11 @@ export function DetailedNoteBlock({
                 style={{ display: isEditing ? 'none' : '' }}
                 options={{ inline: true, noDrag: true, noContextMenu: true, noClickthrough: true }}
                 callbacks={{
-                    'get-semantic-properties': () => data,
+                    'get-semantic-properties': () => dataRef.current,
                 }}
             />
         ),
-        [data, isChildren, callbacks.isEmbed],
+        [data.get('text')?._value?._value?.['_value.%'], isChildren, callbacks.isEmbed],
     );
 
     return (
@@ -829,7 +838,13 @@ export function DetailedEmbedBlock({
                     attributes={{
                         isHeading: !(isChildren || callbacks.isEmbed),
                     }}
-                    options={{ inline: true, noDrag: true, noDrop: true, noClickthrough: true }}
+                    options={{
+                        inline: true,
+                        noDrag: true,
+                        noDrop: true,
+                        noClickthrough: true,
+                        shouldGetBacklinks: true,
+                    }}
                     callbacks={{
                         'get-semantic-properties': () => data,
                         isEmbed: true,
@@ -899,21 +914,14 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
 
     React.useEffect(() => {
         removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
-        let targetObj = data;
-        const paths = [];
-        let its = 0;
-        while (its < 1000) {
-            let path;
-            its += 1;
-            [targetObj, path] = findUid(data, callbacks?.context?.uid);
-            if (targetObj?.uid) delete targetObj.uid;
-            else break;
-            paths.push(path);
-        }
+        const targetObj = data;
+        const paths: any[] = findAllUids(data, callbacks?.context?.uid).map((el) => el[1]);
+        console.log(paths);
         const refinedPaths = paths
             .map((path) =>
                 path.filter(
                     (el: any) =>
+                        el?.type?.['unigraph.id'] &&
                         !['$/schema/subentity', '$/schema/interface/semantic'].includes(el?.type?.['unigraph.id']),
                 ),
             )

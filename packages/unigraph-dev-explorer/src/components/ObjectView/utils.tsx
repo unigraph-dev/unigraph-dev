@@ -10,7 +10,7 @@ export const isStub = (object: any) =>
         typeof object.type['unigraph.id'].startsWith('$/') &&
         (Object.keys(object).length === 3 || Object.keys(object).filter((el) => el.startsWith('_value')).length === 0));
 
-export function SubentityDropAcceptor({ uid }: any) {
+export function SubentityDropAcceptor({ uid, display }: any) {
     const [{ isOver, canDrop }, dropSub] = useDrop(() => ({
         // @ts-expect-error: already checked for namespace map
         accept: Object.keys(window.unigraph.getNamespaceMap() || {}),
@@ -40,6 +40,7 @@ export function SubentityDropAcceptor({ uid }: any) {
             ref={dropSub}
             style={{
                 opacity: canDrop && isOver ? 1 : 0,
+                display: display ? '' : 'none',
                 width: '100%',
                 height: '6px',
                 marginTop: '-3px',
