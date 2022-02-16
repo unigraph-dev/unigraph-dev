@@ -3,6 +3,7 @@ const { google } = require('googleapis');
 const gmailClientId = unigraph.getSecret('google', 'client_id');
 const gmailClientSecret = unigraph.getSecret('google', 'client_secret');
 const fetch = require('node-fetch');
+const _ = require('lodash/fp');
 
 const account = (
     await unigraph.getQueries([
@@ -68,7 +69,7 @@ if (account?.uid) {
         auth,
     });
 
-    const res = await gmail.users.messages.list({ userId: 'me', maxResults: 25 });
+    const res = await gmail.users.messages.list({ userId: 'me', maxResults: 50, includeSpamTrash: true });
     const messages = res.data.messages.map((el) => el.id);
 
     const msgIdResps = await Promise.all(
@@ -90,14 +91,32 @@ if (account?.uid) {
         <~type> { parIds as uid }
     }`,
     ]);
-    const newMsgs = messages.filter((el, index) => results[index].length === 0);
 
-    let newMsgResps = await Promise.all(
-        newMsgs.map((id) => gmail.users.messages.get({ userId: 'me', id, format: 'raw' })),
+    const msgResps = await Promise.all(
+        messages.map((id) => gmail.users.messages.get({ userId: 'me', id, format: 'raw' })),
     );
 
+    const getOldUid = _.curry((condition, el, index) => {
+        const isCondition = condition(el);
+        const isOld = results[index].length !== 0;
+        return isCondition && isOld ? results[index]?.[0].uid : undefined;
+    });
+    const isInOriginTrash = getOldUid(
+        (el) => el.data.labelIds?.includes('TRASH') || el.data.labelIds?.includes('SPAM'),
+    );
+    const isInOriginInbox = getOldUid((el) => el.data.labelIds?.includes('INBOX'));
+    const isNotInOriginInbox = getOldUid((el) => !el.data.labelIds?.includes('INBOX'));
+
+    const uidsToDelete = msgResps.map(isInOriginTrash).filter((el) => el !== undefined);
+    const uidsToInbox = msgResps.map(isInOriginInbox).filter((el) => el !== undefined);
+    const uidsToRemoveInbox = msgResps.map(isNotInOriginInbox).filter((el) => el !== undefined);
+
+    // TODO: remove or hide deleted msgs
+
     // Do not insert drafts to Unigraph
-    newMsgResps = newMsgResps.filter((el) => !el.data.labelIds?.includes('DRAFT'));
+    const newMsgResps = msgResps
+        .filter((el, index) => results[index].length === 0)
+        .filter((el) => _.intersection(el.data.labelIds, ['DRAFT', 'TRASH', 'SPAM']).length === 0);
 
     if (newMsgResps.length) {
         await unigraph.runExecutable('$/executable/add-email', {
@@ -105,15 +124,26 @@ if (account?.uid) {
             messages: newMsgResps.map((el) => ({
                 message: Buffer.from(el.data.raw, 'base64').toString(),
                 read: !el.data.labelIds?.includes('UNREAD'),
+                inbox: el.data.labelIds?.includes('INBOX'),
             })),
         });
     }
-
-    const readMsgs = msgIdResps.map((el, index) =>
-        el.data.labelIds.includes('UNREAD') ? undefined : results[index]?.[0]?.uid,
-    );
+    console.log({
+        newMsgRespsLen: newMsgResps.length,
+        newMsgResps: newMsgResps.map((el) => el.data.labelIds),
+        uidsToRemoveInbox: uidsToRemoveInbox.length,
+        uidsToInbox: uidsToInbox.length,
+        uidsToDeleteLen: uidsToDelete.length,
+        uidsToDelete,
+    });
+    await unigraph.runExecutable('$/executable/add-item-to-list', {
+        where: '$/entity/inbox',
+        item: uidsToInbox,
+        // item: uidsToInbox.reverse(),
+    });
     await unigraph.runExecutable('$/executable/delete-item-from-list', {
         where: '$/entity/inbox',
-        item: readMsgs.filter((el) => el !== undefined),
+        item: [...uidsToRemoveInbox, ...uidsToDelete],
     });
+    uidsToDelete.forEach(unigraph.deleteObject);
 }

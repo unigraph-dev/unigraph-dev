@@ -1,3 +1,4 @@
+import { shouldMirrorEmailInbox } from '../../examples/email/EmailSettings';
 import { DynamicObjectListView } from '../ObjectView/DynamicObjectListView';
 
 /** Dependent on the specific definition of object!! */
@@ -21,7 +22,6 @@ export const ListObjectQuery = (uid: string) => `(func: uid(${uid})) {
     uid
     type { <unigraph.id> }
 }`;
-
 export function ListObjectView({ data, callbacks, ...attributes }: any) {
     const listValue = data?._value?.children;
 
@@ -49,8 +49,10 @@ export function ListObjectView({ data, callbacks, ...attributes }: any) {
                             // TODO: expand this into more general cases - e.g. over a hook
                             const emails = types.filter((el) => el.type === '$/schema/email_message');
                             if (emails.length) {
-                                window.unigraph.runExecutable('$/executable/set-emails-as-read', {
+                                window.unigraph.runExecutable('$/executable/modify-emails-labels', {
                                     uids: emails.map((el) => el.uid),
+                                    removeLabelIds: shouldMirrorEmailInbox() ? ['INBOX'] : ['UNREAD'],
+                                    addLabelIds: [],
                                 });
                             }
                         });
