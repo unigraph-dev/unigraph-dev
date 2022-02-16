@@ -26,23 +26,9 @@ import { hoverSx } from '../utils';
 const PREFIX = 'AppDrawer';
 
 const classes = {
-    drawer: `${PREFIX}-drawer`,
     drawerPaper: `${PREFIX}-drawerPaper`,
 };
 
-const StyledDrawer = styled(Drawer)(({ theme }) => ({
-    [`&.${classes.drawer}`]: {
-        width: '100%',
-        height: '100%',
-        overflow: 'auto',
-        flexShrink: 0,
-    },
-
-    [`& .${classes.drawerPaper}`]: {
-        width: '100%',
-        border: 'none',
-    },
-}));
 const appDrawerHoverSx = { cursor: 'pointer', ...hoverSx };
 export default function DrawerRouter() {
     const devState = window.unigraph.getState('settings/developerMode');
@@ -50,13 +36,18 @@ export default function DrawerRouter() {
     devState.subscribe((newState: boolean) => setDevMode(newState));
 
     return (
-        <StyledDrawer
-            className={classes.drawer}
+        <Drawer
             variant="permanent"
             classes={{
                 paper: classes.drawerPaper,
             }}
             anchor="left"
+            sx={{
+                width: '100%',
+                height: '100%',
+                overflow: 'auto',
+                flexShrink: 0,
+            }}
         >
             <List>
                 <ListSubheader component="div" id="subheader-home">
@@ -142,6 +133,6 @@ export default function DrawerRouter() {
                 </ListSubheader>
                 <FavoriteBar />
             </List>
-        </StyledDrawer>
+        </Drawer>
     );
 }
