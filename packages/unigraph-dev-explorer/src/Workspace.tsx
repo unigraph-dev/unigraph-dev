@@ -41,14 +41,6 @@ export function WorkspacePageComponent({ children, maximize, paddingTop, id, tab
     };
     const memoTabCtx = React.useMemo(() => tabCtx, [id]);
 
-    React.useEffect(() => {
-        console.log('WorkspacePageComponent.useEffect', {
-            id,
-            _maximize,
-            paddingTop,
-            padding: _maximize || !paddingTop ? '0px' : '12px',
-        });
-    }, [_maximize, paddingTop]);
     return (
         <TabContext.Provider value={memoTabCtx}>
             <div
