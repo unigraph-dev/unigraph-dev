@@ -605,6 +605,9 @@ export function DetailedNoteBlock({
     componentId,
     displayAs,
 }: any) {
+    const dataRef = React.useRef<any>(data);
+    dataRef.current = data;
+
     const onPointerUpHandler = React.useCallback(
         (
             ev,
@@ -651,11 +654,11 @@ export function DetailedNoteBlock({
                 style={{ display: isEditing ? 'none' : '' }}
                 options={{ inline: true, noDrag: true, noContextMenu: true, noClickthrough: true }}
                 callbacks={{
-                    'get-semantic-properties': () => data,
+                    'get-semantic-properties': () => dataRef.current,
                 }}
             />
         ),
-        [data, isChildren, callbacks.isEmbed],
+        [data.get('text')?._value?._value?.['_value.%'], isChildren, callbacks.isEmbed],
     );
 
     return (

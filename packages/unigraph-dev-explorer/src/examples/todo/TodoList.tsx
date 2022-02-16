@@ -50,10 +50,6 @@ function TodoListBody({ data }: { data: ATodoList[] }) {
 }
 
 export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline, isEmbed }) => {
-    // console.log(data);
-    const unpadded: ATodoList = unpad(data);
-    // console.log(unpadded)
-
     const NameDisplay = React.useMemo(
         () => (
             <AutoDynamicView
@@ -71,7 +67,7 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
     const SecondaryDisplay = React.useMemo(
         () => (
             <>
-                {!unpadded.children?.map
+                {!data?._value?.children?.['_value[']
                     ? []
                     : data?._value?.children?.['_value[']
                           ?.filter((it: any) => !it._key)
@@ -82,31 +78,42 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
                                   options={{ inline: true }}
                               />
                           ))}
-                {unpadded.priority > 0
-                    ? [<Chip size="small" icon={<PriorityHigh />} label={`Priority ${unpadded.priority}`} />]
-                    : []}
-                {unpadded.time_frame?.start?.datetime && new Date(unpadded.time_frame?.start?.datetime).getTime() !== 0
+                {data.get('priority')?.as('primitive') > 0
                     ? [
                           <Chip
                               size="small"
-                              icon={<CalendarToday />}
-                              label={`Start: ${Sugar.Date.relative(new Date(unpadded.time_frame?.start?.datetime))}`}
+                              icon={<PriorityHigh />}
+                              label={`Priority ${data.get('priority')?.as('primitive')}`}
                           />,
                       ]
                     : []}
-                {unpadded.time_frame?.end?.datetime &&
-                new Date(unpadded.time_frame?.start?.datetime).getTime() !== maxDateStamp
+                {data.get('time_frame/start/datetime')?.as('primitive') &&
+                new Date(data.get('time_frame/start/datetime')?.as('primitive')).getTime() !== 0
                     ? [
                           <Chip
                               size="small"
                               icon={<CalendarToday />}
-                              label={`End: ${Sugar.Date.relative(new Date(unpadded.time_frame?.end?.datetime))}`}
+                              label={`Start: ${Sugar.Date.relative(
+                                  new Date(data.get('time_frame/start/datetime')?.as('primitive')),
+                              )}`}
+                          />,
+                      ]
+                    : []}
+                {data.get('time_frame/end/datetime')?.as('primitive') &&
+                new Date(data.get('time_frame/end/datetime')?.as('primitive')).getTime() !== maxDateStamp
+                    ? [
+                          <Chip
+                              size="small"
+                              icon={<CalendarToday />}
+                              label={`End: ${Sugar.Date.relative(
+                                  new Date(data.get('time_frame/end/datetime')?.as('primitive')),
+                              )}`}
                           />,
                       ]
                     : []}
             </>
         ),
-        [unpadded, callbacks, data],
+        [callbacks, data],
     );
 
     const onPointerUp = React.useCallback(
