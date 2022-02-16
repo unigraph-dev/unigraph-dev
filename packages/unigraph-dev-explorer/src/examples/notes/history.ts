@@ -5,6 +5,7 @@ export type ChildrenChangeState = {
     subsId: any;
     uid: string;
     oldChildrenUid: string;
+    oldData?: any;
 };
 
 export type TextualChangeState = {
@@ -26,9 +27,29 @@ export const applyCommand = (history: HistoryState, redo?: boolean): HistoryStat
     const currentCommand = redo ? history.future.pop() : history.history.pop();
     const currentFuture: CommandState = [];
     if (currentCommand) {
-        currentCommand.forEach((change: ChangeState) => {
+        currentCommand.forEach((change: ChangeState, idx: number) => {
             if (change.type === 'children') {
-                return false;
+                const data = window.unigraph.getDataFromSubscription?.(change.subsId);
+                const [currentText] = findUid(data, change.uid);
+                currentFuture.push({
+                    type: 'children',
+                    subsId: change.subsId,
+                    uid: change.uid,
+                    oldChildrenUid: currentText?.children.uid,
+                });
+                window.unigraph.updateObject(
+                    change.uid,
+                    {
+                        children: {
+                            uid: change.oldChildrenUid,
+                        },
+                    },
+                    false,
+                    false,
+                    idx === currentCommand.length - 1 ? change.subsId : [],
+                    [],
+                );
+                return true;
             }
             if (change.type === 'textual') {
                 const data = window.unigraph.getDataFromSubscription?.(change.subsId);

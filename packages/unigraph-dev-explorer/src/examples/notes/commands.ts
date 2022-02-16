@@ -5,6 +5,7 @@ import { dfs, removeAllPropsFromObj } from '../../utils';
 import { parseTodoObject } from '../todo/parseTodoObject';
 import { NoteEditorContext } from './types';
 import { getParentsAndReferences } from '../../components/ObjectView/backlinksUtils';
+import { addCommand } from './history';
 
 export const focusUid = (obj: any, goingUp?: boolean, caret?: number) => {
     // console.log(document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]);
@@ -606,6 +607,7 @@ export const indentChildren = (data: any, context: NoteEditorContext, index: num
     } else if (!parent) {
         return;
     }
+    const undoCommand: any[] = [];
     let currSubentity = -1;
     let isDeleted = 0;
     let parIndex: number | undefined;
@@ -625,19 +627,57 @@ export const indentChildren = (data: any, context: NoteEditorContext, index: num
             }
             if (isDeleted > 0)
                 return {
-                    uid: el.uid,
                     _index: { '_value.#i': el._index['_value.#i'] - isDeleted },
+                    _key: el._key,
+                    _value: {
+                        uid: el._value.uid,
+                    },
                 };
-            return { uid: el.uid };
+            return {
+                _index: { uid: el._index?.uid, '_value.#i': el._index['_value.#i'] },
+                _key: el._key,
+                _value: {
+                    uid: el._value.uid,
+                },
+            };
         }
         if (isDeleted > 0)
             return {
-                uid: el.uid,
                 _index: { '_value.#i': el._index['_value.#i'] - isDeleted },
+                _key: el._key,
+                _value: {
+                    uid: el._value.uid,
+                },
             };
-        return { uid: el.uid };
+        return {
+            _index: { uid: el._index?.uid, '_value.#i': el._index['_value.#i'] },
+            _key: el._key,
+            _value: {
+                uid: el._value.uid,
+            },
+        };
+    });
+    undoCommand.push({
+        type: 'children',
+        uid: data?._value?.uid,
+        subsId: context.callbacks.subsId,
+        oldChildrenUid: data?._value?.children?.uid,
+        // oldData: data,
+        oldData: undefined,
     });
     if (parIndex !== undefined) {
+        const oldChildrenRefUid = children[parIndex]?._value?._value?._value.uid;
+        const oldChildrenUid = newChildren[parIndex]._value._value._value.children?.uid;
+        if (oldChildrenUid)
+            undoCommand.push({
+                type: 'children',
+                uid: oldChildrenRefUid,
+                subsId: context.callbacks.subsId,
+                oldChildrenUid,
+                // oldData: newChildren[parIndex]._value._value._value,
+                oldData: undefined,
+            });
+
         newChildren[parIndex] = {
             uid: newChildren[parIndex].uid,
             _value: {
@@ -647,7 +687,7 @@ export const indentChildren = (data: any, context: NoteEditorContext, index: num
                     _value: {
                         uid: newChildren[parIndex]._value._value._value.uid,
                         children: {
-                            uid: newChildren[parIndex]._value._value._value.children?.uid || undefined,
+                            uid: undefined,
                             '_value[': [
                                 ...(getSemanticChildren(newChildren[parIndex]._value._value)?.['_value['] || []).map(
                                     (el: any) => ({ uid: el?.uid }),
@@ -668,6 +708,7 @@ export const indentChildren = (data: any, context: NoteEditorContext, index: num
             },
         };
     }
+    addCommand(context.historyState.value, undoCommand);
     const finalChildren = newChildren.filter((el: any) => el !== undefined);
     window.unigraph.updateObject(
         data?._value?.uid,
@@ -714,6 +755,7 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
     let delUidChild = '';
     const recalcBacklinkUids: string[] = [];
     const recalcParents = [...parents.map((el) => el.uid)];
+    const undoCommand: any[] = [];
     const newChildren = children.reduce((prev: any[], curr: any) => {
         if (curr?._value?.type?.['unigraph.id'] === '$/schema/subentity' && ++currSubentity === parent) {
             recalcParents.push(curr._value._value.uid);
@@ -728,7 +770,10 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
                     index.includes(++currChildSubentity)
                 ) {
                     targetChild.push({
-                        uid: ccurr.uid,
+                        _key: ccurr._key,
+                        _value: {
+                            uid: ccurr._value.uid,
+                        },
                         _index: { '_value.#i': curr._index['_value.#i'] + targetChild.length + 1 },
                     });
                     delUidChild = ccurr.uid;
@@ -742,13 +787,25 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
                     return [
                         ...cprev,
                         {
-                            uid: ccurr.uid,
+                            _key: ccurr._key,
+                            _value: {
+                                uid: ccurr._value.uid,
+                            },
                             _index: {
                                 '_value.#i': ccurr._index['_value.#i'] - childIsCompleted,
                             },
                         },
                     ];
-                return [...cprev, { uid: ccurr.uid }];
+                return [
+                    ...cprev,
+                    {
+                        _index: { '_value.#i': ccurr._index['_value.#i'], uid: ccurr._index.uid },
+                        _key: ccurr._key,
+                        _value: {
+                            uid: ccurr._value.uid,
+                        },
+                    },
+                ];
             }, []);
             const newParent = {
                 uid: curr.uid,
@@ -765,6 +822,14 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
                     },
                 },
             };
+            undoCommand.push({
+                type: 'children',
+                uid: curr._value._value._value.uid,
+                subsId: context.callbacks.subsId,
+                oldChildrenUid: curr._value._value._value.children?.uid,
+                // oldData: newChildren[parIndex]._value._value._value,
+                oldData: undefined,
+            });
             delUidPar = curr._value._value._value.children.uid;
             return [...prev, newParent, ...targetChild];
         }
@@ -772,12 +837,33 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
             return [
                 ...prev,
                 {
-                    uid: curr.uid,
                     _index: { '_value.#i': curr._index['_value.#i'] + index.length },
+                    _key: curr._key,
+                    _value: {
+                        uid: curr._value.uid,
+                    },
                 },
             ];
-        return [...prev, { uid: curr.uid }];
+        return [
+            ...prev,
+            {
+                _index: { uid: curr._index?.uid, '_value.#i': curr._index['_value.#i'] },
+                _key: curr._key,
+                _value: {
+                    uid: curr._value.uid,
+                },
+            },
+        ];
     }, []);
+    undoCommand.push({
+        type: 'children',
+        uid: data._value.uid,
+        subsId: context.callbacks.subsId,
+        oldChildrenUid: data._value.children?.uid,
+        // oldData: newChildren[parIndex]._value._value._value,
+        oldData: undefined,
+    });
+    addCommand(context.historyState.value, undoCommand);
     await window.unigraph.updateObject(
         data?._value?.uid,
         { ...data._value, children: { _displayAs: data?._value?.children?._displayAs, '_value[': newChildren } },
