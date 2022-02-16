@@ -89,6 +89,7 @@ export const Runner = ({ uid }: any) => {
         </div>
     );
 };
+const codeEditorHoverSx = { cursor: 'pointer', ...hoverSx };
 
 export function CodeEditor({ id }: any) {
     const [execcontent, setexecContent]: any = React.useState([]);
@@ -163,7 +164,7 @@ export function CodeEditor({ id }: any) {
                                 onClick={() => {
                                     setIsUserCollapseOpen(!isUserCollapseOpen);
                                 }}
-                                style={{ cursor: 'pointer' }}
+                                style={codeEditorHoverSx}
                             >
                                 <ListItemText primary="User code" />
                                 {isUserCollapseOpen ? <ExpandLess /> : <ExpandMore />}
@@ -172,7 +173,7 @@ export function CodeEditor({ id }: any) {
                                 <NewUserCode />
                                 <List style={{ overflow: 'auto' }}>
                                     {userExecContent.map((it: any) => (
-                                        <ListItem sx={hoverSx} key={it.uid} selected={currentUid === it.uid}>
+                                        <ListItem sx={codeEditorHoverSx} key={it.uid} selected={currentUid === it.uid}>
                                             <AutoDynamicView
                                                 object={it}
                                                 onClick={() => {
@@ -192,7 +193,7 @@ export function CodeEditor({ id }: any) {
                                         }}
                                         sx={{
                                             ...(currentPackage === el ? { backgroundColor: 'action.selected' } : {}),
-                                            ...hoverSx,
+                                            ...codeEditorHoverSx,
                                         }}
                                     >
                                         <ListItemText primary={el} />
@@ -204,7 +205,7 @@ export function CodeEditor({ id }: any) {
                                                 .filter((it: any) => it['unigraph.id']?.startsWith(el))
                                                 .map((it: any) => (
                                                     <ListItem
-                                                        sx={hoverSx}
+                                                        sx={codeEditorHoverSx}
                                                         key={it.uid}
                                                         selected={currentUid === it.uid}
                                                     >

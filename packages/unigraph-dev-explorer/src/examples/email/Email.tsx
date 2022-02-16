@@ -1,16 +1,17 @@
 import { Avatar, ListItem as div, ListItemAvatar, ListItemText } from '@mui/material';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { pkg as emailPackage } from 'unigraph-dev-common/lib/data/unigraph.email.pkg';
 import { byUpdatedAt, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import Sugar from 'sugar';
 import { Link } from '@mui/icons-material';
 import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { DynamicViewRenderer } from '../../global.d';
-import { getComponentFromPage } from '../../utils';
+import { getComponentFromPage, getOrInitLocalStorage } from '../../utils';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
 import { registerDetailedDynamicViews, registerDynamicViews, withUnigraphSubscription } from '../../unigraph-react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { AutoDynamicViewDetailed } from '../../components/ObjectView/AutoDynamicViewDetailed';
+import { shouldMirrorEmailInbox } from './EmailSettings';
 
 type AEmail = {
     name: string;
@@ -31,6 +32,15 @@ const EmailListBody: React.FC<{ data: any[] }> = ({ data }) => (
 );
 
 const EmailMessageDetailed: DynamicViewRenderer = ({ data, callbacks }) => {
+    useEffect(() => {
+        if (shouldMirrorEmailInbox()) {
+            window.unigraph.runExecutable('$/executable/modify-emails-labels', {
+                uids: [data.uid],
+                removeLabelIds: ['UNREAD'],
+                addLabelIds: [],
+            });
+        }
+    }, []);
     return (
         <AutoDynamicViewDetailed
             callbacks={{ ...callbacks, context: data }}
@@ -89,7 +99,44 @@ const EmailMessage: DynamicViewRenderer = ({ data, callbacks }) => {
     );
 };
 
+const coupleStateAndLocalStorageObj = (
+    stateName: string,
+    localStorageAreaName: string,
+    localStorageName: string,
+    defaultVal: any,
+) => {
+    // TODO: abstract this better. explorer/src/init.ts uses this pattern too
+    // localStorageAreaName is the name of an JSON object in localStorage,
+    // localStorageName is an attribute of that object
+    const state = window.unigraph.addState(stateName, defaultVal);
+    state.subscribe((val: boolean) => {
+        window.localStorage.setItem(
+            localStorageAreaName,
+            JSON.stringify({
+                ...JSON.parse(window.localStorage.getItem(localStorageAreaName)!),
+                [localStorageName]: val,
+            }),
+        );
+    });
+};
+
+const defaultEmailSettings = { mirrorEmailInbox: true, removeEmailOnRead: false };
 export const init = () => {
+    const emailSettings = getOrInitLocalStorage('emailSettings', defaultEmailSettings);
+
+    coupleStateAndLocalStorageObj(
+        'settings/email/mirrorEmailInbox',
+        'emailSettings',
+        'mirrorEmailInbox',
+        emailSettings.mirrorEmailInbox ?? true,
+    );
+    coupleStateAndLocalStorageObj(
+        'settings/email/removeEmailOnRead',
+        'emailSettings',
+        'removeEmailOnRead',
+        emailSettings.removeEmailOnRead ?? false,
+    );
+
     registerDynamicViews({ '$/schema/email_message': EmailMessage });
     registerDetailedDynamicViews({
         '$/schema/email_message': EmailMessageDetailed,

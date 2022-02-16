@@ -57,9 +57,10 @@ const results = dontCheckUnique
       ]);
 
 const readMask = [];
+const inboxMask = [];
 const toAdd = [];
 
-const inbox_els = [];
+const inboxEls = [];
 let count = 0;
 
 for (let i = 0; i < dest.length; ++i) {
@@ -67,6 +68,7 @@ for (let i = 0; i < dest.length; ++i) {
         count++;
         toAdd.push(dest[i]);
         readMask.push(msgs[i]?.read);
+        inboxMask.push(msgs[i]?.inbox);
     }
 }
 
@@ -92,21 +94,24 @@ for (let i = 0; i < toAddChunks.length; i += 1) {
         console.log(e);
     }
 }
-
+console.log('addEmailMessage');
+const mirrorEmailInbox = unigraph.getState('settings/email/mirrorEmailInbox').value;
 uids.forEach((el, index) => {
-    if (!readMask[index] && el) inbox_els.push(el);
+    // if (!readMask[index] && el) inboxEls.push(el);
+    const shouldPushEl = (mirrorEmailInbox ? inboxMask[index] : !readMask[index]) && el;
+    if (shouldPushEl) inboxEls.push(el);
 });
 
 await unigraph.runExecutable('$/executable/add-item-to-list', {
     where: '$/entity/inbox',
-    item: inbox_els.reverse(),
+    item: inboxEls.reverse(),
 });
 setTimeout(
     () =>
         unigraph.addNotification({
             name: 'Inboxes synced',
             from: 'unigraph.email',
-            content: `Added ${count} emails (${inbox_els.length} unread).`,
+            content: `Added ${count} emails (${inboxEls.length} unread).`,
             actions: [],
         }),
     1000,
