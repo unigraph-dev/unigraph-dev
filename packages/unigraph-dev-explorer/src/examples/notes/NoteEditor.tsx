@@ -204,6 +204,8 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                             dataRef.current['unigraph.origin'] || [],
                         )[0].map((el: any) => ({ uid: el.uid }));
                         if (!dataRef.current._hide) parents.push({ uid: dataRef.current.uid });
+                        if (locateInlineChildren(dataRef.current).uid !== dataRef.current.uid)
+                            parents.push({ uid: locateInlineChildren(dataRef.current).uid });
                         const newStr = `${newContent?.slice?.(0, match.index)}[[${newName}]]${newContent?.slice?.(
                             match.index + match[0].length,
                         )}`;
