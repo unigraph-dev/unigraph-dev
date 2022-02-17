@@ -172,14 +172,14 @@ export function OutlineComponent({
             }}
         >
             <div
-                style={{ position: 'absolute', left: '-4px' }}
+                style={{ position: 'absolute', left: '-4px', cursor: 'pointer' }}
                 className="showOnHover"
                 onClick={() => setCollapsed(!collapsed)}
             >
                 O
             </div>
             <div
-                style={{ position: 'absolute', left: '-4px', top: '8px' }}
+                style={{ position: 'absolute', left: '-4px', top: '10px', cursor: 'pointer' }}
                 className="showOnHover"
                 onClick={() => createBelow()}
             >
