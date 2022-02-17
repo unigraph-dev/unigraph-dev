@@ -32,7 +32,7 @@ export function Inbox() {
                 _stub: true,
                 type: { 'unigraph.id': '$/schema/list' },
             }}
-            attributes={{ removeOnEnter: removeEmailOnRead }}
+            attributes={{ removeOnEnter: removeEmailOnRead, reverse: true }}
             onLoad={onUpdate}
         />
     );
