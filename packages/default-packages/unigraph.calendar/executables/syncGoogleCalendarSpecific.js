@@ -8,6 +8,7 @@ const inspect = _.curry((msg, x) => {
     return x;
 });
 
+const INFINITE_RECURRENCE_YEAR_CEILING = 10;
 const patchInfiniteRecurrence = (rrule) => {
     // split by "\n", find line with "FREQ=", if no "UNTIL=", split by ";", find segment with "FREQ=" and add UNTIL 25 years from now, join back
     const lines = rrule.split('\n');
@@ -17,7 +18,7 @@ const patchInfiniteRecurrence = (rrule) => {
         const segment = lines[freqIndex].split(';');
         const untilSegment = segment.find((seg) => seg.includes('FREQ='));
         const until = new Date();
-        until.setFullYear(until.getFullYear() + 10);
+        until.setFullYear(until.getFullYear() + INFINITE_RECURRENCE_YEAR_CEILING);
         const newUntilSegment = `UNTIL=${new Sugar.Date(until).format('{yyyy}{MM}{dd}T{HH}{mm}{ss}Z').raw}`;
         segment[segment.indexOf(untilSegment)] = newUntilSegment;
         lines[freqIndex] = segment.join(';');
