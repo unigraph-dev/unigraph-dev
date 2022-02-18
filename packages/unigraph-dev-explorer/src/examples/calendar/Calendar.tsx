@@ -156,8 +156,8 @@ const queryDatedWithinTimeRange = (start: string, end: string) => {
 const todoToBigCalendarEvent = (datedObj: TodoUni): CalendarViewEvent => {
     return {
         title: datedObj.get('name').as('primitive'),
-        start: new Date(datedObj.get('time_frame/start/datetime').as('primitive')),
-        end: new Date(datedObj.get('time_frame/end/datetime').as('primitive')),
+        start: getDateAsUTC(datedObj.get('time_frame/start/datetime').as('primitive')),
+        end: getDateAsUTC(datedObj.get('time_frame/end/datetime').as('primitive')),
         allDay: true,
         unigraphObj: datedObj,
     };
@@ -174,10 +174,12 @@ const journalToBigCalendarEvent = (datedObj: JournalUni): CalendarViewEvent => {
 };
 
 const calendarEventToBigCalendarEvent = (datedObj: CalendarEventUni): CalendarViewEvent => {
+    const allDay = datedObj.get('time_frame/start/all_day');
     return {
         title: datedObj.get('name').as('primitive'),
-        start: new Date(datedObj.get('time_frame/start/datetime').as('primitive')),
-        end: new Date(datedObj.get('time_frame/end/datetime').as('primitive')),
+        start: getDateAsUTC(datedObj.get('time_frame/start/datetime').as('primitive')),
+        end: getDateAsUTC(datedObj.get('time_frame/end/datetime').as('primitive')),
+        allDay: allDay ? allDay.as('primitive') : false,
         unigraphObj: datedObj,
     };
 };
@@ -201,8 +203,9 @@ const recurrentCalendarEventToBigCalendarEventsInRange = curry(
                 .map((timeframe: any) => {
                     return {
                         title: datedObj.get('name').as('primitive'),
-                        start: new Date(timeframe.get('start/datetime').as('primitive')),
-                        end: new Date(timeframe.get('end/datetime').as('primitive')),
+                        start: getDateAsUTC(timeframe.get('start/datetime').as('primitive')),
+                        end: getDateAsUTC(timeframe.get('end/datetime').as('primitive')),
+                        allDay: datedObj.get('time_frame/start/all_day').as('primitive'),
                         unigraphObj: datedObj,
                     };
                 });
@@ -210,8 +213,6 @@ const recurrentCalendarEventToBigCalendarEventsInRange = curry(
         return [calendarEventToBigCalendarEvent(datedObj)];
     },
 );
-
-// const recurrentCalendarEventToBigCalendarEvents = recurrentCalendarEventToBigCalendarEventsInRange(null);
 
 const wrapInArray = (obj: any) => {
     if (obj) {
@@ -231,8 +232,6 @@ const datedToBigCalendarEventsInRange = curry(
         return bigCalendarEventsByType[datedObj.getType()](datedObj);
     },
 );
-
-// const datedToBigCalendarEvents = datedToBigCalendarEventsInRange(null);
 
 const unigraphBigCalendarEventComponent = ({ event, ...props }: any) => {
     return (
@@ -269,14 +268,10 @@ export function Calendar() {
     const addToCurrentEvents = React.useCallback(
         (newEvents: CalendarViewEvent[]) => {
             const updatedCurrentEvents = unionWith(compareCalendarViewEvents, newEvents, currentEvents);
-            // console.log('updatedCurrentEvents', {
-            //     updatedCurrentEventsLen: updatedCurrentEvents.length,
-            //     newEventsLen: newEvents.length,
-            //     currentEventsLen: currentEvents.length,
-            //     newEvents,
-            //     currentEvents,
-            //     updatedCurrentEvents,
-            // });
+            console.log('updatedCurrentEvents', {
+                newEvents,
+                updatedCurrentEvents,
+            });
             setCurrentEvents(updatedCurrentEvents);
         },
 
