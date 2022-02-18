@@ -557,7 +557,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                                 selectUid(componentId, false);
                                 callbacks['focus-last-dfs-node'](dataRef.current, editorContext, true, caret);
                             }
-                        } else if ((newCaret || 0) >= (getCurrentText().trim()?.length || 0)) {
+                        } else if (newCaret === 0) {
                             callbacks['focus-last-dfs-node'](dataRef.current, editorContext, true, caret);
                         }
                         setTimeout(() => {
