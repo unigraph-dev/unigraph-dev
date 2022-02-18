@@ -12,9 +12,10 @@ import { getDateAsUTC, TabContext } from '../../utils';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { CalendarViewEvent, TodoUni, CalendarEventUni, JournalUni, DatedObject } from './calendar-types';
+import { getMaxDate, getMinDate } from '../todo/utils';
 
-export function CalendarEvent({ data, callbacks, inline }: any) {
-    const CalendarColor = (
+const CalendarColor = ({ data, inline }: any) => {
+    return (
         <div style={{ alignSelf: 'center', marginRight: inline ? '8px' : '16px' }}>
             <Avatar
                 style={{
@@ -27,84 +28,84 @@ export function CalendarEvent({ data, callbacks, inline }: any) {
             </Avatar>
         </div>
     );
-    //
-    const renderInline = () => {
-        return (
-            <div style={{ display: 'flex' }}>
-                <div>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                        {CalendarColor}
-                        <Typography variant="body1" style={{ marginRight: '8px' }}>
-                            {data.get('name').as('primitive')}
-                        </Typography>
-                        <Typography variant="body2" style={{ color: 'gray' }}>
-                            {data.get('location').as('primitive')}
-                        </Typography>
-                    </div>
-                    <div
-                        style={{
-                            display: data?._value?.children?.['_value[']?.map ? '' : 'none',
-                            marginTop: '0px',
-                        }}
-                    >
-                        {data?._value?.children?.['_value[']?.map
-                            ? data._value.children['_value['].map((it: any) => (
-                                  <AutoDynamicView
-                                      object={new UnigraphObject(it._value)}
-                                      callbacks={callbacks}
-                                      options={{ inline: true }}
-                                      style={{ verticalAlign: 'middle' }}
-                                  />
-                              ))
-                            : []}
-                    </div>
+};
+
+const CalendarEventBig = ({ data, callbacks }: any) => {
+    return (
+        <div style={{ display: 'flex' }}>
+            {CalendarColor({ data, callbacks })}
+            <div>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <Typography variant="body1" style={{ marginRight: '8px' }}>
+                        <strong>{data.get('name').as('primitive')}</strong>
+                    </Typography>
+                    <Typography variant="body2" style={{ color: 'gray' }}>
+                        {data.get('location').as('primitive')}
+                    </Typography>
+                </div>
+                <AutoDynamicView
+                    object={new UnigraphObject(data.get('time_frame')._value)}
+                    callbacks={callbacks}
+                    options={{ noDrag: true, noDrop: true, noContextMenu: true, inline: true }}
+                />
+                <div
+                    style={{
+                        display: data?._value?.children?.['_value[']?.map ? '' : 'none',
+                        marginTop: '4px',
+                    }}
+                >
+                    {data?._value?.children?.['_value[']?.map
+                        ? data._value.children['_value['].map((it: any) => (
+                              <AutoDynamicView
+                                  object={new UnigraphObject(it._value)}
+                                  callbacks={callbacks}
+                                  options={{ inline: true }}
+                                  style={{ verticalAlign: 'middle' }}
+                              />
+                          ))
+                        : []}
                 </div>
             </div>
-        );
-    };
-
-    const render = () => {
-        return (
-            <div style={{ display: 'flex' }}>
-                {CalendarColor}
-                <div>
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <Typography variant="body1" style={{ marginRight: '8px' }}>
-                            <strong>{data.get('name').as('primitive')}</strong>
-                        </Typography>
-                        <Typography variant="body2" style={{ color: 'gray' }}>
-                            {data.get('location').as('primitive')}
-                        </Typography>
-                    </div>
-                    <AutoDynamicView
-                        object={new UnigraphObject(data.get('time_frame')._value)}
-                        callbacks={callbacks}
-                        options={{ noDrag: true, noDrop: true, noContextMenu: true, inline: true }}
-                    />
-                    <div
-                        style={{
-                            display: data?._value?.children?.['_value[']?.map ? '' : 'none',
-                            marginTop: '4px',
-                        }}
-                    >
-                        {data?._value?.children?.['_value[']?.map
-                            ? data._value.children['_value['].map((it: any) => (
-                                  <AutoDynamicView
-                                      object={new UnigraphObject(it._value)}
-                                      callbacks={callbacks}
-                                      options={{ inline: true }}
-                                      style={{ verticalAlign: 'middle' }}
-                                  />
-                              ))
-                            : []}
-                    </div>
+        </div>
+    );
+};
+const CalendarEventInline = ({ data, callbacks }: any) => {
+    return (
+        <div style={{ display: 'flex' }}>
+            <div>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    {CalendarColor({ data, callbacks })}
+                    <Typography variant="body1" style={{ marginRight: '8px' }}>
+                        {data.get('name').as('primitive')}
+                    </Typography>
+                    <Typography variant="body2" style={{ color: 'gray' }}>
+                        {data.get('location').as('primitive')}
+                    </Typography>
+                </div>
+                <div
+                    style={{
+                        display: data?._value?.children?.['_value[']?.map ? '' : 'none',
+                        marginTop: '0px',
+                    }}
+                >
+                    {data?._value?.children?.['_value[']?.map
+                        ? data._value.children['_value['].map((it: any) => (
+                              <AutoDynamicView
+                                  object={new UnigraphObject(it._value)}
+                                  callbacks={callbacks}
+                                  options={{ inline: true }}
+                                  style={{ verticalAlign: 'middle' }}
+                              />
+                          ))
+                        : []}
                 </div>
             </div>
-        );
-    };
-
-    return inline ? renderInline() : render();
-}
+        </div>
+    );
+};
+export const CalendarEvent = ({ data, callbacks, inline }: any) => {
+    return inline ? CalendarEventInline({ data, callbacks }) : CalendarEventBig({ data, callbacks });
+};
 
 export function TimeFrame({ data, callbacks }: any) {
     return (
@@ -154,10 +155,12 @@ const queryDatedWithinTimeRange = (start: string, end: string) => {
 };
 
 const todoToBigCalendarEvent = (datedObj: TodoUni): CalendarViewEvent => {
+    const start = datedObj.get('time_frame/start/datetime').as('primitive');
+    const end = datedObj.get('time_frame/end/datetime').as('primitive');
     return {
         title: datedObj.get('name').as('primitive'),
-        start: getDateAsUTC(datedObj.get('time_frame/start/datetime').as('primitive')),
-        end: getDateAsUTC(datedObj.get('time_frame/end/datetime').as('primitive')),
+        start: getDateAsUTC(new Date(start).toString() !== getMinDate().toString() ? start : end),
+        end: getDateAsUTC(new Date(end).toString() !== getMaxDate().toString() ? end : start),
         allDay: true,
         unigraphObj: datedObj,
     };
@@ -239,6 +242,8 @@ const unigraphBigCalendarEventComponent = ({ event, ...props }: any) => {
             object={new UnigraphObject(event.unigraphObj)}
             options={{ inline: true }}
             callbacks={{ noDate: true, isEmbed: true }}
+            // components={{ '$/schema/calendar_event': { view: CalendarEventInCalendar as any } }}
+            style={{ transform: 'scale(0.8)', transformOrigin: 'left' }}
         />
     );
 };
@@ -335,7 +340,8 @@ export function Calendar() {
                 scrollToTime={new Date(1970, 1, 1, 7, 0, 0)}
                 components={{ event: unigraphBigCalendarEventComponent }}
                 eventPropGetter={(event: any, start: stringOrDate, end: stringOrDate, isSelected: boolean) => ({
-                    style: { backgroundColor: '#fff', color: 'black', border: '1px', borderColor: 'black' },
+                    // style: { backgroundColor: '#f8f8f8', color: 'black', border: '1px', borderColor: 'black' },
+                    style: { backgroundColor: '#f8f8f8', color: 'black', border: '5px', borderColor: 'black' },
                 })}
                 defaultView={currentView}
                 onRangeChange={onRangeChange}
