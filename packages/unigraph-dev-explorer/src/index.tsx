@@ -1,3 +1,4 @@
+/* eslint-disable global-require */
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
@@ -9,6 +10,17 @@ import App from './App';
 import { WorkSpace } from './Workspace';
 import { DynamicComponentView, getComponentAsView } from './components/ObjectView/DynamicComponentView';
 import { getComponentFromExecutable, registerDetailedDynamicViews, registerDynamicViews } from './unigraph-react';
+
+if (window.localStorage.getItem('debug-performance') === 'true') {
+    console.log('a');
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const whyDidYouRender = require('@welldone-software/why-did-you-render');
+    whyDidYouRender(React, {
+        trackAllPureComponents: true,
+        logOnDifferentValues: true,
+        include: [/.*Note.*/, /.*View.*/, /noop/],
+    });
+}
 
 function render(component: any) {
     ReactDOM.render(<React.StrictMode>{component}</React.StrictMode>, document.getElementById('root'));

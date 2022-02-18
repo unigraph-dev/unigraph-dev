@@ -104,6 +104,24 @@ function AdderComponent({ input, setInput, open, setClose, callback, summonerToo
                             )
                             .then((uids: any[]) => {
                                 if (callback && uids[0]) callback(uids[0]);
+                                return uids;
+                            })
+                            .then((uids: any[]) => {
+                                // TODO this callback should be abstracted into a registered hook for the adder
+                                // TODO get these keys some other way bc they might change
+                                const keysToInbox = ['bookmark', 'bm', 'todo', 'td', 'note', 'n'];
+                                if (keysToInbox.includes(parsedKey)) {
+                                    window.unigraph.runExecutable(
+                                        '$/executable/add-item-to-list',
+                                        {
+                                            where: '$/entity/inbox',
+                                            item: uids,
+                                        },
+                                        undefined,
+                                        undefined,
+                                        true,
+                                    );
+                                }
                             });
                         setInput('');
                         setClose();

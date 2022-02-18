@@ -39,7 +39,6 @@ export const useFocusDelegate = (uid: string, componentId: string) => {
 };
 
 export const useSelectionDelegate = (uid: string, componentId: string) => {
-    const tabContext = React.useContext(TabContext);
     const [isSelected, setIsSelected] = React.useState(false);
 
     React.useEffect(() => {
@@ -52,7 +51,7 @@ export const useSelectionDelegate = (uid: string, componentId: string) => {
         return function cleanup() {
             window.unigraph.getState('global/selected').unsubscribe(cbsel);
         };
-    }, [componentId, tabContext, uid]);
+    }, [componentId, uid]);
 
     return [isSelected, () => false];
 };

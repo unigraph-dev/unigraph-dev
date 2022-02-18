@@ -82,6 +82,8 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
     setCommand: any,
 ) => {
     const tabContext = React.useContext(TabContext);
+    const dataRef = React.useRef<any>(data);
+    dataRef.current = data;
 
     const inputterRef = React.useRef<any>();
     inputterRef.current = (text: string) => {
@@ -131,7 +133,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
         }
 
         if (!edited.current) fulfillCaretPostRender();
-    }, [data, pullText, isEditing, fulfillCaretPostRender, focused]);
+    }, [pullText(), isEditing, fulfillCaretPostRender, focused]);
 
     React.useEffect(() => {
         // set caret when focus changes
@@ -197,20 +199,23 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                     textInputRef,
                     caret,
                     async (match: any, newName: string, newUid: string) => {
-                        const parents = getParentsAndReferences(data['~_value'], data['unigraph.origin'] || [])[0].map(
-                            (el: any) => ({ uid: el.uid }),
-                        );
-                        if (!data._hide) parents.push({ uid: data.uid });
+                        const parents = getParentsAndReferences(
+                            dataRef.current['~_value'],
+                            dataRef.current['unigraph.origin'] || [],
+                        )[0].map((el: any) => ({ uid: el.uid }));
+                        if (!dataRef.current._hide) parents.push({ uid: dataRef.current.uid });
+                        if (locateInlineChildren(dataRef.current).uid !== dataRef.current.uid)
+                            parents.push({ uid: locateInlineChildren(dataRef.current).uid });
                         const newStr = `${newContent?.slice?.(0, match.index)}[[${newName}]]${newContent?.slice?.(
                             match.index + match[0].length,
                         )}`;
-                        const semChildren = data?._value;
+                        const semChildren = dataRef.current?._value;
                         setCurrentText(newStr);
                         edited.current = true;
                         // resetEdited();
                         setCaret(document, textInputRef.current, match.index + newName.length + 4);
                         await window.unigraph.updateObject(
-                            locateInlineChildren(data).uid,
+                            locateInlineChildren(dataRef.current).uid,
                             {
                                 _value: {
                                     children: {
@@ -254,11 +259,11 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                             callbacks['replace-child-with-uid'](newUid);
                             setTimeout(() => {
                                 // callbacks['add-child']();
-                                permanentlyDeleteBlock(data);
+                                permanentlyDeleteBlock(dataRef.current);
                             }, 500);
                         }
                         window.unigraph.getState('global/searchPopup').setValue({ show: false });
-                        callbacks['focus-next-dfs-node'](data, editorContext, 0);
+                        callbacks['focus-next-dfs-node'](dataRef.current, editorContext, 0);
                     },
                     false,
                     matchOnly,
@@ -267,7 +272,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                 window.unigraph.getState('global/searchPopup').setValue({ show: false });
             }
         },
-        [callbacks, componentId, data, data.uid, data?._value?.children?.uid, editorContext, resetEdited],
+        [callbacks, componentId, editorContext, resetEdited],
     );
 
     const onBlur = React.useCallback(() => {
@@ -292,7 +297,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                 inputDebounced.current(ev.target.value);
             }
         },
-        [checkReferences, data, pullText],
+        [checkReferences, pullText()],
     );
 
     const pasteLinkIntoSelection = React.useCallback((url: string) => {
@@ -498,7 +503,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                     if (caret === 0) {
                         ev.preventDefault();
                         inputDebounced.current.flush();
-                        callbacks['focus-last-dfs-node'](data, editorContext, true, -1);
+                        callbacks['focus-last-dfs-node'](dataRef.current, editorContext, true, -1);
                     }
                     break;
 
@@ -506,7 +511,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                     if (caret === getCurrentText().length) {
                         ev.preventDefault();
                         inputDebounced.current.flush();
-                        callbacks['focus-next-dfs-node'](data, editorContext, false, 0);
+                        callbacks['focus-next-dfs-node'](dataRef.current, editorContext, false, 0);
                     }
                     break;
 
@@ -519,7 +524,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                             if (ev.shiftKey) {
                                 selectUid(componentId, false);
                             }
-                            callbacks['focus-last-dfs-node'](data, editorContext, true, caret);
+                            callbacks['focus-last-dfs-node'](dataRef.current, editorContext, true, caret);
                         }
                         setTimeout(() => {
                             textInputRef.current.style['caret-color'] = '';
@@ -539,7 +544,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
 
                             // when going from a line above, to a line below, the caret is at the end of the line
                             const caretInLine = caretFromLastLine(getCurrentText(), caret);
-                            callbacks['focus-next-dfs-node'](data, editorContext, false, caretInLine);
+                            callbacks['focus-next-dfs-node'](dataRef.current, editorContext, false, caretInLine);
                         }
                         setTimeout(() => {
                             textInputRef.current.style['caret-color'] = '';
@@ -572,7 +577,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                     break;
             }
         },
-        [callbacks, componentId, data, editorContext, handleOpenScopedChar, pullText],
+        [callbacks, componentId, editorContext, handleOpenScopedChar, pullText],
     );
 
     return [

@@ -33,8 +33,8 @@ export const setupInfiniteScrolling = (
         if (updating || subsHead < chunksHead) {
             if (updating) {
                 states.currentSubs = _.uniq([
-                    ...states.currentSubs.filter((el) => uids.includes(el)),
                     ...(states.chunks[0] || []),
+                    ...states.currentSubs.filter((el) => uids.includes(el)),
                 ]);
             } else {
                 const toSub = states.chunks[subsHead];
