@@ -13,7 +13,7 @@ export function TrashView() {
     React.useEffect(() => {
         const subsId = getRandomInt();
         tabContext.subscribeToQuery(
-            '(func: type(Deleted)) {uid type { <unigraph.id> } }',
+            '(func: type(Deleted)) {uid type { <unigraph.id> } _hide }',
             (res: any[]) => {
                 setTotalDeleted(buildGraph(res));
             },
@@ -33,7 +33,6 @@ export function TrashView() {
                 window.unigraph.deleteObject(uids, true);
             }}
             compact
-            defaultFilter={[]}
             context={{ uid: 'Trash' }}
         />
     );
