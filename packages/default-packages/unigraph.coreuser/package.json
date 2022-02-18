@@ -37,6 +37,10 @@
                 "src": "entities/inbox.json"
             },
             {
+                "id": "feeds",
+                "src": "entities/feeds.json"
+            },
+            {
                 "id": "domains",
                 "src": "entities/domains.json"
             },

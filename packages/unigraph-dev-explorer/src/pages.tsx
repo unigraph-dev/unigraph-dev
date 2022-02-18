@@ -33,6 +33,7 @@ import { BacklinkView } from './components/ObjectView/BacklinkView';
 import ExplorerDashboard from './pages/ExplorerDashboard';
 import { SearchOverlayPopover } from './pages/SearchOverlay';
 import { SubscriptionsView } from './pages/SubscriptionsView';
+import { Feeds } from './components/UnigraphFeeds/Feeds';
 
 const pages: Record<string, any> = {
     'datamodel-playground': {
@@ -121,6 +122,10 @@ const pages: Record<string, any> = {
     inbox: {
         constructor: (props: any) => <Inbox {...props} />,
         name: 'Inbox',
+    },
+    feeds: {
+        constructor: (props: any) => <Feeds {...props} />,
+        name: 'Feeds',
     },
     'object-editor': {
         constructor: (props: any) => <ObjectEditor {...props} />,
