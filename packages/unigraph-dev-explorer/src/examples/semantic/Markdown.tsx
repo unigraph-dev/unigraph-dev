@@ -19,6 +19,15 @@ export function htmlToMarkdown(html: string) {
     return turndown.turndown(html);
 }
 
+const getTextNodes = (root: any) => {
+    const children: any[] = [];
+    root.children.forEach((el: any) => {
+        if (el.children) children.push(...getTextNodes(el));
+        else if (el.type === 'text') children.push(el);
+    });
+    return children;
+};
+
 const compFactory = (name: string, { node, inline, className, children, ...props }: any) =>
     // eslint-disable-next-line react/no-children-prop
     React.createElement(name, {
@@ -27,11 +36,11 @@ const compFactory = (name: string, { node, inline, className, children, ...props
         contentEditable: true,
         suppressContentEditableWarning: true,
         onPointerUp: (event: PointerEvent) => {
+            const currentText = (window.getSelection() as any).anchorNode?.textContent;
+            const currentNode = getTextNodes(node).filter((el: any) => el.value === currentText)[0];
+            const currentPos = currentNode?.position?.start?.offset || 0;
             if (!(event.target as HTMLElement).getAttribute('markdownPos')) {
-                (event.target as HTMLElement).setAttribute(
-                    'markdownPos',
-                    String((props.sourcePosition?.start.column || 0) - 1 + (getCaret(event) || 0)),
-                );
+                (event.target as HTMLElement).setAttribute('markdownPos', String(currentPos + getCaret(event)));
             }
         },
         ...props,
