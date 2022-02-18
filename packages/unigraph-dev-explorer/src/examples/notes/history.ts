@@ -8,6 +8,15 @@ export type ChildrenChangeState = {
     oldData?: any;
 };
 
+export type PredicateChangeState = {
+    type: 'predicate';
+    subsId: any;
+    uid: string;
+    predicate: string;
+    oldValue: any;
+    oldData?: any;
+};
+
 export type TextualChangeState = {
     type: 'textual';
     subsId: any;
@@ -15,7 +24,7 @@ export type TextualChangeState = {
     oldText: string;
 };
 
-export type ChangeState = ChildrenChangeState | TextualChangeState;
+export type ChangeState = ChildrenChangeState | TextualChangeState | PredicateChangeState;
 export type CommandState = ChangeState[];
 
 export type HistoryState = {
@@ -43,6 +52,28 @@ export const applyCommand = (history: HistoryState, redo?: boolean): HistoryStat
                         children: {
                             uid: change.oldChildrenUid,
                         },
+                    },
+                    false,
+                    false,
+                    idx === currentCommand.length - 1 ? change.subsId : [],
+                    [],
+                );
+                return true;
+            }
+            if (change.type === 'predicate') {
+                const data = window.unigraph.getDataFromSubscription?.(change.subsId);
+                const [currentText] = findUid(data, change.uid);
+                currentFuture.push({
+                    type: 'predicate',
+                    subsId: change.subsId,
+                    uid: change.uid,
+                    predicate: change.predicate,
+                    oldValue: currentText?.[change.predicate],
+                });
+                window.unigraph.updateObject(
+                    change.uid,
+                    {
+                        [change.predicate]: change.oldValue,
                     },
                     false,
                     false,

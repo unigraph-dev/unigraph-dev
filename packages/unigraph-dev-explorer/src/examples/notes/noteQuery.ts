@@ -1,6 +1,6 @@
 const MAX_DEPTH = 8;
 const getQuery: (depth: number) => string = (depth: number) => {
-    if (depth >= MAX_DEPTH) return '{ uid _hide type {<unigraph.id>} }';
+    if (depth >= MAX_DEPTH) return '{ uid _hide type {uid <unigraph.id>} }';
     return `{
         _updatedAt
         uid
@@ -17,6 +17,7 @@ const getQuery: (depth: number) => string = (depth: number) => {
             uid
         }
         type {
+            uid
             <unigraph.id>
         }
         _value {
@@ -26,17 +27,17 @@ const getQuery: (depth: number) => string = (depth: number) => {
                 _value {
                     _value {
                         <dgraph.type>
-                        uid type { <unigraph.id> }
+                        uid type { uid <unigraph.id> }
                         <_value.%>
                     }
-                    uid type { <unigraph.id> }
+                    uid type { uid <unigraph.id> }
                 }
             }
             content {
                 uid
                 _value {
                     uid
-                    type { <unigraph.id> }
+                    type { uid <unigraph.id> }
                 }
             }
             children {
@@ -50,7 +51,7 @@ const getQuery: (depth: number) => string = (depth: number) => {
                         _hide
                         _value ${getQuery(depth + 1)}
                         uid
-                        type { <unigraph.id> }
+                        type { uid <unigraph.id> }
                     }
                 }
             }
