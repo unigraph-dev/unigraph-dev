@@ -1163,6 +1163,8 @@ export const replaceChildWithUid = async (data: any, context: NoteEditorContext,
             parentUid = el._value.uid;
             child = el._value._value;
             const newel = {
+                _index: { uid: el._index.uid },
+                _key: el._key,
                 _value: {
                     // subentity
                     uid: el._value.uid,

@@ -19,6 +19,15 @@ export function htmlToMarkdown(html: string) {
     return turndown.turndown(html);
 }
 
+const getTextNodes = (root: any) => {
+    const children: any[] = [];
+    root.children.forEach((el: any) => {
+        if (el.children) children.push(...getTextNodes(el));
+        else if (el.type === 'text') children.push({ position: root.position, ...el });
+    });
+    return children;
+};
+
 const compFactory = (name: string, { node, inline, className, children, ...props }: any) =>
     // eslint-disable-next-line react/no-children-prop
     React.createElement(name, {
@@ -27,11 +36,11 @@ const compFactory = (name: string, { node, inline, className, children, ...props
         contentEditable: true,
         suppressContentEditableWarning: true,
         onPointerUp: (event: PointerEvent) => {
+            const currentText = (window.getSelection() as any).anchorNode?.textContent;
+            const currentNode = getTextNodes(node).filter((el: any) => el.value === currentText)[0];
+            const currentPos = currentNode?.position?.start?.offset || 0;
             if (!(event.target as HTMLElement).getAttribute('markdownPos')) {
-                (event.target as HTMLElement).setAttribute(
-                    'markdownPos',
-                    String((props.sourcePosition?.start.column || 0) - 1 + (getCaret(event) || 0)),
-                );
+                (event.target as HTMLElement).setAttribute('markdownPos', String(currentPos + getCaret(event)));
             }
         },
         ...props,
@@ -56,7 +65,19 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                         p: compFactory.bind(this, 'p'),
                         strong: compFactory.bind(this, 'strong'),
                         em: compFactory.bind(this, 'em'),
-                        code: compFactory.bind(this, 'code'),
+                        code: (props) =>
+                            compFactory('code', {
+                                ...props,
+                                style: {
+                                    display: '',
+                                    wordBreak: 'break-word',
+                                    fontSize: '0.8em',
+                                    padding: '3px',
+                                    backgroundColor: 'whitesmoke',
+                                    border: '1px solid lightgray',
+                                    borderRadius: '4px',
+                                },
+                            }),
                         img: ({ node, inline, className, children, ...props }: any) => {
                             console.log(node);
                             return compFactory('img', {

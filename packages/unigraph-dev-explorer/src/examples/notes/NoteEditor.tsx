@@ -548,12 +548,16 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                 case 'ArrowUp': // up arrow
                     textInputRef.current.style['caret-color'] = 'transparent';
                     inputDebounced.current.flush();
+                    // eslint-disable-next-line no-case-declarations
+                    const beforeArrowIsEdge = textInputRef.current.selectionStart === 0;
                     requestAnimationFrame(() => {
                         const newCaret = textInputRef.current.selectionStart;
-                        if (newCaret === 0) {
-                            if (ev.shiftKey) {
+                        if (ev.shiftKey) {
+                            if (beforeArrowIsEdge || window.unigraph.getState('global/selected').value.length > 0) {
                                 selectUid(componentId, false);
+                                callbacks['focus-last-dfs-node'](dataRef.current, editorContext, true, caret);
                             }
+                        } else if (newCaret === 0) {
                             callbacks['focus-last-dfs-node'](dataRef.current, editorContext, true, caret);
                         }
                         setTimeout(() => {
@@ -565,17 +569,24 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                 case 'ArrowDown': // down arrow
                     textInputRef.current.style['caret-color'] = 'transparent';
                     inputDebounced.current.flush();
+                    // eslint-disable-next-line no-case-declarations
+                    const beforeArrowIsEdge2 =
+                        (textInputRef.current.selectionEnd || 0) >= (getCurrentText().trim()?.length || 0);
                     requestAnimationFrame(() => {
                         const newCaret = textInputRef.current.selectionStart;
-                        if ((newCaret || 0) >= (getCurrentText().trim()?.length || 0)) {
-                            if (ev.shiftKey) {
+                        if (ev.shiftKey) {
+                            if (beforeArrowIsEdge2 || window.unigraph.getState('global/selected').value.length > 0) {
                                 selectUid(componentId, false);
+                                // when going from a line above, to a line below, the caret is at the end of the line
+                                const caretInLine = caretFromLastLine(getCurrentText(), caret);
+                                callbacks['focus-next-dfs-node'](dataRef.current, editorContext, false, caretInLine);
                             }
-
+                        } else if ((newCaret || 0) >= (getCurrentText().trim()?.length || 0)) {
                             // when going from a line above, to a line below, the caret is at the end of the line
                             const caretInLine = caretFromLastLine(getCurrentText(), caret);
                             callbacks['focus-next-dfs-node'](dataRef.current, editorContext, false, caretInLine);
                         }
+
                         setTimeout(() => {
                             textInputRef.current.style['caret-color'] = '';
                         }, 0);

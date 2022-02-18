@@ -271,7 +271,7 @@ export function AutoDynamicView({
             );
         }
         return '';
-    }, [isRecursion, object, attributes, DynamicViews, isFocused, BacklinkComponent]);
+    }, [isRecursion, object, attributes, DynamicViews, isFocused, BacklinkComponent, getObject_]);
 
     return (
         <ErrorBoundary

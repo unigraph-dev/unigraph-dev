@@ -43,7 +43,6 @@ export const setSearchPopup = (boxRef: any, searchString: string, onSelected: an
                                         'unigraph.id': '$/schema/interface/semantic',
                                     },
                                     _value: {
-                                        type: { 'unigraph.id': '$/schema/tag' },
                                         uid: newTagUid[0],
                                     },
                                 },
