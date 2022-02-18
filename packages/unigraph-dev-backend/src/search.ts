@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 const getQueryHead = (qual: string, options: string, filter: string, showHidden: boolean) =>
-    `result(${qual}${options}) @filter(${filter} type(Entity) AND (NOT eq(<_propertyType>, "inheritance")) ${
+    `result(${qual}${options}) @filter(${filter} type(Entity) AND (NOT type(Deleted)) AND (NOT eq(<_propertyType>, "inheritance")) ${
         showHidden ? '' : 'AND (NOT eq(<_hide>, true))'
     })`;
 
