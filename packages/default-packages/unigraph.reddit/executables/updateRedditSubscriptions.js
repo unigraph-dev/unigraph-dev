@@ -112,7 +112,7 @@ if (account?.uid) {
         updatedObjs.filter((el, index) => results[index]?.length === 0),
         '$/schema/reddit_post',
     );
-    const inbox_els = uids;
+    const feeds_els = uids;
 
     if (updatedObjs?.[0]?.id) {
         await unigraph.updateObject(
@@ -129,10 +129,10 @@ if (account?.uid) {
         );
     }
 
-    console.log(`Updated items: ${inbox_els.length}`);
+    console.log(`Updated items: ${feeds_els.length}`);
 
     await unigraph.runExecutable('$/executable/add-item-to-list', {
-        where: '$/entity/inbox',
-        item: inbox_els.reverse(),
+        where: '$/entity/feeds',
+        item: feeds_els.reverse(),
     });
 }

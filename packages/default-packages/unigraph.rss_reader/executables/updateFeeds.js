@@ -131,7 +131,7 @@ await Promise.all(
 
 if (uids.length)
     unigraph.runExecutable('$/package/unigraph.core/0.0.1/executable/add-item-to-list', {
-        where: '$/entity/inbox',
+        where: '$/entity/feeds',
         item: uids.reverse(),
     });
 // TODO: fix this race condition by enforcing

@@ -102,7 +102,7 @@ const objects = await new Promise((resolve, reject) =>
 
 const count = objects.length;
 const uids = await unigraph.addObject(objects, '$/schema/tweet', true);
-const inbox_els = uids.slice(0, count);
+const feeds_els = uids.slice(0, count);
 
 if (objects?.[0]?._value?.twitter_id?.['_value.%']) {
     await unigraph.updateObject(
@@ -119,5 +119,5 @@ if (objects?.[0]?._value?.twitter_id?.['_value.%']) {
     );
 }
 
-await unigraph.runExecutable('$/executable/add-item-to-list', { where: '$/entity/inbox', item: inbox_els.reverse() });
+await unigraph.runExecutable('$/executable/add-item-to-list', { where: '$/entity/feeds', item: feeds_els.reverse() });
 // setTimeout(() => unigraph.addNotification({name: "Tweets added", from: "unigraph.twitter", content: "Added " + count + " items.", actions: []}), 1000);

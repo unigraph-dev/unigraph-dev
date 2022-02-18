@@ -8,6 +8,10 @@ const inspect = _.curry((msg, x) => {
     return x;
 });
 
+const INFINITE_RECURRENCE_YEAR_CEILING = 10;
+const DEFAULT_MSG_EXTERNAL_EVENTS = 'Busy';
+const MAX_EVENTS_PER_ADD = 100;
+
 const patchInfiniteRecurrence = (rrule) => {
     // split by "\n", find line with "FREQ=", if no "UNTIL=", split by ";", find segment with "FREQ=" and add UNTIL 25 years from now, join back
     const lines = rrule.split('\n');
@@ -17,7 +21,7 @@ const patchInfiniteRecurrence = (rrule) => {
         const segment = lines[freqIndex].split(';');
         const untilSegment = segment.find((seg) => seg.includes('FREQ='));
         const until = new Date();
-        until.setFullYear(until.getFullYear() + 10);
+        until.setFullYear(until.getFullYear() + INFINITE_RECURRENCE_YEAR_CEILING);
         const newUntilSegment = `UNTIL=${new Sugar.Date(until).format('{yyyy}{MM}{dd}T{HH}{mm}{ss}Z').raw}`;
         segment[segment.indexOf(untilSegment)] = newUntilSegment;
         lines[freqIndex] = segment.join(';');
@@ -57,6 +61,7 @@ const sync = async (calendar, unigraphCalendar, syncToken) => {
         } else nextPageToken = resp.data.nextPageToken;
     }
     // console.log('sync', { itemsLen: items.length, i });
+    // return { items, nextSyncToken };
     return { items, nextSyncToken };
 };
 
@@ -108,10 +113,11 @@ const toEod = (date) => {
 };
 
 const makeEventObj = (calUid, ev, recurrenceObj) => {
+    // console.log('makeEventObj', { calUid, ev, recurrenceObj });
     return {
         name: {
             type: { 'unigraph.id': '$/schema/markdown' },
-            _value: ev.summary,
+            _value: ev.summary || DEFAULT_MSG_EXTERNAL_EVENTS,
         },
         calendar: { uid: calUid },
         about: {
@@ -232,13 +238,20 @@ const syncGoogleCalendarSpecific = async () => {
     const calendarUid = context?.params?.uid;
     const { calendar } = context;
     const unigraphCalendar = await unigraph.getObject(calendarUid);
-    // console.log('syncGoogleCalendarSpecific', { calendarUid, calendar, unigraphCalendar });
-    const syncToken = unigraphCalendar._value?.sync_token?.['_value.%'] || undefined;
+    const calendarName = unigraphCalendar._value.name._value._value['_value.%'];
+
     // Uncomment to debug:
-    // const syncToken = undefined;
+    const syncToken = unigraphCalendar._value?.sync_token?.['_value.%'] || undefined;
+    // console.log('syncGoogleCalendarSpecific', {
+    //     calendarName,
+    //     unigraphCalendar,
+    //     calendar,
+    // });
+    // syncToken = undefined;
+
     const { items, nextSyncToken } = await sync(calendar, unigraphCalendar, syncToken);
     // const { items, nextSyncToken } = await syncDebug(calendar, unigraphCalendar, syncToken);
-    // console.log('items', { itemsLen: items.length });
+    // console.log('items', { itemsLen: items.length, calendarName });
 
     // DEBUG: delete all events
     // items.filter(_.propEq('status', 'cancelled')).map(_.prop('id')).map(queryFromEventId)
@@ -266,6 +279,7 @@ const syncGoogleCalendarSpecific = async () => {
 
     // console.log('confirmedEventsNonRecurring', {
     //     confirmedEventsNonRecurringLen: confirmedEventsNonRecurring.length,
+    //     calendarName,
     // });
 
     const queriesForEventsWithRecurrence = confirmedEventsNonRecurring
@@ -283,17 +297,18 @@ const syncGoogleCalendarSpecific = async () => {
         }`,
         )
         .then((res) => res.map(_.prop(['0', 'uid'])).filter((x) => x));
-    // console.log('objsWithRecurrence', { objsWithRecurrenceLen: objsWithRecurrence.length });
+    // console.log('objsWithRecurrence', { objsWithRecurrenceLen: objsWithRecurrence.length, calendarName });
 
     const toAdd = confirmedEventsNonRecurring.filter((x) => x).map(makeRecurrentEventObj(calendarUid));
     // .map(expandRecurrences)
     // .flat();
-    // console.log('toAdd', { toAddLen: toAdd.length });
+    // console.log('toAdd', { toAddLen: toAdd.length, calendarName });
 
     // SIDE-EFFECT: delete previous recurrences
     deletePrevRecurrences(objsWithRecurrence);
     if (toAdd.length > 0) {
-        await unigraph.addObject(toAdd, '$/schema/calendar_event');
+    }
+        await unigraph.addObject(toAdd.slice(toAdd.length - MAX_EVENTS_PER_ADD), '$/schema/calendar_event');
     }
     if (syncToken !== nextSyncToken) {
         await unigraph.updateObject(calendarUid, {
