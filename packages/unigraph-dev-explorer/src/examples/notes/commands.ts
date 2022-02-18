@@ -5,7 +5,7 @@ import { dfs, removeAllPropsFromObj } from '../../utils';
 import { parseTodoObject } from '../todo/parseTodoObject';
 import { NoteEditorContext } from './types';
 import { getParentsAndReferences } from '../../components/ObjectView/backlinksUtils';
-import { addCommand, CommandState, getChildrenStubMap } from './history';
+import { addCommand, CommandState, getChildrenStubMap, getCurrentFocus } from './history';
 
 export const focusUid = (obj: any, goingUp?: boolean, caret?: number) => {
     // console.log(document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]);
@@ -51,6 +51,9 @@ export const addChildren = (
 ) => {
     let uidMode = false;
     if (children.filter((el) => el.startsWith('0x')).length === children.length) uidMode = true;
+    const prevUid =
+        getSubentities(data).sort(byElementIndex)[index || (getSemanticChildren(data)?.['_value[']?.length || 0) - 1]
+            ?._value?._value?.uid;
     if (typeof index === 'undefined') index = (getSemanticChildren(data)?.['_value[']?.length || 0) - 1;
     else index = getSubentities(data).sort(byElementIndex)[index]?._index?.['_value.#i'] || 0;
     const parents = getParents(data);
@@ -69,6 +72,8 @@ export const addChildren = (
             oldChildrenUid: data._value.children?.uid,
             // oldData: newChildren[parIndex]._value._value._value,
             oldData: getChildrenStubMap(data._value?.children),
+            focusUid: prevUid,
+            focusCaret: -1,
         },
     ]);
     window.unigraph.updateObject(
@@ -152,7 +157,7 @@ export const addChildren = (
         parents,
         !uidMode,
     );
-    focusUid(myUid);
+    focusUid(myUid, true, -1);
 };
 
 export const splitChild = (data: any, context: NoteEditorContext, index: number, oldtext: string, at: number) => {
@@ -212,6 +217,7 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
                 subsId: context.callbacks.subsId,
                 uid: loc._value._value.uid,
                 oldText: oldtext,
+                ...getCurrentFocus(),
             });
             // distribute references accordingly
             if (el?._value?._value?._value?.children?.['_value[']) {
@@ -405,6 +411,8 @@ export const deleteChildren = (data: any, context: NoteEditorContext, index: num
             subsId: context.callbacks.subsId,
             oldChildrenUid: data._value.children?.uid,
             oldData: data._value?.children,
+            focusUid: toDel[toDel.length - 1]?._value?._value?.uid,
+            focusCaret: -1,
         },
     ]);
 
@@ -825,7 +833,7 @@ export const unindentChild = async (data: any, context: NoteEditorContext, paren
 export const unindentChildren = async (data: any, context: NoteEditorContext, parent: number, index: number[]) => {
     const parents = getParents(data);
     if (!data._hide) parents.push({ uid: data.uid });
-    removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
+    // removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     // console.log(parent, index)
     let currSubentity = -1;
     let isCompleted = false;
@@ -833,11 +841,11 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
     let delUidPar = '';
     let delUidChild = '';
     const recalcBacklinkUids: string[] = [];
-    const recalcParents = [...parents.map((el) => el.uid)];
+    const recalcParents: any[] = [];
     const undoCommand: any[] = [];
     const newChildren = children.reduce((prev: any[], curr: any) => {
         if (curr?._value?.type?.['unigraph.id'] === '$/schema/subentity' && ++currSubentity === parent) {
-            recalcParents.push(curr._value._value.uid);
+            recalcParents.push(curr._value._value.uid, ...getParents(curr._value._value).map((el) => el.uid));
             isCompleted = true;
             let currChildSubentity = -1;
             let childIsCompleted = 0;
@@ -954,7 +962,7 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
     );
     if (recalcBacklinkUids.length >= 1) {
         setTimeout(() => {
-            window.unigraph.recalculateBacklinks(recalcParents, recalcBacklinkUids);
+            window.unigraph.recalculateBacklinks(_.uniq(recalcParents), recalcBacklinkUids);
         }, 1000);
     }
     window.unigraph.touch(parents.map((el) => el.uid));

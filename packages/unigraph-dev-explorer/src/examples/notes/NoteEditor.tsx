@@ -185,7 +185,11 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                 handlePotentialResize();
             }
         }
-    }, [focused]);
+    }, [
+        focused,
+        window.unigraph.getState('global/focused').value.setCaret &&
+            window.unigraph.getState('global/focused').value.caret,
+    ]);
 
     const setCurrentText = (text: string) => {
         const nativeInputValueSetter = Object?.getOwnPropertyDescriptor(

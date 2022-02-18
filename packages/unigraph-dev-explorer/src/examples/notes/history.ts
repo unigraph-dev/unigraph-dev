@@ -19,12 +19,19 @@ export const getChildrenStubMap = (objChildren: any) => {
     };
 };
 
+export const getCurrentFocus = () => ({
+    focusUid: window.unigraph.getState('global/focused').value.uid,
+    focusCaret: window.unigraph.getState('global/focused').value.caret,
+});
+
 export type ChildrenChangeState = {
     type: 'children';
     subsId: any;
     uid: string;
     oldChildrenUid: string;
     oldData?: any;
+    focusUid?: string;
+    focusCaret?: number;
 };
 
 export type PredicateChangeState = {
@@ -34,6 +41,8 @@ export type PredicateChangeState = {
     predicate: string;
     oldValue: any;
     oldData?: any;
+    focusUid?: string;
+    focusCaret?: number;
 };
 
 export type TextualChangeState = {
@@ -41,6 +50,8 @@ export type TextualChangeState = {
     subsId: any;
     uid: string;
     oldText: string;
+    focusUid?: string;
+    focusCaret?: number;
 };
 
 export type ChangeState = ChildrenChangeState | TextualChangeState | PredicateChangeState;
@@ -95,7 +106,7 @@ export const applyCommand = (history: HistoryState, redo?: boolean): HistoryStat
                         idx !== currentCommand.length - 1 ? undefined : eventId,
                     );
                 });
-                return true;
+                // return true;
             }
             if (change.type === 'predicate') {
                 const [currentText] = findUid(data, change.uid);
@@ -124,7 +135,7 @@ export const applyCommand = (history: HistoryState, redo?: boolean): HistoryStat
                         idx !== currentCommand.length - 1 ? undefined : eventId,
                     );
                 });
-                return true;
+                // return true;
             }
             if (change.type === 'textual') {
                 const [currentText] = findUid(data, change.uid);
@@ -152,9 +163,20 @@ export const applyCommand = (history: HistoryState, redo?: boolean): HistoryStat
                         idx !== currentCommand.length - 1 ? undefined : eventId,
                     );
                 });
-                return true;
+                // return true;
             }
-            return false;
+            if (change.focusUid) {
+                toUpdate.push(() => {
+                    const focusState = window.unigraph.getState('global/focused');
+                    focusState.setValue({
+                        ...focusState.value,
+                        uid: change.focusUid,
+                        component: undefined,
+                        caret: change.focusCaret,
+                        setCaret: true,
+                    });
+                });
+            }
         });
         console.log(currentCommand);
         Object.entries(currentObjs).forEach(([key, value]: any, index) => {
