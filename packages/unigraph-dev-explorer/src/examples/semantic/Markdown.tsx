@@ -23,7 +23,7 @@ const getTextNodes = (root: any) => {
     const children: any[] = [];
     root.children.forEach((el: any) => {
         if (el.children) children.push(...getTextNodes(el));
-        else if (el.type === 'text') children.push(el);
+        else if (el.type === 'text') children.push({ position: root.position, ...el });
     });
     return children;
 };
@@ -65,7 +65,19 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                         p: compFactory.bind(this, 'p'),
                         strong: compFactory.bind(this, 'strong'),
                         em: compFactory.bind(this, 'em'),
-                        code: compFactory.bind(this, 'code'),
+                        code: (props) =>
+                            compFactory('code', {
+                                ...props,
+                                style: {
+                                    display: '',
+                                    wordBreak: 'break-word',
+                                    fontSize: '0.8em',
+                                    padding: '3px',
+                                    backgroundColor: 'whitesmoke',
+                                    border: '1px solid lightgray',
+                                    borderRadius: '4px',
+                                },
+                            }),
                         img: ({ node, inline, className, children, ...props }: any) => {
                             console.log(node);
                             return compFactory('img', {
