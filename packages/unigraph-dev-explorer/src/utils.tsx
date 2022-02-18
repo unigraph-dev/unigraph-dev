@@ -571,6 +571,7 @@ export const hoverSx = {
     '&:hover': { backgroundColor: 'action.hover' },
     '&:active': { backgroundColor: 'action.selected' },
 };
+export const pointerHoverSx = { cursor: 'pointer', ...hoverSx };
 
 export const contextMenuItemStyle = { paddingTop: '8px', paddingBottom: '8px' };
 export const globalTheme = {

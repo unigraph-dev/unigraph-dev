@@ -29,7 +29,6 @@ const classes = {
     drawerPaper: `${PREFIX}-drawerPaper`,
 };
 
-const appDrawerHoverSx = { cursor: 'pointer', ...hoverSx };
 export default function DrawerRouter() {
     const devState = window.unigraph.getState('settings/developerMode');
     const [devMode, setDevMode] = React.useState(devState.value);
@@ -55,21 +54,21 @@ export default function DrawerRouter() {
                     Home{' '}
                 </ListSubheader>
 
-                <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/home')}>
+                <ListItem sx={pointerHoverSx} onClick={() => window.wsnavigator('/home')}>
                     <ListItemIcon>
                         <Icon path={mdiHomeOutline} size={1} />
                     </ListItemIcon>
                     <ListItemText primary="Home" />
                 </ListItem>
 
-                <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/library')}>
+                <ListItem sx={pointerHoverSx} onClick={() => window.wsnavigator('/library')}>
                     <ListItemIcon>
                         <Icon path={mdiBookOpenOutline} size={1} />
                     </ListItemIcon>
                     <ListItemText primary="Library" />
                 </ListItem>
 
-                <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/trash')}>
+                <ListItem sx={pointerHoverSx} onClick={() => window.wsnavigator('/trash')}>
                     <ListItemIcon>
                         <Icon path={mdiDeleteOutline} size={1} />
                     </ListItemIcon>
@@ -79,19 +78,19 @@ export default function DrawerRouter() {
                     {' '}
                     Unigraph{' '}
                 </ListSubheader>
-                <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/settings')}>
+                <ListItem sx={pointerHoverSx} onClick={() => window.wsnavigator('/settings')}>
                     <ListItemIcon>
                         <Icon path={mdiCogOutline} size={1} />
                     </ListItemIcon>
                     <ListItemText primary="Settings" />
                 </ListItem>
-                <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/notification-center')}>
+                <ListItem sx={pointerHoverSx} onClick={() => window.wsnavigator('/notification-center')}>
                     <ListItemIcon>
                         <Icon path={mdiBellOutline} size={1} />
                     </ListItemIcon>
                     <ListItemText primary="Notifications" />
                 </ListItem>
-                <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/package-manager')}>
+                <ListItem sx={pointerHoverSx} onClick={() => window.wsnavigator('/package-manager')}>
                     <ListItemIcon>
                         <Icon path={mdiPackageVariantClosed} size={1} />
                     </ListItemIcon>
@@ -102,25 +101,25 @@ export default function DrawerRouter() {
                         {' '}
                         Developer Tools{' '}
                     </ListSubheader>
-                    <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/object-editor')}>
+                    <ListItem sx={pointerHoverSx} onClick={() => window.wsnavigator('/object-editor')}>
                         <ListItemIcon>
                             <Icon path={mdiPencilBoxMultipleOutline} size={1} />
                         </ListItemIcon>
                         <ListItemText primary="Object Editor" />
                     </ListItem>
-                    <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/code-editor')}>
+                    <ListItem sx={pointerHoverSx} onClick={() => window.wsnavigator('/code-editor')}>
                         <ListItemIcon>
                             <Icon path={mdiXml} size={1} />
                         </ListItemIcon>
                         <ListItemText primary="Code Editor" />
                     </ListItem>
-                    <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/request')}>
+                    <ListItem sx={pointerHoverSx} onClick={() => window.wsnavigator('/request')}>
                         <ListItemIcon>
                             <Comment />
                         </ListItemIcon>
                         <ListItemText primary="Request" />
                     </ListItem>
-                    <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/datamodel-playground')}>
+                    <ListItem sx={pointerHoverSx} onClick={() => window.wsnavigator('/datamodel-playground')}>
                         <ListItemIcon>
                             <CompareArrows />
                         </ListItemIcon>
