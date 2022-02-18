@@ -15,6 +15,7 @@ import {
     findUid,
     getCircularReplacer,
     isJsonString,
+    mergeObjectWithUpdater,
 } from '../utils/utils';
 
 const RETRY_CONNECTION_INTERVAL = 5000;
@@ -53,66 +54,6 @@ export const getObjectAs = (object: any, type: 'primitive') => {
         return getObjectAsRecursivePrimitive(object);
     }
     return object;
-};
-
-/**
- * Merges a single source object to a target object.
- *
- * NOTE: this function mutates the target object.
- *
- * @param target
- * @param source
- */
-export const deepMerge = (target: any, source: any) => {
-    const recurse = (targ: any, src: any) => {
-        if (_.isArray(targ) && !_.isArray(src)) {
-            src = [src];
-        } else if (!_.isArray(targ) && _.isArray(src)) {
-            targ = [targ];
-        }
-
-        if (_.isArray(targ) && _.isArray(src)) {
-            const uids: string[] = [];
-            const [[primObj, objObj], [primSrc, objSrc]] = [targ, src].map((arr) => {
-                const objs: any[] = [];
-                const prims: any[] = [];
-                arr.forEach((el) => {
-                    if (typeof el?.uid === 'string') {
-                        objs.push(el);
-                        uids.push(el.uid);
-                    } else prims.push(el);
-                });
-                return [prims, objs];
-            });
-            const finPrims = _.uniq(primObj.concat(primSrc));
-            const finObjs: any[] = [];
-            _.uniq(uids).forEach((uid) => {
-                const obj = objObj.find((el) => el.uid === uid);
-                const srcc = objSrc.find((el) => el.uid === uid);
-                if (obj && srcc) finObjs.push(recurse(obj, srcc));
-                else if (obj) finObjs.push(obj);
-                else if (srcc) finObjs.push(srcc);
-            });
-            return [...finPrims, ...finObjs];
-        }
-
-        if (targ?.uid && src?.uid && targ.uid !== src.uid) {
-            return src;
-        }
-
-        if (typeof src === 'undefined' || src === null) return targ;
-        if (typeof targ === 'undefined' || targ === null) return src;
-
-        // Iterate through `source` properties and if an `Object` set property to merge of `target` and `source` properties
-        for (const key of Object.keys(src)) {
-            if (src[key] instanceof Object) Object.assign(src[key], recurse(targ[key], src[key]));
-        }
-
-        // Join `target` and modified `source`
-        return Object.assign(targ || {}, src);
-    };
-
-    return recurse(target, source);
 };
 
 // TODO: Switch to prototype-based, faster helper functions
@@ -461,18 +402,16 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 }
                 sendEvent(connection, 'update_object', { uid, newObject, upsert, pad, id, subIds, origin, usedUids });
             }),
-        sendFakeUpdate: (subId, updater, eventId) => {
+        sendFakeUpdate: (subId, updater, eventId, fullObject?) => {
             // Merge updater object with existing one
             // console.log('subId0', JSON.parse(JSON.stringify(subResults[subId])));
-            const newObj = JSON.parse(JSON.stringify(subResults[subId], getCircularReplacer()));
-            const newObj2 = JSON.parse(JSON.stringify(newObj));
-            const clonedNewObject = JSON.parse(JSON.stringify(updater));
-            const changeLocs = findAllUids(newObj, updater.uid);
-            changeLocs.forEach(([loc, path]) => {
-                deepMerge(loc, clonedNewObject);
-                // console.log('subId', JSON.parse(JSON.stringify(subResults[subId])));
-                augmentStubs(loc, newObj2);
-            });
+            let newObj: any;
+            if (fullObject) {
+                newObj = updater;
+            } else {
+                newObj = mergeObjectWithUpdater(subResults[subId], updater);
+            }
+
             subResults[subId] = newObj;
             setTimeout(() => {
                 // console.log(newObj);
