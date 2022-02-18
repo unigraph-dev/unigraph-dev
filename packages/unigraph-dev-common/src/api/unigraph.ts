@@ -379,9 +379,9 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             // TODO: This is very useless, should be removed once we get something better
             sendEvent(connection, 'update_spo', { objects, isDelete, subIds });
         },
-        updateObject: (uid, newObject, upsert = true, pad = true, subIds, origin, eagarlyUpdate) =>
+        updateObject: (uid, newObject, upsert = true, pad = true, subIds, origin, eagarlyUpdate, thisEventId: any) =>
             new Promise((resolve, reject) => {
-                const id = getRandomInt();
+                const id = thisEventId || getRandomInt();
                 callbacks[id] = (response: any) => {
                     if (response.success) resolve(id);
                     else reject(response);
@@ -400,11 +400,17 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                         api.sendFakeUpdate?.(subId, newObject, id);
                     }
                 }
+                if (thisEventId && (!Array.isArray(subIds) || subIds.length === 1)) {
+                    const subId = Array.isArray(subIds) ? subIds[0] : subIds;
+                    if (subFakeUpdates[subId] === undefined) subFakeUpdates[subId] = [thisEventId];
+                    else subFakeUpdates[subId].push(thisEventId);
+                }
                 sendEvent(connection, 'update_object', { uid, newObject, upsert, pad, id, subIds, origin, usedUids });
             }),
         sendFakeUpdate: (subId, updater, eventId, fullObject?) => {
             // Merge updater object with existing one
             // console.log('subId0', JSON.parse(JSON.stringify(subResults[subId])));
+            const id = eventId;
             let newObj: any;
             if (fullObject) {
                 newObj = updater;
@@ -419,9 +425,9 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             }, 0);
 
             // Record state changes
-            if (eventId) {
-                if (subFakeUpdates[subId] === undefined) subFakeUpdates[subId] = [eventId];
-                else subFakeUpdates[subId].push(eventId);
+            if (id) {
+                if (subFakeUpdates[subId] === undefined) subFakeUpdates[subId] = [id];
+                else subFakeUpdates[subId].push(id);
             }
         },
         deleteRelation: (uid, relation) => {
