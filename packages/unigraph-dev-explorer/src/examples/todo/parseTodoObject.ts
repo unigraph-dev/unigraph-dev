@@ -4,7 +4,7 @@ import { ATodoList, setHours, getMinDate, getMaxDate } from './utils';
 
 export const parseTodoObject: (arg0: string, refs?: any[]) => ATodoList = (todoString: string, refs?: any[]) => {
     // TODO: Using regex for now, we can switch to a more centralized parsing solution later
-    const tagsRegex = /#[a-zA-Z0-9]*\b ?/gm;
+    const tagsRegex = /#[a-zA-Z0-9/-_]*\b ?/gm;
     let tags = todoString.match(tagsRegex) || [];
     tags = tags.map((tag) => tag.slice(1).trim());
     todoString = todoString.replace(tagsRegex, '');

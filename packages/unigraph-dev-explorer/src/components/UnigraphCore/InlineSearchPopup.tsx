@@ -233,12 +233,12 @@ export const inlineObjectSearch = (
 };
 
 export const inlineRefsToChildren = (refs?: any[]) =>
-    (refs || []).map(({ key, value }) => ({
+    (refs || []).map((ref) => ({
         type: {
             'unigraph.id': '$/schema/interface/semantic',
         },
         $parentcontext: {
-            _key: `[[${key}]]`,
+            _key: ref.key ? `[[${ref.key}]]` : undefined,
         },
-        _value: { uid: value },
+        _value: { uid: ref.value },
     }));
