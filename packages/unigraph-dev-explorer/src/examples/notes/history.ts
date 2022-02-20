@@ -2,8 +2,8 @@ import { findUid, getRandomId, getRandomInt, mergeObjectWithUpdater } from 'unig
 
 export const getChildrenStubMap = (objChildren: any) => {
     return {
-        uid: objChildren.uid,
-        '_value[': (objChildren['_value['] || []).map((child: any) => ({
+        uid: objChildren?.uid,
+        '_value[': (objChildren?.['_value['] || []).map((child: any) => ({
             uid: child.uid,
             _key: child._key,
             _index: child?._index,

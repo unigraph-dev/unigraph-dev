@@ -1007,9 +1007,16 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
     let childTypeLocation = '';
     let childOldTypeUid = '';
     let textIt = currentText || '';
-    let refs: any[] = [];
+    const refs: any[] = [];
     const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
     const newChildren = children?.reduce((prev: any[], el: any, elindex: any) => {
+        if (
+            el?._value?.type?.['unigraph.id'] === '$/schema/interface/semantic' &&
+            el?._value?._value?.type?.['unigraph.id'] === '$/schema/tag'
+        ) {
+            // Looking at parent tags (semantic properties) here
+            refs.push({ value: el?._value?._value?.uid });
+        }
         if (el?._value?.type?.['unigraph.id'] === '$/schema/subentity' && ++currSubentity === index) {
             /* something something */
             childTypeLocation = el._value._value.uid;
@@ -1037,13 +1044,14 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
                 },
             };
             if (!textIt.length) textIt = el._value._value._value.text._value._value['_value.%'];
-            refs =
-                el._value._value._value?.children?.['_value[']
+            refs.push(
+                ...(el._value._value._value?.children?.['_value[']
                     ?.filter?.((it: any) => it._key)
                     .map((ell: any) => ({
                         key: ell._key.slice(2, -2),
                         value: ell._value._value.uid,
-                    })) || [];
+                    })) || []),
+            );
             return [...prev, newel];
         }
         return [...prev, { uid: el.uid }];
