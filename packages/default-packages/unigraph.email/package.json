@@ -1,6 +1,6 @@
 {
     "displayName": "Unigraph Email",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "description": "Simple email client with Unigraph.",
     "name": "unigraph.email",
     "unigraph": {
@@ -46,7 +46,7 @@
                 "env": "routine/js",
                 "src": "executables/modifyEmailsLabels.js",
                 "editable": true,
-                "name": "Add or remove labels from emails" 
+                "name": "Add or remove labels from emails"
             }
         ],
         "entities": [
