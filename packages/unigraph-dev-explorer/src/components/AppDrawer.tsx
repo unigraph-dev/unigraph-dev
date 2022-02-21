@@ -21,7 +21,7 @@ import {
     mdiHomeOutline,
 } from '@mdi/js';
 import { FavoriteBar } from './UnigraphCore/FavoriteBar';
-import { hoverSx } from '../utils';
+import { pointerHoverSx } from '../utils';
 
 const PREFIX = 'AppDrawer';
 
