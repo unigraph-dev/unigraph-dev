@@ -220,7 +220,7 @@ export const purgeOldVersions = async (client: DgraphClient, states: any, pkg: P
     const oldMap = states.caches.schemas.dataAlt[0];
     const delNquads: string[] = [];
     shorthandKeys.forEach((key) => {
-        const mapResult = oldMap[key]['_value['];
+        const mapResult = oldMap[key]?.['_value['];
         if (Array.isArray(mapResult)) {
             // @ts-expect-error: already checked for boolean
             const quads: string[] = mapResult
@@ -253,7 +253,14 @@ export const purgeOldVersions = async (client: DgraphClient, states: any, pkg: P
  * @param states
  * @param pkgName
  */
-export const disablePackage = async (client: DgraphClient, states: any, pkgName: string, enable = false) => {
+export const disablePackage = async (
+    client: DgraphClient,
+    states: any,
+    pkgName: string,
+    enable = false,
+    del = false,
+    exceptVersion: string | undefined = undefined,
+) => {
     // First, get all data in the database for this package
     const pkgContent = (
         await client.queryDgraph(`query {
@@ -261,10 +268,11 @@ export const disablePackage = async (client: DgraphClient, states: any, pkgName:
             uid
             <unigraph.id>
     }}`)
-    )[0];
+    )[0].filter((el: any) => el['unigraph.id'].split('/')[3] !== exceptVersion);
     const shorthandRefs = pkgContent
         .map((el: any) => {
             const struct = el['unigraph.id'].split('/');
+            struct[5] = struct.slice(5).join('/');
             // A sample struct would be ['$', 'package', '<pkgName>', '<version>', 'schema', '<schemaName>']
             if (struct[4] && struct[5] && ['schema', 'executable', 'entity'].includes(struct[4])) {
                 return { from: `$/${struct[4]}/${struct[5]}`, to: el.uid };
@@ -274,33 +282,68 @@ export const disablePackage = async (client: DgraphClient, states: any, pkgName:
         .filter(Boolean);
 
     // Now we should remove/restore all shorthand references and set package content to be hidden/shown
+    const nsMapNquads = shorthandRefs
+        .map((el: any) => `<${states.namespaceMap.uid}> <${el.from}> <${el.to}> .`)
+        .join('\n');
     const deleteNquads = new dgraph.Mutation();
-    deleteNquads.setDelNquads(
-        shorthandRefs.map((el: any) => `<${states.namespaceMap.uid}> <${el.from}> * .`).join('\n'),
-    );
+    deleteNquads.setDelNquads(nsMapNquads);
     const setNquads = new dgraph.Mutation();
-    setNquads.setSetNquads(
-        shorthandRefs.map((el: any) => `<${states.namespaceMap.uid}> <${el.from}> <${el.to}> .`).join('\n'),
-    );
+    setNquads.setSetNquads(nsMapNquads);
+
+    const deleteAllNquads = new dgraph.Mutation();
+    deleteAllNquads.setDelNquads(del ? pkgContent.map((el: any) => `<${el.uid}> * * .`).join('\n') : '');
+
     const hideNquads = new dgraph.Mutation();
     hideNquads.setSetNquads(
         pkgContent.map((el: any) => `<${el.uid}> <_hide> "${enable ? 'false' : 'true'}" .`).join('\n'),
     );
     const result = await client.createDgraphUpsert({
         query: false,
-        mutations: [enable ? setNquads : deleteNquads, hideNquads],
+        mutations: [enable ? setNquads : deleteNquads, hideNquads, deleteAllNquads],
     });
-    states.caches.schemas.updateNow();
-    states.caches.packages.updateNow();
-    states.caches.executables.updateNow();
+    console.log('Disabled/Enabled package: ', pkgName);
+    await states.caches.schemas.updateNow();
     return result;
 };
 
 export const enablePackage = async (client: DgraphClient, states: any, pkgName: string) =>
     disablePackage(client, states, pkgName, true);
 
+export const premergeEntities = async (client: DgraphClient, states: any, pkgName: string, newVersion: string) => {
+    const pkgContent = (
+        await client.queryDgraph(`query {
+    q(func: between(<unigraph.id>, "$/package/${pkgName}/", "$/package/${pkgName}0")) {
+            uid
+            <unigraph.id>
+    }}`)
+    )[0];
+    const newVersions = pkgContent
+        .map((el: any) => {
+            const struct = el['unigraph.id'].split('/');
+            struct[5] = struct.slice(5).join('/');
+            // A sample struct would be ['$', 'package', '<pkgName>', '<version>', 'schema', '<schemaName>']
+            if (struct[4] && struct[5] && ['executable', 'entity'].includes(struct[4])) {
+                struct[3] = newVersion;
+                return { from: el.uid, to: struct.join('/') };
+            }
+            return undefined;
+        })
+        .filter(Boolean);
+
+    const newVersionsNquads = newVersions.map((el: any) => `<${el.from}> <unigraph.id> "${el.to}" .`).join('\n');
+    const setNquads = new dgraph.Mutation();
+    setNquads.setSetNquads(newVersionsNquads);
+    const result = await client.createDgraphUpsert({
+        query: false,
+        mutations: [setNquads],
+    });
+    await states.caches.schemas.updateNow();
+    return result;
+};
+
 export const updatePackage = async (client: DgraphClient, states: any, pkg: PackageDeclaration) => {
-    await disablePackage(client, states, pkg.pkgManifest.package_name);
+    await premergeEntities(client, states, pkg.pkgManifest.package_name, pkg.pkgManifest.version);
+    await disablePackage(client, states, pkg.pkgManifest.package_name, false, true, pkg.pkgManifest.version);
     await purgeOldVersions(client, states, pkg);
     await addUnigraphPackage(client, pkg, states.caches);
     await enablePackage(client, states, pkg.pkgManifest.package_name);

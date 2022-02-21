@@ -13,7 +13,7 @@ import { defaultPackages, defaultTypes, defaultUserlandSchemas } from './templat
 import DgraphClient from './dgraphClient';
 import { addUnigraphPackage, updatePackage } from './packageManager';
 
-export async function checkOrCreateDefaultDataModel(client: DgraphClient, states: any) {
+export async function checkOrCreateDefaultDataModel(client: DgraphClient) {
     const unigraphObject: unknown[] = await client.queryUnigraphId<unknown[]>('$/unigraph');
 
     if (unigraphObject.length < 1) {
@@ -68,12 +68,21 @@ export async function checkOrCreateDefaultDataModel(client: DgraphClient, states
             pkgName: it['unigraph.id'].split('/')[2],
             version: it._value.version['_value.%'],
         }));
+        const nsmapUid = (
+            await client.queryDgraph(`query { nsMap(func: eq(<unigraph.id>, "$/meta/namespace_map")) { uid } }`)
+        )[0][0].uid;
+        const tempSchemaCache = createSchemaCache(client);
         const packageList = Object.fromEntries(defaultPackages.map((el: any) => [el.pkgManifest.package_name, el]));
         const pkgsToUpdate = pkgVersions
             .filter((it: any) => packageList[it.pkgName]?.pkgManifest.version !== it.version)
             .map((it: any) => packageList[it.pkgName]);
         for (let i = 0; i < pkgsToUpdate.length; i += 1) {
-            await updatePackage(client, states, pkgsToUpdate[i]);
+            await updatePackage(
+                client,
+                { namespaceMap: { uid: nsmapUid }, caches: { schemas: tempSchemaCache } },
+                pkgsToUpdate[i],
+            );
+            await tempSchemaCache.updateNow();
         }
         console.log(`Updated ${pkgsToUpdate.length} packages!`);
     }

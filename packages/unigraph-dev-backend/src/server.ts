@@ -100,6 +100,9 @@ export default async function startServer(client: DgraphClient) {
 
     const connections: Record<string, WebSocket> = {};
 
+    // Basic checks
+    await checkOrCreateDefaultDataModel(client);
+
     // Initialize subscriptions
     const pollCallback: MsgCallbackFn = (id, newdata, msgPort, sub, ofUpdate) => {
         if (sub?.callbackType === 'messageid') {
@@ -849,9 +852,6 @@ export default async function startServer(client: DgraphClient) {
     };
 
     await Promise.all(Object.values(caches).map((el: Cache<any>) => el.updateNow()));
-
-    // Basic checks
-    await checkOrCreateDefaultDataModel(client, serverStates);
 
     initEntityHeads(
         serverStates,

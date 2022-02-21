@@ -255,7 +255,9 @@ function buildUnigraphEntityPart(
             let choicesResults = (_.uniqBy(definitions, "uid")).map(defn => {
                 try {
                     return [defn, buildUnigraphEntityPart(rawPart, options, schemaMap, defn)]
-                } catch (e: any) {console.log(e.message || e); return undefined};
+                } catch (e: any) {
+                    return undefined;
+                };
             }).filter(x => x !== undefined);
             if (choicesResults.length !== 1 && rawPartUnigraphType !== "$/primitive/undefined") {
                 throw new TypeError(
@@ -270,8 +272,8 @@ function buildUnigraphEntityPart(
             // Default: Error out.
             throw new TypeError("Schema check failure for object: " + JSON.stringify(rawPart) + JSON.stringify(localSchema) + rawPartUnigraphType);
         }
-    } catch (e) {
-        throw new Error('Building entity part error: ' + e + JSON.stringify(rawPart) + JSON.stringify(localSchema) + rawPartUnigraphType + '\n')
+    } catch (e: any) {
+        throw new Error('Building entity part error: ' + e + '\n' + e.stack + '\n' + JSON.stringify(rawPart) + JSON.stringify(localSchema) + rawPartUnigraphType + '\n')
     }}
 
     let res: any = {...propDesc};
