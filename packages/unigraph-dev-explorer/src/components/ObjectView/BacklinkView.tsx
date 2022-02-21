@@ -17,7 +17,16 @@ var(func: uid(${uid})) {
   }
 }`;
 
-export function BacklinkView({ data, hideHeader, forward, callbacks, reverse, uid, titleBar = ' backlinks' }: any) {
+export function BacklinkView({
+    data,
+    hideHeader,
+    forward,
+    callbacks,
+    reverse,
+    uid,
+    initialTab,
+    titleBar = ' backlinks',
+}: any) {
     const [objects, setObjects]: [any[], any] = React.useState([]);
     const [id, setId] = React.useState(Date.now());
     if (callbacks?.isEmbed) hideHeader = true;
@@ -35,7 +44,7 @@ export function BacklinkView({ data, hideHeader, forward, callbacks, reverse, ui
             id,
             { noExpand: true },
         );
-
+        console.log('BacklinkView', { initialTab });
         return function cleanup() {
             tabContext.unsubscribe(id);
         };
@@ -63,6 +72,7 @@ export function BacklinkView({ data, hideHeader, forward, callbacks, reverse, ui
                 }
             }}
             noRemover
+            initialTab={initialTab}
         />
     );
 }

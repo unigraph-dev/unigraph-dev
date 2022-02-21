@@ -1,10 +1,18 @@
-import { Checkbox, Chip, ListItemText, Typography, Fab, Divider } from '@mui/material';
+import { Checkbox, Chip, ListItemText, Typography, Fab, Divider, Drawer, ListSubheader } from '@mui/material';
 import { CalendarToday, PriorityHigh, Add as AddIcon } from '@mui/icons-material';
 import React from 'react';
 import { pkg as todoPackage } from 'unigraph-dev-common/lib/data/unigraph.todo.pkg';
+import { pkg as semanticPackage } from 'unigraph-dev-common/lib/data/unigraph.semantic.pkg';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import Sugar from 'sugar';
-import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
+import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import Icon from '@mdi/react';
+import { mdiBookOpenOutline, mdiInboxOutline, mdiTagOutline } from '@mdi/js';
+import _ from 'lodash/fp';
+import { useEffectOnce } from 'react-use';
 import { DynamicViewRenderer } from '../../global.d';
 
 import { registerDynamicViews, registerQuickAdder, withUnigraphSubscription } from '../../unigraph-react';
@@ -12,6 +20,29 @@ import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { parseTodoObject } from './parseTodoObject';
 import { ATodoList, filters, maxDateStamp } from './utils';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
+import { pointerHoverSx, TabContext } from '../../utils';
+import { AutoDynamicViewDetailed } from '../../components/ObjectView/AutoDynamicViewDetailed';
+import { BacklinkView } from '../../components/ObjectView/BacklinkView';
+
+const groupByTags = (els: any[]) => {
+    const groupsMap: any = {};
+    els.forEach((it: any) => {
+        const elTags = (it.get('children')?.['_value['] || [])
+            .filter((tag: any) => tag?._value?._value?.type?.['unigraph.id'] === '$/schema/tag')
+            .map((tag: any) => tag?._value?._value?._value?.name?.['_value.%']);
+        console.log('groupByTags', { it, els, groupsMap, elTags });
+        elTags.forEach((tag: any) => {
+            if (groupsMap[tag]) {
+                groupsMap[tag].push(it);
+            } else {
+                groupsMap[tag] = [it];
+            }
+        });
+    });
+    return Object.entries(groupsMap)
+        .map(([k, v]) => ({ name: k, items: v as any[] }))
+        .sort((a, b) => (a.name > b.name ? 1 : -1));
+};
 
 function TodoListBody({ data }: { data: ATodoList[] }) {
     const todoList = data;
@@ -21,6 +52,7 @@ function TodoListBody({ data }: { data: ATodoList[] }) {
     React.useEffect(() => {
         const res = todoList;
         setFilteredItems(res);
+        console.log('TodoListBody', { data });
     }, [todoList]);
 
     return (
@@ -31,20 +63,8 @@ function TodoListBody({ data }: { data: ATodoList[] }) {
                 filters={filters}
                 defaultFilter="only-incomplete"
                 compact
+                groupers={{ tags: groupByTags }}
             />
-            <Fab
-                aria-label="add"
-                style={{ position: 'absolute', right: '16px', bottom: '16px' }}
-                onClick={() => {
-                    window.unigraph.getState('global/omnibarSummoner').setValue({
-                        show: true,
-                        tooltip: 'Add a todo item',
-                        defaultValue: '+todo ',
-                    });
-                }}
-            >
-                <AddIcon />
-            </Fab>
         </div>
     );
 }
@@ -197,7 +217,10 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
         </div>
     );
 };
-
+const parsedHasTags = (parsed: ATodoList | any) => {
+    const tags = parsed?.children.filter(_.propEq(['_value', 'type', 'unigraph.id'], '$/schema/tag'));
+    return tags ? tags.length > 0 : false;
+};
 const quickAdder = async (
     inputStr: string,
     // eslint-disable-next-line default-param-last
@@ -206,10 +229,25 @@ const quickAdder = async (
     refs?: any,
 ) => {
     const parsed = parseTodoObject(inputStr, refs);
-    console.log(parsed);
-    if (!preview)
+    if (!preview) {
         // eslint-disable-next-line no-return-await
-        return await window.unigraph.addObject(parsed, '$/schema/todo');
+        const uid = await window.unigraph.addObject(parsed, '$/schema/todo');
+        if (!parsedHasTags(parsed)) {
+            window.unigraph.runExecutable(
+                '$/executable/add-item-to-list',
+                {
+                    where: '$/entity/inbox',
+                    item: uid,
+                },
+                undefined,
+                undefined,
+                true,
+            );
+        }
+        console.log('adding todo', { uid, parsed });
+
+        return uid;
+    }
     return [parsed, '$/schema/todo'];
 };
 
@@ -302,8 +340,18 @@ export const init = () => {
         },
     });
 };
+const TodoInbox = (props: any) => (
+    <AutoDynamicViewDetailed
+        object={{
+            uid: window.unigraph.getNamespaceMap?.()?.['$/entity/inbox']?.uid,
+            _stub: true,
+            type: { 'unigraph.id': '$/schema/list' },
+        }}
+        attributes={{ reverse: true, noBar: true, initialTab: '$/schema/todo', ...props }}
+    />
+);
 
-export const TodoList = withUnigraphSubscription(
+const TodoAll = withUnigraphSubscription(
     TodoListBody,
     { schemas: [], defaultData: [], packages: [todoPackage] },
     {
@@ -311,15 +359,175 @@ export const TodoList = withUnigraphSubscription(
             tabContext.subscribeToType(
                 '$/schema/todo',
                 (result: ATodoList[]) => {
+                    console.log('TodoList', { result, data: result.map((el: any) => ({ ...el, _stub: true })) });
                     setData(result.map((el: any) => ({ ...el, _stub: true })));
                 },
                 subsId,
                 {
                     showHidden: true,
-                    queryAs:
-                        ' { uid type { <unigraph.id> } _updatedAt _createdAt _hide _value { done { <_value.!> } } } ',
+                    queryAs: todoQueryAs,
                 },
             );
         },
     },
 );
+
+// function TodoMenuTagList({ data }: { data: any[] }) {
+//     const tagList = data;
+
+//     const [filteredItems, setFilteredItems] = React.useState(tagList);
+
+//     React.useEffect(() => {
+//         const res = tagList;
+//         setFilteredItems(res);
+//         console.log('TodoMenuTagList', { data, tagList });
+//     }, [tagList]);
+
+//     return <DynamicObjectListView items={filteredItems} context={null} compact noBar />;
+// }
+
+type TodoMenuItems = {
+    [key: string]: {
+        iconPath: string | undefined;
+        text: string;
+        component: any;
+    };
+};
+
+const maketodoMenuItemsFromTag = (tag: any): TodoMenuItems => {
+    return {
+        [tag.get('name').as('primitive')]: {
+            iconPath: mdiTagOutline,
+            text: tag.get('name').as('primitive'),
+            component: (props: any) => {
+                console.log('BacklinkView', { tag, props, name: tag.get('name').as('primitive') });
+                return <BacklinkView data={tag} {...props} initialTab="$/schema/todo" />;
+            },
+        },
+    };
+};
+
+const TodoMenuSidebar = ({ mode, setMode, todoMenuModes, setTodoMenuModes, todoListProps }: any) => {
+    const tabContext = React.useContext(TabContext);
+
+    useEffectOnce(() => {
+        const subsId = getRandomInt();
+
+        tabContext.subscribeToType('$/schema/tag', (result: any) => {
+            console.log(`subscribed to $/schema/tag`, result);
+            setTodoMenuModes((menuItems: TodoMenuItems) => {
+                const newMenuItems = result.map(maketodoMenuItemsFromTag);
+                return newMenuItems.reduce((acc: TodoMenuItems, newVal: TodoMenuItems) => {
+                    return { ...acc, ...newVal };
+                }, menuItems);
+            });
+        });
+
+        return function cleanup() {
+            tabContext.unsubscribe(subsId);
+        };
+    });
+
+    return (
+        <Drawer
+            variant="permanent"
+            anchor="left"
+            sx={{
+                width: '100%',
+                height: '100%',
+                overflow: 'auto',
+                flexShrink: 0,
+            }}
+        >
+            <List>
+                <ListSubheader component="div" id="subheader-home">
+                    {' '}
+                    Todo Views{' '}
+                </ListSubheader>
+                {_.keys(todoMenuModes).map((key: string) => {
+                    return (
+                        <ListItem sx={pointerHoverSx} onClick={() => setMode(key)}>
+                            <ListItemIcon>
+                                {todoMenuModes[key].iconPath && (
+                                    <Icon path={todoMenuModes[key].iconPath as string} size={1} />
+                                )}
+                            </ListItemIcon>
+                            <ListItemText primary={todoMenuModes[key].text} />
+                        </ListItem>
+                    );
+                })}
+            </List>
+        </Drawer>
+    );
+};
+
+// const todoQueryAs = ' { uid type { <unigraph.id> } _updatedAt _createdAt _hide _value { done { <_value.!> } } } '
+const todoQueryAs = ` { 
+    uid type { <unigraph.id> } _updatedAt _createdAt _hide
+    _value {
+      done { <_value.!> } 
+      children {
+        <_value[> {
+          _value {
+            _value{
+              type { <unigraph.id> }
+              _value { name{ <_value.%> } }
+            }
+          }
+      }
+      }
+    } 
+  } `;
+
+const makeTodoInbox = (theseProps: any) => <TodoInbox {...theseProps} />;
+const makeTodoAll = (theseProps: any) => <TodoAll {...theseProps} />;
+export const TodoList = (props: any) => {
+    const [mode, setMode] = React.useState('inbox');
+
+    const [todoMenuModes, setTodoMenuModes] = React.useState<TodoMenuItems>(() => {
+        return {
+            inbox: {
+                iconPath: mdiInboxOutline,
+                text: 'Inbox',
+                component: makeTodoInbox,
+            },
+            all: {
+                iconPath: mdiBookOpenOutline,
+                text: 'All Todos',
+                component: makeTodoAll,
+            },
+        };
+    });
+
+    React.useEffect(() => {
+        console.log('TodoList mode', { mode, todoMenuModes, componentFunc: todoMenuModes[mode].component });
+    }, [todoMenuModes[mode].component]);
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'row' }}>
+            <div style={{ flexBasis: '15%', height: '100%' }}>
+                <TodoMenuSidebar
+                    mode={mode}
+                    setMode={setMode}
+                    todoMenuModes={todoMenuModes}
+                    setTodoMenuModes={setTodoMenuModes}
+                    todoListProps={props}
+                />
+            </div>
+            <div style={{ flexBasis: '85%', height: '100%' }}>{todoMenuModes[mode].component({ ...props })}</div>
+            <Fab
+                aria-label="add"
+                style={{ position: 'absolute', right: '16px', bottom: '16px' }}
+                onClick={() => {
+                    window.unigraph.getState('global/omnibarSummoner').setValue({
+                        show: true,
+                        tooltip: 'Add a todo item',
+                        defaultValue: '+todo ',
+                    });
+                }}
+            >
+                <AddIcon />
+            </Fab>
+        </div>
+    );
+};
