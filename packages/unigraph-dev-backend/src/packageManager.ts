@@ -211,22 +211,23 @@ export async function addUnigraphPackage(
 /**
  * Purges old versions of a package.
  */
-export const purgeOldVersions = (client: DgraphClient, states: any, pkg: PackageDeclaration) => {
+export const purgeOldVersions = async (client: DgraphClient, states: any, pkg: PackageDeclaration) => {
     const shorthandKeys = Object.keys(pkg.pkgSchemas)
         .map((el) =>
             el.startsWith('interface/') ? [`$/schema/${el}`] : [`$/schema/${el}`, `$/schema/interface/${el}`],
         )
         .flat();
     const oldMap = states.caches.schemas.dataAlt[0];
-    const delNquads = [];
+    const delNquads: string[] = [];
     shorthandKeys.forEach((key) => {
         const mapResult = oldMap[key]['_value['];
         if (Array.isArray(mapResult)) {
-            const quads = mapResult
+            // @ts-expect-error: already checked for boolean
+            const quads: string[] = mapResult
                 .map((el) => {
                     // $/package/pkgName/version/schema/schemaName
                     if (
-                        el['unigraph.id']?.split?.('/')[2] !== pkg.pkgManifest.package_name &&
+                        el['unigraph.id']?.split?.('/')[2] === pkg.pkgManifest.package_name &&
                         el['unigraph.id']?.split?.('/')[3] !== pkg.pkgManifest.version
                     ) {
                         return `<${oldMap[key].uid}> <_value[> <${el.uid}> .`;
@@ -236,6 +237,12 @@ export const purgeOldVersions = (client: DgraphClient, states: any, pkg: Package
                 .filter(Boolean);
             delNquads.push(...quads);
         }
+    });
+    const deleteNquads = new dgraph.Mutation();
+    deleteNquads.setDelNquads(delNquads.join('\n'));
+    await client.createDgraphUpsert({
+        query: false,
+        mutations: [deleteNquads],
     });
 };
 
@@ -291,3 +298,10 @@ export const disablePackage = async (client: DgraphClient, states: any, pkgName:
 
 export const enablePackage = async (client: DgraphClient, states: any, pkgName: string) =>
     disablePackage(client, states, pkgName, true);
+
+export const updatePackage = async (client: DgraphClient, states: any, pkg: PackageDeclaration) => {
+    await disablePackage(client, states, pkg.pkgManifest.package_name);
+    await purgeOldVersions(client, states, pkg);
+    await addUnigraphPackage(client, pkg, states.caches);
+    await enablePackage(client, states, pkg.pkgManifest.package_name);
+};

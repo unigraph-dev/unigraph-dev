@@ -11,9 +11,9 @@ import { buildGraphFromMap, processAutorefUnigraphId } from 'unigraph-dev-common
 import { Cache } from './caches';
 import { defaultPackages, defaultTypes, defaultUserlandSchemas } from './templates/defaultDb';
 import DgraphClient from './dgraphClient';
-import { addUnigraphPackage } from './packageManager';
+import { addUnigraphPackage, updatePackage } from './packageManager';
 
-export async function checkOrCreateDefaultDataModel(client: DgraphClient) {
+export async function checkOrCreateDefaultDataModel(client: DgraphClient, states: any) {
     const unigraphObject: unknown[] = await client.queryUnigraphId<unknown[]>('$/unigraph');
 
     if (unigraphObject.length < 1) {
@@ -49,7 +49,33 @@ export async function checkOrCreateDefaultDataModel(client: DgraphClient) {
             await tempSchemaCache.updateNow();
         }
     } else {
-        // Everything is OK, returning
+        // Look at all enabled packages and see if there's any updates
+        const pkgVerQueryRes =
+            await client.queryDgraph(`query { pkgs(func: uid(uu)) @filter(type(Entity) AND (NOT eq(<_hide>, true))) {
+            uid
+          <unigraph.id>
+            _value {
+                    version {
+                        <_value.%>
+            }
+          }
+      }
+          var(func: eq(<unigraph.id>, "$/schema/package_manifest")) {
+                uu as <~type>
+        } }`);
+        const pkgVersions = pkgVerQueryRes[0].map((it: any) => ({
+            uid: it.uid,
+            pkgName: it['unigraph.id'].split('/')[2],
+            version: it._value.version['_value.%'],
+        }));
+        const packageList = Object.fromEntries(defaultPackages.map((el: any) => [el.pkgManifest.package_name, el]));
+        const pkgsToUpdate = pkgVersions
+            .filter((it: any) => packageList[it.pkgName]?.pkgManifest.version !== it.version)
+            .map((it: any) => packageList[it.pkgName]);
+        for (let i = 0; i < pkgsToUpdate.length; i += 1) {
+            await updatePackage(client, states, pkgsToUpdate[i]);
+        }
+        console.log(`Updated ${pkgsToUpdate.length} packages!`);
     }
 }
 
