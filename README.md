@@ -105,6 +105,15 @@ document.onkeydown = function(evt) {
 };
 ```
 
+## Updating Unigraph
+
+Unigraph is being worked on constantly. If you're interested in getting the latest version, do the following:
+
+- `git pull` to retrieve the latest changes;
+- make sure backend and dgraph is not running;
+- `yarn build-deps` to re-build common libraries and default packages;
+- `./script/start_server.sh` to re-start backend, and update any new packages if available.
+
 ----
 
 
