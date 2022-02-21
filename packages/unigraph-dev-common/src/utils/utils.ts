@@ -305,7 +305,7 @@ export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
 
     function buildDictRecurse(obj: any, pastUids: any[] = []) {
         if (obj && typeof obj === 'object' && Array.isArray(obj)) {
-            obj.forEach((val, index) => {
+            Array.from(obj).forEach((val, index) => {
                 if (val?.uid && !dict[val.uid] && Object.keys(val).filter((el) => el.startsWith('_value')).length > 0)
                     dict[val.uid] = obj[index];
                 if (!pastUids.includes(val?.uid)) buildDictRecurse(val, [...pastUids, val?.uid]);
@@ -325,7 +325,7 @@ export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
 
     function buildGraphRecurse(obj: any, pastUids: any[] = []) {
         if (obj && typeof obj === 'object' && Array.isArray(obj)) {
-            obj.forEach((val, index) => {
+            Array.from(obj).forEach((val, index) => {
                 if (val?.uid && dict[val.uid]) obj[index] = dict[val.uid];
                 if (!pastUids.includes(val?.uid)) buildGraphRecurse(val, [...pastUids, val?.uid]);
             });

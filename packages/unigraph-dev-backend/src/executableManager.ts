@@ -118,9 +118,9 @@ export function initExecutables(
     states: any,
 ) {
     let newHooks = {};
+    Object.values(schedule).forEach((el) => el?.stop());
     executables.forEach(([key, el]) => {
         if (key.startsWith('0x') && el.periodic) {
-            schedule[el['unigraph.id']]?.stop();
             schedule[el['unigraph.id']] = cron.schedule(el.periodic, () =>
                 buildExecutable(el, { ...context, definition: el, params: {} }, unigraph, states)(),
             );

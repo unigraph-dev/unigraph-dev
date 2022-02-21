@@ -307,7 +307,6 @@ const syncGoogleCalendarSpecific = async () => {
     // SIDE-EFFECT: delete previous recurrences
     deletePrevRecurrences(objsWithRecurrence);
     if (toAdd.length > 0) {
-    }
         await unigraph.addObject(toAdd.slice(toAdd.length - MAX_EVENTS_PER_ADD), '$/schema/calendar_event');
     }
     if (syncToken !== nextSyncToken) {
