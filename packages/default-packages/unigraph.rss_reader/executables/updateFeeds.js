@@ -130,7 +130,7 @@ await Promise.all(
 );
 
 if (uids.length)
-    unigraph.runExecutable('$/package/unigraph.core/0.0.1/executable/add-item-to-list', {
+    unigraph.runExecutable('$/package/unigraph.core/0.1.0/executable/add-item-to-list', {
         where: '$/entity/feeds',
         item: uids.reverse(),
     });
