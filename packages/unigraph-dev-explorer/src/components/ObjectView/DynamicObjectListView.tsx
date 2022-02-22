@@ -503,7 +503,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
         if (currentTab.length >= 1)
             allItems = allItems.filter((it: any) => itemGetter(it).type['unigraph.id'] === currentTab);
         setProcItems(allItems);
-        if (allItems.length === 0) setCurrentTab('');
+        if (allItems.length === 0) setCurrentTab(initialTab || '');
     }, [reverseOrder, items, filtersUsed, currentTab]);
 
     const contextRef = React.useRef(context);
