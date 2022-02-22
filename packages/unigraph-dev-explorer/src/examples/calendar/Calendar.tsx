@@ -8,7 +8,7 @@ import moment from 'moment';
 import {} from 'lodash';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
-import { getDateAsUTC, TabContext } from '../../utils';
+import { TabContext } from '../../utils';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { CalendarViewEvent, TodoUni, CalendarEventUni, JournalUni, DatedObject } from './calendar-types';
@@ -153,6 +153,8 @@ const queryDatedWithinTimeRange = (start: string, end: string) => {
       }
     }`;
 };
+
+const getDateAsUTC = (ev: any) => new Date(ev);
 
 const todoToBigCalendarEvent = (datedObj: TodoUni): CalendarViewEvent => {
     const start = datedObj.get('time_frame/start/datetime').as('primitive');

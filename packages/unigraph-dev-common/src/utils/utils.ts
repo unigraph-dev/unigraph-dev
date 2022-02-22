@@ -17,6 +17,79 @@ function getPath(obj: any, path: string | string[]): any {
     }
 }
 
+/**
+ * Merges a single source object to a target object.
+ *
+ * NOTE: this function mutates the target object.
+ *
+ * @param target
+ * @param source
+ */
+export const deepMerge = (target: any, source: any) => {
+    const recurse = (targ: any, src: any) => {
+        if (_.isArray(targ) && !_.isArray(src)) {
+            src = [src];
+        } else if (!_.isArray(targ) && _.isArray(src)) {
+            targ = [targ];
+        }
+
+        if (_.isArray(targ) && _.isArray(src)) {
+            const uids: string[] = [];
+            const [[primObj, objObj], [primSrc, objSrc]] = [targ, src].map((arr) => {
+                const objs: any[] = [];
+                const prims: any[] = [];
+                arr.forEach((el) => {
+                    if (typeof el?.uid === 'string') {
+                        objs.push(el);
+                        uids.push(el.uid);
+                    } else prims.push(el);
+                });
+                return [prims, objs];
+            });
+            const finPrims = _.uniq(primObj.concat(primSrc));
+            const finObjs: any[] = [];
+            _.uniq(uids).forEach((uid) => {
+                const obj = objObj.find((el) => el.uid === uid);
+                const srcc = objSrc.find((el) => el.uid === uid);
+                if (obj && srcc) finObjs.push(recurse(obj, srcc));
+                else if (obj) finObjs.push(obj);
+                else if (srcc) finObjs.push(srcc);
+            });
+            return [...finPrims, ...finObjs];
+        }
+
+        if (targ?.uid && src?.uid && targ.uid !== src.uid) {
+            return src;
+        }
+
+        if (typeof src === 'undefined' || src === null) return targ;
+        if (typeof targ === 'undefined' || targ === null) return src;
+
+        // Iterate through `source` properties and if an `Object` set property to merge of `target` and `source` properties
+        for (const key of Object.keys(src)) {
+            if (src[key] instanceof Object) Object.assign(src[key], recurse(targ[key], src[key]));
+        }
+
+        // Join `target` and modified `source`
+        return Object.assign(targ || {}, src);
+    };
+
+    return recurse(target, source);
+};
+
+export function mergeObjectWithUpdater(orig: any, updater: any) {
+    const newObj = JSON.parse(JSON.stringify(orig, getCircularReplacer()));
+    const newObj2 = JSON.parse(JSON.stringify(newObj));
+    const clonedNewObject = JSON.parse(JSON.stringify(updater));
+    const changeLocs = findAllUids(newObj, updater.uid);
+    changeLocs.forEach(([loc, path]) => {
+        deepMerge(loc, clonedNewObject);
+        // console.log('subId', JSON.parse(JSON.stringify(subResults[subId])));
+        augmentStubs(loc, newObj2);
+    });
+    return newObj;
+}
+
 export function findUid(object: any, uid: string, path?: any[], seenPaths?: string[]) {
     const currentPath = [...(path || [])];
     if (object?.uid) {
@@ -232,7 +305,7 @@ export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
 
     function buildDictRecurse(obj: any, pastUids: any[] = []) {
         if (obj && typeof obj === 'object' && Array.isArray(obj)) {
-            obj.forEach((val, index) => {
+            Array.from(obj).forEach((val, index) => {
                 if (val?.uid && !dict[val.uid] && Object.keys(val).filter((el) => el.startsWith('_value')).length > 0)
                     dict[val.uid] = obj[index];
                 if (!pastUids.includes(val?.uid)) buildDictRecurse(val, [...pastUids, val?.uid]);
@@ -252,7 +325,7 @@ export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
 
     function buildGraphRecurse(obj: any, pastUids: any[] = []) {
         if (obj && typeof obj === 'object' && Array.isArray(obj)) {
-            obj.forEach((val, index) => {
+            Array.from(obj).forEach((val, index) => {
                 if (val?.uid && dict[val.uid]) obj[index] = dict[val.uid];
                 if (!pastUids.includes(val?.uid)) buildGraphRecurse(val, [...pastUids, val?.uid]);
             });

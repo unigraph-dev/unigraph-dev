@@ -9,6 +9,7 @@ import stringify from 'json-stable-stringify';
 import { mdiClockOutline, mdiNoteOutline } from '@mdi/js';
 import { Icon } from '@mdi/react';
 import Sugar from 'sugar';
+import { AppState } from 'unigraph-dev-common/lib/types/unigraph';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { ViewViewDetailed } from '../../components/ObjectView/DefaultObjectView';
 
@@ -25,6 +26,7 @@ import { PlaceholderNoteBlock } from './NoteBlockViews';
 import { useNoteEditor } from './NoteEditor';
 import todoItemPlugin from './contrib/todoItem';
 import { useSubscriptionDelegate } from '../../components/ObjectView/AutoDynamicView/SubscriptionDelegate';
+import { HistoryState } from './history';
 
 const childrenComponents = {
     '$/schema/note_block': {
@@ -328,6 +330,7 @@ export function DetailedOutlinerBlock({
     pullText,
     pushText,
     locateInlineChildren,
+    editorSubsId,
 }: any) {
     const tabContext = React.useContext(TabContext);
     // eslint-disable-next-line no-bitwise
@@ -340,11 +343,16 @@ export function DetailedOutlinerBlock({
         noteEditorProps ? window.unigraph.getState('global/focused').value?.uid === data.uid : false,
     );
     const nodesState = window.unigraph.addState(`${tabContext.viewId}/nodes`, []);
+    const historyState: AppState<HistoryState> = window.unigraph.addState(`${tabContext.viewId}/history`, {
+        history: [],
+        future: [],
+    });
     const editorContext = {
         edited: noteEditorProps ? edited : undefined,
         setCommand,
         callbacks,
         nodesState,
+        historyState,
     };
 
     const resetEdited = () => {
@@ -371,6 +379,7 @@ export function DetailedOutlinerBlock({
                 editorContext,
                 resetEdited,
                 setCommand,
+                editorSubsId,
             )) ||
         [];
 
@@ -673,7 +682,9 @@ export function DetailedNoteBlock({
             index={index}
             componentId={componentId}
             displayAs={displayAs}
-            pullText={() => data.get('text')?.as('primitive')}
+            pullText={(uid: boolean) =>
+                uid ? data?._value?.text?._value?._value?.uid : data.get('text')?.as('primitive')
+            }
             pushText={(text: string) => {
                 return window.unigraph.updateObject(
                     new UnigraphObject(data).get('text')._value._value.uid,
@@ -870,6 +881,7 @@ export function DetailedEmbedBlock({
             noteEditorProps={editor.hook}
             pullText={editor.pullText}
             pushText={editor.pushText}
+            editorSubsId={subsId}
             locateInlineChildren={(dd: any) => dd?._value?.content?._value}
             onFocus={(
                 isEditing: any,

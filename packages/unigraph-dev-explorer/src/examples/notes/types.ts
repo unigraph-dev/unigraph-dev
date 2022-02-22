@@ -3,4 +3,5 @@ export type NoteEditorContext = {
     setCommand: (a: any) => any;
     callbacks: any;
     nodesState: any;
+    historyState: any;
 };
