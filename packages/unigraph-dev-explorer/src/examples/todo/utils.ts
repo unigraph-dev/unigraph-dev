@@ -60,3 +60,11 @@ export const filters = [
         },
     },
 ];
+
+export const getEod = (date: Date) => {
+    date.setHours(23);
+    date.setMinutes(59);
+    date.setSeconds(59);
+    date.setMilliseconds(999);
+    return date.toJSON();
+};
