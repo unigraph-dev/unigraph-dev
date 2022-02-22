@@ -6,6 +6,7 @@ import React from 'react';
 import Sugar from 'sugar';
 import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
+import { BacklinkView } from '../../components/ObjectView/BacklinkView';
 import { DynamicViewRenderer } from '../../global.d';
 import { registerDynamicViews, registerQuickAdder } from '../../unigraph-react';
 import { parseTodoObject } from './parseTodoObject';
@@ -314,10 +315,6 @@ export const TodoList = (props: any) => {
         };
     });
 
-    React.useEffect(() => {
-        console.log('TodoList mode', { mode, todoMenuModes, componentFunc: todoMenuModes[mode].component });
-    }, [todoMenuModes[mode].component]);
-
     return (
         <div style={{ display: 'flex', flexDirection: 'row' }}>
             <div style={{ flexBasis: '15%', height: '100%' }}>
@@ -329,7 +326,9 @@ export const TodoList = (props: any) => {
                     todoListProps={props}
                 />
             </div>
-            <div style={{ flexBasis: '85%', height: '100%' }}>{todoMenuModes[mode].component({ ...props })}</div>
+            <div style={{ flexBasis: '85%', height: '100%' }}>
+                {todoMenuModes[mode].component({ ...props, key: mode })}
+            </div>
             <Fab
                 aria-label="add"
                 style={{ position: 'absolute', right: '16px', bottom: '16px' }}

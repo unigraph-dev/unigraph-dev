@@ -16,68 +16,7 @@ import { DynamicObjectListView } from '../../components/ObjectView/DynamicObject
 import { withUnigraphSubscription } from '../../unigraph-react';
 import { pointerHoverSx, TabContext } from '../../utils';
 import { CurrentEvents } from '../calendar/CurrentEvents';
-import { ATodoList, filters, getEod } from './utils';
-
-const groupByTags = (els: any[]) => {
-    const groupsMap: any = {};
-    els.forEach((it: any) => {
-        const elTags = (it.get('children')?.['_value['] || [])
-            .filter((tag: any) => tag?._value?._value?.type?.['unigraph.id'] === '$/schema/tag')
-            .map((tag: any) => tag?._value?._value?._value?.name?.['_value.%']);
-        elTags.forEach((tag: any) => {
-            if (groupsMap[tag]) {
-                groupsMap[tag].push(it);
-            } else {
-                groupsMap[tag] = [it];
-            }
-        });
-    });
-    return Object.entries(groupsMap)
-        .map(([k, v]) => ({ name: k, items: v as any[] }))
-        .sort((a, b) => (a.name > b.name ? 1 : -1));
-};
-
-export const sortDatedTodosByEnd = (a: any, b: any) => {
-    return (
-        Sugar.Date.create(new Date(new UnigraphObject(a).get('time_frame/end/datetime').as('primitive'))).getTime() -
-        Sugar.Date.create(new Date(new UnigraphObject(b).get('time_frame/end/datetime').as('primitive'))).getTime()
-    );
-};
-const groupTodoByTimeFrameEnd = (els: any[]) => {
-    // Group all current events into an agenda view
-    // 1. Find all timeframed todos and group them
-    const timeframedTodos = els.filter(has(['_value', 'time_frame']));
-    const groups: any = {};
-    groups[Sugar.Date.medium(new Date())] = [];
-    timeframedTodos.forEach((el) => {
-        const dd = Sugar.Date.medium(new Date(new UnigraphObject(el).get('time_frame/end/datetime').as('primitive')));
-        if (groups[dd]) groups[dd].push(el);
-        else groups[dd] = [el];
-    });
-    // 2. Go through groups of timeframedTodos
-
-    const finalGroups: any = Object.entries(groups)
-        .sort((a, b) => Sugar.Date.create(a[0]).getTime() - Sugar.Date.create(b[0]).getTime())
-        .map(([key, value]: any) => {
-            const items = flatten(value.sort(sortDatedTodosByEnd));
-            const endOfDayKey = new Date(getEod(new Date(key))).getTime();
-            const endOfToday = new Date(getEod(new Date())).getTime();
-            const isBeforeNow = endOfDayKey < endOfToday;
-            const name = isBeforeNow ? 'Overdue' : key;
-
-            return { name, items };
-        });
-    const overdue = {
-        name: 'Overdue',
-        items: finalGroups
-            .filter((x: any) => x.name === 'Overdue')
-            .map(prop('items'))
-            .flat(),
-    };
-    const notOverdue = finalGroups.filter((x: any) => x.name !== 'Overdue');
-
-    return [overdue, ...notOverdue];
-};
+import { ATodoList, filters, getEod, groupByTags, groupers, groupTodoByTimeFrameEnd } from './utils';
 
 export const TodoInbox = (props: any) => (
     <AutoDynamicViewDetailed
@@ -86,13 +25,13 @@ export const TodoInbox = (props: any) => (
             _stub: true,
             type: { 'unigraph.id': '$/schema/list' },
         }}
-        attributes={{ reverse: true, noBar: true, initialTab: '$/schema/todo', ...props }}
+        attributes={{ reverse: true, noRemover: true, initialTab: '$/schema/todo', ...props }}
     />
 );
 
-export const TodoToday = (props: any) => {
-    return <CurrentEvents />;
-};
+// export const TodoToday = (props: any) => {
+//     return <CurrentEvents />;
+// };
 
 function TodoListBody({ data }: { data: ATodoList[] }) {
     const todoList = data;
@@ -190,6 +129,37 @@ export const TodoAll = (props: any) => {
     return <Component {...props} />;
 };
 
+function TodoTodayBody({ data }: { data: ATodoList[] }) {
+    const todoList = data;
+
+    const [filteredItems, setFilteredItems] = React.useState(todoList);
+
+    React.useEffect(() => {
+        const res = todoList;
+        setFilteredItems(res);
+        console.log('TodoUpcomingBody', { data });
+    }, [todoList]);
+
+    return (
+        <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
+            <DynamicObjectListView
+                items={filteredItems}
+                context={null}
+                filters={filters}
+                defaultFilter={['only-incomplete', 'until-today']}
+                compact
+                groupers={groupers}
+                groupBy="due_date"
+            />
+        </div>
+    );
+}
+
+export const TodoToday = (props: any) => {
+    const Component = withSubscribeTodos(TodoTodayBody);
+    return <Component {...props} />;
+};
+
 function TodoUpcomingBody({ data }: { data: ATodoList[] }) {
     const todoList = data;
 
@@ -209,7 +179,7 @@ function TodoUpcomingBody({ data }: { data: ATodoList[] }) {
                 filters={filters}
                 defaultFilter="only-incomplete"
                 compact
-                groupers={{ tags: groupByTags, due_date: groupTodoByTimeFrameEnd }}
+                groupers={groupers}
                 groupBy="due_date"
             />
         </div>
@@ -225,7 +195,8 @@ export type TodoMenuItems = {
     [key: string]: {
         iconPath: string | undefined;
         text: string;
-        component: any;
+        component: React.FC;
+        tag?: any;
     };
 };
 
@@ -234,6 +205,7 @@ const maketodoMenuItemsFromTag = (tag: any): TodoMenuItems => {
         [tag.get('name').as('primitive')]: {
             iconPath: mdiTagOutline,
             text: tag.get('name').as('primitive'),
+            tag,
             component: (props: any) => {
                 console.log('BacklinkView', { tag, props, name: tag.get('name').as('primitive') });
                 return <BacklinkView data={tag} {...props} initialTab="$/schema/todo" />;
