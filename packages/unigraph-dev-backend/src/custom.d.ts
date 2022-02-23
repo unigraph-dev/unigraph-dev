@@ -64,6 +64,7 @@ declare type EventCreateUnigraphObject = {
     id: number;
     schema: string | undefined;
     padding: boolean | undefined;
+    subIds: any[] | any;
 };
 
 declare type EventUpdateSPO = {
