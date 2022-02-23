@@ -29,8 +29,6 @@ declare type Subscription = {
     connId?: string;
     clientId?: string;
     hibernated?: boolean;
-    queryNow?: any;
-    finalQuery?: any;
     queryTime?: number;
 };
 
