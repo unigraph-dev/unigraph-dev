@@ -715,6 +715,7 @@ export function DetailedNoteBlock({
                     },
                     indentChild: callbacks['indent-child'],
                     unindentChild: callbacks['unindent-child-in-parent'],
+                    convertChildToTodo: () => callbacks['convert-child-to-todo']?.(getCurrentText()),
                 });
             }}
             onPointerUp={onPointerUpHandler}
