@@ -531,7 +531,6 @@ export function getLocalUnigraphAPI(
                 connId: el.connId,
                 clientId: el.clientId,
                 hibernated: el.hibernated,
-                queryNow: el.queryNow,
                 queryTime: el.queryTime,
             })) || [],
         touch: async (uids) => {

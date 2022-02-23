@@ -26,21 +26,26 @@ export const useSubscriptionDelegate: (...args: any) => [() => any, number] = (
             uidRef.current = object?.uid;
             // console.log(tabContext);
             // if (subsId) tabContext.unsubscribe(subsId);
-            let query = objectView?.query?.(object.uid);
+            let query = objectView?.query?.('QUERYFN_TEMPLATE');
             if (!query) {
-                query = `(func: uid(${object.uid})) @recurse {
+                query = `(func: uid(QUERYFN_TEMPLATE)) @recurse {
                 uid
                 unigraph.id
                 expand(_userpredicate_)
               }`;
             }
-            tabContext.subscribeToQuery(
-                query,
-                (objects: any[]) => {
-                    setLoadedObj(buildGraph(objects)[0]);
+            tabContext.subscribe(
+                {
+                    type: 'object',
+                    uid: [object?.uid],
+                    options: {
+                        queryFn: query,
+                    },
+                },
+                (newObjects: any[]) => {
+                    setLoadedObj(buildGraph(newObjects)[0]);
                 },
                 newSubs,
-                { noExpand: true },
             );
             setSubsId(newSubs);
         }

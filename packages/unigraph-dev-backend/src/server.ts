@@ -104,14 +104,15 @@ export default async function startServer(client: DgraphClient) {
     await checkOrCreateDefaultDataModel(client);
 
     // Initialize subscriptions
-    const pollCallback: MsgCallbackFn = (id, newdata, msgPort, sub, ofUpdate) => {
+    const pollCallback: MsgCallbackFn = (newdata, sub, ofUpdate) => {
         if (sub?.callbackType === 'messageid') {
-            if (msgPort.readyState === 1) {
+            const msgPort = sub.msgPort!;
+            if (msgPort?.readyState === 1) {
                 msgPort.send(
                     stringify({
                         type: 'subscription',
                         updated: true,
-                        id,
+                        id: sub.id,
                         result: newdata,
                         ofUpdate,
                     }),
@@ -152,10 +153,31 @@ export default async function startServer(client: DgraphClient) {
         });
     };
 
+    let pendingIds: any[] = [];
+    const poller = _.debounce(
+        (a, b, c, d, e) => {
+            // console.log(`updating `, d);
+            pollSubscriptions(a, b, c, d, e);
+            pendingIds = [];
+        },
+        100,
+        { leading: false, trailing: true },
+    );
+    const debouncedPollSubscriptions = (subs: any, cclient: any, callback: any, ids: any, states: any) => {
+        pendingIds.push(...(Array.isArray(ids) ? ids : [ids]));
+        poller(subs, cclient, callback, pendingIds, states);
+    };
+
     const hooks: Hooks = {
         after_subscription_added: [
             async (context: HookAfterSubscriptionAddedParams) => {
-                pollSubscriptions(context.subscriptions, dgraphClient, pollCallback, context.ids, serverStates);
+                debouncedPollSubscriptions(
+                    context.subscriptions,
+                    dgraphClient,
+                    pollCallback,
+                    context.ids,
+                    serverStates,
+                );
             },
         ],
         after_schema_updated: [
@@ -956,10 +978,12 @@ export default async function startServer(client: DgraphClient) {
                 ws,
             );
             pollSubscriptions(
-                serverStates.subscriptions.filter((el: any) => el.clientId === clientBrowserId),
+                serverStates.subscriptions,
                 dgraphClient,
                 pollCallback,
-                undefined,
+                serverStates.subscriptions
+                    .filter((el: any) => el.clientId === clientBrowserId)
+                    .map((el: any) => el.id),
                 serverStates,
             );
         }
