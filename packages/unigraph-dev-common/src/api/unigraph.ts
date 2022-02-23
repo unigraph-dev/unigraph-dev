@@ -359,9 +359,9 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 };
                 sendEvent(connection, 'get_object', { uidOrName, options, id });
             }),
-        addObject: (object, schema) =>
+        addObject: (object, schema, id?: any, subIds?: any) =>
             new Promise((resolve, reject) => {
-                const id = getRandomInt();
+                id = id || getRandomInt();
                 callbacks[id] = (response: any) => {
                     if (response.success) resolve(response.results);
                     else reject(response);
@@ -370,6 +370,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                     object,
                     schema,
                     id,
+                    subIds,
                 });
             }),
         deleteObject: (uid, permanent?) => {

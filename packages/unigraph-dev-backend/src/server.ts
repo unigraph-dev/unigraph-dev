@@ -524,7 +524,7 @@ export default async function startServer(client: DgraphClient) {
                 return false;
             }
             localApi
-                .addObject(event.object, event.schema, event.padding)
+                .addObject(event.object, event.schema, event.padding, event.subIds)
                 .then((uids: any[]) => {
                     ws.send(makeResponse(event, true, { results: uids }));
                 })
