@@ -1,6 +1,6 @@
 import React from 'react';
 import Icon from '@mdi/react';
-import { mdiFormatIndentDecrease, mdiFormatIndentIncrease, mdiKeyboardReturn } from '@mdi/js';
+import { mdiCheckboxOutline, mdiFormatIndentDecrease, mdiFormatIndentIncrease, mdiKeyboardReturn } from '@mdi/js';
 import { isMobile } from '../../utils';
 
 export const MobileBar = () => {
@@ -52,6 +52,16 @@ export const MobileBar = () => {
                 }}
             >
                 <Icon size={0.8} style={{ margin: '3px 8px' }} path={mdiKeyboardReturn} />
+            </div>
+
+            <div
+                onPointerDownCapture={(ev) => {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    actionsState.value?.convertChildToTodo();
+                }}
+            >
+                <Icon size={0.8} style={{ margin: '3px 8px' }} path={mdiCheckboxOutline} />
             </div>
         </div>
     );

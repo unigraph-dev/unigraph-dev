@@ -168,7 +168,6 @@ export function AutoDynamicView({
                                     'unigraph.id': '$/schema/interface/semantic',
                                 },
                                 _value: {
-                                    type: { 'unigraph.id': item.itemType },
                                     uid: item.uid,
                                 },
                             },

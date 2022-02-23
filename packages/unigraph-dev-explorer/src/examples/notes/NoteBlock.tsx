@@ -322,7 +322,7 @@ export function DetailedOutlinerBlock({
     displayAs,
     noteEditorProps,
     onFocus,
-    onPointerUp,
+    onClick,
     onKeyDown,
     editorFrameStyle,
     beforeEditor,
@@ -511,11 +511,11 @@ export function DetailedOutlinerBlock({
                         key="editor-frame"
                         ref={editorRef}
                         tabIndex={textInput?.current ? undefined : -1}
-                        onPointerUp={(ev) => {
+                        onClick={(ev) => {
                             if (textInput?.current && !isEditing) {
                                 setIsEditing(true);
                             }
-                            return onPointerUp(
+                            return onClick(
                                 ev,
                                 isEditing,
                                 setIsEditing,
@@ -617,7 +617,7 @@ export function DetailedNoteBlock({
     const dataRef = React.useRef<any>(data);
     dataRef.current = data;
 
-    const onPointerUpHandler = React.useCallback(
+    const onClickHandler = React.useCallback(
         (
             ev,
             isEditing: any,
@@ -715,9 +715,10 @@ export function DetailedNoteBlock({
                     },
                     indentChild: callbacks['indent-child'],
                     unindentChild: callbacks['unindent-child-in-parent'],
+                    convertChildToTodo: () => callbacks['convert-child-to-todo']?.(getCurrentText()),
                 });
             }}
-            onPointerUp={onPointerUpHandler}
+            onClick={onClickHandler}
             beforeEditor={
                 isChildren && data._hide !== true ? (
                     <div
@@ -748,8 +749,9 @@ export function DetailedEmbedBlock({
     componentId,
     displayAs,
 }: any) {
-    const onPointerUpHandler = React.useCallback(
+    const onClickHandler = React.useCallback(
         (ev, isEditing, setIsEditing, getCurrentText, textInput) => {
+            console.log(ev.target);
             const caretPos = Number((ev.target as HTMLElement).getAttribute('markdownPos') || -1);
             (ev.target as HTMLElement).removeAttribute('markdownPos');
             const finalCaretPos = caretPos === -1 ? getCurrentText().length : caretPos;
@@ -899,9 +901,10 @@ export function DetailedEmbedBlock({
                     },
                     indentChild: callbacks['indent-child'],
                     unindentChild: callbacks['unindent-child-in-parent'],
+                    convertChildToTodo: () => callbacks['convert-child-to-todo']?.(getCurrentText()),
                 });
             }}
-            onPointerUp={onPointerUpHandler}
+            onClick={onClickHandler}
             onKeyDown={editor.hook ? undefined : onKeyDownHandler}
             editorFrameStyle={
                 focused
