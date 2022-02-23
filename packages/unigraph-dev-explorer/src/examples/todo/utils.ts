@@ -68,7 +68,6 @@ export const filters = [
     {
         id: 'until-today',
         fn: (obj: any) => {
-            console.log('todo filter until-today', { obj, unpadded: unpad(obj) });
             let r;
             try {
                 const endDatetime = new UnigraphObject(obj).get('time_frame/end/datetime').as('primitive');
@@ -83,6 +82,7 @@ export const filters = [
 
 export const groupByTags = (els: any[]) => {
     const groupsMap: any = {};
+    // console.log('groupByTags', els);
     els.forEach((it: any) => {
         const elTags = (it.get('children')?.['_value['] || [])
             .filter((tag: any) => tag?._value?._value?.type?.['unigraph.id'] === '$/schema/tag')

@@ -24,8 +24,8 @@ export function BacklinkView({
     callbacks,
     reverse,
     uid,
-    initialTab,
     titleBar = ' backlinks',
+    ...attributes
 }: any) {
     const [objects, setObjects]: [any[], any] = React.useState([]);
     const [id, setId] = React.useState(Date.now());
@@ -49,10 +49,6 @@ export function BacklinkView({
         };
     });
 
-    useEffect(() => {
-        console.log('BacklinkView', { initialTab });
-    }, [initialTab]);
-
     return (
         <DynamicObjectListView
             items={objects}
@@ -75,7 +71,7 @@ export function BacklinkView({
                 }
             }}
             noRemover
-            initialTab={initialTab}
+            {...attributes}
         />
     );
 }
