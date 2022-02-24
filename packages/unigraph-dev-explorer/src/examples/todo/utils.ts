@@ -1,4 +1,4 @@
-import { flatten, has, prop } from 'lodash/fp';
+import { find, findLast, flatten, flow, has, prop } from 'lodash/fp';
 import Sugar from 'sugar';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
@@ -150,3 +150,175 @@ export const getEod = (date: Date) => {
     date.setMilliseconds(999);
     return date;
 };
+
+export const completeTodoQueryBody = `
+uid
+type { <unigraph.id> }
+dgraph.type
+<_hide>
+<_value> {
+    uid
+    name {
+        uid _value {
+            dgraph.type uid
+            type { <unigraph.id> }
+            _value { dgraph.type uid type { <unigraph.id> } <_value.%> }
+        }
+    }
+    done { uid <_value.!> }
+    priority { <_value.#i> }
+    time_frame {
+        uid _value {
+            dgraph.type uid type { <unigraph.id> }
+            _value {
+                start {
+                    uid _value {
+                        dgraph.type uid
+                        type { <unigraph.id> }
+                        _value { datetime { <_value.%dt> } timezone { <_value.%> } }
+                    }
+                }
+                end {
+                    uid _value {
+                        dgraph.type uid
+                        type { <unigraph.id> }
+                        _value { datetime { <_value.%dt> } timezone { <_value.%> } }
+                    }
+                }
+            }
+        }
+    }
+    children {
+        <_value[> {
+            uid _key _index {<_value.#i> uid}
+            _value {
+                dgraph.type uid type { <unigraph.id> }
+                _value {
+                    dgraph.type uid type { <unigraph.id> }
+                    _value {
+                        uid name { uid <_value.%> }
+                        color { uid _value { <_value.%> dgraph.type uid type { <unigraph.id> } } }
+                    }
+                }
+            }
+        }
+    }
+}`;
+
+// get inbox uid from name - have to get count from the type field
+export const getTodoInboxCountQuery = (uid: string) =>
+    `inbox_todos(func: uid(${uid})) @cascade{
+        _value{children{<_value[>{_value{
+            paths as math(1) 
+            _value{
+            type @filter(eq(<unigraph.id>,"$/schema/todo")){ 
+                uid <unigraph.id>
+                num_todos:math(paths)
+            }
+            _value{
+                done @filter(eq(<_value.!>, false)) {
+                    uid
+                }
+            }
+        }}}}}
+    }`;
+export const getTodoInboxCountFromRes = prop([
+    '0',
+    '_value',
+    'children',
+    '_value[',
+    '0',
+    '_value',
+    '_value',
+    'type',
+    'num_todos',
+]);
+
+export const getAllTodoCountQuery = () =>
+    `todos(func: eq(<unigraph.id>, "$/schema/todo")) @cascade{
+        <~type> {
+            todoCounts: count(uid)
+            _value{
+                done @filter(eq(<_value.!>, false)) {
+                    uid
+                }
+            }
+        }
+    }
+
+    `;
+export const getAllTodoCountFromRes = flow(prop(['0', '~type']), findLast(has('todoCounts')), prop('todoCounts'));
+
+export const getUpcomingTodoCountQuery = () =>
+    `todos(func: eq(<unigraph.id>, "$/schema/todo")) @cascade{
+        <~type> {
+            todoCounts: count(uid)
+            _value{
+                done @filter(eq(<_value.!>, false)) {
+                    uid
+                }
+                time_frame {
+                    uid _value {
+                        dgraph.type uid type { <unigraph.id> }
+                        _value {
+                            end {
+                                uid _value {
+                                    _value { datetime { <_value.%dt> } }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    `;
+export const getUpcomingTodoCountFromRes = getAllTodoCountFromRes;
+
+export const getTodayTodoCountQuery = () =>
+    `todos(func: eq(<unigraph.id>, "$/schema/todo")) @cascade{
+        <~type> {
+            todoCounts: count(uid)
+            _value{
+                done @filter(eq(<_value.!>, false)) {
+                    uid
+                }
+                time_frame {
+                    uid _value {
+                        dgraph.type uid type { <unigraph.id> }
+                        _value {
+                            end {
+                                uid _value {
+                                    _value { datetime @filter(le(<_value.%dt>, "${getEod(
+                                        new Date(),
+                                    ).toJSON()}"))  { <_value.%dt> } }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    `;
+export const getTodayTodoCountFromRes = getAllTodoCountFromRes;
+
+export const getTaggedTodoCountQuery = (tagUid: string) =>
+    `(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted))) @cascade{
+        todoCounts: count(uid)
+        uid
+        type @filter(eq(<unigraph.id>, "$/schema/todo")) { <unigraph.id> }
+        _value{
+            done @filter(eq(<_value.!>, false)) {
+                <_value.!>
+            }
+        }
+    }
+    var(func: uid(${tagUid})) {
+        <unigraph.origin> {
+            res as uid
+        }
+    }`;
+export const getTaggedTodoCountFromRes = flow(find(has('todoCounts')), prop('todoCounts'));

@@ -1,4 +1,4 @@
-import { mdiTagOutline } from '@mdi/js';
+import { mdiBookOpenOutline, mdiCalendarAlert, mdiCalendarOutline, mdiInboxOutline, mdiTagOutline } from '@mdi/js';
 import Icon from '@mdi/react';
 import { Drawer, ListItemText, ListSubheader } from '@mui/material';
 import List from '@mui/material/List';
@@ -16,7 +16,25 @@ import { DynamicObjectListView } from '../../components/ObjectView/DynamicObject
 import { withUnigraphSubscription } from '../../unigraph-react';
 import { pointerHoverSx, TabContext } from '../../utils';
 import { CurrentEvents } from '../calendar/CurrentEvents';
-import { ATodoList, filters, getEod, groupByTags, groupers, groupTodoByTimeFrameEnd } from './utils';
+import { TodoTagView } from './TodoTagView';
+import {
+    ATodoList,
+    filters,
+    getEod,
+    getTodoInboxCountFromRes,
+    getTodoInboxCountQuery,
+    groupByTags,
+    groupers,
+    groupTodoByTimeFrameEnd,
+    getAllTodoCountQuery,
+    getAllTodoCountFromRes,
+    getTodayTodoCountQuery,
+    getUpcomingTodoCountQuery,
+    getTodayTodoCountFromRes,
+    getUpcomingTodoCountFromRes,
+    getTaggedTodoCountQuery,
+    getTaggedTodoCountFromRes,
+} from './utils';
 
 export const TodoInbox = (props: any) => (
     <AutoDynamicViewDetailed
@@ -197,45 +215,170 @@ export type TodoMenuItems = {
         text: string;
         component: React.FC;
         tag?: any;
+        getCountQuery?: (() => string | undefined) | undefined;
+        getCountFromRes?: ((res: any) => number) | undefined;
     };
 };
 
 const maketodoMenuItemsFromTag = (tag: any): TodoMenuItems => {
+    const tagName = tag.get('name').as('primitive');
     return {
-        [tag.get('name').as('primitive')]: {
+        [tagName]: {
             iconPath: mdiTagOutline,
-            text: tag.get('name').as('primitive'),
+            text: tagName,
             tag,
             component: (props: any) => {
-                console.log('BacklinkView', { tag, props, name: tag.get('name').as('primitive') });
-                return <BacklinkView data={tag} {...props} initialTab="$/schema/todo" />;
+                console.log('TodoTagView', { tag, props, name: tagName });
+                return <TodoTagView data={tag} {...props} initialTab="$/schema/todo" />;
             },
+            getCountQuery: () => getTaggedTodoCountQuery(tag.uid),
+            getCountFromRes: getTaggedTodoCountFromRes,
         },
     };
 };
 
-export const TodoMenuSidebar = ({ mode, setMode, todoMenuModes, setTodoMenuModes, todoListProps }: any) => {
+export const todoDefaultMenuItems: TodoMenuItems = {
+    inbox: {
+        iconPath: mdiInboxOutline,
+        text: 'Inbox',
+        component: TodoInbox,
+        getCountQuery: () => {
+            const inboxUid = window.unigraph.getNamespaceMap?.()?.['$/entity/inbox']?.uid;
+            return inboxUid ? getTodoInboxCountQuery(inboxUid) : undefined;
+        },
+        getCountFromRes: getTodoInboxCountFromRes,
+    },
+    all: {
+        iconPath: mdiBookOpenOutline,
+        text: 'All Todos',
+        component: TodoAll,
+        getCountQuery: getAllTodoCountQuery,
+        getCountFromRes: getAllTodoCountFromRes,
+    },
+    today: {
+        iconPath: mdiCalendarOutline,
+        text: 'Today',
+        component: TodoToday,
+        getCountQuery: getTodayTodoCountQuery,
+        getCountFromRes: getTodayTodoCountFromRes,
+    },
+    upcoming: {
+        iconPath: mdiCalendarAlert,
+        text: 'Upcoming',
+        component: TodoUpcoming,
+        getCountQuery: getUpcomingTodoCountQuery,
+        getCountFromRes: getUpcomingTodoCountFromRes,
+    },
+};
+
+const TodoMenuSidebarItem = ({ iconPath, text, onClick, selected, getCountQuery, getCountFromRes }: any) => {
+    const tabContext = React.useContext(TabContext);
+    const [itemCount, setItemCount] = React.useState<number | undefined>(undefined);
+    useEffectOnce(() => {
+        if (getCountQuery) {
+            const subsId = getRandomInt();
+            tabContext.subscribeToQuery(
+                getCountQuery(),
+                (results: any[]) => {
+                    console.log('subscribeToQuery', { itemCount, results, text, count: getCountFromRes(results) });
+                    setItemCount(getCountFromRes(results));
+                },
+                subsId,
+                { noExpand: true },
+            );
+            return function cleanup() {
+                tabContext.unsubscribe(subsId);
+            };
+        }
+        return undefined;
+    });
+
+    return (
+        <ListItem sx={pointerHoverSx} onClick={onClick} selected={selected}>
+            <ListItemIcon>{iconPath && <Icon path={iconPath as string} size={1} />}</ListItemIcon>
+            <ListItemText primary={text} />
+            {itemCount && <ListItemText primary={itemCount} sx={{ textAlign: 'right' }} />}
+        </ListItem>
+    );
+};
+
+export const TodoMenuSidebar = ({ mode, setMode, todoViews, setTodoViews, todoListProps }: any) => {
+    // basically the same as todoViews but grouped by sections
+    const [todoMenuItems, setTodoMenuItems] = React.useState<{ [key: string]: TodoMenuItems }>(() => {
+        return { defaultViews: todoDefaultMenuItems };
+    });
+    const [archiveExpand, setArchiveExpand] = React.useState<boolean>(false);
     const tabContext = React.useContext(TabContext);
 
     useEffectOnce(() => {
+        // Subscribe to tags in general
         const subsId = getRandomInt();
 
-        tabContext.subscribeToType('$/schema/tag', (result: any) => {
-            console.log(`subscribed to $/schema/tag`, result);
-            const todoTags = result
-                .map(maketodoMenuItemsFromTag)
-                .reduce((acc: TodoMenuItems, newVal: TodoMenuItems) => {
-                    return { ...acc, ...newVal };
-                }, {});
-            setTodoMenuModes((menuItems: TodoMenuItems) => {
-                return { ...menuItems, ...todoTags };
-            });
-        });
+        tabContext.subscribeToType(
+            '$/schema/tag',
+            (result: any) => {
+                console.log(`subscribed to $/schema/tag`, result);
+                const todoTags = result
+                    .map(maketodoMenuItemsFromTag)
+                    .reduce((acc: TodoMenuItems, newVal: TodoMenuItems) => {
+                        return { ...acc, ...newVal };
+                    }, {});
+                setTodoViews((currentViews: TodoMenuItems) => {
+                    return { ...currentViews, ...todoTags };
+                });
+                setTodoMenuItems((currentMenuItems: { [key: string]: TodoMenuItems }) => {
+                    return { ...currentMenuItems, tags: { ...todoTags } };
+                });
+            },
+            subsId,
+        );
 
         return function cleanup() {
             tabContext.unsubscribe(subsId);
         };
     });
+
+    useEffectOnce(() => {
+        // Subscribe to archived tags
+        // Not super efficient, ideally we'd query tags while filter for backlinks to $/entity/todo_archived_tags
+        const subsId = getRandomInt();
+        tabContext.subscribeToObject(
+            '$/entity/todo_archived_tags',
+            (result: any) => {
+                const listContents = result.get('children')?.['_value['] || [];
+                const archivedTodoTagObjs = listContents
+                    .map((x: any) => new UnigraphObject(x?._value?._value))
+                    .filter((x: any) => x.getType('$/schema/tag'));
+                const archivedTodoTags = archivedTodoTagObjs
+                    .map(maketodoMenuItemsFromTag)
+                    .reduce((acc: TodoMenuItems, newVal: TodoMenuItems) => {
+                        return { ...acc, ...newVal };
+                    }, {});
+                setTodoViews((currentViews: TodoMenuItems) => {
+                    return { ...currentViews, ...archivedTodoTags };
+                });
+                console.log(`subscribed to $/entity/todo_archived_tags`, {
+                    result,
+                    archivedTodoTagObjs,
+                    archivedTodoTags,
+                });
+                setTodoMenuItems((currentMenuItems: { [key: string]: TodoMenuItems }) => {
+                    return { ...currentMenuItems, archivedTags: { ...archivedTodoTags } };
+                });
+            },
+            subsId,
+        );
+        return function cleanup() {
+            tabContext.unsubscribe(subsId);
+        };
+    });
+
+    const renderMenuItem = React.useCallback(
+        (key: string) => (
+            <TodoMenuSidebarItem {...todoViews[key]} onClick={() => setMode(key)} selected={key === mode} />
+        ),
+        [mode, setMode, todoViews],
+    );
 
     return (
         <Drawer
@@ -253,18 +396,26 @@ export const TodoMenuSidebar = ({ mode, setMode, todoMenuModes, setTodoMenuModes
                     {' '}
                     Todo Views{' '}
                 </ListSubheader>
-                {_.keys(todoMenuModes).map((key: string) => {
-                    return (
-                        <ListItem sx={pointerHoverSx} onClick={() => setMode(key)} selected={key === mode}>
-                            <ListItemIcon>
-                                {todoMenuModes[key].iconPath && (
-                                    <Icon path={todoMenuModes[key].iconPath as string} size={1} />
-                                )}
-                            </ListItemIcon>
-                            <ListItemText primary={todoMenuModes[key].text} />
-                        </ListItem>
-                    );
-                })}
+                {_.keys(todoMenuItems.defaultViews).map(renderMenuItem)}
+                <ListSubheader component="div" id="subheader-home">
+                    {' '}
+                    Tags{' '}
+                </ListSubheader>
+                {_.keys(todoMenuItems.tags)
+                    .filter((key) => !_.keys(todoMenuItems.archivedTags).includes(key))
+                    .map(renderMenuItem)}
+                {_.keys(todoMenuItems.archivedTags).length > 0 && (
+                    <ListSubheader
+                        component="div"
+                        id="subheader-home"
+                        sx={pointerHoverSx}
+                        onClick={() => setArchiveExpand((prev) => !prev)}
+                    >
+                        {' '}
+                        {archiveExpand ? 'V ' : '> '} Archived Tags{' '}
+                    </ListSubheader>
+                )}
+                {archiveExpand && _.keys(todoMenuItems.archivedTags).map(renderMenuItem)}
             </List>
         </Drawer>
     );

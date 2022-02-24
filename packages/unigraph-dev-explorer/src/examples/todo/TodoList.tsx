@@ -1,4 +1,3 @@
-import { mdiBookOpenOutline, mdiCalendarAlert, mdiCalendarOutline, mdiInboxOutline } from '@mdi/js';
 import { Add as AddIcon, CalendarToday, PriorityHigh } from '@mui/icons-material';
 import { Checkbox, Chip, Divider, Fab, ListItemText, Typography } from '@mui/material';
 import _ from 'lodash/fp';
@@ -6,12 +5,11 @@ import React from 'react';
 import Sugar from 'sugar';
 import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
-import { BacklinkView } from '../../components/ObjectView/BacklinkView';
 import { DynamicViewRenderer } from '../../global.d';
 import { registerDynamicViews, registerQuickAdder } from '../../unigraph-react';
 import { parseTodoObject } from './parseTodoObject';
-import { TodoAll, TodoInbox, TodoMenuItems, TodoMenuSidebar, TodoToday, TodoUpcoming } from './TodoViews';
-import { ATodoList, maxDateStamp } from './utils';
+import { todoDefaultMenuItems, TodoMenuItems, TodoMenuSidebar } from './TodoViews';
+import { ATodoList, completeTodoQueryBody, maxDateStamp } from './utils';
 
 export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline, isEmbed }) => {
     const NameDisplay = React.useMemo(
@@ -188,8 +186,6 @@ const quickAdder = async (
                 true,
             );
         }
-        console.log('adding todo', { uid, parsed });
-
         return uid;
     }
     return [parsed, '$/schema/todo'];
@@ -213,66 +209,17 @@ const tt = () => (
     </>
 );
 
+const completeTodoQuery = (uid: string) => `
+(func: uid(${uid})) {
+    ${completeTodoQueryBody}
+}`;
+
 export const init = () => {
     const description = 'Add a new Todo object';
     registerDynamicViews({
         '$/schema/todo': {
             view: TodoItem,
-            query: (uid: string) => `
-            (func: uid(${uid})) {
-                uid
-                type { <unigraph.id> }
-                dgraph.type
-                <_hide>
-                <_value> {
-                    uid
-                    name {
-                        uid _value {
-                            dgraph.type uid
-                            type { <unigraph.id> }
-                            _value { dgraph.type uid type { <unigraph.id> } <_value.%> }
-                        }
-                    }
-                    done { uid <_value.!> }
-                    priority { <_value.#i> }
-                    time_frame {
-                        uid _value {
-                            dgraph.type uid type { <unigraph.id> }
-                            _value {
-                                start {
-                                    uid _value {
-                                        dgraph.type uid
-                                        type { <unigraph.id> }
-                                        _value { datetime { <_value.%dt> } timezone { <_value.%> } }
-                                    }
-                                }
-                                end {
-                                    uid _value {
-                                        dgraph.type uid
-                                        type { <unigraph.id> }
-                                        _value { datetime { <_value.%dt> } timezone { <_value.%> } }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    children {
-                        <_value[> {
-                            uid _key _index {<_value.#i> uid}
-                            _value {
-                                dgraph.type uid type { <unigraph.id> }
-                                _value {
-                                    dgraph.type uid type { <unigraph.id> }
-                                    _value {
-                                        uid name { uid <_value.%> }
-                                        color { uid _value { <_value.%> dgraph.type uid type { <unigraph.id> } } }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }`,
+            query: (uid: string) => completeTodoQuery(uid),
         },
     });
     registerQuickAdder({
@@ -285,34 +232,11 @@ export const init = () => {
     });
 };
 
-// const makeTodoInbox = (theseProps: any) => <TodoInbox {...theseProps} />;
-// const makeTodoAll = (theseProps: any) => <TodoAll {...theseProps} />;
 export const TodoList = (props: any) => {
     const [mode, setMode] = React.useState('inbox');
 
-    const [todoMenuModes, setTodoMenuModes] = React.useState<TodoMenuItems>(() => {
-        return {
-            inbox: {
-                iconPath: mdiInboxOutline,
-                text: 'Inbox',
-                component: TodoInbox,
-            },
-            all: {
-                iconPath: mdiBookOpenOutline,
-                text: 'All Todos',
-                component: TodoAll,
-            },
-            today: {
-                iconPath: mdiCalendarOutline,
-                text: 'Today',
-                component: TodoToday,
-            },
-            upcoming: {
-                iconPath: mdiCalendarAlert,
-                text: 'Upcoming',
-                component: TodoUpcoming,
-            },
-        };
+    const [todoViews, setTodoViews] = React.useState<TodoMenuItems>(() => {
+        return todoDefaultMenuItems;
     });
 
     return (
@@ -321,14 +245,12 @@ export const TodoList = (props: any) => {
                 <TodoMenuSidebar
                     mode={mode}
                     setMode={setMode}
-                    todoMenuModes={todoMenuModes}
-                    setTodoMenuModes={setTodoMenuModes}
+                    todoViews={todoViews}
+                    setTodoViews={setTodoViews}
                     todoListProps={props}
                 />
             </div>
-            <div style={{ flexBasis: '85%', height: '100%' }}>
-                {todoMenuModes[mode].component({ ...props, key: mode })}
-            </div>
+            <div style={{ flexBasis: '85%', height: '100%' }}>{todoViews[mode].component({ ...props, key: mode })}</div>
             <Fab
                 aria-label="add"
                 style={{ position: 'absolute', right: '16px', bottom: '16px' }}

@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable no-bitwise */
 /* eslint-disable no-plusplus */
+import { Typography } from '@mui/material';
 import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 import React from 'react';

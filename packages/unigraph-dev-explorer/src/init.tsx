@@ -1,34 +1,34 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+import { Typography } from '@mui/material';
+import DragSelect from 'dragselect';
+import _ from 'lodash';
 import { unigraph } from 'unigraph-dev-common';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
-import { isJsonString, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
-import _ from 'lodash';
-import DragSelect from 'dragselect';
-import { ViewViewDetailed } from './components/ObjectView/DefaultObjectView';
-import { BasicPersonView, DefaultSkeleton } from './components/ObjectView/BasicObjectViews';
-import { CodeOrComponentView, Executable } from './components/ObjectView/ExecutableView';
-import { ANotification, Notification as CNotification } from './components/UnigraphCore/Notification';
-import { UserSettings } from './global.d';
-
-import { init as nbInit } from './examples/notes/init';
-import { init as smInit } from './examples/semantic/init';
-import { init as clInit } from './examples/calendar/init';
-import { init as twInit } from './examples/twitter/Tweet';
-import { init as reInit } from './examples/reddit/RedditPost';
-import { init as bmInit } from './examples/bookmarks/Bookmarks';
-import { init as emInit } from './examples/email/Email';
-import { init as tdInit } from './examples/todo/TodoList';
-import { init as rssInit } from './examples/rss_reader/RSSFeeds';
-import { init as pbInit } from './components/UnigraphCore/Pinboard';
-
-import { ListObjectQuery, ListObjectView } from './components/UnigraphCore/ListObjectView';
-import { SubentityView } from './components/UnigraphCore/SubentityView';
-import { ViewItem } from './components/ObjectView/ViewObjectView';
+import { getRandomInt, isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import { backlinkQuery } from './components/ObjectView/backlinksUtils';
-import { MiniListView } from './components/UnigraphCore/ListsList';
-import { getParents, isMobile, isMultiSelectKeyPressed } from './utils';
+import { BasicPersonView, DefaultSkeleton } from './components/ObjectView/BasicObjectViews';
+import { ViewViewDetailed } from './components/ObjectView/DefaultObjectView';
+import { CodeOrComponentView, Executable } from './components/ObjectView/ExecutableView';
+import { ViewItem } from './components/ObjectView/ViewObjectView';
 import { PackageManifestView } from './components/PackageManager/PackageManager';
+import { ListObjectQuery, ListObjectView } from './components/UnigraphCore/ListObjectView';
+import { MiniListView } from './components/UnigraphCore/ListsList';
+import { ANotification, Notification as CNotification } from './components/UnigraphCore/Notification';
+import { init as pbInit } from './components/UnigraphCore/Pinboard';
+import { SubentityView } from './components/UnigraphCore/SubentityView';
+import { init as bmInit } from './examples/bookmarks/Bookmarks';
+import { init as clInit } from './examples/calendar/init';
+import { init as emInit } from './examples/email/Email';
+import { init as nbInit } from './examples/notes/init';
+import { init as reInit } from './examples/reddit/RedditPost';
+import { init as rssInit } from './examples/rss_reader/RSSFeeds';
+import { init as smInit } from './examples/semantic/init';
+import { init as tdInit } from './examples/todo/TodoList';
+import { init as twInit } from './examples/twitter/Tweet';
+import { UserSettings } from './global';
 import { initKeyboardShortcuts } from './keyboardShortcuts';
+import { registerQuickAdder } from './unigraph-react';
+import { getParents, isMobile, isMultiSelectKeyPressed } from './utils';
 
 window.reloadCommands = () => {
     const commandsState = window.unigraph.getState('registry/commands');
@@ -143,6 +143,8 @@ export function init(hostname?: string) {
     initPackages();
     initSelect();
     initKeyboardShortcuts();
+
+    registerListQuickAdder();
 
     if (window.localStorage.getItem('enableAnalytics') === 'true') initAnalyticsIfOptedIn();
 }
@@ -308,3 +310,35 @@ function initPackages() {
     clInit();
     pbInit();
 }
+
+const registerListQuickAdder = () => {
+    const quickAdder = async (
+        inputStr: string,
+        // eslint-disable-next-line default-param-last
+        preview = true,
+        callback: any,
+        refs?: any,
+    ) => {
+        const newObj = { name: inputStr, children: [], $context: { _hide: false } };
+        if (!preview) {
+            const uids = await window.unigraph.addObject(newObj, '$/schema/list');
+            return uids;
+        }
+
+        return [newObj, '$/schema/list'];
+    };
+
+    const tt = () => (
+        <div>
+            <Typography>Enter the list&apos;s name, then press Enter to go</Typography>
+        </div>
+    );
+    registerQuickAdder({
+        list: {
+            adder: quickAdder,
+            tooltip: tt,
+            description: 'Start a new list',
+            alias: ['l'],
+        },
+    });
+};
