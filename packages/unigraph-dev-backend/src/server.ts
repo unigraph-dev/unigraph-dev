@@ -15,6 +15,7 @@ import fetch from 'node-fetch';
 import _, { uniqueId } from 'lodash';
 import { Unigraph } from 'unigraph-dev-common/lib/types/unigraph';
 import stringify from 'json-stable-stringify';
+import cron from 'node-cron';
 import DgraphClient from './dgraphClient';
 import {
     EventAddBacklinks,
@@ -77,7 +78,7 @@ import {
     initEntityHeads,
 } from './hooks';
 import { getAsyncLock } from './asyncManager';
-import { createExecutableCache } from './executableManager';
+import { createExecutableCache, initExecutables } from './executableManager';
 import { getLocalUnigraphAPI } from './localUnigraphApi';
 import { addNotification } from './notifications';
 import { perfLogAfterDbTransaction, perfLogStartDbTransaction, perfLogStartPreprocessing } from './logging';
@@ -99,6 +100,7 @@ export default async function startServer(client: DgraphClient) {
     const lock = getAsyncLock();
 
     const connections: Record<string, WebSocket> = {};
+    const executableSchedule: Record<string, cron.ScheduledTask> = {};
 
     // Basic checks
     await checkOrCreateDefaultDataModel(client);
@@ -185,6 +187,13 @@ export default async function startServer(client: DgraphClient) {
                 await context.caches.schemas.updateNow();
                 await context.caches.packages.updateNow();
                 await context.caches.executables.updateNow();
+                initExecutables(
+                    Object.entries(context.caches.executables.data),
+                    {},
+                    localApi,
+                    serverStates.executableSchedule,
+                    serverStates,
+                );
                 Object.values(connections).forEach((el) =>
                     el.send(
                         stringify({
@@ -208,6 +217,13 @@ export default async function startServer(client: DgraphClient) {
                     context.ofUpdate,
                 );
                 await context.caches.executables.updateNow();
+                initExecutables(
+                    Object.entries(context.caches.executables.data),
+                    {},
+                    localApi,
+                    serverStates.executableSchedule,
+                    serverStates,
+                );
 
                 // Call after_object_created hooks with uids cached
                 const objectCreatedHooks: any = {};
@@ -243,6 +259,7 @@ export default async function startServer(client: DgraphClient) {
         clientLeasedUids: {},
         httpCallbacks: {},
         runningExecutables: [],
+        executableSchedule,
         addRunningExecutable: (defn: any) => {
             serverStates.runningExecutables.push(defn);
             clearTimeout(debounceId);
@@ -889,6 +906,8 @@ export default async function startServer(client: DgraphClient) {
     server.on('listening', (server: any) => {
         console.log('\nUnigraph server listening on port', PORT);
     });
+
+    initExecutables(Object.entries(serverStates.caches['executables'].data), {}, localApi, serverStates.executableSchedule, serverStates);
 
     /** Maps from clientIds to connIds, from this server start  */
     const historialClients: Record<string, string> = {};

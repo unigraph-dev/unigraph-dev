@@ -2,11 +2,22 @@ const { ipcMain } = require('electron');
 
 const createTrayMenu = (onNewTemplate) => {
     let mainWindow;
-    let todayWindow;
+    let searchWindow;
 
     const menuTemplateMain = [
-        { label: 'Show main window' },
-        { label: 'Show today window', click: () => todayWindow.show() },
+        {
+            label: 'Show main window',
+            click: () => {
+                mainWindow.show();
+            },
+        },
+        {
+            label: 'Show search bar',
+            click: () => {
+                searchWindow.show();
+                searchWindow.webContents.send('showOmnibar');
+            },
+        },
     ];
     let menuTemplateFavorites = [];
 
@@ -44,8 +55,8 @@ const createTrayMenu = (onNewTemplate) => {
         setMainWindow: (window) => {
             mainWindow = window;
         },
-        setTodayWindow: (window) => {
-            todayWindow = window;
+        setSearchWindow: (window) => {
+            searchWindow = window;
         },
     };
 };

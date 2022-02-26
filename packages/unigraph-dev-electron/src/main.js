@@ -86,7 +86,7 @@ async function startServer(logHandler) {
             path.join(userData, 'zw'),
         ]);
 
-        const completedLog = 'ResetCors closed'; // When this is logged we know it's completed
+        const completedLog = 'Server is ready: OK'; // When this is logged we know it's completed
         const completedULog = 'Unigraph server listening on port';
 
         function checkIfComplete(str) {
@@ -229,6 +229,7 @@ app.whenReady().then(() => {
         // todayWindow.setVisibleOnAllWorkspaces(true);
         omnibar.setVisibleOnAllWorkspaces(true);
         trayMenu.setMainWindow(mainWindow); // , trayMenu.setTodayWindow(todayWindow)
+        trayMenu.setSearchWindow(omnibar);
         startServer(mainWindow.webContents);
         app.on('activate', () => {
             if (BrowserWindow.getAllWindows().length === 0) {

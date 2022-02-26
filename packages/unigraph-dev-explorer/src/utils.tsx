@@ -572,7 +572,7 @@ export const hoverSx = {
     '&:active': { backgroundColor: 'action.selected' },
 };
 
-export const contextMenuItemStyle = { paddingTop: '8px', paddingBottom: '8px' };
+export const contextMenuItemStyle = { paddingTop: '4px', paddingBottom: '4px' };
 export const globalTheme = {
     palette: {
         primary: { main: '#212121' },
