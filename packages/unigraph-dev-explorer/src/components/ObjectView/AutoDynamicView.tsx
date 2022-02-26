@@ -320,7 +320,7 @@ export function AutoDynamicView({
                     key={`object-view-${object?.uid}`}
                     onClickCapture={customBoundingBox ? () => undefined : onClickCaptureHandler}
                     onClick={(ev) => {
-                        if (!noClickthrough && canClickthrough) {
+                        if ((!noClickthrough && canClickthrough) || typeof onClick === 'function') {
                             typeof onClick === 'function'
                                 ? onClick(ev)
                                 : (() => {

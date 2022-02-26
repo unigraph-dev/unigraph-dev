@@ -76,6 +76,9 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
                                   object={new UnigraphObject(it._value)}
                                   callbacks={callbacks}
                                   options={{ inline: true }}
+                                  onClick={(e: PointerEvent) => {
+                                      e.stopPropagation();
+                                  }}
                               />
                           ))}
                 {data.get('priority')?.as('primitive') > 0
@@ -116,7 +119,7 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
         [callbacks, data],
     );
 
-    const onPointerUp = React.useCallback(
+    const onClick = React.useCallback(
         (ev) => {
             ev.preventDefault();
             ev.stopPropagation();
@@ -151,10 +154,10 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
                     alignSelf: 'baseline',
                 }}
                 checked={data.get('done')?.['_value.!']}
-                onPointerUp={onPointerUp}
+                onClick={onClick}
             />
         ),
-        [data.get('done')?.['_value.!'], callbacks.isEmbed, onPointerUp],
+        [data.get('done')?.['_value.!'], callbacks.isEmbed, onClick],
     );
 
     // console.log(data.uid, unpadded)
