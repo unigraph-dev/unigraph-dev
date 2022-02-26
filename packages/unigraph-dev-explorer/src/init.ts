@@ -89,7 +89,7 @@ export function init(hostname?: string) {
     }
 
     // Connect to Unigraph
-    window.unigraph = unigraph(userSettings.serverLocation, userSettings.browserId);
+    window.unigraph = unigraph(userSettings.serverLocation, userSettings.browserId + window.location.search);
 
     const nfState = window.unigraph.addState('notification-center/notifications', []);
     nfState.subscribe((el: any[]) => {
