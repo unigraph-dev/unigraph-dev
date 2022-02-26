@@ -33,7 +33,7 @@ const StyledStyledEngineProvider = styled(StyledEngineProvider)(({ theme }) => (
 
     [`& .${classes.appBar}`]: {
         width: '100vw',
-        zIndex: theme.zIndex.drawer + 1,
+        zIndex: (theme.zIndex?.drawer || 0) + 1,
     },
 
     // necessary for content to be below app bar
@@ -43,8 +43,8 @@ const StyledStyledEngineProvider = styled(StyledEngineProvider)(({ theme }) => (
 
     [`& .${classes.content}`]: {
         flexGrow: 1,
-        backgroundColor: theme.palette.background.default,
-        padding: theme.spacing(3),
+        backgroundColor: theme.palette?.background?.default || '',
+        padding: theme.spacing?.(3),
     },
 }));
 

@@ -229,6 +229,7 @@ app.whenReady().then(() => {
         // todayWindow.setVisibleOnAllWorkspaces(true);
         omnibar.setVisibleOnAllWorkspaces(true);
         trayMenu.setMainWindow(mainWindow); // , trayMenu.setTodayWindow(todayWindow)
+        trayMenu.setSearchWindow(omnibar);
         startServer(mainWindow.webContents);
         app.on('activate', () => {
             if (BrowserWindow.getAllWindows().length === 0) {
