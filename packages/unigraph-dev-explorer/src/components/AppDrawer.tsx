@@ -29,7 +29,7 @@ const classes = {
     drawerPaper: `${PREFIX}-drawerPaper`,
 };
 
-const appDrawerHoverSx = { cursor: 'pointer', ...hoverSx };
+const appDrawerHoverSx = { paddingBottom: '4px', paddingTop: '4px', cursor: 'pointer', ...hoverSx };
 export default function DrawerRouter() {
     const devState = window.unigraph.getState('settings/developerMode');
     const [devMode, setDevMode] = React.useState(devState.value);

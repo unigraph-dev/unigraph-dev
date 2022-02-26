@@ -51,6 +51,7 @@ export function FavoriteBar() {
             itemGetter={(el: any) => el._value._value}
             noBar
             noRemover
+            itemStyle={{ paddingTop: '4px', paddingBottom: '4px' }}
             defaultFilter={['no-deleted', 'no-noview']}
             itemRemover={(uids) => {
                 window.unigraph.deleteItemFromArray(favEntity?._value?.children?.uid, uids, favEntity.uid);

@@ -147,7 +147,7 @@ export const defaultContextMenu: Array<ContextMenuGenerator> = [
     ),
     (uid, object, handleClose, callbacks) => (
         <MenuItem
-            style={{ paddingTop: '8px', paddingBottom: '0px' }}
+            style={contextMenuItemStyle}
             onClick={() => {
                 handleClose();
                 window.wsnavigator(`/graph?uid=${uid}`);

@@ -86,7 +86,7 @@ async function startServer(logHandler) {
             path.join(userData, 'zw'),
         ]);
 
-        const completedLog = 'ResetCors closed'; // When this is logged we know it's completed
+        const completedLog = 'Server is ready: OK'; // When this is logged we know it's completed
         const completedULog = 'Unigraph server listening on port';
 
         function checkIfComplete(str) {
