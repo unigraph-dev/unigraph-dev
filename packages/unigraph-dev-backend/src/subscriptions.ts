@@ -2,7 +2,7 @@
 import _ from 'lodash';
 import stringify from 'json-stable-stringify';
 import { Query, QueryObject, QueryType } from 'unigraph-dev-common/lib/types/unigraph';
-import { getRandomId, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import { buildGraph, getCircularReplacer, getRandomId, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { makeQueryFragmentFromType } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { buildExecutable } from './executableManager';
 import DgraphClient, { queries } from './dgraphClient';
@@ -100,7 +100,10 @@ export function mergeSubscriptions(
     states?: any,
 ): MergedSubscription[] {
     function callbackIfChanged(updated: any, sub: Subscription, ofUpdate: any) {
-        if (stringify(updated) !== stringify(sub.data)) {
+        if (
+            stringify(updated, { replacer: getCircularReplacer() }) !==
+            stringify(sub.data, { replacer: getCircularReplacer() })
+        ) {
             sub.data = updated;
             msgCallback(updated, sub, ofUpdate);
         }
@@ -196,6 +199,10 @@ export function mergeSubscriptions(
                 subscriptions: subs,
                 aggregateQuery: query,
                 resolver: (updated: any, ofUpdate: any) => {
+                    const startTime = new Date().getTime();
+                    buildGraph(updated);
+                    const graphTime = new Date().getTime() - startTime;
+                    if (graphTime > 5) console.log(`Build graph took ${graphTime}ms, which is a bit slow`);
                     subs.forEach((el) => {
                         const uidResolver = (uu: string) => (uu.startsWith('$/') ? states.namespaceMap[uu].uid : uu);
                         const allUids = (el.query as QueryObject).uid;

@@ -306,8 +306,8 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 };
                 subscriptions[id] = (result: any) =>
                     result.length === 1
-                        ? callback(new UnigraphObject(result[0]))
-                        : callback(result.map((el: any) => new UnigraphObject(el)));
+                        ? callback(buildGraph(result.map((el: any) => new UnigraphObject(el) as any))[0])
+                        : callback(buildGraph(result.map((el: any) => new UnigraphObject(el) as any)));
                 if (typeof options?.queryFn === 'function') options.queryFn = options.queryFn('QUERYFN_TEMPLATE');
                 sendEvent(connection, 'subscribe_to_object', { uid, options }, id);
             }),
@@ -318,7 +318,8 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                     if (response.success) resolve(id);
                     else reject(response);
                 };
-                subscriptions[id] = (result: any[]) => callback(result.map((el: any) => new UnigraphObject(el)));
+                subscriptions[id] = (result: any[]) =>
+                    callback(buildGraph(result.map((el: any) => new UnigraphObject(el) as any)));
                 sendEvent(connection, 'subscribe_to_query', { queryFragment: fragment, options }, id);
             }),
         subscribe: (query, callback, eventId = undefined, update) =>
@@ -332,8 +333,8 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                     subscriptions[id] = (result: any[] | any) => {
                         callback(
                             Array.isArray(result)
-                                ? result.map((el: any) => new UnigraphObject(el))
-                                : new UnigraphObject(result),
+                                ? buildGraph(result.map((el: any) => new UnigraphObject(el) as any))
+                                : buildGraph([result].map((el: any) => new UnigraphObject(el) as any))[0],
                         );
                     };
                 }
