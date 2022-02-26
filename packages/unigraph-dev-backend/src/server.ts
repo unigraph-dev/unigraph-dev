@@ -2,7 +2,7 @@
 import { Application } from 'express-ws';
 import express from 'express';
 import WebSocket from 'ws';
-import { isJsonString, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import { isJsonString, getRandomInt, getCircularReplacer } from 'unigraph-dev-common/lib/utils/utils';
 import { insertsToUpsert } from 'unigraph-dev-common/lib/utils/txnWrapper';
 import {
     buildUnigraphEntity,
@@ -111,13 +111,16 @@ export default async function startServer(client: DgraphClient) {
             const msgPort = sub.msgPort!;
             if (msgPort?.readyState === 1) {
                 msgPort.send(
-                    stringify({
-                        type: 'subscription',
-                        updated: true,
-                        id: sub.id,
-                        result: newdata,
-                        ofUpdate,
-                    }),
+                    stringify(
+                        {
+                            type: 'subscription',
+                            updated: true,
+                            id: sub.id,
+                            result: newdata,
+                            ofUpdate,
+                        },
+                        { replacer: getCircularReplacer() },
+                    ),
                 );
             }
         } else if (sub?.callbackType === 'function' && sub.function) {

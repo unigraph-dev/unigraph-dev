@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { unigraph } from 'unigraph-dev-common';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
-import { isJsonString, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import { isJsonString, getRandomInt, getCircularReplacer } from 'unigraph-dev-common/lib/utils/utils';
 import _ from 'lodash';
 import DragSelect from 'dragselect';
 import { ViewViewDetailed } from './components/ObjectView/DefaultObjectView';
@@ -89,7 +89,7 @@ export function init(hostname?: string) {
     }
 
     // Connect to Unigraph
-    window.unigraph = unigraph(userSettings.serverLocation, userSettings.browserId);
+    window.unigraph = unigraph(userSettings.serverLocation, userSettings.browserId + window.location.search);
 
     const nfState = window.unigraph.addState('notification-center/notifications', []);
     nfState.subscribe((el: any[]) => {
@@ -246,7 +246,9 @@ function initBacklinkManager() {
             },
         },
         (newBacklinks: any[]) => {
-            const newVal = Object.fromEntries(JSON.parse(JSON.stringify(newBacklinks)).map((el: any) => [el.uid, el]));
+            const newVal = Object.fromEntries(
+                JSON.parse(JSON.stringify(newBacklinks, getCircularReplacer())).map((el: any) => [el.uid, el]),
+            );
             newBacklinks
                 .map((el) => el.uid)
                 .map((el) => {

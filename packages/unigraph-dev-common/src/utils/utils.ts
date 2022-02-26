@@ -173,7 +173,7 @@ export const getCircularReplacer = () => {
     return (key: any, value: any) => {
         if (typeof value === 'object' && value !== null) {
             if (seen.has(value)) {
-                return;
+                return value.uid ? { uid: value.uid } : undefined;
             }
             seen.add(value);
         }
