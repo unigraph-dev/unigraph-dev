@@ -200,7 +200,7 @@ export function mergeSubscriptions(
                 aggregateQuery: query,
                 resolver: (updated: any, ofUpdate: any) => {
                     const startTime = new Date().getTime();
-                    buildGraph(updated);
+                    buildGraph(updated, true);
                     const graphTime = new Date().getTime() - startTime;
                     if (graphTime > 5) console.log(`Build graph took ${graphTime}ms, which is a bit slow`);
                     subs.forEach((el) => {

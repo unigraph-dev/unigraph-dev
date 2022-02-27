@@ -296,7 +296,7 @@ export class UnigraphObject extends Object {
  *
  * @param objects Objects with uid references
  */
-export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
+export function buildGraph(objects: UnigraphObject[], topLevelOnly?: boolean): UnigraphObject[] {
     const objs: any[] = [...objects].map((el: any) => new UnigraphObject(el));
     const dict: any = {};
     objs.forEach((object) => {
@@ -337,7 +337,11 @@ export function buildGraph(objects: UnigraphObject[]): UnigraphObject[] {
         }
     }
 
-    objs.forEach((object) => buildDictRecurse(object));
+    if (!topLevelOnly) objs.forEach((object) => buildDictRecurse(object));
+    else
+        objs.forEach((object) => {
+            if (Object.keys(object).length > 1) dict[object.uid] = object;
+        });
     objs.forEach((object) => buildGraphRecurse(object));
 
     return objs;
