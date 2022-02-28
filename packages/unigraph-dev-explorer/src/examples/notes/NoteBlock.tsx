@@ -3,7 +3,13 @@
 import { Typography } from '@mui/material';
 import React from 'react';
 import _ from 'lodash';
-import { buildGraph, findAllUids, findUid, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
+import {
+    buildGraph,
+    findAllUids,
+    findUid,
+    getCircularReplacer,
+    UnigraphObject,
+} from 'unigraph-dev-common/lib/utils/utils';
 import { FiberManualRecord, MoreVert } from '@mui/icons-material';
 import stringify from 'json-stable-stringify';
 import { mdiClockOutline, mdiNoteOutline } from '@mdi/js';
@@ -241,8 +247,16 @@ export function ParentsAndReferences({ data }: any) {
             data['~_value'],
             (data['unigraph.origin'] || []).filter((el: any) => el?.uid !== data?.uid),
         );
-        if (stringify(parents) !== stringify(newPar)) setParents(newPar);
-        if (stringify(references) !== stringify(newRef)) setReferences(newRef);
+        if (
+            stringify(parents, { replacer: getCircularReplacer() }) !==
+            stringify(newPar, { replacer: getCircularReplacer() })
+        )
+            setParents(newPar);
+        if (
+            stringify(references, { replacer: getCircularReplacer() }) !==
+            stringify(newRef, { replacer: getCircularReplacer() })
+        )
+            setReferences(newRef);
     }, [data]);
 
     return (

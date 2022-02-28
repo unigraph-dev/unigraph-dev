@@ -299,50 +299,56 @@ export class UnigraphObject extends Object {
 export function buildGraph(objects: UnigraphObject[], topLevelOnly?: boolean): UnigraphObject[] {
     const objs: any[] = [...objects].map((el: any) => new UnigraphObject(el));
     const dict: any = {};
-    objs.forEach((object) => {
-        if (object?.uid) dict[object.uid] = object;
-    });
 
     function buildDictRecurse(obj: any, pastUids: any[] = []) {
         if (obj && typeof obj === 'object' && Array.isArray(obj)) {
-            Array.from(obj).forEach((val, index) => {
-                if (val?.uid && !dict[val.uid] && Object.keys(val).filter((el) => el.startsWith('_value')).length > 0)
-                    dict[val.uid] = obj[index];
-                if (!pastUids.includes(val?.uid)) buildDictRecurse(val, [...pastUids, val?.uid]);
+            Array.from(obj).forEach((value, index) => {
+                if (value?.uid && !dict[value.uid]) dict[value.uid] = value;
+                else if (value?.uid && Object.values(value).filter((el) => typeof el !== 'function').length > 1)
+                    Object.assign(dict[value.uid], obj[index]);
+                if (!value?.uid) buildDictRecurse(value, [...pastUids]);
+                else if (!pastUids.includes(value?.uid)) buildDictRecurse(value, [...pastUids, value?.uid]);
             });
         } else if (obj && typeof obj === 'object') {
             Object.entries(obj).forEach(([key, value]: [key: string, value: any]) => {
-                if (
-                    value?.uid &&
-                    !dict[value.uid] &&
-                    Object.keys(value).filter((el) => el.startsWith('_value')).length > 0
-                )
-                    dict[value.uid] = obj[key];
-                if (!pastUids.includes(value?.uid)) buildDictRecurse(value, [...pastUids, value?.uid]);
+                if (value?.uid && !dict[value.uid]) dict[value.uid] = value;
+                else if (value?.uid && Object.values(value).filter((el) => typeof el !== 'function').length > 1)
+                    Object.assign(dict[value.uid], obj[key]);
+                if (!value?.uid) buildDictRecurse(value, [...pastUids]);
+                else if (!pastUids.includes(value?.uid)) buildDictRecurse(value, [...pastUids, value?.uid]);
             });
         }
     }
 
     function buildGraphRecurse(obj: any, pastUids: any[] = []) {
+        if (obj?.uid && dict[obj.uid]) Object.assign(obj, dict[obj.uid]);
         if (obj && typeof obj === 'object' && Array.isArray(obj)) {
-            Array.from(obj).forEach((val, index) => {
-                if (val?.uid && dict[val.uid]) obj[index] = dict[val.uid];
-                if (!pastUids.includes(val?.uid)) buildGraphRecurse(val, [...pastUids, val?.uid]);
+            Array.from(obj).forEach((value, index) => {
+                if (!value?.uid) buildGraphRecurse(value, [...pastUids]);
+                else if (!pastUids.includes(value?.uid)) buildGraphRecurse(value, [...pastUids, value?.uid]);
             });
         } else if (obj && typeof obj === 'object') {
             Object.entries(obj).forEach(([key, value]: [key: string, value: any]) => {
-                if (value?.uid && dict[value.uid]) obj[key] = dict[value.uid];
-                if (!pastUids.includes(value?.uid)) buildGraphRecurse(value, [...pastUids, value?.uid]);
+                if (!value?.uid) buildGraphRecurse(value, [...pastUids]);
+                else if (!pastUids.includes(value?.uid)) buildGraphRecurse(value, [...pastUids, value?.uid]);
             });
         }
     }
 
+    const startTime = new Date().getTime();
+
+    objs.forEach((object) => {
+        if (object?.uid && Object.values(object).filter((el) => typeof el !== 'function').length > 1)
+            dict[object.uid] = object;
+    });
     if (!topLevelOnly) objs.forEach((object) => buildDictRecurse(object));
-    else
-        objs.forEach((object) => {
-            if (Object.keys(object).length > 1) dict[object.uid] = object;
-        });
+
+    if (dict['0x5b77']) console.log('dict ', dict['0x5b77']);
+
     objs.forEach((object) => buildGraphRecurse(object));
+
+    const graphTime = new Date().getTime() - startTime;
+    if (graphTime > 15) console.log(`Build graph took ${graphTime}ms, which is a bit slow`);
 
     return objs;
 }
