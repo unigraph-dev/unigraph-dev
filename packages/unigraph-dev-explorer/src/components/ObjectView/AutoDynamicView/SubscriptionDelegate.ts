@@ -1,5 +1,5 @@
 import React from 'react';
-import { getRandomInt, buildGraph } from 'unigraph-dev-common/lib/utils/utils';
+import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { TabContext } from '../../../utils';
 import { isStub } from '../utils';
 
@@ -43,7 +43,7 @@ export const useSubscriptionDelegate: (...args: any) => [() => any, number] = (
                     },
                 },
                 (newObjects: any[]) => {
-                    setLoadedObj(buildGraph(newObjects)[0]);
+                    setLoadedObj(newObjects[0]);
                 },
                 newSubs,
             );

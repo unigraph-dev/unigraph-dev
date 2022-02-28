@@ -603,7 +603,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                     id,
                 );
             }),
-        getSchemaMap: () => caches.schemaMap,
+        getSchemaMap: () => (buildGraph as any)([caches.schemaMap])[0],
         exportObjects: (uids, options) =>
             new Promise((resolve, reject) => {
                 const id = getRandomInt();

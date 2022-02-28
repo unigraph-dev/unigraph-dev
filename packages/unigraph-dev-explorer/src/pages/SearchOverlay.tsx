@@ -3,7 +3,7 @@ import _ from 'lodash';
 import React from 'react';
 import { AppState } from 'unigraph-dev-common/lib/types/unigraph';
 import { buildUnigraphEntity } from 'unigraph-dev-common/lib/utils/entityUtils';
-import { buildGraph, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
+import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { AutoDynamicView } from '../components/ObjectView/AutoDynamicView';
 import { inlineTextSearch } from '../components/UnigraphCore/InlineSearchPopup';
 import { parseQuery } from '../components/UnigraphCore/UnigraphSearch';
@@ -220,21 +220,19 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
                           element: <Typography>No results</Typography>,
                       },
                   ]
-                : buildGraph(entities as any[])
-                      .slice(0, 20)
-                      .map((datael: any) => ({
-                          type: 'command',
-                          element: (
-                              <AutoDynamicView
-                                  object={datael}
-                                  options={{ noClickthrough: false }}
-                                  style={{
-                                      cursor: 'pointer',
-                                      display: 'flex',
-                                  }}
-                              />
-                          ),
-                      }))),
+                : (entities as any[]).slice(0, 20).map((datael: any) => ({
+                      type: 'command',
+                      element: (
+                          <AutoDynamicView
+                              object={datael}
+                              options={{ noClickthrough: false }}
+                              style={{
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                              }}
+                          />
+                      ),
+                  }))),
         );
         displayCommands
             .filter((el) => el.type === 'command')

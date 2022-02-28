@@ -5,7 +5,7 @@ import React from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useSwipeable } from 'react-swipeable';
-import { buildGraph, UnigraphObject, getRandomInt, getRandomId } from 'unigraph-dev-common/lib/utils/utils';
+import { UnigraphObject, getRandomInt, getRandomId } from 'unigraph-dev-common/lib/utils/utils';
 import { AutoDynamicViewProps } from '../../types/ObjectView.d';
 import { DataContext, DataContextWrapper, isMobile, isMultiSelectKeyPressed, selectUid, TabContext } from '../../utils';
 import { onUnigraphContextMenu } from './DefaultObjectContextMenu';

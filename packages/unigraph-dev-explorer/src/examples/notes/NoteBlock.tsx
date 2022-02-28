@@ -3,13 +3,7 @@
 import { Typography } from '@mui/material';
 import React from 'react';
 import _ from 'lodash';
-import {
-    buildGraph,
-    findAllUids,
-    findUid,
-    getCircularReplacer,
-    UnigraphObject,
-} from 'unigraph-dev-common/lib/utils/utils';
+import { findAllUids, getCircularReplacer, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { FiberManualRecord, MoreVert } from '@mui/icons-material';
 import stringify from 'json-stable-stringify';
 import { mdiClockOutline, mdiNoteOutline } from '@mdi/js';
@@ -262,7 +256,7 @@ export function ParentsAndReferences({ data }: any) {
     return (
         <div style={{ marginTop: '36px' }}>
             <DynamicObjectListView
-                items={parents}
+                items={parents.map((el: any) => ({ ...el, _stub: true }))}
                 context={data}
                 compact
                 noDrop
@@ -282,7 +276,7 @@ export function ParentsAndReferences({ data }: any) {
                 }}
             />
             <DynamicObjectListView
-                items={references}
+                items={references.map((el: any) => ({ ...el, _stub: true }))}
                 context={data}
                 compact
                 noDrop
@@ -508,7 +502,7 @@ export function DetailedOutlinerBlock({
                         onUnigraphContextMenu(event, data, undefined, { ...callbacks, componentId })
                     }
                     callbacks={callbacks}
-                    semanticChildren={buildGraph(otherChildren)
+                    semanticChildren={otherChildren
                         .filter((el: any) => el.type)
                         .map((el: any) => (
                             <AutoDynamicView

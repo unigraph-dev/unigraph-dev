@@ -58,7 +58,7 @@ const getQuery: (depth: number) => string = (depth: number) => {
                     }
                     <_value> @filter(uid_in(type, $unigraph.id{$/schema/interface/semantic})) {
                         _hide
-                        _value { uid type { uid <unigraph.id> } _value { uid } }
+                        _value { uid type { uid <unigraph.id> } }
                         uid
                         type { uid <unigraph.id> }
                     }

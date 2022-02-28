@@ -2,7 +2,6 @@ import { Avatar, Badge, Typography } from '@mui/material';
 import Sugar from 'sugar';
 import React from 'react';
 import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
-import { buildGraph } from 'unigraph-dev-common/lib/utils/utils';
 import { registerDynamicViews } from '../../unigraph-react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { DynamicViewRenderer } from '../../global.d';
@@ -19,7 +18,6 @@ const removeContextEntities = (tweet: any, entities: any[]) => {
 };
 
 export const Tweet: DynamicViewRenderer = ({ data, callbacks }) => {
-    buildGraph([data]);
     const twid = data.get('from_user/twitter_id').as('primitive');
     const nslnk = externalNamespaces.filter((el) => el.participants.includes(twid))[0]?.createLink;
 
