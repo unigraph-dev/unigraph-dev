@@ -323,8 +323,13 @@ export function buildGraph(objects: UnigraphObject[], topLevelOnly?: boolean): U
         }
     }
 
+    const graphSeen = new WeakSet();
     function buildGraphRecurse(obj: any, pastUids: any[] = []) {
-        if (obj?.uid && dict[obj.uid]) Object.assign(obj, dict[obj.uid]);
+        if (graphSeen.has(obj)) return;
+        if (typeof obj === 'object') graphSeen.add(obj);
+        if (obj?.uid && dict[obj.uid]) {
+            Object.assign(obj, dict[obj.uid]);
+        }
         if (obj && typeof obj === 'object' && Array.isArray(obj)) {
             Array.from(obj).forEach((value, index) => {
                 if (!value?.uid) buildGraphRecurse(value, [...pastUids]);
