@@ -246,9 +246,7 @@ function initBacklinkManager() {
             },
         },
         (newBacklinks: any[]) => {
-            const newVal = Object.fromEntries(
-                JSON.parse(JSON.stringify(newBacklinks, getCircularReplacer())).map((el: any) => [el.uid, el]),
-            );
+            const newVal = Object.fromEntries(newBacklinks.map((el: any) => [el.uid, el]));
             newBacklinks
                 .map((el) => el.uid)
                 .map((el) => {

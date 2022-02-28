@@ -71,16 +71,16 @@ export function wrapUpsertFromUpdater(
         return currentQuery;
     }
 
-    function buildQueryCount(parUid: string, n: number, hasUidHere: string | false = false) {
+    function buildQueryCount(parUid: string, n: number, hasUidHere: string | false = false, exclPos: number[] = []) {
         const currentQuery = `${parUid}_${queries.length.toString()}`;
         const getUidQuery = hasUidHere || parUid;
         const query = `var(func: uid(${getUidQuery})) { ${currentQuery}_scoped as count(<_value[>) }`;
         const subqueries = [];
         for (let i = 0; i < n; i += 1) {
-            subqueries.push(`${currentQuery}_${i} as math(${currentQuery}+${i})`);
+            if (!exclPos.includes(i)) subqueries.push(`${currentQuery}_${i} as math(${currentQuery}+${i})`);
         }
         const query2 = `var() {${currentQuery} as sum(val(${currentQuery}_scoped)) ${subqueries.join(' ')} }`;
-        queries.push(query, query2);
+        if (subqueries.length) queries.push(query, query2);
         return currentQuery;
     }
 
@@ -97,7 +97,10 @@ export function wrapUpsertFromUpdater(
         if (typeof origNow === 'object' && Array.isArray(origNow)) {
             // TODO: document expected behavior: when upserting an array, elements are always appended.
             if (typeof origNow[0] === 'object') {
-                const currPos = buildQueryCount(thisUid, origNow.length, hasUidHere);
+                const exclPos = origNow
+                    .map((el, index) => (typeof el?._index?.['_value.#i'] === 'number' ? index : undefined))
+                    .filter((el) => el !== undefined);
+                const currPos = buildQueryCount(thisUid, origNow.length, hasUidHere, exclPos as number[]);
                 const newOrig = origNow.map((el, index) => {
                     if (el?._key) {
                         queries.push(
@@ -114,7 +117,12 @@ export function wrapUpsertFromUpdater(
                     }
                     return {
                         ...el,
-                        _index: { '_value.#i': `val(${currPos}_${index})` },
+                        _index: {
+                            '_value.#i':
+                                typeof el?._index?.['_value.#i'] === 'number'
+                                    ? el?._index?.['_value.#i']
+                                    : `val(${currPos}_${index})`,
+                        },
                     };
                 });
                 return newOrig; // Appends it

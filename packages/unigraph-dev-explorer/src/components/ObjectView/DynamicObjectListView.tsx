@@ -25,7 +25,7 @@ import _ from 'lodash';
 import React from 'react';
 import { useDrop } from 'react-dnd';
 import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
-import { buildGraph as buildGraphFn, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { TransitionGroup } from 'react-transition-group';
@@ -173,7 +173,6 @@ export type DynamicObjectListViewProps = {
     reverse?: boolean;
     virtualized?: boolean;
     groupBy?: string;
-    buildGraph?: boolean;
     groupers?: any;
     noBar?: boolean;
     noRemover?: boolean;
@@ -246,7 +245,6 @@ function DynamicList({
     itemRemover,
     itemGetter,
     infinite = true,
-    buildGraph,
     parId,
     noRemover,
     compact,
@@ -272,7 +270,7 @@ function DynamicList({
                 items.map((el: any) => itemGetter(el).uid),
                 infinite ? 15 : items.length,
                 (its: any[]) => {
-                    setLoadedItems(buildGraph ? buildGraphFn(its) : its);
+                    setLoadedItems(its);
                 },
                 tabContext,
                 subscribeOptions,
@@ -441,7 +439,6 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
     defaultFilter,
     reverse,
     virtualized,
-    buildGraph,
     noBar,
     noRemover,
     noDrop,
@@ -699,7 +696,6 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                               itemRemover,
                               itemUids: procItems.map((el) => el.uid),
                               itemGetter,
-                              buildGraph,
                               parId,
                               noRemover,
                               compact,
@@ -728,7 +724,6 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                       itemUids: el.items.map((ell) => ell.uid),
                                       itemGetter: _.identity,
                                       infinite: false,
-                                      buildGraph,
                                       parId,
                                       noRemover,
                                       compact,

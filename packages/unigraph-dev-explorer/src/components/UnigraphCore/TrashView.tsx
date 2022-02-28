@@ -1,7 +1,7 @@
 import { Divider, ListItem, ListItemIcon, Typography } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import React from 'react';
-import { buildGraph, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { TabContext } from '../../utils';
 import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
 import { DynamicObjectListView } from '../ObjectView/DynamicObjectListView';
@@ -15,7 +15,7 @@ export function TrashView() {
         tabContext.subscribeToQuery(
             '(func: type(Deleted)) {uid type { <unigraph.id> } _hide }',
             (res: any[]) => {
-                setTotalDeleted(buildGraph(res));
+                setTotalDeleted(res);
             },
             subsId,
             { noExpand: true },

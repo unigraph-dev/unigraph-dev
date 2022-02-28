@@ -163,8 +163,7 @@ function buildUnigraphEntityPart(
                             delete el['$parentcontext'];
                         }
                         return {
-                            ...buildUnigraphEntityPart(el, options, schemaMap, newLocalSchema1), 
-                            _index: {"_value.#i": index},
+                            ...buildUnigraphEntityPart(el, options, schemaMap, newLocalSchema1),
                             ...context
                         }
                     });

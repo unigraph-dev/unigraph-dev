@@ -14,6 +14,8 @@ import { IWebsocket, Subscription } from './custom.d';
  * @returns
  */
 export function getFragment(query: Query, states: any) {
+    let template = '';
+
     if (query.type === 'query') {
         const eventId = getRandomInt();
         const frag =
@@ -21,7 +23,7 @@ export function getFragment(query: Query, states: any) {
                 ? query.fragment
                 : `(func: uid(par${eventId})) @recurse {uid unigraph.id expand(_userpredicate_)}
         par${eventId} as var${query.fragment}`;
-        return frag;
+        template = frag;
     }
     if (query.type === 'type') {
         const { all, showHidden, uidsOnly, first, metadataOnly, depth, queryAs } = (query as QueryType).options!;
@@ -49,7 +51,7 @@ export function getFragment(query: Query, states: any) {
         <~type> {
         par${eventId} as uid
         }}`;
-        return frag;
+        template = frag;
     }
     if (query.type === 'object') {
         // eslint-disable-next-line prefer-const
@@ -65,16 +67,19 @@ export function getFragment(query: Query, states: any) {
             : `@recurse${
                   options?.depth ? `(depth: ${options?.depth})` : ''
               } { uid unigraph.id expand(_userpredicate_) }`;
-        const frag = options.queryFn
+        const frag = options?.queryFn
             ? options.queryFn.replace('QUERYFN_TEMPLATE', Array.isArray(uid) ? uid.join(', ') : uid)
             : `(func: uid(${Array.isArray(uid) ? uid.join(', ') : uid})) 
             ${queryBody}`;
-        return frag;
+        template = frag;
     }
     if (query.type === 'group') {
-        return '';
+        template = '';
     }
-    return '';
+
+    return template.replace(/\$unigraph.id{(\$\/[^}]*)}/g, (match, capture) => {
+        return states.caches.schemas.dataAlt[0]?.[capture].uid;
+    });
 }
 
 export function buildPollingQuery(subs: { id: any; query: any }[], states: any) {
@@ -200,7 +205,7 @@ export function mergeSubscriptions(
                 aggregateQuery: query,
                 resolver: (updated: any, ofUpdate: any) => {
                     const startTime = new Date().getTime();
-                    buildGraph(updated);
+                    buildGraph(updated, true);
                     const graphTime = new Date().getTime() - startTime;
                     if (graphTime > 5) console.log(`Build graph took ${graphTime}ms, which is a bit slow`);
                     subs.forEach((el) => {

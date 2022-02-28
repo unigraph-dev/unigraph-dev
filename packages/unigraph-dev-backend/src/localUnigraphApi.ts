@@ -23,7 +23,7 @@ import DgraphClient, { UnigraphUpsert } from './dgraphClient';
 import { buildExecutable, ExecContext } from './executableManager';
 import { callHooks } from './hooks';
 import { addNotification } from './notifications';
-import { createSubscriptionLocal, createSubscriptionWS, resolveSubscriptionUpdate } from './subscriptions';
+import { createSubscriptionLocal, createSubscriptionWS, getFragment, resolveSubscriptionUpdate } from './subscriptions';
 import { Cache } from './caches';
 import { getQueryString } from './search';
 
@@ -160,20 +160,8 @@ export function getLocalUnigraphAPI(
             return res;
         },
         getObject: async (uidOrName: any, options: any) => {
-            let uid = uidOrName;
-            if (typeof uidOrName === 'string' && uidOrName.startsWith('$/')) {
-                // Is named entity
-                uid = states.namespaceMap[uid].uid;
-            }
-            const frag = `query(func: uid(${
-                Array.isArray(uid) ? uid.reduce((prev: string, el: string) => `${prev + el},`, '').slice(0, -1) : uid
-            })) 
-                ${
-                    options?.queryAsType
-                        ? makeQueryFragmentFromType(options.queryAsType, states.caches.schemas.data)
-                        : '@recurse { uid unigraph.id expand(_userpredicate_) }'
-                }`;
-            const ret = Array.isArray(uid)
+            const frag = `query${getFragment({ type: 'object', uid: uidOrName, options }, states)}`;
+            const ret = Array.isArray(uidOrName)
                 ? (await client.queryDgraph(`query { ${frag} }`))[0]
                 : (await client.queryDgraph(`query { ${frag} }`))[0]?.[0];
             return ret;
