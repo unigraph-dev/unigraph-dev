@@ -18,6 +18,10 @@
             {
                 "id": "todo_view",
                 "src": "entities/todo_view.json"
+            },
+            {
+                "id": "todo_archived_tags",
+                "src": "entities/todo_archived_tags.json"
             }
         ],
         "executables": [

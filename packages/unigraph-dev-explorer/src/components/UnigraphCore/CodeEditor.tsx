@@ -23,7 +23,7 @@ import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import { ExecutableCodeEditor } from '../ObjectView/DefaultCodeEditor';
 import DetailedObjectView from '../UserLibrary/UserLibraryObject';
 import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
-import { hoverSx, TabContext } from '../../utils';
+import { hoverSx, pointerHoverSx, TabContext } from '../../utils';
 
 loader.config({ paths: { vs: './vendor/monaco-editor_at_0.31.1/' } });
 
@@ -89,7 +89,6 @@ export const Runner = ({ uid }: any) => {
         </div>
     );
 };
-const codeEditorHoverSx = { cursor: 'pointer', ...hoverSx };
 
 export function CodeEditor({ id }: any) {
     const [execcontent, setexecContent]: any = React.useState([]);
@@ -164,7 +163,7 @@ export function CodeEditor({ id }: any) {
                                 onClick={() => {
                                     setIsUserCollapseOpen(!isUserCollapseOpen);
                                 }}
-                                style={codeEditorHoverSx}
+                                style={pointerHoverSx}
                             >
                                 <ListItemText primary="User code" />
                                 {isUserCollapseOpen ? <ExpandLess /> : <ExpandMore />}
@@ -173,7 +172,7 @@ export function CodeEditor({ id }: any) {
                                 <NewUserCode />
                                 <List style={{ overflow: 'auto' }}>
                                     {userExecContent.map((it: any) => (
-                                        <ListItem sx={codeEditorHoverSx} key={it.uid} selected={currentUid === it.uid}>
+                                        <ListItem sx={pointerHoverSx} key={it.uid} selected={currentUid === it.uid}>
                                             <AutoDynamicView
                                                 object={it}
                                                 onClick={() => {
@@ -193,7 +192,7 @@ export function CodeEditor({ id }: any) {
                                         }}
                                         sx={{
                                             ...(currentPackage === el ? { backgroundColor: 'action.selected' } : {}),
-                                            ...codeEditorHoverSx,
+                                            ...pointerHoverSx,
                                         }}
                                     >
                                         <ListItemText primary={el} />
@@ -205,7 +204,7 @@ export function CodeEditor({ id }: any) {
                                                 .filter((it: any) => it['unigraph.id']?.startsWith(el))
                                                 .map((it: any) => (
                                                     <ListItem
-                                                        sx={codeEditorHoverSx}
+                                                        sx={pointerHoverSx}
                                                         key={it.uid}
                                                         selected={currentUid === it.uid}
                                                     >

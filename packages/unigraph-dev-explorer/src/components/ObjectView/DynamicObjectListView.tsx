@@ -22,7 +22,7 @@ import {
 import { styled } from '@mui/material/styles';
 import { ExpandMore, ClearAll, InboxOutlined } from '@mui/icons-material';
 import _ from 'lodash';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useDrop } from 'react-dnd';
 import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
@@ -185,6 +185,7 @@ export type DynamicObjectListViewProps = {
     removeOnEnter?: boolean;
     style?: any;
     components?: any;
+    initialTab?: string;
 };
 
 function DynamicListBasic({
@@ -449,6 +450,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
     removeOnEnter,
     components,
     itemAdder,
+    initialTab,
 }) => {
     const tabContext = React.useContext(TabContext);
 
@@ -457,7 +459,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
     [groupBy, setGroupBy] = React.useState(groupBy || '');
     groupers = { ...groupers, ...groupersDefault };
     const [reverseOrder, setReverseOrder] = React.useState(reverse || false);
-    const [currentTab, setCurrentTab] = React.useState('');
+    const [currentTab, setCurrentTab] = React.useState(initialTab || '');
 
     const isStub =
         !items[0] ||
@@ -507,7 +509,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
         if (currentTab.length >= 1)
             allItems = allItems.filter((it: any) => itemGetter(it).type['unigraph.id'] === currentTab);
         setProcItems(allItems);
-        if (allItems.length === 0) setCurrentTab('');
+        if (allItems.length === 0) setCurrentTab(initialTab || '');
     }, [reverseOrder, items, filtersUsed, currentTab]);
 
     const contextRef = React.useRef(context);

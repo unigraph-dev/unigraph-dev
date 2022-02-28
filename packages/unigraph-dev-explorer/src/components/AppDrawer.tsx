@@ -21,7 +21,7 @@ import {
     mdiHomeOutline,
 } from '@mdi/js';
 import { FavoriteBar } from './UnigraphCore/FavoriteBar';
-import { hoverSx } from '../utils';
+import { pointerHoverSx } from '../utils';
 
 const PREFIX = 'AppDrawer';
 
@@ -35,7 +35,7 @@ const Root = styled('div')(({ theme }) => ({
     },
 }));
 
-const appDrawerHoverSx = { paddingBottom: '4px', paddingTop: '4px', cursor: 'pointer', ...hoverSx };
+const appDrawerHoverSx = { paddingBottom: '4px', paddingTop: '4px', pointerHoverSx };
 export default function DrawerRouter() {
     const devState = window.unigraph.getState('settings/developerMode');
     const [devMode, setDevMode] = React.useState(devState.value);

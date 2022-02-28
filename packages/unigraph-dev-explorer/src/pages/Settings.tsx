@@ -14,9 +14,8 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
-import { hoverSx } from '../utils';
+import { hoverSx, pointerHoverSx } from '../utils';
 
-const settingsHoverSx = { cursor: 'pointer', ...hoverSx };
 export default function Settings() {
     const [settings, setSettings] = React.useState(JSON.parse(window.localStorage.getItem('userSettings') || ''));
 
@@ -61,13 +60,13 @@ export default function Settings() {
                 <ListSubheader component="div" id="nested-list-subheader" key="connectionsettings">
                     Connection
                 </ListSubheader>
-                <ListItem sx={settingsHoverSx} onClick={(e) => handleClick(e, 0)} key="connection">
+                <ListItem sx={pointerHoverSx} onClick={(e) => handleClick(e, 0)} key="connection">
                     <ListItemText primary="Server address" secondary={`Current address: ${settings.serverLocation}`} />
                 </ListItem>
                 <ListSubheader component="div" id="nested-list-subheader" key="window">
                     Window Management
                 </ListSubheader>
-                <ListItem sx={settingsHoverSx} onClick={(e) => false} key="newwindow">
+                <ListItem sx={pointerHoverSx} onClick={(e) => false} key="newwindow">
                     <ListItemText
                         id="switch-list-label-new-window"
                         primary="New window options"
@@ -90,7 +89,7 @@ export default function Settings() {
                 <ListSubheader component="div" id="nested-list-subheader" key="analyticsHeader">
                     Analytics
                 </ListSubheader>
-                <ListItem sx={settingsHoverSx} onClick={(e) => false} key="analytics">
+                <ListItem sx={pointerHoverSx} onClick={(e) => false} key="analytics">
                     <ListItemText
                         id="switch-list-label-analytics-mode"
                         primary="Enable analytics"
@@ -109,7 +108,7 @@ export default function Settings() {
                         />
                     </ListItemSecondaryAction>
                 </ListItem>
-                <ListItem sx={settingsHoverSx} onClick={(e) => false} key="analytics-email">
+                <ListItem sx={pointerHoverSx} onClick={(e) => false} key="analytics-email">
                     <ListItemText
                         id="switch-list-label-analytics-mode"
                         primary="Email"
@@ -134,7 +133,7 @@ export default function Settings() {
                 <ListSubheader component="div" id="nested-list-subheader" key="developers">
                     Developers
                 </ListSubheader>
-                <ListItem sx={settingsHoverSx} onClick={(e) => false} key="developermode">
+                <ListItem sx={pointerHoverSx} onClick={(e) => false} key="developermode">
                     <ListItemText
                         id="switch-list-label-developer-mode"
                         primary="Developer mode"
@@ -157,7 +156,7 @@ export default function Settings() {
                     App Settings
                 </ListSubheader>
                 <ListItem
-                    sx={settingsHoverSx}
+                    sx={pointerHoverSx}
                     onClick={(e) => {
                         window.wsnavigator('/settings/twitter');
                     }}
@@ -170,7 +169,7 @@ export default function Settings() {
                     />
                 </ListItem>
                 <ListItem
-                    sx={settingsHoverSx}
+                    sx={pointerHoverSx}
                     onClick={(e) => {
                         window.wsnavigator('/settings/reddit');
                     }}
@@ -183,7 +182,7 @@ export default function Settings() {
                     />
                 </ListItem>
                 <ListItem
-                    sx={settingsHoverSx}
+                    sx={pointerHoverSx}
                     onClick={(e) => {
                         window.wsnavigator('/settings/email');
                     }}

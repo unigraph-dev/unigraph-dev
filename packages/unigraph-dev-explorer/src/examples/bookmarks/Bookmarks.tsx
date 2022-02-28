@@ -26,7 +26,7 @@ type ABookmark = {
     };
 };
 
-export const createBookmark: (t: string, a?: boolean) => Promise<any> = (text: string, add = true) => {
+export const createBookmark = async (text: string, add = true) => {
     const tagsRegex = /#[a-zA-Z0-9]*\b ?/gm;
     let tags = text.match(tagsRegex) || [];
     tags = tags.map((tag) => tag.slice(1).trim());
@@ -41,23 +41,35 @@ export const createBookmark: (t: string, a?: boolean) => Promise<any> = (text: s
         name = 'Invalid url';
     }
     if (add) {
-        window.unigraph.runExecutable(getExecutableId(bookmarkPackage, 'add-bookmark'), { url, tags });
-        return new Promise((res, rej) => {
-            res(undefined as any);
+        const uid = await window.unigraph.runExecutable(getExecutableId(bookmarkPackage, 'add-bookmark'), {
+            url,
+            tags,
         });
-    }
-    return new Promise((res, rej) => {
-        res({
-            name,
-            children: tags.map((tagName) => ({
-                type: { 'unigraph.id': '$/schema/subentity' },
-                _value: {
-                    type: { 'unigraph.id': '$/schema/tag' },
-                    name: tagName,
+        console.log('createBookmark', { url, tags, uid });
+        if (tags.length === 0) {
+            window.unigraph.runExecutable(
+                '$/executable/add-item-to-list',
+                {
+                    where: '$/entity/inbox',
+                    item: uid,
                 },
-            })),
-        });
-    });
+                undefined,
+                undefined,
+                true,
+            );
+        }
+        return uid;
+    }
+    return {
+        name,
+        children: tags.map((tagName) => ({
+            type: { 'unigraph.id': '$/schema/subentity' },
+            _value: {
+                type: { 'unigraph.id': '$/schema/tag' },
+                name: tagName,
+            },
+        })),
+    };
 };
 
 function BookmarksBody({ data }: { data: ABookmark[] }) {
@@ -170,7 +182,11 @@ export const BookmarkItem: DynamicViewRenderer = ({ data, callbacks }) => {
 
 const quickAdder = async (inputStr: string, preview = true) => {
     // eslint-disable-next-line no-return-await
-    if (!preview) return await createBookmark(inputStr);
+    if (!preview) {
+        const uid = await createBookmark(inputStr);
+        console.log('adding bookmark', { uid, inputStr });
+        return uid;
+    }
     return [await createBookmark(inputStr, false), '$/schema/web_bookmark'];
 };
 

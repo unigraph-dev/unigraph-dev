@@ -105,7 +105,7 @@ const coupleStateAndLocalStorageObj = (
     localStorageName: string,
     defaultVal: any,
 ) => {
-    // TODO: abstract this better. explorer/src/init.ts uses this pattern too
+    // TODO: abstract this better. explorer/src/init.tsx uses this pattern too
     // localStorageAreaName is the name of an JSON object in localStorage,
     // localStorageName is an attribute of that object
     const state = window.unigraph.addState(stateName, defaultVal);
