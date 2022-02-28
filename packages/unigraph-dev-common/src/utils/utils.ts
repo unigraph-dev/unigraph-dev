@@ -311,7 +311,7 @@ export function buildGraph(objects: UnigraphObject[], topLevelOnly?: boolean): U
                     // console.log(`assigning uid ${value.uid} with `, obj[index]);
                     Object.assign(dict[value.uid], obj[index]);
                 }
-                if (!pastUids.includes(value?.uid)) buildDictRecurse(value, [...pastUids, value?.uid]);
+                buildDictRecurse(value, [...pastUids, value?.uid]);
             });
         } else if (obj && typeof obj === 'object') {
             Object.entries(obj).forEach(([key, value]: [key: string, value: any]) => {
@@ -320,7 +320,7 @@ export function buildGraph(objects: UnigraphObject[], topLevelOnly?: boolean): U
                     // console.log(`assigning uid ${value.uid} with `, obj[key]);
                     Object.assign(dict[value.uid], obj[key]);
                 }
-                if (!pastUids.includes(value?.uid)) buildDictRecurse(value, [...pastUids, value?.uid]);
+                buildDictRecurse(value, [...pastUids, value?.uid]);
             });
         }
     }
@@ -349,6 +349,8 @@ export function buildGraph(objects: UnigraphObject[], topLevelOnly?: boolean): U
             dict[object.uid] = object;
     });
     if (!topLevelOnly) objs.forEach((object) => buildDictRecurse(object));
+
+    // console.log(dict);
 
     objs.forEach((object) => buildGraphRecurse(object));
 
