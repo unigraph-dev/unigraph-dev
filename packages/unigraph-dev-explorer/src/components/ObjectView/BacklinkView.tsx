@@ -1,5 +1,4 @@
-import { Typography } from '@mui/material';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useEffectOnce } from 'react-use';
 import { TabContext } from '../../utils';
 import { DynamicObjectListView } from './DynamicObjectListView';
