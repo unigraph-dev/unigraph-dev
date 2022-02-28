@@ -1,7 +1,6 @@
 import { Typography } from '@mui/material';
 import React, { useEffect } from 'react';
 import { useEffectOnce } from 'react-use';
-import { buildGraph } from 'unigraph-dev-common/lib/utils/utils';
 import { TabContext } from '../../utils';
 import { DynamicObjectListView } from './DynamicObjectListView';
 
@@ -37,7 +36,7 @@ export function BacklinkView({
         tabContext.subscribeToQuery(
             getQuery(data?.uid || uid, forward),
             (newObjs: any[]) => {
-                const finalObjs = buildGraph(newObjs).filter((el: any) => el.uid !== (data?.uid || uid));
+                const finalObjs = newObjs.filter((el: any) => el.uid !== (data?.uid || uid));
                 if (!reverse) finalObjs.reverse();
                 setObjects(finalObjs);
             },

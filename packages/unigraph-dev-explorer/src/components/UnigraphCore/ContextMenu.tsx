@@ -46,8 +46,8 @@ export function ContextMenu() {
                 PaperProps={{
                     elevation: 4,
                     style: {
-                        padding: '6px 4px',
-                        borderRadius: '16px',
+                        padding: '4px 4px',
+                        borderRadius: '6px',
                     },
                 }}
             >
@@ -60,8 +60,8 @@ export function ContextMenu() {
                         {objDef?._icon ? (
                             <ListItemIcon
                                 style={{
-                                    minWidth: '20px',
-                                    minHeight: '20px',
+                                    minWidth: '19px',
+                                    minHeight: '19px',
                                     marginLeft: '12px',
                                     marginRight: '8px',
                                     backgroundImage: `url("data:image/svg+xml,${objDef?._icon}")`,
@@ -75,7 +75,7 @@ export function ContextMenu() {
                         )}
                         <ListItemText>{objDef?._name || state.contextObject?.type?.['unigraph.id']}</ListItemText>
                     </MenuItem>
-                    <Divider />
+                    <Divider sx={{ margin: '4px 0px !important' }} />
                     {state.menuContent?.map((el: any) =>
                         el(
                             state.contextUid!,
@@ -87,7 +87,7 @@ export function ContextMenu() {
                     )}
                     {schemaMenuConstructors.length > 0 ? (
                         <>
-                            <Divider />
+                            <Divider sx={{ margin: '4px 0px !important' }} />
                             {schemaMenuConstructors.map((el: any) =>
                                 el(
                                     state.contextUid!,
@@ -106,7 +106,7 @@ export function ContextMenu() {
                     )}
                     {state.contextContextUid ? (
                         <>
-                            <Divider />
+                            <Divider sx={{ margin: '4px 0px !important' }} />
                             <MenuItem style={contextMenuItemStyle}>
                                 <ListItemIcon style={{ minWidth: '32px' }}>
                                     <Icon path={mdiCubeOutline} size={0.8} />
@@ -115,8 +115,8 @@ export function ContextMenu() {
                                 {objCtxDef?._icon ? (
                                     <ListItemIcon
                                         style={{
-                                            minWidth: '20px',
-                                            minHeight: '20px',
+                                            minWidth: '19px',
+                                            minHeight: '19px',
                                             marginLeft: '12px',
                                             marginRight: '8px',
                                             backgroundImage: `url("data:image/svg+xml,${objCtxDef?._icon}")`,
@@ -137,7 +137,7 @@ export function ContextMenu() {
                                     {objCtxDef?._name || state.contextContextObject?.type?.['unigraph.id']}
                                 </ListItemText>
                             </MenuItem>
-                            <Divider />
+                            <Divider sx={{ margin: '4px 0px !important' }} />
                             {state.menuContextContent?.map((el: any) =>
                                 el(
                                     state.contextUid!,

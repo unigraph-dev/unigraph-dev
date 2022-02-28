@@ -1,6 +1,5 @@
 import _ from 'lodash';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
-import { buildGraph } from 'unigraph-dev-common/lib/utils/utils';
 
 /**
  * Manages the data side of an infinite scrolling view.
@@ -78,7 +77,6 @@ export const setupInfiniteScrolling = (
         toSub,
         (results: any[] | any) => {
             const uidsMap: any = {};
-            buildGraph(results);
             results.forEach
                 ? results.forEach((el: any) => {
                       uidsMap[el.uid] = el;

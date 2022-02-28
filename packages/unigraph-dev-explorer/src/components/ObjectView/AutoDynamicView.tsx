@@ -5,7 +5,7 @@ import React from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useSwipeable } from 'react-swipeable';
-import { buildGraph, UnigraphObject, getRandomInt, getRandomId } from 'unigraph-dev-common/lib/utils/utils';
+import { UnigraphObject, getRandomInt, getRandomId } from 'unigraph-dev-common/lib/utils/utils';
 import { AutoDynamicViewProps } from '../../types/ObjectView.d';
 import { DataContext, DataContextWrapper, isMobile, isMultiSelectKeyPressed, selectUid, TabContext } from '../../utils';
 import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
@@ -320,7 +320,7 @@ export function AutoDynamicView({
                     key={`object-view-${object?.uid}`}
                     onClickCapture={customBoundingBox ? () => undefined : onClickCaptureHandler}
                     onClick={(ev) => {
-                        if (!noClickthrough && canClickthrough) {
+                        if ((!noClickthrough && canClickthrough) || typeof onClick === 'function') {
                             typeof onClick === 'function'
                                 ? onClick(ev)
                                 : (() => {

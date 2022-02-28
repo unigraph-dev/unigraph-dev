@@ -105,7 +105,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
     const caches: Record<string, any> = {
         namespaceMap: isJsonString(window.localStorage.getItem('caches/namespaceMap'))
             ? // @ts-expect-error: already checked if not JSON
-              JSON.parse(window.localStorage.getItem('caches/namespaceMap'))
+              buildGraph([JSON.parse(window.localStorage.getItem('caches/namespaceMap'))])[0]
             : false,
     };
     const cacheCallbacks: Record<string, any[]> = {};
@@ -187,8 +187,12 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             if (parsed.type === 'response' && parsed.id && callbacks[parsed.id]) callbacks[parsed.id](parsed);
             if (parsed.type === 'cache_updated' && parsed.name) {
                 if (parsed.name !== 'uid_lease') {
+                    buildGraph([parsed.result]);
                     caches[parsed.name] = parsed.result;
-                    window.localStorage.setItem(`caches/${parsed.name}`, JSON.stringify(parsed.result));
+                    window.localStorage.setItem(
+                        `caches/${parsed.name}`,
+                        JSON.stringify(parsed.result, getCircularReplacer()),
+                    );
                 } else {
                     const finalLeaseResult = _.difference(parsed.result, exhaustedLeases);
                     caches[parsed.name] = finalLeaseResult;
@@ -306,8 +310,8 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 };
                 subscriptions[id] = (result: any) =>
                     result.length === 1
-                        ? callback(new UnigraphObject(result[0]))
-                        : callback(result.map((el: any) => new UnigraphObject(el)));
+                        ? callback(buildGraph(result.map((el: any) => new UnigraphObject(el) as any))[0])
+                        : callback(buildGraph(result.map((el: any) => new UnigraphObject(el) as any)));
                 if (typeof options?.queryFn === 'function') options.queryFn = options.queryFn('QUERYFN_TEMPLATE');
                 sendEvent(connection, 'subscribe_to_object', { uid, options }, id);
             }),
@@ -318,7 +322,8 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                     if (response.success) resolve(id);
                     else reject(response);
                 };
-                subscriptions[id] = (result: any[]) => callback(result.map((el: any) => new UnigraphObject(el)));
+                subscriptions[id] = (result: any[]) =>
+                    callback(buildGraph(result.map((el: any) => new UnigraphObject(el) as any)));
                 sendEvent(connection, 'subscribe_to_query', { queryFragment: fragment, options }, id);
             }),
         subscribe: (query, callback, eventId = undefined, update) =>
@@ -332,8 +337,8 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                     subscriptions[id] = (result: any[] | any) => {
                         callback(
                             Array.isArray(result)
-                                ? result.map((el: any) => new UnigraphObject(el))
-                                : new UnigraphObject(result),
+                                ? buildGraph(result.map((el: any) => new UnigraphObject(el) as any))
+                                : buildGraph([result].map((el: any) => new UnigraphObject(el) as any))[0],
                         );
                     };
                 }
@@ -354,7 +359,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 const id = getRandomInt();
                 callbacks[id] = (response: any) => {
                     // console.log('getObject', response);
-                    if (response.success) resolve(response.results);
+                    if (response.success) resolve(buildGraph(response.results));
                     else reject(response);
                 };
                 sendEvent(connection, 'get_object', { uidOrName, options, id });
@@ -476,7 +481,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             new Promise((resolver, reject) => {
                 const id = getRandomInt();
                 callbacks[id] = (response: any) => {
-                    if (response.success && response.schemas) resolver(response.schemas);
+                    if (response.success && response.schemas) resolver((buildGraph as any)([response.schemas])[0]);
                     else reject(response);
                 };
                 sendEvent(
@@ -493,7 +498,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             new Promise((resolve, reject) => {
                 const id = getRandomInt();
                 callbacks[id] = (response: any) => {
-                    if (response.success && response.packages) resolve(response.packages);
+                    if (response.success && response.packages) resolve((buildGraph as any)([response.packages])[0]);
                     else reject(response);
                 };
                 sendEvent(
@@ -569,7 +574,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             new Promise((resolve, reject) => {
                 const id = getRandomInt();
                 callbacks[id] = (response: any) => {
-                    if (response.success) resolve(response.results ? response.results : {});
+                    if (response.success) resolve((response.results || []).map((el: any) => buildGraph(el)));
                     else reject(response);
                 };
                 sendEvent(connection, 'get_queries', { fragments: queries }, id);
@@ -587,7 +592,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             new Promise((resolve, reject) => {
                 const id = getRandomInt();
                 callbacks[id] = (response: any) => {
-                    if (response.success && response.results) resolve(response.results);
+                    if (response.success && response.results) resolve((buildGraph as any)([response.results])[0]);
                     else reject(response);
                 };
                 sendEvent(
@@ -678,7 +683,9 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 sendEvent(connection, 'add_backlinks', { fromUids, toUids }, id);
             }),
         getDataFromSubscription: (subId) => {
-            return subResults[subId];
+            return Array.isArray(subResults[subId])
+                ? buildGraph(subResults[subId])
+                : buildGraph([subResults[subId]])[0];
         },
     };
 

@@ -108,7 +108,6 @@ export function UnigraphSearch({ id }: any) {
                 items={entities}
                 context={null}
                 defaultFilter={showHidden ? 'no-filter' : undefined}
-                buildGraph
                 subscribeOptions={{ depth: 12 }}
             />
         </>

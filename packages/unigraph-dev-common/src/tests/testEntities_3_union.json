@@ -176,9 +176,6 @@
                 },
                 "_value[": [
                     {
-                        "_index": {
-                            "_value.#i": 0
-                        },
                         "_value": {
                             "_value": {
                                 "name": {

@@ -86,7 +86,7 @@ async function startServer(logHandler) {
             path.join(userData, 'zw'),
         ]);
 
-        const completedLog = 'ResetCors closed'; // When this is logged we know it's completed
+        const completedLog = 'Server is ready: OK'; // When this is logged we know it's completed
         const completedULog = 'Unigraph server listening on port';
 
         function checkIfComplete(str) {
@@ -229,6 +229,7 @@ app.whenReady().then(() => {
         // todayWindow.setVisibleOnAllWorkspaces(true);
         omnibar.setVisibleOnAllWorkspaces(true);
         trayMenu.setMainWindow(mainWindow); // , trayMenu.setTodayWindow(todayWindow)
+        trayMenu.setSearchWindow(omnibar);
         startServer(mainWindow.webContents);
         app.on('activate', () => {
             if (BrowserWindow.getAllWindows().length === 0) {
@@ -304,19 +305,6 @@ app.on('window-all-closed', () => {
 app.on('quit', () => {
     if (alpha) alpha.kill();
     if (zero) zero.kill();
-});
-
-app.on('will-quit', async function (e) {
-    const choice = await require('electron').dialog.showMessageBox({
-        type: 'question',
-        buttons: ['Quit', 'Minimize to Tray'],
-        title: 'Confirm',
-        message:
-            'Unigraph can minimize to tray. It consumes minimal battery and can help you manage your knowledge more quickly (for example, instant access to your information).',
-    });
-    if (choice.response === 1) {
-        e.preventDefault();
-    }
 });
 
 app.on('before-quit', function () {

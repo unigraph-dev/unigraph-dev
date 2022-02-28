@@ -1,6 +1,5 @@
-import { Typography } from '@mui/material';
 import React from 'react';
-import { buildGraph, getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
+import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import Sugar from 'sugar';
 import { flatten } from 'lodash';
@@ -53,7 +52,7 @@ export function CurrentEvents() {
         tabContext.subscribeToQuery(
             '$/executable/get-next-events',
             (res: any) => {
-                setCurrentEvents(buildGraph(res as any[]));
+                setCurrentEvents(res as any[]);
             },
             id,
             { noExpand: true },

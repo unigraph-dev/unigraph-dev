@@ -8,6 +8,7 @@ import {
     registerContextMenuItems,
     registerQuickAdder,
 } from '../../unigraph-react';
+import { contextMenuItemStyle } from '../../utils';
 import { setChildrenDisplayAs } from './commands';
 import { DetailedNoteBlock } from './NoteBlock';
 import { NoteBlock } from './NoteBlockViews';
@@ -104,6 +105,7 @@ export const init = () => {
     registerContextMenuItems('$/schema/note_block', [
         (uid: any, object: any, handleClose: any, callbacks: any) => (
             <MenuItem
+                style={contextMenuItemStyle}
                 onClick={() => {
                     handleClose();
                     callbacks['convert-child-to-todo']();
@@ -117,6 +119,7 @@ export const init = () => {
             const displayAs = object?._value?.children?._displayAs || 'outliner';
             return (
                 <MenuItem
+                    style={contextMenuItemStyle}
                     onClick={() => {
                         handleClose();
                         setChildrenDisplayAs(object, callbacks, displayAs === 'outliner' ? 'paragraph' : 'outliner');

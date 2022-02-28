@@ -89,7 +89,7 @@ export function init(hostname?: string) {
     }
 
     // Connect to Unigraph
-    window.unigraph = unigraph(userSettings.serverLocation, userSettings.browserId);
+    window.unigraph = unigraph(userSettings.serverLocation, userSettings.browserId + window.location.search);
 
     const nfState = window.unigraph.addState('notification-center/notifications', []);
     nfState.subscribe((el: any[]) => {
@@ -248,7 +248,7 @@ function initBacklinkManager() {
             },
         },
         (newBacklinks: any[]) => {
-            const newVal = Object.fromEntries(JSON.parse(JSON.stringify(newBacklinks)).map((el: any) => [el.uid, el]));
+            const newVal = Object.fromEntries(newBacklinks.map((el: any) => [el.uid, el]));
             newBacklinks
                 .map((el) => el.uid)
                 .map((el) => {

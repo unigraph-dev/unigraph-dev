@@ -2,7 +2,7 @@
 import _ from 'lodash';
 import stringify from 'json-stable-stringify';
 import { Query, QueryObject, QueryType } from 'unigraph-dev-common/lib/types/unigraph';
-import { getRandomId, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import { buildGraph, getCircularReplacer, getRandomId, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { makeQueryFragmentFromType } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { buildExecutable } from './executableManager';
 import DgraphClient, { queries } from './dgraphClient';
@@ -14,6 +14,8 @@ import { IWebsocket, Subscription } from './custom.d';
  * @returns
  */
 export function getFragment(query: Query, states: any) {
+    let template = '';
+
     if (query.type === 'query') {
         const eventId = getRandomInt();
         const frag =
@@ -21,7 +23,7 @@ export function getFragment(query: Query, states: any) {
                 ? query.fragment
                 : `(func: uid(par${eventId})) @recurse {uid unigraph.id expand(_userpredicate_)}
         par${eventId} as var${query.fragment}`;
-        return frag;
+        template = frag;
     }
     if (query.type === 'type') {
         const { all, showHidden, uidsOnly, first, metadataOnly, depth, queryAs } = (query as QueryType).options!;
@@ -49,7 +51,7 @@ export function getFragment(query: Query, states: any) {
         <~type> {
         par${eventId} as uid
         }}`;
-        return frag;
+        template = frag;
     }
     if (query.type === 'object') {
         // eslint-disable-next-line prefer-const
@@ -65,16 +67,19 @@ export function getFragment(query: Query, states: any) {
             : `@recurse${
                   options?.depth ? `(depth: ${options?.depth})` : ''
               } { uid unigraph.id expand(_userpredicate_) }`;
-        const frag = options.queryFn
+        const frag = options?.queryFn
             ? options.queryFn.replace('QUERYFN_TEMPLATE', Array.isArray(uid) ? uid.join(', ') : uid)
             : `(func: uid(${Array.isArray(uid) ? uid.join(', ') : uid})) 
             ${queryBody}`;
-        return frag;
+        template = frag;
     }
     if (query.type === 'group') {
-        return '';
+        template = '';
     }
-    return '';
+
+    return template.replace(/\$unigraph.id{(\$\/[^}]*)}/g, (match, capture) => {
+        return states.caches.schemas.dataAlt[0]?.[capture].uid;
+    });
 }
 
 export function buildPollingQuery(subs: { id: any; query: any }[], states: any) {
@@ -100,7 +105,10 @@ export function mergeSubscriptions(
     states?: any,
 ): MergedSubscription[] {
     function callbackIfChanged(updated: any, sub: Subscription, ofUpdate: any) {
-        if (stringify(updated) !== stringify(sub.data)) {
+        if (
+            stringify(updated, { replacer: getCircularReplacer() }) !==
+            stringify(sub.data, { replacer: getCircularReplacer() })
+        ) {
             sub.data = updated;
             msgCallback(updated, sub, ofUpdate);
         }
@@ -196,6 +204,10 @@ export function mergeSubscriptions(
                 subscriptions: subs,
                 aggregateQuery: query,
                 resolver: (updated: any, ofUpdate: any) => {
+                    const startTime = new Date().getTime();
+                    buildGraph(updated, true);
+                    const graphTime = new Date().getTime() - startTime;
+                    if (graphTime > 5) console.log(`Build graph took ${graphTime}ms, which is a bit slow`);
                     subs.forEach((el) => {
                         const uidResolver = (uu: string) => (uu.startsWith('$/') ? states.namespaceMap[uu].uid : uu);
                         const allUids = (el.query as QueryObject).uid;

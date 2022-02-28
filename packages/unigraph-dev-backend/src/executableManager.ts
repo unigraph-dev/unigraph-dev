@@ -38,8 +38,6 @@ export function createExecutableCache(
     unigraph: Unigraph,
     states: any,
 ): Cache<any> {
-    const schedule: Record<string, cron.ScheduledTask> = {};
-
     const cache: Cache<any> = {
         data: {},
         updateNow: async () => null,
@@ -67,7 +65,6 @@ export function createExecutableCache(
                 if (k.startsWith('$/executable') && !cache.data[k]) cache.data[k] = unpad(v);
             });
 
-            initExecutables(Object.entries(cache.data), context, unigraph, schedule, states);
             done(false, null);
         });
     };

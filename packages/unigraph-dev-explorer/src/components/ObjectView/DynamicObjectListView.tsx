@@ -25,7 +25,7 @@ import _ from 'lodash';
 import React, { useEffect } from 'react';
 import { useDrop } from 'react-dnd';
 import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
-import { buildGraph as buildGraphFn, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { TransitionGroup } from 'react-transition-group';
@@ -45,6 +45,7 @@ const Root = styled('div')(({ theme }) => ({
     [`& .${classes.content}`]: {
         width: '100%',
         overflow: 'auto',
+        marginRight: '8px',
     },
 }));
 
@@ -114,12 +115,14 @@ function DynamicListItem({
     components,
     removeOnEnter,
     compact,
+    itemStyle,
 }: any) {
     return (
         <ListItem
             sx={hoverSx}
             style={{
                 ...(compact ? { paddingTop: '2px', paddingBottom: '2px' } : {}),
+                ...itemStyle,
             }}
         >
             <ListItemIcon
@@ -170,12 +173,12 @@ export type DynamicObjectListViewProps = {
     reverse?: boolean;
     virtualized?: boolean;
     groupBy?: string;
-    buildGraph?: boolean;
     groupers?: any;
     noBar?: boolean;
     noRemover?: boolean;
     noDrop?: boolean;
     compact?: boolean;
+    itemStyle?: any;
     subscribeOptions?: any;
     titleBar?: any;
     loadAll?: boolean;
@@ -199,6 +202,7 @@ function DynamicListBasic({
     compact,
     removeOnEnter,
     components,
+    itemStyle,
 }: any) {
     const tabContext = React.useContext(TabContext);
     return (
@@ -218,6 +222,7 @@ function DynamicListBasic({
                     context={context}
                     listUid={listUid}
                     compact={compact}
+                    itemStyle={itemStyle}
                     callbacks={callbacks}
                     itemUids={items.map((ell: any) => itemGetter(ell).uid)}
                     itemRemover={itemRemover}
@@ -241,13 +246,13 @@ function DynamicList({
     itemRemover,
     itemGetter,
     infinite = true,
-    buildGraph,
     parId,
     noRemover,
     compact,
     subscribeOptions,
     removeOnEnter,
     components,
+    itemStyle,
 }: any) {
     const tabContext = React.useContext(TabContext);
     const [loadedItems, setLoadedItems] = React.useState<any[]>([]);
@@ -266,7 +271,7 @@ function DynamicList({
                 items.map((el: any) => itemGetter(el).uid),
                 infinite ? 15 : items.length,
                 (its: any[]) => {
-                    setLoadedItems(buildGraph ? buildGraphFn(its) : its);
+                    setLoadedItems(its);
                 },
                 tabContext,
                 subscribeOptions,
@@ -323,6 +328,7 @@ function DynamicList({
                         listUid={listUid}
                         reverse={reverse}
                         compact={compact}
+                        itemStyle={itemStyle}
                         callbacks={callbacks}
                         itemUids={items.map((ell: any) => itemGetter(ell).uid)}
                         itemRemover={itemRemover}
@@ -360,7 +366,7 @@ function MultiTypeDescriptor({
                     marginBottom: '0px',
                 }}
             />
-            <Root style={{ whiteSpace: 'nowrap', display: 'flex' }}>
+            <div style={{ whiteSpace: 'nowrap', display: 'flex' }}>
                 {itemGroups.map((el, index) => (
                     <TabButton isSelected={selectedTab === el.name} onClick={() => setSelectedTab(el.name)}>
                         <div
@@ -383,7 +389,7 @@ function MultiTypeDescriptor({
                         <Typography style={{ marginRight: '8px' }}>{el.items.length}</Typography>
                     </TabButton>
                 ))}
-            </Root>
+            </div>
         </>
     ) : (
         <span />
@@ -434,11 +440,11 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
     defaultFilter,
     reverse,
     virtualized,
-    buildGraph,
     noBar,
     noRemover,
     noDrop,
     compact,
+    itemStyle,
     subscribeOptions,
     loadAll,
     removeOnEnter,
@@ -538,7 +544,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
     }));
 
     return (
-        <div
+        <Root
             style={{
                 height: '100%',
                 width: '100%',
@@ -692,10 +698,10 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                               itemRemover,
                               itemUids: procItems.map((el) => el.uid),
                               itemGetter,
-                              buildGraph,
                               parId,
                               noRemover,
                               compact,
+                              itemStyle,
                               subscribeOptions,
                               removeOnEnter,
                               components,
@@ -720,10 +726,10 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                       itemUids: el.items.map((ell) => ell.uid),
                                       itemGetter: _.identity,
                                       infinite: false,
-                                      buildGraph,
                                       parId,
                                       noRemover,
                                       compact,
+                                      itemStyle,
                                       subscribeOptions,
                                       removeOnEnter,
                                       components,
@@ -732,6 +738,6 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                           ))}
                 </div>
             </DataContextWrapper>
-        </div>
+        </Root>
     );
 };

@@ -1,12 +1,11 @@
 import { Avatar, Typography } from '@mui/material';
 import React from 'react';
-import { buildGraph, getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
+import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import Sugar from 'sugar';
 import { unionBy, isString, has, flow, propEq, curry, unionWith } from 'lodash/fp';
 import { Calendar as BigCalendar, DateLocalizer, momentLocalizer, stringOrDate, View } from 'react-big-calendar';
 import moment from 'moment';
 import {} from 'lodash';
-import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { TabContext } from '../../utils';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
@@ -195,8 +194,8 @@ const recurrentCalendarEventToBigCalendarEventsInRange = curry(
     (range: CalendarViewRange | null, datedObj: DatedObject): CalendarViewEvent[] => {
         const timeframes = datedObj.get('recurrence')?.['_value['];
         if (timeframes?.length) {
-            return buildGraph(timeframes)
-                .filter((timeframe) => {
+            return timeframes
+                .filter((timeframe: any) => {
                     // filter not in our view time range
                     if (!range) {
                         return true;
@@ -290,7 +289,7 @@ export function Calendar() {
         tabContext.subscribeToQuery(
             queryDatedWithinTimeRange(viewRange.start?.toJSON(), viewRange.end?.toJSON()),
             (res: any) => {
-                const graphRes = buildGraph(res) as DatedObject[];
+                const graphRes = res as DatedObject[];
                 addToCurrentEvents(
                     graphRes
                         .map(datedToBigCalendarEventsInRange(viewRange))

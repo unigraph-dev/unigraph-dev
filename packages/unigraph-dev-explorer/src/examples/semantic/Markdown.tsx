@@ -144,7 +144,7 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                                                 children,
                                                 contentEditable: true,
                                                 suppressContentEditableWarning: true,
-                                                onPointerUp: (event: MouseEvent) => {
+                                                onClick: (event: MouseEvent) => {
                                                     event.stopPropagation();
                                                     event.preventDefault();
                                                     if (matches[0])
