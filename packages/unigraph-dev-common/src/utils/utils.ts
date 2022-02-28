@@ -297,10 +297,13 @@ export class UnigraphObject extends Object {
  * @param objects Objects with uid references
  */
 export function buildGraph(objects: UnigraphObject[], topLevelOnly?: boolean): UnigraphObject[] {
-    const objs: any[] = [...objects].map((el: any) => new UnigraphObject(el));
+    const objs: any[] = [...objects].map((el: any) => (Array.isArray(el) ? el : new UnigraphObject(el)));
     const dict: any = {};
 
+    const seen = new WeakSet();
     function buildDictRecurse(obj: any, pastUids: any[] = []) {
+        if (seen.has(obj)) return;
+        if (typeof obj === 'object') seen.add(obj);
         if (obj && typeof obj === 'object' && Array.isArray(obj)) {
             Array.from(obj).forEach((value, index) => {
                 if (value?.uid && !dict[value.uid]) dict[value.uid] = value;

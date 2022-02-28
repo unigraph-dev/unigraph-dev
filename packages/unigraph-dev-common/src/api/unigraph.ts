@@ -105,7 +105,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
     const caches: Record<string, any> = {
         namespaceMap: isJsonString(window.localStorage.getItem('caches/namespaceMap'))
             ? // @ts-expect-error: already checked if not JSON
-              JSON.parse(window.localStorage.getItem('caches/namespaceMap'))
+              buildGraph([JSON.parse(window.localStorage.getItem('caches/namespaceMap'))])[0]
             : false,
     };
     const cacheCallbacks: Record<string, any[]> = {};
@@ -187,8 +187,12 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             if (parsed.type === 'response' && parsed.id && callbacks[parsed.id]) callbacks[parsed.id](parsed);
             if (parsed.type === 'cache_updated' && parsed.name) {
                 if (parsed.name !== 'uid_lease') {
+                    buildGraph([parsed.result]);
                     caches[parsed.name] = parsed.result;
-                    window.localStorage.setItem(`caches/${parsed.name}`, JSON.stringify(parsed.result));
+                    window.localStorage.setItem(
+                        `caches/${parsed.name}`,
+                        JSON.stringify(parsed.result, getCircularReplacer()),
+                    );
                 } else {
                     const finalLeaseResult = _.difference(parsed.result, exhaustedLeases);
                     caches[parsed.name] = finalLeaseResult;
@@ -603,7 +607,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                     id,
                 );
             }),
-        getSchemaMap: () => (buildGraph as any)([caches.schemaMap])[0],
+        getSchemaMap: () => caches.schemaMap,
         exportObjects: (uids, options) =>
             new Promise((resolve, reject) => {
                 const id = getRandomInt();
