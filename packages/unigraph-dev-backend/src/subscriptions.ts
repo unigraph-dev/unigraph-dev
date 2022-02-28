@@ -67,7 +67,7 @@ export function getFragment(query: Query, states: any) {
             : `@recurse${
                   options?.depth ? `(depth: ${options?.depth})` : ''
               } { uid unigraph.id expand(_userpredicate_) }`;
-        const frag = options.queryFn
+        const frag = options?.queryFn
             ? options.queryFn.replace('QUERYFN_TEMPLATE', Array.isArray(uid) ? uid.join(', ') : uid)
             : `(func: uid(${Array.isArray(uid) ? uid.join(', ') : uid})) 
             ${queryBody}`;
