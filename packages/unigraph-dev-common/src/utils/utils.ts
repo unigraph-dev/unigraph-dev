@@ -343,8 +343,6 @@ export function buildGraph(objects: UnigraphObject[], topLevelOnly?: boolean): U
     });
     if (!topLevelOnly) objs.forEach((object) => buildDictRecurse(object));
 
-    if (dict['0x5b77']) console.log('dict ', dict['0x5b77']);
-
     objs.forEach((object) => buildGraphRecurse(object));
 
     const graphTime = new Date().getTime() - startTime;

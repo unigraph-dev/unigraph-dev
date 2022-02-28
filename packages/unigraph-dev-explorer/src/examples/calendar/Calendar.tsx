@@ -195,7 +195,7 @@ const recurrentCalendarEventToBigCalendarEventsInRange = curry(
         const timeframes = datedObj.get('recurrence')?.['_value['];
         if (timeframes?.length) {
             return timeframes
-                .filter((timeframe) => {
+                .filter((timeframe: any) => {
                     // filter not in our view time range
                     if (!range) {
                         return true;
