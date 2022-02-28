@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable no-bitwise */
 /* eslint-disable no-plusplus */
+import { Typography } from '@mui/material';
 import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 import React from 'react';
@@ -571,6 +572,7 @@ export const hoverSx = {
     '&:hover': { backgroundColor: 'action.hover' },
     '&:active': { backgroundColor: 'action.selected' },
 };
+export const pointerHoverSx = { cursor: 'pointer', ...hoverSx };
 
 export const contextMenuItemStyle = { paddingTop: '4px', paddingBottom: '4px' };
 export const globalTheme = {

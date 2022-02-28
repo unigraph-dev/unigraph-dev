@@ -1,8 +1,29 @@
 import _ from 'lodash';
 import React from 'react';
-import { shouldRemoveEmailOnReadState } from '../../examples/email/EmailSettings';
+import { shouldRemoveEmailOnReadState, shouldMirrorEmailInbox } from '../../examples/email/EmailSettings';
 import { Badger } from '../../utils';
 import { AutoDynamicViewDetailed } from '../ObjectView/AutoDynamicViewDetailed';
+
+export const inboxRemoveCallback = (uids: string[]) =>
+    window.unigraph
+        .getQueries(uids.map((el: string) => `(func: uid(${el})) { type { <unigraph.id> } }`))
+        .then((res: any[]) => {
+            const types = res
+                .map((el, index) => ({
+                    uid: uids[index],
+                    type: el[0]?.type?.['unigraph.id'],
+                }))
+                .filter((el) => el.type !== undefined);
+            // TODO: expand this into more general cases - e.g. over a hook
+            const emails = types.filter((el) => el.type === '$/schema/email_message');
+            if (emails.length) {
+                window.unigraph.runExecutable('$/executable/modify-emails-labels', {
+                    uids: emails.map((el) => el.uid),
+                    removeLabelIds: shouldMirrorEmailInbox() ? ['INBOX'] : ['UNREAD'],
+                    addLabelIds: [],
+                });
+            }
+        });
 
 export function Inbox() {
     const [onUpdate, setOnUpdate] = React.useState(_.noop);

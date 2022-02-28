@@ -1,53 +1,15 @@
-import { Checkbox, Chip, ListItemText, Typography, Fab, Divider } from '@mui/material';
-import { CalendarToday, PriorityHigh, Add as AddIcon } from '@mui/icons-material';
+import { Add as AddIcon, CalendarToday, PriorityHigh } from '@mui/icons-material';
+import { Checkbox, Chip, Divider, Fab, ListItemText, Typography } from '@mui/material';
+import _ from 'lodash/fp';
 import React from 'react';
-import { pkg as todoPackage } from 'unigraph-dev-common/lib/data/unigraph.todo.pkg';
-import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import Sugar from 'sugar';
 import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
-import { DynamicViewRenderer } from '../../global.d';
-
-import { registerDynamicViews, registerQuickAdder, withUnigraphSubscription } from '../../unigraph-react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
+import { DynamicViewRenderer } from '../../global.d';
+import { registerDynamicViews, registerQuickAdder } from '../../unigraph-react';
 import { parseTodoObject } from './parseTodoObject';
-import { ATodoList, filters, maxDateStamp } from './utils';
-import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
-
-function TodoListBody({ data }: { data: ATodoList[] }) {
-    const todoList = data;
-
-    const [filteredItems, setFilteredItems] = React.useState(todoList);
-
-    React.useEffect(() => {
-        const res = todoList;
-        setFilteredItems(res);
-    }, [todoList]);
-
-    return (
-        <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
-            <DynamicObjectListView
-                items={filteredItems}
-                context={null}
-                filters={filters}
-                defaultFilter="only-incomplete"
-                compact
-            />
-            <Fab
-                aria-label="add"
-                style={{ position: 'absolute', right: '16px', bottom: '16px' }}
-                onClick={() => {
-                    window.unigraph.getState('global/omnibarSummoner').setValue({
-                        show: true,
-                        tooltip: 'Add a todo item',
-                        defaultValue: '+todo ',
-                    });
-                }}
-            >
-                <AddIcon />
-            </Fab>
-        </div>
-    );
-}
+import { todoDefaultMenuItems, TodoMenuItems, TodoMenuSidebar } from './TodoViews';
+import { ATodoList, completeTodoQueryBody, maxDateStamp } from './utils';
 
 export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline, isEmbed }) => {
     const NameDisplay = React.useMemo(
@@ -200,7 +162,10 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
         </div>
     );
 };
-
+const parsedHasTags = (parsed: ATodoList | any) => {
+    const tags = parsed?.children.filter(_.propEq(['_value', 'type', 'unigraph.id'], '$/schema/tag'));
+    return tags ? tags.length > 0 : false;
+};
 const quickAdder = async (
     inputStr: string,
     // eslint-disable-next-line default-param-last
@@ -209,10 +174,23 @@ const quickAdder = async (
     refs?: any,
 ) => {
     const parsed = parseTodoObject(inputStr, refs);
-    console.log(parsed);
-    if (!preview)
+    if (!preview) {
         // eslint-disable-next-line no-return-await
-        return await window.unigraph.addObject(parsed, '$/schema/todo');
+        const uid = await window.unigraph.addObject(parsed, '$/schema/todo');
+        if (!parsedHasTags(parsed)) {
+            window.unigraph.runExecutable(
+                '$/executable/add-item-to-list',
+                {
+                    where: '$/entity/inbox',
+                    item: uid,
+                },
+                undefined,
+                undefined,
+                true,
+            );
+        }
+        return uid;
+    }
     return [parsed, '$/schema/todo'];
 };
 
@@ -234,66 +212,17 @@ const tt = () => (
     </>
 );
 
+const completeTodoQuery = (uid: string) => `
+(func: uid(${uid})) {
+    ${completeTodoQueryBody}
+}`;
+
 export const init = () => {
     const description = 'Add a new Todo object';
     registerDynamicViews({
         '$/schema/todo': {
             view: TodoItem,
-            query: (uid: string) => `
-            (func: uid(${uid})) {
-                uid
-                type { <unigraph.id> }
-                dgraph.type
-                <_hide>
-                <_value> {
-                    uid
-                    name {
-                        uid _value {
-                            dgraph.type uid
-                            type { <unigraph.id> }
-                            _value { dgraph.type uid type { <unigraph.id> } <_value.%> }
-                        }
-                    }
-                    done { uid <_value.!> }
-                    priority { <_value.#i> }
-                    time_frame {
-                        uid _value {
-                            dgraph.type uid type { <unigraph.id> }
-                            _value {
-                                start {
-                                    uid _value {
-                                        dgraph.type uid
-                                        type { <unigraph.id> }
-                                        _value { datetime { <_value.%dt> } timezone { <_value.%> } }
-                                    }
-                                }
-                                end {
-                                    uid _value {
-                                        dgraph.type uid
-                                        type { <unigraph.id> }
-                                        _value { datetime { <_value.%dt> } timezone { <_value.%> } }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    children {
-                        <_value[> {
-                            uid _key _index {<_value.#i> uid}
-                            _value {
-                                dgraph.type uid type { <unigraph.id> }
-                                _value {
-                                    dgraph.type uid type { <unigraph.id> }
-                                    _value {
-                                        uid name { uid <_value.%> }
-                                        color { uid _value { <_value.%> dgraph.type uid type { <unigraph.id> } } }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }`,
+            query: (uid: string) => completeTodoQuery(uid),
         },
     });
     registerQuickAdder({
@@ -306,23 +235,38 @@ export const init = () => {
     });
 };
 
-export const TodoList = withUnigraphSubscription(
-    TodoListBody,
-    { schemas: [], defaultData: [], packages: [todoPackage] },
-    {
-        afterSchemasLoaded: (subsId: number, tabContext: any, data: any, setData: any) => {
-            tabContext.subscribeToType(
-                '$/schema/todo',
-                (result: ATodoList[]) => {
-                    setData(result.map((el: any) => ({ ...el, _stub: true })));
-                },
-                subsId,
-                {
-                    showHidden: true,
-                    queryAs:
-                        ' { uid type { <unigraph.id> } _updatedAt _createdAt _hide _value { done { <_value.!> } } } ',
-                },
-            );
-        },
-    },
-);
+export const TodoList = (props: any) => {
+    const [mode, setMode] = React.useState('inbox');
+
+    const [todoViews, setTodoViews] = React.useState<TodoMenuItems>(() => {
+        return todoDefaultMenuItems;
+    });
+
+    return (
+        <div style={{ display: 'flex', flexDirection: 'row' }}>
+            <div style={{ flexBasis: '15%', height: '100%' }}>
+                <TodoMenuSidebar
+                    mode={mode}
+                    setMode={setMode}
+                    todoViews={todoViews}
+                    setTodoViews={setTodoViews}
+                    todoListProps={props}
+                />
+            </div>
+            <div style={{ flexBasis: '85%', height: '100%' }}>{todoViews[mode].component({ ...props, key: mode })}</div>
+            <Fab
+                aria-label="add"
+                style={{ position: 'absolute', right: '16px', bottom: '16px' }}
+                onClick={() => {
+                    window.unigraph.getState('global/omnibarSummoner').setValue({
+                        show: true,
+                        tooltip: 'Add a todo item',
+                        defaultValue: '+todo ',
+                    });
+                }}
+            >
+                <AddIcon />
+            </Fab>
+        </div>
+    );
+};

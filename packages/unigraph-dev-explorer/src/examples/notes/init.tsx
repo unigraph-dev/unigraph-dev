@@ -61,9 +61,20 @@ export const init = () => {
                 },
                 '$/schema/note_block',
             );
+            window.unigraph.runExecutable(
+                '$/executable/add-item-to-list',
+                {
+                    where: '$/entity/inbox',
+                    item: uids,
+                },
+                undefined,
+                undefined,
+                true,
+            );
             if (!callback) window.wsnavigator(`/library/object?uid=${uids[0]}&isStub=true&type=$/schema/note_block`);
             return uids;
         }
+
         return [
             {
                 text: {

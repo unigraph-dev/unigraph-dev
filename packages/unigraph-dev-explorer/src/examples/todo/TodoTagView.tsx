@@ -1,13 +1,13 @@
-import React from 'react';
+import { Typography } from '@mui/material';
+import React, { useEffect } from 'react';
 import { useEffectOnce } from 'react-use';
+import { buildGraph } from 'unigraph-dev-common/lib/utils/utils';
+import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
 import { TabContext } from '../../utils';
-import { DynamicObjectListView } from './DynamicObjectListView';
+import { completeTodoQueryBody, groupers } from './utils';
 
 const getQuery = (uid: string, forward?: boolean) => `(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted))) {
-  uid
-  <unigraph.id>
-  _hide
-  type { <unigraph.id> }
+  ${completeTodoQueryBody}
 }
 var(func: uid(${uid})) {
   <${forward ? '~' : ''}unigraph.origin> {
@@ -15,14 +15,14 @@ var(func: uid(${uid})) {
   }
 }`;
 
-export function BacklinkView({
+export function TodoTagView({
     data,
     hideHeader,
     forward,
     callbacks,
     reverse,
     uid,
-    titleBar = ' backlinks',
+    titleBar = ' tagged tasks',
     ...attributes
 }: any) {
     const [objects, setObjects]: [any[], any] = React.useState([]);
@@ -35,7 +35,7 @@ export function BacklinkView({
         tabContext.subscribeToQuery(
             getQuery(data?.uid || uid, forward),
             (newObjs: any[]) => {
-                const finalObjs = newObjs.filter((el: any) => el.uid !== (data?.uid || uid));
+                const finalObjs = buildGraph(newObjs).filter((el: any) => el.uid !== (data?.uid || uid));
                 if (!reverse) finalObjs.reverse();
                 setObjects(finalObjs);
             },
@@ -69,6 +69,7 @@ export function BacklinkView({
                 }
             }}
             noRemover
+            groupers={groupers}
             {...attributes}
         />
     );

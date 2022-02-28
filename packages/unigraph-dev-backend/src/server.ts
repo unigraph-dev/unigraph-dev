@@ -928,7 +928,13 @@ export default async function startServer(client: DgraphClient) {
         console.log('\nUnigraph server listening on port', PORT);
     });
 
-    initExecutables(Object.entries(serverStates.caches['executables'].data), {}, localApi, serverStates.executableSchedule, serverStates);
+    initExecutables(
+        Object.entries(serverStates.caches['executables'].data),
+        {},
+        localApi,
+        serverStates.executableSchedule,
+        serverStates,
+    );
 
     /** Maps from clientIds to connIds, from this server start  */
     const historialClients: Record<string, string> = {};
@@ -985,29 +991,35 @@ export default async function startServer(client: DgraphClient) {
             delete serverStates.clientLeasedUids[connId];
         });
         ws.send(
-            stringify({
-                type: 'cache_updated',
-                name: 'namespaceMap',
-                result: serverStates.namespaceMap,
-            },
-            { replacer: getCircularReplacer() },),
+            stringify(
+                {
+                    type: 'cache_updated',
+                    name: 'namespaceMap',
+                    result: serverStates.namespaceMap,
+                },
+                { replacer: getCircularReplacer() },
+            ),
         );
         ws.send(
-            stringify({
-                type: 'cache_updated',
-                name: 'schemaMap',
-                result: serverStates.caches['schemas'].data,
-            },
-            { replacer: getCircularReplacer() },),
+            stringify(
+                {
+                    type: 'cache_updated',
+                    name: 'schemaMap',
+                    result: serverStates.caches['schemas'].data,
+                },
+                { replacer: getCircularReplacer() },
+            ),
         );
         leaseToClient(connId);
         ws.send(
-            stringify({
-                type: 'cache_updated',
-                name: 'uid_lease',
-                result: serverStates.clientLeasedUids[connId],
-            },
-            { replacer: getCircularReplacer() },),
+            stringify(
+                {
+                    type: 'cache_updated',
+                    name: 'uid_lease',
+                    result: serverStates.clientLeasedUids[connId],
+                },
+                { replacer: getCircularReplacer() },
+            ),
         );
         console.log('opened socket connection');
 
@@ -1024,9 +1036,7 @@ export default async function startServer(client: DgraphClient) {
                 serverStates.subscriptions,
                 dgraphClient,
                 pollCallback,
-                serverStates.subscriptions
-                    .filter((el: any) => el.clientId === clientBrowserId)
-                    .map((el: any) => el.id),
+                serverStates.subscriptions.filter((el: any) => el.clientId === clientBrowserId).map((el: any) => el.id),
                 serverStates,
             );
         }

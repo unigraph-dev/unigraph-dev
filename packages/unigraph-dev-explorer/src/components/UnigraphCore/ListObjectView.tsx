@@ -1,5 +1,5 @@
-import { shouldMirrorEmailInbox } from '../../examples/email/EmailSettings';
 import { DynamicObjectListView } from '../ObjectView/DynamicObjectListView';
+import { inboxRemoveCallback } from '../UnigraphInbox/Inbox';
 
 /** Dependent on the specific definition of object!! */
 export const ListObjectQuery = (uid: string) => `(func: uid(${uid})) {
@@ -33,29 +33,11 @@ export function ListObjectView({ data, callbacks, ...attributes }: any) {
             listUid={listValue.uid}
             callbacks={{ ...(attributes?.callbacks || {}), ...callbacks }}
             itemGetter={(el: any) => el._value._value}
-            itemRemover={(uids) => {
+            itemRemover={(uids: string[]) => {
                 window.unigraph.deleteItemFromArray(listValue.uid, uids, data.uid, callbacks?.subsId || undefined);
                 if (window.unigraph.getNamespaceMap?.()['$/entity/inbox'].uid === data.uid) {
                     // Is removing from inbox, do things here...
-                    window.unigraph
-                        .getQueries(uids.map((el: string) => `(func: uid(${el})) { type { <unigraph.id> } }`))
-                        .then((res: any[]) => {
-                            const types = res
-                                .map((el, index) => ({
-                                    uid: uids[index],
-                                    type: el[0]?.type?.['unigraph.id'],
-                                }))
-                                .filter((el) => el.type !== undefined);
-                            // TODO: expand this into more general cases - e.g. over a hook
-                            const emails = types.filter((el) => el.type === '$/schema/email_message');
-                            if (emails.length) {
-                                window.unigraph.runExecutable('$/executable/modify-emails-labels', {
-                                    uids: emails.map((el) => el.uid),
-                                    removeLabelIds: shouldMirrorEmailInbox() ? ['INBOX'] : ['UNREAD'],
-                                    addLabelIds: [],
-                                });
-                            }
-                        });
+                    inboxRemoveCallback(uids);
                 }
             }}
         />
