@@ -106,7 +106,7 @@ export default async function startServer(client: DgraphClient) {
     await checkOrCreateDefaultDataModel(client);
 
     // Initialize subscriptions
-    const pollCallback: MsgCallbackFn = (newdata, sub, ofUpdate) => {
+    const pollCallback: MsgCallbackFn = (newdata, sub, ofUpdate, supplementary?) => {
         if (sub?.callbackType === 'messageid') {
             const msgPort = sub.msgPort!;
             if (msgPort?.readyState === 1) {
@@ -118,8 +118,9 @@ export default async function startServer(client: DgraphClient) {
                             id: sub.id,
                             result: newdata,
                             ofUpdate,
+                            supplementary,
                         },
-                        { replacer: getCircularReplacer() },
+                        supplementary ? {} : { replacer: getCircularReplacer() },
                     ),
                 );
             }

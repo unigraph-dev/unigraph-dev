@@ -90,7 +90,7 @@ export function buildPollingQuery(subs: { id: any; query: any }[], states: any) 
     }, '{')} }`;
 }
 
-export type MsgCallbackFn = (updated: any, sub: Subscription, ofUpdate?: number | string) => any;
+export type MsgCallbackFn = (updated: any, sub: Subscription, ofUpdate?: number | string, supplementary?: any) => any;
 
 export type MergedSubscription = {
     subscriptions: Subscription[];
@@ -104,13 +104,13 @@ export function mergeSubscriptions(
     ids?: any[],
     states?: any,
 ): MergedSubscription[] {
-    function callbackIfChanged(updated: any, sub: Subscription, ofUpdate: any) {
+    function callbackIfChanged(updated: any, sub: Subscription, ofUpdate: any, supplementary?: any) {
         if (
             stringify(updated, { replacer: getCircularReplacer() }) !==
             stringify(sub.data, { replacer: getCircularReplacer() })
         ) {
             sub.data = updated;
-            msgCallback(updated, sub, ofUpdate);
+            msgCallback(updated, sub, ofUpdate, supplementary);
         }
     }
 
@@ -204,10 +204,6 @@ export function mergeSubscriptions(
                 subscriptions: subs,
                 aggregateQuery: query,
                 resolver: (updated: any, ofUpdate: any) => {
-                    const startTime = new Date().getTime();
-                    buildGraph(updated, true);
-                    const graphTime = new Date().getTime() - startTime;
-                    if (graphTime > 5) console.log(`Build graph took ${graphTime}ms, which is a bit slow`);
                     subs.forEach((el) => {
                         const uidResolver = (uu: string) => (uu.startsWith('$/') ? states.namespaceMap[uu].uid : uu);
                         const allUids = (el.query as QueryObject).uid;
@@ -220,7 +216,7 @@ export function mergeSubscriptions(
                             (Array.isArray((el.query as QueryObject).uid) ? (el.query as QueryObject).uid.length : 1)
                         )
                             return;
-                        callbackIfChanged(updatedIts, el, ofUpdate);
+                        callbackIfChanged(updatedIts, el, ofUpdate, updated);
                     });
                 },
             });
