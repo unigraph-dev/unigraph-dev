@@ -253,7 +253,12 @@ export const TodoList = (props: any) => {
                     todoListProps={props}
                 />
             </div>
-            <div style={{ flexBasis: '85%', height: '100%' }}>{todoViews[mode].component({ ...props, key: mode })}</div>
+            <div style={{ flexBasis: '85%', height: '100%' }}>
+                <Typography variant="h5" sx={{ margin: '8px' }}>
+                    {todoViews[mode].text}
+                </Typography>
+                {todoViews[mode].component({ ...props, key: mode })}
+            </div>
             <Fab
                 aria-label="add"
                 style={{ position: 'absolute', right: '16px', bottom: '16px' }}
