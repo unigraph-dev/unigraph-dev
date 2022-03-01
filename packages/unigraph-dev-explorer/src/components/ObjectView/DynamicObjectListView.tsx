@@ -117,6 +117,10 @@ function DynamicListItem({
     compact,
     itemStyle,
 }: any) {
+    const [itemHovered, setItemHovered] = React.useState<boolean>(false);
+    const isRemoverActive = React.useCallback(() => {
+        return !(itemRemover === _.noop || isMobile() || noRemover);
+    }, [itemRemover, noRemover]);
     return (
         <ListItem
             sx={hoverSx}
@@ -124,17 +128,9 @@ function DynamicListItem({
                 ...(compact ? { paddingTop: '2px', paddingBottom: '2px' } : {}),
                 ...itemStyle,
             }}
+            onMouseOver={() => setItemHovered(true)}
+            onMouseLeave={() => setItemHovered(false)}
         >
-            <ListItemIcon
-                onClick={() => {
-                    itemRemover([item.uid]);
-                }}
-                style={{
-                    display: itemRemover === _.noop || isMobile() || noRemover ? 'none' : '',
-                }}
-            >
-                <ClearAll />
-            </ListItemIcon>
             <AutoDynamicView
                 options={{ compact }}
                 object={new UnigraphObject(item)}
@@ -153,6 +149,27 @@ function DynamicListItem({
                     },
                 }}
             />
+            {isRemoverActive() && (
+                <ListItemIcon
+                    onClick={() => {
+                        itemRemover([item.uid]);
+                    }}
+                    sx={{
+                        cursor: 'pointer',
+                        minWidth: 'auto',
+                        padding: '5px',
+                        borderRadius: '50%',
+                        display: itemHovered ? '' : 'none',
+                        '&:hover': {
+                            display: '',
+                            backgroundColor: 'action.selected',
+                        },
+                        '&:active': { backgroundColor: 'action.active' },
+                    }}
+                >
+                    <ClearAll />
+                </ListItemIcon>
+            )}
         </ListItem>
     );
 }
