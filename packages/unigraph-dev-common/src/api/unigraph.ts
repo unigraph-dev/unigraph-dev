@@ -209,6 +209,13 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 }
                 subFakeUpdates[parsed.id] = [];
                 subResults[parsed.id] = JSON.parse(JSON.stringify(parsed.result));
+                if (parsed.supplementary) {
+                    buildGraph(
+                        _.uniqBy([...parsed.result, ...parsed.supplementary], 'uid'),
+                        true,
+                        parsed.result.length,
+                    );
+                }
                 subscriptions[parsed.id](parsed.result);
             }
             if (parsed.type === 'open_url' && window) window.open(parsed.url, '_blank');

@@ -296,7 +296,11 @@ export class UnigraphObject extends Object {
  *
  * @param objects Objects with uid references
  */
-export function buildGraph(objects: UnigraphObject[], topLevelOnly?: boolean): UnigraphObject[] {
+export function buildGraph(
+    objects: UnigraphObject[],
+    topLevelOnly?: boolean,
+    onlyLookAtFirstN?: number,
+): UnigraphObject[] {
     const objs: any[] = [...objects].map((el: any) => (Array.isArray(el) ? el : new UnigraphObject(el)));
     const dict: any = {};
 
@@ -352,7 +356,9 @@ export function buildGraph(objects: UnigraphObject[], topLevelOnly?: boolean): U
 
     // console.log(dict);
 
-    objs.forEach((object) => buildGraphRecurse(object));
+    objs.filter((el, index) => (onlyLookAtFirstN ? index < onlyLookAtFirstN : true)).forEach((object) =>
+        buildGraphRecurse(object),
+    );
 
     const graphTime = new Date().getTime() - startTime;
     if (graphTime > 15) console.log(`Build graph took ${graphTime}ms, which is a bit slow`);
