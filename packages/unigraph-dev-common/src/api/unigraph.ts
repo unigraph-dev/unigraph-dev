@@ -209,7 +209,14 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 }
                 subFakeUpdates[parsed.id] = [];
                 subResults[parsed.id] = JSON.parse(JSON.stringify(parsed.result));
-                subscriptions[parsed.id](parsed.result);
+                if (parsed.supplementary) {
+                    buildGraph(
+                        _.uniqBy([...parsed.result, ...parsed.supplementary], 'uid'),
+                        true,
+                        parsed.result.length,
+                    );
+                }
+                subscriptions[parsed.id](parsed.result, parsed.supplementary !== undefined);
             }
             if (parsed.type === 'open_url' && window) window.open(parsed.url, '_blank');
             return ev;
@@ -295,8 +302,9 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                     if (response.success) resolve(id);
                     else reject(response);
                 };
-                subscriptions[id] = (result: any[]) => {
-                    callback(buildGraph(result.map((el: any) => new UnigraphObject(el)) as any));
+                subscriptions[id] = (result: any[], skipBuild?: boolean) => {
+                    const fn = skipBuild ? _.identity : buildGraph;
+                    callback((fn as any)(result.map((el: any) => new UnigraphObject(el)) as any));
                 };
                 sendEvent(connection, 'subscribe_to_type', { schema: name, options }, id);
             }),
@@ -308,10 +316,12 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                     if (response.success) resolve(id);
                     else reject(response);
                 };
-                subscriptions[id] = (result: any) =>
+                subscriptions[id] = (result: any, skipBuild?: boolean) => {
+                    const fn = skipBuild ? _.identity : buildGraph;
                     result.length === 1
-                        ? callback(buildGraph(result.map((el: any) => new UnigraphObject(el) as any))[0])
-                        : callback(buildGraph(result.map((el: any) => new UnigraphObject(el) as any)));
+                        ? callback((fn as any)(result.map((el: any) => new UnigraphObject(el) as any))[0])
+                        : callback((fn as any)(result.map((el: any) => new UnigraphObject(el) as any)));
+                };
                 if (typeof options?.queryFn === 'function') options.queryFn = options.queryFn('QUERYFN_TEMPLATE');
                 sendEvent(connection, 'subscribe_to_object', { uid, options }, id);
             }),
@@ -322,8 +332,10 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                     if (response.success) resolve(id);
                     else reject(response);
                 };
-                subscriptions[id] = (result: any[]) =>
-                    callback(buildGraph(result.map((el: any) => new UnigraphObject(el) as any)));
+                subscriptions[id] = (result: any[], skipBuild?: boolean) => {
+                    const fn = skipBuild ? _.identity : buildGraph;
+                    callback((fn as any)(result.map((el: any) => new UnigraphObject(el) as any)));
+                };
                 sendEvent(connection, 'subscribe_to_query', { queryFragment: fragment, options }, id);
             }),
         subscribe: (query, callback, eventId = undefined, update) =>
@@ -334,11 +346,12 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                     else reject(response);
                 };
                 if (!update) {
-                    subscriptions[id] = (result: any[] | any) => {
+                    subscriptions[id] = (result: any[] | any, skipBuild?: boolean) => {
+                        const fn = skipBuild ? _.identity : buildGraph;
                         callback(
                             Array.isArray(result)
-                                ? buildGraph(result.map((el: any) => new UnigraphObject(el) as any))
-                                : buildGraph([result].map((el: any) => new UnigraphObject(el) as any))[0],
+                                ? fn(result.map((el: any) => new UnigraphObject(el) as any))
+                                : (fn as any)([result].map((el: any) => new UnigraphObject(el) as any))[0],
                         );
                     };
                 }

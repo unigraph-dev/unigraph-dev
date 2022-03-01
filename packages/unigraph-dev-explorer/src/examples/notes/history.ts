@@ -76,7 +76,10 @@ export const applyCommand = (history: HistoryState, redo?: boolean): HistoryStat
             const data = currentObjs[change.subsId];
 
             if (change.type === 'children') {
-                const [currentText] = findUid(data, change.uid);
+                const seenPaths: any[] = [];
+                const seenObjects: any[] = [];
+                findUid(data, change.uid, [], seenPaths, seenObjects);
+                const currentText = seenObjects[0];
                 currentFuture.push({
                     type: 'children',
                     subsId: change.subsId,
@@ -109,7 +112,10 @@ export const applyCommand = (history: HistoryState, redo?: boolean): HistoryStat
                 // return true;
             }
             if (change.type === 'predicate') {
-                const [currentText] = findUid(data, change.uid);
+                const seenPaths: any[] = [];
+                const seenObjects: any[] = [];
+                findUid(data, change.uid, [], seenPaths, seenObjects);
+                const currentText = seenObjects[0];
                 currentFuture.push({
                     type: 'predicate',
                     subsId: change.subsId,
@@ -138,7 +144,10 @@ export const applyCommand = (history: HistoryState, redo?: boolean): HistoryStat
                 // return true;
             }
             if (change.type === 'textual') {
-                const [currentText] = findUid(data, change.uid);
+                const seenPaths: any[] = [];
+                const seenObjects: any[] = [];
+                findUid(data, change.uid, [], seenPaths, seenObjects);
+                const currentText = seenObjects[0];
                 currentFuture.push({
                     type: 'textual',
                     subsId: change.subsId,

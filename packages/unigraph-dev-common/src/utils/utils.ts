@@ -90,27 +90,32 @@ export function mergeObjectWithUpdater(orig: any, updater: any) {
     return newObj;
 }
 
-export function findUid(object: any, uid: string, path?: any[], seenPaths?: string[]) {
+export function findUid(object: any, uid: string, path?: any[], seenPaths?: any[], seenObjects?: any[]) {
     const currentPath = [...(path || [])];
     if (object?.uid) {
         currentPath.push(object);
     }
-    if (seenPaths?.includes(currentPath.map((el) => el.uid).join('/')) && object?.uid === uid) {
-        console.log(seenPaths, currentPath.map((el) => el.uid).join('/'));
+    if (path?.map((el) => el.uid).includes(object?.uid)) {
         return [undefined, currentPath];
     }
     if (object?.uid === uid) return [object, currentPath];
     if (typeof object === 'object' && object) {
         if (Array.isArray(object)) {
             for (const el of object) {
-                const result: any = findUid(el, uid, currentPath, seenPaths);
-                if (result[0]) return result;
+                const result: any = findUid(el, uid, currentPath, seenPaths, seenObjects);
+                if (result[0]) {
+                    seenPaths?.push(result[1]);
+                    seenObjects?.push(result[0]);
+                }
             }
         } else {
             const keys = Object.keys(object);
             for (let i = 0; i < keys.length; i += 1) {
-                const result: any = findUid(object[keys[i]], uid, currentPath, seenPaths);
-                if (result[0]) return result;
+                const result: any = findUid(object[keys[i]], uid, currentPath, seenPaths, seenObjects);
+                if (result[0]) {
+                    seenPaths?.push(result[1]);
+                    seenObjects?.push(result[0]);
+                }
             }
         }
     }
@@ -118,20 +123,15 @@ export function findUid(object: any, uid: string, path?: any[], seenPaths?: stri
 }
 
 export function findAllUids(object: any, uid: string) {
-    let currentResult = true;
     const allResults: any[] = [];
-    while (currentResult !== undefined && currentResult !== null) {
-        const res = findUid(
-            object,
-            uid,
-            [],
-            allResults.map((el) => el[2].map((ell: any) => ell.uid).join('/')),
-        );
-        if (res[0] !== undefined && res[0] !== null && res[0].uid) {
-            allResults.push([res[0].uid, res[0], res[1]]);
+    const seenPaths: any[] = [];
+    const seenObjects: any[] = [];
+    findUid(object, uid, [], seenPaths, seenObjects);
+    seenObjects.forEach((obj, index) => {
+        if (obj !== undefined && obj !== null && obj.uid) {
+            allResults.push([obj.uid, obj, seenPaths[index]]);
         }
-        [currentResult] = res;
-    }
+    });
     return allResults.map((el) => [Object.assign(el[1], { uid: el[0] }), el[2]]);
 }
 
@@ -296,7 +296,11 @@ export class UnigraphObject extends Object {
  *
  * @param objects Objects with uid references
  */
-export function buildGraph(objects: UnigraphObject[], topLevelOnly?: boolean): UnigraphObject[] {
+export function buildGraph(
+    objects: UnigraphObject[],
+    topLevelOnly?: boolean,
+    onlyLookAtFirstN?: number,
+): UnigraphObject[] {
     const objs: any[] = [...objects].map((el: any) => (Array.isArray(el) ? el : new UnigraphObject(el)));
     const dict: any = {};
 
@@ -352,7 +356,9 @@ export function buildGraph(objects: UnigraphObject[], topLevelOnly?: boolean): U
 
     // console.log(dict);
 
-    objs.forEach((object) => buildGraphRecurse(object));
+    objs.filter((el, index) => (onlyLookAtFirstN ? index < onlyLookAtFirstN : true)).forEach((object) =>
+        buildGraphRecurse(object),
+    );
 
     const graphTime = new Date().getTime() - startTime;
     if (graphTime > 15) console.log(`Build graph took ${graphTime}ms, which is a bit slow`);
