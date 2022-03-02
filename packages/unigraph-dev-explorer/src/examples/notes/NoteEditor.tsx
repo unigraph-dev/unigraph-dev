@@ -187,8 +187,8 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
         }
     }, [
         focused,
-        window.unigraph.getState('global/focused').value.setCaret &&
-            window.unigraph.getState('global/focused').value.caret,
+        window.unigraph.getState('global/focused').value.setCaret !== undefined,
+        window.unigraph.getState('global/focused').value.caret !== -1,
     ]);
 
     const setCurrentText = (text: string) => {
