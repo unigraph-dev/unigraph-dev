@@ -462,6 +462,9 @@ export function getLocalUnigraphAPI(
             throw Error('Not available in server side');
         },
         getSearchResults: async (query, display: any, hops, searchOptions) => {
+            // eslint-disable-next-line no-return-await
+            if (display === 'name')
+                return (await client.getSearchNameResults(query[0].value, searchOptions?.hideHidden)) as any;
             let res: { results: any[]; entities: any[] } = {
                 results: [],
                 entities: [],
