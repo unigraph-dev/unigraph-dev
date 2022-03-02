@@ -503,7 +503,7 @@ export function DetailedOutlinerBlock({
                     }
                     callbacks={callbacks}
                     semanticChildren={otherChildren
-                        .filter((el: any) => el.type)
+                        .filter((el: any) => el?.type)
                         .map((el: any) => (
                             <AutoDynamicView
                                 object={
@@ -694,16 +694,22 @@ export function DetailedNoteBlock({
                 uid ? data?._value?.text?._value?._value?.uid : data.get('text')?.as('primitive')
             }
             pushText={(text: string) => {
-                return window.unigraph.updateObject(
-                    new UnigraphObject(data).get('text')._value._value.uid,
-                    {
-                        '_value.%': text,
-                    },
-                    false,
-                    false,
-                    callbacks.subsId,
-                    [],
-                );
+                return data._hide
+                    ? window.unigraph.updateObject(
+                          new UnigraphObject(data).get('text')._value._value.uid,
+                          {
+                              '_value.%': text,
+                          },
+                          false,
+                          false,
+                          callbacks.subsId,
+                          [],
+                      )
+                    : window.unigraph.runExecutable('$/executable/rename-entity', {
+                          uid: data.uid,
+                          newName: text,
+                          subIds: callbacks.subsId,
+                      });
             }}
             noteEditorProps={useNoteEditor}
             onFocus={(

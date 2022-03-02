@@ -73,6 +73,13 @@
                 "src": "executables/addSemanticProperty.js",
                 "editable": true,
                 "name": "Adds a semantic property to an object"
+            },
+            {
+                "id": "rename-entity",
+                "env": "routine/js",
+                "src": "executables/renameEntity.js",
+                "editable": true,
+                "name": "Renames an entity and update all its references"
             }
         ]
     }
