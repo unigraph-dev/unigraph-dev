@@ -187,8 +187,8 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
         }
     }, [
         focused,
-        window.unigraph.getState('global/focused').value.setCaret &&
-            window.unigraph.getState('global/focused').value.caret,
+        window.unigraph.getState('global/focused').value.setCaret !== undefined,
+        window.unigraph.getState('global/focused').value.caret !== -1,
     ]);
 
     const setCurrentText = (text: string) => {
@@ -201,12 +201,13 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
         const event = new Event('change', { bubbles: true });
         textInputRef.current.dispatchEvent(event);
     };
-    const getCurrentText = () => textInputRef.current.value;
+    const getCurrentText = () => textInputRef.current?.value;
 
     const checkReferences = React.useCallback(
         (matchOnly?: boolean) => {
             // const newContent = textInput.current.textContent;
             const newContent = getCurrentText();
+            if (newContent === undefined || newContent === '') return;
             const caret = textInputRef.current.selectionStart;
             // Check if inside a reference block
 
@@ -221,7 +222,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                             dataRef.current['~_value'],
                             dataRef.current['unigraph.origin'] || [],
                         )[0].map((el: any) => ({ uid: el.uid }));
-                        if (!dataRef.current._hide) parents.push({ uid: dataRef.current.uid });
+                        parents.push({ uid: dataRef.current.uid });
                         if (locateInlineChildren(dataRef.current).uid !== dataRef.current.uid)
                             parents.push({ uid: locateInlineChildren(dataRef.current).uid });
                         const newStr = `${newContent?.slice?.(0, match.index)}[[${newName}]]${newContent?.slice?.(

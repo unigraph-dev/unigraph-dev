@@ -33,7 +33,8 @@ export const defaultTypes = `<_value>: uid @reverse .
 <_value.?>: bool .
 <_value.%>: string @index(fulltext, trigram, hash) .
 <_value.>: default .
-<_value[>: [uid] .
+<children>: uid @reverse .
+<_value[>: [uid] @reverse .
 <_value.%dt>: dateTime @index(hour) .
 <_definition>: uid .
 <type>: uid @reverse .

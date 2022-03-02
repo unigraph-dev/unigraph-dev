@@ -240,13 +240,13 @@ export function augmentStubs(objWithStubs: any, origObj: any) {
     // console.log(uidDict);
 }
 
-function getObjectAsRecursivePrimitive(object: any) {
+function getObjectAsRecursivePrimitive(object: any, getRef?: boolean) {
     let targetValue: any;
     Object.keys(object).forEach((el) => {
         if (el.startsWith('_value.')) {
-            targetValue = object[el];
+            targetValue = getRef ? object : object[el];
         } else if (el.startsWith('_value') && typeof object[el] === 'object') {
-            const subObj = getObjectAsRecursivePrimitive(object[el]);
+            const subObj = getObjectAsRecursivePrimitive(object[el], getRef);
             if (subObj || subObj === '' || subObj === 0 || subObj === false) targetValue = subObj;
         }
     });
@@ -256,6 +256,9 @@ function getObjectAsRecursivePrimitive(object: any) {
 export const getObjectAs = (object: any, type: 'primitive') => {
     if (type === 'primitive') {
         return getObjectAsRecursivePrimitive(object);
+    }
+    if (type === 'primitiveRef') {
+        return getObjectAsRecursivePrimitive(object, true);
     }
     return object;
 };

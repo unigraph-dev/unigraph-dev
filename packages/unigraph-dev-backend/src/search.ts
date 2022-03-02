@@ -126,7 +126,7 @@ export const makeSearchQuery = (
         ${qhops.join('\n')}
         ${resultQuery}
     }`;
-    console.log(fq);
+    // console.log(fq);
     return fq;
 };
 
