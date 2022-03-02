@@ -43,7 +43,7 @@ export const TodoInbox = (props: any) => (
             _stub: true,
             type: { 'unigraph.id': '$/schema/list' },
         }}
-        attributes={{ reverse: true, noRemover: true, initialTab: '$/schema/todo', ...props }}
+        attributes={{ reverse: true, initialTab: '$/schema/todo', ...props }}
     />
 );
 
@@ -402,6 +402,7 @@ export const TodoMenuSidebar = ({ mode, setMode, todoViews, setTodoViews, todoLi
                     Tags{' '}
                 </ListSubheader>
                 {_.keys(todoMenuItems.tags)
+                    .sort()
                     .filter((key) => !_.keys(todoMenuItems.archivedTags).includes(key))
                     .map(renderMenuItem)}
                 {_.keys(todoMenuItems.archivedTags).length > 0 && (
@@ -415,7 +416,7 @@ export const TodoMenuSidebar = ({ mode, setMode, todoViews, setTodoViews, todoLi
                         {archiveExpand ? 'V ' : '> '} Archived Tags{' '}
                     </ListSubheader>
                 )}
-                {archiveExpand && _.keys(todoMenuItems.archivedTags).map(renderMenuItem)}
+                {archiveExpand && _.keys(todoMenuItems.archivedTags).sort().map(renderMenuItem)}
             </List>
         </Drawer>
     );

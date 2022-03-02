@@ -35,7 +35,7 @@ const Root = styled('div')(({ theme }) => ({
     },
 }));
 
-const appDrawerHoverSx = { paddingBottom: '4px', paddingTop: '4px', pointerHoverSx };
+const appDrawerHoverSx = { paddingBottom: '4px', paddingTop: '4px', ...pointerHoverSx };
 export default function DrawerRouter() {
     const devState = window.unigraph.getState('settings/developerMode');
     const [devMode, setDevMode] = React.useState(devState.value);
