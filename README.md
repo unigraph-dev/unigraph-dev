@@ -2,17 +2,18 @@
 
 A local-first and universal knowledge graph, personal search engine, and workspace for your life.
 
+Please join the Discord community below to talk about contributing, or open a GitHub issue if you want to help!
+
 [![Discord](https://img.shields.io/discord/835194192044621885.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/vDTkKar5Vz)
 
 ## Docs
 
-[TO BE UPDATED]
-
-Quick links:
-
 - [Schemas and Objects (overview)](./docs/architectural/schemas_and_objects.md)
 - [Data model](./docs/architectural/data_model.md)
 - [Glossary](./docs/glossary.md)
+
+License:
+[MIT](https://github.com/unigraph-dev/unigraph-dev/blob/main/LICENSE)
 
 ## Getting started
 
@@ -126,14 +127,6 @@ This repository contains all relevant source code for Unigraph:
     * unigraph-dev-common/ : shared data and utilities between backend and frontend.
     * unigraph-dev-explorer/ : Unigraph frontend in React.
     * default-packages/ : schema, data and code declarations for packages providing default functionalities. If you are looking to build packages, you can study example projects here.
-
-## License
-
-MIT License.
-
-## Contributing
-
-This page will be updated in a few days, but please join the Discord community in the mean time to talk about contributing, or open a GitHub issue if you want to help!
 
 ## API Keys
 
