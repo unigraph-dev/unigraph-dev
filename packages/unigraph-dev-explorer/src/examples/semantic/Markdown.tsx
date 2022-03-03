@@ -28,6 +28,9 @@ const getTextNodes = (root: any) => {
     return children;
 };
 
+const defaultIcon =
+    "%3Csvg xmlns='http://www.w3.org/2000/svg' style='width:24px;height:24px' viewBox='0 0 24 24'%3E%3Cpath fill='currentColor' d='M5 19V5H12V12H19V13C19.7 13 20.37 13.13 21 13.35V9L15 3H5C3.89 3 3 3.89 3 5V19C3 20.1 3.89 21 5 21H13.35C13.13 20.37 13 19.7 13 19H5M14 4.5L19.5 10H14V4.5M23 18V20H20V23H18V20H15V18H18V15H20V18H23Z' /%3E%3C/svg%3E";
+
 const compFactory = (name: string, { node, inline, className, children, ...props }: any) =>
     // eslint-disable-next-line react/no-children-prop
     React.createElement(name, {
@@ -47,7 +50,91 @@ const compFactory = (name: string, { node, inline, className, children, ...props
         style: { display: 'contents', ...props.style },
     });
 
+const addPage = async (childrenRoot: any, newName: any, subsId: any) => {
+    if (!childrenRoot) throw new Error("We can't add a page to which that doesn't exist");
+    const newUid = await window.unigraph.addObject(
+        {
+            text: {
+                _value: newName,
+                type: { 'unigraph.id': '$/schema/markdown' },
+            },
+        },
+        '$/schema/note_block',
+    );
+    window.unigraph.updateObject(
+        childrenRoot.uid,
+        {
+            _value: {
+                children: {
+                    '_value[': [
+                        {
+                            _key: `[[${newName}]]`,
+                            _value: {
+                                'dgraph.type': ['Interface'],
+                                type: { 'unigraph.id': '$/schema/interface/semantic' },
+                                _hide: true,
+                                _value: { uid: newUid[0] },
+                            },
+                        },
+                    ],
+                },
+            },
+        },
+        true,
+        false,
+        subsId,
+    );
+    return newUid[0];
+};
+
+const tryFindLinkToAdd = async (childrenRoot: any, name: string, subsId: any) => {
+    if (!childrenRoot) return;
+    const res = await window.unigraph.getQueries([
+        `(func: uid(parentUid)) {
+            uid
+            type {<unigraph.id>}
+            popularity: count(<unigraph.origin>)
+        }
+        k as var(func: eq(<_value.%>, "${name}")) {
+            <_value.%>
+            type {<unigraph.id>}
+            unigraph.origin @filter(type(Entity) AND not uid(k)) {
+                    parentUid as uid
+            }
+        }`,
+    ]);
+    const linkFound = res[0].sort((a: any, b: any) => b.popularity - a.popularity)[0];
+    if (linkFound) {
+        console.log('k');
+        window.unigraph.updateObject(
+            childrenRoot.uid,
+            {
+                _value: {
+                    children: {
+                        '_value[': [
+                            {
+                                _key: `[[${name}]]`,
+                                _value: {
+                                    'dgraph.type': ['Interface'],
+                                    type: { 'unigraph.id': '$/schema/interface/semantic' },
+                                    _hide: true,
+                                    _value: { uid: linkFound.uid },
+                                },
+                            },
+                        ],
+                    },
+                },
+            },
+            true,
+            false,
+            subsId,
+        );
+    }
+};
+
 export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) => {
+    const timeout = React.useRef<any>(0);
+
     const MarkdownComponent = React.useMemo(() => {
         return (
             <Typography
@@ -121,22 +208,32 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                                     window.unigraph.getNamespaceMap?.()?.[
                                         matches[0]?._value?._value?.type?.['unigraph.id']
                                     ];
+                                if (!objDef) {
+                                    if (timeout.current) clearTimeout(timeout.current);
+                                    timeout.current = setTimeout(
+                                        () =>
+                                            tryFindLinkToAdd(
+                                                callbacks?.['get-semantic-properties']?.(),
+                                                children[0],
+                                                callbacks.subsId,
+                                            ),
+                                        100,
+                                    );
+                                }
                                 return (
                                     <>
                                         <span style={{ color: 'darkgray' }}>[[</span>
-                                        {objDef ? (
-                                            <div
-                                                style={{
-                                                    display: 'inline-flex',
-                                                    minWidth: '16px',
-                                                    minHeight: '15px',
-                                                    backgroundImage: `url("data:image/svg+xml,${objDef?._icon}")`,
-                                                    opacity: 0.54,
-                                                }}
-                                            />
-                                        ) : (
-                                            []
-                                        )}
+                                        <div
+                                            style={{
+                                                display: 'inline-flex',
+                                                minWidth: '16px',
+                                                minHeight: '15px',
+                                                backgroundImage: `url("data:image/svg+xml,${
+                                                    objDef ? objDef?._icon : defaultIcon
+                                                }")`,
+                                                opacity: 0.54,
+                                            }}
+                                        />
                                         {
                                             // eslint-disable-next-line react/no-children-prop
                                             React.createElement('span', {
@@ -157,13 +254,25 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                                                         );
                                                     else if (callbacks?.namespaceLink) {
                                                         window.open(callbacks.namespaceLink(children[0]), '_blank');
+                                                    } else {
+                                                        // Create new note on click, then navigate to it
+                                                        const childrenRoot = callbacks?.['get-semantic-properties']?.();
+                                                        addPage(childrenRoot, children[0], callbacks.subsId).then(
+                                                            (navUid: any) => {
+                                                                window.wsnavigator(
+                                                                    `/library/object?uid=${navUid}&viewer=${'dynamic-view-detailed'}&type=$/schema/note_block`,
+                                                                );
+                                                            },
+                                                        );
                                                     }
                                                 },
                                                 ...props,
                                                 style: {
                                                     display: 'contents',
                                                     color:
-                                                        matches[0] || callbacks?.namespaceLink ? 'mediumblue' : 'black',
+                                                        matches[0] || callbacks?.namespaceLink
+                                                            ? 'mediumblue'
+                                                            : 'cornflowerblue',
                                                     ':hover': {
                                                         textDecoration: 'underline',
                                                     },

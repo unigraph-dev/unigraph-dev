@@ -82,39 +82,51 @@ export const addChildren = (
             children: {
                 _displayAs: data?._value?.children?._displayAs,
                 '_value[': [
-                    ...(data?._value?.children?.['_value['] || []).map((el: any) => ({
-                        _value: { uid: el._value.uid },
-                        _key: el._key,
-                        _index: {
-                            '_value.#i':
-                                el._index['_value.#i'] > (index as number)
-                                    ? el._index['_value.#i'] + children.length
-                                    : el._index['_value.#i'],
-                        },
-                        ...(changeValue && el._index?.['_value.#i'] === index
-                            ? {
-                                  _value: {
-                                      uid: el._value.uid,
-                                      _value: {
-                                          uid: el._value._value.uid,
-                                          _value: {
-                                              uid: el._value._value._value.uid,
-                                              text: {
-                                                  uid: el?._value?._value?._value?.text?.uid,
-                                                  _value: {
-                                                      uid: el?._value?._value?._value?.text?._value?.uid,
-                                                      _value: {
-                                                          uid: el?._value?._value?._value?.text?._value?._value?.uid,
-                                                          '_value.%': changeValue,
-                                                      },
-                                                  },
-                                              },
-                                          },
+                    ...(data?._value?.children?.['_value['] || [])
+                        .map((el: any) =>
+                            el._value?.uid
+                                ? {
+                                      _value: { uid: el._value.uid },
+                                      _key: el._key,
+                                      _index: {
+                                          '_value.#i':
+                                              el._index['_value.#i'] > (index as number)
+                                                  ? el._index['_value.#i'] + children.length
+                                                  : el._index['_value.#i'],
                                       },
-                                  },
-                              }
-                            : {}),
-                    })),
+                                      ...(changeValue && el._index?.['_value.#i'] === index
+                                          ? {
+                                                _value: {
+                                                    uid: el._value.uid,
+                                                    _value: {
+                                                        uid: el._value._value.uid,
+                                                        _value: {
+                                                            uid: el._value._value._value.uid,
+                                                            text: {
+                                                                uid: el?._value?._value?._value?.text?.uid,
+                                                                _value: {
+                                                                    uid: el?._value?._value?._value?.text?._value?.uid,
+                                                                    _value: {
+                                                                        uid: el?._value?._value?._value?.text?._value
+                                                                            ?._value?.uid,
+                                                                        '_value.%': changeValue,
+                                                                    },
+                                                                },
+                                                            },
+                                                        },
+                                                    },
+                                                },
+                                            }
+                                          : {}),
+                                  }
+                                : undefined,
+                        )
+                        .filter(Boolean)
+                        .map((el: any, idx: number) => {
+                            const ret = el;
+                            ret._index['_value.#i'] = idx > (index as number) ? idx + children.length : idx;
+                            return ret;
+                        }),
                     ...children.map((el: string, i: number) => ({
                         _value: {
                             type: {
@@ -392,16 +404,18 @@ export const deleteChildren = (data: any, context: NoteEditorContext, index: num
                 return prev;
             }
         }
-        return [
-            ...prev,
-            {
-                _index: { '_value.#i': el._index['_value.#i'] - deleted },
-                _key: el._key,
-                _value: {
-                    uid: el._value.uid,
-                },
-            },
-        ];
+        return el._value?.uid
+            ? [
+                  ...prev,
+                  {
+                      _index: { '_value.#i': prev.length },
+                      _key: el._key,
+                      _value: {
+                          uid: el._value.uid,
+                      },
+                  },
+              ]
+            : prev;
     }, []);
 
     addCommand(context.historyState.value, [

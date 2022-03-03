@@ -240,9 +240,6 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                                     children: {
                                         '_value[': [
                                             {
-                                                _index: {
-                                                    '_value.#i': semChildren?.children?.['_value[']?.length || 0,
-                                                },
                                                 _key: `[[${newName}]]`,
                                                 _value: {
                                                     'dgraph.type': ['Interface'],
@@ -288,6 +285,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                     matchOnly,
                 ) || hasMatch;
             if (!hasMatch) {
+                console.log();
                 window.unigraph.getState('global/searchPopup').setValue({ show: false });
             }
         },
@@ -301,7 +299,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
 
     React.useEffect(() => {
         const fn = (state: any) => {
-            if (state.component !== componentId) return;
+            if (componentId === undefined || state.component !== componentId) return;
             checkReferences(true);
         };
         window.unigraph.getState('global/focused').subscribe(fn);
