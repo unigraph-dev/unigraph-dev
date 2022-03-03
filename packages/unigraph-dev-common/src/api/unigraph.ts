@@ -654,6 +654,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             }),
         leaseUid: () => {
             const leased = caches.uid_lease.shift();
+            exhaustedLeases.push(leased);
             sendEvent(connection, 'lease_uid', { uid: leased });
             return leased;
         },
