@@ -1077,7 +1077,13 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
     todoObj.uid = window.unigraph.leaseUid?.();
     clearEmpties(todoObj);
     console.log(todoObj);
-    const paddedObj = buildUnigraphEntity(JSON.parse(JSON.stringify(todoObj)), '$/schema/todo', schemas);
+    const paddedObj: any = buildUnigraphEntity(JSON.parse(JSON.stringify(todoObj)), '$/schema/todo', schemas);
+    paddedObj._value.uid = window.unigraph.leaseUid?.();
+    paddedObj._value.name.uid = window.unigraph.leaseUid?.();
+    paddedObj['unigraph.indexes'].name.uid = paddedObj._value.name.uid;
+    paddedObj._value.name._value.uid = window.unigraph.leaseUid?.();
+    paddedObj._value.name._value._value.uid = window.unigraph.leaseUid?.();
+
     stubConverted._value = paddedObj;
 
     addCommand(context.historyState.value, [
@@ -1104,7 +1110,7 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
     focusedState.setValue({ ...focusedState.value, component: undefined });
 
     stubConverted._value = { uid: todoObj.uid };
-    await window.unigraph.addObject(todoObj, '$/schema/todo', undefined, []);
+    await window.unigraph.addObject(paddedObj, '$/schema/todo', true, []);
     // eslint-disable-next-line prefer-destructuring
     await window.unigraph.updateObject(
         data?._value?.uid,

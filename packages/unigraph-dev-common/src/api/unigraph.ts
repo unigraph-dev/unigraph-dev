@@ -377,7 +377,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 };
                 sendEvent(connection, 'get_object', { uidOrName, options, id });
             }),
-        addObject: (object, schema, id?: any, subIds?: any) =>
+        addObject: (object, schema, padding?: any, subIds?: any, id?: any) =>
             new Promise((resolve, reject) => {
                 id = id || getRandomInt();
                 callbacks[id] = (response: any) => {
@@ -388,6 +388,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                     object,
                     schema,
                     id,
+                    padding,
                     subIds,
                 });
             }),
@@ -438,16 +439,13 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             }
 
             subResults[subId] = newObj;
-            setTimeout(() => {
-                // console.log(newObj);
-                subscriptions[subId](newObj);
-            }, 0);
 
             // Record state changes
             if (id) {
                 if (subFakeUpdates[subId] === undefined) subFakeUpdates[subId] = [id];
                 else subFakeUpdates[subId].push(id);
             }
+            subscriptions[subId](newObj);
         },
         deleteRelation: (uid, relation) => {
             sendEvent(connection, 'delete_relation', { uid, relation });
