@@ -177,7 +177,7 @@ export function InlineSearch() {
                     style: {
                         maxHeight: '320px',
                         padding: '10px',
-                        borderRadius: '16px',
+                        borderRadius: '4px',
                     },
                 }}
             >
@@ -187,11 +187,12 @@ export function InlineSearch() {
                         style={{
                             ...(index === currentAction
                                 ? {
-                                      borderRadius: '6px',
+                                      borderRadius: '2px',
                                       backgroundColor: 'gainsboro',
                                   }
                                 : {}),
                             cursor: 'pointer',
+                            padding: '2px',
                         }}
                         id={`globalSearchItem_${index === currentAction ? 'current' : ''}`}
                     >
