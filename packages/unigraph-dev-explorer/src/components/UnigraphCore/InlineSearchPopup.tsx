@@ -51,16 +51,14 @@ export function InlineSearch() {
 
     const [state, setState] = React.useState(ctxMenuState.value);
     const search = React.useRef(
-        _.throttle((key: string) => {
+        _.debounce((key: string) => {
             if (key !== undefined && key.length > 1) {
                 window.unigraph
                     .getSearchResults(parseQuery(key as any) as any, 'name', 2, {
-                        limit: 500,
-                        noPrimitives: true,
                         hideHidden: ctxMenuState.value.hideHidden,
                     })
                     .then((res: any) => {
-                        const results = res.entities
+                        const results = [...res.top, ...res.entities]
                             .filter((el: any) => el.type['unigraph.id'] !== '$/schema/embed_block')
                             .map((el: any) => ({
                                 name: new UnigraphObject(el['unigraph.indexes']?.name || {}).as('primitive'),
@@ -68,20 +66,11 @@ export function InlineSearch() {
                                 type: el.type['unigraph.id'],
                             }))
                             .filter((el: any) => el.name);
-                        const topResults = res.top
-                            .filter((el: any) => el.type['unigraph.id'] !== '$/schema/embed_block')
-                            .map((el: any) => ({
-                                name: new UnigraphObject(el['unigraph.indexes']?.name || {}).as('primitive'),
-                                uid: el.uid,
-                                type: el.type['unigraph.id'],
-                            }))
-                            .filter((el: any) => el.name);
-                        console.log(topResults);
                         if (window.unigraph.getState('global/searchPopup').value.search === key)
-                            setSearchResults([...topResults, ...results]);
+                            setSearchResults(results);
                     });
             }
-        }, 500),
+        }, 200),
     );
 
     const handleClose = () => ctxMenuState.setValue({ show: false });
@@ -89,7 +78,6 @@ export function InlineSearch() {
     React.useEffect(() => ctxMenuState.subscribe((v) => setState(v)), []);
 
     const [searchResults, setSearchResults] = React.useState<any[]>([]);
-    const [topResults, setTopResults] = React.useState<any[]>([]);
     React.useEffect(() => {
         if (!state.show) setSearchResults([]);
         else setCurrentAction(0);
@@ -102,7 +90,6 @@ export function InlineSearch() {
             ...(state.default || []).map((el: any, index: number) => [
                 <Typography variant="body1">{el.label(state.search!)}</Typography>,
                 (ev: any) => {
-                    console.log('Yo');
                     ev.preventDefault();
                     ev.stopPropagation();
                     el.onSelected(state.search!).then(([newUid, newType]: [string, string]) => {
