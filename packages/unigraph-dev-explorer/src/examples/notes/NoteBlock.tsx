@@ -97,6 +97,18 @@ const BlockChildren = ({
                         marginBottom: '1px',
                         zIndex: 999,
                     }}
+                    transformOnDrop={(props: any) => {
+                        return {
+                            ...props,
+                            uid: undefined,
+                            data: {
+                                type: { 'unigraph.id': '$/schema/embed_block' },
+                                _value: {
+                                    content: { uid: props.uid },
+                                },
+                            },
+                        };
+                    }}
                 >
                     {subentities.map((el: any, elindex: any) => {
                         const isCol = isChildrenCollapsed[el.uid];

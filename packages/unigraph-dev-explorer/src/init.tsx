@@ -137,6 +137,8 @@ export function init(hostname?: string) {
     /* Example: {'shift+Tab': {'319908': () => {return true;}}} */
     window.unigraph.addState('global/keyboardShortcuts', {});
 
+    if (window.localStorage.getItem('enableAnalytics') === 'true') initAnalyticsIfOptedIn();
+
     initContextMenu();
     initRegistry();
     initBacklinkManager();
@@ -145,8 +147,6 @@ export function init(hostname?: string) {
     initKeyboardShortcuts();
 
     registerListQuickAdder();
-
-    if (window.localStorage.getItem('enableAnalytics') === 'true') initAnalyticsIfOptedIn();
 }
 
 function initSelect() {
@@ -282,6 +282,17 @@ function initBacklinkManager() {
     );
 }
 
+/**
+ * Initializes analytics when user explicitly opted in.
+ *
+ * Information we collect:
+ * - basic info: time, email (user-given), browser, os, country
+ * - user actions: click, keypress - anonimized into 15 second chunks
+ *
+ * We use them to calculate session length and usage frequency.
+ *
+ * Your anonymized data is shared with Mixpanel.
+ */
 function initAnalyticsIfOptedIn() {
     // eslint-disable-next-line global-require
     const mixpanel = require('mixpanel-browser');
@@ -290,12 +301,24 @@ function initAnalyticsIfOptedIn() {
     mixpanel.init('d15629c3a0ad692d3b7491a9091dd2be', {
         debug: true,
         ignore_dnt: true, // with user's explicit consent
+        // eslint-disable-next-line inclusive-language/use-inclusive-words -- pre-defined property
+        property_blacklist: [
+            // don't request detailed information
+            '$city',
+            '$initial_referring_domain',
+            '$initial_referrer',
+            '$screen_height',
+            '$screen_width',
+            '$current_url',
+        ],
     });
     mixpanel.track('initAnalyticsAndUserOptedIn');
 
-    (window as any).onEventSend = (eventName: string) => {
-        if (!['run_executable', 'unsubscribe_by_id'].includes(eventName)) window.mixpanel?.track(`event/${eventName}`);
-    };
+    const onUserInteraction = _.throttle(() => {
+        mixpanel.track('userInteraction');
+    }, 1000 * 15); // anonymize user interaction into 15 second chunks
+    document.addEventListener('pointerdown', onUserInteraction, true);
+    document.addEventListener('keydown', onUserInteraction, true);
 }
 
 function initPackages() {
