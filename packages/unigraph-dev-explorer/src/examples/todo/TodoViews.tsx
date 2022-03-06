@@ -220,7 +220,8 @@ export type TodoMenuItems = {
     };
 };
 
-const maketodoMenuItemsFromTag = (tag: any): TodoMenuItems => {
+const maketodoMenuItemsFromTag = (tag: any): TodoMenuItems | undefined => {
+    if (!tag.get('name')) return undefined;
     const tagName = tag.get('name').as('primitive');
     return {
         [tagName]: {
@@ -297,7 +298,7 @@ const TodoMenuSidebarItem = ({ iconPath, text, onClick, selected, getCountQuery,
         <ListItem sx={pointerHoverSx} onClick={onClick} selected={selected}>
             <ListItemIcon>{iconPath && <Icon path={iconPath as string} size={1} />}</ListItemIcon>
             <ListItemText primary={text} />
-            {itemCount && <ListItemText primary={itemCount} sx={{ textAlign: 'right' }} />}
+            {itemCount && <ListItemText primary={itemCount} sx={{ textAlign: 'right', marginLeft: '4px' }} />}
         </ListItem>
     );
 };
@@ -320,6 +321,7 @@ export const TodoMenuSidebar = ({ mode, setMode, todoViews, setTodoViews, todoLi
                 console.log(`subscribed to $/schema/tag`, result);
                 const todoTags = result
                     .map(maketodoMenuItemsFromTag)
+                    .filter(Boolean)
                     .reduce((acc: TodoMenuItems, newVal: TodoMenuItems) => {
                         return { ...acc, ...newVal };
                     }, {});
@@ -351,6 +353,7 @@ export const TodoMenuSidebar = ({ mode, setMode, todoViews, setTodoViews, todoLi
                     .filter((x: any) => x.getType('$/schema/tag'));
                 const archivedTodoTags = archivedTodoTagObjs
                     .map(maketodoMenuItemsFromTag)
+                    .filter(Boolean)
                     .reduce((acc: TodoMenuItems, newVal: TodoMenuItems) => {
                         return { ...acc, ...newVal };
                     }, {});

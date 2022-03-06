@@ -243,8 +243,8 @@ export const TodoList = (props: any) => {
     });
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'row' }}>
-            <div style={{ flexBasis: '15%', height: '100%' }}>
+        <div style={{ display: 'flex', flexDirection: 'row', height: '100%' }}>
+            <div style={{ flexShrink: 0, height: '100%', overflowY: 'auto' }}>
                 <TodoMenuSidebar
                     mode={mode}
                     setMode={setMode}
@@ -253,7 +253,7 @@ export const TodoList = (props: any) => {
                     todoListProps={props}
                 />
             </div>
-            <div style={{ flexBasis: '85%', height: '100%' }}>
+            <div style={{ flexGrow: 1, height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <Typography variant="h5" sx={{ margin: '8px' }}>
                     {todoViews[mode].text}
                 </Typography>

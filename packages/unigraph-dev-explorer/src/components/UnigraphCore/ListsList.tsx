@@ -75,7 +75,7 @@ var(func: eq(<unigraph.id>, "$/schema/list")) {
     }
 }`,
                 (result: any) => {
-                    setData(result);
+                    setData(result.filter((el: any) => el?._value?.name?.['_value.%']));
                 },
                 subsId,
                 { noExpand: true },

@@ -702,7 +702,6 @@ export const indentChild = (data: any, context: NoteEditorContext, index: number
 export const indentChildren = (data: any, context: NoteEditorContext, index: number[], parent?: number) => {
     const parents = getParents(data);
     if (!data._hide) parents.push({ uid: data.uid });
-    removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     if (!parent && index[0] !== 0) {
         parent = index[0] - 1;
     } else if (!parent) {
@@ -719,7 +718,7 @@ export const indentChildren = (data: any, context: NoteEditorContext, index: num
             currSubentity++;
             if (index.includes(currSubentity)) {
                 isDeleted++;
-                newUid.push({ uid: el._value.uid, _value: { uid: el._value._value.uid } });
+                newUid.push({ uid: el._value.uid, _value: { uid: el._value._value?.uid } });
                 return undefined;
             }
             if (currSubentity === parent) {
@@ -731,14 +730,14 @@ export const indentChildren = (data: any, context: NoteEditorContext, index: num
                     _index: { '_value.#i': el._index['_value.#i'] - isDeleted },
                     _key: el._key,
                     _value: {
-                        uid: el._value.uid,
+                        uid: el._value?.uid,
                     },
                 };
             return {
                 _index: { uid: el._index?.uid, '_value.#i': el._index['_value.#i'] },
                 _key: el._key,
                 _value: {
-                    uid: el._value.uid,
+                    uid: el._value?.uid,
                 },
             };
         }
@@ -747,14 +746,14 @@ export const indentChildren = (data: any, context: NoteEditorContext, index: num
                 _index: { '_value.#i': el._index['_value.#i'] - isDeleted },
                 _key: el._key,
                 _value: {
-                    uid: el._value.uid,
+                    uid: el._value?.uid,
                 },
             };
         return {
             _index: { uid: el._index?.uid, '_value.#i': el._index['_value.#i'] },
             _key: el._key,
             _value: {
-                uid: el._value.uid,
+                uid: el._value?.uid,
             },
         };
     });
@@ -873,7 +872,7 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
                     targetChild.push({
                         _key: ccurr._key,
                         _value: {
-                            uid: ccurr._value.uid,
+                            uid: ccurr._value?.uid,
                         },
                         _index: { '_value.#i': curr._index['_value.#i'] + targetChild.length + 1 },
                     });
@@ -890,7 +889,7 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
                         {
                             _key: ccurr._key,
                             _value: {
-                                uid: ccurr._value.uid,
+                                uid: ccurr._value?.uid,
                             },
                             _index: {
                                 '_value.#i': ccurr._index['_value.#i'] - childIsCompleted,
@@ -903,7 +902,7 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
                         _index: { '_value.#i': ccurr._index['_value.#i'], uid: ccurr._index.uid },
                         _key: ccurr._key,
                         _value: {
-                            uid: ccurr._value.uid,
+                            uid: ccurr._value?.uid,
                         },
                     },
                 ];
