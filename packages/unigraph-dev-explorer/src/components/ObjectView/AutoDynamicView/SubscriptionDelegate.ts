@@ -1,5 +1,5 @@
 import React from 'react';
-import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { TabContext } from '../../../utils';
 import { isStub } from '../utils';
 
@@ -14,7 +14,11 @@ export const useSubscriptionDelegate: (...args: any) => [() => any, number] = (
     const [loadedObj, setLoadedObj] = React.useState<any>(false);
     const [subsId, setSubsId] = React.useState(0);
 
-    const getObject = React.useCallback(() => (isObjectStub ? loadedObj : object), [loadedObj, object, isObjectStub]);
+    const getObject = React.useCallback(() => {
+        let obj = isObjectStub ? loadedObj : object;
+        if (obj?.constructor.name !== 'UnigraphObject' && obj?.uid) obj = new UnigraphObject(obj);
+        return obj;
+    }, [loadedObj, object, isObjectStub]);
 
     React.useEffect(() => {
         if (!isObjectStub) setLoadedObj(object);
@@ -23,7 +27,6 @@ export const useSubscriptionDelegate: (...args: any) => [() => any, number] = (
     React.useEffect(() => {
         const newSubs = getRandomInt();
         if (isObjectStub && object?.uid !== uidRef.current) {
-            uidRef.current = object?.uid;
             // console.log(tabContext);
             // if (subsId) tabContext.unsubscribe(subsId);
             let query = objectView?.query?.('QUERYFN_TEMPLATE');
@@ -43,6 +46,7 @@ export const useSubscriptionDelegate: (...args: any) => [() => any, number] = (
                     },
                 },
                 (newObjects: any[]) => {
+                    uidRef.current = object?.uid;
                     setLoadedObj(newObjects[0]);
                 },
                 newSubs,

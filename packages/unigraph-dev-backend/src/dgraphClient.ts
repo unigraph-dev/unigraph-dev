@@ -4,7 +4,7 @@ import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import fetch from 'node-fetch';
 import { getAsyncLock, withLock } from './asyncManager';
 import { perfLogStartDbTransaction, perfLogAfterDbTransaction } from './logging';
-import { makeSearchQuery } from './search';
+import { makeNameQuery, makeSearchQuery } from './search';
 
 export type UnigraphUpsert = {
     queries: string[];
@@ -346,6 +346,15 @@ export default class DgraphClient {
     const res = (await this.queryDgraph(finalQuery));
     perfLogAfterDbTransaction ()
     return {results: ((searchOptions?.noPrimitives || searchOptions?.resultsOnly) ? [] : res[0]) as any[], entities: res[res.length - 1] as any[]};
+  }
+
+  async getSearchNameResults(query: string, hideHidden?: boolean) { // Only do keyword matches
+    const finalQuery = makeNameQuery(query, hideHidden)
+    // console.log(finalQuery)
+    perfLogStartDbTransaction ()
+    const res = (await this.queryDgraph(finalQuery));
+    perfLogAfterDbTransaction ()
+    return {entities: res[1] as any[], top: res[0] as any[]};
   }
 
   async getPackages() {

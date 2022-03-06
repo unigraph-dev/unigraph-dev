@@ -4,16 +4,51 @@ const getQueryHead = (qual: string, options: string, filter: string, showHidden:
         showHidden ? '' : 'AND (NOT eq(<_hide>, true))'
     })`;
 
+// TODO: move this to more flexible query
+export const makeNameQuery = (name: string, hideHidden?: boolean) => `query {
+    uhops0 as var(func: alloftext(<_value.%>, "${name.replace(/"/g, '\\"')}"))
+    var(func: uid(uhops0)) {
+        <unigraph.origin> @filter(type(Entity)) {
+            uhops1 as uid
+        }
+    }
+    filteredEntity as var(func: uid(uhops1)) @filter((NOT type(Deleted)) AND NOT (uid(uhops0)) AND (NOT eq(<_propertyType>, "inheritance")) ${
+        hideHidden ? 'AND (NOT eq(<_hide>, true))' : ''
+    } AND has(_updatedAt)) {
+    incoming as count(<unigraph.origin>) @filter(type(Entity))
+}
+result_top(func: uid(filteredEntity), orderdesc: val(incoming)) @filter(gt(val(incoming), 5)) {uid _updatedAt
+    type {
+      unigraph.id
+    }
+    unigraph.id
+    unigraph.indexes {
+      expand(_userpredicate_) { uid expand(_userpredicate_) { uid expand(_userpredicate_) { 
+        uid expand(_userpredicate_) { uid expand(_userpredicate_) { uid expand(_userpredicate_) } } } } }
+      
+}}
+      result(func: uid(filteredEntity), orderdesc: _updatedAt, first: 200) @filter(has(<unigraph.indexes>)) {
+    uid
+    _updatedAt
+    type {
+      unigraph.id
+    }
+    unigraph.indexes {
+      expand(_userpredicate_) { uid expand(_userpredicate_) { uid expand(_userpredicate_) { 
+        uid expand(_userpredicate_) { uid expand(_userpredicate_) { uid expand(_userpredicate_) } } } } }
+      
+}
+}
+}`;
+
 const resQueries = {
     indexes: (qual: string, options: string, filter: string, showHidden: boolean, _: string) => `var${getQueryHead(
         qual,
         '',
         filter,
         showHidden,
-    )} {incoming as sum(val(incoming2))
-        <unigraph.origin> @filter(type(Entity)) {
-          incoming2 as count(<unigraph.origin>) @filter(type(Entity) AND uid(uhops0, uhops1))
-        }
+    )} {
+        incoming as sum(<unigraph.origin>) @filter(type(Entity))
     }
     ${getQueryHead(
         `${qual}, orderdesc: val(incoming), orderdesc: _updatedAt`,
@@ -126,7 +161,7 @@ export const makeSearchQuery = (
         ${qhops.join('\n')}
         ${resultQuery}
     }`;
-    // console.log(fq);
+    console.log(fq);
     return fq;
 };
 

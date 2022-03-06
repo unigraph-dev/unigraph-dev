@@ -7,6 +7,43 @@ import { parseQuery } from './UnigraphSearch';
 import { setSearchPopup } from '../../examples/notes/searchPopup';
 import { SearchPopupState } from '../../global.d';
 
+const ResultDisplay = ({ el }: any) => {
+    return (
+        <div style={{ display: 'inline-flex' }}>
+            <div
+                style={{
+                    minHeight: '18px',
+                    minWidth: '18px',
+                    height: '18px',
+                    width: '18px',
+                    alignSelf: 'center',
+                    marginRight: '3px',
+                    opacity: 0.54,
+                    backgroundImage: `url("data:image/svg+xml,${
+                        window.unigraph.getNamespaceMap?.()?.[el.type]?._icon
+                    }")`,
+                }}
+            />
+            <Typography style={{ color: 'grey', marginLeft: '2px' }}>
+                {window.unigraph.getNamespaceMap?.()?.[el.type]?._name}
+            </Typography>
+            <Divider
+                variant="middle"
+                orientation="vertical"
+                style={{
+                    height: '16px',
+                    alignSelf: 'center',
+                    marginLeft: '16px',
+                    marginRight: '16px',
+                    marginTop: '0px',
+                    marginBottom: '0px',
+                }}
+            />
+            <Typography variant="body1">{el.name}</Typography>
+        </div>
+    );
+};
+
 export function InlineSearch() {
     const ctxMenuState: AppState<Partial<SearchPopupState>> = window.unigraph.getState('global/searchPopup');
 
@@ -14,16 +51,14 @@ export function InlineSearch() {
 
     const [state, setState] = React.useState(ctxMenuState.value);
     const search = React.useRef(
-        _.throttle((key: string) => {
+        _.debounce((key: string) => {
             if (key !== undefined && key.length > 1) {
                 window.unigraph
-                    .getSearchResults(parseQuery(key as any) as any, 'indexes', 2, {
-                        limit: 500,
-                        noPrimitives: true,
+                    .getSearchResults(parseQuery(key as any) as any, 'name', 2, {
                         hideHidden: ctxMenuState.value.hideHidden,
                     })
                     .then((res: any) => {
-                        const results = res.entities
+                        const results = [...res.top, ...res.entities]
                             .filter((el: any) => el.type['unigraph.id'] !== '$/schema/embed_block')
                             .map((el: any) => ({
                                 name: new UnigraphObject(el['unigraph.indexes']?.name || {}).as('primitive'),
@@ -35,7 +70,7 @@ export function InlineSearch() {
                             setSearchResults(results);
                     });
             }
-        }, 500),
+        }, 200),
     );
 
     const handleClose = () => ctxMenuState.setValue({ show: false });
@@ -55,7 +90,6 @@ export function InlineSearch() {
             ...(state.default || []).map((el: any, index: number) => [
                 <Typography variant="body1">{el.label(state.search!)}</Typography>,
                 (ev: any) => {
-                    console.log('Yo');
                     ev.preventDefault();
                     ev.stopPropagation();
                     el.onSelected(state.search!).then(([newUid, newType]: [string, string]) => {
@@ -64,38 +98,7 @@ export function InlineSearch() {
                 },
             ]),
             ...searchResults.map((el: any) => [
-                <div style={{ display: 'inline-flex' }}>
-                    <div
-                        style={{
-                            minHeight: '18px',
-                            minWidth: '18px',
-                            height: '18px',
-                            width: '18px',
-                            alignSelf: 'center',
-                            marginRight: '3px',
-                            opacity: 0.54,
-                            backgroundImage: `url("data:image/svg+xml,${
-                                window.unigraph.getNamespaceMap?.()?.[el.type]?._icon
-                            }")`,
-                        }}
-                    />
-                    <Typography style={{ color: 'grey', marginLeft: '2px' }}>
-                        {window.unigraph.getNamespaceMap?.()?.[el.type]?._name}
-                    </Typography>
-                    <Divider
-                        variant="middle"
-                        orientation="vertical"
-                        style={{
-                            height: '16px',
-                            alignSelf: 'center',
-                            marginLeft: '16px',
-                            marginRight: '16px',
-                            marginTop: '0px',
-                            marginBottom: '0px',
-                        }}
-                    />
-                    <Typography variant="body1">{el.name}</Typography>
-                </div>,
+                <ResultDisplay el={el} />,
                 (ev: any) => {
                     ev.preventDefault();
                     ev.stopPropagation();
@@ -161,7 +164,7 @@ export function InlineSearch() {
                     style: {
                         maxHeight: '320px',
                         padding: '10px',
-                        borderRadius: '16px',
+                        borderRadius: '4px',
                     },
                 }}
             >
@@ -171,11 +174,12 @@ export function InlineSearch() {
                         style={{
                             ...(index === currentAction
                                 ? {
-                                      borderRadius: '6px',
+                                      borderRadius: '2px',
                                       backgroundColor: 'gainsboro',
                                   }
                                 : {}),
                             cursor: 'pointer',
+                            padding: '2px',
                         }}
                         id={`globalSearchItem_${index === currentAction ? 'current' : ''}`}
                     >

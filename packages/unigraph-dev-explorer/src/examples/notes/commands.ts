@@ -82,39 +82,51 @@ export const addChildren = (
             children: {
                 _displayAs: data?._value?.children?._displayAs,
                 '_value[': [
-                    ...(data?._value?.children?.['_value['] || []).map((el: any) => ({
-                        _value: { uid: el._value.uid },
-                        _key: el._key,
-                        _index: {
-                            '_value.#i':
-                                el._index['_value.#i'] > (index as number)
-                                    ? el._index['_value.#i'] + children.length
-                                    : el._index['_value.#i'],
-                        },
-                        ...(changeValue && el._index?.['_value.#i'] === index
-                            ? {
-                                  _value: {
-                                      uid: el._value.uid,
-                                      _value: {
-                                          uid: el._value._value.uid,
-                                          _value: {
-                                              uid: el._value._value._value.uid,
-                                              text: {
-                                                  uid: el?._value?._value?._value?.text?.uid,
-                                                  _value: {
-                                                      uid: el?._value?._value?._value?.text?._value?.uid,
-                                                      _value: {
-                                                          uid: el?._value?._value?._value?.text?._value?._value?.uid,
-                                                          '_value.%': changeValue,
-                                                      },
-                                                  },
-                                              },
-                                          },
+                    ...(data?._value?.children?.['_value['] || [])
+                        .map((el: any) =>
+                            el._value?.uid
+                                ? {
+                                      _value: { uid: el._value.uid },
+                                      _key: el._key,
+                                      _index: {
+                                          '_value.#i':
+                                              el._index['_value.#i'] > (index as number)
+                                                  ? el._index['_value.#i'] + children.length
+                                                  : el._index['_value.#i'],
                                       },
-                                  },
-                              }
-                            : {}),
-                    })),
+                                      ...(changeValue && el._index?.['_value.#i'] === index
+                                          ? {
+                                                _value: {
+                                                    uid: el._value.uid,
+                                                    _value: {
+                                                        uid: el._value._value.uid,
+                                                        _value: {
+                                                            uid: el._value._value._value.uid,
+                                                            text: {
+                                                                uid: el?._value?._value?._value?.text?.uid,
+                                                                _value: {
+                                                                    uid: el?._value?._value?._value?.text?._value?.uid,
+                                                                    _value: {
+                                                                        uid: el?._value?._value?._value?.text?._value
+                                                                            ?._value?.uid,
+                                                                        '_value.%': changeValue,
+                                                                    },
+                                                                },
+                                                            },
+                                                        },
+                                                    },
+                                                },
+                                            }
+                                          : {}),
+                                  }
+                                : undefined,
+                        )
+                        .filter(Boolean)
+                        .map((el: any, idx: number) => {
+                            const ret = el;
+                            ret._index['_value.#i'] = idx > (index as number) ? idx + children.length : idx;
+                            return ret;
+                        }),
                     ...children.map((el: string, i: number) => ({
                         _value: {
                             type: {
@@ -392,16 +404,18 @@ export const deleteChildren = (data: any, context: NoteEditorContext, index: num
                 return prev;
             }
         }
-        return [
-            ...prev,
-            {
-                _index: { '_value.#i': el._index['_value.#i'] - deleted },
-                _key: el._key,
-                _value: {
-                    uid: el._value.uid,
-                },
-            },
-        ];
+        return el._value?.uid
+            ? [
+                  ...prev,
+                  {
+                      _index: { '_value.#i': prev.length },
+                      _key: el._key,
+                      _value: {
+                          uid: el._value.uid,
+                      },
+                  },
+              ]
+            : prev;
     }, []);
 
     addCommand(context.historyState.value, [
@@ -688,7 +702,6 @@ export const indentChild = (data: any, context: NoteEditorContext, index: number
 export const indentChildren = (data: any, context: NoteEditorContext, index: number[], parent?: number) => {
     const parents = getParents(data);
     if (!data._hide) parents.push({ uid: data.uid });
-    removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     if (!parent && index[0] !== 0) {
         parent = index[0] - 1;
     } else if (!parent) {
@@ -705,7 +718,7 @@ export const indentChildren = (data: any, context: NoteEditorContext, index: num
             currSubentity++;
             if (index.includes(currSubentity)) {
                 isDeleted++;
-                newUid.push({ uid: el._value.uid, _value: { uid: el._value._value.uid } });
+                newUid.push({ uid: el._value.uid, _value: { uid: el._value._value?.uid } });
                 return undefined;
             }
             if (currSubentity === parent) {
@@ -717,14 +730,14 @@ export const indentChildren = (data: any, context: NoteEditorContext, index: num
                     _index: { '_value.#i': el._index['_value.#i'] - isDeleted },
                     _key: el._key,
                     _value: {
-                        uid: el._value.uid,
+                        uid: el._value?.uid,
                     },
                 };
             return {
                 _index: { uid: el._index?.uid, '_value.#i': el._index['_value.#i'] },
                 _key: el._key,
                 _value: {
-                    uid: el._value.uid,
+                    uid: el._value?.uid,
                 },
             };
         }
@@ -733,14 +746,14 @@ export const indentChildren = (data: any, context: NoteEditorContext, index: num
                 _index: { '_value.#i': el._index['_value.#i'] - isDeleted },
                 _key: el._key,
                 _value: {
-                    uid: el._value.uid,
+                    uid: el._value?.uid,
                 },
             };
         return {
             _index: { uid: el._index?.uid, '_value.#i': el._index['_value.#i'] },
             _key: el._key,
             _value: {
-                uid: el._value.uid,
+                uid: el._value?.uid,
             },
         };
     });
@@ -859,7 +872,7 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
                     targetChild.push({
                         _key: ccurr._key,
                         _value: {
-                            uid: ccurr._value.uid,
+                            uid: ccurr._value?.uid,
                         },
                         _index: { '_value.#i': curr._index['_value.#i'] + targetChild.length + 1 },
                     });
@@ -876,7 +889,7 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
                         {
                             _key: ccurr._key,
                             _value: {
-                                uid: ccurr._value.uid,
+                                uid: ccurr._value?.uid,
                             },
                             _index: {
                                 '_value.#i': ccurr._index['_value.#i'] - childIsCompleted,
@@ -889,7 +902,7 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
                         _index: { '_value.#i': ccurr._index['_value.#i'], uid: ccurr._index.uid },
                         _key: ccurr._key,
                         _value: {
-                            uid: ccurr._value.uid,
+                            uid: ccurr._value?.uid,
                         },
                     },
                 ];
@@ -1063,7 +1076,13 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
     todoObj.uid = window.unigraph.leaseUid?.();
     clearEmpties(todoObj);
     console.log(todoObj);
-    const paddedObj = buildUnigraphEntity(JSON.parse(JSON.stringify(todoObj)), '$/schema/todo', schemas);
+    const paddedObj: any = buildUnigraphEntity(JSON.parse(JSON.stringify(todoObj)), '$/schema/todo', schemas);
+    paddedObj._value.uid = window.unigraph.leaseUid?.();
+    paddedObj._value.name.uid = window.unigraph.leaseUid?.();
+    paddedObj['unigraph.indexes'].name.uid = paddedObj._value.name.uid;
+    paddedObj._value.name._value.uid = window.unigraph.leaseUid?.();
+    paddedObj._value.name._value._value.uid = window.unigraph.leaseUid?.();
+
     stubConverted._value = paddedObj;
 
     addCommand(context.historyState.value, [
@@ -1090,7 +1109,7 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
     focusedState.setValue({ ...focusedState.value, component: undefined });
 
     stubConverted._value = { uid: todoObj.uid };
-    await window.unigraph.addObject(todoObj, '$/schema/todo', undefined, []);
+    await window.unigraph.addObject(paddedObj, '$/schema/todo', true, []);
     // eslint-disable-next-line prefer-destructuring
     await window.unigraph.updateObject(
         data?._value?.uid,

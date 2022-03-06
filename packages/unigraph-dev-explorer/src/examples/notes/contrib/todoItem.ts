@@ -51,9 +51,11 @@ const editorPlugin = {
             .filter((el: any) => el?._value?._value?.type?.['unigraph.id'] === '$/schema/tag')
             .map((tag: any) => `#${tag?._value?._value?._value?.name?.['_value.%']}`);
         const name = new UnigraphObject(data).get('name')?.as('primitive');
-        return name === undefined ? undefined : `${name}${tags.length ? ` ${tags.join(' ')}` : ''}`;
+        return name === undefined
+            ? undefined
+            : `${name}${tags.length ? ` ${tags.join(' ')}` : ''}${name.trim().length ? '' : ' '}`;
     },
-    pushText: (subsId: any, data: any, text: string) => {
+    pushText: (subsId: any, data: any, text: string, isFlushing?: boolean) => {
         // console.log(data);
         const todoObject = parseTodoObject(text);
         const totalTags = todoObject.children
@@ -76,9 +78,13 @@ const editorPlugin = {
                     },
                 },
             },
-            children: {
-                '_value[': totalChildren,
-            },
+            ...(isFlushing
+                ? {
+                      children: {
+                          '_value[': totalChildren,
+                      },
+                  }
+                : {}),
         };
         // console.log(newObject);
         return window.unigraph.updateObject(data._value.uid, newObject, false, false, subsId, []);

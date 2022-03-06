@@ -691,7 +691,7 @@ export function DetailedNoteBlock({
             componentId={componentId}
             displayAs={displayAs}
             pullText={(uid: boolean) =>
-                uid ? data?._value?.text?._value?._value?.uid : data.get('text')?.as('primitive')
+                new UnigraphObject(data).get('text')?.as('primitiveRef')?.[uid ? 'uid' : '_value.%']
             }
             pushText={(text: string) => {
                 return data._hide
@@ -968,7 +968,7 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
                 refinedPath
                     .map((el: any) => new UnigraphObject(el)?.get('text')?.as('primitive'))
                     .filter(Boolean)
-                    .slice(0, noChildren ? undefined : -2),
+                    .slice(0, noChildren ? undefined : -1),
             ),
         );
     }, []);
