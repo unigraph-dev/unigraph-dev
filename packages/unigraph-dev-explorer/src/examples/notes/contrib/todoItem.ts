@@ -55,7 +55,7 @@ const editorPlugin = {
             ? undefined
             : `${name}${tags.length ? ` ${tags.join(' ')}` : ''}${name.trim().length ? '' : ' '}`;
     },
-    pushText: (subsId: any, data: any, text: string) => {
+    pushText: (subsId: any, data: any, text: string, isFlushing?: boolean) => {
         // console.log(data);
         const todoObject = parseTodoObject(text);
         const totalTags = todoObject.children
@@ -78,9 +78,13 @@ const editorPlugin = {
                     },
                 },
             },
-            children: {
-                '_value[': totalChildren,
-            },
+            ...(isFlushing
+                ? {
+                      children: {
+                          '_value[': totalChildren,
+                      },
+                  }
+                : {}),
         };
         // console.log(newObject);
         return window.unigraph.updateObject(data._value.uid, newObject, false, false, subsId, []);

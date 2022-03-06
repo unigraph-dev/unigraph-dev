@@ -287,16 +287,25 @@ export const crcStringify = function (thing: any) {
 // `wait` milliseconds.
 export const debounce = (func: any, wait: number) => {
     let timeout: any;
+    let currentDelay: any;
 
-    return function executedFunction(...args: any[]) {
-        const later = () => {
+    const executedFunction = function (...args: any[]) {
+        const later = (isFlushing?: boolean) => {
             clearTimeout(timeout);
-            func(...args);
+            func(...args, isFlushing);
         };
 
+        currentDelay = later;
         clearTimeout(timeout);
         timeout = setTimeout(later, wait);
     };
+
+    executedFunction.cancel = () => clearTimeout(timeout);
+    executedFunction.flush = () => {
+        if (currentDelay) currentDelay(true);
+    };
+
+    return executedFunction;
 };
 
 type TreeNode = {

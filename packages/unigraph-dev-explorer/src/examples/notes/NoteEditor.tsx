@@ -7,7 +7,7 @@ import { blobToBase64, isUrl } from 'unigraph-dev-common/lib/utils/utils';
 import { parseUnigraphHtml } from '../../clipboardUtils';
 import { getParentsAndReferences } from '../../components/ObjectView/backlinksUtils';
 import { inlineTextSearch, inlineObjectSearch } from '../../components/UnigraphCore/InlineSearchPopup';
-import { scrollIntoViewIfNeeded, selectUid, setCaret, TabContext } from '../../utils';
+import { debounce, scrollIntoViewIfNeeded, selectUid, setCaret, TabContext } from '../../utils';
 import { htmlToMarkdown } from '../semantic/Markdown';
 import { permanentlyDeleteBlock } from './commands';
 import { addTextualCommand, applyCommand } from './history';
@@ -89,7 +89,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
 
     const oldTextRef = React.useRef<string>();
     const inputterRef = React.useRef<any>();
-    inputterRef.current = (text: string) => {
+    inputterRef.current = (text: string, isFlushing?: boolean) => {
         if (data?._value?.children?.['_value[']) {
             const deadLinks: any = [];
             data._value.children['_value['].forEach((el: any) => {
@@ -107,11 +107,12 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
             );
             editorContext.historyState.setValue(newHist);
         }
+        const ret = oldTextRef.current === text ? undefined : pushText(text, isFlushing);
         oldTextRef.current = text;
-        return pushText(text);
+        return ret;
     };
 
-    const inputDebounced = React.useRef(_.debounce((...args) => inputterRef.current(...args), 200));
+    const inputDebounced = React.useRef(debounce((...args: any[]) => inputterRef.current(...args), 200));
     const textInputRef: any = React.useRef();
 
     const handlePotentialResize = () => {
