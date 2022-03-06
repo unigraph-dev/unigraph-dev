@@ -23,9 +23,7 @@ await unigraph.updateObject(
         children: sources.map((el) => {
             return {
                 type: { 'unigraph.id': '$/schema/subentity' },
-                _value: {
-                    uid: el,
-                },
+                _value: el?.startsWith?.('0x') ? { uid: el } : el,
             };
         }),
     },

@@ -47,7 +47,7 @@ const onDrop = (dndContext: any, listId: any, arrayId: any, index: any, dropperP
         window.unigraph
             .runExecutable('$/executable/add-item-to-list', {
                 where: listId,
-                item: dropperProps.uid,
+                item: dropperProps.uid || dropperProps.data,
                 indexes: [index],
             })
             .then(() => {
@@ -57,7 +57,7 @@ const onDrop = (dndContext: any, listId: any, arrayId: any, index: any, dropperP
         // Different DnD context - should just insert
         window.unigraph.runExecutable('$/executable/add-item-to-list', {
             where: listId,
-            item: dropperProps.uid,
+            item: dropperProps.uid || dropperProps.data,
             indexes: [index],
         });
     }
@@ -72,6 +72,7 @@ export function DragandDrop({
     isReverse,
     Comp = React.Fragment,
     ChildrenComp = React.Fragment,
+    transformOnDrop,
 }: any) {
     return (
         <Comp>
@@ -82,6 +83,7 @@ export function DragandDrop({
                         <BelowDropAcceptor
                             onDrop={(props: any) => {
                                 console.log(dndContext, listId, arrayId, index, props);
+                                if (typeof transformOnDrop === 'function') props = transformOnDrop(props);
                                 onDrop(dndContext, listId, arrayId, index, props);
                             }}
                             isReverse={isReverse}
