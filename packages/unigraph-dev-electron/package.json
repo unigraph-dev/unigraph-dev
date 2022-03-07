@@ -26,6 +26,8 @@
     },
     "electronVersion": "^17.1.0",
     "build": {
+        "productName": "Unigraph",
+        "appId": "dev.unigraph.electron",
         "generateUpdatesFilesForAllChannels": true,
         "afterSign": "electron-builder-notarize",
         "mac": {
