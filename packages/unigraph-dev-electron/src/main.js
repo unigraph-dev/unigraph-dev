@@ -3,6 +3,7 @@ const path = require('path');
 const { spawn } = require('child_process');
 const { fixPathForAsarUnpack } = require('electron-util');
 const { ipcMain } = require('electron');
+const { autoUpdater } = require('electron-updater');
 
 const Store = require('electron-store');
 const net = require('net');
@@ -37,6 +38,8 @@ if (process.env.FRONTEND_LOCATION) shouldStartBackend = false;
 function isDev() {
     return process.argv[2] == '--dev';
 }
+
+if (!isDev()) autoUpdater.checkForUpdatesAndNotify();
 
 function isUnigraphPortOpen(port) {
     return new Promise((resolve, reject) => {
