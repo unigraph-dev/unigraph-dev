@@ -11,7 +11,7 @@
     },
     "homepage": "./",
     "devDependencies": {
-        "electron": "13.1.7",
+        "electron": "17.1.0",
         "electron-builder": "22.14",
         "electron-builder-notarize": "^1.4.0"
     },
@@ -24,7 +24,7 @@
         "unigraph-dev-backend": "^0.2.0",
         "unigraph-dev-common": "^0.2.0"
     },
-    "electronVersion": "^13.1.7",
+    "electronVersion": "^17.1.0",
     "build": {
         "generateUpdatesFilesForAllChannels": true,
         "afterSign": "electron-builder-notarize",

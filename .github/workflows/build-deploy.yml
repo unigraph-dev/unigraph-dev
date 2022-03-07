@@ -138,8 +138,8 @@ jobs:
                   release: ${{ startsWith(github.ref, 'refs/tags/v') }}
                   package_root: 'packages/unigraph-dev-electron'
                   # macOS code signing certificate
-                  # mac_certs: ${{ secrets.mac_certs }}
-                  # mac_certs_password: ${{ secrets.mac_certs_password }}
+                  mac_certs: ${{ secrets.mac_certs }}
+                  mac_certs_password: ${{ secrets.mac_certs_password }}
                   args: ${{ matrix.electron-arch-overrides }}
 
               env:
