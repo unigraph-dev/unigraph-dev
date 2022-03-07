@@ -3,6 +3,69 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://github.com/unigraph-dev/unigraph-dev/compare/v0.1.0...v0.2.0) (2022-03-07)
+
+
+### Bug Fixes
+
+* **analytics:** anonymize detailed user information and calculate session length ([5a298fe](https://github.com/unigraph-dev/unigraph-dev/commit/5a298fed45f633ce3cde52c8860e643e501c6ae6))
+* **api:** add option to select subscription IDs for adding objects ([7933ae9](https://github.com/unigraph-dev/unigraph-dev/commit/7933ae92bc24769b5f9c4c1d837af105b342f5d8))
+* **api:** race condition in uid lease that breaks editor ([e0a27d0](https://github.com/unigraph-dev/unigraph-dev/commit/e0a27d0c22108ce00da4224b03af0cdd2470750f))
+* **bookmarks:** fix inbox adding, only add untagged bms to inbox ([72a5e36](https://github.com/unigraph-dev/unigraph-dev/commit/72a5e36a561eb64b2d63a10d5b4273e2ba9a67d4))
+* **calendar:** syntax error when adding calendar ([a8b6dc3](https://github.com/unigraph-dev/unigraph-dev/commit/a8b6dc3e074336984131ccbc7815e3172f4a7e3a))
+* **calendar:** temporarily disable converting date to utc ([c1f65ab](https://github.com/unigraph-dev/unigraph-dev/commit/c1f65abd7013c0f07572744889e565407a3bcb36))
+* **common:** speed up buildGraph ([b03f7a0](https://github.com/unigraph-dev/unigraph-dev/commit/b03f7a08250f5f4025501ff071de141d571f8d5a))
+* consistent styling and backend issues ([fd01f30](https://github.com/unigraph-dev/unigraph-dev/commit/fd01f30c684aac116cb3b8290ca962d17a567452))
+* **datamodel:** buildGraph at api level ([de047d0](https://github.com/unigraph-dev/unigraph-dev/commit/de047d0988a4e872ce9000b6a90ef4931236c0d5))
+* **datamodel:** buildGraph speedup & reliability ([9338fce](https://github.com/unigraph-dev/unigraph-dev/commit/9338fcec23e8e888ee5e2013fa7ebb692de18b46))
+* **datamodel:** buildGraph speedup & reliability ([a245232](https://github.com/unigraph-dev/unigraph-dev/commit/a2452325bab66b768069e5dda97b1fc28e27a535))
+* **datamodel:** buildGraph use only reference, merge uids ([23caffb](https://github.com/unigraph-dev/unigraph-dev/commit/23caffbea31e1c336b91f0187e0cb4b2db4f2c53))
+* **datamodel:** correctly set array indexes with user specified ([55fbda6](https://github.com/unigraph-dev/unigraph-dev/commit/55fbda6206fd7d967f0cf12f6a69adad790d9f68))
+* **datamodel:** findUid adapted to graph data model ([e480b39](https://github.com/unigraph-dev/unigraph-dev/commit/e480b391e402a3ea5f57f36529185df6465b63e2))
+* **dnd:** drag and drop use embed block in notes too ([366eb75](https://github.com/unigraph-dev/unigraph-dev/commit/366eb75706adae685f0aec3296897463f635e77d))
+* editor use onClick instead of onPointerUp, tag adding upsert fix ([b988fab](https://github.com/unigraph-dev/unigraph-dev/commit/b988fabe153117157286b583003787ecca9782c9))
+* **editor:** duplicate db updates & partial todo tag creation ([ba7687a](https://github.com/unigraph-dev/unigraph-dev/commit/ba7687a65478e64d6106d9376e64a735ea27e3c5))
+* **editor:** inline editor search improvements ([ce045a3](https://github.com/unigraph-dev/unigraph-dev/commit/ce045a3c9f4d03958b449772318264fffdbf0bb9))
+* **editor:** more editor fixes, general responsiveness, and todo interop ([3a8b5a6](https://github.com/unigraph-dev/unigraph-dev/commit/3a8b5a67b522390356a29f9484bc1b6c92979e7f))
+* **editor:** sometimes clicking on empty notes don't focus ([52b14a9](https://github.com/unigraph-dev/unigraph-dev/commit/52b14a9b7360e57cfda5d891be954611820c1c13))
+* electron always quits and discern ids between windows ([65c63c1](https://github.com/unigraph-dev/unigraph-dev/commit/65c63c1176f81abfebe81a2e3aa313032aef8afb))
+* **frontend:** various elements shouldn't jump to editor on click ([9c379d4](https://github.com/unigraph-dev/unigraph-dev/commit/9c379d43d01db78b29b85c4fadc132b89f4f7673))
+* list display & linked reference display ([2243668](https://github.com/unigraph-dev/unigraph-dev/commit/2243668afd637ef3694e52de063ae551e1931a3c))
+* **notes:** stub query position issue ([25864ff](https://github.com/unigraph-dev/unigraph-dev/commit/25864ffbc716f26cba35513f8aca09f555b7179d))
+* **queries:** explicitly check for options ([6ff3b72](https://github.com/unigraph-dev/unigraph-dev/commit/6ff3b72e1b28717f2699340189e5932088f9a88f))
+* **search:** speedup query, search result balancing relevance and recency ([8cd0855](https://github.com/unigraph-dev/unigraph-dev/commit/8cd0855a8d660b3048b21e9de7ac849bda81c9de))
+* styling app drawer, electron fixes ([811d55a](https://github.com/unigraph-dev/unigraph-dev/commit/811d55a04823920c8d53a1ee9df2f8ad43fe6419))
+* **subscriptions:** client side buildGraph speedup ([5a3a41e](https://github.com/unigraph-dev/unigraph-dev/commit/5a3a41ebcded3747b931863ab5b62ef6d0cb3cf4))
+* **subscription:** use buildGraph for all subscriptions, prepare for subgraph ([6890aa6](https://github.com/unigraph-dev/unigraph-dev/commit/6890aa604b68d15a04b6108ef975647f693ead4d))
+* **todos:** bugs with tags and filtering ([ca139aa](https://github.com/unigraph-dev/unigraph-dev/commit/ca139aadbfb97267d775939fb7933e4e376b3fa4))
+* **todo:** style fixes ([80611fd](https://github.com/unigraph-dev/unigraph-dev/commit/80611fd308b30838f8936c82b2b1b63884af82ba))
+* **todo:** tag regex matching ([996d8f2](https://github.com/unigraph-dev/unigraph-dev/commit/996d8f2c27a4db92421fa2ff222e70ef190da8ae))
+
+
+### Features
+
+* **backend:** auto group and batch subscriptions ([8336cf6](https://github.com/unigraph-dev/unigraph-dev/commit/8336cf6c127d8f086f669c21dde095fd5c643c3b))
+* **backend:** auto update default packages if new version exists ([1065a46](https://github.com/unigraph-dev/unigraph-dev/commit/1065a468f1ae8bd8ae55f29d7555850e841b1603))
+* **backend:** auto update when new version is found ([a4b89b5](https://github.com/unigraph-dev/unigraph-dev/commit/a4b89b5441f71de250320fc7e42f697569b34838))
+* **editor:** add item to todo on mobile ([bb0ca69](https://github.com/unigraph-dev/unigraph-dev/commit/bb0ca697418487a1ec77ca14a0b0df9d40b6ab54))
+* properly build subgraph, prepare for subgraph sync ([ea99f85](https://github.com/unigraph-dev/unigraph-dev/commit/ea99f85282f6b72d8403e17998b52c80a042338e))
+* **query:** support unigraph.id template in dql queries (temporary) ([fd24d31](https://github.com/unigraph-dev/unigraph-dev/commit/fd24d31d0232a4102fd263219d542d558f21b8ab))
+* **semantic:** add generic entity renaming with all references ([da91571](https://github.com/unigraph-dev/unigraph-dev/commit/da915716e0a952dcc914987d950c8c6483e7e265))
+* **today-todos:** implemented ([c6fb3fe](https://github.com/unigraph-dev/unigraph-dev/commit/c6fb3fe7d4ee841a1e36ff6af260e66d37fa8dc3))
+* **todo:** archived tags, tag subgrouping, count queries ([edb9e47](https://github.com/unigraph-dev/unigraph-dev/commit/edb9e47a5c09b9581cbda85ace3b4ddbaec59dd8))
+* **todos:** tags in alphabetical order ([cf5fce0](https://github.com/unigraph-dev/unigraph-dev/commit/cf5fce034051fd4b5d0b4338d8ced92fa2cf5e10))
+* **upcoming-todos:** implemented, bit messy code ([b02770c](https://github.com/unigraph-dev/unigraph-dev/commit/b02770c73c2b6249c5ed2dfc06000fa245c2c785))
+
+
+### Performance Improvements
+
+* **notes:** don't get contents on linked reference, speedup queries ([6e4be48](https://github.com/unigraph-dev/unigraph-dev/commit/6e4be48ffac28c85d87c6564b3ec876c5c815da4))
+* tidy up subscription on client side ([8d2de57](https://github.com/unigraph-dev/unigraph-dev/commit/8d2de5727a81cd0d7715100200a5d2b982cf7d57))
+
+
+
+
+
 # [0.1.0](https://github.com/unigraph-dev/unigraph-dev/compare/v0.1.10...v0.1.0) (2022-02-21)
 
 

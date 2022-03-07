@@ -3,6 +3,32 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://github.com/ssalka/unigraph-dev/compare/v0.1.0...v0.2.0) (2022-03-07)
+
+
+### Bug Fixes
+
+* **api:** add option to select subscription IDs for adding objects ([7933ae9](https://github.com/ssalka/unigraph-dev/commit/7933ae92bc24769b5f9c4c1d837af105b342f5d8))
+* **editor:** sometimes clicking on empty notes don't focus ([52b14a9](https://github.com/ssalka/unigraph-dev/commit/52b14a9b7360e57cfda5d891be954611820c1c13))
+* **search:** speedup query, search result balancing relevance and recency ([8cd0855](https://github.com/ssalka/unigraph-dev/commit/8cd0855a8d660b3048b21e9de7ac849bda81c9de))
+
+
+### Features
+
+* **backend:** auto group and batch subscriptions ([8336cf6](https://github.com/ssalka/unigraph-dev/commit/8336cf6c127d8f086f669c21dde095fd5c643c3b))
+* **backend:** auto update default packages if new version exists ([1065a46](https://github.com/ssalka/unigraph-dev/commit/1065a468f1ae8bd8ae55f29d7555850e841b1603))
+* **backend:** auto update when new version is found ([a4b89b5](https://github.com/ssalka/unigraph-dev/commit/a4b89b5441f71de250320fc7e42f697569b34838))
+* **semantic:** add generic entity renaming with all references ([da91571](https://github.com/ssalka/unigraph-dev/commit/da915716e0a952dcc914987d950c8c6483e7e265))
+
+
+### Performance Improvements
+
+* tidy up subscription on client side ([8d2de57](https://github.com/ssalka/unigraph-dev/commit/8d2de5727a81cd0d7715100200a5d2b982cf7d57))
+
+
+
+
+
 # [0.1.0](https://github.com/ssalka/unigraph-dev/compare/v0.1.10...v0.1.0) (2022-02-21)
 
 

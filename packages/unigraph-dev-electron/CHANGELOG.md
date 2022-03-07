@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://github.com/TheExGenesis/unigraph-dev/compare/v0.1.0...v0.2.0) (2022-03-07)
+
+
+### Bug Fixes
+
+* consistent styling and backend issues ([fd01f30](https://github.com/TheExGenesis/unigraph-dev/commit/fd01f30c684aac116cb3b8290ca962d17a567452))
+* electron always quits and discern ids between windows ([65c63c1](https://github.com/TheExGenesis/unigraph-dev/commit/65c63c1176f81abfebe81a2e3aa313032aef8afb))
+* styling app drawer, electron fixes ([811d55a](https://github.com/TheExGenesis/unigraph-dev/commit/811d55a04823920c8d53a1ee9df2f8ad43fe6419))
+
+
+
+
+
 # [0.1.0](https://github.com/TheExGenesis/unigraph-dev/compare/v0.1.10...v0.1.0) (2022-02-21)
 
 

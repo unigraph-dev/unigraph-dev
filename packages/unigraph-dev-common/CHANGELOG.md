@@ -3,6 +3,39 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://github.com/unigraph-dev/unigraph-dev/compare/v0.1.0...v0.2.0) (2022-03-07)
+
+
+### Bug Fixes
+
+* **api:** add option to select subscription IDs for adding objects ([7933ae9](https://github.com/unigraph-dev/unigraph-dev/commit/7933ae92bc24769b5f9c4c1d837af105b342f5d8))
+* **api:** race condition in uid lease that breaks editor ([e0a27d0](https://github.com/unigraph-dev/unigraph-dev/commit/e0a27d0c22108ce00da4224b03af0cdd2470750f))
+* **common:** speed up buildGraph ([b03f7a0](https://github.com/unigraph-dev/unigraph-dev/commit/b03f7a08250f5f4025501ff071de141d571f8d5a))
+* **datamodel:** buildGraph at api level ([de047d0](https://github.com/unigraph-dev/unigraph-dev/commit/de047d0988a4e872ce9000b6a90ef4931236c0d5))
+* **datamodel:** buildGraph speedup & reliability ([9338fce](https://github.com/unigraph-dev/unigraph-dev/commit/9338fcec23e8e888ee5e2013fa7ebb692de18b46))
+* **datamodel:** buildGraph use only reference, merge uids ([23caffb](https://github.com/unigraph-dev/unigraph-dev/commit/23caffbea31e1c336b91f0187e0cb4b2db4f2c53))
+* **datamodel:** correctly set array indexes with user specified ([55fbda6](https://github.com/unigraph-dev/unigraph-dev/commit/55fbda6206fd7d967f0cf12f6a69adad790d9f68))
+* **datamodel:** findUid adapted to graph data model ([e480b39](https://github.com/unigraph-dev/unigraph-dev/commit/e480b391e402a3ea5f57f36529185df6465b63e2))
+* **editor:** more editor fixes, general responsiveness, and todo interop ([3a8b5a6](https://github.com/unigraph-dev/unigraph-dev/commit/3a8b5a67b522390356a29f9484bc1b6c92979e7f))
+* **subscriptions:** client side buildGraph speedup ([5a3a41e](https://github.com/unigraph-dev/unigraph-dev/commit/5a3a41ebcded3747b931863ab5b62ef6d0cb3cf4))
+* **subscription:** use buildGraph for all subscriptions, prepare for subgraph ([6890aa6](https://github.com/unigraph-dev/unigraph-dev/commit/6890aa604b68d15a04b6108ef975647f693ead4d))
+
+
+### Features
+
+* **backend:** auto update when new version is found ([a4b89b5](https://github.com/unigraph-dev/unigraph-dev/commit/a4b89b5441f71de250320fc7e42f697569b34838))
+* properly build subgraph, prepare for subgraph sync ([ea99f85](https://github.com/unigraph-dev/unigraph-dev/commit/ea99f85282f6b72d8403e17998b52c80a042338e))
+* **semantic:** add generic entity renaming with all references ([da91571](https://github.com/unigraph-dev/unigraph-dev/commit/da915716e0a952dcc914987d950c8c6483e7e265))
+
+
+### Performance Improvements
+
+* tidy up subscription on client side ([8d2de57](https://github.com/unigraph-dev/unigraph-dev/commit/8d2de5727a81cd0d7715100200a5d2b982cf7d57))
+
+
+
+
+
 # [0.1.0](https://github.com/unigraph-dev/unigraph-dev/compare/v0.1.10...v0.1.0) (2022-02-21)
 
 
