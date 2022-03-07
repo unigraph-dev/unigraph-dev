@@ -98,6 +98,7 @@ jobs:
                   repository: 'unigraph-dev/dgraph'
                   latest: true
                   fileName: 'dgraph_darwin_amd64'
+                  token: '${{secrets.PUBLIC_ACCESS_TOKEN}}'
                   out-file-path: ./dgraph-download
 
             - uses: robinraju/release-downloader@v1.3
@@ -106,6 +107,7 @@ jobs:
                   repository: 'unigraph-dev/dgraph'
                   latest: true
                   fileName: 'dgraph_darwin_arm64'
+                  token: '${{secrets.PUBLIC_ACCESS_TOKEN}}'
                   out-file-path: ./dgraph-download
 
             - run: mv ./dgraph-download/dgraph_* ./dgraph-download/dgraph
@@ -138,7 +140,7 @@ jobs:
                   # macOS code signing certificate
                   # mac_certs: ${{ secrets.mac_certs }}
                   # mac_certs_password: ${{ secrets.mac_certs_password }}
-                  args: -c.publish.publishAutoUpdate=false ${{ matrix.electron-arch-overrides }}
+                  args: ${{ matrix.electron-arch-overrides }}
 
               env:
                   # macOS notarization API key
