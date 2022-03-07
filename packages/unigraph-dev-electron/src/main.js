@@ -79,6 +79,8 @@ async function startServer(logHandler) {
             path.join(userData, 'w'),
             '--postings',
             path.join(userData, 'p'),
+            '--tmp',
+            path.join(userData, 't'),
         ]);
         zero = spawn(fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', 'dgraph')), [
             'zero',
