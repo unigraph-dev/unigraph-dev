@@ -3,7 +3,7 @@
     "view": {
         "name": "Continue reading",
         "env": "react-explorer",
-        "view": { "unigraph.id": "$/package/unigraph.reader/0.1.0/executable/home-continue-reading" }
+        "view": { "unigraph.id": "$/package/unigraph.reader/0.2.0/executable/home-continue-reading" }
     },
-    "condition": { "unigraph.id": "$/package/unigraph.reader/0.1.0/executable/home-continue-reading-condition" }
+    "condition": { "unigraph.id": "$/package/unigraph.reader/0.2.0/executable/home-continue-reading-condition" }
 }

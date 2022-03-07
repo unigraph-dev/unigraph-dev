@@ -3,7 +3,7 @@
     "view": {
         "name": "Upcoming events",
         "env": "react-explorer",
-        "view": { "unigraph.id": "$/package/unigraph.calendar/0.1.0/executable/home-next-events" }
+        "view": { "unigraph.id": "$/package/unigraph.calendar/0.2.0/executable/home-next-events" }
     },
-    "condition": { "unigraph.id": "$/package/unigraph.calendar/0.1.0/executable/home-next-events-condition" }
+    "condition": { "unigraph.id": "$/package/unigraph.calendar/0.2.0/executable/home-next-events-condition" }
 }
