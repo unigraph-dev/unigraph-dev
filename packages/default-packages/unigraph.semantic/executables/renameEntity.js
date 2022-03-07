@@ -56,18 +56,22 @@ const oldName = oldNameRef['_value.%'];
 newName = newName.replace(/"/g, '\\"');
 const updateTriplets = [`<${oldNameRef.uid}> <_value.%> "${newName}" .`];
 
-statusQueryResult['unigraph.origin'].forEach((childRef) => {
+statusQueryResult['unigraph.origin']?.forEach((childRef) => {
     // For every reference, do the following:
     // 1. Rename every children that matches the key & old UID to the new key
-    childRef._value.children['_value['].forEach((child) => {
+    childRef._value.children?.['_value[']?.forEach((child) => {
         if (child._key === `[[${oldName}]]` && child._value._value.uid === uid)
             updateTriplets.push(`<${child.uid}> <_key> "[[${newName}]]" .`);
     });
     // 2. Rename the old ref to new one, for each occurence
     const oldRefName = new UnigraphObject(childRef['unigraph.indexes'].name).as('primitiveRef');
-    updateTriplets.push(
-        `<${oldRefName.uid}> <_value.%> "${oldRefName['_value.%'].replaceAll(`[[${oldName}]]`, `[[${newName}]]`)}" .`,
-    );
+    if (oldRefName)
+        updateTriplets.push(
+            `<${oldRefName.uid}> <_value.%> "${oldRefName['_value.%'].replaceAll(
+                `[[${oldName}]]`,
+                `[[${newName}]]`,
+            )}" .`,
+        );
 });
 
 await unigraph.updateTriplets(updateTriplets, undefined, subIds);

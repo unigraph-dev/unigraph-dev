@@ -156,7 +156,7 @@ export function AutoDynamicView({
 
     const [, drop] = useDrop(
         () => ({
-            accept: window.unigraph.getState('referenceables/semantic_children').value,
+            accept: window.unigraph.getState('referenceables/semantic_children').value || [],
             drop: (item: { uid: string; itemType: string }, monitor) => {
                 if (!monitor.didDrop() && allowSemantic && !noDrop && item.uid !== object?.uid) {
                     window.unigraph.updateObject(object?.uid, {
