@@ -112,6 +112,9 @@ jobs:
 
             - run: mv ./dgraph-download/dgraph_* ./dgraph-download/dgraph
 
+            - run: mv ./dgraph-download/dgraph ./dgraph-download/dgraph.exe
+              if: runner.os == 'Windows'
+
             - run: chmod +x ./dgraph-download/dgraph
               if: runner.os != 'Windows'
 
