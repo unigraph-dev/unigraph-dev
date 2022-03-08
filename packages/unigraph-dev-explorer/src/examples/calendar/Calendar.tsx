@@ -1,6 +1,6 @@
 import { Avatar, Typography } from '@mui/material';
 import React from 'react';
-import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
+import { buildGraph, getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import Sugar from 'sugar';
 import { unionBy, isString, has, flow, propEq, curry, unionWith } from 'lodash/fp';
 import { Calendar as BigCalendar, DateLocalizer, momentLocalizer, stringOrDate, View } from 'react-big-calendar';
@@ -190,29 +190,30 @@ const calendarEventToBigCalendarEvent = (datedObj: CalendarEventUni): CalendarVi
 
 type CalendarViewRange = { start: Date; end: Date };
 
+const isInRange = curry((range: any, timeframe: any) => {
+    // filter not in our view time range
+    if (!range) {
+        return true;
+    }
+    const afterStart = new Date(timeframe.get('end/datetime').as('primitive')) >= range.start;
+    const beforeEnd = new Date(timeframe.get('start/datetime').as('primitive')) <= range.end;
+    return afterStart && beforeEnd;
+});
+
+const datedObjToBigCalendarEvent = curry((datedObj: any, timeframe: any) => {
+    return {
+        title: datedObj.get('name')?.as('primitive') || false,
+        start: getDateAsUTC(timeframe.get('start/datetime')?.as('primitive') || false),
+        end: getDateAsUTC(timeframe.get('end/datetime')?.as('primitive') || false),
+        allDay: datedObj.get('time_frame/start/all_day')?.as('primitive') || false,
+        unigraphObj: datedObj,
+    };
+});
 const recurrentCalendarEventToBigCalendarEventsInRange = curry(
     (range: CalendarViewRange | null, datedObj: DatedObject): CalendarViewEvent[] => {
         const timeframes = datedObj.get('recurrence')?.['_value['];
         if (timeframes?.length) {
-            return timeframes
-                .filter((timeframe: any) => {
-                    // filter not in our view time range
-                    if (!range) {
-                        return true;
-                    }
-                    const afterStart = new Date(timeframe.get('end/datetime').as('primitive')) >= range.start;
-                    const beforeEnd = new Date(timeframe.get('start/datetime').as('primitive')) <= range.end;
-                    return afterStart && beforeEnd;
-                })
-                .map((timeframe: any) => {
-                    return {
-                        title: datedObj.get('name').as('primitive'),
-                        start: getDateAsUTC(timeframe.get('start/datetime').as('primitive')),
-                        end: getDateAsUTC(timeframe.get('end/datetime').as('primitive')),
-                        allDay: datedObj.get('time_frame/start/all_day').as('primitive'),
-                        unigraphObj: datedObj,
-                    };
-                });
+            return buildGraph(timeframes).filter(isInRange(range)).map(datedObjToBigCalendarEvent(datedObj));
         }
         return [calendarEventToBigCalendarEvent(datedObj)];
     },
@@ -274,10 +275,6 @@ export function Calendar() {
     const addToCurrentEvents = React.useCallback(
         (newEvents: CalendarViewEvent[]) => {
             const updatedCurrentEvents = unionWith(compareCalendarViewEvents, newEvents, currentEvents);
-            console.log('updatedCurrentEvents', {
-                newEvents,
-                updatedCurrentEvents,
-            });
             setCurrentEvents(updatedCurrentEvents);
         },
 
@@ -289,7 +286,7 @@ export function Calendar() {
         tabContext.subscribeToQuery(
             queryDatedWithinTimeRange(viewRange.start?.toJSON(), viewRange.end?.toJSON()),
             (res: any) => {
-                const graphRes = res as DatedObject[];
+                const graphRes = buildGraph(res) as DatedObject[];
                 addToCurrentEvents(
                     graphRes
                         .map(datedToBigCalendarEventsInRange(viewRange))
