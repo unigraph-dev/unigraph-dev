@@ -82,12 +82,17 @@ export function init(hostname?: string) {
 
     let userSettings = defaultSettings;
 
+    // initialize settings
     if (!isJsonString(window.localStorage.getItem('userSettings'))) {
         window.localStorage.setItem('userSettings', JSON.stringify(defaultSettings));
     } else {
         userSettings = JSON.parse(window.localStorage.getItem('userSettings') || '');
     }
 
+    // initialize onboarding
+    if (!isJsonString(window.localStorage.getItem('showOnboarding'))) {
+        window.localStorage.setItem('showOnboarding', 'true');
+    }
     // Connect to Unigraph
     window.unigraph = unigraph(userSettings.serverLocation, userSettings.browserId + window.location.search);
 
@@ -123,6 +128,15 @@ export function init(hostname?: string) {
     analyticsState.subscribe((val: boolean) => {
         if (val && !window.mixpanel) initAnalyticsIfOptedIn();
         window.localStorage.setItem('enableAnalytics', JSON.stringify(val));
+    });
+
+    const onboardingState = window.unigraph.addState(
+        'settings/showOnboarding',
+        window.localStorage.getItem('showOnboarding') === 'true',
+    );
+    onboardingState.subscribe((val: boolean) => {
+        // if (val && !window.mixpanel) initAnalyticsIfOptedIn();
+        window.localStorage.setItem('showOnboarding', JSON.stringify(val));
     });
 
     window.unigraph.addState('global/selected', []);
