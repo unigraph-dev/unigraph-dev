@@ -1,6 +1,6 @@
 {
     "displayName": "Unigraph Onboarding",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Initial setup instructions for Unigraph",
     "name": "unigraph.onboarding",
     "unigraph": {
@@ -8,6 +8,10 @@
             {
                 "id": "section_onboarding",
                 "src": "entities/onboarding.json"
+            },
+            {
+                "id": "tutorial",
+                "src": "entities/tutorial.json"
             }
         ],
         "executables": [

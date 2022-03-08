@@ -16,6 +16,37 @@ import {
 } from '@mui/material';
 import { hoverSx, pointerHoverSx } from '../utils';
 
+export const useAnalyticsState = () => {
+    const analyticsState = window.unigraph.getState('settings/enableAnalytics');
+    const [analyticsMode, setAnalyticsMode] = React.useState(analyticsState.value);
+    analyticsState.subscribe((newState: boolean) => setAnalyticsMode(newState));
+    return { analyticsMode, analyticsState };
+};
+
+export const AnalyticsItem = ({ analyticsMode, analyticsState }: { analyticsMode: any; analyticsState: any }) => {
+    return (
+        <ListItem sx={pointerHoverSx} onClick={(e) => false} key="analytics">
+            <ListItemText
+                id="switch-list-label-analytics-mode"
+                primary="Enable analytics"
+                secondary="Opt-in to analytics with mixpanel"
+            />
+            <ListItemSecondaryAction>
+                <Switch
+                    edge="end"
+                    onChange={(e) => {
+                        analyticsState.setValue(!analyticsMode);
+                    }}
+                    checked={analyticsMode}
+                    inputProps={{
+                        'aria-labelledby': 'switch-list-label-developer-mode',
+                    }}
+                />
+            </ListItemSecondaryAction>
+        </ListItem>
+    );
+};
+
 export default function Settings() {
     const [settings, setSettings] = React.useState(JSON.parse(window.localStorage.getItem('userSettings') || ''));
 
@@ -26,9 +57,8 @@ export default function Settings() {
     const [devMode, setDevMode] = React.useState(devState.value);
     devState.subscribe((newState: boolean) => setDevMode(newState));
 
-    const analyticsState = window.unigraph.getState('settings/enableAnalytics');
-    const [analyticsMode, setAnalyticsMode] = React.useState(analyticsState.value);
-    analyticsState.subscribe((newState: boolean) => setAnalyticsMode(newState));
+    const { analyticsMode, analyticsState } = useAnalyticsState();
+
     const [email, setEmail] = React.useState(window.localStorage.getItem('email') || '');
 
     const handleClick = (event: any, n: number) => {
@@ -89,25 +119,7 @@ export default function Settings() {
                 <ListSubheader component="div" id="nested-list-subheader" key="analyticsHeader">
                     Analytics
                 </ListSubheader>
-                <ListItem sx={pointerHoverSx} onClick={(e) => false} key="analytics">
-                    <ListItemText
-                        id="switch-list-label-analytics-mode"
-                        primary="Enable analytics"
-                        secondary="Opt-in to analytics with mixpanel"
-                    />
-                    <ListItemSecondaryAction>
-                        <Switch
-                            edge="end"
-                            onChange={(e) => {
-                                analyticsState.setValue(!analyticsMode);
-                            }}
-                            checked={analyticsMode}
-                            inputProps={{
-                                'aria-labelledby': 'switch-list-label-developer-mode',
-                            }}
-                        />
-                    </ListItemSecondaryAction>
-                </ListItem>
+                <AnalyticsItem analyticsMode={analyticsMode} analyticsState={analyticsState} />
                 <ListItem sx={pointerHoverSx} onClick={(e) => false} key="analytics-email">
                     <ListItemText
                         id="switch-list-label-analytics-mode"

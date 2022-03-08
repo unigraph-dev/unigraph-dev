@@ -54,7 +54,7 @@ export const PackageManifestView = ({ data }: any) => {
     );
 };
 
-export const PackageManager: React.FC = ({}) => {
+export const usePackages = () => {
     const [packages, setPackages]: any = React.useState([]);
     const tabContext = React.useContext(TabContext);
 
@@ -75,6 +75,11 @@ export const PackageManager: React.FC = ({}) => {
         };
     }, []);
 
+    return packages;
+};
+
+export const PackageManager: React.FC = ({}) => {
+    const packages = usePackages();
     return (
         <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
             <Typography gutterBottom variant="h4">

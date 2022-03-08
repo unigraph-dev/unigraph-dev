@@ -356,13 +356,23 @@ export function WorkSpace(this: any) {
                             id: 'home',
                             enableDrag: false,
                         },
+                        ...(window.localStorage.getItem('showOnboarding')
+                            ? [
+                                  {
+                                      ...getComponentFromPage('/onboarding'),
+                                      enableClose: true,
+                                      id: 'onboarding',
+                                      enableDrag: true,
+                                  },
+                              ]
+                            : []),
                     ],
                 },
             ],
         },
     };
-
     const pages = window.unigraph.getState('registry/pages');
+    // const showOnboardingState = window.unigraph.getState('settings/showOnboarding');
 
     const tabCtx = React.useMemo(
         () => (node: Node, config: any) => ({

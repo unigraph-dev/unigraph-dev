@@ -21,6 +21,7 @@ import Request from './pages/Request';
 import RSSReader from './examples/rss_reader';
 import DataModelPlayground from './pages/DataModelPlayground';
 import ExplorerHome from './pages/ExplorerHome';
+import Onboarding from './pages/Onboarding';
 import { TrashView } from './components/UnigraphCore/TrashView';
 import { Categories } from './components/UnigraphCore/Categories';
 import { InspectorView } from './components/UnigraphCore/InspectorView';
@@ -108,6 +109,11 @@ const pages: Record<string, any> = {
     'library/backlink': {
         constructor: (props: any) => <BacklinkView {...props} />,
         name: 'Backlink View',
+    },
+    onboarding: {
+        constructor: (props: any) => <Onboarding {...props} />,
+        name: 'Onboarding',
+        paddingTop: false,
     },
     home: {
         constructor: (props: any) => <ExplorerHome {...props} />,
