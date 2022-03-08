@@ -73,7 +73,11 @@ async function startServer(logHandler) {
             if (!Array.isArray(data)) data = [data];
             logs.push(...data);
             if (!dontCheck) checkIfUComplete(...data);
-            logHandler.send('loading_log', logs);
+            try {
+                logHandler.send('loading_log', logs);
+            } catch (e) {
+                // Nothing happens
+            }
             return oldConsoleLog(...data);
         };
         alpha = spawn(fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', 'dgraph')), [
