@@ -1,5 +1,11 @@
 import { PackageDeclaration } from 'unigraph-dev-common/lib/types/packages';
-import { unpad, processAutorefUnigraphId, buildUnigraphEntity, isRaw } from 'unigraph-dev-common/lib/utils/entityUtils';
+import {
+    unpad,
+    processAutorefUnigraphId,
+    buildUnigraphEntity,
+    isRaw,
+    replaceUnigraphIds,
+} from 'unigraph-dev-common/lib/utils/entityUtils';
 import { insertsToUpsert } from 'unigraph-dev-common/lib/utils/txnWrapper';
 import { getRefQueryUnigraphId } from 'unigraph-dev-common/lib/utils/utils';
 import dgraph from 'dgraph-js';
@@ -86,6 +92,12 @@ export async function addUnigraphPackage(
     const upsertSchema = insertsToUpsert(toUpsert, undefined, caches.schemas.dataAlt![0]);
     await client.createUnigraphUpsert(upsertSchema);
     await caches.schemas.updateNow();
+
+    const replacer = (unigraphId: string) =>
+        unigraphId.startsWith('$./')
+            ? unigraphId.replace('$./', `$/package/${pkg.pkgManifest.package_name}/${pkg.pkgManifest.version}/`)
+            : unigraphId;
+
     // 1.5 Create all executables if there are any
     const executables = !(pkg.pkgExecutables && Object.entries(pkg.pkgExecutables))
         ? []
@@ -108,6 +120,7 @@ export async function addUnigraphPackage(
                       delete obj.type;
                       // console.log(JSON.stringify(obj))
                       // console.log(JSON.stringify(caches['schemas'].data[schema]))
+                      replaceUnigraphIds(obj, replacer);
                       if (!caches.schemas.data?.[schema]?._definition && caches.schemas.data[schema]?.['_value[']) {
                           // Deal with schema cited only just created now
                           const id = caches.schemas.data[schema]['_value['][0]['unigraph.id'];
@@ -130,18 +143,14 @@ export async function addUnigraphPackage(
     ) {
         throw new SyntaxError('Malformed package declaration, aborting!');
     }
-    const replacer = (unigraphId: string) =>
-        unigraphId.startsWith('$./')
-            ? unigraphId.replace('$./', `$/package/${pkg.pkgManifest.package_name}/${pkg.pkgManifest.version}/`)
-            : unigraphId;
 
     const toUpsert2 = [];
     for (let i = 0; i < executables.length; i += 1) {
-        const autoRefExecutable = processAutorefUnigraphId(executables[i], replacer);
+        const autoRefExecutable = processAutorefUnigraphId(executables[i]);
         toUpsert2.push(autoRefExecutable);
     }
     for (let i = 0; i < entities.length; i += 1) {
-        const autoRefEntity = processAutorefUnigraphId(entities[i], replacer);
+        const autoRefEntity = processAutorefUnigraphId(entities[i]);
         toUpsert2.push(autoRefEntity);
     }
     const upsertEntityExecutable = insertsToUpsert(toUpsert2, undefined, caches.schemas.dataAlt![0]);

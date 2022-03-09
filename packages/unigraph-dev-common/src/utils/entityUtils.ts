@@ -853,3 +853,20 @@ export function removeUids(objs: any[]) {
 export function isRaw(obj: any) {
     return obj.uid && obj['dgraph.type'];
 }
+
+export function replaceUnigraphIds(obj: any, replacer: any) {
+
+    function recurse(current: any) {
+        if (current['unigraph.id']) {
+            current['unigraph.id'] = replacer(current['unigraph.id']);
+        }
+        if (typeof current === "object" && current && Array.isArray(current)) {
+            current.forEach(el => recurse(el));
+        } else if (typeof current === "object" && current) {
+            Object.values(current).forEach(el => recurse(el));
+        }
+    }
+
+    recurse(obj);
+    return obj;
+}
