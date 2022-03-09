@@ -6,7 +6,7 @@
         "name": "Speed reader",
         "env": "react-explorer",
         "view": {
-            "unigraph.id": "$/package/unigraph.coreuser/0.2.0/executable/speed-reader"
+            "unigraph.id": "$/package/unigraph.coreuser/0.2.1/executable/speed-reader"
         }
     }
 }

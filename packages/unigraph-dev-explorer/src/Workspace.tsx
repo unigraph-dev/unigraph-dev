@@ -582,7 +582,7 @@ export function WorkSpace(this: any) {
                                                         '$/schema/view',
                                                     );
                                                     await window.unigraph.runExecutable(
-                                                        '$/package/unigraph.core/0.2.0/executable/add-item-to-list',
+                                                        '$/package/unigraph.core/0.2.1/executable/add-item-to-list',
                                                         {
                                                             item: uid[0],
                                                             where: '$/entity/favorite_bar',
