@@ -5,32 +5,30 @@ const gmailClientSecret = unigraph.getSecret('google', 'client_secret');
 const fetch = require('node-fetch');
 const _ = require('lodash/fp');
 
-const account = (
+const accounts = (
     await unigraph.getQueries([
-        `(func: uid(accs)) @cascade {
-    uid
-    type {<unigraph.id>}
-    _value {
-        site {
+        `(func: uid(parAcc)) @filter((NOT type(Deleted)) AND (NOT eq(<_hide>, true))) @cascade {
+            uid
+            type @filter(eq(<unigraph.id>, "$/schema/internet_account")) {<unigraph.id>}
             _value {
-                _value {
-                    name @filter(eq(<_value.%>, "Google")) {
-                        <_value.%>
+                site {
+                    _value {
+                        _value {
+                            name @filter(eq(<_value.%>, "Google")) {
+                                <_value.%>
+                            }
+                        }
                     }
                 }
+                name { <_value.%> }
+                username { <_value.%> }
             }
-        }
-        access_token { <_value.%> }
-        token_expires_in { <_value.%dt> }
-        refresh_token { <_value.%> }
-    }
-}
-
-var(func: eq(<unigraph.id>, "$/schema/internet_account")) {
-    <~type> { accs as uid }
-}`,
+        } var(func: eq(<unigraph.id>, "$/schema/internet_account")) {
+            <~type> { parAcc as uid }
+        }`,
     ])
-)?.[0]?.[0];
+)?.[0];
+// )?.[0]?.[0];
 
 const getQuery = (msgid) => `(func: uid(parIds)) @cascade { 
     uid
@@ -39,7 +37,7 @@ const getQuery = (msgid) => `(func: uid(parIds)) @cascade {
     }
 }`;
 
-if (account?.uid) {
+const updateAccountInbox = async (account) => {
     let token = account._value.access_token['_value.%'];
     const refresh = account._value.refresh_token['_value.%'];
 
@@ -145,4 +143,6 @@ if (account?.uid) {
         item: [...uidsToRemoveInbox, ...uidsToDelete],
     });
     uidsToDelete.forEach(unigraph.deleteObject);
-}
+};
+
+await Promise.all(accounts.filter((account) => account?.uid).map(updateAccountInbox));
