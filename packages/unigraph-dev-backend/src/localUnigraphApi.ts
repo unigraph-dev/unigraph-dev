@@ -432,6 +432,10 @@ export function getLocalUnigraphAPI(
             const exec = uid.startsWith('0x')
                 ? unpad((await client.queryUID(uid))[0])
                 : states.caches.executables.data[uid];
+            if (!exec) {
+                console.error('Executable not found!');
+                return undefined;
+            }
             const execFn = await buildExecutable(
                 exec,
                 { params, definition: exec, ...context },
