@@ -179,6 +179,13 @@ const journalToBigCalendarEvent = (datedObj: JournalUni): CalendarViewEvent => {
 
 const calendarEventToBigCalendarEvent = (datedObj: CalendarEventUni): CalendarViewEvent => {
     const allDay = datedObj.get('time_frame/start/all_day');
+    if (allDay) {
+        console.log('calendarEventToBigCalendarEvent', {
+            allDay,
+            end: datedObj.get('time_frame/end/datetime').as('primitive'),
+            start: datedObj.get('time_frame/start/datetime').as('primitive'),
+        });
+    }
     return {
         title: datedObj.get('name').as('primitive'),
         start: getDateAsUTC(datedObj.get('time_frame/start/datetime').as('primitive')),
