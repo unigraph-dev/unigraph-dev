@@ -1,6 +1,6 @@
 {
     "displayName": "RSS Reader",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "An RSS Reader with Unigraph",
     "name": "unigraph.rss_reader",
     "unigraph": {

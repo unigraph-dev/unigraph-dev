@@ -1,6 +1,6 @@
 {
     "displayName": "Unigraph for Reddit",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "description": "View your Reddit subscriptions in Unigraph",
     "name": "unigraph.reddit",
     "unigraph": {

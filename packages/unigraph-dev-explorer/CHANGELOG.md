@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.1](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.0...v0.2.1) (2022-03-09)
+
+
+### Bug Fixes
+
+* **calendar:** reintroduce buildGraph ([327f6ca](https://github.com/unigraph-dev/unigraph-dev/commit/327f6ca1399e31c9c391e0fc7133446850cc233a))
+
+
+
+
+
 # [0.2.0](https://github.com/unigraph-dev/unigraph-dev/compare/v0.1.0...v0.2.0) (2022-03-07)
 
 
