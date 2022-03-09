@@ -25,6 +25,7 @@ const TextareaAutosizeStyled = styled(TextareaAutosize)(({ theme }) => ({
         border: 'none',
         outline: 'none',
         width: '100%',
+        background: 'transparent',
     },
 }));
 

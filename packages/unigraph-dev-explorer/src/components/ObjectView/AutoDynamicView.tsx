@@ -312,7 +312,7 @@ export function AutoDynamicView({
                         display: inline ? 'inline' : 'block',
                         ...(inline ? {} : { width: '100%' }),
                         backgroundColor: isSelected || isDragging ? 'whitesmoke' : 'unset',
-                        borderRadius: isSelected || isDragging ? '12px' : '',
+                        borderRadius: isSelected || isDragging ? '6px' : '',
                         ...style,
                     }}
                     key={`object-view-${object?.uid}`}
