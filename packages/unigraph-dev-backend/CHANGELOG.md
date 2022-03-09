@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.2](https://github.com/ssalka/unigraph-dev/compare/v0.2.1...v0.2.2) (2022-03-09)
+
+
+### Bug Fixes
+
+* **backend:** executable early raise error ([3229517](https://github.com/ssalka/unigraph-dev/commit/322951776efb9481dd01ff963af9d6632379aac5))
+* **backend:** import/export objects now use proper format ([5db704e](https://github.com/ssalka/unigraph-dev/commit/5db704e876fe639739106bd628cd6b57864c0be4))
+* **packages:** package declaration now independent from unigraph versioning ([141bd18](https://github.com/ssalka/unigraph-dev/commit/141bd18adb1734db6b3d0280e0bd1104feca1adf))
+
+
+
+
+
 ## [0.2.1](https://github.com/ssalka/unigraph-dev/compare/v0.2.0...v0.2.1) (2022-03-09)
 
 **Note:** Version bump only for package unigraph-dev-backend

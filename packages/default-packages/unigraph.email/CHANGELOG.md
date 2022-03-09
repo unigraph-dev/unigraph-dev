@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.2](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.1...v0.2.2) (2022-03-09)
+
+
+### Features
+
+* **email:** support multiple email accounts ([d0de455](https://github.com/unigraph-dev/unigraph-dev/commit/d0de4558cac6f36f98c333001f30cc8640ba11ce))
+
+
+
+
+
 ## [0.2.1](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.0...v0.2.1) (2022-03-09)
 
 **Note:** Version bump only for package unigraph.email

@@ -1,6 +1,6 @@
 {
     "displayName": "Unigraph Kanban",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "description": "Kanban component for Unigraph",
     "name": "unigraph.kanban",
     "unigraph": {
