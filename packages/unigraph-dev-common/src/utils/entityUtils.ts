@@ -456,7 +456,7 @@ function getKey(object: any, key: string) {return object['_value'][key]}
  * @param entity An already-processed entity for autoref
  * @param schemas List of schemas
  */
-export function processAutoref(entity: any, schema = "any", schemas: Record<string, Schema>) {
+export function processAutoref(entity: any, schema = "any", schemas: Record<string, Schema>, unigraphIdReplacer?: any) {
 
     /**
      * Recursively looks for places to insert autoref.
@@ -500,7 +500,12 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
                         if (key === "unigraph.id") {
                             // Add autoref by unigraph.id
                             currentEntity['$ref'] = {
-                                query: [{key: 'unigraph.id', value: value}],
+                                query: [
+                                    {
+                                        key: 'unigraph.id',
+                                        value: unigraphIdReplacer ? unigraphIdReplacer(value) : value
+                                    }
+                                ],
                             };
                             delete currentEntity['unigraph.id'];
                         } else if (Object.keys(keysMap).includes(key)) {
@@ -544,7 +549,7 @@ export function processAutoref(entity: any, schema = "any", schemas: Record<stri
  * Processes autoref for schema objects, changing mentions of `unigraph.id` into references, and keep everything else untouched, without object paddings.
  * 
  */
-export function processAutorefUnigraphId(orig: any) {
+export function processAutorefUnigraphId(orig: any, unigraphIdReplacer?: any) {
     function recurse(current: any) {
         switch (typeof current) {
             case "object":
@@ -556,7 +561,12 @@ export function processAutorefUnigraphId(orig: any) {
                         if (key === "unigraph.id") {
                             // Add autoref by unigraph.id
                             current['$ref'] = {
-                                query: [{key: 'unigraph.id', value: value}],
+                                query: [
+                                    {
+                                        key: 'unigraph.id',
+                                        value: unigraphIdReplacer ? unigraphIdReplacer(value) : value
+                                    }
+                                ],
                             };
                             delete current['unigraph.id'];
                         } else {
@@ -820,4 +830,26 @@ export function unflatten(objsMap: any, targets: string[]) {
 
     targets.forEach(el => unflattenRecurse(objsMap[el], el));
     return targets.map(el => objsMap[el]);
+}
+
+export function removeUids(objs: any[]) {
+
+    function removeUidRecurse(obj: any) {
+        if (obj.uid && obj.uid.startsWith('0x')) {
+            obj.uid = obj.uid.replace('0x', '_:');
+        }
+        if (typeof obj === "object" && obj && Array.isArray(obj)) {
+            obj.forEach(el => removeUidRecurse(el));
+        } else if (typeof obj === "object" && obj) {
+            Object.values(obj).forEach(el => removeUidRecurse(el));
+        }
+    }
+
+    objs.forEach(removeUidRecurse);
+    return objs;
+
+}
+
+export function isRaw(obj: any) {
+    return obj.uid && obj['dgraph.type'];
 }

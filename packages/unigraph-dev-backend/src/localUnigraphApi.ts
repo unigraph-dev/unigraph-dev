@@ -14,6 +14,7 @@ import {
     flatten,
     unflatten,
     unpad,
+    removeUids,
 } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { insertsToUpsert } from 'unigraph-dev-common/lib/utils/txnWrapper';
 import dgraph from 'dgraph-js';
@@ -431,6 +432,10 @@ export function getLocalUnigraphAPI(
             const exec = uid.startsWith('0x')
                 ? unpad((await client.queryUID(uid))[0])
                 : states.caches.executables.data[uid];
+            if (!exec) {
+                console.error('Executable not found!');
+                return undefined;
+            }
             const execFn = await buildExecutable(
                 exec,
                 { params, definition: exec, ...context },
@@ -498,7 +503,8 @@ export function getLocalUnigraphAPI(
             indexesRes.forEach((el: any, idx: number) => {
                 if (el[0]) entityMap[Object.keys(entityMap)[idx]]['unigraph.indexes'] = el[0]['unigraph.indexes'];
             });
-            return unflatten(entityMap, uids);
+            const unflattened = unflatten(entityMap, uids);
+            return removeUids(unflattened);
         },
         callHook: async (name, params) => {
             await callHooks(states.hooks, name, params);

@@ -169,7 +169,7 @@ export const addChildren = (
         parents,
         !uidMode,
     );
-    focusUid(myUid, true, -1);
+    focusUid(myUid, false, -1);
 };
 
 export const splitChild = (data: any, context: NoteEditorContext, index: number, oldtext: string, at: number) => {

@@ -1,5 +1,5 @@
 import { PackageDeclaration } from 'unigraph-dev-common/lib/types/packages';
-import { unpad, processAutorefUnigraphId, buildUnigraphEntity } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { unpad, processAutorefUnigraphId, buildUnigraphEntity, isRaw } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { insertsToUpsert } from 'unigraph-dev-common/lib/utils/txnWrapper';
 import { getRefQueryUnigraphId } from 'unigraph-dev-common/lib/utils/utils';
 import dgraph from 'dgraph-js';
@@ -113,7 +113,7 @@ export async function addUnigraphPackage(
                           const id = caches.schemas.data[schema]['_value['][0]['unigraph.id'];
                           caches.schemas.data[schema] = caches.schemas.data[id];
                       }
-                      const builtEntity: any = buildUnigraphEntity(obj, schema, caches.schemas.data);
+                      const builtEntity: any = isRaw(obj) ? obj : buildUnigraphEntity(obj, schema, caches.schemas.data);
                       // eslint-disable-next-line max-len
                       builtEntity[
                           'unigraph.id'
@@ -130,14 +130,18 @@ export async function addUnigraphPackage(
     ) {
         throw new SyntaxError('Malformed package declaration, aborting!');
     }
-    // TODO: Use concurrency here
+    const replacer = (unigraphId: string) =>
+        unigraphId.startsWith('$./')
+            ? unigraphId.replace('$./', `$/package/${pkg.pkgManifest.package_name}/${pkg.pkgManifest.version}/`)
+            : unigraphId;
+
     const toUpsert2 = [];
     for (let i = 0; i < executables.length; i += 1) {
-        const autoRefExecutable = processAutorefUnigraphId(executables[i]);
+        const autoRefExecutable = processAutorefUnigraphId(executables[i], replacer);
         toUpsert2.push(autoRefExecutable);
     }
     for (let i = 0; i < entities.length; i += 1) {
-        const autoRefEntity = processAutorefUnigraphId(entities[i]);
+        const autoRefEntity = processAutorefUnigraphId(entities[i], replacer);
         toUpsert2.push(autoRefEntity);
     }
     const upsertEntityExecutable = insertsToUpsert(toUpsert2, undefined, caches.schemas.dataAlt![0]);

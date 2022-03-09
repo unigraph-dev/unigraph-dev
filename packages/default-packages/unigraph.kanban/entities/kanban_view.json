@@ -2,5 +2,5 @@
     "type": { "unigraph.id": "$/schema/object_view" },
     "name": "Kanban view",
     "item_type": { "unigraph.id": "$/schema/kanban" },
-    "view": { "unigraph.id": "$/package/unigraph.kanban/0.2.1/executable/kanban-view" }
+    "view": { "unigraph.id": "$./executable/kanban-view" }
 }
