@@ -130,14 +130,18 @@ export async function addUnigraphPackage(
     ) {
         throw new SyntaxError('Malformed package declaration, aborting!');
     }
-    // TODO: Use concurrency here
+    const replacer = (unigraphId: string) =>
+        unigraphId.startsWith('$./')
+            ? unigraphId.replace('$./', `$/package/${pkg.pkgManifest.package_name}/${pkg.pkgManifest.version}/`)
+            : unigraphId;
+
     const toUpsert2 = [];
     for (let i = 0; i < executables.length; i += 1) {
-        const autoRefExecutable = processAutorefUnigraphId(executables[i]);
+        const autoRefExecutable = processAutorefUnigraphId(executables[i], replacer);
         toUpsert2.push(autoRefExecutable);
     }
     for (let i = 0; i < entities.length; i += 1) {
-        const autoRefEntity = processAutorefUnigraphId(entities[i]);
+        const autoRefEntity = processAutorefUnigraphId(entities[i], replacer);
         toUpsert2.push(autoRefEntity);
     }
     const upsertEntityExecutable = insertsToUpsert(toUpsert2, undefined, caches.schemas.dataAlt![0]);
