@@ -821,3 +821,25 @@ export function unflatten(objsMap: any, targets: string[]) {
     targets.forEach(el => unflattenRecurse(objsMap[el], el));
     return targets.map(el => objsMap[el]);
 }
+
+export function removeUids(objs: any[]) {
+
+    function removeUidRecurse(obj: any) {
+        if (obj.uid && obj.uid.startsWith('0x')) {
+            obj.uid = obj.uid.replace('0x', '_:');
+        }
+        if (typeof obj === "object" && obj && Array.isArray(obj)) {
+            obj.forEach(el => removeUidRecurse(el));
+        } else if (typeof obj === "object" && obj) {
+            Object.values(obj).forEach(el => removeUidRecurse(el));
+        }
+    }
+
+    objs.forEach(removeUidRecurse);
+    return objs;
+
+}
+
+export function isRaw(obj: any) {
+    return obj.uid && obj['dgraph.type'];
+}

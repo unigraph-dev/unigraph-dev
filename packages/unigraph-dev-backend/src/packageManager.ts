@@ -1,5 +1,5 @@
 import { PackageDeclaration } from 'unigraph-dev-common/lib/types/packages';
-import { unpad, processAutorefUnigraphId, buildUnigraphEntity } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { unpad, processAutorefUnigraphId, buildUnigraphEntity, isRaw } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { insertsToUpsert } from 'unigraph-dev-common/lib/utils/txnWrapper';
 import { getRefQueryUnigraphId } from 'unigraph-dev-common/lib/utils/utils';
 import dgraph from 'dgraph-js';
@@ -113,7 +113,7 @@ export async function addUnigraphPackage(
                           const id = caches.schemas.data[schema]['_value['][0]['unigraph.id'];
                           caches.schemas.data[schema] = caches.schemas.data[id];
                       }
-                      const builtEntity: any = buildUnigraphEntity(obj, schema, caches.schemas.data);
+                      const builtEntity: any = isRaw(obj) ? obj : buildUnigraphEntity(obj, schema, caches.schemas.data);
                       // eslint-disable-next-line max-len
                       builtEntity[
                           'unigraph.id'
