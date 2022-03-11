@@ -1,7 +1,8 @@
 const { app, BrowserWindow, Menu, Tray, nativeImage, globalShortcut, shell } = require('electron');
 const path = require('path');
 const os = require('os');
-const { spawn } = require('child_process');
+const child_process = require('child_process');
+const { spawn } = child_process;
 const { fixPathForAsarUnpack } = require('electron-util');
 const { ipcMain } = require('electron');
 const { autoUpdater } = require('electron-updater');
