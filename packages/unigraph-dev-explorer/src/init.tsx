@@ -308,6 +308,7 @@ function initAnalyticsIfOptedIn() {
     window.mixpanel = mixpanel;
 
     mixpanel.init('d15629c3a0ad692d3b7491a9091dd2be', {
+        persistence: 'localStorage',
         debug: true,
         ignore_dnt: true, // with user's explicit consent
         // eslint-disable-next-line inclusive-language/use-inclusive-words -- pre-defined property
