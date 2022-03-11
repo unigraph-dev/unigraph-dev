@@ -19,7 +19,7 @@ jobs:
                 electron-arch-overrides: ['']
                 include:
                     - os: macos-latest
-                      electron-arch-overrides: '-c.mac.target.arch=x64'
+                      electron-arch-overrides: '-c.mac.target.target=default -c.mac.target.arch=x64'
                     # - os: macos-latest
                     #   electron-arch-overrides: '-c.mac.target.target=dmg -c.mac.target.arch=arm64'
         env:
