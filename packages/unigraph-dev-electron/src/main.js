@@ -40,6 +40,13 @@ function isDev() {
     return process.argv[2] == '--dev';
 }
 
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+    app.quit();
+    process.exit(0);
+}
+
 if (!isDev()) autoUpdater.checkForUpdatesAndNotify();
 
 function isUnigraphPortOpen(port) {
@@ -239,6 +246,12 @@ app.whenReady().then(() => {
             if (BrowserWindow.getAllWindows().length === 0) {
                 createMainWindowNoLoad();
             }
+            if (mainWindow) {
+                mainWindow.show();
+            }
+        });
+        app.on('second-instance', (event, commandLine, workingDirectory) => {
+            // Someone tried to run a second instance, we should focus our window.
             if (mainWindow) {
                 mainWindow.show();
             }
