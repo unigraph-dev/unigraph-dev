@@ -105,7 +105,7 @@ export default function Settings() {
                         <TextField value={email} onChange={(ev) => setEmail(ev.target.value)} />
                         <Button
                             onClick={() => {
-                                analyticsState.setValue(email.length === 0);
+                                analyticsState.setValue(email.length !== 0);
                                 window.localStorage.setItem('email', email);
                                 (window as any).mixpanel.identify(email);
                                 (window as any).mixpanel.people.set({

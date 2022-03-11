@@ -325,7 +325,7 @@ function initAnalyticsIfOptedIn() {
 
     const onUserInteraction = _.throttle(() => {
         mixpanel.track('userInteraction');
-    }, 1000 * 15); // anonymize user interaction into 15 second chunks
+    }, 1000 * 60 * 1); // anonymize user interaction into 1 minute chunks
     document.addEventListener('pointerdown', onUserInteraction, true);
     document.addEventListener('keydown', onUserInteraction, true);
 }
