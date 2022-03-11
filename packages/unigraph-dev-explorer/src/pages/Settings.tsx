@@ -93,31 +93,19 @@ export default function Settings() {
                     <ListItemText
                         id="switch-list-label-analytics-mode"
                         primary="Enable analytics"
-                        secondary="Opt-in to analytics with mixpanel"
-                    />
-                    <ListItemSecondaryAction>
-                        <Switch
-                            edge="end"
-                            onChange={(e) => {
-                                analyticsState.setValue(!analyticsMode);
-                            }}
-                            checked={analyticsMode}
-                            inputProps={{
-                                'aria-labelledby': 'switch-list-label-developer-mode',
-                            }}
-                        />
-                    </ListItemSecondaryAction>
-                </ListItem>
-                <ListItem sx={pointerHoverSx} onClick={(e) => false} key="analytics-email">
-                    <ListItemText
-                        id="switch-list-label-analytics-mode"
-                        primary="Email"
-                        secondary="Enter your email to track your activity"
+                        secondary={
+                            <span>
+                                Opt-in to analytics with mixpanel by entering your email address.
+                                <br />
+                                We will only record your usage length and basic information (OS, country).
+                            </span>
+                        }
                     />
                     <ListItemSecondaryAction>
                         <TextField value={email} onChange={(ev) => setEmail(ev.target.value)} />
                         <Button
                             onClick={() => {
+                                analyticsState.setValue(email.length === 0);
                                 window.localStorage.setItem('email', email);
                                 (window as any).mixpanel.identify(email);
                                 (window as any).mixpanel.people.set({
@@ -126,7 +114,7 @@ export default function Settings() {
                                 });
                             }}
                         >
-                            Submit
+                            Opt-in
                         </Button>
                     </ListItemSecondaryAction>
                 </ListItem>
