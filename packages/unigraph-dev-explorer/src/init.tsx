@@ -72,8 +72,9 @@ export function init(hostname?: string) {
     const hst = hostname || (window.location.hostname.length ? window.location.hostname : 'localhost');
     const browserId = `${getRandomInt()}${getRandomInt()}`;
 
+    const defaultServer = `ws://${hst}:4002`;
     const defaultSettings: UserSettings = {
-        serverLocation: `ws://${hst}:3001`,
+        serverLocation: defaultServer,
         newWindow: 'new-tab',
         nativeNotifications: true,
         developerMode: false,
@@ -86,6 +87,11 @@ export function init(hostname?: string) {
         window.localStorage.setItem('userSettings', JSON.stringify(defaultSettings));
     } else {
         userSettings = JSON.parse(window.localStorage.getItem('userSettings') || '');
+        if (userSettings.serverLocation === `ws://${hst}:3001`) {
+            // Migrating from earlier versions
+            userSettings.serverLocation = defaultServer;
+            window.localStorage.setItem('userSettings', JSON.stringify(userSettings));
+        }
     }
 
     // Connect to Unigraph
@@ -98,10 +104,13 @@ export function init(hostname?: string) {
         const updated = new Date(unpadded?._updatedAt);
         const current = new Date();
         if (current.valueOf() - updated.valueOf() < 5000 && Notification && !isMobile()) {
+            /*
             // eslint-disable-next-line no-new
             new Notification(unpadded.name, {
                 body: `${unpadded.from}: ${unpadded.content}`,
             });
+            */
+            // Disable notifications until further polish
         }
     });
 

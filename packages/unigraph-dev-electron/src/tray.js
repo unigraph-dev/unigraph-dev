@@ -1,4 +1,4 @@
-const { ipcMain } = require('electron');
+const { app } = require('electron');
 
 const createTrayMenu = (onNewTemplate) => {
     let mainWindow;
@@ -30,8 +30,15 @@ const createTrayMenu = (onNewTemplate) => {
             { type: 'separator' },
             { label: 'Favorites', enabled: false },
             ...menuTemplateFavorites,
+            { type: 'separator' },
+            {
+                label: 'Quit',
+                click: () => {
+                    app.quit();
+                },
+            },
         ];
-        console.log(menuTemplate);
+        // console.log(menuTemplate);
         onNewTemplate(menuTemplate);
     }
 
