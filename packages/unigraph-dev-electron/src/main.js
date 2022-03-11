@@ -4,6 +4,7 @@ const { spawn } = require('child_process');
 const { fixPathForAsarUnpack } = require('electron-util');
 const { ipcMain } = require('electron');
 const { autoUpdater } = require('electron-updater');
+const log = require('electron-log');
 
 const Store = require('electron-store');
 const net = require('net');
@@ -70,6 +71,7 @@ async function startServer(logHandler) {
     if (store.get('startServer') !== false && (!portopen || !isDev()) && shouldStartBackend) {
         const oldConsoleLog = console.log;
         console.log = (data) => {
+            log.log(data);
             if (!Array.isArray(data)) data = [data];
             logs.push(...data);
             if (!dontCheck) checkIfUComplete(...data);
@@ -153,13 +155,6 @@ function createLoadingWindow(props) {
 
     return win;
 }
-
-const createTodayWindow = () =>
-    createMainWindow({
-        transparent: true,
-        frame: false,
-        backgroundColor: '#00ffffff',
-    });
 
 const createOmnibar = () =>
     createMainWindow({
@@ -307,8 +302,9 @@ function showOmnibar() {
 
 ipcMain.on('close_omnibar', closeOmnibar);
 
-app.on('window-all-closed', () => {
-    // Prevent app quitting
+app.on('window-all-closed', (e) => {
+    // Prevent app quitting, instead runs in background
+    e.preventDefault();
 });
 
 app.on('quit', () => {
