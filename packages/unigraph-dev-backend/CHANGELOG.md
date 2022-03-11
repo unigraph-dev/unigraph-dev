@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.3](https://github.com/ssalka/unigraph-dev/compare/v0.2.2...v0.2.3) (2022-03-11)
+
+
+### Bug Fixes
+
+* change websocket port to less common port ([4c98406](https://github.com/ssalka/unigraph-dev/commit/4c98406dae11819ec8a45be8acd53d2d2dd2e162))
+
+
+
+
+
 ## [0.2.2](https://github.com/ssalka/unigraph-dev/compare/v0.2.1...v0.2.2) (2022-03-09)
 
 

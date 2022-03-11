@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.3](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.2...v0.2.3) (2022-03-11)
+
+
+### Bug Fixes
+
+* **autoupdate:** add zip target for macOS for autoupdate ([42e968a](https://github.com/unigraph-dev/unigraph-dev/commit/42e968a831e2137801230ef559fd17c5336eac7d))
+* **calendar, editor:** calendar props update, editor issues ([36113d5](https://github.com/unigraph-dev/unigraph-dev/commit/36113d586d194bb51234a69069d829e67869504e))
+* change websocket port to less common port ([4c98406](https://github.com/unigraph-dev/unigraph-dev/commit/4c98406dae11819ec8a45be8acd53d2d2dd2e162))
+* **electron:** properly quit unigraph with tray icon ([97a4adf](https://github.com/unigraph-dev/unigraph-dev/commit/97a4adf377c5e31c813bd7696524f7eb1278893d))
+* simplify analytics flow ([fad6bc6](https://github.com/unigraph-dev/unigraph-dev/commit/fad6bc6387f5d63a10468325cd0c57fc85498ad4))
+* upgrade to es6, with suport for async functions ([169d0a9](https://github.com/unigraph-dev/unigraph-dev/commit/169d0a9cfa6aa0ba650530a99e51c12a5e9e3bb0))
+
+
+
+
+
 ## [0.2.2](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.1...v0.2.2) (2022-03-09)
 
 
