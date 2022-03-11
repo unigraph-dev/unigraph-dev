@@ -39,7 +39,7 @@ export const PackageManifestView = ({ data }: any) => {
                 }}
                 control={
                     <Switch
-                        checked={data._hide}
+                        checked={!data._hide}
                         onChange={() =>
                             data._hide
                                 ? window.unigraph.enablePackage?.(pkgName)
