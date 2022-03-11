@@ -324,7 +324,7 @@ app.on('window-all-closed', (e) => {
 app.on('quit', () => {
     function killer(ps) {
         if (os.platform() === 'win32'){
-            child_process.exec('taskkill /pid ' + ps.pid + ' /T /F')
+            child_process.exec('taskkill /pid ' + ps.pid + ' /T')
         } else {
             ps.kill();  
         }
