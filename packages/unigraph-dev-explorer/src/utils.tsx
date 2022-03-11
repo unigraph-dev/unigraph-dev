@@ -368,7 +368,7 @@ export const isMultiSelectKeyPressed = (event: React.MouseEvent) => event.altKey
 
 export const runClientExecutable = (src: string, params: any) => {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    const AsyncFunction = Object.getPrototypeOf(async () => false).constructor;
+    const AsyncFunction = eval('Object.getPrototypeOf(async function () {}).constructor');
     const fn = new AsyncFunction(
         'require',
         'unpad',

@@ -127,11 +127,7 @@
         "prepare": "node scripts/build.js --lib"
     },
     "browserslist": {
-        "production": [
-            ">0.2%",
-            "not dead",
-            "not op_mini all"
-        ],
+        "production": "supports es6",
         "development": [
             "last 1 chrome version",
             "last 1 firefox version",
