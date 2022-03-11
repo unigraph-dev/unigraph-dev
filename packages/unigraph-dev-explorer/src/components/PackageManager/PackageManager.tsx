@@ -103,7 +103,12 @@ export const PackageManager: React.FC = ({}) => {
                     Add package (overwrite)
                 </Button>
             </div>
-            <DynamicObjectListView items={packages} context={null} compact />
+            <DynamicObjectListView
+                items={packages}
+                context={null}
+                defaultFilter={['no-noview', 'no-deleted', 'no-trivial']}
+                compact
+            />
         </div>
     );
 };
