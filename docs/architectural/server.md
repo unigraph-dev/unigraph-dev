@@ -3,7 +3,7 @@ updated_at: 2021-11-27T14:49:09-05:00
 ---
 # Server API
 
-We use a websocket-based API (with optional HTTP equivalence) for our server. To interact with the server, first establish a connection with the local server (default address is `ws://localhost:3000`). The equivalent HTTP API is available at `http://localhost:4001`
+We use a websocket-based API (with optional HTTP equivalence) for our server. To interact with the server, first establish a connection with the local server (default address is `ws://localhost:4002`). The equivalent HTTP API is available at `http://localhost:4001`
 
 After establishing the connection, you can use the event system of the server, either by sending events to the server or listening to updates (subscribing to events).
 

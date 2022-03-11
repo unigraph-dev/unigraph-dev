@@ -67,7 +67,7 @@ async function startServer(logHandler) {
         path.join(userData, 'w'),
         store.get('startServer') !== false,
     );
-    if (store.get('startServer') !== false && !portopen && shouldStartBackend) {
+    if (store.get('startServer') !== false && (!portopen || !isDev()) && shouldStartBackend) {
         const oldConsoleLog = console.log;
         console.log = (data) => {
             if (!Array.isArray(data)) data = [data];
