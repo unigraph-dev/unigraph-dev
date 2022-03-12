@@ -10,20 +10,27 @@ export function TwitterSettings() {
     const [loaded, setLoaded] = React.useState(false);
     const [lists, setLists] = React.useState([]);
     const [account, setAccount] = React.useState<any>({});
-    const subscriptions =
-        account?._value?.subscriptions?.['_value[']?.map((it: any) => ({
-            uid: it._value.uid,
-            name: it._value._value.name['_value.%'],
-            last_id_fetched: it._value._value.last_id_fetched['_value.%'],
-        })) || [];
+    const [subscriptions, setSubscriptions] = React.useState<any>([]);
+
+    // const subscriptions = ;
     const tabContext = React.useContext(TabContext);
     useEffectOnce(() => {
         window.unigraph.ensurePackage('unigraph.twitter', twitterPackage).then(() => setLoaded(true));
     });
 
     React.useEffect(() => {
+        const newSubscriptions = account?._value?.subscriptions?.['_value[']?.map((it: any) => ({
+            uid: it._value.uid,
+            name: it._value._value.name['_value.%'],
+            last_id_fetched: it._value._value.last_id_fetched['_value.%'],
+        }));
+        setSubscriptions(newSubscriptions || []);
         if (account?.uid) {
-            window.unigraph.runExecutable('$/executable/get-twitter-lists', {}).then(setLists);
+            window.unigraph.runExecutable('$/executable/get-twitter-lists', {}).then((x: any) => {
+                if (x?.length) {
+                    setLists(x);
+                }
+            });
         }
     }, [account]);
 
@@ -80,7 +87,7 @@ export function TwitterSettings() {
                 <~type> { parAcc as uid }
             }`,
                 (res: any[]) => {
-                    setAccount(res[0]);
+                    setAccount(res?.[0]);
                 },
                 id,
                 { noExpand: true },
@@ -104,11 +111,11 @@ export function TwitterSettings() {
             <Typography variant="body1">Account info</Typography>
             <p>
                 <strong>Name: </strong>
-                {account?.get?.('name').as?.('primitive')}
+                {account?.get?.('name')?.as?.('primitive')}
             </p>
             <p>
                 <strong>Username: </strong>
-                {account?.get?.('username').as?.('primitive')}
+                {account?.get?.('username')?.as?.('primitive')}
             </p>
             <Typography variant="body1">Currently subscribed to</Typography>
             {subscriptions?.map((el: any) => (
