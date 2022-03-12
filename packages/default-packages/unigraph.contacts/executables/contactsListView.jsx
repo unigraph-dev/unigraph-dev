@@ -19,18 +19,23 @@ React.useEffect(() => {
 }, []);
 
 return (
-    <div>
-        <TextField value={newName} onChange={(e) => setNewName(e.target.value)}>
-            Name
-        </TextField>
-        <TextField value={newEmail} onChange={(e) => setNewEmail(e.target.value)}>
-            Email
-        </TextField>
-        <Button onClick={() => unigraph.addObject({ emails: [newEmail], name: newName }, '$/schema/contact')}>
-            Add
-        </Button>
-        {contacts.map((el) => (
-            <AutoDynamicView object={new UnigraphObject(el)} />
-        ))}
-    </div>
+    <>
+        <Typography variant="h5" sx={{ margin: '8px' }}>
+            Contacts
+        </Typography>
+        <div>
+            <TextField value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Name">
+                Name
+            </TextField>
+            <TextField value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="Email">
+                Email
+            </TextField>
+            <Button onClick={() => unigraph.addObject({ emails: [newEmail], name: newName }, '$/schema/contact')}>
+                Add Contact
+            </Button>
+            {contacts.map((el) => (
+                <AutoDynamicView object={new UnigraphObject(el)} />
+            ))}
+        </div>
+    </>
 );
