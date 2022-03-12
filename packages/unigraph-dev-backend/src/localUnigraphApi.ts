@@ -431,6 +431,11 @@ export function getLocalUnigraphAPI(
             const exec = uid.startsWith('0x')
                 ? unpad((await client.queryUID(uid))[0])
                 : states.caches.executables.data[uid];
+            console.log('runExecutable \n\n', { uid, params, context, fnString, bypassCache, exec });
+            if (!exec) {
+                // TODO this check is here bc removed packages will remove executables from the cache but still be called. We'd like runExecutable to not even be called at that point.
+                return {};
+            }
             const execFn = await buildExecutable(
                 exec,
                 { params, definition: exec, ...context },
