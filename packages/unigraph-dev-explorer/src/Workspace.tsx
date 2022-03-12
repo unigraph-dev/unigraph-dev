@@ -256,6 +256,7 @@ const setTitleOnRenderTab = (model: Model) => {
     let selIndex = model.getActiveTabset()?._attributes?.selected;
     selIndex = selIndex || 0;
     let selName = 'Loading';
+    let selId = '';
 
     if (model.getActiveTabset() === undefined) {
         // @ts-expect-error: using private API
@@ -264,6 +265,8 @@ const setTitleOnRenderTab = (model: Model) => {
     try {
         // @ts-expect-error: using private API
         selName = model.getActiveTabset()?._children?.[selIndex]?.getName();
+        // @ts-expect-error: using private API
+        selId = model.getActiveTabset()?._children?.[selIndex]?._attributes.id;
     } catch (e) {
         return;
     }
@@ -271,6 +274,7 @@ const setTitleOnRenderTab = (model: Model) => {
     const titleStrZero = `${selName} - Unigraph`;
     const finalTitle = count - 4 > 0 ? titleStr : titleStrZero;
     document.title = finalTitle;
+    window.unigraph.getState('global/activeTab').setValue(selId);
 };
 
 const providedTheme = createTheme(globalTheme);

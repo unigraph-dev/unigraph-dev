@@ -1,6 +1,7 @@
 /* eslint-disable no-plusplus */
 import _ from 'lodash';
 import { buildUnigraphEntity, byElementIndex, clearEmpties } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { dfs, removeAllPropsFromObj } from '../../utils';
 import { parseTodoObject } from '../todo/parseTodoObject';
 import { NoteEditorContext } from './types';
@@ -1071,7 +1072,7 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
     }, []);
     // console.log(textIt, newChildren, )
     if (todoUid) return;
-    const schemas = await window.unigraph.getSchemas();
+    const schemas = (window.unigraph as any).getSchemaMap();
     const todoObj = parseTodoObject(textIt, refs);
     todoObj.uid = window.unigraph.leaseUid?.();
     clearEmpties(todoObj);
@@ -1095,15 +1096,21 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
         },
     ]);
 
+    const eventId = getRandomInt();
+
     // send fake update now
-    window.unigraph.sendFakeUpdate?.(context.callbacks.subsId, {
-        uid: data?._value?.uid,
-        children: {
-            _displayAs: data?._value?.children?._displayAs,
-            '_value[': newChildren,
-            uid: window.unigraph.leaseUid?.(),
+    window.unigraph.sendFakeUpdate?.(
+        context.callbacks.subsId,
+        {
+            uid: data?._value?.uid,
+            children: {
+                _displayAs: data?._value?.children?._displayAs,
+                '_value[': newChildren,
+                uid: window.unigraph.leaseUid?.(),
+            },
         },
-    });
+        eventId,
+    );
 
     const focusedState = window.unigraph.getState('global/focused');
     focusedState.setValue({ ...focusedState.value, component: undefined });
@@ -1118,6 +1125,8 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
         false,
         context.callbacks.subsId,
         parents,
+        undefined,
+        eventId,
     );
     window.unigraph.touch(parents.map((el) => el.uid));
 };

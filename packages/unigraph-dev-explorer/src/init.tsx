@@ -145,6 +145,7 @@ export function init(hostname?: string) {
     window.unigraph.addState('global/focused/actions', {});
     /* Example: {'shift+Tab': {'319908': () => {return true;}}} */
     window.unigraph.addState('global/keyboardShortcuts', {});
+    window.unigraph.addState('global/activeTab', '');
 
     if (window.localStorage.getItem('enableAnalytics') === 'true') initAnalyticsIfOptedIn();
 
