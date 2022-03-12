@@ -344,7 +344,6 @@ export function AutoDynamicView({
                             cursor: noClickthrough || !canClickthrough ? '' : 'pointer',
                             ...(inline ? {} : { width: '100%' }),
                             ...(isMobile() ? { touchAction: 'pan-y' } : {}),
-                            ...style,
                         }}
                         aria-label={`Object view for uid ${object?.uid}, of type ${
                             object?.type?.['unigraph.id'] || 'unknown'

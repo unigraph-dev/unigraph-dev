@@ -362,11 +362,14 @@ export function DetailedOutlinerBlock({
     const [isEditing, setIsEditing] = React.useState(
         noteEditorProps ? window.unigraph.getState('global/focused').value?.uid === data.uid : false,
     );
-    const nodesState = window.unigraph.addState(`${tabContext.viewId}/nodes`, []);
-    const historyState: AppState<HistoryState> = window.unigraph.addState(`${tabContext.viewId}/history`, {
-        history: [],
-        future: [],
-    });
+    const nodesState = window.unigraph.addState(`${tabContext.viewId}${callbacks.subsId}/nodes`, []);
+    const historyState: AppState<HistoryState> = window.unigraph.addState(
+        `${tabContext.viewId}${callbacks.subsId}/history`,
+        {
+            history: [],
+            future: [],
+        },
+    );
     const editorContext = {
         edited: noteEditorProps ? edited : undefined,
         setCommand,
@@ -983,7 +986,7 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
                     .slice(0, noChildren ? undefined : -1),
             ),
         );
-    }, []);
+    }, [data]);
 
     return (
         <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
@@ -1022,7 +1025,7 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
                                 <OutlineComponent isChildren>
                                     <AutoDynamicView
                                         object={refObject}
-                                        callbacks={{ isEmbed: true }}
+                                        callbacks={{ ...callbacks, isEmbed: true }}
                                         options={{ noClickthrough: true, noSubentities: true }}
                                         components={childrenComponents}
                                         attributes={{

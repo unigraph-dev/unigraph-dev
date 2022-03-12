@@ -996,6 +996,7 @@ export const getLastDFSNode = (data: any, context: NoteEditorContext) => {
     const orderedNodes = dfs(context.nodesState.value).filter((el) =>
         ['$/schema/note_block', '$/schema/embed_block'].includes((el as any).type),
     );
+    console.log(orderedNodes);
     const newIndex = orderedNodes.findIndex((el) => el.uid === data.uid) - 1;
     if (orderedNodes[newIndex] && !orderedNodes[newIndex].root) return orderedNodes[newIndex];
     return { uid: '' };
@@ -1059,12 +1060,14 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
             };
             if (!textIt.length) textIt = el._value._value._value.text._value._value['_value.%'];
             refs.push(
-                ...(el._value._value._value?.children?.['_value[']
-                    ?.filter?.((it: any) => it._key)
-                    .map((ell: any) => ({
-                        key: ell._key.slice(2, -2),
-                        value: ell._value._value.uid,
-                    })) || []),
+                ...(
+                    el._value._value._value?.children?.['_value[']
+                        ?.filter?.((it: any) => it._key)
+                        .map((ell: any) => ({
+                            key: ell._key.slice(2, -2),
+                            value: ell._value?._value?.uid,
+                        })) || []
+                ).filter((it: any) => it.value),
             );
             return [...prev, newel];
         }
