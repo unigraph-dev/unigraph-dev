@@ -329,7 +329,7 @@ type TreeNode = {
     type?: string;
 };
 export const dfs = (nodes: TreeNode[]) => {
-    const root = nodes.filter((el) => el.root)[0];
+    const root = nodes.filter((el) => el.root)[0] || nodes[0];
     const nmap: Record<string, TreeNode> = Object.fromEntries(nodes.map((el) => [el.uid, el]));
     const traversal: TreeNode[] = [];
 

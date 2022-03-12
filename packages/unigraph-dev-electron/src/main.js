@@ -2,6 +2,7 @@ const { app, BrowserWindow, Menu, Tray, nativeImage, globalShortcut, shell } = r
 const path = require('path');
 const os = require('os');
 const child_process = require('child_process');
+
 const { spawn } = child_process;
 const { fixPathForAsarUnpack } = require('electron-util');
 const { ipcMain } = require('electron');
@@ -324,10 +325,10 @@ app.on('window-all-closed', (e) => {
 
 app.on('quit', () => {
     function killer(ps) {
-        if (os.platform() === 'win32'){
-            child_process.exec('taskkill /pid ' + ps.pid + ' /T')
+        if (os.platform() === 'win32') {
+            child_process.exec(`taskkill /pid ${ps.pid} /T /F`);
         } else {
-            ps.kill();  
+            ps.kill();
         }
     }
 
