@@ -941,7 +941,7 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
                     _index: { '_value.#i': curr._index['_value.#i'] + index.length },
                     _key: curr._key,
                     _value: {
-                        uid: curr._value.uid,
+                        uid: curr._value?.uid,
                     },
                 },
             ];
@@ -951,7 +951,7 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
                 _index: { uid: curr._index?.uid, '_value.#i': curr._index['_value.#i'] },
                 _key: curr._key,
                 _value: {
-                    uid: curr._value.uid,
+                    uid: curr._value?.uid,
                 },
             },
         ];
