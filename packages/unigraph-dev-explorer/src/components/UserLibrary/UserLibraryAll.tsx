@@ -85,10 +85,12 @@ function UserLibraryAll({ id }: any) {
         );
         window.unigraph.getQueries(nsmap.map((el) => getStatsQuery(el))).then((res: any[]) => {
             setItemGroups(
-                res.map((el, index) => ({
-                    name: nsmap[index],
-                    items: el[0]?.objects,
-                })),
+                res
+                    .map((el, index) => ({
+                        name: nsmap[index],
+                        items: el[0]?.objects,
+                    }))
+                    .sort((a, b) => b.items - a.items),
             );
         });
     });

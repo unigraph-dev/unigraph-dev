@@ -1,6 +1,6 @@
 {
     "name": "unigraph-dev-explorer",
-    "version": "0.2.1",
+    "version": "0.2.3",
     "dependencies": {
         "@babel/core": "7.12.3",
         "@date-io/moment": "1.x",
@@ -95,7 +95,7 @@
         "turndown": "^7.1.1",
         "typeface-roboto": "^1.1.13",
         "typescript": "^4.2.2",
-        "unigraph-dev-common": "^0.2.1",
+        "unigraph-dev-common": "^0.2.3",
         "url-loader": "4.1.1",
         "uuid": "^8.3.2",
         "webpack": "4.44.2",
@@ -127,11 +127,7 @@
         "prepare": "node scripts/build.js --lib"
     },
     "browserslist": {
-        "production": [
-            ">0.2%",
-            "not dead",
-            "not op_mini all"
-        ],
+        "production": "supports es6",
         "development": [
             "last 1 chrome version",
             "last 1 firefox version",

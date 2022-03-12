@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.3](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.2...v0.2.3) (2022-03-11)
+
+
+### Bug Fixes
+
+* change websocket port to less common port ([4c98406](https://github.com/unigraph-dev/unigraph-dev/commit/4c98406dae11819ec8a45be8acd53d2d2dd2e162))
+* **electron:** properly quit unigraph with tray icon ([97a4adf](https://github.com/unigraph-dev/unigraph-dev/commit/97a4adf377c5e31c813bd7696524f7eb1278893d))
+
+
+
+
+
+## [0.2.2](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.1...v0.2.2) (2022-03-09)
+
+**Note:** Version bump only for package unigraph-dev-electron
+
+
+
+
+
 ## [0.2.1](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.0...v0.2.1) (2022-03-09)
 
 **Note:** Version bump only for package unigraph-dev-electron

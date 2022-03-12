@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable no-bitwise */
 /* eslint-disable no-plusplus */
-import { Typography } from '@mui/material';
 import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 import React from 'react';
@@ -10,6 +9,18 @@ import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 
 export const NavigationContext = React.createContext<(location: string) => any>((location: string) => ({}));
+
+export function isValidHttpUrl(string: string) {
+    let url;
+
+    try {
+        url = new URL(string);
+    } catch (e) {
+        return false;
+    }
+
+    return url.protocol === 'http:' || url.protocol === 'https:';
+}
 
 export const TabContext = React.createContext({
     viewId: 0,
@@ -300,7 +311,10 @@ export const debounce = (func: any, wait: number) => {
         timeout = setTimeout(later, wait);
     };
 
-    executedFunction.cancel = () => clearTimeout(timeout);
+    executedFunction.cancel = () => {
+        clearTimeout(timeout);
+        currentDelay = null;
+    };
     executedFunction.flush = () => {
         if (currentDelay) currentDelay(true);
     };
@@ -368,7 +382,7 @@ export const isMultiSelectKeyPressed = (event: React.MouseEvent) => event.altKey
 
 export const runClientExecutable = (src: string, params: any) => {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    const AsyncFunction = Object.getPrototypeOf(async () => false).constructor;
+    const AsyncFunction = eval('Object.getPrototypeOf(async function () {}).constructor');
     const fn = new AsyncFunction(
         'require',
         'unpad',

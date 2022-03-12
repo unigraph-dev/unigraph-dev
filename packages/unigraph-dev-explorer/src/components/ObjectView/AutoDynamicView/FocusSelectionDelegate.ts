@@ -22,7 +22,7 @@ export const useFocusDelegate = (uid: string, componentId: string) => {
                 setIsFocused(true);
             else setIsFocused(false);
         };
-        window.unigraph.getState('global/focused').subscribe(cbfoc);
+        window.unigraph.getState('global/focused').subscribe(cbfoc, true);
 
         return function cleanup() {
             window.unigraph.getState('global/focused').unsubscribe(cbfoc);

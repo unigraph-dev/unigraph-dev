@@ -25,6 +25,7 @@ const TextareaAutosizeStyled = styled(TextareaAutosize)(({ theme }) => ({
         border: 'none',
         outline: 'none',
         width: '100%',
+        background: 'transparent',
     },
 }));
 
@@ -107,7 +108,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
             );
             editorContext.historyState.setValue(newHist);
         }
-        const ret = oldTextRef.current === text ? undefined : pushText(text, isFlushing);
+        const ret = oldTextRef.current === text && !isFlushing ? undefined : pushText(text, isFlushing);
         oldTextRef.current = text;
         return ret;
     };
@@ -483,7 +484,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                     if (!ev.shiftKey && !ev.ctrlKey && !ev.metaKey) {
                         ev.preventDefault();
                         edited.current = false;
-                        inputDebounced.current.cancel();
+                        inputDebounced.current.flush();
                         const currentText = getCurrentText() || pullText();
                         callbacks['split-child']?.(currentText, caret);
                         // setCurrentText(currentText.slice(caret));

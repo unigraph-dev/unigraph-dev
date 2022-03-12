@@ -3,6 +3,37 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.3](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.2...v0.2.3) (2022-03-11)
+
+
+### Bug Fixes
+
+* **calendar, editor:** calendar props update, editor issues ([36113d5](https://github.com/unigraph-dev/unigraph-dev/commit/36113d586d194bb51234a69069d829e67869504e))
+* change websocket port to less common port ([4c98406](https://github.com/unigraph-dev/unigraph-dev/commit/4c98406dae11819ec8a45be8acd53d2d2dd2e162))
+* simplify analytics flow ([fad6bc6](https://github.com/unigraph-dev/unigraph-dev/commit/fad6bc6387f5d63a10468325cd0c57fc85498ad4))
+* upgrade to es6, with suport for async functions ([169d0a9](https://github.com/unigraph-dev/unigraph-dev/commit/169d0a9cfa6aa0ba650530a99e51c12a5e9e3bb0))
+
+
+
+
+
+## [0.2.2](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.1...v0.2.2) (2022-03-09)
+
+
+### Bug Fixes
+
+* common ui fixes ([f868ca9](https://github.com/unigraph-dev/unigraph-dev/commit/f868ca98236deb641f9bf950cd7979ba50464116))
+* **packages:** package declaration now independent from unigraph versioning ([141bd18](https://github.com/unigraph-dev/unigraph-dev/commit/141bd18adb1734db6b3d0280e0bd1104feca1adf))
+
+
+### Features
+
+* **email:** support multiple email accounts ([d0de455](https://github.com/unigraph-dev/unigraph-dev/commit/d0de4558cac6f36f98c333001f30cc8640ba11ce))
+
+
+
+
+
 ## [0.2.1](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.0...v0.2.1) (2022-03-09)
 
 

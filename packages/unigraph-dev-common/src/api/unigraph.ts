@@ -128,7 +128,10 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             const state: AppState = {
                 value: initialValue,
                 subscribers: [],
-                subscribe: (subscriber: (newValue: any) => any) => state.subscribers.push(subscriber),
+                subscribe: (subscriber: (newValue: any) => any, initial?) => {
+                    state.subscribers.push(subscriber);
+                    if (initial) subscriber(state.value);
+                },
                 unsubscribe: (cb: (newValue: any) => any) => {
                     state.subscribers = state.subscribers.filter((el) => el !== cb);
                 },

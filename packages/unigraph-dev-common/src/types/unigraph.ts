@@ -11,7 +11,12 @@ export type UnigraphUpsert = {
 export type AppState<T = any> = {
     value: T;
     subscribers: ((newValue: T) => any)[];
-    subscribe: (fn: (newValue: T) => any) => any;
+    /**
+     * Subscribe to changes in the state.
+     * @param fn Callback to be called when the state changes.
+     * @param initial If true, the callback will be called immediately with the current state.
+     */
+    subscribe: (fn: (newValue: T) => any, initial?: boolean) => any;
     unsubscribe: (fn: (newValue: T) => any) => any;
     setValue: (newValue: T | ((oldValue: T) => T), flush?: boolean) => any;
 };

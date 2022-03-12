@@ -7,7 +7,7 @@ import { Calendar as BigCalendar, DateLocalizer, momentLocalizer, stringOrDate, 
 import moment from 'moment';
 import {} from 'lodash';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
-import { TabContext } from '../../utils';
+import { isValidHttpUrl, TabContext } from '../../utils';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { CalendarViewEvent, TodoUni, CalendarEventUni, JournalUni, DatedObject } from './calendar-types';
@@ -30,16 +30,27 @@ const CalendarColor = ({ data, inline }: any) => {
 };
 
 const CalendarEventBig = ({ data, callbacks }: any) => {
+    const loc = data.get('location').as('primitive');
+
     return (
         <div style={{ display: 'flex' }}>
             {CalendarColor({ data, callbacks })}
             <div>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
                     <Typography variant="body1" style={{ marginRight: '8px' }}>
                         <strong>{data.get('name').as('primitive')}</strong>
                     </Typography>
-                    <Typography variant="body2" style={{ color: 'gray' }}>
-                        {data.get('location').as('primitive')}
+                    <Typography
+                        variant="body2"
+                        sx={{
+                            color: 'gray',
+                            '&:hover': isValidHttpUrl(loc) ? { textDecoration: 'underline', cursor: 'pointer' } : {},
+                        }}
+                        onClick={() => {
+                            if (isValidHttpUrl(loc)) window.open(loc, '_blank');
+                        }}
+                    >
+                        {loc}
                     </Typography>
                 </div>
                 <AutoDynamicView

@@ -84,7 +84,7 @@ import { addNotification } from './notifications';
 import { perfLogAfterDbTransaction, perfLogStartDbTransaction, perfLogStartPreprocessing } from './logging';
 import { createPackageCache, addUnigraphPackage, disablePackage, enablePackage } from './packageManager';
 
-const PORT = 3001;
+const PORT = 4002;
 const PORT_HTTP = 4001;
 const verbose = 5;
 

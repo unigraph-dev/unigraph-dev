@@ -72,7 +72,7 @@ yarn electron-start
 >- `killall dgraph` to kill all running `dgraph` processes, then
 >- remove `p/`, `w/`, `zw/` in your data directory (by default `/opt/unigraph`)
 
-> Server initialization is successful upon `unigraph> Unigraph server listening on port 3001` and announcing upserts.
+> Server initialization is successful upon `unigraph> Unigraph server listening on port 4002` and announcing upserts.
 
 
 **5)** If you want to use third-party API integrations, consult the **"**API Keys**"** section below.

@@ -10,11 +10,12 @@ export function TwitterSettings() {
     const [loaded, setLoaded] = React.useState(false);
     const [lists, setLists] = React.useState([]);
     const [account, setAccount] = React.useState<any>({});
-    const subscriptions = account?._value?.subscriptions['_value['].map((it: any) => ({
-        uid: it._value.uid,
-        name: it._value._value.name['_value.%'],
-        last_id_fetched: it._value._value.last_id_fetched['_value.%'],
-    }));
+    const subscriptions =
+        account?._value?.subscriptions?.['_value[']?.map((it: any) => ({
+            uid: it._value.uid,
+            name: it._value._value.name['_value.%'],
+            last_id_fetched: it._value._value.last_id_fetched['_value.%'],
+        })) || [];
     const tabContext = React.useContext(TabContext);
     useEffectOnce(() => {
         window.unigraph.ensurePackage('unigraph.twitter', twitterPackage).then(() => setLoaded(true));

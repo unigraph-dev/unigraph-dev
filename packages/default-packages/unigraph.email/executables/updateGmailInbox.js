@@ -22,6 +22,9 @@ const accounts = (
                 }
                 name { <_value.%> }
                 username { <_value.%> }
+                access_token { <_value.%> }
+                token_expires_in { <_value.%dt> }
+                refresh_token { <_value.%> }
             }
         } var(func: eq(<unigraph.id>, "$/schema/internet_account")) {
             <~type> { parAcc as uid }
