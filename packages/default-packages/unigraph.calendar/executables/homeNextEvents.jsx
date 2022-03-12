@@ -45,48 +45,47 @@ var(func: uid(frames)) {
     };
 }, []);
 
+const groupByTimeframe = React.useCallback((els) => {
+    els = buildGraph(els);
+    const groups = {};
+    groups[Sugar.Date.medium(new Date())] = [];
+    els.filter((el) => el.type['unigraph.id'] === '$/schema/time_frame').forEach((el) => {
+        const dd = Sugar.Date.medium(new Date(new UnigraphObject(el).get('start/datetime').as('primitive')));
+        if (groups[dd]) groups[dd].push(el);
+        else groups[dd] = [el];
+    });
+    // 2. Go through groups and find all entities associated with these timeframes
+    const finalGroups = [];
+    Object.entries(groups)
+        .sort((a, b) => Sugar.Date.create(a[0]).getTime() - Sugar.Date.create(b[0]).getTime())
+        .map(([key, value]) => {
+            const insert = { name: key, items: [] };
+            value
+                .sort(
+                    (a, b) =>
+                        Sugar.Date.create(
+                            new Date(new UnigraphObject(a).get('start/datetime').as('primitive')),
+                        ).getTime() -
+                        Sugar.Date.create(
+                            new Date(new UnigraphObject(b).get('start/datetime').as('primitive')),
+                        ).getTime(),
+                )
+                .map((val) => {
+                    els.filter((el) => el.type['unigraph.id'] !== '$/schema/time_frame').forEach((el) => {
+                        if (JSON.stringify(unpad(el, false)).includes(val._value.uid)) insert.items.push(el);
+                    });
+                });
+            finalGroups.push(insert);
+        });
+    return finalGroups;
+}, []);
+
 return (
     <DynamicObjectListView
         items={events}
         groupBy="time_frame"
         groupers={{
-            time_frame: (els) => {
-                els = buildGraph(els);
-                const groups = {};
-                groups[Sugar.Date.medium(new Date())] = [];
-                els.filter((el) => el.type['unigraph.id'] === '$/schema/time_frame').forEach((el) => {
-                    const dd = Sugar.Date.medium(
-                        new Date(new UnigraphObject(el).get('start/datetime').as('primitive')),
-                    );
-                    if (groups[dd]) groups[dd].push(el);
-                    else groups[dd] = [el];
-                });
-                // 2. Go through groups and find all entities associated with these timeframes
-                const finalGroups = [];
-                Object.entries(groups)
-                    .sort((a, b) => Sugar.Date.create(a[0]).getTime() - Sugar.Date.create(b[0]).getTime())
-                    .map(([key, value]) => {
-                        const insert = { name: key, items: [] };
-                        value
-                            .sort(
-                                (a, b) =>
-                                    Sugar.Date.create(
-                                        new Date(new UnigraphObject(a).get('start/datetime').as('primitive')),
-                                    ).getTime() -
-                                    Sugar.Date.create(
-                                        new Date(new UnigraphObject(b).get('start/datetime').as('primitive')),
-                                    ).getTime(),
-                            )
-                            .map((val) => {
-                                els.filter((el) => el.type['unigraph.id'] !== '$/schema/time_frame').forEach((el) => {
-                                    if (JSON.stringify(unpad(el, false)).includes(val._value.uid))
-                                        insert.items.push(el);
-                                });
-                            });
-                        finalGroups.push(insert);
-                    });
-                return finalGroups;
-            },
+            time_frame: groupByTimeframe,
         }}
         callbacks={{ noDate: true }}
         context={null}
