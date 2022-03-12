@@ -84,6 +84,12 @@
                         "package": "@mui/material",
                         "import": "Button",
                         "as": "Button"
+                    },
+                    {
+                        "env": "npm",
+                        "package": "@mui/material",
+                        "import": "Typography",
+                        "as": "Typography"
                     }
                 ]
             },
@@ -135,6 +141,12 @@
                         "package": "@mui/material",
                         "import": "Grid",
                         "as": "Grid"
+                    },
+                    {
+                        "env": "npm",
+                        "package": "@mui/material",
+                        "import": "Avatar",
+                        "as": "Avatar"
                     }
                 ]
             }
