@@ -1,6 +1,6 @@
 {
     "displayName": "Unigraph CoreUser",
-    "version": "0.2.4",
+    "version": "0.2.5",
     "description": "Provides core utilities for enhancing the user experience.",
     "name": "unigraph.coreuser",
     "unigraph": {

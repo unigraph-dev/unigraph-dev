@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.5](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.4...v0.2.5) (2022-03-13)
+
+
+### Bug Fixes
+
+* **contacts:** Make contacts more approachable ([409e605](https://github.com/unigraph-dev/unigraph-dev/commit/409e60507ff82a19fca43f69f45826c0c4ba8be6))
+
+
+### Features
+
+* **contacts:** improve list an detailed view ([17752fb](https://github.com/unigraph-dev/unigraph-dev/commit/17752fb9f7b720334ecca956e0add583289e7398))
+* **readSomethingNew:** link to lists ([9a0a09a](https://github.com/unigraph-dev/unigraph-dev/commit/9a0a09a89dc4e042b6b0430578e71a87ca1d3c16))
+* **todo:** hide tags w 0 todos ([efc561f](https://github.com/unigraph-dev/unigraph-dev/commit/efc561fd6c99d9d7a8347f8ecc8e15f223fc3ad8))
+
+
+
+
+
 ## [0.2.4](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.3...v0.2.4) (2022-03-13)
 
 
