@@ -73,7 +73,7 @@ function AdderComponent({ input, setInput, open, setClose, callback, summonerToo
                 style={{
                     width: '100%',
                     borderRadius: '4px',
-                    backgroundColor: '#fafafa',
+                    backgroundColor: 'whitesmoke',
                     padding: '8px',
                     margin: '0px, -4px',
                 }}
@@ -284,7 +284,7 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
                     width: '100%',
                     padding: '4px',
                     borderRadius: '4px',
-                    backgroundColor: '#fafafa',
+                    backgroundColor: 'whitesmoke',
                     margin: '0px, -4px',
                 }}
                 value={input}
@@ -312,7 +312,7 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
                     ? finalCommands.map((el) => (
                           <div
                               style={{
-                                  backgroundColor: el.index === selectedIndex ? 'whitesmoke' : '',
+                                  backgroundColor: el.index === selectedIndex ? '#e8e8e8' : '',
                                   padding: '4px',
                                   borderRadius: '4px',
                               }}
