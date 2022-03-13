@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.4](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.3...v0.2.4) (2022-03-13)
+
+
+### Bug Fixes
+
+* editor issues, todo interop, and home screen updating ([b7571c0](https://github.com/unigraph-dev/unigraph-dev/commit/b7571c0607f4e507f29b432a6b3932b2e55c1874))
+* **editor:** unindenting issues ([3cc4ede](https://github.com/unigraph-dev/unigraph-dev/commit/3cc4ede583cdc41bb460261a102e8d01840088e8))
+* **packages:** don't hide hidden packages ([f3908d8](https://github.com/unigraph-dev/unigraph-dev/commit/f3908d8cdc413f78c38934929cf54c335ff250d0))
+* **packages:** invert checkbox state ([b3f55d8](https://github.com/unigraph-dev/unigraph-dev/commit/b3f55d855e72a37539a25b1a33f89216649da13b))
+* search bar styling enhancement, editable backlinks ([6de3006](https://github.com/unigraph-dev/unigraph-dev/commit/6de30067eb75c4f3a3c486a6600e1aa4f135fd46))
+* **styling:** text field and todo list styling ([dcf8b54](https://github.com/unigraph-dev/unigraph-dev/commit/dcf8b5490ba58899647dcee0d182660c7458b24d))
+
+
+
+
+
 ## [0.2.3](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.2...v0.2.3) (2022-03-11)
 
 

@@ -1,6 +1,6 @@
 {
     "displayName": "Twitter subscriptions",
-    "version": "0.2.3",
+    "version": "0.2.4",
     "description": "Subscribe to your Twitter updates.",
     "name": "unigraph.twitter",
     "unigraph": {

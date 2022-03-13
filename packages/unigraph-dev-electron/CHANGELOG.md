@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.4](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.3...v0.2.4) (2022-03-13)
+
+
+### Bug Fixes
+
+* **electron:** force kill all children on windows ([e36a4f9](https://github.com/unigraph-dev/unigraph-dev/commit/e36a4f90063ddc6fdea83bdaad0f7be82079c502))
+
+
+
+
+
 ## [0.2.3](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.2...v0.2.3) (2022-03-11)
 
 
