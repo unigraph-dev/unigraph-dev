@@ -1,6 +1,6 @@
 {
     "displayName": "Executables",
-    "version": "0.2.3",
+    "version": "0.2.4",
     "description": "Example executables",
     "name": "unigraph.execexample",
     "unigraph": {

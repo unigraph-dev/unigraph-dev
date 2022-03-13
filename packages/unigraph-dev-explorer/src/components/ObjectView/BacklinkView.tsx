@@ -1,5 +1,6 @@
 import React from 'react';
 import { useEffectOnce } from 'react-use';
+import { noteQueryDetailed } from '../../examples/notes/noteQuery';
 import { TabContext } from '../../utils';
 import { DynamicObjectListView } from './DynamicObjectListView';
 
@@ -68,7 +69,17 @@ export function BacklinkView({
                     );
                 }
             }}
+            callbacks={{ ...callbacks, isBacklink: true }}
             noRemover
+            viewOptions={(object: any) => {
+                if (object?.type?.['unigraph.id'] === '$/schema/note_block') {
+                    return {
+                        noClickthrough: true,
+                        noBacklink: true,
+                    };
+                }
+                return {};
+            }}
             {...attributes}
         />
     );

@@ -175,7 +175,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                 }
                 // last caret might be coming from a longer line, or as -1
                 caret = caret || _.min([_.max([focusedState2.caret, 0]), getCurrentText().length]);
-                console.log(caret, getCurrentText(), focusedState2);
+                console.log(focused, caret, getCurrentText(), focusedState2);
                 setCaret(document, textInputRef.current, caret);
             };
             if (!isEditing) {
@@ -314,6 +314,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                 if (!edited.current) edited.current = true;
                 checkReferences();
                 inputDebounced.current(ev.target.value);
+                setFocusedCaret(textInputRef.current);
             }
         },
         [checkReferences, pullText()],
@@ -453,8 +454,9 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
             switch (ev.key) {
                 case 'a': // "a" key
                     if (
-                        ev.ctrlKey ||
-                        (ev.metaKey && caret === 0 && textInputRef.current.selectionEnd === getCurrentText().length)
+                        (ev.ctrlKey || ev.metaKey) &&
+                        caret === 0 &&
+                        textInputRef.current.selectionEnd === getCurrentText().length
                     ) {
                         ev.preventDefault();
                         selectUid(componentId);
@@ -484,7 +486,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                     if (!ev.shiftKey && !ev.ctrlKey && !ev.metaKey) {
                         ev.preventDefault();
                         edited.current = false;
-                        inputDebounced.current.flush();
+                        inputDebounced.current.cancel();
                         const currentText = getCurrentText() || pullText();
                         callbacks['split-child']?.(currentText, caret);
                         // setCurrentText(currentText.slice(caret));

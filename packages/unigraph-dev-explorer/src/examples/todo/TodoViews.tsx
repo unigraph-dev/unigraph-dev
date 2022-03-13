@@ -298,7 +298,9 @@ const TodoMenuSidebarItem = ({ iconPath, text, onClick, selected, getCountQuery,
         <ListItem sx={pointerHoverSx} onClick={onClick} selected={selected}>
             <ListItemIcon>{iconPath && <Icon path={iconPath as string} size={1} />}</ListItemIcon>
             <ListItemText primary={text} />
-            {itemCount && <ListItemText primary={itemCount} sx={{ textAlign: 'right', marginLeft: '4px' }} />}
+            {typeof itemCount === 'number' && (
+                <ListItemText primary={itemCount} sx={{ textAlign: 'right', marginLeft: '8px' }} />
+            )}
         </ListItem>
     );
 };
@@ -391,6 +393,7 @@ export const TodoMenuSidebar = ({ mode, setMode, todoViews, setTodoViews, todoLi
                 width: '100%',
                 height: '100%',
                 overflow: 'auto',
+                minWidth: '280px',
                 flexShrink: 0,
             }}
         >

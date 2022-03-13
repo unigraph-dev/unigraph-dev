@@ -70,7 +70,13 @@ function AdderComponent({ input, setInput, open, setClose, callback, summonerToo
     return (
         <div>
             <InputBase
-                style={{ width: '100%' }}
+                style={{
+                    width: '100%',
+                    borderRadius: '4px',
+                    backgroundColor: 'whitesmoke',
+                    padding: '8px',
+                    margin: '0px, -4px',
+                }}
                 inputRef={tf}
                 value={input}
                 onChange={(ev) => {
@@ -240,7 +246,7 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
     const search = React.useMemo(
         () =>
             _.debounce((newQuery) => {
-                if (newQuery.length) {
+                if (newQuery.length && !newQuery.startsWith('+')) {
                     window.unigraph
                         .getSearchResults(parseQuery(newQuery) as any, 'metadata', 2, {
                             noPrimitives: true,
@@ -274,7 +280,13 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
             <InputBase
                 inputRef={tf}
                 autoFocus
-                style={{ width: '100%' }}
+                style={{
+                    width: '100%',
+                    padding: '4px',
+                    borderRadius: '4px',
+                    backgroundColor: 'whitesmoke',
+                    margin: '0px, -4px',
+                }}
                 value={input}
                 onChange={(ev) => {
                     setInput(ev.target.value);
@@ -291,7 +303,7 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
                     ev.preventDefault();
                     ev.stopPropagation();
                 }}
-                placeholder="Enter: +<type shortname> to create; ?<search query> to search; <command> to execute command"
+                placeholder="Start typing to search, Arrow keys to navigate, and Enter to select."
             />
             <div>
                 {summonerTooltip ? <Typography>{summonerTooltip}</Typography> : []}
@@ -300,9 +312,9 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
                     ? finalCommands.map((el) => (
                           <div
                               style={{
-                                  backgroundColor: el.index === selectedIndex ? 'whitesmoke' : '',
+                                  backgroundColor: el.index === selectedIndex ? '#e8e8e8' : '',
                                   padding: '4px',
-                                  borderRadius: '8px',
+                                  borderRadius: '4px',
                               }}
                               id={`omnibarItem_${el.index === selectedIndex ? 'current' : ''}`}
                               onClickCapture={(ev: any) => {
@@ -413,7 +425,7 @@ export function SearchOverlayPopover({ open, setClose, noShadow }: any) {
                 maxHeight: '60%',
                 overflow: 'auto',
                 padding: '16px',
-                borderRadius: '16px',
+                borderRadius: '8px',
                 display: searchEnabled ? 'block' : 'none',
             }}
         >

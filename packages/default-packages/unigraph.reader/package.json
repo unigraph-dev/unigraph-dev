@@ -1,6 +1,6 @@
 {
     "displayName": "Unigraph Reader",
-    "version": "0.2.3",
+    "version": "0.2.4",
     "description": "Read articles and PDFs with style and efficiency.",
     "name": "unigraph.reader",
     "unigraph": {

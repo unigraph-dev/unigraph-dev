@@ -116,6 +116,7 @@ function DynamicListItem({
     removeOnEnter,
     compact,
     itemStyle,
+    viewOptions,
 }: any) {
     const [itemHovered, setItemHovered] = React.useState<boolean>(false);
     const isRemoverActive = React.useCallback(() => {
@@ -132,7 +133,7 @@ function DynamicListItem({
             onMouseLeave={() => setItemHovered(false)}
         >
             <AutoDynamicView
-                options={{ compact }}
+                options={{ ...(typeof viewOptions === 'function' ? viewOptions(item) : viewOptions), compact }}
                 object={new UnigraphObject(item)}
                 components={components}
                 callbacks={{
@@ -203,6 +204,7 @@ export type DynamicObjectListViewProps = {
     style?: any;
     components?: any;
     initialTab?: string;
+    viewOptions?: any;
 };
 
 function DynamicListBasic({
@@ -220,6 +222,7 @@ function DynamicListBasic({
     removeOnEnter,
     components,
     itemStyle,
+    viewOptions,
 }: any) {
     const tabContext = React.useContext(TabContext);
     return (
@@ -247,6 +250,7 @@ function DynamicListBasic({
                     noRemover={noRemover}
                     removeOnEnter={removeOnEnter}
                     components={components}
+                    viewOptions={viewOptions}
                 />
             ))}
         </DragandDrop>
@@ -270,6 +274,7 @@ function DynamicList({
     removeOnEnter,
     components,
     itemStyle,
+    viewOptions,
 }: any) {
     const tabContext = React.useContext(TabContext);
     const [loadedItems, setLoadedItems] = React.useState<any[]>([]);
@@ -352,6 +357,7 @@ function DynamicList({
                         noRemover={noRemover}
                         removeOnEnter={removeOnEnter}
                         components={components}
+                        viewOptions={viewOptions}
                     />
                 ))}
             </DragandDrop>
@@ -468,6 +474,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
     components,
     itemAdder,
     initialTab,
+    viewOptions,
 }) => {
     const tabContext = React.useContext(TabContext);
 
@@ -722,6 +729,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                               subscribeOptions,
                               removeOnEnter,
                               components,
+                              viewOptions,
                           })
                         : groupers[groupBy](procItems.map(itemGetter)).map((el: Group) => (
                               <>
@@ -750,6 +758,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                       subscribeOptions,
                                       removeOnEnter,
                                       components,
+                                      viewOptions,
                                   })}
                               </>
                           ))}

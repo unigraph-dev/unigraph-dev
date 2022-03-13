@@ -16,6 +16,18 @@ export function HomeSection({ data }: any) {
     const tabContext = React.useContext(TabContext);
 
     React.useEffect(() => {
+        const fn = (newId: string) => {
+            if (newId === 'home') setFlushCondition(true);
+        };
+
+        window.unigraph.getState('global/activeTab').subscribe(fn);
+
+        return () => {
+            window.unigraph.getState('global/activeTab').unsubscribe(fn);
+        };
+    }, []);
+
+    React.useEffect(() => {
         const shouldRender = () => {
             if (tabContext.isVisible()) {
                 window.unigraph.runExecutable(data.get('condition')._value.uid, {}).then((ret: any) => {
@@ -24,7 +36,7 @@ export function HomeSection({ data }: any) {
                 });
             }
         };
-        const int = setInterval(shouldRender, 180000);
+        const int = setInterval(shouldRender, 1000 * 60);
         if (flushCondition) {
             shouldRender();
             setFlushCondition(false);

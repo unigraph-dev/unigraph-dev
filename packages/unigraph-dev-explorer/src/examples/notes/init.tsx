@@ -10,13 +10,19 @@ import {
 } from '../../unigraph-react';
 import { contextMenuItemStyle } from '../../utils';
 import { setChildrenDisplayAs } from './commands';
-import { DetailedNoteBlock } from './NoteBlock';
+import { DetailedNoteBlock, ReferenceNoteView } from './NoteBlock';
 import { NoteBlock } from './NoteBlockViews';
 import { noteQuery, noteQueryDetailed, journalQuery, journalQueryDetailed } from './noteQuery';
 
 export const init = () => {
     registerDynamicViews({
-        '$/schema/note_block': { view: NoteBlock, query: noteQuery, options: { noSubentities: true } },
+        '$/schema/note_block': {
+            view: (props: any) => (props?.callbacks?.isBacklink ? ReferenceNoteView(props) : NoteBlock(props)),
+            query: noteQuery,
+            options: {
+                noSubentities: true,
+            },
+        },
     });
     registerDetailedDynamicViews({
         '$/schema/note_block': {

@@ -1,6 +1,7 @@
 /* eslint-disable no-plusplus */
 import _ from 'lodash';
 import { buildUnigraphEntity, byElementIndex, clearEmpties } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { dfs, removeAllPropsFromObj } from '../../utils';
 import { parseTodoObject } from '../todo/parseTodoObject';
 import { NoteEditorContext } from './types';
@@ -940,7 +941,7 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
                     _index: { '_value.#i': curr._index['_value.#i'] + index.length },
                     _key: curr._key,
                     _value: {
-                        uid: curr._value.uid,
+                        uid: curr._value?.uid,
                     },
                 },
             ];
@@ -950,7 +951,7 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
                 _index: { uid: curr._index?.uid, '_value.#i': curr._index['_value.#i'] },
                 _key: curr._key,
                 _value: {
-                    uid: curr._value.uid,
+                    uid: curr._value?.uid,
                 },
             },
         ];
@@ -995,6 +996,7 @@ export const getLastDFSNode = (data: any, context: NoteEditorContext) => {
     const orderedNodes = dfs(context.nodesState.value).filter((el) =>
         ['$/schema/note_block', '$/schema/embed_block'].includes((el as any).type),
     );
+    console.log(orderedNodes);
     const newIndex = orderedNodes.findIndex((el) => el.uid === data.uid) - 1;
     if (orderedNodes[newIndex] && !orderedNodes[newIndex].root) return orderedNodes[newIndex];
     return { uid: '' };
@@ -1058,12 +1060,14 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
             };
             if (!textIt.length) textIt = el._value._value._value.text._value._value['_value.%'];
             refs.push(
-                ...(el._value._value._value?.children?.['_value[']
-                    ?.filter?.((it: any) => it._key)
-                    .map((ell: any) => ({
-                        key: ell._key.slice(2, -2),
-                        value: ell._value._value.uid,
-                    })) || []),
+                ...(
+                    el._value._value._value?.children?.['_value[']
+                        ?.filter?.((it: any) => it._key)
+                        .map((ell: any) => ({
+                            key: ell._key.slice(2, -2),
+                            value: ell._value?._value?.uid,
+                        })) || []
+                ).filter((it: any) => it.value),
             );
             return [...prev, newel];
         }
@@ -1071,7 +1075,7 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
     }, []);
     // console.log(textIt, newChildren, )
     if (todoUid) return;
-    const schemas = await window.unigraph.getSchemas();
+    const schemas = (window.unigraph as any).getSchemaMap();
     const todoObj = parseTodoObject(textIt, refs);
     todoObj.uid = window.unigraph.leaseUid?.();
     clearEmpties(todoObj);
@@ -1095,15 +1099,21 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
         },
     ]);
 
+    const eventId = getRandomInt();
+
     // send fake update now
-    window.unigraph.sendFakeUpdate?.(context.callbacks.subsId, {
-        uid: data?._value?.uid,
-        children: {
-            _displayAs: data?._value?.children?._displayAs,
-            '_value[': newChildren,
-            uid: window.unigraph.leaseUid?.(),
+    window.unigraph.sendFakeUpdate?.(
+        context.callbacks.subsId,
+        {
+            uid: data?._value?.uid,
+            children: {
+                _displayAs: data?._value?.children?._displayAs,
+                '_value[': newChildren,
+                uid: window.unigraph.leaseUid?.(),
+            },
         },
-    });
+        eventId,
+    );
 
     const focusedState = window.unigraph.getState('global/focused');
     focusedState.setValue({ ...focusedState.value, component: undefined });
@@ -1118,6 +1128,8 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
         false,
         context.callbacks.subsId,
         parents,
+        undefined,
+        eventId,
     );
     window.unigraph.touch(parents.map((el) => el.uid));
 };
