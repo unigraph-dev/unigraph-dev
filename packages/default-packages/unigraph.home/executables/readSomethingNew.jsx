@@ -28,7 +28,35 @@ React.useEffect(() => {
 
 return (
     <div>
-        <Typography>You have {count['$/entity/feeds'].toString()} items in your feeds.</Typography>
-        <Typography>You have {count['$/entity/read_later'].toString()} items in your read later feed.</Typography>
+        <div>
+            <Typography style={{ display: 'inline-block' }}>
+                You have {count['$/entity/feeds'].toString()} items in your{' '}
+            </Typography>{' '}
+            <Typography
+                style={{ display: 'inline-block', fontWeight: 'bold', cursor: 'pointer' }}
+                onClick={() => window.wsnavigator('/feeds')}
+            >
+                feeds.
+            </Typography>
+        </div>
+        <div>
+            <Typography style={{ display: 'inline-block' }}>
+                You have {count['$/entity/read_later'].toString()} items in your
+            </Typography>{' '}
+            <Typography
+                style={{ display: 'inline-block', fontWeight: 'bold', cursor: 'pointer' }}
+                onClick={() =>
+                    window.wsnavigator(
+                        `/library/object?uid=${
+                            window.unigraph.getNamespaceMap()['$/entity/read_later'].uid
+                        }&viewer=${'dynamic-view-detailed'}&type=${
+                            window.unigraph.getNamespaceMap()['$/entity/read_later'].uid['unigraph.id']
+                        }`,
+                    )
+                }
+            >
+                read later feed.
+            </Typography>
+        </div>
     </div>
 );
