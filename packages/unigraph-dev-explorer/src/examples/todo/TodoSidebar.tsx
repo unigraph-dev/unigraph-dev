@@ -128,7 +128,7 @@ const TodoMenuSidebarItem = ({ iconPath, text, onClick, selected, itemCount, not
         <ListItem sx={!notDefaultView ? pointerHoverSx : {}} onClick={onClick} selected={selected}>
             <ListItemIcon>{iconPath && <Icon path={iconPath as string} size={1} />}</ListItemIcon>
             <ListItemText primary={text} />
-            {typeof itemCount === 'number' && (
+            {typeof itemCount === 'number' && itemCount > 0 && (
                 <ListItemText primary={itemCount} sx={{ textAlign: 'right', marginLeft: '8px' }} />
             )}
         </ListItem>
