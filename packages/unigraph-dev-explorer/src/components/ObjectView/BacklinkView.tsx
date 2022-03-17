@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useEffectOnce } from 'react-use';
+import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import { Actions } from 'flexlayout-react';
 import { noteQueryDetailed } from '../../examples/notes/noteQuery';
-import { TabContext } from '../../utils';
+import { TabContext, useNameTab } from '../../utils';
 import { DynamicObjectListView } from './DynamicObjectListView';
 
 const getQuery = (uid: string, forward?: boolean) => `(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted))) {
@@ -28,6 +30,7 @@ export function BacklinkView({
 }: any) {
     const [objects, setObjects]: [any[], any] = React.useState([]);
     const [id, setId] = React.useState(Date.now());
+    useNameTab('Backlinks: ', uid);
     if (callbacks?.isEmbed) hideHeader = true;
 
     const tabContext = React.useContext(TabContext);
