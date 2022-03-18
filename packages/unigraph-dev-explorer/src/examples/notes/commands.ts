@@ -395,6 +395,7 @@ export const deleteChildren = (data: any, context: NoteEditorContext, index: num
     let currSubentity = -1;
     let deleted = 0;
     const parents = getParents(data);
+    if (!data._hide) parents.push({ uid: data.uid });
     const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
     const toDel: any[] = [];
     const newChildren = children?.reduce((prev: any[], el: any, elindex: any) => {
@@ -450,7 +451,7 @@ export const deleteChildren = (data: any, context: NoteEditorContext, index: num
             }
         });
     }, 1000);
-    window.unigraph.touch(getParents(data).map((ell) => ell.uid));
+    window.unigraph.touch(parents.map((ell) => ell.uid));
 };
 
 export const unsplitChild = async (data: any, context: NoteEditorContext, index: number, currString: string) => {
