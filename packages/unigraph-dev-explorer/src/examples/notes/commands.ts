@@ -171,6 +171,7 @@ export const addChildren = (
         !uidMode,
     );
     focusUid(myUid, false, -1);
+    window.unigraph.touch(parents.map((el) => el.uid));
 };
 
 export const splitChild = (data: any, context: NoteEditorContext, index: number, oldtext: string, at: number) => {
