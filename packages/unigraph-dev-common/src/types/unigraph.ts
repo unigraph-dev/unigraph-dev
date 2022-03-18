@@ -458,5 +458,11 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param subId Subscription ID.
      */
     getDataFromSubscription?(subId: any): any;
+
+    // Syncing Unigraph changes
+
+    startSyncListen(resource: string, key: string): any;
+    updateSyncResource(resource: string, uids: string[]): any;
+    acknowledgeSync(resource: string, key: string, uids: any[]): any;
 }
 /** End of unigraph interface */ // Don't remove this line - needed for Monaco to work

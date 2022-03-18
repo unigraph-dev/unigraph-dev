@@ -358,3 +358,28 @@ declare type EventAddBacklinks = {
     fromUids: string[];
     toUids: string[];
 };
+
+declare type EventStartSyncListen = {
+    type: 'event';
+    event: 'start_sync_listen';
+    id: number;
+    resource: string;
+    key: string;
+};
+
+declare type EventUpdateSyncResource = {
+    type: 'event';
+    event: 'update_sync_resource';
+    id: number;
+    resource: string;
+    uids: string[];
+}
+
+declare type EventAcknowledgeSync = {
+    type: 'event';
+    event: 'acknowledge_sync';
+    id: number;
+    resource: string;
+    key: string;
+    uids: string[];
+}

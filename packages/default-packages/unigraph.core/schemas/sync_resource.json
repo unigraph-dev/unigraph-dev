@@ -1,0 +1,45 @@
+{
+    "dgraph.type": "Type",
+    "_name": "Sync resource",
+    "_definition": {
+        "type": { "unigraph.id": "$/composer/Object" },
+        "_parameters": {
+            "_indexedBy": { "unigraph.id": "$/primitive/string" }
+        },
+        "_properties": [
+            {
+                "_key": "name",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                },
+                "_indexAs": "name"
+            },
+            {
+                "_key": "initializer",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/executable" }
+                }
+            },
+            {
+                "_key": "pending_uids",
+                "_definition": {
+                    "type": {
+                        "unigraph.id": "$/composer/Array"
+                    },
+                    "_parameters": {
+                        "_element": {
+                            "type": {
+                                "unigraph.id": "$/composer/Array"
+                            },
+                            "_parameters": {
+                                "_element": {
+                                    "type": { "unigraph.id": "$/schema/any" }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        ]
+    }
+}

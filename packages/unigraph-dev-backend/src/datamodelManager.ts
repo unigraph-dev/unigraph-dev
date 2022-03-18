@@ -74,7 +74,7 @@ export async function checkOrCreateDefaultDataModel(client: DgraphClient) {
         const tempSchemaCache = createSchemaCache(client);
         const packageList = Object.fromEntries(defaultPackages.map((el: any) => [el.pkgManifest.package_name, el]));
         const pkgsToUpdate = pkgVersions
-            .filter((it: any) => packageList[it.pkgName]?.pkgManifest.version !== it.version)
+            .filter((it: any) => packageList[it.pkgName] && packageList[it.pkgName]?.pkgManifest.version !== it.version)
             .map((it: any) => packageList[it.pkgName]);
         for (let i = 0; i < pkgsToUpdate.length; i += 1) {
             await updatePackage(

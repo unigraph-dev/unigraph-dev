@@ -30,6 +30,7 @@ export type HookAfterObjectChangedParams = {
     caches: Record<string, Cache<any>>,
     subIds?: any[],
     ofUpdate?: any,
+    changedUids?: string[],
 }
 
 export async function initEntityHeads (states: any, schemas: string[], client: DgraphClient) {
@@ -63,4 +64,45 @@ export async function afterObjectCreatedHooks (states: any, hooks: Record<string
             Object.values(hooks)[index].forEach(it => it({uids: el}));
         }
     });
+}
+
+export function createUidListCache(
+    client: DgraphClient,
+): Cache<any> {
+    const cache: Cache<any> = {
+        data: {},
+        updateNow: async () => null,
+        cacheType: 'manual',
+        subscribe: (listener) => null,
+    };
+
+    cache.updateNow = async () => {
+        const newdata = await client.getUidLists();
+
+        cache.data = Object.fromEntries(
+            newdata.map((el: any) => ["$/"+el['unigraph.id'].split('/').slice(4).join('/'), (el['_value['] || []).map((it: any) => it._value.uid)])
+        );
+    };
+
+    cache.updateNow();
+
+    return cache;
+}
+
+export async function afterObjectUpdatedHooks (
+    states: any, 
+    hooks: Record<string, any[]>, 
+    client: DgraphClient, 
+    changedUids: string[],
+    uidLists: Record<string, string[]>
+) {
+    // console.log(hooks, changedUids, uidLists);
+    if (Object.keys(hooks).length === 0) return;
+    Object.keys(hooks).map((uidListName) => {
+        if (!hooks[uidListName]?.length) return;
+        const list = uidLists[uidListName];
+        const totalChangedUids = _.intersection(list, changedUids);
+        if (totalChangedUids.length === 0) return;
+        hooks[uidListName].forEach(it => it({uids: totalChangedUids}));
+    })
 }

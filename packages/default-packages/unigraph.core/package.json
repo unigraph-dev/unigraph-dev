@@ -10,6 +10,10 @@
                 "src": "schemas/list.json"
             },
             {
+                "id": "uid_list",
+                "src": "schemas/uid_list.json"
+            },
+            {
                 "id": "object_view",
                 "src": "schemas/object_view.json"
             },
@@ -36,6 +40,10 @@
             {
                 "id": "pinboard",
                 "src": "schemas/pinboard.json"
+            },
+            {
+                "id": "sync_resource",
+                "src": "schemas/sync_resource.json"
             }
         ],
         "executables": [
@@ -66,6 +74,13 @@
                 "src": "executables/deleteItemFromList.js",
                 "editable": true,
                 "name": "Deletes an item from a list object"
+            },
+            {
+                "id": "update-uid-list",
+                "env": "routine/js",
+                "src": "executables/updateUidList.js",
+                "editable": true,
+                "name": "Updates a uid_list object"
             }
         ]
     }
