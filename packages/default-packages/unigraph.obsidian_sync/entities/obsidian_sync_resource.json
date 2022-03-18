@@ -1,0 +1,10 @@
+{
+    "type": {
+        "unigraph.id": "$/schema/sync_resource"
+    },
+    "name": "Obsidian sync",
+    "initializer": {
+        "unigraph.id": "$./executable/initialize-obsidian-sync"
+    },
+    "pending_uids": []
+}
