@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 rm -rf packages/unigraph-dev-electron/buildweb
 rm -rf packages/unigraph-dev-electron/distnode
