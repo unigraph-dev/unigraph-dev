@@ -702,6 +702,33 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 ? buildGraph(subResults[subId])
                 : buildGraph([subResults[subId]])[0];
         },
+        startSyncListen: (resource, key) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success && response.results) resolve(response.results);
+                    else reject(response);
+                };
+                sendEvent(connection, 'start_sync_listen', { resource, key }, id);
+            }),
+        updateSyncResource: (resource, uids) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success && response.results) resolve(response.results);
+                    else reject(response);
+                };
+                sendEvent(connection, 'update_sync_resource', { resource, uids }, id);
+            }),
+        acknowledgeSync: (resource, key, uids) =>
+            new Promise((resolve, reject) => {
+                const id = getRandomInt();
+                callbacks[id] = (response: any) => {
+                    if (response.success && response.results) resolve(response.results);
+                    else reject(response);
+                };
+                sendEvent(connection, 'acknowledge_sync', { resource, key, uids }, id);
+            }),
     };
 
     return api;

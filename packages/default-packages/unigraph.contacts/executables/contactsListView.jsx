@@ -40,7 +40,12 @@ return (
             >
                 Email
             </TextField>
-            <Button onClick={() => unigraph.addObject({ emails: [newEmail], name: newName }, '$/schema/contact')}>
+            <Button
+                onClick={async () => {
+                    const uids = await unigraph.addObject({ emails: [newEmail], name: newName }, '$/schema/contact');
+                    unigraph.runExecutable('$/executable/migrate-person-to-contact', { uid: uids[0], email: newEmail });
+                }}
+            >
                 Add Contact
             </Button>
         </div>

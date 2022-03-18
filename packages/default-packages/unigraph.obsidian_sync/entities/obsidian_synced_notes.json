@@ -1,0 +1,6 @@
+{
+    "type": { "unigraph.id": "$/schema/uid_list" },
+    "dgraph.type": ["Entity", "Named"],
+    "uid": "_:entity_1",
+    "_value[": []
+}

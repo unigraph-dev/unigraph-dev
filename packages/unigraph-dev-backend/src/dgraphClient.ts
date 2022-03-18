@@ -136,6 +136,7 @@ export default class DgraphClient {
     !test ? true : console.log("Trying to create upsert....============================================")
     const txn = this.dgraphClient.newTxn();
     let response: dgraph.Response;
+    let updatedUids: string[] = [];
     if (!data.appends.length && !data.mutations.length && !data.queries.length) return [];
     try {
       const mutations: Mutation[] = [...data.mutations, ...data.appends].map((obj: any, index) => {
@@ -179,6 +180,10 @@ export default class DgraphClient {
         console.log(JSON.stringify(data, null, 4))
       }
       
+      updatedUids = response?.getMetrics()?.getNumUidsMap().toObject()
+        .map(obj => obj[0].startsWith('_u-') ? obj[0].slice(3) : undefined)
+        .filter(obj => obj) as string[];
+
     } catch (e) {
       console.error('Error: ', e);
     } finally {
@@ -187,7 +192,7 @@ export default class DgraphClient {
     /* eslint-disable */
     !test ? true : console.log("upsert details above================================================")
     //return ["0x" + getRandomInt().toString()];
-    return data.mutations.map((el, index) => {
+    return [data.mutations.map((el, index) => {
       let targetUid = `upsert${index}`;
       //console.log(el.uid, targetUid, response.getUidsMap(), response.getJson())
       if (el.uid) {
@@ -198,24 +203,29 @@ export default class DgraphClient {
         else targetUid = el.uid
       }
       return response.getUidsMap().get(targetUid)
-    });
+    }), updatedUids];
   }
 
   async createDgraphUpsert(data: {query: string | false, mutations: Mutation[]}) {
     const txn = this.dgraphClient.newTxn();
     let response;
+    let updatedUids: string[] = [];
     try {
       const req = new dgraph.Request();
       if (data.query) req.setQuery(data.query);
       req.setMutationsList(data.mutations);
       req.setCommitNow(true);
       response = await withLock(this.txnlock, 'txn', () => txn.doRequest(req));
+
+      updatedUids = response?.getMetrics()?.getNumUidsMap().toObject()
+        .map((obj: any) => obj[0].startsWith('_u-') ? obj[0].slice(3) : undefined)
+        .filter((obj: any) => obj) as string[];
     } catch (e) {
       console.error('Error: ', e);
     } finally {
       await txn.discard();
     }
-    return response;
+    return [response, updatedUids];
   }
 
   async deleteRelationbyJson(data: any) {
@@ -311,6 +321,24 @@ export default class DgraphClient {
         unigraph.id
         _definition
         expand(_userpredicate_)
+      }
+    }
+  `, {})
+  }
+
+  async getUidLists() {
+    return this.queryData<any[]>(`
+    query findByName() {
+      entities(func: uid(listChildren)) @filter(NOT eq(<_hide>, true)) {
+        unigraph.id
+        <_value[> {
+          <_value> {
+            uid
+          }
+        }
+      }
+      var(func: eq(<unigraph.id>, "$/schema/uid_list")) {
+        <~type> { listChildren as uid }
       }
     }
   `, {})

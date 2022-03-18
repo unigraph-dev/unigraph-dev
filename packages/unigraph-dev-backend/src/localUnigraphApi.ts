@@ -3,7 +3,7 @@
 
 /* eslint-disable default-param-last */
 /* eslint-disable max-len */
-import { buildGraph, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import { buildGraph, getCircularReplacer, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { Unigraph } from 'unigraph-dev-common/lib/types/unigraph';
 import {
     processAutorefUnigraphId,
@@ -19,6 +19,7 @@ import {
 import { insertsToUpsert } from 'unigraph-dev-common/lib/utils/txnWrapper';
 import dgraph from 'dgraph-js';
 import path from 'path';
+import stringify from 'json-stable-stringify';
 import { Subscription } from './custom.d';
 import DgraphClient, { UnigraphUpsert } from './dgraphClient';
 import { buildExecutable, ExecContext } from './executableManager';
@@ -136,11 +137,12 @@ export function getLocalUnigraphAPI(
             });
             // console.log(JSON.stringify(finalUnigraphObject, null, 4));
             const upsert = insertsToUpsert(finalUnigraphObjects, undefined, states.caches.schemas.dataAlt![0]);
-            const uids = await client.createUnigraphUpsert(upsert);
+            const [uids, changedUids] = await client.createUnigraphUpsert(upsert);
             callHooks(states.hooks, 'after_object_changed', {
                 subscriptions: states.subscriptions,
                 caches: states.caches,
                 subIds,
+                changedUids,
             });
             return uids;
         },
@@ -219,7 +221,7 @@ export function getLocalUnigraphAPI(
                 const updateTriplets = new dgraph.Mutation();
                 if (!isDelete) updateTriplets.setSetNquads(objects.join('\n'));
                 else updateTriplets.setDelNquads(objects.join('\n'));
-                const result = await client.createDgraphUpsert({
+                const [result, changedUids] = await client.createDgraphUpsert({
                     query: false,
                     mutations: [updateTriplets],
                 });
@@ -227,6 +229,7 @@ export function getLocalUnigraphAPI(
                     subscriptions: states.subscriptions,
                     caches: states.caches,
                     subIds,
+                    changedUids,
                 });
             }
         },
@@ -271,11 +274,12 @@ export function getLocalUnigraphAPI(
                 // console.log(finalUpdater, upsert)
                 const finalUpsert = insertsToUpsert([upsert], isUpsert, states.caches.schemas.dataAlt![0]);
                 // console.log(finalUpsert)
-                await client.createUnigraphUpsert(finalUpsert);
+                const [uids, changedUids] = await client.createUnigraphUpsert(finalUpsert);
                 callHooks(states.hooks, 'after_object_changed', {
                     subscriptions: states.subscriptions,
                     caches: states.caches,
                     subIds,
+                    changedUids,
                 });
             } catch (e) {
                 console.log(e, uid, newObject);
@@ -338,7 +342,7 @@ export function getLocalUnigraphAPI(
             const quads = newObject.map((el, index) => `<${el}> <_value.#i> "${index}" .\n`);
             const createJson = new dgraph.Mutation();
             createJson.setSetNquads(quads.join(''));
-            const result = await client.createDgraphUpsert({
+            const [result, changedUids] = await client.createDgraphUpsert({
                 query: false,
                 mutations: [createJson],
             });
@@ -347,10 +351,11 @@ export function getLocalUnigraphAPI(
                 subscriptions: states.subscriptions,
                 caches: states.caches,
                 subIds,
+                changedUids,
             });
             return result;
         },
-        deleteItemFromArray: async (uid, item, relUid, subIds) => {
+        deleteItemFromArray: async (uid, item, relUid, subIds, runHooks = true) => {
             const items = Array.isArray(item) ? item : [item];
             const query = `query { res(func: uid(${uid})) {
                 uid
@@ -395,7 +400,7 @@ export function getLocalUnigraphAPI(
             deleteArray.setDelNquads(toDel);
             const createJson = new dgraph.Mutation();
             createJson.setSetNquads(newValues.join('\n'));
-            const result = await client.createDgraphUpsert({
+            const [result, changedUids] = await client.createDgraphUpsert({
                 query: false,
                 mutations: [deleteArray, createJson],
             });
@@ -403,6 +408,7 @@ export function getLocalUnigraphAPI(
                 subscriptions: states.subscriptions,
                 caches: states.caches,
                 subIds,
+                changedUids: runHooks ? changedUids : undefined,
             });
             return result;
         },
@@ -536,9 +542,14 @@ export function getLocalUnigraphAPI(
             const quads = totalUids.map((uid) => `<${uid}> <_updatedAt> "${nowDateString}" .`);
             const updater = new dgraph.Mutation();
             updater.setSetNquads(quads.join('\n'));
-            const result = await client.createDgraphUpsert({
+            const [result, changedUids] = await client.createDgraphUpsert({
                 query: false,
                 mutations: [updater],
+            });
+            callHooks(states.hooks, 'after_object_changed', {
+                subscriptions: [],
+                caches: states.caches,
+                changedUids,
             });
             return result;
         },
@@ -558,13 +569,14 @@ export function getLocalUnigraphAPI(
             });
             const updater = new dgraph.Mutation();
             updater.setDelNquads(toDel.join('\n'));
-            const result = await client.createDgraphUpsert({
+            const [result, changedUids] = await client.createDgraphUpsert({
                 query: false,
                 mutations: [updater],
             });
             callHooks(states.hooks, 'after_object_changed', {
                 subscriptions: states.subscriptions,
                 caches: states.caches,
+                changedUids,
             });
             return result;
         },
@@ -577,15 +589,155 @@ export function getLocalUnigraphAPI(
             });
             const updater = new dgraph.Mutation();
             updater.setSetNquads(toAdd.join('\n'));
-            const result = await client.createDgraphUpsert({
+            const [result, changedUids] = await client.createDgraphUpsert({
                 query: false,
                 mutations: [updater],
             });
             callHooks(states.hooks, 'after_object_changed', {
                 subscriptions: states.subscriptions,
                 caches: states.caches,
+                changedUids,
             });
             return result;
+        },
+        startSyncListen: async (resource, key, sendable?: any) => {
+            const resUid = resource.startsWith('$/entity/') ? states.namespaceMap[resource]?.uid : resource;
+            if (!resUid.startsWith('0x')) throw new Error("Invalid resource uid or name - maybe it doesn't exist?");
+
+            // Get the resource first
+            const resObject = (
+                await client.queryDgraph(`query {
+                res(func: uid(${resUid})) {
+                    <_value> {
+                        uid
+                        <initializer> {
+                            <_value> {
+                                uid
+                            }
+                        }
+                        <pending_uids> {
+                            uid
+                            <_value[> @filter(eq(<_key>, "${key}")) {
+                                _key
+                                uid
+                                <_value[> {
+                                    <_value> {
+                                        uid
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }`)
+            )[0][0];
+            const thisKey = resObject._value.pending_uids?.['_value[']?.[0]?.uid;
+            let pendingUids;
+            if (!thisKey) {
+                const initialUids = await api.runExecutable(resObject._value.initializer?._value.uid, {} as any);
+                pendingUids = initialUids;
+                const m = new dgraph.Mutation();
+                m.setSetJson({
+                    uid: resObject._value.uid,
+                    pending_uids: {
+                        uid: resObject._value.pending_uids?.uid,
+                        '_value[': {
+                            _key: key,
+                            '_value[': initialUids.map((el: string[]) => ({ _value: { uid: el } })),
+                        },
+                    },
+                });
+                await client.createDgraphUpsert({
+                    query: false,
+                    mutations: [m],
+                });
+            } else {
+                pendingUids = (resObject._value.pending_uids?.['_value[']?.[0]?.['_value['] || []).map(
+                    (el: any) => el._value.uid,
+                );
+            }
+            const syncListeners: Record<string, any[]> = (states as any).websocketSyncListeners;
+            if (!syncListeners[resUid]) syncListeners[resUid] = [sendable];
+            else syncListeners[resUid].push(sendable);
+            if (pendingUids.length > 0)
+                sendable.send(
+                    stringify(
+                        {
+                            type: 'sync_updated',
+                            uid: resUid,
+                            result: pendingUids,
+                        },
+                        { replacer: getCircularReplacer() },
+                    ),
+                );
+        },
+        updateSyncResource: async (resource, uids) => {
+            const resUid = resource.startsWith('$/entity/') ? states.namespaceMap[resource]?.uid : resource;
+            if (!resUid.startsWith('0x')) throw new Error("Invalid resource uid or name - maybe it doesn't exist?");
+
+            (((states as any).websocketSyncListeners as Record<string, any[]>)[resUid] || []).map((el) =>
+                el.send(
+                    stringify(
+                        {
+                            type: 'sync_updated',
+                            uid: resUid,
+                            result: uids,
+                        },
+                        { replacer: getCircularReplacer() },
+                    ),
+                ),
+            );
+            // Get the resource first
+            const resObject = (
+                await client.queryDgraph(`query {
+                res(func: uid(${resUid})) {
+                    <_value> {
+                        <pending_uids> {
+                            <_value[> {
+                                uid
+                            }
+                        }
+                    }
+                }
+            }`)
+            )[0][0];
+            const allKeysUids = resObject._value.pending_uids?.['_value[']?.map((el: any) => el.uid) || [];
+            const allUpdates = allKeysUids.map((uid: string) => ({
+                uid,
+                '_value[': uids.map((el) => ({ _value: { uid: el } })),
+            }));
+            const [result, changedUids] = await client.createDgraphUpsert({
+                query: false,
+                mutations: allUpdates.map((el: any) => {
+                    const m = new dgraph.Mutation();
+                    m.setSetJson(el);
+                    return m;
+                }),
+            });
+            return result;
+        },
+        acknowledgeSync: async (resource, key, uids) => {
+            const resUid = resource.startsWith('$/entity/') ? states.namespaceMap[resource]?.uid : resource;
+            if (!resUid.startsWith('0x')) throw new Error("Invalid resource uid or name - maybe it doesn't exist?");
+
+            // Get the resource first
+            const resWithKey = (
+                await client.queryDgraph(`query {
+                res(func: uid(${resUid})) {
+                    <_value> {
+                        <pending_uids> {
+                            <_value[> @filter(eq(<_key>, "${key}")) {
+                                uid
+                            }
+                        }
+                    }
+                }
+            }`)
+            )[0][0];
+            const resKeyUid = resWithKey?._value?.pending_uids?.['_value[']?.[0]?.uid;
+            if (!resKeyUid) throw new Error('Invalid sync key - no changes made');
+            const deleter = (api.deleteItemFromArray as any)(resKeyUid, uids, resUid, [], false);
+            return deleter;
         },
     };
 

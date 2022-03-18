@@ -1,0 +1,35 @@
+{
+    "displayName": "Obsidian sync for Unigraph",
+    "version": "0.2.5",
+    "description": "Syncs your Unigraph notes with Obsidian",
+    "name": "unigraph.obsidian_sync",
+    "unigraph": {
+        "executables": [
+            {
+                "id": "obsidian-on-synced-notes-changed",
+                "env": "routine/js",
+                "src": "executables/obsidianOnSyncedNotesChanged.js",
+                "editable": true,
+                "name": "Called when synced notes to Obsidian changes",
+                "on_hook": "after_object_updated/uid_list/obsidian_synced_notes"
+            },
+            {
+                "id": "initialize-obsidian-sync",
+                "env": "routine/js",
+                "src": "executables/initializeObsidianSync.js",
+                "editable": true,
+                "name": "Initializes synced notes for Obsidian"
+            }
+        ],
+        "entities": [
+            {
+                "id": "obsidian_synced_notes",
+                "src": "entities/obsidian_synced_notes.json"
+            },
+            {
+                "id": "obsidian_sync_resource",
+                "src": "entities/obsidian_sync_resource.json"
+            }
+        ]
+    }
+}

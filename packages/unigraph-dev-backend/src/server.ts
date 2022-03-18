@@ -18,6 +18,7 @@ import stringify from 'json-stable-stringify';
 import cron from 'node-cron';
 import DgraphClient from './dgraphClient';
 import {
+    EventAcknowledgeSync,
     EventAddBacklinks,
     EventAddNotification,
     EventAddUnigraphPackage,
@@ -47,6 +48,7 @@ import {
     EventResponser,
     EventRunExecutable,
     EventSetDgraphSchema,
+    EventStartSyncListen,
     EventSubscribe,
     EventSubscribeObject,
     EventSubscribeQuery,
@@ -55,6 +57,7 @@ import {
     EventUnsubscribeById,
     EventUpdateObject,
     EventUpdateSPO,
+    EventUpdateSyncResource,
     IWebsocket,
     Subscription,
     UnigraphUpsert,
@@ -70,7 +73,9 @@ import {
 } from './subscriptions';
 import {
     afterObjectCreatedHooks,
+    afterObjectUpdatedHooks,
     callHooks,
+    createUidListCache,
     HookAfterObjectChangedParams,
     HookAfterSchemaUpdatedParams,
     HookAfterSubscriptionAddedParams,
@@ -226,7 +231,9 @@ export default async function startServer(client: DgraphClient) {
                     serverStates,
                     context.ofUpdate,
                 );
+                // TODO: conditionally call this updateNow because we have a list of changed UIDs
                 await context.caches.executables.updateNow();
+                await context.caches.uid_lists.updateNow();
                 initExecutables(
                     Object.entries(context.caches.executables.data),
                     {},
@@ -243,6 +250,26 @@ export default async function startServer(client: DgraphClient) {
                         objectCreatedHooks[schemaName] = serverStates.hooks[el];
                     }
                 });
+
+                const objectUpdatedHooks: any = {};
+                if ((context.changedUids as string[])?.length > 0) {
+                    // console.log(context.changedUids);
+                    Object.keys(serverStates.hooks).forEach((el) => {
+                        if (el.startsWith('after_object_updated/uid_list/')) {
+                            const schemaName = el.replace('after_object_updated/uid_list/', '$/entity/');
+                            objectUpdatedHooks[schemaName] = serverStates.hooks[el];
+                        }
+                    });
+
+                    afterObjectUpdatedHooks(
+                        serverStates,
+                        objectUpdatedHooks,
+                        client,
+                        context.changedUids as any,
+                        context.caches.uid_lists.data,
+                    );
+                }
+
                 lock.acquire('caches/head', async (done: any) => {
                     await afterObjectCreatedHooks(serverStates, objectCreatedHooks, client);
                     done(false, null);
@@ -308,6 +335,7 @@ export default async function startServer(client: DgraphClient) {
         },
         entityHeadByType: {},
         pollCallback,
+        websocketSyncListeners: {},
     });
 
     await checkLeasedUid();
@@ -363,6 +391,7 @@ export default async function startServer(client: DgraphClient) {
     const localApi = getLocalUnigraphAPI(client, serverStates);
     serverStates.localApi = localApi;
     caches.executables = createExecutableCache(client, { hello: 'world' }, localApi, serverStates);
+    caches.uid_lists = createUidListCache(client);
 
     setInterval(() => {
         pollSubscriptions(serverStates.subscriptions, dgraphClient, pollCallback, undefined, serverStates);
@@ -628,7 +657,7 @@ export default async function startServer(client: DgraphClient) {
 
                     dgraphClient
                         .createUnigraphUpsert(upsert)
-                        .then((res) => {
+                        .then(([uids, changedUids]) => {
                             perfLogAfterDbTransaction();
                             if (event.usedUids) {
                                 serverStates.leasedUids = _.difference(serverStates.leasedUids, event.usedUids);
@@ -641,6 +670,7 @@ export default async function startServer(client: DgraphClient) {
                                 caches: caches,
                                 subIds: event.subIds,
                                 ofUpdate: event.id,
+                                changedUids,
                             });
                             ws.send(makeResponse(event, true));
                         })
@@ -682,12 +712,13 @@ export default async function startServer(client: DgraphClient) {
 
                 dgraphClient
                     .createUnigraphUpsert(finalUpsert)
-                    .then((_) => {
+                    .then(([res, changedUids]) => {
                         callHooks(serverStates.hooks, 'after_object_changed', {
                             subscriptions: serverStates.subscriptions,
                             caches: caches,
                             subIds: event.subIds,
                             ofUpdate: event.id,
+                            changedUids,
                         });
                         ws.send(makeResponse(event, true));
                     })
@@ -791,11 +822,12 @@ export default async function startServer(client: DgraphClient) {
             const upsert = insertsToUpsert(ref, undefined, serverStates.caches['schemas'].dataAlt![0]);
             dgraphClient
                 .createUnigraphUpsert(upsert)
-                .then((_) => {
+                .then(([res, changedUids]) => {
                     callHooks(serverStates.hooks, 'after_object_changed', {
                         subscriptions: serverStates.subscriptions,
                         caches: caches,
                         ofUpdate: event.id,
+                        changedUids,
                     });
                     ws.send(makeResponse(event, true));
                 })
@@ -910,6 +942,28 @@ export default async function startServer(client: DgraphClient) {
                 .catch((e: any) => ws.send(makeResponse(event, false, { error: e.toString() })));
             ws.send(makeResponse(event, true, { result: res }));
         },
+
+        start_sync_listen: async function (event: EventStartSyncListen, ws: IWebsocket) {
+            const res = await serverStates.localApi
+                .startSyncListen(event.resource, event.key, ws)
+                .catch((e: any) => ws.send(makeResponse(event, false, { error: e.toString() })));
+            ws.send(makeResponse(event, true, { result: res }));
+        },
+
+        update_sync_resource: async function (event: EventUpdateSyncResource, ws: IWebsocket) {
+            const res = await serverStates.localApi
+                .updateSyncResource(event.resource, event.uids)
+                .catch((e: any) => ws.send(makeResponse(event, false, { error: e.toString() })));
+            ws.send(makeResponse(event, true, { result: res }));
+        },
+
+        acknowledge_sync: async function (event: EventAcknowledgeSync, ws: IWebsocket) {
+            const res = await serverStates.localApi
+                .acknowledgeSync(event.resource, event.key, event.uids)
+                .catch((e: any) => ws.send(makeResponse(event, false, { error: e.toString() })));
+            ws.send(makeResponse(event, true, { result: res }));
+        },
+
     };
 
     await Promise.all(Object.values(caches).map((el: Cache<any>) => el.updateNow()));

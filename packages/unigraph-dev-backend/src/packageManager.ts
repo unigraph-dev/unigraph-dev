@@ -126,7 +126,9 @@ export async function addUnigraphPackage(
                           const id = caches.schemas.data[schema]['_value['][0]['unigraph.id'];
                           caches.schemas.data[schema] = caches.schemas.data[id];
                       }
-                      const builtEntity: any = isRaw(obj) ? obj : buildUnigraphEntity(obj, schema, caches.schemas.data);
+                      const builtEntity: any = isRaw(obj)
+                          ? { ...obj, type: { 'unigraph.id': schema } }
+                          : buildUnigraphEntity(obj, schema, caches.schemas.data);
                       // eslint-disable-next-line max-len
                       builtEntity[
                           'unigraph.id'

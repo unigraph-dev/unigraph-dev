@@ -68,6 +68,12 @@ const changesForOpenScopedMarkdownLink = (scope: ScopeForAutoComplete, ev: Keybo
     };
 };
 
+const touchParents = (data: any) => {
+    const [parents] = getParentsAndReferences(data['~_value'], data['unigraph.origin']);
+    if (!data._hide) parents.push({ uid: data.uid });
+    window.unigraph.touch(parents.map((el) => el.uid));
+};
+
 export const useNoteEditor: (...args: any) => [any, (text: string) => void, () => string, () => void, any] = (
     pullText: any,
     pushText: any,
@@ -110,6 +116,9 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
         }
         const ret = oldTextRef.current === text && !isFlushing ? undefined : pushText(text, isFlushing);
         oldTextRef.current = text;
+        if (ret && !isFlushing) {
+            touchParents(dataRef.current);
+        }
         return ret;
     };
 
@@ -259,6 +268,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                             callbacks.subsId,
                             parents,
                         );
+                        touchParents(data);
                         window.unigraph.getState('global/searchPopup').setValue({ show: false });
                     },
                     undefined,
