@@ -31,7 +31,9 @@ export const useNameTab = (prefix: string, uid: string) => {
         tabContext.subscribeToObject(
             uid,
             (newObjs: any) => {
-                const tabName = newObjs?.get('name')?.as('primitive');
+                const objName = newObjs?.get('name')?.as('primitive');
+                const typeName = newObjs?.type?.['_value[']?.[2]?._name;
+                const tabName = objName ?? typeName ?? prefix;
                 // if (tabName) tabContext.setTitle(tabName);
                 if (tabName !== undefined && tabContext.viewId)
                     window.layoutModel.doAction(Actions.renameTab(tabContext.viewId as any, `${prefix}${tabName}`));
