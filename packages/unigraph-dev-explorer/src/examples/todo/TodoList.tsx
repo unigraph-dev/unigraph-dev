@@ -8,7 +8,7 @@ import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { DynamicViewRenderer } from '../../global.d';
 import { registerDynamicViews, registerQuickAdder } from '../../unigraph-react';
 import { parseTodoObject } from './parseTodoObject';
-import { todoDefaultMenuItems, TodoMenuItems, TodoMenuSidebar } from './TodoViews';
+import { todoDefaultMenuItems, TodoMenuItems, TodoMenuSidebar } from './TodoSidebar';
 import { ATodoList, completeTodoQueryBody, maxDateStamp } from './utils';
 
 export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline, isEmbed }) => {
