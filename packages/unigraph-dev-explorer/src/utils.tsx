@@ -6,7 +6,8 @@ import stringify from 'json-stable-stringify';
 import _ from 'lodash';
 import React from 'react';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
-import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
+import { getRandomInt, isJsonString } from 'unigraph-dev-common/lib/utils/utils';
+import { Actions } from 'flexlayout-react';
 
 export const NavigationContext = React.createContext<(location: string) => any>((location: string) => ({}));
 
@@ -21,6 +22,31 @@ export function isValidHttpUrl(string: string) {
 
     return url.protocol === 'http:' || url.protocol === 'https:';
 }
+
+export const useNameTab = (prefix: string, uid: string) => {
+    const tabContext = React.useContext(TabContext);
+    // const [name, setName] = React.useState('Backlink View');
+    React.useEffect(() => {
+        const subsId = getRandomInt();
+        tabContext.subscribeToObject(
+            uid,
+            (newObjs: any) => {
+                const objName = newObjs?.get('name')?.as('primitive');
+                const typeName = newObjs?.type?.['_value[']?.[2]?._name;
+                const tabName = objName ?? typeName ?? prefix;
+                // if (tabName) tabContext.setTitle(tabName);
+                if (tabName !== undefined && tabContext.viewId)
+                    window.layoutModel.doAction(Actions.renameTab(tabContext.viewId as any, `${prefix}${tabName}`));
+                console.log('useNameTab', { newObjs, subsId, uid, tabName, tabContext });
+            },
+            subsId,
+        );
+
+        return function cleanup() {
+            tabContext.unsubscribe(subsId);
+        };
+    }, []);
+};
 
 export const TabContext = React.createContext({
     viewId: 0,

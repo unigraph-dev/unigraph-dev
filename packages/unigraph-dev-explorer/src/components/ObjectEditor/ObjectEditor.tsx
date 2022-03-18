@@ -30,7 +30,7 @@ import { BacklinkView } from '../ObjectView/BacklinkView';
 import { onUnigraphContextMenu } from '../ObjectView/DefaultObjectContextMenu';
 import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
 import { getDynamicViews } from '../../unigraph-react';
-import { TabContext } from '../../utils';
+import { TabContext, useNameTab } from '../../utils';
 
 const editorFrameStyle = {
     padding: '12px',
@@ -567,6 +567,7 @@ export function ObjectEditor({ uid }: any) {
     const [allSchemas, setAllSchemas] = React.useState(null);
 
     const tabContext = React.useContext(TabContext);
+    useNameTab('Editor: ', uid);
 
     useEffectOnce(() => {
         window.unigraph.getSchemas().then((schemas: any) => setAllSchemas(schemas));

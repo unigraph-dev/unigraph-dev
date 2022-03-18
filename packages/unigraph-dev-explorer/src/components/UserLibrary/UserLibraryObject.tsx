@@ -1,4 +1,5 @@
 import React from 'react';
+import { Actions } from 'flexlayout-react';
 import { TabContext } from '../../utils';
 
 import { AutoDynamicViewDetailed } from '../ObjectView/AutoDynamicViewDetailed';
@@ -36,7 +37,7 @@ export default function DetailedObjectView({ uid, viewer, id, context, component
                 !isStub &&
                 (viewerId !== 'dynamic-view-detailed' ||
                     !Object.keys(DynamicViewsDetailed).includes(type) ||
-                    !DynamicViewsDetailed[type].query)
+                    !DynamicViewsDetailed[type].query) // DOCS Q: why check for query?
             ) {
                 tabContext.subscribeToObject(
                     objectId,
@@ -47,6 +48,7 @@ export default function DetailedObjectView({ uid, viewer, id, context, component
                 );
 
                 if (context?.startsWith?.('0x')) {
+                    // DOCS Q: what's context here for?
                     setContextObj({
                         type: { 'unigraph.id': '$/skeleton/default' },
                         uid: '0x0',
