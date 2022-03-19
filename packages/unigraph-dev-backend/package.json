@@ -1,6 +1,6 @@
 {
     "name": "unigraph-dev-backend",
-    "version": "0.2.5",
+    "version": "0.2.6",
     "description": "",
     "main": "dist/index.js",
     "engines": {

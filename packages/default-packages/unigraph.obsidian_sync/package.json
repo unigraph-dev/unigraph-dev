@@ -1,6 +1,6 @@
 {
     "displayName": "Obsidian sync for Unigraph",
-    "version": "0.2.5",
+    "version": "0.2.6",
     "description": "Syncs your Unigraph notes with Obsidian",
     "name": "unigraph.obsidian_sync",
     "unigraph": {

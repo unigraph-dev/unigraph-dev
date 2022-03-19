@@ -3,6 +3,34 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.6](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.5...v0.2.6) (2022-03-19)
+
+
+### Bug Fixes
+
+* **contacts:** find email mentions in the graph after adding a contact ([7dae58c](https://github.com/unigraph-dev/unigraph-dev/commit/7dae58c4f50fbb6bb495f859021ce74ab44e978b))
+* **editor:** commands with update parent ([0428dc8](https://github.com/unigraph-dev/unigraph-dev/commit/0428dc8e15edc802764d5ddceb901d84360d10c7))
+* **frontend:** hide raw JSON representation by default ([4857799](https://github.com/unigraph-dev/unigraph-dev/commit/4857799b57d5c6499c6e5e67028ad4b6b479d2e7))
+* **notes:** formal expand/hide option for outlining ([bd7f706](https://github.com/unigraph-dev/unigraph-dev/commit/bd7f706dd41179cacb05eb3696336899a23a5dee))
+* **search:** inline search differentiate between top matches and recent updated ([93b8469](https://github.com/unigraph-dev/unigraph-dev/commit/93b8469cca6b621d53d90f1d3ef7d68384d7b906))
+
+
+### Features
+
+* **api:** http json api, docs ([efda92d](https://github.com/unigraph-dev/unigraph-dev/commit/efda92dcd97ab387585be61525b5558f750afbfe))
+* better error display with datamodels ([5f2b22c](https://github.com/unigraph-dev/unigraph-dev/commit/5f2b22c911f806e2de6a9f79eee990ff913d3f4d))
+* **editor:** update parents' timestamps ([07bba56](https://github.com/unigraph-dev/unigraph-dev/commit/07bba560d769a3907dc0886089425a0b6a2ea8f8))
+* **obsidian_sync:** obsidian sync first pass ([fcfe7ba](https://github.com/unigraph-dev/unigraph-dev/commit/fcfe7bac67cf80f859861eb74a2ab1e4fbc44cf9))
+* **sync:** add framework for bi-directional sync service ([2086682](https://github.com/unigraph-dev/unigraph-dev/commit/208668241d76e98b5e545b88553d6796222beda3))
+* **tabs:** names for backlink view and object view ([ab81229](https://github.com/unigraph-dev/unigraph-dev/commit/ab81229cca9c24f3b303530b533d72ba0875bebb))
+* **tabs:** type name for tabs on objects without names ([b6ce5e9](https://github.com/unigraph-dev/unigraph-dev/commit/b6ce5e93cf96e23d747e338c49d3a9948a364e57))
+* **todo:** hide number if 0 ([c8af818](https://github.com/unigraph-dev/unigraph-dev/commit/c8af818950b38dff2bfbf9d954951732b7e21c12))
+* **todo:** made tag list in sidebar a dynamicList ([2db1f0e](https://github.com/unigraph-dev/unigraph-dev/commit/2db1f0ee9af93950fffde9b82259515b161ef6ca))
+
+
+
+
+
 ## [0.2.5](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.4...v0.2.5) (2022-03-13)
 
 

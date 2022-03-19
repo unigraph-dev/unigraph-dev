@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.6](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.5...v0.2.6) (2022-03-19)
+
+
+### Features
+
+* **api:** http json api, docs ([efda92d](https://github.com/unigraph-dev/unigraph-dev/commit/efda92dcd97ab387585be61525b5558f750afbfe))
+* better error display with datamodels ([5f2b22c](https://github.com/unigraph-dev/unigraph-dev/commit/5f2b22c911f806e2de6a9f79eee990ff913d3f4d))
+* **sync:** add framework for bi-directional sync service ([2086682](https://github.com/unigraph-dev/unigraph-dev/commit/208668241d76e98b5e545b88553d6796222beda3))
+
+
+
+
+
 ## [0.2.5](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.4...v0.2.5) (2022-03-13)
 
 **Note:** Version bump only for package unigraph-dev-common

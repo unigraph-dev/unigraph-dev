@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.6](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.5...v0.2.6) (2022-03-19)
+
+
+### Bug Fixes
+
+* **contacts:** find email mentions in the graph after adding a contact ([7dae58c](https://github.com/unigraph-dev/unigraph-dev/commit/7dae58c4f50fbb6bb495f859021ce74ab44e978b))
+
+
+
+
+
 ## [0.2.5](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.4...v0.2.5) (2022-03-13)
 
 
