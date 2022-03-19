@@ -1,3 +1,4 @@
+import { ChevronRight, ExpandLess, ExpandMore } from '@mui/icons-material';
 import { Typography, FormControlLabel, Checkbox, Skeleton } from '@mui/material';
 import React from 'react';
 import ReactJson, { InteractionProps } from 'react-json-view';
@@ -6,16 +7,36 @@ import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 
 export function StringObjectViewer({ object }: { object: any }) {
     const finalObject = unpad(object);
+    const [expanded, setExpanded] = React.useState(false);
 
     return (
-        <div style={{ maxHeight: '160px', width: '100%', overflowX: 'auto' }}>
-            Type: {window.unigraph.getNamespaceMap?.()?.[object?.type?.['unigraph.id']]?._name}
+        <div style={{ width: '100%' }}>
+            <span style={{ color: 'gray' }}>Type: </span>
+            {window.unigraph.getNamespaceMap?.()?.[object?.type?.['unigraph.id']]?._name}
             <br />
-            {!object._value ? (
-                new UnigraphObject({ ...object }).as('primitive')
-            ) : (
-                <pre>{JSON.stringify(finalObject, null, 2)}</pre>
-            )}
+            <div
+                style={{ display: 'flex', marginLeft: '-4px', marginTop: '2px', marginBottom: '2px', color: 'gray' }}
+                onClick={() => setExpanded(!expanded)}
+            >
+                {expanded ? <ExpandLess /> : <ExpandMore />}
+                <div>{expanded ? 'Hide' : 'Show'} raw JSON representation</div>
+            </div>
+            <div
+                style={{
+                    maxHeight: '160px',
+                    width: '100%',
+                    overflowX: 'auto',
+                    borderRadius: '4px',
+                    border: '1px solid lightgray',
+                    display: expanded ? 'block' : 'none',
+                }}
+            >
+                {!object._value ? (
+                    new UnigraphObject({ ...object }).as('primitive')
+                ) : (
+                    <pre>{JSON.stringify(finalObject, null, 2)}</pre>
+                )}
+            </div>
         </div>
     );
 }

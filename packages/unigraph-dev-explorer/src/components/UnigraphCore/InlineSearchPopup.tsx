@@ -58,7 +58,7 @@ export function InlineSearch() {
                         hideHidden: ctxMenuState.value.hideHidden,
                     })
                     .then((res: any) => {
-                        const results = [...res.top, ...res.entities]
+                        const resultsTop = res.top
                             .filter((el: any) => el.type['unigraph.id'] !== '$/schema/embed_block')
                             .map((el: any) => ({
                                 name: new UnigraphObject(el['unigraph.indexes']?.name || {}).as('primitive'),
@@ -66,8 +66,18 @@ export function InlineSearch() {
                                 type: el.type['unigraph.id'],
                             }))
                             .filter((el: any) => el.name);
-                        if (window.unigraph.getState('global/searchPopup').value.search === key)
+                        const results = res.entities
+                            .filter((el: any) => el.type['unigraph.id'] !== '$/schema/embed_block')
+                            .map((el: any) => ({
+                                name: new UnigraphObject(el['unigraph.indexes']?.name || {}).as('primitive'),
+                                uid: el.uid,
+                                type: el.type['unigraph.id'],
+                            }))
+                            .filter((el: any) => el.name);
+                        if (window.unigraph.getState('global/searchPopup').value.search === key) {
                             setSearchResults(results);
+                            setTopResults(resultsTop);
+                        }
                     });
             }
         }, 200),
@@ -78,40 +88,56 @@ export function InlineSearch() {
     React.useEffect(() => ctxMenuState.subscribe((v) => setState(v)), []);
 
     const [searchResults, setSearchResults] = React.useState<any[]>([]);
+    const [topResults, setTopResults] = React.useState<any[]>([]);
     React.useEffect(() => {
-        if (!state.show) setSearchResults([]);
-        else setCurrentAction(0);
+        if (!state.show) {
+            setSearchResults([]);
+            setTopResults([]);
+        } else setCurrentAction(0);
         search.current(state.search as string);
     }, [state]);
 
     const [actionItems, setActionItems] = React.useState<any[]>([]);
     React.useEffect(() => {
-        setActionItems([
-            ...(state.default || []).map((el: any, index: number) => [
-                <Typography variant="body1">{el.label(state.search!)}</Typography>,
-                (ev: any) => {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    el.onSelected(state.search!).then(([newUid, newType]: [string, string]) => {
-                        state.onSelected?.(state.search!, newUid, newType);
-                    });
-                },
-            ]),
-            ...searchResults.map((el: any) => [
-                <ResultDisplay el={el} />,
-                (ev: any) => {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    state.onSelected?.(el.name, el.uid, el.type);
-                },
-            ]),
-        ]);
-    }, [searchResults, state]);
+        setActionItems(
+            [
+                ...(state.default || []).map((el: any, index: number) => [
+                    <Typography variant="body1">{el.label(state.search!)}</Typography>,
+                    (ev: any) => {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        el.onSelected(state.search!).then(([newUid, newType]: [string, string]) => {
+                            state.onSelected?.(state.search!, newUid, newType);
+                        });
+                    },
+                    'default',
+                ]),
+                ...topResults.map((el: any) => [
+                    <ResultDisplay el={el} />,
+                    (ev: any) => {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        state.onSelected?.(el.name, el.uid, el.type);
+                    },
+                    'top',
+                ]),
+                ...searchResults.map((el: any) => [
+                    <ResultDisplay el={el} />,
+                    (ev: any) => {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        state.onSelected?.(el.name, el.uid, el.type);
+                    },
+                    'recent',
+                ]),
+            ].map((el: any, index: number) => [...el, index]),
+        );
+    }, [searchResults, topResults, state]);
 
     React.useEffect(() => {
         if (searchResults.length > 0 && searchResults[0]?.name.toLowerCase().includes(state.search?.toLowerCase()))
             setCurrentAction((ca: number) => Math.max(ca, (state.default || []).length));
-    }, [searchResults, (state.default || []).length]);
+    }, [searchResults, topResults, (state.default || []).length]);
 
     React.useEffect(() => {
         const handler = (ev: any) => {
@@ -168,24 +194,37 @@ export function InlineSearch() {
                     },
                 }}
             >
-                {actionItems.map((el: any, index: number) => (
-                    <div
-                        onClick={el[1]}
-                        style={{
-                            ...(index === currentAction
-                                ? {
-                                      borderRadius: '2px',
-                                      backgroundColor: 'gainsboro',
-                                  }
-                                : {}),
-                            cursor: 'pointer',
-                            padding: '2px',
-                        }}
-                        id={`globalSearchItem_${index === currentAction ? 'current' : ''}`}
-                    >
-                        {el[0]}
-                    </div>
-                ))}
+                {Object.entries(_.groupBy(actionItems, (el: any) => el[2])).map(([key, value]) => {
+                    return (
+                        <>
+                            {key === 'default' ? (
+                                []
+                            ) : (
+                                <Typography style={{ color: 'darkgray', marginTop: '4px' }}>
+                                    {key === 'top' ? 'Top linked' : 'Recently updated'}
+                                </Typography>
+                            )}
+                            {value.map((el: any, index: number) => (
+                                <div
+                                    onClick={el[1]}
+                                    style={{
+                                        ...(el[3] === currentAction
+                                            ? {
+                                                  borderRadius: '2px',
+                                                  backgroundColor: 'gainsboro',
+                                              }
+                                            : {}),
+                                        cursor: 'pointer',
+                                        padding: '2px',
+                                    }}
+                                    id={`globalSearchItem_${el[3] === currentAction ? 'current' : ''}`}
+                                >
+                                    {el[0]}
+                                </div>
+                            ))}
+                        </>
+                    );
+                })}
             </Popover>
         </div>
     );

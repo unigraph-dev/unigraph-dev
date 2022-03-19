@@ -4,7 +4,7 @@ import { Typography } from '@mui/material';
 import React from 'react';
 import _ from 'lodash';
 import { findAllUids, getCircularReplacer, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
-import { FiberManualRecord, MoreVert } from '@mui/icons-material';
+import { ChevronRight, ExpandMore, FiberManualRecord, MoreVert } from '@mui/icons-material';
 import stringify from 'json-stable-stringify';
 import { mdiClockOutline, mdiNoteOutline } from '@mdi/js';
 import { Icon } from '@mdi/react';
@@ -128,6 +128,7 @@ const BlockChildren = ({
                                 }}
                                 displayAs={childrenDisplayAs}
                                 parentDisplayAs={displayAs}
+                                showCollapse={getSubentities(el)[0].length >= 1}
                             >
                                 <BlockChild
                                     el={el}
@@ -174,6 +175,7 @@ export function OutlineComponent({
     isChildren,
     createBelow,
     displayAs,
+    showCollapse,
     parentDisplayAs,
 }: any) {
     const outlineHead = React.useMemo(
@@ -213,6 +215,9 @@ export function OutlineComponent({
         [collapsed, displayAs, parentDisplayAs],
     );
 
+    const [hover, setHover] = React.useState(false);
+    const olRef = React.useRef<HTMLDivElement>(null);
+
     return (
         <div
             style={{
@@ -221,20 +226,25 @@ export function OutlineComponent({
                 alignItems: 'baseline',
                 position: 'relative',
             }}
+            ref={olRef}
+            onPointerMove={(e) => {
+                const rect = (olRef as any).current.getBoundingClientRect();
+                const y = e.clientY - rect.top; // y position within the element
+                setHover(y > 0 && y < 16);
+            }}
+            onPointerOut={() => setHover(false)}
         >
             <div
-                style={{ position: 'absolute', left: '-4px', cursor: 'pointer' }}
-                className="showOnHover"
+                style={{
+                    position: 'absolute',
+                    left: '-12px',
+                    cursor: 'pointer',
+                    transform: 'scale(0.8, 1)',
+                    display: showCollapse && hover ? '' : 'none',
+                }}
                 onClick={() => setCollapsed(!collapsed)}
             >
-                O
-            </div>
-            <div
-                style={{ position: 'absolute', left: '-4px', top: '10px', cursor: 'pointer' }}
-                className="showOnHover"
-                onClick={() => createBelow()}
-            >
-                V
+                {collapsed ? <ChevronRight /> : <ExpandMore />}
             </div>
             {outlineHead}
             <div style={{ flexGrow: 1, marginLeft: displayAs !== 'outliner' && !parentDisplayAs ? '' : '24px' }}>
@@ -507,7 +517,7 @@ export function DetailedOutlinerBlock({
             <div
                 style={{
                     width: '100%',
-                    ...(!isChildren ? { overflow: 'hidden' } : {}),
+                    ...(!isChildren ? { overflow: 'visible' } : {}),
                 }}
             >
                 <NoteViewTextWrapper
