@@ -121,6 +121,8 @@ export interface Unigraph<TT = WebSocket | false> {
      * Create a new schema using the json-ts format and add it to cache.
      *
      * Users should use `ensurePackage` and `ensureSchema` for applications.
+     *
+     * @param schema The schema to add to the current graph. Must be in the schema definition format.
      */
     createSchema(schema: any): Promise<any>;
     /**
@@ -149,6 +151,7 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param callback the callback function.
      * @param eventId can be left empty - in this case, we will generate one for you,
      * but you cannot get the subscription elsewhere other than from callback.
+     * @param options can be used to specify the query options.
      */
     subscribeToType(
         name: QueryType['name'],
@@ -163,6 +166,7 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param callback the callback function.
      * @param eventId can be left empty - in this case, we will generate one for you,
      * but you cannot get the subscription elsewhere other than from callback.
+     * @param options can be used to specify the query options.
      */
     subscribeToObject(
         uid: QueryObject['uid'],
@@ -177,6 +181,7 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param callback the callback function.
      * @param eventId can be left empty - in this case, we will generate one for you,
      * but you cannot get the subscription elsewhere other than from callback.
+     * @param options can be used to specify the query options.
      */
     subscribeToQuery(
         fragment: QueryRaw['fragment'],
@@ -189,7 +194,7 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param query the query to subscribe to. Must follow the Query type (note this is different from a GraphQL query)
      * @param callback a callback function. Can leave empty if updating existing one, since the previous one will be called.
      * @param eventId subscription ID (if update, must be the same)
-     * @param update whether we're updating the query (delta query).
+     * @param update whether we're updating the subscription (delta query).
      */
     subscribe(query: Query, callback: (results: any[] | any) => void, eventId?: number, update?: boolean): Promise<any>;
     /**
@@ -205,6 +210,8 @@ export interface Unigraph<TT = WebSocket | false> {
      *
      * @param object The object to be added.
      * @param schema Schema of that object, must be valid. Such as: `$/schema/abc`
+     * @param padded Whether the object is already in padded format (the Unigraph data model, with `_value` etc.)
+     * @param subIds What subscriptions to update after the addition. If not set, all subscriptions will be updated.
      */
     addObject(object: any, schema: string, padded?: boolean, subIds?: any[]): any;
     /**
@@ -224,7 +231,13 @@ export interface Unigraph<TT = WebSocket | false> {
     /**
      * Gets many query results at once using 1 single transaction.
      *
+     * For more information, see example packages in the `default-package` folder.
+     *
      * @param fragments Array of DQL (GraphQL+-) Query fragments - such as `(func: fn1(something)){ uid expand(_predicate_) }`
+     * @param getAll whether to get the full objects recursively after querying qualifying UIDs. If you're already declaring
+     * the results in the query, this should be set to `false`. (default: `true`)
+     * @param batch how many fragments to query at once. (default: `50`)
+     * @param commonVars the part of query appended to all batched queries, such as finding the list of all uids of a certain type.
      */
     getQueries(fragments: string[] | string, getAll?: boolean, batch?: number, commonVars?: string): any;
     /**
@@ -234,6 +247,7 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param method A string describing what kind of search to perform. Default is 'fulltext'
      * @param display How to return the results to display. 'indexes' will only fetch the indexes.
      * @param hops How many hops to fetch.
+     * @param searchOptions Options for the search query.
      */
     getSearchResults(
         query: { method: 'fulltext' | 'type' | 'uid'; value: any }[],
@@ -246,10 +260,21 @@ export interface Unigraph<TT = WebSocket | false> {
             hideHidden?: boolean;
         },
     ): Promise<{ results: any[]; entities: any[] }>;
-    /** Deletes an object by its UID. */
+    /**
+     * Deletes an object by its UID.
+     *
+     * @param uid The UID of the object to delete.
+     * @param permanent Whether the deletion is permanent. If true, we will also remove all references, backlinks,
+     * and annotations of the object. This process cannot be undone.
+     */
     deleteObject(uid: string | string[], permanent?: boolean): any;
     /**
      * Updates objects simply using the SPO triplet format.
+     *
+     * @param triplets An array of triplets to update, in RDF format, such as [`<0x123> <_value> <0x456> .`]
+     * @param isDelete Whether to consider the triplets as deletion. For example, the example triplet will
+     * delete the link from `0x123` to `0x456` if `isDelete` is `true`.
+     * @param subIds What subscriptions to update after the mutation. If not set, all subscriptions will be updated.
      */
     updateTriplets(triplets: any[], isDelete?: boolean, subIds?: any[] | any): any;
     /**
@@ -262,6 +287,12 @@ export interface Unigraph<TT = WebSocket | false> {
      * make sure your update is minimal.
      * @param pad Whether to pad the new object - for partial update this should be false.
      * @param subIds Subscriptions (if known) associated with the updated object.
+     * @param origin An array of UID strings used to construct the backlink map of the updated object.
+     * You normally doesn't have to use this.
+     * @param eagarlyUpdate Whether to process the updates in client side before sending to the server.
+     * Setting this to `true` will make the update process much faster, but it must not be an upsert or padded update,
+     * and cannot qualify for uniqueness criteria, etc. If you need to do this, you should set `eagarlyUpdate` to `false`
+     * and use `sendFakeUpdate` to update the client with the same information while using the uniqueness criteria in the backend instead.
      */
     updateObject(
         uid: string,
@@ -286,7 +317,7 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param uid The uid of the target list - must be of type `$/composer/Array`
      * @param item an array of an array of 2 items, first being the original index(es) or uid, second being the desired index(es).
      * @param relationUid Optional. Specifies the uid of the entity this array belongs to. If present, entity relation to it will also be deleted.
-     * @param subIds Optional, either an ID or an array of ID with relevant subscriptions.
+     * @param subIds Optional, either an ID or an array of ID with relevant subscriptions. If not set, all subscriptions will be updated.
      */
     reorderItemInArray?(
         uid: string,
@@ -300,7 +331,7 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param uid The uid of the target list - must be of type `$/composer/Array`
      * @param item Either the UID (outer) or the index of an item, or an array of such items.
      * @param relationUid Optional. Specifies the uid of the entity this array belongs to. If present, entity relation to it will also be deleted.
-     * @param subIds Optional, either an ID or an array of ID with relevant subscriptions.
+     * @param subIds Optional, either an ID or an array of ID with relevant subscriptions. If not set, all subscriptions will be updated.
      */
     deleteItemFromArray(
         uid: string,
@@ -355,10 +386,10 @@ export interface Unigraph<TT = WebSocket | false> {
     /**
      * Runs an executable with the given global ID and parameters.
      *
-     * @param id The global executable id of the form `$/package/xxx/xxx/executable/abc`, or simply a database-wide UID.
+     * @param uid The global executable id of the form `$/package/xxx/xxx/executable/abc`, or simply a database-wide UID.
      * You can use the global function `getExecutableId` to find it.
      * @param params The parameters defined for that executable.
-     * @param fnString Whether to return the executable function as a function or stirng.
+     * @param fnString Whether to return the executable function as a function or string.
      */
     runExecutable<T>(uid: string, params: T, context?: any, fnString?: boolean, bypassCache?: boolean): Promise<any>;
     /**
@@ -434,13 +465,13 @@ export interface Unigraph<TT = WebSocket | false> {
      * If not, the backlink is removed.
      *
      * @param fromUids A list of objects to fetch.
-     * @param toUids
-     * @param depth
+     * @param toUids A list of objects to check if they are still linked to the fromUids.
+     * @param depth How deep to check.
      */
     recalculateBacklinks(fromUids: string[], toUids: string[], depth?: number): any;
     /**
      * Adds a list of fromUids (parents) to backlinks (unigraph.origin) of toUids (children).
-     * @param fromUids
+     * @param fromUids A list of objects to fetch.
      * @param toUids
      */
     addBacklinks(fromUids: string[], toUids: string[]): any;
@@ -461,8 +492,40 @@ export interface Unigraph<TT = WebSocket | false> {
 
     // Syncing Unigraph changes
 
+    /**
+     * Starts listening to changes in a specific sync resource.
+     *
+     * Make sure to listen to the `sync_updated` events to get all UIDs that have been updated,
+     * and then query the database for the objects.
+     *
+     * If the client was offline and changes have been made, the client will be notified of any pending changes.
+     *
+     * @param resource The sync resource to listen to.
+     * @param key The sync key, used to distinctly identify the requesting client.
+     */
     startSyncListen(resource: string, key: string): any;
+    /**
+     * Update a given sync resource with new uids that's changed.
+     * This should only be used for backend routines to notify the sync listeners of any update.
+     *
+     * Changes will be broadcasted immediately to exisiting clients,
+     * and will be broadcasted to offline clients as soon as they connect.
+     *
+     * @param resource The sync resource to listen to.
+     * @param uids The list of uids that have been updated.
+     */
     updateSyncResource(resource: string, uids: string[]): any;
+    /**
+     * Acknowledges a list of UIDs that have been updated already,
+     * so Unigraph can safely remove them from pending updates.
+     *
+     * You must call this method after you save the changes, for example,
+     * Or you will get duplicate changes (although not with stale data) next time.
+     *
+     * @param resource The sync resource to listen to.
+     * @param key The sync key, used to distinctly identify the requesting client.
+     * @param uids The list of uids that have been synced successfully.
+     */
     acknowledgeSync(resource: string, key: string, uids: any[]): any;
 }
 /** End of unigraph interface */ // Don't remove this line - needed for Monaco to work

@@ -481,7 +481,7 @@ export default async function startServer(client: DgraphClient) {
 
         async get_queries(event: EventGetQueries, ws: IWebsocket) {
             const results = await localApi
-                .getQueries(event.fragments)
+                .getQueries(event.fragments, event.getAll, event.batch, event.commonVars)
                 .catch((e: any) => ws.send(makeResponse(event, false, { error: e })));
             ws.send(makeResponse(event, true, { results }));
         },
@@ -1098,16 +1098,23 @@ export default async function startServer(client: DgraphClient) {
     });
 
     const httpserver = express();
+    httpserver.use(express.json());
 
     Object.entries(eventRouter).forEach(([key, fn]) => {
         httpserver.get('/' + key, (req, res) => {
-            console.log(req.query);
-            fn(req.query, res as any);
+            // console.log(req.get('Content-Type'));
+            if (req.is('application/json')) {
+                console.log('json ', req.body);
+                fn(req.body, res as any);
+            } else if (Object.keys(req.query).length > 0) {
+                console.log(req.query);
+                fn(req.query, res as any);
+            }
         });
     });
 
     httpserver.get('/', (req, res) => {
-        res.send(`<!DOCTYPE HTML><head></head><body>${Object.entries(eventRouter).map((el) => el[0] + '<br>')}</body>`);
+        res.send(`<!DOCTYPE HTML><head></head><body>For the Unigraph HTTP API documentation, see <a href=\"https://github.com/unigraph-dev/unigraph-dev/tree/main/docs/http_api.md\">our GitHub page</a>.</body>`);
     });
 
     httpserver.get('/callback', (req, res) => {
