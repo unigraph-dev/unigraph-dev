@@ -1,6 +1,6 @@
 import { jsonToGraphQLQuery } from 'json-to-graphql-query';
 import _ from 'lodash';
-import { buildGraph } from './utils';
+import { buildGraph, getCircularReplacer } from './utils';
 import {
     ComposerUnionInstance,
     Definition,
@@ -297,9 +297,9 @@ function buildUnigraphEntityPart(
                 if (choicesResults.length !== 1 && rawPartUnigraphType !== '$/primitive/undefined') {
                     throw new TypeError(
                         'Union type does not allow ambiguous or nonexistent selections!' +
-                            JSON.stringify(rawPart) +
-                            JSON.stringify(localSchema) +
-                            rawPartUnigraphType +
+                        "\n===================\nEntity: " + JSON.stringify(rawPart, getCircularReplacer(), 4) +
+                        "\n===================\nSchema: " + JSON.stringify(localSchema, getCircularReplacer(), 4) +
+                        "\n===================\nType: " + rawPartUnigraphType +
                             '\navailable types: ' +
                             definitions.map((el: any) => el?.type?.['unigraph.id'] + ' ') +
                             '\n\n',
@@ -311,8 +311,8 @@ function buildUnigraphEntityPart(
                 // Default: Error out.
                 throw new TypeError(
                     'Schema check failure for object: ' +
-                        JSON.stringify(rawPart) +
-                        JSON.stringify(localSchema) +
+                        JSON.stringify(rawPart, getCircularReplacer(), 4) +
+                        JSON.stringify(localSchema, getCircularReplacer(), 4) +
                         rawPartUnigraphType,
                 );
             }
@@ -329,10 +329,10 @@ function buildUnigraphEntityPart(
                     '\n' +
                     e.stack +
                     '\n' +
-                    JSON.stringify(rawPart) +
-                    JSON.stringify(localSchema) +
-                    rawPartUnigraphType +
-                    '\n',
+                    "\n===================\nEntity: " + JSON.stringify(rawPart, getCircularReplacer(), 4) +
+                    "\n===================\Schema: " + JSON.stringify(localSchema, getCircularReplacer(), 4) +
+                    "\n===================\nType: " + rawPartUnigraphType +
+                    '\n===================\n',
             );
         }
     }
