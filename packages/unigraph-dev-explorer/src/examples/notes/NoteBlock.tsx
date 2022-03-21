@@ -1,10 +1,12 @@
+/* eslint-disable react/require-default-props */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable no-param-reassign */
 import { Typography } from '@mui/material';
+import { styled } from '@mui/styles';
 import React from 'react';
 import _ from 'lodash';
 import { findAllUids, getCircularReplacer, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
-import { ChevronRight, ExpandMore, FiberManualRecord, MoreVert } from '@mui/icons-material';
+import { ChevronRight, MoreVert } from '@mui/icons-material';
 import stringify from 'json-stable-stringify';
 import { mdiClockOutline, mdiNoteOutline } from '@mdi/js';
 import { Icon } from '@mdi/react';
@@ -168,6 +170,75 @@ const BlockChildren = ({
         <></>
     );
 
+const Outline = styled('div')({
+    flex: '0 0 auto',
+    display: 'flex',
+    alignItems: 'baseline',
+    position: 'relative',
+});
+
+const ChildrenLeftBorder = styled('div')({
+    flex: '0 0 1px',
+    height: 'calc(100% + 4px)',
+    width: '1px',
+    backgroundColor: 'lightgray',
+    position: 'absolute',
+    left: '-0.8rem',
+});
+
+const BulletContainer = styled('div')({
+    flex: '0 0 1rem',
+    display: 'flex',
+    width: '1rem',
+    height: '1rem',
+    borderRadius: '50%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    transition: '0.1s ease-in',
+    transform: 'translateY(-0.15rem)', // fine tune vertical alignment
+});
+
+const Bullet = styled('div')({
+    borderRadius: '50%',
+    width: '0.375rem',
+    height: '0.375rem',
+    backgroundColor: '#333333',
+});
+
+const Toggle = styled('button')({
+    flex: '0 0 1rem',
+    width: '1rem',
+    height: '1rem',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    cursor: 'pointer',
+    background: 'none',
+    border: 'none',
+    outline: 'none',
+    position: 'absolute',
+    margin: 0,
+    padding: 0,
+    left: '-0.8rem',
+    top: '0.15rem',
+    transition: 'transform 0.1s ease-in',
+});
+
+const ChildrenContainer = styled('div')({
+    marginLeft: '0.3rem',
+});
+
+interface OutlineComponentProps {
+    children?: React.ReactNode;
+    collapsed?: boolean;
+    setCollapsed?: (val: boolean) => void;
+    isChildren?: boolean;
+    createBelow?: any;
+    displayAs?: string;
+    showCollapse?: boolean;
+    parentDisplayAs?: string;
+}
+
 export function OutlineComponent({
     children,
     collapsed,
@@ -177,80 +248,48 @@ export function OutlineComponent({
     displayAs,
     showCollapse,
     parentDisplayAs,
-}: any) {
-    const outlineHead = React.useMemo(
-        () =>
-            displayAs === 'outliner' ? (
-                <>
-                    <div
-                        style={{
-                            height: 'calc(100% + 4px)',
-                            width: '1px',
-                            backgroundColor: 'lightgray',
-                            position: 'absolute',
-                            left: '-12px',
-                            display: parentDisplayAs === 'outliner' ? '' : 'none',
-                        }}
-                    />
-                    <FiberManualRecord
-                        style={{
-                            fontSize: '0.5rem',
-                            marginLeft: '8px',
-                            marginRight: '8px',
-                            top: '8px',
-                            position: 'absolute',
-                            ...(collapsed
-                                ? {
-                                      borderRadius: '4px',
-                                      color: 'lightgray',
-                                      backgroundColor: 'black',
-                                  }
-                                : {}),
-                        }}
-                    />
-                </>
-            ) : (
-                []
-            ),
-        [collapsed, displayAs, parentDisplayAs],
-    );
-
+}: OutlineComponentProps) {
     const [hover, setHover] = React.useState(false);
-    const olRef = React.useRef<HTMLDivElement>(null);
+    const rOutlineEl = React.useRef<HTMLDivElement>(null);
+    const onPointerMove = React.useCallback((e: React.PointerEvent) => {
+        const outlineEl = rOutlineEl.current;
+        if (!outlineEl) return;
+        const rect = outlineEl.getBoundingClientRect();
+        const y = e.clientY - rect.top; // y position within the element
+        setHover(y > 0 && y < 24);
+    }, []);
+    const onPointerOut = React.useCallback(() => setHover(false), []);
+    const toggleChildren = React.useCallback(() => setCollapsed && setCollapsed(!collapsed), [collapsed, setCollapsed]);
 
     return (
-        <div
-            style={{
-                flex: '0 0 auto',
-                display: 'flex',
-                alignItems: 'baseline',
-                position: 'relative',
-            }}
-            ref={olRef}
-            onPointerMove={(e) => {
-                const rect = (olRef as any).current.getBoundingClientRect();
-                const y = e.clientY - rect.top; // y position within the element
-                setHover(y > 0 && y < 16);
-            }}
-            onPointerOut={() => setHover(false)}
-        >
-            <div
+        <Outline ref={rOutlineEl} onPointerMove={onPointerMove} onPointerOut={onPointerOut}>
+            <Toggle
                 style={{
-                    position: 'absolute',
-                    left: '-12px',
-                    cursor: 'pointer',
-                    transform: 'scale(0.8, 1)',
-                    display: showCollapse && hover ? '' : 'none',
+                    visibility: showCollapse && hover ? 'visible' : 'hidden',
+                    transform: `rotate(${collapsed ? '0deg' : '90deg'})`,
                 }}
-                onClick={() => setCollapsed(!collapsed)}
+                onClick={toggleChildren}
             >
-                {collapsed ? <ChevronRight /> : <ExpandMore />}
-            </div>
-            {outlineHead}
-            <div style={{ flexGrow: 1, marginLeft: displayAs !== 'outliner' && !parentDisplayAs ? '' : '24px' }}>
-                {children}
-            </div>
-        </div>
+                <ChevronRight />
+            </Toggle>
+            {displayAs === 'outliner' && (
+                <>
+                    <ChildrenLeftBorder
+                        style={{
+                            display: parentDisplayAs === 'outliner' ? 'block' : 'none',
+                        }}
+                    />
+                    <BulletContainer
+                        style={{
+                            backgroundColor: collapsed ? '#e4e4e4' : 'transparent',
+                        }}
+                    >
+                        <Bullet />
+                    </BulletContainer>
+                </>
+            )}
+            <ChildrenContainer style={{ flexGrow: 1 }}>{children}</ChildrenContainer>
+        </Outline>
     );
 }
 
