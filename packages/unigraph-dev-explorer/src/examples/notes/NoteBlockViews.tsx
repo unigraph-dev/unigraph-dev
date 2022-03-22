@@ -1,4 +1,8 @@
+/* eslint-disable react/require-default-props */
+import { MouseEventHandler } from 'react';
 import { Typography } from '@mui/material';
+import { grey } from '@mui/material/colors';
+import { styled } from '@mui/styles';
 import { mdiNoteOutline } from '@mdi/js';
 import { Icon } from '@mdi/react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
@@ -51,18 +55,22 @@ export function NoteBlock({ data, inline }: any) {
     );
 }
 
-export function PlaceholderNoteBlock({ callbacks }: any) {
+/** Placeholder note block */
+const FillParentWidth = styled('div')({
+    width: '100%',
+});
+
+const PlaceholderText = styled(Typography)({
+    fontStyle: 'italic',
+    color: grey[500],
+});
+
+export function PlaceholderNoteBlock({ onClick }: { onClick?: MouseEventHandler<HTMLSpanElement> }) {
     return (
-        <div style={{ width: '100%' }}>
-            <Typography
-                variant="body1"
-                style={{ fontStyle: 'italic' }}
-                onClick={() => {
-                    callbacks['add-child']();
-                }}
-            >
+        <FillParentWidth>
+            <PlaceholderText variant="body1" onClick={onClick}>
                 Click here to start writing
-            </Typography>
-        </div>
+            </PlaceholderText>
+        </FillParentWidth>
     );
 }

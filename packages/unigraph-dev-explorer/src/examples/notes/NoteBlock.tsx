@@ -72,7 +72,6 @@ const BlockChild = ({ elindex, shortcuts, displayAs, isCollapsed, setCollapsed, 
 );
 
 const BlockChildren = ({
-    isCollapsed,
     isChildren,
     subentities,
     tabContext,
@@ -84,8 +83,12 @@ const BlockChildren = ({
     childrenDisplayAs,
     callbacks,
     copyOrCutHandler,
-}: any) =>
-    !(isCollapsed === true) ? (
+}: any) => {
+    const addNoteBlock = React.useCallback(() => {
+        noteBlockCommands['add-child'](data, editorContext);
+    }, [data, editorContext]);
+
+    return (
         <div style={{ width: '100%' }}>
             {subentities.length || isChildren ? (
                 <DragandDrop
@@ -157,18 +160,12 @@ const BlockChildren = ({
                     displayAs={data?._value?.children?._displayAs || 'outliner'}
                     parentDisplayAs={displayAs}
                 >
-                    <PlaceholderNoteBlock
-                        callbacks={{
-                            'add-child': () => noteBlockCommands['add-child'](data, editorContext),
-                        }}
-                    />
+                    <PlaceholderNoteBlock onClick={addNoteBlock} />
                 </OutlineComponent>
             )}
         </div>
-    ) : (
-        // eslint-disable-next-line react/jsx-no-useless-fragment
-        <></>
     );
+};
 
 const Outline = styled('div')({
     flex: '0 0 auto',
@@ -654,20 +651,21 @@ export function DetailedOutlinerBlock({
                 ) : (
                     []
                 )}
-                <BlockChildren
-                    isCollapsed={isCollapsed}
-                    isChildren={isChildren}
-                    subentities={subentities}
-                    tabContext={tabContext}
-                    data={data}
-                    isChildrenCollapsed={isChildrenCollapsed}
-                    setIsChildrenCollapsed={setIsChildrenCollapsed}
-                    editorContext={editorContext}
-                    displayAs={displayAs}
-                    childrenDisplayAs={childrenDisplayAs}
-                    callbacks={callbacks}
-                    copyOrCutHandler={copyOrCutHandler}
-                />
+                {!isCollapsed && (
+                    <BlockChildren
+                        isChildren={isChildren}
+                        subentities={subentities}
+                        tabContext={tabContext}
+                        data={data}
+                        isChildrenCollapsed={isChildrenCollapsed}
+                        setIsChildrenCollapsed={setIsChildrenCollapsed}
+                        editorContext={editorContext}
+                        displayAs={displayAs}
+                        childrenDisplayAs={childrenDisplayAs}
+                        callbacks={callbacks}
+                        copyOrCutHandler={copyOrCutHandler}
+                    />
+                )}
                 {!isChildren ? <ParentsAndReferences data={data} /> : []}
             </div>
         </NoteViewPageWrapper>
