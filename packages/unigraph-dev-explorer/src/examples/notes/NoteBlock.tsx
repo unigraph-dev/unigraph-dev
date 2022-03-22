@@ -223,6 +223,7 @@ const Toggle = styled('button')({
 
 const ChildrenContainer = styled('div')({
     marginLeft: '0.3rem',
+    wordBreak: 'break-word',
 });
 
 interface OutlineComponentProps {
@@ -857,12 +858,12 @@ export function DetailedEmbedBlock({
 
     const onKeyDownHandler = React.useCallback(
         (
-            ev,
-            isEditing: any,
-            setIsEditing: any,
+            ev: React.KeyboardEvent,
+            isEditing: boolean,
+            setIsEditing: React.Dispatch<React.SetStateAction<boolean>>,
             getCurrentText: any,
             textInput: any,
-            edited: any,
+            edited: React.MutableRefObject<boolean>,
             editorRef: any,
             editorContext: any,
         ) => {
