@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable no-param-reassign */
-import { Typography } from '@mui/material';
+import { Typography, colors } from '@mui/material';
 import { styled } from '@mui/styles';
 import React from 'react';
 import _ from 'lodash';
@@ -174,16 +174,18 @@ const Outline = styled('div')({
     position: 'relative',
 });
 
-const ChildrenLeftBorder = styled('div')({
-    flex: '0 0 1px',
-    height: 'calc(100% + 4px)',
-    width: '1px',
-    backgroundColor: 'lightgray',
-    position: 'absolute',
-    left: '-0.8rem',
+const ControlsContainer = styled('div')({
+    flex: '0 0 1rem',
+    display: 'flex',
+    width: '1rem',
+    height: '1rem',
+    justifyContent: 'center',
+    alignItems: 'center',
+    transform: 'translateY(-0.2rem)', // fine tune vertical alignment
+    position: 'relative',
 });
 
-const BulletContainer = styled('div')({
+const Bullet = styled('div')({
     flex: '0 0 1rem',
     display: 'flex',
     width: '1rem',
@@ -191,19 +193,16 @@ const BulletContainer = styled('div')({
     borderRadius: '50%',
     justifyContent: 'center',
     alignItems: 'center',
-    transition: '0.1s ease-in',
-    transform: 'translateY(-0.15rem)', // fine tune vertical alignment
-});
-
-const Bullet = styled('div')({
-    borderRadius: '50%',
-    width: '0.375rem',
-    height: '0.375rem',
-    backgroundColor: '#333333',
+    transition: 'background 0.1s ease-in',
+    '& > svg': {
+        fill: colors.common.black,
+    },
 });
 
 const Toggle = styled('button')({
-    flex: '0 0 1rem',
+    position: 'absolute',
+    top: 0,
+    left: '-1rem',
     width: '1rem',
     height: '1rem',
     display: 'flex',
@@ -212,16 +211,28 @@ const Toggle = styled('button')({
     cursor: 'pointer',
     background: 'none',
     border: 'none',
+    borderRadius: '50%',
     outline: 'none',
-    position: 'absolute',
     margin: 0,
-    padding: 0,
-    left: '-0.8rem',
-    top: '0.15rem',
+    padding: '0.1rem',
+    fontSize: '1.25rem',
     transition: 'transform 0.1s ease-in',
+    '&:hover': {
+        backgroundColor: colors.grey[200],
+    },
+});
+
+const ChildrenLeftBorder = styled('div')({
+    flex: '0 0 1px',
+    height: 'calc(100% + 4px)',
+    width: '1px',
+    backgroundColor: colors.grey[300],
+    position: 'absolute',
+    left: 'calc(-0.8rem - 0.5px)',
 });
 
 const ChildrenContainer = styled('div')({
+    flexGrow: 1,
     marginLeft: '0.3rem',
     wordBreak: 'break-word',
 });
@@ -237,6 +248,9 @@ interface OutlineComponentProps {
     parentDisplayAs?: string;
 }
 
+/** Hold the reference to the DOM of the content of an outline. */
+const OutlineContentContext = React.createContext<React.MutableRefObject<HTMLDivElement | null>>({ current: null });
+
 export function OutlineComponent({
     children,
     collapsed,
@@ -248,45 +262,50 @@ export function OutlineComponent({
     parentDisplayAs,
 }: OutlineComponentProps) {
     const [hover, setHover] = React.useState(false);
-    const rOutlineEl = React.useRef<HTMLDivElement>(null);
+    const rContentEl = React.useRef<HTMLDivElement>(null);
     const onPointerMove = React.useCallback((e: React.PointerEvent) => {
-        const outlineEl = rOutlineEl.current;
-        if (!outlineEl) return;
-        const rect = outlineEl.getBoundingClientRect();
-        const y = e.clientY - rect.top; // y position within the element
-        setHover(y > 0 && y < 24);
+        const contentEl = rContentEl.current;
+        if (!contentEl) return;
+        const rect = contentEl.getBoundingClientRect();
+        setHover(e.clientY > rect.top && e.clientY < rect.bottom);
     }, []);
-    const onPointerOut = React.useCallback(() => setHover(false), []);
+    const onPointerLeave = React.useCallback(() => setHover(false), []);
     const toggleChildren = React.useCallback(() => setCollapsed && setCollapsed(!collapsed), [collapsed, setCollapsed]);
 
     return (
-        <Outline ref={rOutlineEl} onPointerMove={onPointerMove} onPointerOut={onPointerOut}>
-            <Toggle
-                style={{
-                    visibility: showCollapse && hover ? 'visible' : 'hidden',
-                    transform: `rotate(${collapsed ? '0deg' : '90deg'})`,
-                }}
-                onClick={toggleChildren}
-            >
-                <ChevronRight />
-            </Toggle>
-            {displayAs === 'outliner' && (
-                <>
-                    <ChildrenLeftBorder
+        <Outline onPointerMove={onPointerMove} onPointerLeave={onPointerLeave}>
+            <ControlsContainer>
+                <Toggle
+                    style={{
+                        visibility: showCollapse && hover ? 'visible' : 'hidden',
+                        transform: `rotate(${collapsed ? '0deg' : '90deg'})`,
+                    }}
+                    onClick={toggleChildren}
+                >
+                    <ChevronRight fontSize="inherit" />
+                </Toggle>
+                {displayAs === 'outliner' && (
+                    <Bullet
                         style={{
-                            display: parentDisplayAs === 'outliner' ? 'block' : 'none',
-                        }}
-                    />
-                    <BulletContainer
-                        style={{
-                            backgroundColor: collapsed ? '#e4e4e4' : 'transparent',
+                            backgroundColor: collapsed ? colors.grey[200] : 'transparent',
                         }}
                     >
-                        <Bullet />
-                    </BulletContainer>
-                </>
+                        <svg width="0.375rem" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="8" cy="8" r="8" />
+                        </svg>
+                    </Bullet>
+                )}
+            </ControlsContainer>
+            {displayAs === 'outliner' && (
+                <ChildrenLeftBorder
+                    style={{
+                        display: parentDisplayAs === 'outliner' ? 'block' : 'none',
+                    }}
+                />
             )}
-            <ChildrenContainer style={{ flexGrow: 1 }}>{children}</ChildrenContainer>
+            <ChildrenContainer>
+                <OutlineContentContext.Provider value={rContentEl}>{children}</OutlineContentContext.Provider>
+            </ChildrenContainer>
         </Outline>
     );
 }
@@ -549,6 +568,15 @@ export function DetailedOutlinerBlock({
 
     const childrenDisplayAs = data?._value?.children?._displayAs || 'outliner';
 
+    const rOutlineContentEl = React.useContext(OutlineContentContext);
+    const combinedRef = React.useCallback(
+        (node: HTMLDivElement) => {
+            rOutlineContentEl.current = node;
+            editorRef.current = node;
+        },
+        [rOutlineContentEl],
+    );
+
     return (
         <NoteViewPageWrapper isRoot={!isChildren}>
             <div
@@ -579,7 +607,7 @@ export function DetailedOutlinerBlock({
                 >
                     <div
                         key="editor-frame"
-                        ref={editorRef}
+                        ref={combinedRef}
                         tabIndex={textInput?.current ? undefined : -1}
                         onClick={(ev) => {
                             if (textInput?.current && !isEditing) {
