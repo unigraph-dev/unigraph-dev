@@ -270,7 +270,10 @@ export function OutlineComponent({
         <Outline
             onPointerMove={onPointerMove}
             onPointerLeave={onPointerLeave}
-            style={{ transform: displayAs === 'outliner' ? 'translateX(-1rem)' : 'translateX(-1.3rem)' }}
+            style={{
+                transform: displayAs === 'outliner' ? 'translateX(-1rem)' : 'translateX(-1.3rem)',
+                width: displayAs === 'outliner' ? 'calc(100% + 1rem)' : 'calc(100% + 1.3rem)',
+            }}
         >
             <Toggle
                 style={{
