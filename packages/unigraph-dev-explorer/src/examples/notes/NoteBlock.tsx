@@ -416,6 +416,36 @@ const DateContainer = styled('div')({
     fontSize: '0.9rem',
 });
 
+const ChildrenIndicator = React.memo(function ChildrenIndicator({
+    count,
+    onClick,
+}: {
+    count: number;
+    onClick?: React.MouseEventHandler;
+}) {
+    return (
+        <Typography
+            style={{
+                position: 'absolute',
+                top: 0,
+                left: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0.125rem',
+                color: colors.grey[500],
+                wordBreak: 'keep-all',
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+            }}
+            title={`Show ${count} children`}
+            onClick={onClick}
+        >
+            ({count})
+        </Typography>
+    );
+});
+
 export function DetailedOutlinerBlock({
     data,
     isChildren,
@@ -604,6 +634,15 @@ export function DetailedOutlinerBlock({
         [callbacks, componentId, data],
     );
 
+    const onClickChildrenIndicator = React.useCallback(
+        (ev: React.MouseEvent) => {
+            ev.preventDefault();
+            ev.stopPropagation();
+            setCollapsed(false);
+        },
+        [setCollapsed],
+    );
+
     return (
         <NoteViewPageWrapper isRoot={!isChildren}>
             <div
@@ -680,19 +719,9 @@ export function DetailedOutlinerBlock({
                             editorContext,
                         )}
                         {NoteEditorInner}
-                        <Typography
-                            style={{
-                                display: isEditing || !isCollapsed ? 'none' : '',
-                                marginLeft: '6px',
-                                color: 'gray',
-                                cursor: 'pointer',
-                            }}
-                            onClick={(ev) => {
-                                ev.preventDefault();
-                                ev.stopPropagation();
-                                setCollapsed(false);
-                            }}
-                        >{`(${subentities.length})`}</Typography>
+                        {!isEditing && isCollapsed && (
+                            <ChildrenIndicator count={subentities.length} onClick={onClickChildrenIndicator} />
+                        )}
                     </div>
                 </NoteViewTextWrapper>
                 {!isChildren && !callbacks.isEmbed && (
