@@ -41,6 +41,9 @@ const childrenComponents = {
     '$/schema/embed_block': {
         view: DetailedEmbedBlock,
         query: noteQuery,
+        options: {
+            ignoreBacklinks: true,
+        },
     },
 };
 
@@ -832,7 +835,7 @@ export function DetailedEmbedBlock({
             console.log(ev.target);
             const caretPos = Number((ev.target as HTMLElement).getAttribute('markdownPos') || -1);
             (ev.target as HTMLElement).removeAttribute('markdownPos');
-            const finalCaretPos = caretPos === -1 ? getCurrentText().length : caretPos;
+            const finalCaretPos = caretPos === -1 ? getCurrentText?.()?.length : caretPos;
             window.unigraph.getState('global/focused').setValue({
                 ...window.unigraph.getState('global/focused').value,
                 uid: data?.uid,

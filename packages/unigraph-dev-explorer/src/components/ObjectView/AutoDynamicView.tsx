@@ -54,7 +54,8 @@ export function AutoDynamicView({
     if (!callbacks) callbacks = {};
 
     const shouldGetBacklinks =
-        finalOptions.shouldGetBacklinks || (!excludableTypes.includes(object?.type?.['unigraph.id']) && !inline);
+        !finalOptions.ignoreBacklinks &&
+        (finalOptions.shouldGetBacklinks || (!excludableTypes.includes(object?.type?.['unigraph.id']) && !inline));
 
     const dataContext = React.useContext(DataContext);
     const tabContext = React.useContext(TabContext);
@@ -303,7 +304,7 @@ export function AutoDynamicView({
             <DataContextWrapper
                 contextUid={object?.uid}
                 contextData={getObjectRef.current()}
-                parents={totalParents}
+                parents={finalOptions.ignoreBacklinks ? dataContext.parents : totalParents}
                 viewType="$/schema/dynamic_view"
                 expandedChildren={expandedChildren || false}
             >
