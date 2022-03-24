@@ -179,40 +179,28 @@ const Outline = styled('div')({
     position: 'relative',
 });
 
-const ControlsContainer = styled('div')({
+const controlStyles = {
     flex: '0 0 1rem',
-    display: 'flex',
     width: '1rem',
     height: '1rem',
+    display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    transform: 'translateY(-0.2rem)', // fine tune vertical alignment
-    position: 'relative',
-});
+};
 
 const Bullet = styled('div')({
-    flex: '0 0 1rem',
-    display: 'flex',
-    width: '1rem',
-    height: '1rem',
-    borderRadius: '50%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    transition: 'background 0.1s ease-in',
-    '& > svg': {
-        fill: colors.common.black,
+    ...controlStyles,
+    position: 'relative',
+    top: '0.125rem',
+    '& > svg > circle': {
+        transition: 'fill 0.1s ease-in',
     },
 });
 
 const Toggle = styled('button')({
-    position: 'absolute',
-    top: 0,
-    left: '-1rem',
-    width: '1rem',
-    height: '1rem',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
+    ...controlStyles,
+    position: 'relative',
+    top: '0.125rem',
     cursor: 'pointer',
     background: 'none',
     border: 'none',
@@ -220,7 +208,7 @@ const Toggle = styled('button')({
     outline: 'none',
     margin: 0,
     padding: '0.1rem',
-    fontSize: '1.25rem',
+    fontSize: '1rem',
     transition: 'transform 0.1s ease-in, background 0.1s ease-in',
     '&:hover': {
         backgroundColor: colors.grey[200],
@@ -233,7 +221,7 @@ const ChildrenLeftBorder = styled('div')({
     width: '1px',
     backgroundColor: colors.grey[300],
     position: 'absolute',
-    left: 'calc(-0.8rem - 0.5px)',
+    left: 'calc(0.2rem - 0.5px)',
 });
 
 const ChildrenContainer = styled('div')({
@@ -278,29 +266,28 @@ export function OutlineComponent({
     const toggleChildren = React.useCallback(() => setCollapsed && setCollapsed(!collapsed), [collapsed, setCollapsed]);
 
     return (
-        <Outline onPointerMove={onPointerMove} onPointerLeave={onPointerLeave}>
-            <ControlsContainer>
-                <Toggle
-                    style={{
-                        visibility: showCollapse && hover ? 'visible' : 'hidden',
-                        transform: `rotate(${collapsed ? '0deg' : '90deg'})`,
-                    }}
-                    onClick={toggleChildren}
-                >
-                    <ChevronRight fontSize="inherit" />
-                </Toggle>
-                {displayAs === 'outliner' && (
-                    <Bullet
-                        style={{
-                            backgroundColor: collapsed ? colors.grey[200] : 'transparent',
-                        }}
-                    >
-                        <svg width="0.375rem" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="8" cy="8" r="8" />
-                        </svg>
-                    </Bullet>
-                )}
-            </ControlsContainer>
+        <Outline
+            onPointerMove={onPointerMove}
+            onPointerLeave={onPointerLeave}
+            style={{ transform: 'translateX(-1rem)' }}
+        >
+            <Toggle
+                style={{
+                    visibility: showCollapse && hover ? 'visible' : 'hidden',
+                    transform: `rotate(${collapsed ? '0deg' : '90deg'})`,
+                }}
+                onClick={toggleChildren}
+            >
+                <ChevronRight fontSize="inherit" />
+            </Toggle>
+            {displayAs === 'outliner' && (
+                <Bullet>
+                    <svg width="100%" height="100%" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" style={{ fill: collapsed ? colors.grey[200] : 'transparent' }} />
+                        <circle cx="12" cy="12" r="4" style={{ fill: 'black' }} />
+                    </svg>
+                </Bullet>
+            )}
             {displayAs === 'outliner' && (
                 <ChildrenLeftBorder
                     style={{
