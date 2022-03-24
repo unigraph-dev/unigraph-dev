@@ -74,6 +74,14 @@ const BlockChild = ({ elindex, shortcuts, displayAs, isCollapsed, setCollapsed, 
     />
 );
 
+const dropIndicatorStyles = {
+    position: 'absolute',
+    height: '6px',
+    marginTop: '-3px',
+    marginBottom: '1px',
+    zIndex: 999,
+};
+
 const BlockChildren = ({
     isChildren,
     subentities,
@@ -98,13 +106,7 @@ const BlockChildren = ({
                     dndContext={tabContext.viewId}
                     listId={data?.uid}
                     arrayId={data?._value?.children?.uid}
-                    style={{
-                        position: 'absolute',
-                        height: '6px',
-                        marginTop: '-3px',
-                        marginBottom: '1px',
-                        zIndex: 999,
-                    }}
+                    style={dropIndicatorStyles}
                     transformOnDrop={(props: any) => {
                         return {
                             ...props,

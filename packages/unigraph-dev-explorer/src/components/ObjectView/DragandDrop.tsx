@@ -78,7 +78,7 @@ export function DragandDrop({
         <Comp>
             {children.map((child: any, index: number) => (
                 <ChildrenComp key={`${child.key || index}`}>
-                    <div key={`${child.key || index}_dropper`}>
+                    <div key={`${child.key || index}_dropper`} style={{ position: 'relative' }}>
                         {child}
                         <BelowDropAcceptor
                             onDrop={(props: any) => {
