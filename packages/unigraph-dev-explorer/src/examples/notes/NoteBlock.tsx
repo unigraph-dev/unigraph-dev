@@ -177,6 +177,7 @@ const Outline = styled('div')({
     display: 'flex',
     alignItems: 'baseline',
     position: 'relative',
+    transition: 'transform 0.1s ease-in',
 });
 
 const controlStyles = {
@@ -269,7 +270,7 @@ export function OutlineComponent({
         <Outline
             onPointerMove={onPointerMove}
             onPointerLeave={onPointerLeave}
-            style={{ transform: 'translateX(-1rem)' }}
+            style={{ transform: displayAs === 'outliner' ? 'translateX(-1rem)' : 'translateX(-1.3rem)' }}
         >
             <Toggle
                 style={{
