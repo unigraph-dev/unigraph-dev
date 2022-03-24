@@ -401,6 +401,15 @@ function NoteViewTextWrapper({ children, semanticChildren, isRoot, onContextMenu
     );
 }
 
+const DateContainer = styled('div')({
+    marginTop: '4px',
+    marginBottom: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    color: colors.grey[500],
+    fontSize: '0.9rem',
+});
+
 export function DetailedOutlinerBlock({
     data,
     isChildren,
@@ -675,15 +684,17 @@ export function DetailedOutlinerBlock({
                         >{`(${subentities.length})`}</Typography>
                     </div>
                 </NoteViewTextWrapper>
-                {!isChildren && !callbacks.isEmbed ? (
-                    <div style={{ marginTop: '4px', marginBottom: '12px', display: 'flex', color: 'gray' }}>
-                        <Icon path={mdiClockOutline} size={0.8} style={{ marginRight: '4px' }} />
-                        {`${new Date(data._updatedAt || 0).toLocaleString()} (${Sugar.Date.relative(
+                {!isChildren && !callbacks.isEmbed && (
+                    <DateContainer>
+                        <Icon
+                            path={mdiClockOutline}
+                            size={0.75}
+                            style={{ marginRight: '0.25rem', transform: 'translateY(-0.08rem)' }}
+                        />
+                        <span>{`${Sugar.Date(data._updatedAt || 0).long()} (${Sugar.Date.relative(
                             new Date(data._updatedAt || 0),
-                        )})`}
-                    </div>
-                ) : (
-                    []
+                        )})`}</span>
+                    </DateContainer>
                 )}
                 {!isCollapsed && (
                     <BlockChildren
