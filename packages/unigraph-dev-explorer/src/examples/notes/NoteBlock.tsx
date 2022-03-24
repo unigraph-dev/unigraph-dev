@@ -374,7 +374,11 @@ export function ParentsAndReferences({ data }: any) {
 }
 
 function NoteViewPageWrapper({ children, isRoot }: any) {
-    return !isRoot ? children : <div style={{ height: '100%', width: '100%', padding: '1rem 2rem' }}>{children}</div>;
+    return !isRoot ? (
+        children
+    ) : (
+        <div style={{ height: '100%', width: '100%', padding: '1rem 2rem', overflow: 'auto' }}>{children}</div>
+    );
 }
 
 /** Renders both page title and content of each note block. */
