@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable no-param-reassign */
-import { Typography, colors } from '@mui/material';
+import { Typography, colors, IconButton } from '@mui/material';
 import { styled } from '@mui/styles';
 import React from 'react';
 import _ from 'lodash';
@@ -221,7 +221,7 @@ const Toggle = styled('button')({
     margin: 0,
     padding: '0.1rem',
     fontSize: '1.25rem',
-    transition: 'transform 0.1s ease-in',
+    transition: 'transform 0.1s ease-in, background 0.1s ease-in',
     '&:hover': {
         backgroundColor: colors.grey[200],
     },
@@ -386,8 +386,22 @@ function NoteViewPageWrapper({ children, isRoot }: any) {
     return !isRoot ? children : <div style={{ height: '100%', width: '100%', padding: '1rem' }}>{children}</div>;
 }
 
-function NoteViewTextWrapper({ children, semanticChildren, isRoot, onContextMenu, callbacks, isEditing }: any) {
-    // console.log(callbacks.BacklinkComponent);
+/** Renders both page title and content of each note block. */
+function NoteViewTextWrapper({
+    children,
+    semanticChildren,
+    isRoot,
+    isEditing,
+    onContextMenu,
+    callbacks,
+}: {
+    children: React.ReactNode;
+    semanticChildren: React.ReactNode;
+    isRoot: boolean;
+    isEditing: boolean;
+    onContextMenu: React.MouseEventHandler;
+    callbacks: any;
+}) {
     return (
         <div
             style={{ display: 'flex', alignItems: 'center' }}
@@ -395,8 +409,12 @@ function NoteViewTextWrapper({ children, semanticChildren, isRoot, onContextMenu
         >
             {children}
             {semanticChildren}
-            {isRoot ? <MoreVert onClick={onContextMenu} style={{ marginLeft: '8px' }} /> : []}
-            {callbacks.BacklinkComponent ? callbacks.BacklinkComponent : []}
+            {isRoot && (
+                <IconButton onClick={onContextMenu} style={{ marginLeft: '8px' }} aria-label="more" size="small">
+                    <MoreVert fontSize="small" />
+                </IconButton>
+            )}
+            {callbacks.BacklinkComponent}
         </div>
     );
 }
@@ -591,6 +609,13 @@ export function DetailedOutlinerBlock({
         [rOutlineContentEl],
     );
 
+    const onContextMenu = React.useCallback(
+        (event: React.MouseEvent) => {
+            onUnigraphContextMenu(event, data, undefined, { ...callbacks, componentId });
+        },
+        [callbacks, componentId, data],
+    );
+
     return (
         <NoteViewPageWrapper isRoot={!isChildren}>
             <div
@@ -602,9 +627,7 @@ export function DetailedOutlinerBlock({
                 <NoteViewTextWrapper
                     isRoot={!isChildren}
                     isEditing={isEditing}
-                    onContextMenu={(event: any) =>
-                        onUnigraphContextMenu(event, data, undefined, { ...callbacks, componentId })
-                    }
+                    onContextMenu={onContextMenu}
                     callbacks={callbacks}
                     semanticChildren={otherChildren
                         .filter((el: any) => el?.type)
