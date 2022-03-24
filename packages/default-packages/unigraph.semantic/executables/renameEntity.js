@@ -1,4 +1,4 @@
-let { uid, newName, subIds } = context.params;
+let { uid, newName, subIds, force } = context.params;
 // "0x7ad860", "Meeting note with Aria2" (from "Meeting note with Aria"), N/A
 // First, get the old name and everything referencing the old uid
 
@@ -17,7 +17,7 @@ unigraph.indexes {
             expand(_userpredicate_) { } } } } } }
   }
 }
-<unigraph.origin> @cascade {
+<unigraph.origin> {
         uid
   unigraph.indexes {
         name {
@@ -56,16 +56,21 @@ const oldName = oldNameRef['_value.%'];
 newName = newName.replace(/"/g, '\\"');
 const updateTriplets = [`<${oldNameRef.uid}> <_value.%> "${newName}" .`];
 
-statusQueryResult['unigraph.origin']?.forEach((childRef) => {
+(statusQueryResult['unigraph.origin'] || []).forEach((childRef) => {
     // For every reference, do the following:
     // 1. Rename every children that matches the key & old UID to the new key
-    childRef._value.children?.['_value[']?.forEach((child) => {
-        if (child._key === `[[${oldName}]]` && child._value._value.uid === uid)
+    childRef?._value?.children?.['_value[']?.forEach((child) => {
+        if ((child._key === `[[${oldName}]]` || force) && child?._value?._value?.uid === uid)
             updateTriplets.push(`<${child.uid}> <_key> "[[${newName}]]" .`);
     });
     // 2. Rename the old ref to new one, for each occurence
-    const oldRefName = new UnigraphObject(childRef['unigraph.indexes'].name).as('primitiveRef');
-    if (oldRefName)
+    const oldRefName = new UnigraphObject(childRef?.['unigraph.indexes']?.name)?.as('primitiveRef');
+    if (
+        oldRefName?.uid &&
+        oldRefName.uid !== oldNameRef.uid &&
+        oldRefName?.['_value.%'] &&
+        (oldRefName['_value.%'].includes(oldName) || force)
+    )
         updateTriplets.push(
             `<${oldRefName.uid}> <_value.%> "${oldRefName['_value.%'].replaceAll(
                 `[[${oldName}]]`,
@@ -73,5 +78,7 @@ statusQueryResult['unigraph.origin']?.forEach((childRef) => {
             )}" .`,
         );
 });
+
+console.log(updateTriplets, 'Hi');
 
 await unigraph.updateTriplets(updateTriplets, undefined, subIds);

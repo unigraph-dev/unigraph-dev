@@ -8,14 +8,21 @@ import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 export function StringObjectViewer({ object }: { object: any }) {
     const finalObject = unpad(object);
     const [expanded, setExpanded] = React.useState(false);
+    const name = window.unigraph.getNamespaceMap?.()?.[object?.type?.['unigraph.id']]?._name;
 
     return (
         <div style={{ width: '100%' }}>
-            <span style={{ color: 'gray' }}>Type: </span>
-            {window.unigraph.getNamespaceMap?.()?.[object?.type?.['unigraph.id']]?._name}
+            <span style={{ color: 'gray' }}>{name ? 'Type: ' : 'Uid: '}</span>
+            {name || object.uid}
             <br />
             <div
-                style={{ display: 'flex', marginLeft: '-4px', marginTop: '2px', marginBottom: '2px', color: 'gray' }}
+                style={{
+                    display: Object.keys(object).filter((x) => x.startsWith('_value')).length ? 'flex' : 'none',
+                    marginLeft: '-4px',
+                    marginTop: '2px',
+                    marginBottom: '2px',
+                    color: 'gray',
+                }}
                 onClick={() => setExpanded(!expanded)}
             >
                 {expanded ? <ExpandLess /> : <ExpandMore />}
