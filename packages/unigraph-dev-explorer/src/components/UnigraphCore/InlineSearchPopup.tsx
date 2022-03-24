@@ -135,9 +135,9 @@ export function InlineSearch() {
     }, [searchResults, topResults, state]);
 
     React.useEffect(() => {
-        if (searchResults.length > 0 && searchResults[0]?.name.toLowerCase().includes(state.search?.toLowerCase()))
+        if (topResults.length > 0 && topResults[0]?.name.toLowerCase().includes(state.search?.toLowerCase()))
             setCurrentAction((ca: number) => Math.max(ca, (state.default || []).length));
-    }, [searchResults, topResults, (state.default || []).length]);
+    }, [topResults, (state.default || []).length]);
 
     React.useEffect(() => {
         const handler = (ev: any) => {
