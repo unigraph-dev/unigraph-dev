@@ -37,6 +37,11 @@
 
 .flexlayout__tab_button_content {
     font-size: 14px;
+    line-height: 1;
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .flexlayout__tab_button_trailing {
