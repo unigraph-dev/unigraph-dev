@@ -44,7 +44,9 @@ React.useEffect(() => {
 }, []);
 
 return note && note?.type?.['unigraph.id'] === '$/schema/journal' ? (
-    <AutoDynamicViewDetailed object={note} />
+    <div style={{ margin: '0px -16px', display: 'flex' }}>
+        <AutoDynamicViewDetailed object={note} />
+    </div>
 ) : note ? (
     ''
 ) : (
