@@ -381,7 +381,7 @@ export function ParentsAndReferences({ data }: any) {
 }
 
 function NoteViewPageWrapper({ children, isRoot }: any) {
-    return !isRoot ? children : <div style={{ height: '100%', width: '100%', padding: '16px' }}>{children}</div>;
+    return !isRoot ? children : <div style={{ height: '100%', width: '100%', padding: '1rem' }}>{children}</div>;
 }
 
 function NoteViewTextWrapper({ children, semanticChildren, isRoot, onContextMenu, callbacks, isEditing }: any) {
