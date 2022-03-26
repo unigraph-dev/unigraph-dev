@@ -180,12 +180,6 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                                 },
                             });
                         },
-                        ol: (props) =>
-                            compFactory('ol', {
-                                ...props,
-                                inline: true,
-                                style: { marginLeft: '8px' },
-                            }),
                         a: (props) =>
                             compFactory('a', {
                                 ...props,
