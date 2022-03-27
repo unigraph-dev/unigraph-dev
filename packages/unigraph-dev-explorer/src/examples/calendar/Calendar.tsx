@@ -56,7 +56,7 @@ const CalendarEventBig = ({ data, callbacks }: any) => {
                 <AutoDynamicView
                     object={new UnigraphObject(data.get('time_frame')._value)}
                     callbacks={callbacks}
-                    options={{ noDrag: true, noDrop: true, noContextMenu: true, inline: true }}
+                    options={{ noDrag: true, noDrop: true, noContextMenu: false, inline: true }}
                 />
                 <div
                     style={{
