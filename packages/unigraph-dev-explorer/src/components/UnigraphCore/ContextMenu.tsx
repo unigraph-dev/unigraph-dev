@@ -12,14 +12,13 @@ export function ContextMenu() {
     const [ctxMenuState, setCtxMenuState] = React.useState<AppState<Partial<ContextMenuState>>>(
         window.unigraph.getState('global/contextMenu'),
     );
-    const [state, setState] = React.useState<Partial<ContextMenuState> | null>(null);
+    const [state, setState] = React.useState<Partial<ContextMenuState>>(
+        window.unigraph.getState('global/contextMenu').value,
+    );
 
     React.useEffect(() => {
         setState(ctxMenuState.value);
-        if (ctxMenuState !== null) {
-            console.log('ctxMenuState', { ctxMenuState });
-            ctxMenuState.subscribe((v) => setState(v));
-        }
+        ctxMenuState.subscribe((v) => setState(v));
     }, [ctxMenuState]);
 
     const [schemaMenuConstructors, setSchemaMenuConstructors] = React.useState<any>(null);
@@ -27,16 +26,13 @@ export function ContextMenu() {
     const [objCtxDef, setObjCtxDef] = React.useState<any>(null);
 
     React.useEffect(() => {
-        if (state !== null) {
-            setSchemaMenuConstructors([
-                ...(window.unigraph.getState('registry/contextMenu').value[
-                    state.contextObject?.type?.['unigraph.id']
-                ] || []),
-                ...(state.schemaMenuContent || []),
-            ]);
-            setObjDef(window.unigraph.getNamespaceMap?.()?.[state.contextObject?.type?.['unigraph.id']]);
-            setObjCtxDef(window.unigraph.getNamespaceMap?.()?.[state.contextContextObject?.type?.['unigraph.id']]);
-        }
+        setSchemaMenuConstructors([
+            ...(window.unigraph.getState('registry/contextMenu').value[state.contextObject?.type?.['unigraph.id']] ||
+                []),
+            ...(state.schemaMenuContent || []),
+        ]);
+        setObjDef(window.unigraph.getNamespaceMap?.()?.[state.contextObject?.type?.['unigraph.id']]);
+        setObjCtxDef(window.unigraph.getNamespaceMap?.()?.[state.contextContextObject?.type?.['unigraph.id']]);
     }, [state]);
 
     const handleClose = React.useCallback(() => {
@@ -44,7 +40,7 @@ export function ContextMenu() {
         ctxMenuState.setValue({ show: false });
     }, [ctxMenuState]);
 
-    return state === null ? null : (
+    return (
         <div ref={thisRef}>
             <Popover
                 id="context-menu"
