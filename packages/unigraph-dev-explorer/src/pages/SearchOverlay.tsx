@@ -249,31 +249,30 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
         }
     }, [parsed]);
 
-    const search = React.useMemo(
-        () =>
-            _.debounce((newQuery) => {
-                if (newQuery.length && !newQuery.startsWith('+')) {
-                    window.unigraph
-                        .getSearchResults(parseQuery(newQuery) as any, 'metadata', 2, {
-                            noPrimitives: true,
-                        })
-                        .then((res) => {
-                            setEntities(
-                                res.entities?.length > 0
-                                    ? res.entities.filter(
-                                          (el) =>
-                                              typeHasDynamicView(el?.type?.['unigraph.id']) &&
-                                              !['$/schema/markdown', '$/schema/subentity'].includes(
-                                                  el?.type?.['unigraph.id'],
-                                              ),
-                                      )
-                                    : [null],
-                            );
-                        });
-                } else {
-                    setEntities([]);
-                }
-            }, 200),
+    const search = React.useCallback(
+        _.debounce((newQuery) => {
+            if (newQuery.length && !newQuery.startsWith('+')) {
+                window.unigraph
+                    .getSearchResults(parseQuery(newQuery) as any, 'metadata', 2, {
+                        noPrimitives: true,
+                    })
+                    .then((res) => {
+                        setEntities(
+                            res.entities?.length > 0
+                                ? res.entities.filter(
+                                      (el) =>
+                                          typeHasDynamicView(el?.type?.['unigraph.id']) &&
+                                          !['$/schema/markdown', '$/schema/subentity'].includes(
+                                              el?.type?.['unigraph.id'],
+                                          ),
+                                  )
+                                : [null],
+                        );
+                    });
+            } else {
+                setEntities([]);
+            }
+        }, 200),
         [],
     );
 
