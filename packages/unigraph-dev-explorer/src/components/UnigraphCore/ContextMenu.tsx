@@ -7,24 +7,38 @@ import { ContextMenuState } from '../../global.d';
 import { contextMenuItemStyle, deselectUid } from '../../utils';
 
 export function ContextMenu() {
-    const ctxMenuState: AppState<Partial<ContextMenuState>> = window.unigraph.getState('global/contextMenu');
-
-    const [state, setState] = React.useState(ctxMenuState.value);
     const thisRef = React.useRef(null);
 
-    const handleClose = () => {
+    const [ctxMenuState, setCtxMenuState] = React.useState<AppState<Partial<ContextMenuState>>>(
+        window.unigraph.getState('global/contextMenu'),
+    );
+    const [state, setState] = React.useState<Partial<ContextMenuState>>(
+        window.unigraph.getState('global/contextMenu').value,
+    );
+
+    React.useEffect(() => {
+        setState(ctxMenuState.value);
+        ctxMenuState.subscribe((v) => setState(v));
+    }, [ctxMenuState]);
+
+    const [schemaMenuConstructors, setSchemaMenuConstructors] = React.useState<any>(null);
+    const [objDef, setObjDef] = React.useState<any>(null);
+    const [objCtxDef, setObjCtxDef] = React.useState<any>(null);
+
+    React.useEffect(() => {
+        setSchemaMenuConstructors([
+            ...(window.unigraph.getState('registry/contextMenu').value[state.contextObject?.type?.['unigraph.id']] ||
+                []),
+            ...(state.schemaMenuContent || []),
+        ]);
+        setObjDef(window.unigraph.getNamespaceMap?.()?.[state.contextObject?.type?.['unigraph.id']]);
+        setObjCtxDef(window.unigraph.getNamespaceMap?.()?.[state.contextContextObject?.type?.['unigraph.id']]);
+    }, [state]);
+
+    const handleClose = React.useCallback(() => {
         deselectUid();
         ctxMenuState.setValue({ show: false });
-    };
-    const schemaMenuConstructors = [
-        ...(window.unigraph.getState('registry/contextMenu').value[state.contextObject?.type?.['unigraph.id']] || []),
-        ...(state.schemaMenuContent || []),
-    ];
-
-    React.useMemo(() => ctxMenuState.subscribe((v) => setState(v)), []);
-
-    const objDef = window.unigraph.getNamespaceMap?.()?.[state.contextObject?.type?.['unigraph.id']];
-    const objCtxDef = window.unigraph.getNamespaceMap?.()?.[state.contextContextObject?.type?.['unigraph.id']];
+    }, [ctxMenuState]);
 
     return (
         <div ref={thisRef}>
@@ -85,7 +99,7 @@ export function ContextMenu() {
                             state.contextContextUid,
                         ),
                     )}
-                    {schemaMenuConstructors.length > 0 ? (
+                    {schemaMenuConstructors !== null && schemaMenuConstructors.length > 0 ? (
                         <>
                             <Divider sx={{ margin: '4px 0px !important' }} />
                             {schemaMenuConstructors.map((el: any) =>

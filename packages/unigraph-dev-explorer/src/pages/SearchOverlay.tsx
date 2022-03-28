@@ -21,8 +21,12 @@ const groups = [
 ];
 
 function AdderComponent({ input, setInput, open, setClose, callback, summonerTooltip }: any) {
-    const parsedKey = input.substr(1, input.indexOf(' ') - 1);
-    const parsedValue = input.substr(input.indexOf(' ') + 1);
+    const [parsedInput, setParsedInput] = React.useState({ key: '', val: '' });
+
+    React.useEffect(() => {
+        setParsedInput({ key: input.substr(1, input.indexOf(' ') - 1), val: input.substr(input.indexOf(' ') + 1) });
+    }, [input]);
+
     const [toAdd, setToAdd] = React.useState<any>(null);
     const [adderRefs, setAdderRefs] = React.useState<any[]>([]);
     const tf = React.useRef<HTMLDivElement | null>(null);
@@ -33,8 +37,8 @@ function AdderComponent({ input, setInput, open, setClose, callback, summonerToo
 
     React.useEffect(() => {
         const allAdders = window.unigraph.getState('registry/quickAdder').value;
-        if (allAdders[parsedKey]) {
-            allAdders[parsedKey].adder(parsedValue).then((res: any) => {
+        if (allAdders[parsedInput.key]) {
+            allAdders[parsedInput.key].adder(parsedInput.val).then((res: any) => {
                 const [object, type] = res;
                 window.unigraph.getSchemas().then((schemas: any) => {
                     try {
@@ -65,7 +69,7 @@ function AdderComponent({ input, setInput, open, setClose, callback, summonerToo
                 });
             });
         }
-    }, [input]);
+    }, [parsedInput]);
 
     return (
         <div>
@@ -99,11 +103,11 @@ function AdderComponent({ input, setInput, open, setClose, callback, summonerToo
                     setInput(ev.target.value);
                 }}
                 onKeyPress={async (ev) => {
-                    if (ev.key === 'Enter' && window.unigraph.getState('registry/quickAdder').value[parsedKey]) {
+                    if (ev.key === 'Enter' && window.unigraph.getState('registry/quickAdder').value[parsedInput.key]) {
                         window.unigraph
                             .getState('registry/quickAdder')
-                            .value[parsedKey]?.adder(
-                                JSON.parse(JSON.stringify(parsedValue)),
+                            .value[parsedInput.key]?.adder(
+                                JSON.parse(JSON.stringify(parsedInput.val)),
                                 false,
                                 callback,
                                 adderRefs,
@@ -119,11 +123,13 @@ function AdderComponent({ input, setInput, open, setClose, callback, summonerToo
             />
             <div>
                 {summonerTooltip ? <Typography>{summonerTooltip}</Typography> : []}
-                <Typography>{`Adding ${parsedKey} (Enter to add)`}</Typography>
+                <Typography>{`Adding ${parsedInput.key} (Enter to add)`}</Typography>
                 {toAdd || []}
                 <div style={{ marginTop: '32px' }}>
-                    {window.unigraph.getState('registry/quickAdder').value[parsedKey]?.tooltip
-                        ? React.createElement(window.unigraph.getState('registry/quickAdder').value[parsedKey]?.tooltip)
+                    {window.unigraph.getState('registry/quickAdder').value[parsedInput.key]?.tooltip
+                        ? React.createElement(
+                              window.unigraph.getState('registry/quickAdder').value[parsedInput.key]?.tooltip,
+                          )
                         : []}
                 </div>
             </div>
@@ -243,31 +249,30 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
         }
     }, [parsed]);
 
-    const search = React.useMemo(
-        () =>
-            _.debounce((newQuery) => {
-                if (newQuery.length && !newQuery.startsWith('+')) {
-                    window.unigraph
-                        .getSearchResults(parseQuery(newQuery) as any, 'metadata', 2, {
-                            noPrimitives: true,
-                        })
-                        .then((res) => {
-                            setEntities(
-                                res.entities?.length > 0
-                                    ? res.entities.filter(
-                                          (el) =>
-                                              typeHasDynamicView(el?.type?.['unigraph.id']) &&
-                                              !['$/schema/markdown', '$/schema/subentity'].includes(
-                                                  el?.type?.['unigraph.id'],
-                                              ),
-                                      )
-                                    : [null],
-                            );
-                        });
-                } else {
-                    setEntities([]);
-                }
-            }, 200),
+    const search = React.useCallback(
+        _.debounce((newQuery) => {
+            if (newQuery.length && !newQuery.startsWith('+')) {
+                window.unigraph
+                    .getSearchResults(parseQuery(newQuery) as any, 'metadata', 2, {
+                        noPrimitives: true,
+                    })
+                    .then((res) => {
+                        setEntities(
+                            res.entities?.length > 0
+                                ? res.entities.filter(
+                                      (el) =>
+                                          typeHasDynamicView(el?.type?.['unigraph.id']) &&
+                                          !['$/schema/markdown', '$/schema/subentity'].includes(
+                                              el?.type?.['unigraph.id'],
+                                          ),
+                                  )
+                                : [null],
+                        );
+                    });
+            } else {
+                setEntities([]);
+            }
+        }, 200),
         [],
     );
 

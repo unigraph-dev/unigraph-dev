@@ -45,17 +45,27 @@ const ResultDisplay = ({ el }: any) => {
 };
 
 export function InlineSearch() {
-    const ctxMenuState: AppState<Partial<SearchPopupState>> = window.unigraph.getState('global/searchPopup');
+    const [ctxMenuState, setCtxMenuState] = React.useState<AppState<Partial<SearchPopupState>>>(
+        window.unigraph.getState('global/searchPopup'),
+    );
+    const [state, setState] = React.useState<Partial<SearchPopupState>>(
+        window.unigraph.getState('global/searchPopup').value,
+    );
+
+    React.useEffect(() => {
+        setState(ctxMenuState.value);
+        ctxMenuState.subscribe((v) => setState(v));
+    }, [ctxMenuState]);
+    //
 
     const [currentAction, setCurrentAction] = React.useState(0);
 
-    const [state, setState] = React.useState(ctxMenuState.value);
-    const search = React.useRef(
+    const search = React.useCallback(
         _.debounce((key: string) => {
             if (key !== undefined && key.length > 1) {
                 window.unigraph
                     .getSearchResults(parseQuery(key as any) as any, 'name', 2, {
-                        hideHidden: ctxMenuState.value.hideHidden,
+                        hideHidden: state.hideHidden,
                     })
                     .then((res: any) => {
                         const resultsTop = res.top
@@ -81,11 +91,10 @@ export function InlineSearch() {
                     });
             }
         }, 200),
+        [state],
     );
 
-    const handleClose = () => ctxMenuState.setValue({ show: false });
-
-    React.useEffect(() => ctxMenuState.subscribe((v) => setState(v)), []);
+    const handleClose = React.useCallback(() => ctxMenuState.setValue({ show: false }), [ctxMenuState]);
 
     const [searchResults, setSearchResults] = React.useState<any[]>([]);
     const [topResults, setTopResults] = React.useState<any[]>([]);
@@ -94,7 +103,7 @@ export function InlineSearch() {
             setSearchResults([]);
             setTopResults([]);
         } else setCurrentAction(0);
-        search.current(state.search as string);
+        search(state.search as string);
     }, [state]);
 
     const [actionItems, setActionItems] = React.useState<any[]>([]);
@@ -137,7 +146,7 @@ export function InlineSearch() {
     React.useEffect(() => {
         if (topResults.length > 0 && topResults[0]?.name.toLowerCase().includes(state.search?.toLowerCase()))
             setCurrentAction((ca: number) => Math.max(ca, (state.default || []).length));
-    }, [topResults, (state.default || []).length]);
+    }, [topResults, (state?.default || []).length]);
 
     React.useEffect(() => {
         const handler = (ev: any) => {
