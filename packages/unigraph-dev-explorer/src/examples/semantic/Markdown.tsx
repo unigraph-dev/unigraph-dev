@@ -36,7 +36,7 @@ const compFactory = (name: string, { node, inline, className, children, ...props
     React.createElement(name, {
         className,
         children,
-        contentEditable: true,
+        contentEditable: name !== 'code', // FIXME: Look into if we can remove this line completely.
         suppressContentEditableWarning: true,
         onPointerUp: (event: PointerEvent) => {
             const currentText = (window.getSelection() as any).anchorNode?.textContent;
