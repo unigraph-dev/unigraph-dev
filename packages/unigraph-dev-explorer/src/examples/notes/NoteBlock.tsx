@@ -278,7 +278,7 @@ export function OutlineComponent({
         >
             <DragHandle
                 style={{
-                    visibility: showCollapse && hover ? 'visible' : 'hidden',
+                    visibility: hover ? 'visible' : 'hidden',
                 }}
             />
             <Toggle
