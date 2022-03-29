@@ -6,7 +6,7 @@ import { styled } from '@mui/styles';
 import React from 'react';
 import _ from 'lodash';
 import { findAllUids, getCircularReplacer, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
-import { ChevronRight, MoreVert } from '@mui/icons-material';
+import { MoreVert } from '@mui/icons-material';
 import stringify from 'json-stable-stringify';
 import { mdiClockOutline, mdiNoteOutline } from '@mdi/js';
 import { Icon } from '@mdi/react';
@@ -15,7 +15,7 @@ import { AppState } from 'unigraph-dev-common/lib/types/unigraph';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { ViewViewDetailed } from '../../components/ObjectView/DefaultObjectView';
 
-import { addChild, copyChildToClipboard } from './commands';
+import { copyChildToClipboard } from './commands';
 import { onUnigraphContextMenu } from '../../components/ObjectView/DefaultObjectContextMenu';
 import { noteQuery, noteQueryDetailed } from './noteQuery';
 import { getParentsAndReferences } from '../../components/ObjectView/backlinksUtils';
@@ -29,7 +29,8 @@ import { useNoteEditor } from './NoteEditor';
 import todoItemPlugin from './contrib/todoItem';
 import { useSubscriptionDelegate } from '../../components/ObjectView/AutoDynamicView/SubscriptionDelegate';
 import { HistoryState } from './history';
-import { DragHandle } from './DragHandle';
+import { Outline, OutlineContentContext } from './Outline';
+import { UnigraphObject as PlainUnigraphObject } from './types';
 
 const childrenComponents = {
     '$/schema/note_block': {
@@ -121,37 +122,40 @@ const BlockChildren = ({
                         };
                     }}
                 >
-                    {subentities.map((el: any, elindex: any) => {
-                        const isCol = isChildrenCollapsed[el.uid];
+                    {(subentities as PlainUnigraphObject[]).map((entity, index) => {
+                        if (!entity?.uid) return undefined;
+                        const { uid } = entity;
+                        const isCollapsed = isChildrenCollapsed[uid];
                         return (
                             <Outline
-                                key={el.uid}
-                                isChildren={isChildren}
-                                collapsed={isCol}
+                                key={uid}
+                                object={entity}
+                                index={index}
+                                collapsed={isCollapsed}
                                 setCollapsed={(val: boolean) => {
                                     setIsChildrenCollapsed({
                                         ...isChildrenCollapsed,
-                                        [el.uid]: val,
+                                        [uid]: val,
                                     });
                                 }}
-                                createBelow={() => {
-                                    addChild(data, editorContext, elindex);
-                                }}
+                                // createBelow={() => {
+                                //     addChild(data, editorContext, elindex);
+                                // }}
                                 displayAs={childrenDisplayAs}
                                 parentDisplayAs={displayAs}
-                                showCollapse={getSubentities(el)[0].length >= 1}
+                                showCollapse={getSubentities(entity)[0].length >= 1}
                             >
                                 <BlockChild
-                                    el={el}
-                                    elindex={elindex}
+                                    el={entity}
+                                    elindex={index}
                                     editorContext={editorContext}
-                                    callbacks={getCallbacks(callbacks, data, editorContext, elindex)}
-                                    shortcuts={getShortcuts(data, editorContext, elindex, copyOrCutHandler, callbacks)}
-                                    isCollapsed={isCol}
+                                    callbacks={getCallbacks(callbacks, data, editorContext, index)}
+                                    shortcuts={getShortcuts(data, editorContext, index, copyOrCutHandler, callbacks)}
+                                    isCollapsed={isCollapsed}
                                     setCollapsed={(val: boolean) => {
                                         setIsChildrenCollapsed({
                                             ...isChildrenCollapsed,
-                                            [el.uid]: val,
+                                            [uid]: val,
                                         });
                                     }}
                                     displayAs={childrenDisplayAs}
@@ -161,157 +165,20 @@ const BlockChildren = ({
                     })}
                 </DragandDrop>
             ) : (
-                <Outline
-                    isChildren={isChildren}
-                    displayAs={data?._value?.children?._displayAs || 'outliner'}
-                    parentDisplayAs={displayAs}
-                >
-                    <PlaceholderNoteBlock onClick={addNoteBlock} />
-                </Outline>
+                data && (
+                    <Outline
+                        object={data}
+                        index={0}
+                        displayAs={data?._value?.children?._displayAs || 'outliner'}
+                        parentDisplayAs={displayAs}
+                    >
+                        <PlaceholderNoteBlock onClick={addNoteBlock} />
+                    </Outline>
+                )
             )}
         </div>
     );
 };
-
-const OutlineContainer = styled('div')({
-    flex: '0 0 auto',
-    display: 'flex',
-    alignItems: 'baseline',
-    position: 'relative',
-    transition: 'transform 0.1s ease-in',
-});
-
-const controlStyles = {
-    flex: '0 0 1rem',
-    width: '1rem',
-    height: '1rem',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-};
-
-const Bullet = styled('div')({
-    ...controlStyles,
-    position: 'relative',
-    top: '0.125rem',
-    '& > svg > circle': {
-        transition: 'fill 0.1s ease-in',
-    },
-});
-
-const Toggle = styled('button')({
-    ...controlStyles,
-    position: 'relative',
-    top: '0.125rem',
-    cursor: 'pointer',
-    background: 'none',
-    border: 'none',
-    borderRadius: '50%',
-    outline: 'none',
-    margin: 0,
-    padding: '0.1rem',
-    fontSize: '1rem',
-    transition: 'transform 0.1s ease-in, background 0.1s ease-in',
-    '&:hover': {
-        backgroundColor: colors.grey[200],
-    },
-});
-
-const ChildrenLeftBorder = styled('div')({
-    flex: '0 0 1px',
-    height: 'calc(100% + 4px)',
-    width: '1px',
-    backgroundColor: colors.grey[300],
-    position: 'absolute',
-    left: 'calc(1.2rem - 0.5px)',
-});
-
-const ChildrenContainer = styled('div')({
-    flexGrow: 1,
-    marginLeft: '0.3rem',
-    wordBreak: 'break-word',
-});
-
-interface OutlineProps {
-    children?: React.ReactNode;
-    collapsed?: boolean;
-    setCollapsed?: (val: boolean) => void;
-    isChildren?: boolean;
-    createBelow?: any;
-    displayAs?: string;
-    showCollapse?: boolean;
-    parentDisplayAs?: string;
-}
-
-/** Hold the reference to the DOM of the content of an outline. */
-const OutlineContentContext = React.createContext<React.MutableRefObject<HTMLDivElement | null>>({ current: null });
-
-/** A container for both the content and its children. */
-export function Outline({
-    children,
-    collapsed,
-    setCollapsed,
-    isChildren,
-    createBelow,
-    displayAs,
-    showCollapse,
-    parentDisplayAs,
-}: OutlineProps) {
-    const [hover, setHover] = React.useState(false);
-    const rContentEl = React.useRef<HTMLDivElement>(null);
-    const onPointerMove = React.useCallback((e: React.PointerEvent) => {
-        const contentEl = rContentEl.current;
-        if (!contentEl) return;
-        const rect = contentEl.getBoundingClientRect();
-        setHover(e.clientY > rect.top && e.clientY < rect.bottom);
-    }, []);
-    const onPointerLeave = React.useCallback(() => setHover(false), []);
-    const toggleChildren = React.useCallback(() => setCollapsed && setCollapsed(!collapsed), [collapsed, setCollapsed]);
-
-    return (
-        <OutlineContainer
-            onPointerMove={onPointerMove}
-            onPointerLeave={onPointerLeave}
-            style={{
-                transform: displayAs === 'outliner' ? 'translateX(-2rem)' : 'translateX(-2.3rem)',
-                width: displayAs === 'outliner' ? 'calc(100% + 2rem)' : 'calc(100% + 2.3rem)',
-            }}
-        >
-            <DragHandle
-                style={{
-                    visibility: hover ? 'visible' : 'hidden',
-                }}
-            />
-            <Toggle
-                style={{
-                    visibility: showCollapse && hover ? 'visible' : 'hidden',
-                    transform: `rotate(${collapsed ? '0deg' : '90deg'})`,
-                }}
-                onClick={toggleChildren}
-            >
-                <ChevronRight fontSize="inherit" />
-            </Toggle>
-            {displayAs === 'outliner' && (
-                <Bullet>
-                    <svg width="100%" height="100%" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="12" cy="12" r="10" style={{ fill: collapsed ? colors.grey[200] : 'transparent' }} />
-                        <circle cx="12" cy="12" r="4" style={{ fill: 'black' }} />
-                    </svg>
-                </Bullet>
-            )}
-            {displayAs === 'outliner' && (
-                <ChildrenLeftBorder
-                    style={{
-                        display: parentDisplayAs === 'outliner' ? 'block' : 'none',
-                    }}
-                />
-            )}
-            <ChildrenContainer>
-                <OutlineContentContext.Provider value={rContentEl}>{children}</OutlineContentContext.Provider>
-            </ChildrenContainer>
-        </OutlineContainer>
-    );
-}
 
 export function ParentsAndReferences({ data }: any) {
     const [parents, setParents] = React.useState([]);
@@ -1170,7 +1037,7 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
                             {noChildren ? (
                                 []
                             ) : (
-                                <Outline isChildren>
+                                <Outline object={refObject} index={index}>
                                     <AutoDynamicView
                                         object={refObject}
                                         callbacks={{ ...callbacks, isEmbed: true }}

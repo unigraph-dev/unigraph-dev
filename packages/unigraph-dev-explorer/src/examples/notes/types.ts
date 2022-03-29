@@ -5,3 +5,10 @@ export type NoteEditorContext = {
     nodesState: any;
     historyState: any;
 };
+
+export interface UnigraphObject {
+    type?: {
+        'unigraph.id': string;
+    };
+    uid?: string;
+}
