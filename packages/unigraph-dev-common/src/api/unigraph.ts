@@ -149,6 +149,10 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
         return states[name];
     };
 
+    const dispatchCommand = (name: string, params: any, context: any) => {
+        console.log('dispatchCommand', { name, params, context });
+    };
+
     function connect() {
         const urlString = new URL(url);
         urlString.searchParams.append('browserId', browserId);
@@ -250,6 +254,8 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
         getState,
         addState,
         deleteState: (name) => delete states[name],
+        getStateMap: () => states,
+        dispatchCommand,
         backendConnection: connection,
         backendMessages: messages,
         eventTarget,

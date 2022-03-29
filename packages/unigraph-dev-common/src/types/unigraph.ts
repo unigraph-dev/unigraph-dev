@@ -418,6 +418,17 @@ export interface Unigraph<TT = WebSocket | false> {
      */
     deleteState(name: string): any;
     /**
+     * Gets a map of all states
+     *
+     */
+    getStateMap(): Record<string, AppState>;
+    /**
+     * Signals user intent to run code. One kind of UI Hook. Only available in front-end.
+     *
+     * @param name Name of the state object - this is globally (to the app) unique
+     */
+    dispatchCommand<T>(name: string, params: T, context: any): any;
+    /**
      * Gets the schema map in cache.
      * @param schemas
      * @param resolve
