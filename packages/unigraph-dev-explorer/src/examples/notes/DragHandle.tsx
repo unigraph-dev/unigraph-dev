@@ -19,14 +19,9 @@ const DragHandleContainer = styled('div')({
     },
 });
 
-interface Props {
-    style?: React.CSSProperties;
-    onContextMenu?: (event: React.MouseEvent) => void;
-}
-
-export const DragHandle = React.forwardRef<HTMLDivElement, Props>(({ style, onContextMenu }, ref) => {
+export const DragHandle = React.forwardRef<HTMLDivElement, React.ComponentPropsWithoutRef<'div'>>((props, ref) => {
     return (
-        <DragHandleContainer ref={ref} style={style} onContextMenu={onContextMenu}>
+        <DragHandleContainer ref={ref} {...props}>
             <svg width="100%" height="100%" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="9" cy="7" r="1.5" />
                 <circle cx="9" cy="12" r="1.5" />
