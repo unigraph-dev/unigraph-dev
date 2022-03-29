@@ -124,7 +124,7 @@ const BlockChildren = ({
                     {subentities.map((el: any, elindex: any) => {
                         const isCol = isChildrenCollapsed[el.uid];
                         return (
-                            <OutlineComponent
+                            <Outline
                                 key={el.uid}
                                 isChildren={isChildren}
                                 collapsed={isCol}
@@ -156,18 +156,18 @@ const BlockChildren = ({
                                     }}
                                     displayAs={childrenDisplayAs}
                                 />
-                            </OutlineComponent>
+                            </Outline>
                         );
                     })}
                 </DragandDrop>
             ) : (
-                <OutlineComponent
+                <Outline
                     isChildren={isChildren}
                     displayAs={data?._value?.children?._displayAs || 'outliner'}
                     parentDisplayAs={displayAs}
                 >
                     <PlaceholderNoteBlock onClick={addNoteBlock} />
-                </OutlineComponent>
+                </Outline>
             )}
         </div>
     );
@@ -232,7 +232,7 @@ const ChildrenContainer = styled('div')({
     wordBreak: 'break-word',
 });
 
-interface OutlineComponentProps {
+interface OutlineProps {
     children?: React.ReactNode;
     collapsed?: boolean;
     setCollapsed?: (val: boolean) => void;
@@ -246,7 +246,8 @@ interface OutlineComponentProps {
 /** Hold the reference to the DOM of the content of an outline. */
 const OutlineContentContext = React.createContext<React.MutableRefObject<HTMLDivElement | null>>({ current: null });
 
-export function OutlineComponent({
+/** A container for both the content and its children. */
+export function Outline({
     children,
     collapsed,
     setCollapsed,
@@ -255,7 +256,7 @@ export function OutlineComponent({
     displayAs,
     showCollapse,
     parentDisplayAs,
-}: OutlineComponentProps) {
+}: OutlineProps) {
     const [hover, setHover] = React.useState(false);
     const rContentEl = React.useRef<HTMLDivElement>(null);
     const onPointerMove = React.useCallback((e: React.PointerEvent) => {
@@ -1169,7 +1170,7 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
                             {noChildren ? (
                                 []
                             ) : (
-                                <OutlineComponent isChildren>
+                                <Outline isChildren>
                                     <AutoDynamicView
                                         object={refObject}
                                         callbacks={{ ...callbacks, isEmbed: true }}
@@ -1179,7 +1180,7 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
                                             isChildren: true,
                                         }}
                                     />
-                                </OutlineComponent>
+                                </Outline>
                             )}
                         </div>
                     </div>
