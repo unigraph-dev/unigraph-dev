@@ -29,6 +29,7 @@ import { useNoteEditor } from './NoteEditor';
 import todoItemPlugin from './contrib/todoItem';
 import { useSubscriptionDelegate } from '../../components/ObjectView/AutoDynamicView/SubscriptionDelegate';
 import { HistoryState } from './history';
+import { DragHandle } from './DragHandle';
 
 const childrenComponents = {
     '$/schema/note_block': {
@@ -172,7 +173,7 @@ const BlockChildren = ({
     );
 };
 
-const Outline = styled('div')({
+const OutlineContainer = styled('div')({
     flex: '0 0 auto',
     display: 'flex',
     alignItems: 'baseline',
@@ -222,7 +223,7 @@ const ChildrenLeftBorder = styled('div')({
     width: '1px',
     backgroundColor: colors.grey[300],
     position: 'absolute',
-    left: 'calc(0.2rem - 0.5px)',
+    left: 'calc(1.2rem - 0.5px)',
 });
 
 const ChildrenContainer = styled('div')({
@@ -267,14 +268,19 @@ export function OutlineComponent({
     const toggleChildren = React.useCallback(() => setCollapsed && setCollapsed(!collapsed), [collapsed, setCollapsed]);
 
     return (
-        <Outline
+        <OutlineContainer
             onPointerMove={onPointerMove}
             onPointerLeave={onPointerLeave}
             style={{
-                transform: displayAs === 'outliner' ? 'translateX(-1rem)' : 'translateX(-1.3rem)',
-                width: displayAs === 'outliner' ? 'calc(100% + 1rem)' : 'calc(100% + 1.3rem)',
+                transform: displayAs === 'outliner' ? 'translateX(-2rem)' : 'translateX(-2.3rem)',
+                width: displayAs === 'outliner' ? 'calc(100% + 2rem)' : 'calc(100% + 2.3rem)',
             }}
         >
+            <DragHandle
+                style={{
+                    visibility: showCollapse && hover ? 'visible' : 'hidden',
+                }}
+            />
             <Toggle
                 style={{
                     visibility: showCollapse && hover ? 'visible' : 'hidden',
@@ -302,7 +308,7 @@ export function OutlineComponent({
             <ChildrenContainer>
                 <OutlineContentContext.Provider value={rContentEl}>{children}</OutlineContentContext.Provider>
             </ChildrenContainer>
-        </Outline>
+        </OutlineContainer>
     );
 }
 
