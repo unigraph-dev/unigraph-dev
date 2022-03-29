@@ -103,79 +103,80 @@ const BlockChildren = ({
 
     return (
         <div style={{ width: '100%' }}>
-            {subentities.length || isChildren ? (
-                <DragandDrop
-                    dndContext={tabContext.viewId}
-                    listId={data?.uid}
-                    arrayId={data?._value?.children?.uid}
-                    style={dropIndicatorStyles}
-                    transformOnDrop={(props: any) => {
-                        return {
-                            ...props,
-                            uid: undefined,
-                            data: {
-                                type: { 'unigraph.id': '$/schema/embed_block' },
-                                _value: {
-                                    content: { uid: props.uid },
-                                },
-                            },
-                        };
-                    }}
-                >
-                    {(subentities as PlainUnigraphObject[]).map((entity, index) => {
-                        if (!entity?.uid) return undefined;
-                        const { uid } = entity;
-                        const isCollapsed = isChildrenCollapsed[uid];
-                        return (
-                            <Outline
-                                key={uid}
-                                object={entity}
-                                index={index}
-                                collapsed={isCollapsed}
-                                setCollapsed={(val: boolean) => {
-                                    setIsChildrenCollapsed({
-                                        ...isChildrenCollapsed,
-                                        [uid]: val,
-                                    });
-                                }}
-                                // createBelow={() => {
-                                //     addChild(data, editorContext, elindex);
-                                // }}
-                                displayAs={childrenDisplayAs}
-                                parentDisplayAs={displayAs}
-                                showCollapse={getSubentities(entity)[0].length >= 1}
-                            >
-                                <BlockChild
-                                    el={entity}
-                                    elindex={index}
-                                    editorContext={editorContext}
-                                    callbacks={getCallbacks(callbacks, data, editorContext, index)}
-                                    shortcuts={getShortcuts(data, editorContext, index, copyOrCutHandler, callbacks)}
-                                    isCollapsed={isCollapsed}
-                                    setCollapsed={(val: boolean) => {
-                                        setIsChildrenCollapsed({
-                                            ...isChildrenCollapsed,
-                                            [uid]: val,
-                                        });
-                                    }}
-                                    displayAs={childrenDisplayAs}
-                                />
-                            </Outline>
-                        );
-                    })}
-                </DragandDrop>
-            ) : (
-                data && (
-                    <Outline
-                        object={data}
-                        index={0}
-                        displayAs={data?._value?.children?._displayAs || 'outliner'}
-                        parentDisplayAs={displayAs}
-                    >
-                        <PlaceholderNoteBlock onClick={addNoteBlock} />
-                    </Outline>
-                )
-            )}
+            {subentities.length || isChildren
+                ? // <DragandDrop
+                  //     dndContext={tabContext.viewId}
+                  //     listId={data?.uid}
+                  //     arrayId={data?._value?.children?.uid}
+                  //     style={dropIndicatorStyles}
+                  //     transformOnDrop={(props: any) => {
+                  //         return {
+                  //             ...props,
+                  //             uid: undefined,
+                  //             data: {
+                  //                 type: { 'unigraph.id': '$/schema/embed_block' },
+                  //                 _value: {
+                  //                     content: { uid: props.uid },
+                  //                 },
+                  //             },
+                  //         };
+                  //     }}
+                  // >
+                  (subentities as PlainUnigraphObject[]).map((entity, index) => {
+                      if (!entity?.uid) return undefined;
+                      const { uid } = entity;
+                      const isCollapsed = isChildrenCollapsed[uid];
+                      return (
+                          <Outline
+                              key={uid}
+                              object={entity}
+                              parentObject={data}
+                              index={index}
+                              editorContext={editorContext}
+                              collapsed={isCollapsed}
+                              setCollapsed={(val: boolean) => {
+                                  setIsChildrenCollapsed({
+                                      ...isChildrenCollapsed,
+                                      [uid]: val,
+                                  });
+                              }}
+                              // createBelow={() => {
+                              //     addChild(data, editorContext, elindex);
+                              // }}
+                              displayAs={childrenDisplayAs}
+                              parentDisplayAs={displayAs}
+                              showCollapse={getSubentities(entity)[0].length >= 1}
+                          >
+                              <BlockChild
+                                  el={entity}
+                                  elindex={index}
+                                  editorContext={editorContext}
+                                  callbacks={getCallbacks(callbacks, data, editorContext, index)}
+                                  shortcuts={getShortcuts(data, editorContext, index, copyOrCutHandler, callbacks)}
+                                  isCollapsed={isCollapsed}
+                                  setCollapsed={(val: boolean) => {
+                                      setIsChildrenCollapsed({
+                                          ...isChildrenCollapsed,
+                                          [uid]: val,
+                                      });
+                                  }}
+                                  displayAs={childrenDisplayAs}
+                              />
+                          </Outline>
+                      );
+                  })
+                : // </DragandDrop>
+                  data && (
+                      <Outline
+                          object={data}
+                          index={0}
+                          editorContext={editorContext}
+                          displayAs={data?._value?.children?._displayAs || 'outliner'}
+                          parentDisplayAs={displayAs}
+                      >
+                          <PlaceholderNoteBlock onClick={addNoteBlock} />
+                      </Outline>
+                  )}
         </div>
     );
 };

@@ -1,13 +1,13 @@
 /* eslint-disable react/require-default-props */
 import React from 'react';
-import { useDrag } from 'react-dnd';
+import { useDrag, useDrop } from 'react-dnd';
 import { colors } from '@mui/material';
 import { styled } from '@mui/styles';
 import { ChevronRight } from '@mui/icons-material';
 
 import { DragHandle } from './DragHandle';
 import { DataContext, TabContext } from '../../utils';
-import { UnigraphObject } from './types';
+import { NoteEditorContext, UnigraphObject } from './types';
 
 const OutlineContainer = styled('div')({
     flex: '0 0 auto',
@@ -68,10 +68,37 @@ const ChildrenContainer = styled('div')({
     wordBreak: 'break-word',
 });
 
+const DropTargetAfter = styled('div')({
+    position: 'absolute',
+    left: '2rem',
+    right: 0,
+    bottom: -10,
+    height: 20,
+});
+
+const DropIndicator = styled('div')({
+    position: 'absolute',
+    left: '2rem',
+    right: 0,
+    bottom: -2,
+    height: 4,
+    zIndex: -1,
+});
+
+/** Describe the object being dragged. */
+interface DragObject {
+    uid: string;
+    parentUid: string;
+    itemType: string | undefined;
+    tabId: number;
+}
+
 interface OutlineProps {
     object: UnigraphObject;
+    parentObject?: UnigraphObject;
     /** The index within its siblings. */
     index: number;
+    editorContext?: NoteEditorContext;
     children?: React.ReactNode;
     collapsed?: boolean;
     setCollapsed?: (val: boolean) => void;
@@ -88,7 +115,9 @@ export const OutlineContentContext = React.createContext<React.MutableRefObject<
 /** A container for both the content and its children. */
 export function Outline({
     object,
+    parentObject,
     index,
+    editorContext,
     children,
     collapsed,
     setCollapsed,
@@ -109,18 +138,16 @@ export function Outline({
 
     const dataContext = React.useContext(DataContext);
     const tabContext = React.useContext(TabContext);
-    const deleteOutline = React.useCallback(() => {
-        console.log('removeFromContext', object);
-    }, [object]);
-    const [, setDragSource] = useDrag(
+    const dndType = 'outliner-dnd';
+
+    const [, setDragSource] = useDrag<DragObject, unknown, unknown>(
         () => ({
-            type: object.type?.['unigraph.id'] || '$/schema/any',
+            type: dndType,
             item: {
                 uid: object.uid,
+                parentUid: dataContext.contextUid,
                 itemType: object.type?.['unigraph.id'],
-                dndContext: tabContext.viewId,
-                dataContext: dataContext.contextUid,
-                removeFromContext: deleteOutline,
+                tabId: tabContext.viewId,
             },
             collect: (monitor) => {
                 if (monitor.isDragging() && window.dragselect) {
@@ -130,9 +157,34 @@ export function Outline({
                     isDragging: !!monitor.isDragging(),
                 };
             },
-            end: (item, monitor) => console.log('end drag', monitor.getDropResult()),
         }),
         [object?.type?.['unigraph.id'], object?.uid, tabContext.viewId, dataContext.contextUid],
+    );
+
+    const [{ shouldShowDropTargetAfter }, setDropTarget] = useDrop<
+        DragObject,
+        unknown,
+        { shouldShowDropTargetAfter: boolean }
+    >(
+        () => ({
+            accept: [dndType],
+            drop: (item) => {
+                console.log('drop', item.uid, 'to', parentObject?.uid, 'after index', index);
+                window.unigraph.runExecutable('$/executable/delete-item-from-list', {
+                    where: item.parentUid,
+                    item: item.uid,
+                });
+                window.unigraph.runExecutable('$/executable/add-item-to-list', {
+                    where: parentObject?.uid,
+                    item: item.uid,
+                    indexes: [index],
+                });
+            },
+            collect: (monitor) => ({
+                shouldShowDropTargetAfter: !!monitor.isOver(),
+            }),
+        }),
+        [object.uid],
     );
 
     return (
@@ -177,6 +229,12 @@ export function Outline({
             <ChildrenContainer>
                 <OutlineContentContext.Provider value={rContentEl}>{children}</OutlineContentContext.Provider>
             </ChildrenContainer>
+            <DropIndicator
+                style={{
+                    background: shouldShowDropTargetAfter ? 'rgba(63, 167, 223, 0.3)' : 'transparent',
+                }}
+            />
+            <DropTargetAfter ref={setDropTarget} />
         </OutlineContainer>
     );
 }
