@@ -15,6 +15,7 @@ import {
     focusLastDFSNode,
     focusNextDFSNode,
 } from './commands';
+import { NoteEditorContext } from './types';
 
 export const closeScopeCharDict: { [key: string]: string } = {
     '[': ']',
@@ -85,7 +86,7 @@ export const getShortcuts = (data: any, editorContext: any, elindex: any, copyOr
     oncut: (ev: any) => copyOrCutHandler(ev, elindex, true),
 });
 
-export const getCallbacks = (callbacks: any, data: any, editorContext: any, elindex: any) => ({
+export const getCallbacks = (callbacks: any, data: any, editorContext: NoteEditorContext, elindex: any) => ({
     ...callbacks,
     ...Object.fromEntries(
         Object.entries(noteBlockCommands).map(([k, v]: any) => [
