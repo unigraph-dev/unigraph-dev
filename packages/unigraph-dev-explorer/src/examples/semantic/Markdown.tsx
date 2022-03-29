@@ -175,6 +175,7 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                                 children,
                                 style: {
                                     display: '',
+                                    maxWidth: '100%',
                                     // eslint-disable-next-line no-nested-ternary
                                     height: node?.properties?.alt?.startsWith?.('inline:') ? '1.5em' : '',
                                 },

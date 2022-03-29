@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
 /* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable no-param-reassign */
-import { Typography, colors } from '@mui/material';
+import { Typography, colors, IconButton } from '@mui/material';
 import { styled } from '@mui/styles';
 import React from 'react';
 import _ from 'lodash';
@@ -74,6 +74,14 @@ const BlockChild = ({ elindex, shortcuts, displayAs, isCollapsed, setCollapsed, 
     />
 );
 
+const dropIndicatorStyles = {
+    position: 'absolute',
+    height: '6px',
+    marginTop: '-3px',
+    marginBottom: '1px',
+    zIndex: 999,
+};
+
 const BlockChildren = ({
     isChildren,
     subentities,
@@ -98,13 +106,7 @@ const BlockChildren = ({
                     dndContext={tabContext.viewId}
                     listId={data?.uid}
                     arrayId={data?._value?.children?.uid}
-                    style={{
-                        position: 'absolute',
-                        height: '6px',
-                        marginTop: '-3px',
-                        marginBottom: '1px',
-                        zIndex: 999,
-                    }}
+                    style={dropIndicatorStyles}
                     transformOnDrop={(props: any) => {
                         return {
                             ...props,
@@ -175,42 +177,31 @@ const Outline = styled('div')({
     display: 'flex',
     alignItems: 'baseline',
     position: 'relative',
+    transition: 'transform 0.1s ease-in',
 });
 
-const ControlsContainer = styled('div')({
+const controlStyles = {
     flex: '0 0 1rem',
-    display: 'flex',
     width: '1rem',
     height: '1rem',
+    display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    transform: 'translateY(-0.2rem)', // fine tune vertical alignment
-    position: 'relative',
-});
+};
 
 const Bullet = styled('div')({
-    flex: '0 0 1rem',
-    display: 'flex',
-    width: '1rem',
-    height: '1rem',
-    borderRadius: '50%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    transition: 'background 0.1s ease-in',
-    '& > svg': {
-        fill: colors.common.black,
+    ...controlStyles,
+    position: 'relative',
+    top: '0.125rem',
+    '& > svg > circle': {
+        transition: 'fill 0.1s ease-in',
     },
 });
 
 const Toggle = styled('button')({
-    position: 'absolute',
-    top: 0,
-    left: '-1rem',
-    width: '1rem',
-    height: '1rem',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
+    ...controlStyles,
+    position: 'relative',
+    top: '0.125rem',
     cursor: 'pointer',
     background: 'none',
     border: 'none',
@@ -218,8 +209,8 @@ const Toggle = styled('button')({
     outline: 'none',
     margin: 0,
     padding: '0.1rem',
-    fontSize: '1.25rem',
-    transition: 'transform 0.1s ease-in',
+    fontSize: '1rem',
+    transition: 'transform 0.1s ease-in, background 0.1s ease-in',
     '&:hover': {
         backgroundColor: colors.grey[200],
     },
@@ -231,7 +222,7 @@ const ChildrenLeftBorder = styled('div')({
     width: '1px',
     backgroundColor: colors.grey[300],
     position: 'absolute',
-    left: 'calc(-0.8rem - 0.5px)',
+    left: 'calc(0.2rem - 0.5px)',
 });
 
 const ChildrenContainer = styled('div')({
@@ -276,29 +267,31 @@ export function OutlineComponent({
     const toggleChildren = React.useCallback(() => setCollapsed && setCollapsed(!collapsed), [collapsed, setCollapsed]);
 
     return (
-        <Outline onPointerMove={onPointerMove} onPointerLeave={onPointerLeave}>
-            <ControlsContainer>
-                <Toggle
-                    style={{
-                        visibility: showCollapse && hover ? 'visible' : 'hidden',
-                        transform: `rotate(${collapsed ? '0deg' : '90deg'})`,
-                    }}
-                    onClick={toggleChildren}
-                >
-                    <ChevronRight fontSize="inherit" />
-                </Toggle>
-                {displayAs === 'outliner' && (
-                    <Bullet
-                        style={{
-                            backgroundColor: collapsed ? colors.grey[200] : 'transparent',
-                        }}
-                    >
-                        <svg width="0.375rem" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="8" cy="8" r="8" />
-                        </svg>
-                    </Bullet>
-                )}
-            </ControlsContainer>
+        <Outline
+            onPointerMove={onPointerMove}
+            onPointerLeave={onPointerLeave}
+            style={{
+                transform: displayAs === 'outliner' ? 'translateX(-1rem)' : 'translateX(-1.3rem)',
+                width: displayAs === 'outliner' ? 'calc(100% + 1rem)' : 'calc(100% + 1.3rem)',
+            }}
+        >
+            <Toggle
+                style={{
+                    visibility: showCollapse && hover ? 'visible' : 'hidden',
+                    transform: `rotate(${collapsed ? '0deg' : '90deg'})`,
+                }}
+                onClick={toggleChildren}
+            >
+                <ChevronRight fontSize="inherit" />
+            </Toggle>
+            {displayAs === 'outliner' && (
+                <Bullet>
+                    <svg width="100%" height="100%" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" style={{ fill: collapsed ? colors.grey[200] : 'transparent' }} />
+                        <circle cx="12" cy="12" r="4" style={{ fill: 'black' }} />
+                    </svg>
+                </Bullet>
+            )}
             {displayAs === 'outliner' && (
                 <ChildrenLeftBorder
                     style={{
@@ -381,11 +374,29 @@ export function ParentsAndReferences({ data }: any) {
 }
 
 function NoteViewPageWrapper({ children, isRoot }: any) {
-    return !isRoot ? children : <div style={{ height: '100%', width: '100%', padding: '16px' }}>{children}</div>;
+    return !isRoot ? (
+        children
+    ) : (
+        <div style={{ height: '100%', width: '100%', padding: '1rem 2rem', overflow: 'auto' }}>{children}</div>
+    );
 }
 
-function NoteViewTextWrapper({ children, semanticChildren, isRoot, onContextMenu, callbacks, isEditing }: any) {
-    // console.log(callbacks.BacklinkComponent);
+/** Renders both page title and content of each note block. */
+function NoteViewTextWrapper({
+    children,
+    semanticChildren,
+    isRoot,
+    isEditing,
+    onContextMenu,
+    callbacks,
+}: {
+    children: React.ReactNode;
+    semanticChildren: React.ReactNode;
+    isRoot: boolean;
+    isEditing: boolean;
+    onContextMenu: React.MouseEventHandler;
+    callbacks: any;
+}) {
     return (
         <div
             style={{ display: 'flex', alignItems: 'center' }}
@@ -393,11 +404,54 @@ function NoteViewTextWrapper({ children, semanticChildren, isRoot, onContextMenu
         >
             {children}
             {semanticChildren}
-            {isRoot ? <MoreVert onClick={onContextMenu} style={{ marginLeft: '8px' }} /> : []}
-            {callbacks.BacklinkComponent ? callbacks.BacklinkComponent : []}
+            {isRoot && (
+                <IconButton onClick={onContextMenu} style={{ marginLeft: '8px' }} aria-label="more" size="small">
+                    <MoreVert fontSize="small" />
+                </IconButton>
+            )}
+            {callbacks.BacklinkComponent}
         </div>
     );
 }
+
+const DateContainer = styled('div')({
+    marginTop: '4px',
+    marginBottom: '12px',
+    display: 'flex',
+    alignItems: 'center',
+    color: colors.grey[500],
+    fontSize: '0.9rem',
+});
+
+const ChildrenIndicator = React.memo(function ChildrenIndicator({
+    count,
+    onClick,
+}: {
+    count: number;
+    onClick?: React.MouseEventHandler;
+}) {
+    return (
+        <Typography
+            style={{
+                position: 'absolute',
+                top: 0,
+                left: '100%',
+                height: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '0.125rem',
+                color: colors.grey[500],
+                wordBreak: 'keep-all',
+                fontSize: '0.8rem',
+                cursor: 'pointer',
+            }}
+            title={`Show ${count} children`}
+            onClick={onClick}
+        >
+            ({count})
+        </Typography>
+    );
+});
 
 export function DetailedOutlinerBlock({
     data,
@@ -580,6 +634,22 @@ export function DetailedOutlinerBlock({
         [rOutlineContentEl],
     );
 
+    const onContextMenu = React.useCallback(
+        (event: React.MouseEvent) => {
+            onUnigraphContextMenu(event, data, undefined, { ...callbacks, componentId });
+        },
+        [callbacks, componentId, data],
+    );
+
+    const onClickChildrenIndicator = React.useCallback(
+        (ev: React.MouseEvent) => {
+            ev.preventDefault();
+            ev.stopPropagation();
+            setCollapsed(false);
+        },
+        [setCollapsed],
+    );
+
     return (
         <NoteViewPageWrapper isRoot={!isChildren}>
             <div
@@ -591,9 +661,7 @@ export function DetailedOutlinerBlock({
                 <NoteViewTextWrapper
                     isRoot={!isChildren}
                     isEditing={isEditing}
-                    onContextMenu={(event: any) =>
-                        onUnigraphContextMenu(event, data, undefined, { ...callbacks, componentId })
-                    }
+                    onContextMenu={onContextMenu}
                     callbacks={callbacks}
                     semanticChildren={otherChildren
                         .filter((el: any) => el?.type)
@@ -658,30 +726,22 @@ export function DetailedOutlinerBlock({
                             editorContext,
                         )}
                         {NoteEditorInner}
-                        <Typography
-                            style={{
-                                display: isEditing || !isCollapsed ? 'none' : '',
-                                marginLeft: '6px',
-                                color: 'gray',
-                                cursor: 'pointer',
-                            }}
-                            onClick={(ev) => {
-                                ev.preventDefault();
-                                ev.stopPropagation();
-                                setCollapsed(false);
-                            }}
-                        >{`(${subentities.length})`}</Typography>
+                        {!isEditing && isCollapsed && (
+                            <ChildrenIndicator count={subentities.length} onClick={onClickChildrenIndicator} />
+                        )}
                     </div>
                 </NoteViewTextWrapper>
-                {!isChildren && !callbacks.isEmbed ? (
-                    <div style={{ marginTop: '4px', marginBottom: '12px', display: 'flex', color: 'gray' }}>
-                        <Icon path={mdiClockOutline} size={0.8} style={{ marginRight: '4px' }} />
-                        {`${new Date(data._updatedAt || 0).toLocaleString()} (${Sugar.Date.relative(
+                {!isChildren && !callbacks.isEmbed && (
+                    <DateContainer>
+                        <Icon
+                            path={mdiClockOutline}
+                            size={0.75}
+                            style={{ marginRight: '0.25rem', transform: 'translateY(-0.08rem)' }}
+                        />
+                        <span>{`${Sugar.Date(data._updatedAt || 0).long()} (${Sugar.Date.relative(
                             new Date(data._updatedAt || 0),
-                        )})`}
-                    </div>
-                ) : (
-                    []
+                        )})`}</span>
+                    </DateContainer>
                 )}
                 {!isCollapsed && (
                     <BlockChildren
