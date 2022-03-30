@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.7](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.6...v0.2.7) (2022-03-30)
+
+
+### Bug Fixes
+
+* **dailyNotes:** make horizontal padding same width as note ([70b2a61](https://github.com/unigraph-dev/unigraph-dev/commit/70b2a615efb73ae9e82c71967bf37a3d854c00b9))
+
+
+
+
+
 ## [0.2.5](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.4...v0.2.5) (2022-03-13)
 
 **Note:** Version bump only for package unigraph.notes

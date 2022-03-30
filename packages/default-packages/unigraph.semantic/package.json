@@ -1,6 +1,6 @@
 {
     "displayName": "Semantic",
-    "version": "0.2.5",
+    "version": "0.2.7",
     "description": "Semantic properties support for unigraph objects.",
     "name": "unigraph.semantic",
     "unigraph": {
