@@ -443,7 +443,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             }),
         sendFakeUpdate: (subId, updater, eventId, fullObject?) => {
             // Merge updater object with existing one
-            console.log('subId0', JSON.parse(JSON.stringify(subResults[subId], getCircularReplacer())));
+            // console.log('subId0', JSON.parse(JSON.stringify(subResults[subId], getCircularReplacer())));
             const id = eventId;
             let newObj: any;
             if (fullObject) {
@@ -453,7 +453,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             }
 
             subResults[subId] = newObj;
-            console.log(newObj);
+            // console.log(newObj);
 
             // Record state changes
             if (id) {
