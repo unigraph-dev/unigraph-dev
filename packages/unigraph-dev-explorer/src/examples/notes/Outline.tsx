@@ -107,6 +107,11 @@ interface OutlineProps {
     parentDisplayAs?: string;
 }
 
+/** Get the uid of the "$/composer/array" object that holds children note blocks of a note block. */
+function getChildrenComposerArrayUid(object: UnigraphObject): string | undefined {
+    return object?._value?.children?.uid;
+}
+
 /** Hold the reference to the DOM of the content of an outline. */
 export const OutlineContentContext = React.createContext<React.MutableRefObject<HTMLDivElement | null>>({
     current: null,
@@ -158,7 +163,7 @@ export function Outline({
                 };
             },
         }),
-        [object?.type?.['unigraph.id'], object?.uid, tabContext.viewId, dataContext.contextUid],
+        [object.uid, object.type?.['unigraph.id'], dataContext.contextUid, tabContext.viewId],
     );
 
     const [{ shouldShowDropTargetAfter }, setDropTarget] = useDrop<
@@ -169,22 +174,37 @@ export function Outline({
         () => ({
             accept: [dndType],
             drop: (item) => {
-                console.log('drop', item.uid, 'to', parentObject?.uid, 'after index', index);
-                window.unigraph.runExecutable('$/executable/delete-item-from-list', {
-                    where: item.parentUid,
-                    item: item.uid,
-                });
-                window.unigraph.runExecutable('$/executable/add-item-to-list', {
-                    where: parentObject?.uid,
-                    item: item.uid,
-                    indexes: [index],
-                });
+                console.log('drop', item.uid, 'from', item.parentUid, 'to', parentObject?.uid, 'after index', index);
+                /**
+                 * Use `reorderItemInArray` if drag and drop in the same array, to prevent
+                 * wrong result due to add-then-remove race condition.
+                 */
+                if (item.parentUid === parentObject?.uid) {
+                    const arrayUid = getChildrenComposerArrayUid(parentObject);
+                    if (!arrayUid) return;
+
+                    typeof window.unigraph.reorderItemInArray === 'function' &&
+                        window.unigraph.reorderItemInArray(arrayUid, [item.uid, index]);
+                } else {
+                    const targetNoteBlockUid = parentObject?.uid;
+                    if (!targetNoteBlockUid) return;
+
+                    window.unigraph.runExecutable('$/executable/add-item-to-list', {
+                        where: targetNoteBlockUid,
+                        item: item.uid,
+                        indexes: [index],
+                    });
+                    window.unigraph.runExecutable('$/executable/delete-item-from-list', {
+                        where: item.parentUid,
+                        item: item.uid,
+                    });
+                }
             },
             collect: (monitor) => ({
                 shouldShowDropTargetAfter: !!monitor.isOver(),
             }),
         }),
-        [object.uid],
+        [parentObject?.uid, index],
     );
 
     return (
