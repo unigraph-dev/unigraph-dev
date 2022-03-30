@@ -7,8 +7,9 @@ export type NoteEditorContext = {
 };
 
 export interface UnigraphObject {
+    uid: string;
+    _value?: any;
     type?: {
         'unigraph.id': string;
     };
-    uid: string;
 }
