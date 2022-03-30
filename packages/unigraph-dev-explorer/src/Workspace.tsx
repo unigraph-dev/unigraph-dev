@@ -571,8 +571,10 @@ export function WorkSpace(this: any) {
                                                         delete config.undefine;
                                                         delete config.id;
                                                     }
-                                                    const uid = await window.unigraph.addObject(
+                                                    const uid = (window.unigraph as any).leaseUid();
+                                                    window.unigraph.addObject(
                                                         {
+                                                            uid,
                                                             name: node.getName(),
                                                             env: 'react-explorer',
                                                             view: node.getComponent(),
@@ -584,11 +586,13 @@ export function WorkSpace(this: any) {
                                                             },
                                                         },
                                                         '$/schema/view',
+                                                        undefined,
+                                                        [],
                                                     );
                                                     await window.unigraph.runExecutable(
                                                         '$/executable/add-item-to-list',
                                                         {
-                                                            item: uid[0],
+                                                            item: uid,
                                                             where: '$/entity/favorite_bar',
                                                         },
                                                     );
