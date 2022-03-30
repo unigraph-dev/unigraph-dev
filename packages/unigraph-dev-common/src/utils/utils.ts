@@ -144,7 +144,7 @@ export function assignUids(object: any, totalLeases: string[], usedLeases: strin
         } else {
             const keys = Object.keys(object);
             if (keys.includes('unigraph.id')) return;
-            if (!keys.includes('uid')) {
+            if (!keys.includes('uid') || object.uid === undefined || object.uid === null) {
                 // Assign a new uid to the object
                 const newUid = totalLeases.shift();
                 if (!newUid) throw new RangeError('No more uids available');
