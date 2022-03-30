@@ -1,4 +1,4 @@
-const MAX_DEPTH = 8;
+const MAX_DEPTH = 16;
 const getQuery: (depth: number) => string = (depth: number) => {
     if (depth >= MAX_DEPTH) return '{ uid _hide type {uid <unigraph.id>} }';
     return `{
