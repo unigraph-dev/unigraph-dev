@@ -3,6 +3,7 @@ import { styled } from '@mui/styles';
 import React from 'react';
 
 const DragHandleContainer = styled('div')({
+    flex: '0 0 1rem',
     width: '1rem',
     height: '1rem',
     display: 'flex',
