@@ -47,9 +47,12 @@ const Toggle = styled('button')({
     margin: 0,
     padding: '0.1rem',
     fontSize: '1rem',
-    transition: 'transform 0.1s ease-in, background 0.1s ease-in',
+    transition: 'transform 0.1s ease-in, background 30ms ease-in',
     '&:hover': {
-        backgroundColor: colors.grey[200],
+        background: 'rgba(0, 0, 0, 0.08)',
+    },
+    '&:active': {
+        background: 'rgba(0, 0, 0, 0.16)',
     },
 });
 
@@ -220,6 +223,7 @@ export function Outline({
                 ref={setDragSource}
                 style={{
                     visibility: hover ? 'visible' : 'hidden',
+                    transform: 'translateY(0.1rem)', // visual fine tune
                 }}
             />
             <Toggle
