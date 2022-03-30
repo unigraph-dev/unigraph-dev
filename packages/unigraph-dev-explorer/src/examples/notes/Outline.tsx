@@ -97,6 +97,7 @@ interface DropIndicatorProps {
 }
 
 const dropIndicatorHeight = 4;
+/** @see https://mui.com/styles/basics/#adapting-the-styled-components-api */
 const DropIndicator = styled(
     ({
         show,
@@ -193,12 +194,17 @@ export function Outline({
                 tabId: tabContext.viewId,
             },
             collect: (monitor) => {
-                if (monitor.isDragging() && window.dragselect) {
-                    window.dragselect.break();
+                if (monitor.isDragging() && window.dragselect && window.dragselect.isDragging()) {
+                    window.dragselect.stop();
                 }
                 return {
                     isDragging: !!monitor.isDragging(),
                 };
+            },
+            end: () => {
+                if (window.dragselect) {
+                    window.dragselect.start();
+                }
             },
         }),
         [object.uid, object.type?.['unigraph.id'], dataContext.contextUid, tabContext.viewId],
