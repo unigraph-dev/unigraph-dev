@@ -71,21 +71,56 @@ const ChildrenContainer = styled('div')({
     wordBreak: 'break-word',
 });
 
-const DropTargetAfter = styled('div')({
+/**
+ * This need to be large so it doesn't require too much precision for
+ * a drag to be detected, but it shouldn't be too large and overlap with other
+ * drop targets.
+ */
+const dropTargetHeight = 20;
+const DropTarget = styled('div')({
     position: 'absolute',
     left: '2rem',
     right: 0,
-    bottom: -10,
-    height: 20,
+    height: dropTargetHeight,
 });
 
-const DropIndicator = styled('div')({
+const DropTargetAfter = styled(DropTarget)({
+    bottom: -dropTargetHeight / 2,
+});
+
+const DropTargetBefore = styled(DropTarget)({
+    top: -dropTargetHeight / 2,
+});
+
+interface DropIndicatorProps {
+    show: boolean;
+}
+
+const dropIndicatorHeight = 4;
+const DropIndicator = styled(
+    ({
+        show,
+        ...other
+    }: DropIndicatorProps &
+        Omit<
+            React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>,
+            keyof DropIndicatorProps
+        >) => <div {...other} />,
+)({
     position: 'absolute',
     left: '2rem',
     right: 0,
-    bottom: -2,
-    height: 4,
+    height: dropIndicatorHeight,
     zIndex: -1,
+    background: ({ show }) => (show ? 'rgba(63, 167, 223, 0.3)' : 'transparent'),
+});
+
+const DropIndicatorBefore = styled(DropIndicator)({
+    top: -dropIndicatorHeight / 2,
+});
+
+const DropIndicatorAfter = styled(DropIndicator)({
+    bottom: -dropIndicatorHeight / 2,
 });
 
 /** Describe the object being dragged. */
@@ -169,7 +204,38 @@ export function Outline({
         [object.uid, object.type?.['unigraph.id'], dataContext.contextUid, tabContext.viewId],
     );
 
-    const [{ shouldShowDropTargetAfter }, setDropTarget] = useDrop<
+    const onDrop = React.useCallback(
+        (item: DragObject, side: 'before' | 'after') => {
+            console.log('drop', item.uid, 'from', item.parentUid, 'to', parentObject?.uid, `${side} index`, index);
+            /**
+             * Use `reorderItemInArray` if drag and drop in the same array, to prevent
+             * wrong result due to add-then-remove race condition.
+             */
+            if (item.parentUid === parentObject?.uid) {
+                const arrayUid = getChildrenComposerArrayUid(parentObject);
+                if (!arrayUid) return;
+
+                typeof window.unigraph.reorderItemInArray === 'function' &&
+                    window.unigraph.reorderItemInArray(arrayUid, [item.uid, side === 'after' ? index : index - 1]);
+            } else {
+                const targetNoteBlockUid = parentObject?.uid;
+                if (!targetNoteBlockUid) return;
+
+                window.unigraph.runExecutable('$/executable/add-item-to-list', {
+                    where: targetNoteBlockUid,
+                    item: item.uid,
+                    indexes: [index],
+                });
+                window.unigraph.runExecutable('$/executable/delete-item-from-list', {
+                    where: item.parentUid,
+                    item: item.uid,
+                });
+            }
+        },
+        [parentObject, index],
+    );
+
+    const [{ shouldShowDropTargetAfter }, setDropTargetAfter] = useDrop<
         DragObject,
         unknown,
         { shouldShowDropTargetAfter: boolean }
@@ -177,37 +243,30 @@ export function Outline({
         () => ({
             accept: [dndType],
             drop: (item) => {
-                console.log('drop', item.uid, 'from', item.parentUid, 'to', parentObject?.uid, 'after index', index);
-                /**
-                 * Use `reorderItemInArray` if drag and drop in the same array, to prevent
-                 * wrong result due to add-then-remove race condition.
-                 */
-                if (item.parentUid === parentObject?.uid) {
-                    const arrayUid = getChildrenComposerArrayUid(parentObject);
-                    if (!arrayUid) return;
-
-                    typeof window.unigraph.reorderItemInArray === 'function' &&
-                        window.unigraph.reorderItemInArray(arrayUid, [item.uid, index]);
-                } else {
-                    const targetNoteBlockUid = parentObject?.uid;
-                    if (!targetNoteBlockUid) return;
-
-                    window.unigraph.runExecutable('$/executable/add-item-to-list', {
-                        where: targetNoteBlockUid,
-                        item: item.uid,
-                        indexes: [index],
-                    });
-                    window.unigraph.runExecutable('$/executable/delete-item-from-list', {
-                        where: item.parentUid,
-                        item: item.uid,
-                    });
-                }
+                onDrop(item, 'after');
             },
             collect: (monitor) => ({
                 shouldShowDropTargetAfter: !!monitor.isOver(),
             }),
         }),
-        [parentObject?.uid, index],
+        [onDrop],
+    );
+
+    const [{ shouldShowDropTargetBefore }, setDropTargetBefore] = useDrop<
+        DragObject,
+        unknown,
+        { shouldShowDropTargetBefore: boolean }
+    >(
+        () => ({
+            accept: [dndType],
+            drop: (item) => {
+                onDrop(item, 'before');
+            },
+            collect: (monitor) => ({
+                shouldShowDropTargetBefore: !!monitor.isOver(),
+            }),
+        }),
+        [onDrop],
     );
 
     return (
@@ -253,12 +312,14 @@ export function Outline({
             <ChildrenContainer>
                 <OutlineContentContext.Provider value={rContentEl}>{children}</OutlineContentContext.Provider>
             </ChildrenContainer>
-            <DropIndicator
-                style={{
-                    background: shouldShowDropTargetAfter ? 'rgba(63, 167, 223, 0.3)' : 'transparent',
-                }}
-            />
-            <DropTargetAfter ref={setDropTarget} />
+            <DropIndicatorAfter show={shouldShowDropTargetAfter} />
+            <DropTargetAfter ref={setDropTargetAfter} />
+            {index === 0 && (
+                <>
+                    <DropIndicatorBefore show={shouldShowDropTargetBefore} />
+                    <DropTargetBefore ref={setDropTargetBefore} />
+                </>
+            )}
         </OutlineContainer>
     );
 }
