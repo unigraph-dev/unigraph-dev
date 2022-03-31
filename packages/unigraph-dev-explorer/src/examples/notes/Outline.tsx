@@ -8,6 +8,7 @@ import { ChevronRight } from '@mui/icons-material';
 import { DragHandle } from './DragHandle';
 import { DataContext, TabContext } from '../../utils';
 import { NoteEditorContext, UnigraphObject } from './types';
+import { useOutlineCollapsed } from './useOutlineCollapsed';
 
 const OutlineContainer = styled('div')({
     flex: '0 0 auto',
@@ -139,8 +140,6 @@ interface OutlineProps {
     index: number;
     editorContext?: NoteEditorContext;
     children?: React.ReactNode;
-    collapsed?: boolean;
-    setCollapsed?: (val: boolean) => void;
     displayAs?: string;
     showCollapse?: boolean;
     parentDisplayAs?: string;
@@ -163,8 +162,6 @@ export function Outline({
     index,
     editorContext,
     children,
-    collapsed,
-    setCollapsed,
     displayAs,
     showCollapse,
     parentDisplayAs,
@@ -178,7 +175,7 @@ export function Outline({
         setHover(e.clientY > rect.top && e.clientY < rect.bottom);
     }, []);
     const onPointerLeave = React.useCallback(() => setHover(false), []);
-    const toggleChildren = React.useCallback(() => setCollapsed && setCollapsed(!collapsed), [collapsed, setCollapsed]);
+    const [isCollapsed, toggleCollapsed] = useOutlineCollapsed(object.uid);
 
     const dataContext = React.useContext(DataContext);
     const tabContext = React.useContext(TabContext);
@@ -298,16 +295,21 @@ export function Outline({
             <Toggle
                 style={{
                     visibility: showCollapse && hover ? 'visible' : 'hidden',
-                    transform: `rotate(${collapsed ? '0deg' : '90deg'})`,
+                    transform: `rotate(${isCollapsed ? '0deg' : '90deg'})`,
                 }}
-                onClick={toggleChildren}
+                onClick={toggleCollapsed}
             >
                 <ChevronRight fontSize="inherit" />
             </Toggle>
             {displayAs === 'outliner' && (
                 <Bullet>
                     <svg width="100%" height="100%" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="12" cy="12" r="10" style={{ fill: collapsed ? colors.grey[200] : 'transparent' }} />
+                        <circle
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            style={{ fill: isCollapsed ? colors.grey[200] : 'transparent' }}
+                        />
                         <circle cx="12" cy="12" r="4" style={{ fill: 'black' }} />
                     </svg>
                 </Bullet>

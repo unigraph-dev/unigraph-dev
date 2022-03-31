@@ -56,11 +56,6 @@ export const caretToLastLine = (text: string, _caret: number) => {
     return caretInLine;
 };
 
-export const persistCollapsedNodes = (nodes: any) => {
-    const localState = JSON.parse(window.localStorage.getItem('noteblockCollapsedByUid') || '{}');
-    window.localStorage.setItem('noteblockCollapsedByUid', JSON.stringify({ ...localState, ...nodes }));
-};
-
 export const getShortcuts = (data: any, editorContext: any, elindex: any, copyOrCutHandler: any, callbacks: any) => ({
     'shift+Tab': (ev: any) => {
         ev.preventDefault();
