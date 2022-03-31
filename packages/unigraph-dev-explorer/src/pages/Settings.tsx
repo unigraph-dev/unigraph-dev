@@ -14,7 +14,7 @@ import {
     TextField,
     Typography,
 } from '@mui/material';
-import { hoverSx, pointerHoverSx } from '../utils';
+import { hoverSx, pointerHoverSx, TabContext } from '../utils';
 
 export default function Settings() {
     const [settings, setSettings] = React.useState(JSON.parse(window.localStorage.getItem('userSettings') || ''));
@@ -30,6 +30,12 @@ export default function Settings() {
     const [analyticsMode, setAnalyticsMode] = React.useState(analyticsState.value);
     analyticsState.subscribe((newState: boolean) => setAnalyticsMode(newState));
     const [email, setEmail] = React.useState(window.localStorage.getItem('email') || '');
+
+    const tabContext = React.useContext(TabContext);
+    const [settingsPage, setSettingsPage] = React.useState<any>([]);
+    React.useEffect(() => {
+        tabContext.subscribeToType('$/schema/settings_page', (pages: any[]) => setSettingsPage(pages));
+    }, []);
 
     const handleClick = (event: any, n: number) => {
         const total = anchorEl;
@@ -159,19 +165,6 @@ export default function Settings() {
                 <ListItem
                     sx={pointerHoverSx}
                     onClick={(e) => {
-                        window.wsnavigator('/settings/reddit');
-                    }}
-                    key="reddit"
-                >
-                    <ListItemText
-                        id="switch-list-label-developer-mode"
-                        primary="Reddit settings"
-                        secondary="Connect your Reddit account to Unigraph"
-                    />
-                </ListItem>
-                <ListItem
-                    sx={pointerHoverSx}
-                    onClick={(e) => {
                         window.wsnavigator('/settings/email');
                     }}
                     key="email"
@@ -182,6 +175,20 @@ export default function Settings() {
                         secondary="Connect your email inboxes to Unigraph"
                     />
                 </ListItem>
+                {settingsPage.map((el: any) => (
+                    <ListItem
+                        sx={pointerHoverSx}
+                        onClick={(e) => {
+                            window.wsnavigator(`/${el._value.page._value._value.view._value.uid}`);
+                        }}
+                        key={el.uid}
+                    >
+                        <ListItemText
+                            primary={el.get('title').as('primitive')}
+                            secondary={el.get('subtitle').as('primitive')}
+                        />
+                    </ListItem>
+                ))}
             </List>
             <Popover
                 id={JSON.stringify(activePopover)}
