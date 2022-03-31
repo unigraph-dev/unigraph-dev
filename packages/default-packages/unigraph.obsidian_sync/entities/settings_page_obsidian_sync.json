@@ -1,0 +1,10 @@
+{
+    "type": { "unigraph.id": "$/schema/settings_page" },
+    "title": "Obsidian sync settings",
+    "subtitle": "Setup Obsidian sync with Unigraph",
+    "page": {
+        "name": "Obsidian sync settings",
+        "env": "react-explorer",
+        "view": { "unigraph.id": "$./executable/settings-view-obsidian-sync" }
+    }
+}

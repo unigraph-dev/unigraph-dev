@@ -19,6 +19,27 @@
                 "src": "executables/initializeObsidianSync.js",
                 "editable": true,
                 "name": "Initializes synced notes for Obsidian"
+            },
+            {
+                "id": "settings-view-obsidian-sync",
+                "env": "component/react-jsx",
+                "src": "executables/obsidianSyncSettings.jsx",
+                "editable": true,
+                "imports": [
+                    {
+                        "env": "npm",
+                        "package": "@mui/material",
+                        "import": "Typography",
+                        "as": "Typography"
+                    },
+                    {
+                        "env": "npm",
+                        "package": "@mui/material",
+                        "import": "Button",
+                        "as": "Button"
+                    }
+                ],
+                "name": "Obsidian sync settings view"
             }
         ],
         "entities": [
@@ -29,6 +50,10 @@
             {
                 "id": "obsidian_sync_resource",
                 "src": "entities/obsidian_sync_resource.json"
+            },
+            {
+                "id": "settings_page_obsidian_sync",
+                "src": "entities/settings_page_obsidian_sync.json"
             }
         ]
     }
