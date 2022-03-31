@@ -289,7 +289,7 @@ export function Outline({
                 ref={setDragSource}
                 style={{
                     visibility: hover ? 'visible' : 'hidden',
-                    transform: 'translateY(0.1rem)', // visual fine tune
+                    transform: 'translateY(0.2rem)', // visual fine tune
                 }}
             />
             <Toggle
