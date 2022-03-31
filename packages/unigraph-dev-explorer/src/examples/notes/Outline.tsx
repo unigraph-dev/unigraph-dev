@@ -231,6 +231,7 @@ export function Outline({
                     where: targetNoteBlockUid,
                     item: item.uid,
                     indexes: [index],
+                    before: side === 'before',
                 });
                 window.unigraph.runExecutable('$/executable/delete-item-from-list', {
                     where: item.parentUid,

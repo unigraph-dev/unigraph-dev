@@ -1,5 +1,7 @@
 const destUidOrName = context.params.where;
 const sourceUid = context.params.item;
+/** Set `true` to add items before indexes, otherwise after indexes. */
+const listBefore = context.params.before;
 const { indexes, subIds } = context.params;
 let destUid;
 
@@ -39,7 +41,7 @@ if (indexes && Array.isArray(indexes) && indexes.length === sources.length) {
     if (listUid)
         await unigraph.reorderItemInArray(
             listUid,
-            sources.map((el, idx) => [el, indexes[idx]]),
+            sources.map((el, idx) => [el, indexes[listBefore ? idx - 1 : idx]]),
             undefined,
             subIds,
         );
