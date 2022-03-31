@@ -156,7 +156,7 @@ export const OutlineContentContext = React.createContext<React.MutableRefObject<
     current: null,
 });
 
-/** A container for both the content and its children. */
+/** An outline item. */
 export function Outline({
     object,
     parentObject,
@@ -195,6 +195,7 @@ export function Outline({
             },
             collect: (monitor) => {
                 if (monitor.isDragging() && window.dragselect && window.dragselect.isDragging()) {
+                    /** Disable selection box. */
                     window.dragselect.stop();
                 }
                 return {
@@ -203,6 +204,7 @@ export function Outline({
             },
             end: () => {
                 if (window.dragselect) {
+                    /** Enable selection box. */
                     window.dragselect.start();
                 }
             },
@@ -281,6 +283,7 @@ export function Outline({
             onPointerMove={onPointerMove}
             onPointerLeave={onPointerLeave}
             style={{
+                /** Make room for drag handle and toggle. */
                 transform: displayAs === 'outliner' ? 'translateX(-2rem)' : 'translateX(-2.3rem)',
                 width: displayAs === 'outliner' ? 'calc(100% + 2rem)' : 'calc(100% + 2.3rem)',
             }}
