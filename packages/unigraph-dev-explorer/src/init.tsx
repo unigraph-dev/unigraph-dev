@@ -20,7 +20,6 @@ import { init as bmInit } from './examples/bookmarks/Bookmarks';
 import { init as clInit } from './examples/calendar/init';
 import { init as emInit } from './examples/email/Email';
 import { init as nbInit } from './examples/notes/init';
-import { init as reInit } from './examples/reddit/RedditPost';
 import { init as rssInit } from './examples/rss_reader/RSSFeeds';
 import { init as smInit } from './examples/semantic/init';
 import { init as tdInit } from './examples/todo/TodoList';
@@ -340,7 +339,6 @@ function initPackages() {
     nbInit();
     smInit();
     twInit();
-    reInit();
     clInit();
     pbInit();
 }

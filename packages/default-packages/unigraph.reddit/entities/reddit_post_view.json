@@ -1,0 +1,6 @@
+{
+    "type": { "unigraph.id": "$/schema/object_view" },
+    "name": "Reddit post view",
+    "item_type": { "unigraph.id": "$/schema/reddit_post" },
+    "view": { "unigraph.id": "$./executable/reddit-post-view" }
+}
