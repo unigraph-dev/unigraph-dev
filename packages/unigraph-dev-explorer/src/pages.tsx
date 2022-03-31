@@ -24,7 +24,6 @@ import ExplorerHome from './pages/ExplorerHome';
 import { TrashView } from './components/UnigraphCore/TrashView';
 import { Categories } from './components/UnigraphCore/Categories';
 import { InspectorView } from './components/UnigraphCore/InspectorView';
-import { RedditSettings } from './examples/reddit/RedditSettings';
 import { AppDrawer } from './components';
 import { ConnectionWidget } from './components/UnigraphCore/ConnectionWidget';
 import { AllApps, AppLibraryWidget } from './components/PackageManager/AppLibraryWidget';
@@ -88,10 +87,6 @@ const pages: Record<string, any> = {
     'settings/twitter': {
         constructor: (props: any) => <TwitterSettings {...props} />,
         name: 'Twitter Settings',
-    },
-    'settings/reddit': {
-        constructor: (props: any) => <RedditSettings {...props} />,
-        name: 'Reddit Settings',
     },
     'settings/email': {
         constructor: (props: any) => <EmailSettings {...props} />,

@@ -1,0 +1,10 @@
+{
+    "type": { "unigraph.id": "$/schema/settings_page" },
+    "title": "Reddit settings",
+    "subtitle": "Connect your Reddit account to Unigraph",
+    "page": {
+        "name": "Reddit settings",
+        "env": "react-explorer",
+        "view": { "unigraph.id": "$./executable/settings-view-reddit" }
+    }
+}
