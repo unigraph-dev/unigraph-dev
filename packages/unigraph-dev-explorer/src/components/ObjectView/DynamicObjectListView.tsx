@@ -546,7 +546,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
         // @ts-expect-error: already checked for namespace map
         accept: Object.keys(window.unigraph.getNamespaceMap() || {}),
         drop: (item: { uid: string; dndContext: any; removeFromContext?: any }, monitor) => {
-            if (!monitor.didDrop() && !noDrop && contextRef.current) {
+            if (!monitor.didDrop() && !noDrop && (contextRef.current || itemAdder)) {
                 if (itemAdder) {
                     itemAdder(item.uid);
                 } else {
@@ -702,7 +702,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                             </IconButton>
                             <IconButton
                                 style={{
-                                    display: canDrop && !noDrop && contextRef.current ? '' : 'none',
+                                    display: canDrop && ((!noDrop && contextRef.current) || itemAdder) ? '' : 'none',
                                 }}
                                 size="large"
                             >

@@ -178,7 +178,8 @@ function initSelect() {
         return selectedUids;
     };
 
-    if (!isMobile()) {
+    // eslint-disable-next-line no-constant-condition
+    if (!isMobile() && false) {
         window.dragselect = new DragSelect({ autoScrollSpeed: 0.0001, draggability: false });
         window.dragselect.subscribe('callback', ({ items, event }: any) => {
             const distance = window.dragselect.getCursorPositionDifference();
