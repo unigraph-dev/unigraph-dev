@@ -72,10 +72,9 @@ const updateTriplets = [`<${oldNameRef.uid}> <_value.%> "${newName}" .`];
         (oldRefName['_value.%'].includes(oldName) || force)
     )
         updateTriplets.push(
-            `<${oldRefName.uid}> <_value.%> "${oldRefName['_value.%'].replaceAll(
-                `[[${oldName}]]`,
-                `[[${newName}]]`,
-            )}" .`,
+            `<${oldRefName.uid}> <_value.%> "${oldRefName['_value.%']
+                .replaceAll(`[[${oldName}]]`, `[[${newName}]]`)
+                .replace(/"/g, '\\"')}" .`,
         );
 });
 
