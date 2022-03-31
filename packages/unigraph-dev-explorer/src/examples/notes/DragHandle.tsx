@@ -9,7 +9,7 @@ const DragHandleContainer = styled('div')({
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    cursor: 'pointer',
+    cursor: 'grab',
     borderRadius: '0.25rem',
     transition: 'background 30ms ease-in',
     '&:hover': {
