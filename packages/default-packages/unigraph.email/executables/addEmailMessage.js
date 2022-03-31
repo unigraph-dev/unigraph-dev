@@ -11,12 +11,19 @@ const getQuery = (msgid) => `(func: uid(parIds)) @cascade {
     }
 }`;
 
-const dest = parsed.map((el) => {
+const dest = parsed.map((el, index) => {
     return {
         name: {
             type: { 'unigraph.id': '$/schema/note' },
             _value: el.subject || '',
         },
+        ...(msgs[index].externalUrl
+            ? {
+                  $context: {
+                      _externalUrl: msgs[index].externalUrl,
+                  },
+              }
+            : {}),
         message_id: el.messageId,
         message: {
             date_received: el.date?.toISOString?.() || new Date(0).toISOString(),
@@ -97,28 +104,29 @@ for (let i = 0; i < toAddChunks.length; i += 1) {
     }
 }
 
-const inboxEntries = await unigraph.getObject('$/entity/inbox').then((x) => x._value.children._value ?? []);
-const inboxEntryUids = inboxEntries.map((x) => x._value._value.uid);
+// const inboxEntries = await unigraph.getObject('$/entity/inbox').then((x) => x._value.children._value ?? []);
+// const inboxEntryUids = inboxEntries.map((x) => x._value._value.uid);
 
-const mirrorEmailInbox = unigraph.getState('settings/email/mirrorEmailInbox').value;
+// const mirrorEmailInbox = unigraph.getState('settings/email/mirrorEmailInbox').value;
 uids.forEach((el, index) => {
-    // if (!readMask[index] && el) inboxEls.push(el);
-    const elShouldBeInbox = (mirrorEmailInbox ? inboxMask[index] : !readMask[index]) && el;
-    const elInInbox = inboxEntryUids.includes(el);
-    if (elShouldBeInbox && !elInInbox) inboxEls.push(el);
+    if (inboxMask[index] && el) inboxEls.push(el);
+    // const elShouldBeInbox = (mirrorEmailInbox ? inboxMask[index] : !readMask[index]) && el;
+    // const elInInbox = inboxEntryUids.includes(el);
+    // if (elShouldBeInbox && !elInInbox) inboxEls.push(el);
 });
 
 await unigraph.runExecutable('$/executable/add-item-to-list', {
     where: '$/entity/inbox',
     item: inboxEls.reverse(),
 });
-setTimeout(
-    () =>
-        unigraph.addNotification({
-            name: 'Inboxes synced',
-            from: 'unigraph.email',
-            content: `Added ${count} emails (${inboxEls.length} unread).`,
-            actions: [],
-        }),
-    1000,
-);
+if (count > 0)
+    setTimeout(
+        () =>
+            unigraph.addNotification({
+                name: 'Inboxes synced',
+                from: 'unigraph.email',
+                content: `Added ${count} emails (${inboxEls.length} in inbox).`,
+                actions: [],
+            }),
+        1000,
+    );

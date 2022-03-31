@@ -60,11 +60,6 @@ export const RedditPost: DynamicViewRenderer = ({ data, callbacks }) => {
 
     return (
         <div style={{ display: 'flex' }}>
-            <div style={{ alignSelf: 'baseline', marginRight: '16px' }}>
-                <ArrowUpward fontSize="small" />
-                <p style={{ marginTop: '0px', marginBottom: '2px' }}>Vote</p>
-                <ArrowDownward fontSize="small" />
-            </div>
             <div
                 style={{
                     alignSelf: 'baseline',
