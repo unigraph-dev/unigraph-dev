@@ -1,6 +1,6 @@
 /* eslint-disable react/require-default-props */
 import React from 'react';
-import { useDrag, useDrop } from 'react-dnd';
+import { DropTargetMonitor, useDrag, useDrop } from 'react-dnd';
 import { colors } from '@mui/material';
 import { styled } from '@mui/styles';
 import { ChevronRight } from '@mui/icons-material';
@@ -127,15 +127,21 @@ const DropIndicatorAfter = styled(DropIndicator)({
 
 /** Describe the object being dragged. */
 interface DragObject {
+    // FIXME: Don't pass noteBlock in here, find a way to get it via uid.
+    noteBlock: UnigraphObject;
+    /** The note block's uid. */
     uid: string;
+    /** The parent note block's uid. */
     parentUid: string;
+    /** For future global dnd. */
     itemType: string | undefined;
+    /** For future global dnd. */
     tabId: number;
 }
 
 interface OutlineProps {
-    object: UnigraphObject;
-    parentObject?: UnigraphObject;
+    noteBlock: UnigraphObject;
+    parentNoteBlock?: UnigraphObject;
     /** The index within its siblings. */
     index: number;
     editorContext?: NoteEditorContext;
@@ -150,6 +156,27 @@ function getChildrenComposerArrayUid(object: UnigraphObject): string | undefined
     return object?._value?.children?.uid;
 }
 
+/** Check if `a` is a descendant of `b`, where `a` and `b` are note block objects. */
+function isDescendantOf(a: UnigraphObject, b: UnigraphObject): boolean {
+    if (a.uid === b.uid) return true;
+
+    /** Check children note blocks if they exist. */
+    const childrenOfB = b?._value?.children?.['_value['];
+    if (childrenOfB && Array.isArray(childrenOfB)) {
+        for (let i = 0; i < childrenOfB.length; i += 1) {
+            const child = childrenOfB[i] as UnigraphObject;
+            if (isDescendantOf(a, child)) return true;
+        }
+        return false;
+    }
+
+    /** Go down one more level to see if there are children note blocks. */
+    if (b?._value) return isDescendantOf(a, b._value);
+
+    /** Nothing to do, declare not found. */
+    return false;
+}
+
 /** Hold the reference to the DOM of the content of an outline. */
 export const OutlineContentContext = React.createContext<React.MutableRefObject<HTMLDivElement | null>>({
     current: null,
@@ -157,8 +184,8 @@ export const OutlineContentContext = React.createContext<React.MutableRefObject<
 
 /** An outline item. */
 export function Outline({
-    object,
-    parentObject,
+    noteBlock,
+    parentNoteBlock,
     index,
     editorContext,
     children,
@@ -175,7 +202,7 @@ export function Outline({
         setHover(e.clientY > rect.top && e.clientY < rect.bottom);
     }, []);
     const onPointerLeave = React.useCallback(() => setHover(false), []);
-    const [isCollapsed, toggleCollapsed] = useOutlineCollapsed(object.uid);
+    const [isCollapsed, toggleCollapsed] = useOutlineCollapsed(noteBlock.uid);
 
     const dataContext = React.useContext(DataContext);
     const tabContext = React.useContext(TabContext);
@@ -185,9 +212,10 @@ export function Outline({
         () => ({
             type: dndType,
             item: {
-                uid: object.uid,
+                noteBlock,
+                uid: noteBlock.uid,
                 parentUid: dataContext.contextUid,
-                itemType: object.type?.['unigraph.id'],
+                itemType: noteBlock.type?.['unigraph.id'],
                 tabId: tabContext.viewId,
             },
             collect: (monitor) => {
@@ -206,25 +234,28 @@ export function Outline({
                 }
             },
         }),
-        [object.uid, object.type?.['unigraph.id'], dataContext.contextUid, tabContext.viewId],
+        [noteBlock, dataContext.contextUid, tabContext.viewId],
     );
 
     const onDrop = React.useCallback(
         (item: DragObject, side: 'before' | 'after') => {
-            console.log('drop', item.uid, 'from', item.parentUid, 'to', parentObject?.uid, `${side} index`, index);
+            console.log('drop', item.uid, 'from', item.parentUid, 'to', parentNoteBlock?.uid, `${side} index`, index);
             /**
              * Use `reorderItemInArray` if drag and drop in the same array, to prevent
              * wrong result due to add-then-remove race condition.
              */
-            if (item.parentUid === parentObject?.uid) {
-                const arrayUid = getChildrenComposerArrayUid(parentObject);
+            if (item.parentUid === parentNoteBlock?.uid) {
+                const arrayUid = getChildrenComposerArrayUid(parentNoteBlock);
                 if (!arrayUid) return;
 
                 typeof window.unigraph.reorderItemInArray === 'function' &&
                     window.unigraph.reorderItemInArray(arrayUid, [item.uid, side === 'after' ? index : index - 1]);
             } else {
-                const targetNoteBlockUid = parentObject?.uid;
+                const targetNoteBlockUid = parentNoteBlock?.uid;
                 if (!targetNoteBlockUid) return;
+
+                /** Prevent dropping a note block into its own descendant note blocks. */
+                if (parentNoteBlock && isDescendantOf(parentNoteBlock, item.noteBlock)) return;
 
                 window.unigraph.runExecutable('$/executable/add-item-to-list', {
                     where: targetNoteBlockUid,
@@ -238,41 +269,48 @@ export function Outline({
                 });
             }
         },
-        [parentObject, index],
+        [parentNoteBlock, index],
     );
 
-    const [{ shouldShowDropTargetAfter }, setDropTargetAfter] = useDrop<
+    const onCollect = React.useCallback(
+        (monitor: DropTargetMonitor<DragObject>) => {
+            const item = monitor.getItem()?.noteBlock;
+            return {
+                /** Don't show drop target when dragging over descendants. */
+                shouldShow: !!monitor.isOver() && !!item && !!parentNoteBlock && !isDescendantOf(parentNoteBlock, item),
+            };
+        },
+        [parentNoteBlock],
+    );
+
+    const [{ shouldShow: shouldShowDropTargetAfter }, setDropTargetAfter] = useDrop<
         DragObject,
         unknown,
-        { shouldShowDropTargetAfter: boolean }
+        { shouldShow: boolean }
     >(
         () => ({
             accept: [dndType],
             drop: (item) => {
                 onDrop(item, 'after');
             },
-            collect: (monitor) => ({
-                shouldShowDropTargetAfter: !!monitor.isOver(),
-            }),
+            collect: onCollect,
         }),
-        [onDrop],
+        [onDrop, onCollect],
     );
 
-    const [{ shouldShowDropTargetBefore }, setDropTargetBefore] = useDrop<
+    const [{ shouldShow: shouldShowDropTargetBefore }, setDropTargetBefore] = useDrop<
         DragObject,
         unknown,
-        { shouldShowDropTargetBefore: boolean }
+        { shouldShow: boolean }
     >(
         () => ({
             accept: [dndType],
             drop: (item) => {
                 onDrop(item, 'before');
             },
-            collect: (monitor) => ({
-                shouldShowDropTargetBefore: !!monitor.isOver(),
-            }),
+            collect: onCollect,
         }),
-        [onDrop],
+        [onDrop, onCollect],
     );
 
     return (
