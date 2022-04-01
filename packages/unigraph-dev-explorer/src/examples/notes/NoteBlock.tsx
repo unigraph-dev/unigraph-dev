@@ -125,8 +125,8 @@ const BlockChildren = ({
                       return (
                           <Outline
                               key={uid}
-                              object={entity}
-                              parentObject={data}
+                              noteBlock={entity}
+                              parentNoteBlock={data}
                               index={index}
                               editorContext={editorContext}
                               // createBelow={() => {
@@ -150,7 +150,7 @@ const BlockChildren = ({
                 : // </DragandDrop>
                   data && (
                       <Outline
-                          object={data}
+                          noteBlock={data}
                           index={0}
                           editorContext={editorContext}
                           displayAs={data?._value?.children?._displayAs || 'outliner'}
@@ -989,7 +989,7 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
                             {noChildren ? (
                                 []
                             ) : (
-                                <Outline object={refObject} index={index}>
+                                <Outline noteBlock={refObject} index={index}>
                                     <AutoDynamicView
                                         object={refObject}
                                         callbacks={{ ...callbacks, isEmbed: true }}
