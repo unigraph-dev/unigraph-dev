@@ -26,6 +26,7 @@ import { pkg as twitter } from 'unigraph-dev-common/lib/data/unigraph.twitter.pk
 import { pkg as nlp } from 'unigraph-dev-common/lib/data/unigraph.nlp.pkg';
 import { pkg as openai } from 'unigraph-dev-common/lib/data/unigraph.openai.pkg';
 import { pkg as kanban } from 'unigraph-dev-common/lib/data/unigraph.kanban.pkg';
+import { pkg as uiCommands } from 'unigraph-dev-common/lib/data/unigraph.ui_commands.pkg';
 
 export const defaultTypes = `<_value>: uid @reverse .
 <_value.#i>: int .
@@ -362,4 +363,5 @@ export const defaultPackages = [
     nlp,
     openai,
     kanban,
+    uiCommands,
 ];
