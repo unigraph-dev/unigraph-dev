@@ -1,0 +1,30 @@
+{
+    "dgraph.type": "Type",
+    "_name": "Command Handler",
+    "_definition": {
+        "type": { "unigraph.id": "$/composer/Object" },
+        "_parameters": {
+            "_indexedBy": { "unigraph.id": "$/primitive/string" }
+        },
+        "_properties": [
+            {
+                "_key": "command",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/command" }
+                }
+            },
+            {
+                "_key": "condition",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/executable" }
+                }
+            },
+            {
+                "_key": "action",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/executable" }
+                }
+            }
+        ]
+    }
+}
