@@ -3,6 +3,43 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.7](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.6...v0.2.7) (2022-03-30)
+
+
+### Bug Fixes
+
+* **dailyNotes:** make horizontal padding same width as note ([70b2a61](https://github.com/unigraph-dev/unigraph-dev/commit/70b2a615efb73ae9e82c71967bf37a3d854c00b9))
+* **dynamic view:** add option to ignore backlink completely and use parents' backlinks ([d9e6da7](https://github.com/unigraph-dev/unigraph-dev/commit/d9e6da7a6b1069c84a4d82c154ff5bb50c437c3a))
+* **editor:** align children text with title when bullets are hidden ([4499e27](https://github.com/unigraph-dev/unigraph-dev/commit/4499e27994005a2cde2367d58e551c511a81959d))
+* **editor:** editor state mismatch fixes, increase query depth ([adc791b](https://github.com/unigraph-dev/unigraph-dev/commit/adc791b816168902a0bdef4a6ff81a63bd83ddec))
+* **editor:** improve toggle stability ([01485ec](https://github.com/unigraph-dev/unigraph-dev/commit/01485ec2b9cd22962b9fafc50ffb94d1d9f785aa))
+* **editor:** make scrollable view properly ([d0ee8ce](https://github.com/unigraph-dev/unigraph-dev/commit/d0ee8ce64e6df36d25a84a0882103a935e392d63))
+* **editor:** make sure toggle shows at the right place ([2735e03](https://github.com/unigraph-dev/unigraph-dev/commit/2735e03bcf510e6dac821a9190c115eb6e119645))
+* **editor:** outline width should be constant ([2ba9a59](https://github.com/unigraph-dev/unigraph-dev/commit/2ba9a595ce55957e48c311c01da3e02bae2cc92c))
+* **editor:** prevent drop indicator overflow ([ec7c0a4](https://github.com/unigraph-dev/unigraph-dev/commit/ec7c0a4c05ffe788cd9662e4ea07e4ff7cbb1548))
+* **editor:** prevent super long words overflow when not being edited ([db892bd](https://github.com/unigraph-dev/unigraph-dev/commit/db892bd06cd2913ca3d69448c225dd166e6991e9))
+* **editor:** prevent toggle button go out of the tab ([9246000](https://github.com/unigraph-dev/unigraph-dev/commit/92460001fd80eed8abc71009088fd3add1d860dc))
+* **editor:** remove the space bullets take when in paragraph mode ([070fd2f](https://github.com/unigraph-dev/unigraph-dev/commit/070fd2f651b91264ae59d231c14947d82dc0a910))
+* **semantic:** prevent image width overflow ([4dbea60](https://github.com/unigraph-dev/unigraph-dev/commit/4dbea609a27ef9ce06001d931471f864055ddd9d))
+* **semantic:** prevent numbered list overlap with outliner bullet ([e90907d](https://github.com/unigraph-dev/unigraph-dev/commit/e90907dd2b85cf879bbc5add5915b55e6ca5dfb8))
+* styling, search result display ([3c54aab](https://github.com/unigraph-dev/unigraph-dev/commit/3c54aaba57280e606cc310218a0338558ee8419e))
+* **unigraph:** favorites bar speedup ([2f07fa5](https://github.com/unigraph-dev/unigraph-dev/commit/2f07fa554092fd6683fa72cf5f73a4c4fd34c950))
+* **unigraph:** rename entity references ([cb036bd](https://github.com/unigraph-dev/unigraph-dev/commit/cb036bdd4eba1c2831d9de48e3d6fec937e402cf))
+
+
+### Features
+
+* **calendar:** activate context menu in calendar events ([f36cadb](https://github.com/unigraph-dev/unigraph-dev/commit/f36cadbd7a8eecb05caf537333b568631d2d7325))
+* **editor:** add more padding around the editor ([35bb133](https://github.com/unigraph-dev/unigraph-dev/commit/35bb1332ceb0736867477122dda3eee79c14669c))
+* **editor:** improve the visual feeling of the date description ([5c13849](https://github.com/unigraph-dev/unigraph-dev/commit/5c13849e2d62a7ac230a711335bf46ed31124e82))
+* **editor:** prevent children count interfere with text ([5a0b296](https://github.com/unigraph-dev/unigraph-dev/commit/5a0b2961133ccd54ffdd029cec621a5ac50785e8))
+* **tabs:** limit tab width at 200px max ([afc4ca3](https://github.com/unigraph-dev/unigraph-dev/commit/afc4ca388364b32ca82eda41fc24c09b51b8f373))
+* **tabs:** make close tab button larger so it's easier to click ([524b615](https://github.com/unigraph-dev/unigraph-dev/commit/524b6151067a948a6355843ee0aa83c2ff0b9584))
+
+
+
+
+
 ## [0.2.6](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.5...v0.2.6) (2022-03-19)
 
 

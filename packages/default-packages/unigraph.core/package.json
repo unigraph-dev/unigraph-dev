@@ -26,6 +26,10 @@
                 "src": "schemas/view.json"
             },
             {
+                "id": "settings_page",
+                "src": "schemas/settings_page.json"
+            },
+            {
                 "id": "conditional_view",
                 "src": "schemas/conditional_view.json"
             },

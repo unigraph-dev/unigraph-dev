@@ -101,6 +101,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
     const subscriptions: Record<string, Function> = {};
     const subResults: Record<string, any> = {};
     const subFakeUpdates: Record<string, any[]> = {};
+    const subBlockingRoutine: Record<string, any> = {};
     const states: Record<string, AppState> = {};
     const caches: Record<string, any> = {
         namespaceMap: isJsonString(window.localStorage.getItem('caches/namespaceMap'))
@@ -207,6 +208,9 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 cacheCallbacks[parsed.name]?.forEach((el) => el(parsed.result));
             }
             if (parsed.type === 'subscription' && parsed.id && subscriptions[parsed.id] && parsed.result) {
+                if (subBlockingRoutine[parsed.id] && !parsed.ofUpdate) {
+                    return ev;
+                }
                 if (
                     Array.isArray(subFakeUpdates[parsed.id]) &&
                     (subFakeUpdates[parsed.id].includes(parsed.ofUpdate) || subFakeUpdates[parsed.id].length > 0) &&
@@ -214,6 +218,13 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 ) {
                     return ev;
                 }
+                // Reconciled subscription with client, blocking polling/routine updates for 5 seconds
+                subBlockingRoutine[parsed.id] = true;
+                setTimeout(() => {
+                    subBlockingRoutine[parsed.id] = false;
+                }, 5000);
+
+                // Now we can safely update the state
                 subFakeUpdates[parsed.id] = [];
                 subResults[parsed.id] = JSON.parse(JSON.stringify(parsed.result));
                 if (parsed.supplementary) {
@@ -429,16 +440,16 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                         api.sendFakeUpdate?.(subId, newObject, id);
                     }
                 }
-                if (thisEventId && (!Array.isArray(subIds) || subIds.length === 1)) {
+                if (!Array.isArray(subIds) || subIds.length === 1) {
                     const subId = Array.isArray(subIds) ? subIds[0] : subIds;
-                    if (subFakeUpdates[subId] === undefined) subFakeUpdates[subId] = [thisEventId];
-                    else subFakeUpdates[subId].push(thisEventId);
+                    if (subFakeUpdates[subId] === undefined) subFakeUpdates[subId] = [id];
+                    else subFakeUpdates[subId].push(id);
                 }
                 sendEvent(connection, 'update_object', { uid, newObject, upsert, pad, id, subIds, origin, usedUids });
             }),
         sendFakeUpdate: (subId, updater, eventId, fullObject?) => {
             // Merge updater object with existing one
-            // console.log('subId0', JSON.parse(JSON.stringify(subResults[subId])));
+            // console.log('subId0', JSON.parse(JSON.stringify(subResults[subId], getCircularReplacer())));
             const id = eventId;
             let newObj: any;
             if (fullObject) {
@@ -448,6 +459,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             }
 
             subResults[subId] = newObj;
+            // console.log(newObj);
 
             // Record state changes
             if (id) {

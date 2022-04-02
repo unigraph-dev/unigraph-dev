@@ -90,7 +90,13 @@ const EmailMessage: DynamicViewRenderer = ({ data, callbacks }) => {
                 secondary={[
                     Sugar.Date.relative(new Date(unpadded?.message?.date_received)),
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <Link />
+                        <Link
+                            style={{ display: data?._externalUrl ? '' : 'none', marginRight: '4px' }}
+                            onClick={(ev) => {
+                                ev.stopPropagation();
+                                window.open(data._externalUrl, '_blank');
+                            }}
+                        />
                         {`${unpadded.content?.abstract}...`}
                     </div>,
                 ]}

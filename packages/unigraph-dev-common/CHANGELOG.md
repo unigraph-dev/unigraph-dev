@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.7](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.6...v0.2.7) (2022-03-30)
+
+
+### Bug Fixes
+
+* **editor:** editor state mismatch fixes, increase query depth ([adc791b](https://github.com/unigraph-dev/unigraph-dev/commit/adc791b816168902a0bdef4a6ff81a63bd83ddec))
+
+
+
+
+
 ## [0.2.6](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.5...v0.2.6) (2022-03-19)
 
 

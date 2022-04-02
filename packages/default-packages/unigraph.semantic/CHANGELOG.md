@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.7](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.6...v0.2.7) (2022-03-30)
+
+
+### Bug Fixes
+
+* **unigraph:** rename entity references ([cb036bd](https://github.com/unigraph-dev/unigraph-dev/commit/cb036bdd4eba1c2831d9de48e3d6fec937e402cf))
+
+
+
+
+
 ## [0.2.5](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.4...v0.2.5) (2022-03-13)
 
 **Note:** Version bump only for package unigraph.semantic

@@ -99,8 +99,21 @@ const updateAccountInbox = async (account) => {
         messages.map((id) => gmail.users.messages.get({ userId: 'me', id, format: 'raw' })),
     );
     const inbox = await unigraph.getObject('$/entity/inbox');
-    const inboxEntries = inbox._value.children['_value['] ?? [];
+    const inboxEntries = (inbox._value.children['_value['] ?? []).filter(
+        (x) => x._value._value.type?.['unigraph.id'] === '$/schema/email_message',
+    );
     const inboxEntryUids = inboxEntries.map((x) => x._value._value.uid);
+    const inboxEntryMsgIds = inboxEntries
+        .map((x) => [x._value._value?._value?.message_id?.['_value.%'], x._value._value.uid])
+        .filter(Boolean);
+    const gmailIdsForCurrentInbox = await Promise.all(
+        inboxEntryMsgIds.map((el) =>
+            gmail.users.messages.list({ userId: 'me', q: `rfc822msgid:${el[0]}`, labelIds: ['INBOX'] }),
+        ),
+    );
+    const uidsToRemoveInbox = gmailIdsForCurrentInbox
+        .map((el, idx) => (el.data?.messages?.length > 0 ? undefined : inboxEntryMsgIds[idx][1]))
+        .filter(Boolean);
 
     const getOldUid = _.curry((condition, el, index) => {
         const isCondition = condition(el);
@@ -111,14 +124,12 @@ const updateAccountInbox = async (account) => {
         (el) => el.data.labelIds?.includes('TRASH') || el.data.labelIds?.includes('SPAM'),
     );
     const isOldAndInOriginInbox = getOldUid((el) => el.data.labelIds?.includes('INBOX'));
-    const isOldAndNotInOriginInbox = getOldUid((el) => !el.data.labelIds?.includes('INBOX'));
 
     const uidsToDelete = msgResps.map(isOldAndInOriginTrash).filter((el) => el !== undefined);
     const uidsToInbox = msgResps
         .map(isOldAndInOriginInbox)
         .filter((el) => el !== undefined)
         .filter((x) => !inboxEntryUids.includes(x));
-    const uidsToRemoveInbox = msgResps.map(isOldAndNotInOriginInbox).filter((el) => el !== undefined);
 
     // TODO: remove or hide deleted msgs
 
@@ -132,6 +143,7 @@ const updateAccountInbox = async (account) => {
             dont_check_unique: true,
             messages: newMsgResps.map((el) => ({
                 message: Buffer.from(el.data.raw, 'base64').toString(),
+                externalUrl: `https://mail.google.com/mail/u/${account._value.username['_value.%']}/#all/${el.data.id}`,
                 read: !el.data.labelIds?.includes('UNREAD'),
                 inbox: el.data.labelIds?.includes('INBOX'),
             })),

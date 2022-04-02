@@ -34,6 +34,7 @@ make install  # installs built binary in $GOPATH/bin
 dgraph
 ```
 
+**Alternative** for step **1)**: find Unigraph's Dgraph binary for your platform on [GitHub Releases](https://github.com/unigraph-dev/dgraph/releases) and rename it to `dgraph`. On Linux or macOS, you'll need to make it executable: `chmod +x ./Downloads/dgraph`. Then, continue to step **2)**.
 
 **2)** In the `unigraph` project root, fetch and build project dependencies:
 

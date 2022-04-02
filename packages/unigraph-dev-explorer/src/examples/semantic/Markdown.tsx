@@ -36,8 +36,6 @@ const compFactory = (name: string, { node, inline, className, children, ...props
     React.createElement(name, {
         className,
         children,
-        contentEditable: true,
-        suppressContentEditableWarning: true,
         onPointerUp: (event: PointerEvent) => {
             const currentText = (window.getSelection() as any).anchorNode?.textContent;
             const currentNode = getTextNodes(node).filter((el: any) => el.value === currentText)[0];
