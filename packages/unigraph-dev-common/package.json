@@ -4,9 +4,6 @@
     "description": "Common libraries and files for unigraph-dev",
     "main": "./lib/index.js",
     "types": "./lib/index.d.ts",
-    "bin": {
-        "unigraph-packager": "./unigraph-packager.js"
-    }, 
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "build": "tsc",
