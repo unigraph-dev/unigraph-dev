@@ -1,0 +1,25 @@
+{
+    "name": "unigraph-packager",
+    "version": "0.2.7-1",
+    "description": "Unigraph package builder.",
+    "main": "./unigraph-packager.js",
+    "bin": {
+        "unigraph-packager": "./unigraph-packager.js"
+    }, 
+    "dependencies": {
+        "yargs": "^17.0.1"
+    },
+    "devDependencies": {
+        "typescript": "^4.2.2"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/unigraph-dev/unigraph-dev.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/unigraph-dev/unigraph-dev/issues"
+    },
+    "homepage": "https://github.com/unigraph-dev/unigraph-dev#readme"
+}
