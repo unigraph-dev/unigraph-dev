@@ -5,7 +5,7 @@ import React from 'react';
 const DragHandleContainer = styled('div')({
     flex: '0 0 1rem',
     width: '1rem',
-    height: '1.2rem',
+    height: '1.25rem',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
@@ -17,6 +17,7 @@ const DragHandleContainer = styled('div')({
     },
     '&:active': {
         background: 'rgba(0, 0, 0, 0.2)',
+        cursor: 'grabbing',
     },
 });
 

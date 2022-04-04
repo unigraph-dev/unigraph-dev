@@ -77,7 +77,7 @@ const ChildrenContainer = styled('div')({
  * a drag to be detected, but it shouldn't be too large and overlap with other
  * drop targets.
  */
-const dropTargetHeight = 20;
+const dropTargetHeight = 30;
 const DropTarget = styled('div')({
     position: 'absolute',
     left: '2rem',
@@ -208,7 +208,7 @@ export function Outline({
     const tabContext = React.useContext(TabContext);
     const dndType = 'outliner-dnd';
 
-    const [, setDragSource] = useDrag<DragObject, unknown, unknown>(
+    const [, setDragSource, setDragPreview] = useDrag<DragObject, unknown, unknown>(
         () => ({
             type: dndType,
             item: {
@@ -237,6 +237,14 @@ export function Outline({
         [noteBlock, dataContext.contextUid, tabContext.viewId],
     );
 
+    const canDrop = React.useCallback(
+        (item: DragObject) => {
+            /** Prevent dropping a note block into its own descendant note blocks. */
+            return !!parentNoteBlock && !isDescendantOf(parentNoteBlock, item.noteBlock);
+        },
+        [parentNoteBlock],
+    );
+
     const onDrop = React.useCallback(
         (item: DragObject, side: 'before' | 'after') => {
             console.log('drop', item.uid, 'from', item.parentUid, 'to', parentNoteBlock?.uid, `${side} index`, index);
@@ -254,8 +262,7 @@ export function Outline({
                 const targetNoteBlockUid = parentNoteBlock?.uid;
                 if (!targetNoteBlockUid) return;
 
-                /** Prevent dropping a note block into its own descendant note blocks. */
-                if (parentNoteBlock && isDescendantOf(parentNoteBlock, item.noteBlock)) return;
+                // if (parentNoteBlock && isDescendantOf(parentNoteBlock, item.noteBlock)) return;
 
                 window.unigraph.runExecutable('$/executable/add-item-to-list', {
                     where: targetNoteBlockUid,
@@ -272,16 +279,11 @@ export function Outline({
         [parentNoteBlock, index],
     );
 
-    const onCollect = React.useCallback(
-        (monitor: DropTargetMonitor<DragObject>) => {
-            const item = monitor.getItem()?.noteBlock;
-            return {
-                /** Don't show drop target when dragging over descendants. */
-                shouldShow: !!monitor.isOver() && !!item && !!parentNoteBlock && !isDescendantOf(parentNoteBlock, item),
-            };
-        },
-        [parentNoteBlock],
-    );
+    const onCollect = React.useCallback((monitor: DropTargetMonitor<DragObject>) => {
+        return {
+            shouldShow: !!monitor.isOver() && !!monitor.canDrop(),
+        };
+    }, []);
 
     const [{ shouldShow: shouldShowDropTargetAfter }, setDropTargetAfter] = useDrop<
         DragObject,
@@ -293,9 +295,10 @@ export function Outline({
             drop: (item) => {
                 onDrop(item, 'after');
             },
+            canDrop,
             collect: onCollect,
         }),
-        [onDrop, onCollect],
+        [onDrop, canDrop, onCollect],
     );
 
     const [{ shouldShow: shouldShowDropTargetBefore }, setDropTargetBefore] = useDrop<
@@ -308,9 +311,10 @@ export function Outline({
             drop: (item) => {
                 onDrop(item, 'before');
             },
+            canDrop,
             collect: onCollect,
         }),
-        [onDrop, onCollect],
+        [onDrop, canDrop, onCollect],
     );
 
     return (
@@ -359,7 +363,7 @@ export function Outline({
                     }}
                 />
             )}
-            <ChildrenContainer>
+            <ChildrenContainer ref={setDragPreview}>
                 <OutlineContentContext.Provider value={rContentEl}>{children}</OutlineContentContext.Provider>
             </ChildrenContainer>
             <DropIndicatorAfter show={shouldShowDropTargetAfter} />
