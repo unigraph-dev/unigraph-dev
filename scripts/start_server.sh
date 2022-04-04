@@ -28,6 +28,7 @@ fi
 
 par=$( cd $(dirname $0) ; pwd -P )
 
+eval 'mkdir $data || true'
 eval 'cd $data && $dgraph alpha &'
 eval 'cd $data && $dgraph zero &'
 sleep 10

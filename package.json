@@ -12,7 +12,7 @@
     },
     "scripts": {
         "postinstall": "run-script-os",
-        "postinstall:linux:darwin": "(mkdir packages/unigraph-dev-explorer/public/vendor/ || true) && cp -R ./node_modules/monaco-editor/min/vs packages/unigraph-dev-explorer/public/vendor/monaco-editor_at_0.31.1/",
+        "postinstall:linux:darwin": "(mkdir packages/unigraph-dev-explorer/public/vendor/ || true) && (cp -R ./node_modules/monaco-editor/min/vs packages/unigraph-dev-explorer/public/vendor/monaco-editor_at_0.31.1/ || true)",
         "postinstall:windows": "pwsh -Command \"mkdir -Force packages/unigraph-dev-explorer/public/vendor/ && Copy-Item ./node_modules/monaco-editor/min/vs -Destination packages/unigraph-dev-explorer/public/vendor/monaco-editor_at_0.31.1/ -Recurse -Force\"",
         "backend-build": "yarn workspace unigraph-dev-backend build",
         "backend-start": "yarn workspace unigraph-dev-backend start",
