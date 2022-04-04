@@ -274,13 +274,13 @@ export default class DgraphClient {
    * @param query 
    * @param vars 
    */
-  async queryDgraph(query: string, vars: Record<string, any>|undefined = undefined): Promise<any[]> {
+  async queryDgraph(query: string, vars: Record<string, any>|undefined = undefined, withTxn?: boolean): Promise<any[]> {
     const res = await this.dgraphClient
       .newTxn({ readOnly: true })
       .queryWithVars(query, vars).catch(e => {console.log(e); return e});
     const tns = res.getLatency().getTotalNs();
     if (tns > 400000000) console.log(`[PERF] Slow - Transaction complete - but took ${tns / 1000000.0} ms. ` + query.slice(0, 100) + '...')
-    return Object.values(res.getJson());
+    return withTxn ? [(res as dgraph.Response).getTxn()?.getStartTs(), Object.values(res.getJson())] : Object.values(res.getJson());
   }
 
   /**

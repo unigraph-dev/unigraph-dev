@@ -111,7 +111,7 @@ export default async function startServer(client: DgraphClient) {
     await checkOrCreateDefaultDataModel(client);
 
     // Initialize subscriptions
-    const pollCallback: MsgCallbackFn = (newdata, sub, ofUpdate, supplementary?) => {
+    const pollCallback: MsgCallbackFn = (newdata, sub, ofUpdate, supplementary?, txn?) => {
         if (sub?.callbackType === 'messageid') {
             const msgPort = sub.msgPort!;
             if (msgPort?.readyState === 1) {
@@ -121,6 +121,7 @@ export default async function startServer(client: DgraphClient) {
                             type: 'subscription',
                             updated: true,
                             id: sub.id,
+                            txn,
                             result: newdata,
                             ofUpdate,
                             supplementary,
