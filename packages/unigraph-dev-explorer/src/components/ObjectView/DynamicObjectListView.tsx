@@ -321,7 +321,7 @@ function DynamicList({
 
     React.useEffect(() => {
         setupProps?.onUpdate(items.map((el: any) => itemGetter(el).uid));
-    }, [items.map((el: any) => itemGetter(el).uid)]);
+    }, [JSON.stringify(items.map((el: any) => itemGetter(el).uid).sort())]);
 
     return (
         <InfiniteScroll
