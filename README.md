@@ -17,6 +17,17 @@ License:
 
 ## Getting started
 
+### Running with Docker image
+
+We provide an experimental Dockerfile for easy setup:
+
+- Building Unigraph: `docker build -t unigraph-devserver.` (this should take roughly 10 minutes max),
+- Running Unigraph: `docker run -d -p 4002:4002 -v <data directory>:/opt/unigraph -p 4001:4001 -p 3000:3000 -P unigraph-devserver`, 
+
+To update the Docker image, run `docker build` again after `git pull`.
+
+### Building from source
+
 **1)** Build the [`Dgraph`](https://github.com/unigraph-dev/dgraph) backend binary from source [[reference](https://github.com/unigraph-dev/dgraph#install-from-source)]
 
 > requires `gcc`, `make`, `go>=1.13`
