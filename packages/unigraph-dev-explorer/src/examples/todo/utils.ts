@@ -27,6 +27,14 @@ export type ATodoList = {
 
 export const filters = [
     {
+        id: 'only-untagged',
+        fn: (obj: any) => {
+            const children = new UnigraphObject(obj).get('children')?.['_value['] || [];
+            const tags = children.filter((el: any) => el?._value?._value?.type?.['unigraph.id'] === '$/schema/tag');
+            return tags.length === 0;
+        },
+    },
+    {
         id: 'only-incomplete',
         fn: (obj: any) => {
             let r;
@@ -248,6 +256,34 @@ export const getAllTodoCountQuery = () =>
 
     `;
 export const getAllTodoCountFromRes = flow(prop(['0', '~type']), findLast(has('todoCounts')), prop('todoCounts'));
+
+export const getUntaggedTodoCountQuery = () =>
+    `todos(func: uid(todos)) @filter(NOT uid(tagged) AND type(Entity)) {
+        todoCounts: count(uid)
+    }
+    var(func: eq(<unigraph.id>, "$/schema/todo")) @cascade {
+        <~type> @filter(NOT eq(<_hide>, true)) {
+            todos as uid
+        }
+    }
+	tagged as var(func: uid(todos)) @cascade {
+        uid
+        _value {
+            children {
+                <_value[> {
+                    _value {
+                        _value {
+                            type @filter(eq(<unigraph.id>, "$/schema/tag")) {
+                                uid
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    `;
+export const getUntaggedTodoCountFromRes = prop(['0', 'todoCounts']);
 
 export const getUpcomingTodoCountQuery = () =>
     `todos(func: eq(<unigraph.id>, "$/schema/todo")) @cascade{
