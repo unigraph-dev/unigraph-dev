@@ -22,9 +22,9 @@ COPY ./packages/unigraph-dev-backend/package.json /app/packages/unigraph-dev-bac
 COPY ./packages/unigraph-dev-common/package.json /app/packages/unigraph-dev-common/package.json
 COPY ./packages/unigraph-dev-electron/package.json /app/packages/unigraph-dev-electron/package.json
 COPY ./packages/unigraph-dev-explorer/package.json /app/packages/unigraph-dev-explorer/package.json
-RUN cd /app && yarn
+RUN cd /app && yarn --network-timeout 600000
 COPY . /app
-RUN cd /app && yarn
+RUN cd /app && yarn --network-timeout 600000
 RUN cd /app && yarn build-deps
 
 # Run Unigraph

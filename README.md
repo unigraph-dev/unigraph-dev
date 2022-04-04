@@ -21,7 +21,7 @@ License:
 
 We provide an experimental Dockerfile for easy setup:
 
-- Building Unigraph: `docker build -t unigraph-devserver.` (this should take roughly 10 minutes max),
+- Building Unigraph: `docker build -t unigraph-devserver .` (this should take roughly 10 minutes max),
 - Running Unigraph: `docker run -d -p 4002:4002 -v <data directory>:/opt/unigraph -p 4001:4001 -p 3000:3000 -P unigraph-devserver`, 
 
 To update the Docker image, run `docker build` again after `git pull`.
