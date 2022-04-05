@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.8](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.7...v0.2.8) (2022-04-05)
+
+
+### Bug Fixes
+
+* correct package.json declarations ([5d9525c](https://github.com/unigraph-dev/unigraph-dev/commit/5d9525cd51f14fec1d03df2df6a767f5e5f3ad50))
+
+
+### Features
+
+* **packager:** enhance packager and add unigraph packager to npx ([cb2a556](https://github.com/unigraph-dev/unigraph-dev/commit/cb2a556b4ae6ebda9624c298eec85109fe9986b0))
+
+
+
+
+
 ## [0.2.7](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.6...v0.2.7) (2022-03-30)
 
 

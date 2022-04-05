@@ -1,11 +1,11 @@
 {
     "name": "unigraph-packager",
-    "version": "0.2.7-1",
+    "version": "0.2.8",
     "description": "Unigraph package builder.",
     "main": "./unigraph-packager.js",
     "bin": {
         "unigraph-packager": "./unigraph-packager.js"
-    }, 
+    },
     "dependencies": {
         "yargs": "^17.0.1"
     },

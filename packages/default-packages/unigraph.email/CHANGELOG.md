@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.8](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.7...v0.2.8) (2022-04-05)
+
+
+### Bug Fixes
+
+* **email:** properly sync email, add option to open in gmail ([d0a4e6d](https://github.com/unigraph-dev/unigraph-dev/commit/d0a4e6deddf16b2ad82210bd8d801c12432e8a93))
+
+
+
+
+
 ## [0.2.5](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.4...v0.2.5) (2022-03-13)
 
 **Note:** Version bump only for package unigraph.email

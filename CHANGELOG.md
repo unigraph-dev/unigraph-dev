@@ -3,6 +3,36 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.8](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.7...v0.2.8) (2022-04-05)
+
+
+### Bug Fixes
+
+* correct package.json declarations ([5d9525c](https://github.com/unigraph-dev/unigraph-dev/commit/5d9525cd51f14fec1d03df2df6a767f5e5f3ad50))
+* disable drag select temporarily because it's causing problems ([73e9b74](https://github.com/unigraph-dev/unigraph-dev/commit/73e9b74cc2d6526ee9023891bfffc87ec7f33c43))
+* **dockerfile:** dependencies fix for docker ([f4a15c3](https://github.com/unigraph-dev/unigraph-dev/commit/f4a15c391a699385b1201ca959dd14dc5d856dc5))
+* **editor:** allow focusing code blocks (```) ([0a7d0e0](https://github.com/unigraph-dev/unigraph-dev/commit/0a7d0e0a23c931f5e7f0dc3569d93bc042e8bbde))
+* **email:** properly sync email, add option to open in gmail ([d0a4e6d](https://github.com/unigraph-dev/unigraph-dev/commit/d0a4e6deddf16b2ad82210bd8d801c12432e8a93))
+* **executable:** executable preview now working ([37a8d77](https://github.com/unigraph-dev/unigraph-dev/commit/37a8d77866568ccab47c4fb4b7ac1eb6b574e77a))
+* **obsidian:** add obsidian sync settings page ([09c46a8](https://github.com/unigraph-dev/unigraph-dev/commit/09c46a803a2d14a05a3ae18baf490a376e080d38))
+* **reddit:** remove unused vote option ([42d359a](https://github.com/unigraph-dev/unigraph-dev/commit/42d359a4cd4ab44269d9014428d4c392636776be))
+* remove unused inspector pane ([00618c6](https://github.com/unigraph-dev/unigraph-dev/commit/00618c602ebffc18737522948cceb71bdf88083b))
+* renaming entities escapes double quotes ([f61402b](https://github.com/unigraph-dev/unigraph-dev/commit/f61402b6f32b4f398b4c5e1e979fb3b4f59d8e26))
+* **settings:** add definition for settings pages ([13da813](https://github.com/unigraph-dev/unigraph-dev/commit/13da813cab21064dc57f17c8d20e878497102ac6))
+* **todo:** show untagged tasks, autodynamicview filter by tag with todo by default ([65c6e54](https://github.com/unigraph-dev/unigraph-dev/commit/65c6e5440f2c71200900c0ccae87c73a48a52a50))
+* various ux fixes ([788c021](https://github.com/unigraph-dev/unigraph-dev/commit/788c02121a1a885f5f7a8b9b1e5465d4422ce6c0))
+
+
+### Features
+
+* **notes:** use the new, richer daily notes page ([eb96dca](https://github.com/unigraph-dev/unigraph-dev/commit/eb96dcabfe8db91313603db626387535efcba116))
+* **packager:** enhance packager and add unigraph packager to npx ([cb2a556](https://github.com/unigraph-dev/unigraph-dev/commit/cb2a556b4ae6ebda9624c298eec85109fe9986b0))
+* **unigraph:** improve user experience with Docker ([487a11e](https://github.com/unigraph-dev/unigraph-dev/commit/487a11e5703bfaa4097e5fe77abecf9182fd6e30))
+
+
+
+
+
 ## [0.2.7](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.6...v0.2.7) (2022-03-30)
 
 
