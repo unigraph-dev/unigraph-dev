@@ -47,21 +47,36 @@ export function HomeSection({ data }: any) {
         };
     }, [flushCondition]);
 
+    // eslint-disable-next-line no-nested-ternary
     return shouldDisplay ? (
-        <Card
-            style={{ padding: '16px', margin: '12px' }}
-            variant="outlined"
-            onClick={() => {
-                setTimeout(() => {
-                    setFlushCondition(true);
-                }, 500);
-            }}
-        >
-            <Typography variant="h6" gutterBottom>
-                {data.get('view/name').as('primitive')}
-            </Typography>
-            <AutoDynamicViewDetailed object={new UnigraphObject(data.get('view')._value)} />
-        </Card>
+        data.get('view/maximize')?.as('primitive') ? (
+            <Card
+                style={{ margin: '12px' }}
+                variant="outlined"
+                onClick={() => {
+                    setTimeout(() => {
+                        setFlushCondition(true);
+                    }, 500);
+                }}
+            >
+                <AutoDynamicViewDetailed object={new UnigraphObject(data.get('view')._value)} />
+            </Card>
+        ) : (
+            <Card
+                style={{ padding: '16px', margin: '12px' }}
+                variant="outlined"
+                onClick={() => {
+                    setTimeout(() => {
+                        setFlushCondition(true);
+                    }, 500);
+                }}
+            >
+                <Typography variant="h6" gutterBottom>
+                    {data.get('view/name').as('primitive')}
+                </Typography>
+                <AutoDynamicViewDetailed object={new UnigraphObject(data.get('view')._value)} />
+            </Card>
+        )
     ) : (
         <span />
     );
