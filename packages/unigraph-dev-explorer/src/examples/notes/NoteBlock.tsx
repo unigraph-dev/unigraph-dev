@@ -336,6 +336,7 @@ export function ParentsAndReferences({ data }: any) {
                 noDrop
                 titleBar=" parents"
                 loadAll
+                noHoverHighlight
                 components={{
                     '$/schema/note_block': {
                         view: NoChildrenReferenceNoteView,
@@ -356,6 +357,7 @@ export function ParentsAndReferences({ data }: any) {
                 noDrop
                 titleBar=" linked references"
                 loadAll
+                noHoverHighlight
                 components={{
                     '$/schema/note_block': {
                         view: ReferenceNoteView,
