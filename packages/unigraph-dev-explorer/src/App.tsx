@@ -5,11 +5,13 @@ import { styled } from '@mui/styles';
 
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';
 import { getParameters, globalTheme, isElectron, NavigationContext } from './utils';
 import { ContextMenu } from './components/UnigraphCore/ContextMenu';
 import { InlineSearch } from './components/UnigraphCore/InlineSearchPopup';
 import { SearchOverlayPopover } from './pages/SearchOverlay';
 import { MobileBar } from './components/UnigraphCore/MobileBar';
+import { CustomDragLayer } from './CustomDragLayer';
 
 declare module '@mui/styles/defaultTheme' {
     // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -50,6 +52,10 @@ const StyledStyledEngineProvider = styled(StyledEngineProvider)(({ theme }) => (
 
 const providedTheme = createTheme(globalTheme);
 
+const dndOpts = {
+    enableMouseEvents: true,
+};
+
 function AppToWrap() {
     const history = createBrowserHistory();
     const componentPathName = new URLSearchParams(window.location.search).get('pageName');
@@ -59,7 +65,8 @@ function AppToWrap() {
 
     return (
         <div className={classes.root}>
-            <DndProvider backend={HTML5Backend}>
+            <DndProvider backend={TouchBackend} options={dndOpts}>
+                <CustomDragLayer />
                 <div id="global-elements">
                     <ContextMenu />
                     <InlineSearch />
