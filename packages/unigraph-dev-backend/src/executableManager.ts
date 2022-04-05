@@ -14,23 +14,11 @@ import _ from 'lodash';
 import { PackageDeclaration } from 'unigraph-dev-common/lib/types/packages';
 import Babel from '@babel/core';
 import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
+import { Executable, ExecContext, ExecRunner, runEnvLambdaJs } from 'unigraph-dev-common/lib/utils/executableUtils';
 import { addHook } from './hooks';
 import { Cache } from './caches';
 import DgraphClient from './dgraphClient';
 import { mergeWithConcatArray } from './utils';
-
-export type Executable = {
-    name?: string;
-    'unigraph.id': string;
-    src: string;
-    env: string;
-    periodic?: string;
-    on_hook?: string;
-    editable?: boolean;
-    edited?: boolean;
-    children?: any;
-    concurrency?: number;
-};
 
 export function createExecutableCache(
     client: DgraphClient,
@@ -131,27 +119,6 @@ export function initExecutables(
     states.hooks = _.mergeWith({}, states.defaultHooks, newHooks, mergeWithConcatArray);
 }
 
-/** Routines */
-
-export type ExecContext = {
-    /** Input parameters in the form of an object */
-    params: any;
-    /** Package declaration */
-    package?: PackageDeclaration;
-    /** Definition of the executable */
-    definition: Executable;
-    showConsole?: boolean;
-    /** A function that send events */
-    send?: any;
-    [x: string]: any;
-};
-
-/**
- * A type of functions that "runs" the executable once.
- * Takes the necessary contexts and returns a paramless function that executes ther executable when called.
- */
-export type ExecRunner = (src: string, context: ExecContext, unigraph: Unigraph) => (() => any) | string;
-
 export const runEnvRoutineJs: ExecRunner = (src, context, unigraph) => {
     // const fn = () => eval(src);
     // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -191,45 +158,6 @@ export const runEnvRoutineJs: ExecRunner = (src, context, unigraph) => {
           });
 };
 
-export const runEnvLambdaJs: ExecRunner = (src, context, unigraph) => {
-    // const fn = () => eval(src);
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    const AsyncFunction = Object.getPrototypeOf(async () => false).constructor;
-    const logs: any[] = [];
-    const scopedConsole = context.showConsole
-        ? {
-              ...console,
-              log: (...params: any[]) => {
-                  console.log(...params);
-                  logs.push(...params);
-              },
-          }
-        : console;
-    const fn = new AsyncFunction(
-        'require',
-        'unpad',
-        'context',
-        'unigraph',
-        'console',
-        `try {
-        return ${src}
-} catch (e) {
-        unigraph.addNotification({
-            from: "Executable manager", 
-            name: "Failed to run executable " + context.definition["unigraph.id"], 
-            content: "Error was: " + e.toString() + e.stack }
-        )
-    }`,
-    ).bind(this, require, unpad, context, unigraph, scopedConsole);
-
-    return !context.showConsole
-        ? fn
-        : async () => ({
-              _return: await fn(),
-              _logs: logs,
-          });
-};
-
 export const runEnvReactJSX: ExecRunner = (src, context, unigraph) => {
     let transpiled: any;
     try {
@@ -252,7 +180,7 @@ ${src}
     return transpiled;
 };
 
-export const runEnvClientJs: ExecRunner = (src, context, unigraph) => src;
+const returnSrcFromEnvClientJs: ExecRunner = (src, context, unigraph) => src;
 
 /** Environments */
 
@@ -260,5 +188,5 @@ export const environmentRunners = {
     'routine/js': runEnvRoutineJs,
     'lambda/js': runEnvLambdaJs,
     'component/react-jsx': runEnvReactJSX,
-    'client/js': runEnvClientJs,
+    'client/js': returnSrcFromEnvClientJs, // TODO: should we just forbid this in backend?
 }; /** List of all environments supported in Unigraph */

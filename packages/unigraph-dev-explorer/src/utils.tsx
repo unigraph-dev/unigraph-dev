@@ -406,6 +406,7 @@ export const deselectUid = (uid?: string) => {
 
 export const isMultiSelectKeyPressed = (event: React.MouseEvent) => event.altKey;
 
+// TODO delete this and use the one in common
 export const runClientExecutable = (src: string, params: any) => {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     const AsyncFunction = eval('Object.getPrototypeOf(async function () {}).constructor');

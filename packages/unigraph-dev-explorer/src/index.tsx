@@ -114,6 +114,27 @@ window.unigraph.onReady!(() => {
         );
     });
 
+    // Register commands and command handlers
+    window.unigraph.subscribeToType(
+        '$/schema/command',
+        (data: any[]) => {
+            const commandState = window.unigraph.getState('registry/uiCommands');
+            commandState.setValue(data);
+        },
+        undefined,
+        { all: true },
+    );
+
+    window.unigraph.subscribeToType(
+        '$/schema/command_handler',
+        (data: any[]) => {
+            const commandState = window.unigraph.getState('registry/uiCommandHandlers');
+            commandState.setValue(data);
+        },
+        undefined,
+        { all: true },
+    );
+
     initDynamicObjectViews();
     window.reloadCommands();
 
