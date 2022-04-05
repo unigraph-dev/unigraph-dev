@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.3.0](https://github.com/ssalka/unigraph-dev/compare/v0.2.7...v0.3.0) (2022-04-05)
+
+**Note:** Version bump only for package unigraph-dev-backend
+
+
+
+
+
 ## [0.2.6](https://github.com/ssalka/unigraph-dev/compare/v0.2.5...v0.2.6) (2022-03-19)
 
 

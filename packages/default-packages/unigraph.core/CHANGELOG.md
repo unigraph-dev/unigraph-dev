@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.3.0](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.7...v0.3.0) (2022-04-05)
+
+
+### Bug Fixes
+
+* **settings:** add definition for settings pages ([13da813](https://github.com/unigraph-dev/unigraph-dev/commit/13da813cab21064dc57f17c8d20e878497102ac6))
+
+
+
+
+
 ## [0.2.6](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.5...v0.2.6) (2022-03-19)
 
 

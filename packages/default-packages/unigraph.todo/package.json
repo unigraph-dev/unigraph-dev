@@ -1,6 +1,6 @@
 {
     "displayName": "Todo",
-    "version": "0.2.5",
+    "version": "0.3.0",
     "description": "Todo lists and task management.",
     "name": "unigraph.todo",
     "unigraph": {

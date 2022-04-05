@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.3.0](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.7...v0.3.0) (2022-04-05)
+
+
+### Features
+
+* **notes:** use the new, richer daily notes page ([eb96dca](https://github.com/unigraph-dev/unigraph-dev/commit/eb96dcabfe8db91313603db626387535efcba116))
+
+
+
+
+
 ## [0.2.7](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.6...v0.2.7) (2022-03-30)
 
 
