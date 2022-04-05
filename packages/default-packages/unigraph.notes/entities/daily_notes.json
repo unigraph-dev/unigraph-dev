@@ -3,6 +3,7 @@
     "view": {
         "name": "Journal",
         "env": "react-explorer",
+        "maximize": true,
         "view": { "unigraph.id": "$./executable/daily-notes" }
     },
     "condition": {

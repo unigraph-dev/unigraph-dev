@@ -1,8 +1,12 @@
 const d = new Date();
-const utcTime = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0)).toISOString();
-const dateStr = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+const getUtcTime = (d) => new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0));
+const getStartOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0);
+const getDateStr = (d) => `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+const utcTime = getUtcTime(d).toISOString();
 const tabContext = React.useContext(TabContext);
+const [today, setToday] = React.useState(getStartOfDay(d).toISOString());
 const [note, setNote] = React.useState({});
+
 React.useEffect(() => {
     const subsId = getRandomInt();
 
@@ -13,7 +17,7 @@ React.useEffect(() => {
         }
         point as var(func: uid(partf)) @cascade {
             _value {
-                datetime @filter(eq(<_value.%dt>, "${utcTime}")) {
+                datetime @filter(eq(<_value.%dt>, "${getUtcTime(new Date(today)).toISOString()}")) {
                     <_value.%dt>
                 }
             }
@@ -41,36 +45,121 @@ React.useEffect(() => {
     return function cleanup() {
         tabContext.unsubscribe(subsId);
     };
-}, []);
+}, [today]);
 
-return note && note?.type?.['unigraph.id'] === '$/schema/journal' ? (
-    <div style={{ margin: '0px -16px', display: 'flex' }}>
-        <AutoDynamicViewDetailed object={note} />
-    </div>
-) : note ? (
-    ''
-) : (
-    <div>
-        <Button
-            style={{ textTransform: 'none', marginTop: '8px' }}
-            variant="outlined"
-            onClick={() => {
-                window.unigraph.addObject(
-                    {
-                        date: {
-                            datetime: utcTime,
-                            all_day: true,
-                            timezone: 'local',
-                        },
-                        note: {
-                            text: { _value: dateStr, type: { 'unigraph.id': '$/schema/markdown' } },
-                        },
-                    },
-                    '$/schema/journal',
-                );
-            }}
-        >
-            + Add daily note
-        </Button>
+const [hoveredOffset, setHoveredOffset] = React.useState(-1);
+const WeekView = React.useCallback(
+    ({ start }) => {
+        return (
+            <div style={{ display: 'flex' }}>
+                <span
+                    onClick={() => {
+                        setToday(Sugar.Date.addDays(new Date(today), -1).toISOString());
+                        setNote({});
+                    }}
+                    style={{ color: 'rgb(145, 145, 168)', alignSelf: 'center', cursor: 'pointer' }}
+                >
+                    <ChevronLeft />
+                </span>
+                {[0, 1, 2, 3, 4, 5, 6].map((offset) => {
+                    const dated = Sugar.Date.addDays(new Date(start), offset);
+                    const selected = dated.toISOString() === today;
+                    return (
+                        <div
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                margin: '2px',
+                                alignItems: 'center',
+                                minWidth: '48px',
+                                // eslint-disable-next-line no-nested-ternary
+                                backgroundColor: selected ? '#e8ecff' : hoveredOffset === offset ? '#f4f4fa' : '',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                            }}
+                            onMouseOver={() => setHoveredOffset(offset)}
+                            onFocus={() => setHoveredOffset(offset)}
+                            onMouseLeave={() => setHoveredOffset(-1)}
+                            onClick={() => {
+                                setToday(Sugar.Date.addDays(new Date(start), offset).toISOString());
+                                setNote({});
+                            }}
+                        >
+                            <span style={{ color: selected ? '#3668ff' : '#9191a8' }}>
+                                {Sugar.Date.format(new Date(dated), '{Dow}')}
+                            </span>
+                            <span style={{ color: selected ? '#3668ff' : '' }}>
+                                {Sugar.Date.format(new Date(dated), '{d}')}
+                            </span>
+                        </div>
+                    );
+                })}
+                <span
+                    onClick={() => {
+                        setToday(Sugar.Date.addDays(new Date(today), 1).toISOString());
+                        setNote({});
+                    }}
+                    style={{ color: 'rgb(145, 145, 168)', alignSelf: 'center', cursor: 'pointer' }}
+                >
+                    <ChevronRight />
+                </span>
+            </div>
+        );
+    },
+    [today, hoveredOffset],
+);
+
+return (
+    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', padding: '16px' }}>
+            <div style={{ flexGrow: 1, marginRight: '16px' }}>
+                <span style={{ fontWeight: 300, color: 'gray' }}>Journal</span>
+                <br />
+                <span style={{ fontWeight: 'bold' }}>{Sugar.Date.format(new Date(today), '%B')}</span>{' '}
+                {new Date(today).getUTCFullYear()}
+            </div>
+            <WeekView start={Sugar.Date.beginningOfWeek(new Date(today)).toISOString()} />
+        </div>
+
+        <Divider />
+        <div style={{ overflowX: 'auto' }}>
+            {
+                // eslint-disable-next-line no-nested-ternary
+                note && note?.type?.['unigraph.id'] === '$/schema/journal' ? (
+                    <div style={{ display: 'flex' }}>
+                        <AutoDynamicViewDetailed object={note} />
+                    </div>
+                ) : note ? (
+                    <div style={{ margin: '16px', color: 'gray' }}>Loading...</div>
+                ) : (
+                    <div>
+                        <Button
+                            style={{ textTransform: 'none', marginTop: '8px', margin: '16px' }}
+                            variant="outlined"
+                            onClick={() => {
+                                window.unigraph.addObject(
+                                    {
+                                        date: {
+                                            datetime: getUtcTime(new Date(today)).toISOString(),
+                                            all_day: true,
+                                            timezone: 'local',
+                                        },
+                                        note: {
+                                            text: {
+                                                _value: getDateStr(new Date(today)),
+                                                type: { 'unigraph.id': '$/schema/markdown' },
+                                            },
+                                        },
+                                    },
+                                    '$/schema/journal',
+                                );
+                            }}
+                        >
+                            + Add daily note
+                        </Button>
+                    </div>
+                )
+            }
+        </div>
     </div>
 );
