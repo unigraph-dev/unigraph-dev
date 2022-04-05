@@ -266,7 +266,7 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                                                         matches[0] || callbacks?.namespaceLink
                                                             ? 'mediumblue'
                                                             : 'cornflowerblue',
-                                                    ':hover': {
+                                                    '&:hover': {
                                                         textDecoration: 'underline',
                                                     },
                                                     cursor: 'pointer',
