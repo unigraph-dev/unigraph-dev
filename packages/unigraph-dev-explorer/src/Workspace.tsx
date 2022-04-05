@@ -270,9 +270,9 @@ const setTitleOnRenderTab = (model: Model) => {
     } catch (e) {
         return;
     }
-    const titleStr = `${selName} and ${count - 4} other tabs - Unigraph`;
+    const titleStr = `${selName} and ${count - 3} other tabs - Unigraph`;
     const titleStrZero = `${selName} - Unigraph`;
-    const finalTitle = count - 4 > 0 ? titleStr : titleStrZero;
+    const finalTitle = count - 3 > 0 ? titleStr : titleStrZero;
     document.title = finalTitle;
     window.unigraph.getState('global/activeTab').setValue(selId);
 };
@@ -325,7 +325,7 @@ export function WorkSpace(this: any) {
                     },
                 ],
             },
-            {
+            /* {
                 type: 'border',
                 location: 'right',
                 id: 'border-right',
@@ -341,7 +341,7 @@ export function WorkSpace(this: any) {
                         component: '/pages/inspector',
                     },
                 ],
-            },
+            }, */
         ],
         layout: {
             type: 'row',
