@@ -7,11 +7,17 @@ import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import ReactDOM from 'react-dom';
 import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import { TouchBackend } from 'react-dnd-touch-backend';
 import { AutoDynamicView } from './components/ObjectView/AutoDynamicView';
 import { getComponentAsView } from './components/ObjectView/DynamicComponentView';
 import { init } from './init';
 import { initDefaultComponents } from './pages';
 import { registerDynamicViews, registerDetailedDynamicViews } from './unigraph-react';
+import { CustomDragLayer } from './CustomDragLayer';
+
+const dndOpts = {
+    enableMouseEvents: true,
+};
 
 function UnigraphComponent({ uid }: any) {
     const [object, setObject] = React.useState<any>(undefined);
@@ -31,7 +37,12 @@ function UnigraphComponent({ uid }: any) {
         };
     }, []);
 
-    return <DndProvider backend={HTML5Backend}>{object ? <AutoDynamicView object={object} /> : []}</DndProvider>;
+    return (
+        <DndProvider backend={TouchBackend} options={dndOpts}>
+            <CustomDragLayer />
+            {object ? <AutoDynamicView object={object} /> : []}
+        </DndProvider>
+    );
 }
 
 export const mountComponentWithUid = (uid: string, elementId: string) => {

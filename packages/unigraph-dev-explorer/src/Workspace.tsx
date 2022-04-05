@@ -16,7 +16,7 @@ import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { Menu, Details } from '@mui/icons-material';
 import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';
 
 import MomentUtils from '@date-io/moment';
 // or @mui/lab/Adapter{Dayjs,Luxon,Moment} or any valid date-io adapter
@@ -33,6 +33,7 @@ import { ContextMenu } from './components/UnigraphCore/ContextMenu';
 import { getComponentFromPage, getParameters, globalTheme, isElectron, isSmallScreen, TabContext } from './utils';
 import { SearchOverlayPopover } from './pages/SearchOverlay';
 import { MobileBar } from './components/UnigraphCore/MobileBar';
+import { CustomDragLayer } from './CustomDragLayer';
 
 export function WorkspacePageComponent({ children, maximize, paddingTop, id, tabCtx }: any) {
     const [_maximize, setMaximize] = React.useState(maximize);
@@ -279,6 +280,10 @@ const setTitleOnRenderTab = (model: Model) => {
 
 const providedTheme = createTheme(globalTheme);
 
+const dndOpts = {
+    enableMouseEvents: true,
+};
+
 export function WorkSpace(this: any) {
     const json = {
         global: {
@@ -478,7 +483,8 @@ export function WorkSpace(this: any) {
         <StyledEngineProvider injectFirst>
             <ThemeProvider theme={providedTheme}>
                 <LocalizationProvider dateAdapter={AdapterMoment}>
-                    <DndProvider backend={HTML5Backend}>
+                    <DndProvider backend={TouchBackend} options={dndOpts}>
+                        <CustomDragLayer />
                         <div id="global-elements" className="lol1">
                             <SearchOverlayPopover />
                             <ContextMenu />
