@@ -74,6 +74,7 @@ export function BacklinkView({
             }}
             callbacks={{ ...callbacks, isBacklink: true }}
             noRemover
+            noHoverHighlight
             viewOptions={(object: any) => {
                 if (object?.type?.['unigraph.id'] === '$/schema/note_block') {
                     return {
