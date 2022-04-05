@@ -24,9 +24,9 @@ export const Executable: DynamicViewRenderer = ({ data, callbacks }) => {
             window.newTab(window.layoutModel, {
                 type: 'tab',
                 name: 'Component preview',
-                component: `/pages/${data.uid}`,
+                component: `/pages/library/object`,
                 enableFloat: 'true',
-                config: {},
+                config: { uid: data.uid, type: '$/schema/executable' },
             });
         },
         'lambda/js': async () => {

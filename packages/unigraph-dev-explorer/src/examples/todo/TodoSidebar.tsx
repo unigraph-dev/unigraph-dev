@@ -1,4 +1,11 @@
-import { mdiBookOpenOutline, mdiCalendarAlert, mdiCalendarOutline, mdiInboxOutline, mdiTagOutline } from '@mdi/js';
+import {
+    mdiBookOpenOutline,
+    mdiCalendarAlert,
+    mdiCalendarOutline,
+    mdiInboxOutline,
+    mdiTagOffOutline,
+    mdiTagOutline,
+} from '@mdi/js';
 import Icon from '@mdi/react';
 import { Drawer, ListItemText, ListSubheader } from '@mui/material';
 import List from '@mui/material/List';
@@ -10,9 +17,10 @@ import { useEffectOnce } from 'react-use';
 import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
 import { pointerHoverSx, TabContext } from '../../utils';
-import { TodoAll, TodoInbox, TodoToday, TodoUpcoming } from './TodoDefaultViews';
+import { TodoAll, TodoInbox, TodoToday, TodoUntagged, TodoUpcoming } from './TodoDefaultViews';
 import { TodoTagView } from './TodoTagView';
 import {
+    filters,
     getAllTodoCountFromRes,
     getAllTodoCountQuery,
     getTaggedTodoCountFromRes,
@@ -21,6 +29,8 @@ import {
     getTodayTodoCountQuery,
     getTodoInboxCountFromRes,
     getTodoInboxCountQuery,
+    getUntaggedTodoCountFromRes,
+    getUntaggedTodoCountQuery,
     getUpcomingTodoCountFromRes,
     getUpcomingTodoCountQuery,
 } from './utils';
@@ -91,6 +101,13 @@ export const todoDefaultMenuItems: TodoMenuItems = {
         getCountQuery: getUpcomingTodoCountQuery,
         getCountFromRes: getUpcomingTodoCountFromRes,
     },
+    untagged: {
+        iconPath: mdiTagOffOutline,
+        text: 'Untagged',
+        component: TodoUntagged,
+        getCountQuery: getUntaggedTodoCountQuery,
+        getCountFromRes: getUntaggedTodoCountFromRes,
+    },
 };
 
 const useCount = (query: string | undefined, getCountFromRes: any | undefined) => {
@@ -149,7 +166,22 @@ const useTags = () => {
         // Subscribe to tags in general
         const subsId = getRandomInt();
 
-        tabContext.subscribeToType('$/schema/tag', setValidTags, subsId);
+        tabContext.subscribeToType('$/schema/tag', setValidTags, subsId, {
+            queryAs: `{
+            _value {
+                name {
+                    <_value.%>
+                }
+            }
+            type { <unigraph.id> }
+            uid
+            <unigraph.origin> @filter(NOT eq(<_hide>, true)) {
+                type @filter(eq(<unigraph.id>, "$/schema/todo")) {
+                    uid
+                }
+            }
+        }`,
+        });
 
         return function cleanup() {
             tabContext.unsubscribe(subsId);
@@ -282,14 +314,29 @@ export const TodoMenuSidebar = ({ mode, setMode, todoViews, setTodoViews, todoLi
                     .filter((key) => !_.keys(todoMenuItems.archivedTags).includes(key))
                     .map(renderMenuItem)} */}
                 <DynamicObjectListView
-                    items={tags.filter(
-                        (tag: any) => !_.keys(todoMenuItems.archivedTags).includes(tag.get('name').as('primitive')),
-                    )}
+                    items={tags
+                        .filter(
+                            (tag: any) => !_.keys(todoMenuItems.archivedTags).includes(tag.get('name').as('primitive')),
+                        )
+                        .sort((a: any, b: any) => {
+                            return a.get('name')?.as('primitive') < b.get('name')?.as('primitive') ? 1 : -1;
+                        })}
                     context={null}
                     noDrop
                     noBar
                     loadAll
                     compact
+                    filters={[
+                        ...filters,
+                        {
+                            id: 'only-with-todo',
+                            fn: (obj: any) => {
+                                return obj?.['unigraph.origin']?.length > 0;
+                            },
+                        },
+                    ]}
+                    defaultFilter="only-with-todo"
+                    itemStyle={{ margin: '0px', padding: '0px' }}
                     style={{ height: 'auto' }}
                     components={{
                         '$/schema/tag': {

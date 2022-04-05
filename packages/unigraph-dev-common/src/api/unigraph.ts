@@ -104,7 +104,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
     const subscriptions: Record<string, Function> = {};
     const subResults: Record<string, any> = {};
     const subFakeUpdates: Record<string, any[]> = {};
-    const subBlockingRoutine: Record<string, any> = {};
+    const subsTxn: Record<string, any> = {};
     const states: Record<string, AppState> = {};
     const caches: Record<string, any> = {
         namespaceMap: isJsonString(window.localStorage.getItem('caches/namespaceMap'))
@@ -325,7 +325,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 cacheCallbacks[parsed.name]?.forEach((el) => el(parsed.result));
             }
             if (parsed.type === 'subscription' && parsed.id && subscriptions[parsed.id] && parsed.result) {
-                if (subBlockingRoutine[parsed.id] && !parsed.ofUpdate) {
+                if (subsTxn[parsed.id] && parsed.txn < subsTxn[parsed.id]) {
                     return ev;
                 }
                 if (
@@ -335,11 +335,8 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 ) {
                     return ev;
                 }
-                // Reconciled subscription with client, blocking polling/routine updates for 5 seconds
-                subBlockingRoutine[parsed.id] = true;
-                setTimeout(() => {
-                    subBlockingRoutine[parsed.id] = false;
-                }, 5000);
+
+                subsTxn[parsed.id] = parsed.txn || 999999999999;
 
                 // Now we can safely update the state
                 subFakeUpdates[parsed.id] = [];

@@ -22,7 +22,7 @@ export function TodoTagView({
     callbacks,
     reverse,
     uid,
-    titleBar = ' tagged tasks',
+    titleBar = ' tagged items',
     ...attributes
 }: any) {
     const [objects, setObjects]: [any[], any] = React.useState([]);

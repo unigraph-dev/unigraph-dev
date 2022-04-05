@@ -90,12 +90,18 @@ export function buildPollingQuery(subs: { id: any; query: any }[], states: any) 
     }, '{')} }`;
 }
 
-export type MsgCallbackFn = (updated: any, sub: Subscription, ofUpdate?: number | string, supplementary?: any) => any;
+export type MsgCallbackFn = (
+    updated: any,
+    sub: Subscription,
+    ofUpdate?: number | string,
+    supplementary?: any,
+    txn?: any,
+) => any;
 
 export type MergedSubscription = {
     subscriptions: Subscription[];
     aggregateQuery: Query;
-    resolver: (updated: any, ofUpdate?: any) => void;
+    resolver: (updated: any, ofUpdate?: any, txn?: string) => void;
 };
 
 export function mergeSubscriptions(
@@ -104,13 +110,13 @@ export function mergeSubscriptions(
     ids?: any[],
     states?: any,
 ): MergedSubscription[] {
-    function callbackIfChanged(updated: any, sub: Subscription, ofUpdate: any, supplementary?: any) {
+    function callbackIfChanged(updated: any, sub: Subscription, ofUpdate: any, supplementary?: any, txn?: string) {
         if (
             stringify(updated, { replacer: getCircularReplacer() }) !==
             stringify(sub.data, { replacer: getCircularReplacer() })
         ) {
             sub.data = updated;
-            msgCallback(updated, sub, ofUpdate, supplementary);
+            msgCallback(updated, sub, ofUpdate, supplementary, txn);
         }
     }
 
@@ -138,9 +144,9 @@ export function mergeSubscriptions(
             totalMerged.push({
                 subscriptions: subs,
                 aggregateQuery: query,
-                resolver: (updated: any, ofUpdate: any) => {
+                resolver: (updated: any, ofUpdate: any, txn?: string) => {
                     subs.forEach((el) => {
-                        callbackIfChanged(updated, el, ofUpdate);
+                        callbackIfChanged(updated, el, ofUpdate, undefined, txn);
                     });
                 },
             });
@@ -162,9 +168,9 @@ export function mergeSubscriptions(
             totalMerged.push({
                 subscriptions: subs,
                 aggregateQuery: query,
-                resolver: (updated: any, ofUpdate: any) => {
+                resolver: (updated: any, ofUpdate: any, txn?: string) => {
                     subs.forEach((el) => {
-                        callbackIfChanged(updated, el, ofUpdate);
+                        callbackIfChanged(updated, el, ofUpdate, undefined, txn);
                     });
                 },
             });
@@ -203,7 +209,7 @@ export function mergeSubscriptions(
             totalMerged.push({
                 subscriptions: subs,
                 aggregateQuery: query,
-                resolver: (updated: any, ofUpdate: any) => {
+                resolver: (updated: any, ofUpdate: any, txn?: string) => {
                     subs.forEach((el) => {
                         const uidResolver = (uu: string) => (uu.startsWith('$/') ? states.namespaceMap[uu].uid : uu);
                         const allUids = (el.query as QueryObject).uid;
@@ -216,7 +222,7 @@ export function mergeSubscriptions(
                             (Array.isArray((el.query as QueryObject).uid) ? (el.query as QueryObject).uid.length : 1)
                         )
                             return;
-                        callbackIfChanged(updatedIts, el, ofUpdate, updated);
+                        callbackIfChanged(updatedIts, el, ofUpdate, updated, txn);
                     });
                 },
             });
@@ -271,9 +277,9 @@ export async function pollSubscriptions(
         } else query = buildPollingQuery([{ query: el.aggregateQuery, id: getRandomId() }], serverStates);
         try {
             // const startTime = new Date().getTime();
-            const results: any[] = await client.queryDgraph(query);
+            const [txn, results]: any[] = await client.queryDgraph(query, undefined, true);
             const val = results[0];
-            el.resolver(val, ofUpdate);
+            el.resolver(val, ofUpdate, txn);
             // el.queryTime = new Date().getTime() - startTime;
         } catch (e) {
             console.log(e, query);

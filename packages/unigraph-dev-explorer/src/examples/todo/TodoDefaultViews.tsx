@@ -5,31 +5,6 @@ import { DynamicObjectListView } from '../../components/ObjectView/DynamicObject
 import { withUnigraphSubscription } from '../../unigraph-react';
 import { ATodoList, filters, groupByTags, groupers } from './utils';
 
-function TodoListBody({ data }: { data: ATodoList[] }) {
-    const todoList = data;
-
-    const [filteredItems, setFilteredItems] = React.useState(todoList);
-
-    React.useEffect(() => {
-        const res = todoList;
-        setFilteredItems(res);
-        console.log('TodoListBody', { data });
-    }, [todoList]);
-
-    return (
-        <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
-            <DynamicObjectListView
-                items={filteredItems}
-                context={null}
-                filters={filters}
-                defaultFilter="only-incomplete"
-                compact
-                groupers={{ tags: groupByTags }}
-            />
-        </div>
-    );
-}
-
 export const TodoInbox = (props: any) => (
     <AutoDynamicViewDetailed
         object={{
@@ -107,67 +82,56 @@ const withSubscribeTodos = (component: React.FC<any>) => {
         },
     );
 };
+
+function TodoListBodyFactory(filtersMaker: any[], attrs?: any) {
+    return function ({ data }: { data: ATodoList[] }) {
+        const todoList = data;
+
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const [filteredItems, setFilteredItems] = React.useState(todoList);
+
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        React.useEffect(() => {
+            const res = todoList;
+            setFilteredItems(res);
+            // console.log('TodoListBody', { data });
+        }, [todoList]);
+
+        return (
+            <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
+                <DynamicObjectListView
+                    items={filteredItems}
+                    context={null}
+                    filters={filters}
+                    defaultFilter={filtersMaker}
+                    compact
+                    groupers={{ ...groupers, tags: groupByTags }}
+                    {...(attrs || {})}
+                />
+            </div>
+        );
+    };
+}
+
+const TodoListBody = TodoListBodyFactory(['only-incomplete']);
+const UntaggedTodoListBody = TodoListBodyFactory(['only-incomplete', 'only-untagged']);
+const TodoTodayBody = TodoListBodyFactory(['only-incomplete', 'until-today'], { groupBy: 'due_date' });
+const TodoUpcomingBody = TodoListBodyFactory(['only-incomplete'], { groupBy: 'due_date' });
+
 export const TodoAll = (props: any) => {
     const Component = withSubscribeTodos(TodoListBody);
     return <Component {...props} />;
 };
 
-function TodoTodayBody({ data }: { data: ATodoList[] }) {
-    const todoList = data;
-
-    const [filteredItems, setFilteredItems] = React.useState(todoList);
-
-    React.useEffect(() => {
-        const res = todoList;
-        setFilteredItems(res);
-        console.log('TodoUpcomingBody', { data });
-    }, [todoList]);
-
-    return (
-        <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
-            <DynamicObjectListView
-                items={filteredItems}
-                context={null}
-                filters={filters}
-                defaultFilter={['only-incomplete', 'until-today']}
-                compact
-                groupers={groupers}
-                groupBy="due_date"
-            />
-        </div>
-    );
-}
+export const TodoUntagged = (props: any) => {
+    const Component = withSubscribeTodos(UntaggedTodoListBody);
+    return <Component {...props} />;
+};
 
 export const TodoToday = (props: any) => {
     const Component = withSubscribeTodos(TodoTodayBody);
     return <Component {...props} />;
 };
-
-function TodoUpcomingBody({ data }: { data: ATodoList[] }) {
-    const todoList = data;
-
-    const [filteredItems, setFilteredItems] = React.useState(todoList);
-
-    React.useEffect(() => {
-        const res = todoList;
-        setFilteredItems(res);
-        console.log('TodoUpcomingBody', { data });
-    }, [todoList]);
-
-    return (
-        <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
-            <DynamicObjectListView
-                items={filteredItems}
-                context={null}
-                filters={filters}
-                defaultFilter="only-incomplete"
-                compact
-                groupers={groupers}
-                groupBy="due_date"
-            />
-        </div>
-    );
-}
 
 export const TodoUpcoming = (props: any) => {
     const Component = withSubscribeTodos(TodoUpcomingBody);

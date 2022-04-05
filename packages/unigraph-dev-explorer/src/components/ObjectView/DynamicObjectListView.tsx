@@ -20,7 +20,7 @@ import {
     Box,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { ExpandMore, ClearAll, InboxOutlined } from '@mui/icons-material';
+import { ExpandMore, ClearAll, InboxOutlined, ExpandLess } from '@mui/icons-material';
 import _ from 'lodash';
 import React, { useEffect } from 'react';
 import { useDrop } from 'react-dnd';
@@ -117,6 +117,7 @@ function DynamicListItem({
     compact,
     itemStyle,
     viewOptions,
+    noHoverHighlight,
 }: any) {
     const [itemHovered, setItemHovered] = React.useState<boolean>(false);
     const isRemoverActive = React.useCallback(() => {
@@ -124,7 +125,7 @@ function DynamicListItem({
     }, [itemRemover, noRemover]);
     return (
         <ListItem
-            sx={hoverSx}
+            sx={noHoverHighlight ? {} : hoverSx}
             style={{
                 ...(compact ? { paddingTop: '2px', paddingBottom: '2px' } : {}),
                 ...itemStyle,
@@ -205,6 +206,7 @@ export type DynamicObjectListViewProps = {
     components?: any;
     initialTab?: string;
     viewOptions?: any;
+    noHoverHighlight?: boolean;
 };
 
 function DynamicListBasic({
@@ -223,6 +225,7 @@ function DynamicListBasic({
     components,
     itemStyle,
     viewOptions,
+    noHoverHighlight,
 }: any) {
     const tabContext = React.useContext(TabContext);
     return (
@@ -251,6 +254,7 @@ function DynamicListBasic({
                     removeOnEnter={removeOnEnter}
                     components={components}
                     viewOptions={viewOptions}
+                    noHoverHighlight={noHoverHighlight}
                 />
             ))}
         </DragandDrop>
@@ -275,6 +279,7 @@ function DynamicList({
     components,
     itemStyle,
     viewOptions,
+    noHoverHighlight,
 }: any) {
     const tabContext = React.useContext(TabContext);
     const [loadedItems, setLoadedItems] = React.useState<any[]>([]);
@@ -321,7 +326,7 @@ function DynamicList({
 
     React.useEffect(() => {
         setupProps?.onUpdate(items.map((el: any) => itemGetter(el).uid));
-    }, [items.map((el: any) => itemGetter(el).uid)]);
+    }, [JSON.stringify(items.map((el: any) => itemGetter(el).uid).sort())]);
 
     return (
         <InfiniteScroll
@@ -358,6 +363,7 @@ function DynamicList({
                         removeOnEnter={removeOnEnter}
                         components={components}
                         viewOptions={viewOptions}
+                        noHoverHighlight={noHoverHighlight}
                     />
                 ))}
             </DragandDrop>
@@ -475,6 +481,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
     itemAdder,
     initialTab,
     viewOptions,
+    noHoverHighlight,
 }) => {
     const tabContext = React.useContext(TabContext);
 
@@ -596,7 +603,16 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                 }}
                             >
                                 <AccordionSummary
-                                    expandIcon={<ExpandMore onClick={() => setOptionsOpen(!optionsOpen)} />}
+                                    expandIcon={React.createElement(optionsOpen ? ExpandLess : ExpandMore, {
+                                        onClick: () => setOptionsOpen(!optionsOpen),
+                                        sx: {
+                                            cursor: 'pointer',
+                                            borderRadius: '16px',
+                                            '&:hover': {
+                                                backgroundColor: '#f5f5f5',
+                                            },
+                                        },
+                                    })}
                                     aria-controls="panel1bh-content"
                                     id="panel1bh-header"
                                     classes={{ content: classes.content }}
@@ -730,6 +746,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                               removeOnEnter,
                               components,
                               viewOptions,
+                              noHoverHighlight,
                           })
                         : groupers[groupBy](procItems.map(itemGetter)).map((el: Group) => (
                               <>
@@ -759,6 +776,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                       removeOnEnter,
                                       components,
                                       viewOptions,
+                                      noHoverHighlight,
                                   })}
                               </>
                           ))}
