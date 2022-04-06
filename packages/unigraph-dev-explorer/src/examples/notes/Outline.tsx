@@ -77,7 +77,7 @@ const ChildrenContainer = styled('div')({
  * a drag to be detected, but it shouldn't be too large and overlap with other
  * drop targets.
  */
-const dropTargetHeight = 30;
+const dropTargetHeight = 20;
 const DropTarget = styled('div')({
     position: 'absolute',
     left: '2rem',
