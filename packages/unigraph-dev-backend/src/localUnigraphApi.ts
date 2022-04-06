@@ -20,7 +20,7 @@ import { insertsToUpsert } from 'unigraph-dev-common/lib/utils/txnWrapper';
 import dgraph from 'dgraph-js';
 import path from 'path';
 import stringify from 'json-stable-stringify';
-import { ExecContext } from 'unigraph-dev-common/lib/utils/executableUtils';
+import { ExecContext } from 'unigraph-dev-common/lib/types/executableTypes';
 import { Subscription } from './custom.d';
 import DgraphClient, { UnigraphUpsert } from './dgraphClient';
 import { buildExecutable } from './executableManager';
