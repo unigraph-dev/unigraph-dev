@@ -20,9 +20,10 @@ import { insertsToUpsert } from 'unigraph-dev-common/lib/utils/txnWrapper';
 import dgraph from 'dgraph-js';
 import path from 'path';
 import stringify from 'json-stable-stringify';
+import { ExecContext } from 'unigraph-dev-common/lib/types/executableTypes';
 import { Subscription } from './custom.d';
 import DgraphClient, { UnigraphUpsert } from './dgraphClient';
-import { buildExecutable, ExecContext } from './executableManager';
+import { buildExecutable } from './executableManager';
 import { callHooks } from './hooks';
 import { addNotification } from './notifications';
 import { createSubscriptionLocal, createSubscriptionWS, getFragment, resolveSubscriptionUpdate } from './subscriptions';
@@ -47,7 +48,7 @@ export function getLocalUnigraphAPI(
     const eventTarget: any = {};
 
     const api: Unigraph = {
-        backendConnection: { current: false },
+        backendConnection: { current: undefined },
         backendMessages: messages,
         eventTarget,
         buildGraph,

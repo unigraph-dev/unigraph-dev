@@ -2,10 +2,13 @@
 
 // FIXME: This file is ambiguous in purpose! Move utils to utils folder and keep this a small interface with a window object.
 
-import _ from 'lodash';
+import _ from 'lodash/fp';
 import React from 'react';
+import { ValidationError } from 'schema-utils';
 import { PackageDeclaration } from '../types/packages';
-import { Unigraph, AppState, UnigraphObject as IUnigraphObject } from '../types/unigraph';
+import { Unigraph, AppState, UnigraphObject as IUnigraphObject, UnigraphExecutable } from '../types/unigraph';
+import { buildExecutableForClient } from '../utils/executableUtils';
+import { Executable } from '../types/executableTypes';
 import {
     assignUids,
     augmentStubs,
@@ -113,6 +116,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
     let retries: any = false;
     let readyCallback = () => undefined;
     const msgQueue: string[] = [];
+    let api: Unigraph<WebSocket | undefined>;
 
     const getState = (name: string) => {
         if (name && states[name]) {
@@ -148,6 +152,123 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             return state;
         }
         return states[name];
+    };
+
+    const runExecutableInServer = <T>(
+        uid: string,
+        params: T,
+        context?: any,
+        fnString?: boolean,
+        bypassCache?: boolean,
+    ) =>
+        new Promise((resolve, reject) => {
+            const id = getRandomInt();
+            callbacks[id] = (response: any) => {
+                if (response.success) {
+                    if (response.returns?.return_function_component !== undefined && !fnString) {
+                        // eslint-disable-next-line no-new-func
+                        const retFn = new Function('React', `return ${response.returns?.return_function_component}`)(
+                            React,
+                        );
+                        console.log(retFn);
+                        resolve(retFn);
+                    } else {
+                        resolve(response.returns ? response.returns : {});
+                    }
+                } else reject(response);
+            };
+            sendEvent(connection, 'run_executable', { uid, params: params || {}, bypassCache, context }, id);
+        });
+
+    const runExecutableInClient = <T>(
+        exec: Executable,
+        params: T,
+        context?: any,
+        fnString?: boolean,
+        bypassCache?: boolean,
+    ) => {
+        let ret;
+        // if (!bypassCache)
+        //     await states.lock.acquire('caches/exec', async (done: any) => {
+        //         done(false, null);
+        //     });
+        // const exec = uid.startsWith('0x')
+        //     ? unpad((await client.queryUID(uid))[0])
+        //     : states.caches.executables.data[uid];
+        // if (!exec) {
+        //     console.error('Executable not found!');
+        //     return undefined;
+        // }
+        const execFn = buildExecutableForClient(exec, { params, definition: exec, ...context }, api, states);
+        if (typeof execFn === 'function') {
+            ret = execFn();
+        } else if (typeof execFn === 'string') {
+            ret = { return_function_component: execFn };
+        } else ret = {};
+        console.log('runExecutable', { exec, ret, execFn });
+        return ret;
+    };
+
+    const runExecutable = <T>(uidOrExec: any, params: T, context?: any, fnString?: boolean) => {
+        // Routs through backend if passed a uid, tries to run in client otherwise (should be passed a Unigraph Object of an Executable)
+        if (typeof uidOrExec === 'string') {
+            return runExecutableInServer(uidOrExec, params, context, fnString, true);
+        }
+        // client only runs client and lambda execs
+        return runExecutableInClient(uidOrExec, params, context, fnString, true);
+    };
+
+    const dispatchCommand = (name: string, params: any, context: any) => {
+        // finds a command in the registry,
+        // picks the right handler whose condition returns true,
+        // and calls its action
+
+        // finds right command
+        const allCommands: any[] = states['registry/uiCommands'].value;
+        const allCommandHandlers: any[] = states['registry/uiCommandHandlers'].value;
+        const commands = allCommands.filter(_.propEq('unigraph.id', name));
+        // test name: "$/package/unigraph.ui_commands/0.2.5/entity/close_tab_command"
+        if (commands.length === 0) {
+            console.error('No commands registered');
+            return;
+        }
+        const command = commands[0];
+
+        // finds right handler
+        const handlers = allCommandHandlers
+            .filter((handler: any) => handler.get('command')._value['unigraph.id'] === name)
+            .map(_.prop('_value'));
+
+        const validateHandler = (handler: any) => {
+            // TODO uncomment when lambdas (like the condition) return stuff
+            return runExecutable(handler.condition._value._value, {});
+            // return true;
+        };
+
+        const validHandlers = handlers.filter(validateHandler);
+
+        if (validHandlers.length === 0) {
+            console.error('No handlers found');
+            return;
+        }
+
+        const pickValidHandler = _.last;
+        const handler = pickValidHandler(validHandlers);
+
+        // runs action for handler
+        runExecutable(handler.action._value._value, params, context);
+
+        console.log('dispatchedCommand', {
+            name,
+            params,
+            context,
+            allCommands,
+            allCommandHandlers,
+            command,
+            handlers,
+            validHandlers,
+            handler,
+        });
     };
 
     function connect() {
@@ -222,7 +343,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 subResults[parsed.id] = JSON.parse(JSON.stringify(parsed.result));
                 if (parsed.supplementary) {
                     buildGraph(
-                        _.uniqBy([...parsed.result, ...parsed.supplementary], 'uid'),
+                        _.uniqBy('uid', [...parsed.result, ...parsed.supplementary]),
                         true,
                         parsed.result.length,
                     );
@@ -254,10 +375,12 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
         }
     }
 
-    const api: Unigraph<WebSocket | undefined> = {
+    api = {
         getState,
         addState,
         deleteState: (name) => delete states[name],
+        getStateMap: () => states,
+        dispatchCommand,
         backendConnection: connection,
         backendMessages: messages,
         eventTarget,
@@ -566,26 +689,8 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 const id = getRandomInt();
                 sendEvent(connection, 'import_objects', { objects }, id);
             }),
-        runExecutable: (uid, params?, context?, fnString?, bypassCache?) =>
-            new Promise((resolve, reject) => {
-                const id = getRandomInt();
-                callbacks[id] = (response: any) => {
-                    if (response.success) {
-                        if (response.returns?.return_function_component !== undefined && !fnString) {
-                            // eslint-disable-next-line no-new-func
-                            const retFn = new Function(
-                                'React',
-                                `return ${response.returns?.return_function_component}`,
-                            )(React);
-                            console.log(retFn);
-                            resolve(retFn);
-                        } else {
-                            resolve(response.returns ? response.returns : {});
-                        }
-                    } else reject(response);
-                };
-                sendEvent(connection, 'run_executable', { uid, params: params || {}, bypassCache, context }, id);
-            }),
+        runExecutable,
+        runExecutableInClient,
         getNamespaceMapUid: (name) => {
             throw Error('Not implemented');
         },

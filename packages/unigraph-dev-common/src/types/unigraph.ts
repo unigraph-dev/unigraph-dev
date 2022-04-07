@@ -1,3 +1,4 @@
+import { Executable } from './executableTypes';
 import { SchemaAny, SchemaDgraph, SchemaFullName, SchemaShorthandName, UnigraphUid } from './json-ts';
 import { PackageDeclaration } from './packages';
 
@@ -107,7 +108,7 @@ export type UnigraphObject<T = Record<string, any>> = T & {
  * 1) If you're using Unigraph API over websocket, check out the server side
  * documentations as well, since there would be more detail in context.
  */
-export interface Unigraph<TT = WebSocket | false> {
+export interface Unigraph<TT = WebSocket | undefined> {
     backendConnection: { current: TT };
     /** Messages received from backend. Only used when running over WebSocket. */
     backendMessages: string[];
@@ -384,6 +385,20 @@ export interface Unigraph<TT = WebSocket | false> {
      */
     importObjects(objects: any[] | string): Promise<any>;
     /**
+     * Runs an executable in the client side.
+     *
+     * @param exec The unigraph object of the executable .
+     * @param params The parameters defined for that executable.
+     * @param fnString Whether to return the executable function as a function or string.
+     */
+    runExecutableInClient?<T>(
+        exec: Executable,
+        params: T,
+        context?: any,
+        fnString?: boolean,
+        bypassCache?: boolean,
+    ): Promise<any>;
+    /**
      * Runs an executable with the given global ID and parameters.
      *
      * @param uid The global executable id of the form `$/package/xxx/xxx/executable/abc`, or simply a database-wide UID.
@@ -417,6 +432,17 @@ export interface Unigraph<TT = WebSocket | false> {
      * @param name Name of the state object - this is globally (to the app) unique
      */
     deleteState(name: string): any;
+    /**
+     * Gets a map of all states
+     *
+     */
+    getStateMap?(): Record<string, AppState>;
+    /**
+     * Signals user intent to run code. One kind of UI Hook. Only available in front-end.
+     *
+     * @param name Name of the state object - this is globally (to the app) unique
+     */
+    dispatchCommand?<T>(name: string, params: T, context: any): any;
     /**
      * Gets the schema map in cache.
      * @param schemas

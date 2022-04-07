@@ -48,6 +48,14 @@
             {
                 "id": "sync_resource",
                 "src": "schemas/sync_resource.json"
+            },
+            {
+                "id": "command",
+                "src": "schemas/command.json"
+            },
+            {
+                "id": "command_handler",
+                "src": "schemas/command_handler.json"
             }
         ],
         "executables": [

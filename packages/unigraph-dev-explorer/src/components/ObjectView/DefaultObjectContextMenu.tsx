@@ -33,11 +33,10 @@ export const defaultContextMenu: Array<ContextMenuGenerator> = [
             <MenuItem
                 style={contextMenuItemStyle}
                 onClick={() => {
+                    // window.unigraph.dispatchCommand('open-detailed-view', object, { uiCaller: 'ContextMenu', uid });
                     handleClose();
                     window.wsnavigator(
-                        `/library/object?uid=${uid}&viewer=${'dynamic-view-detailed'}&type=${
-                            object?.type?.['unigraph.id']
-                        }`,
+                        `/library/object?uid=${uid}&viewer=dynamic-view-detailed&type=${object?.type?.['unigraph.id']}`,
                     );
                 }}
             >

@@ -1,0 +1,6 @@
+{
+    "type": { "unigraph.id": "$/schema/command_handler" },
+    "command": { "unigraph.id": "$./entity/close_tab_command" },
+    "action": { "unigraph.id": "$./executable/close-tab-action" },
+    "condition": { "unigraph.id": "$./executable/close-tab-condition" }
+}

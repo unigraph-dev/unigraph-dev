@@ -49,9 +49,8 @@ export async function checkOrCreateDefaultDataModel(client: DgraphClient) {
             await tempSchemaCache.updateNow();
         }
     } else {
-        // Look at all enabled packages and see if there's any updates
-        const pkgVerQueryRes =
-            await client.queryDgraph(`query { pkgs(func: uid(uu)) @filter(type(Entity) AND (NOT eq(<_hide>, true))) {
+        // Look at all packages and see if there's any updates
+        const pkgVerQueryRes = await client.queryDgraph(`query { pkgs(func: uid(uu)) @filter(type(Entity)) {
             uid
           <unigraph.id>
             _value {
@@ -73,6 +72,7 @@ export async function checkOrCreateDefaultDataModel(client: DgraphClient) {
         )[0][0].uid;
         const tempSchemaCache = createSchemaCache(client);
         const packageList = Object.fromEntries(defaultPackages.map((el: any) => [el.pkgManifest.package_name, el]));
+        // TODO add also packages from packageList that aren't in pkgVersions
         const pkgsToUpdate = pkgVersions
             .filter((it: any) => packageList[it.pkgName] && packageList[it.pkgName]?.pkgManifest.version !== it.version)
             .map((it: any) => packageList[it.pkgName]);

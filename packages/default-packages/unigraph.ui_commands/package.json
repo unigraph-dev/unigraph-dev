@@ -1,0 +1,36 @@
+{
+    "displayName": "Unigraph UI Commands",
+    "version": "0.2.5",
+    "description": "User-triggered commands and command handlers.",
+    "name": "unigraph.ui_commands",
+    "unigraph": {
+        "entities": [
+            {
+                "id": "close_tab_command",
+                "src": "entities/close_tab_command.json"
+            },
+            {
+                "id": "close_tab_command_handler",
+                "src": "entities/close_tab_command_handler.json"
+            }
+        ],
+        "executables": [
+            {
+                "id": "close-tab-action",
+                "env": "client/js",
+                "src": "executables/closeTabAction.js",
+                "editable": true,
+                "name": "Close tab (Action)",
+                "concurrency": 1
+            },
+            {
+                "id": "close-tab-condition",
+                "env": "lambda/js",
+                "src": "executables/closeTabCondition.js",
+                "editable": true,
+                "name": "Close tab (Condition)",
+                "concurrency": 1
+            }
+        ]
+    }
+}
