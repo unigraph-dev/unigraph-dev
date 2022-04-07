@@ -75,14 +75,6 @@ const BlockChild = ({ elindex, shortcuts, displayAs, callbacks, el }: any) => (
     />
 );
 
-const dropIndicatorStyles = {
-    position: 'absolute',
-    height: '6px',
-    marginTop: '-3px',
-    marginBottom: '1px',
-    zIndex: 999,
-};
-
 const BlockChildren = ({
     isChildren,
     subentities,
