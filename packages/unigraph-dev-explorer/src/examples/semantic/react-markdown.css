@@ -1,0 +1,4 @@
+.react-markdown ol, .react-markdown ul {
+  margin: 0;
+  padding-left: 1.15rem;
+}
