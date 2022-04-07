@@ -5,6 +5,7 @@ import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import remarkBreaks from 'remark-breaks';
 import 'katex/dist/katex.min.css';
+import './react-markdown.css';
 import TurndownService from 'turndown';
 import rehypeRaw from 'rehype-raw';
 import { DynamicViewRenderer } from '../../global.d';
@@ -142,6 +143,7 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                 }}
             >
                 <ReactMarkdown
+                    className="react-markdown"
                     // eslint-disable-next-line react/no-children-prop
                     children={data['_value.%'] || (isHeading ? '_no title_' : '|')}
                     remarkPlugins={[remarkMath as any, remarkWikilink, remarkBreaks as any]}
