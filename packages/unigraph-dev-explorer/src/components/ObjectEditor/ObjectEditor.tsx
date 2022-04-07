@@ -30,7 +30,8 @@ import { BacklinkView } from '../ObjectView/BacklinkView';
 import { onUnigraphContextMenu } from '../ObjectView/DefaultObjectContextMenu';
 import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
 import { getDynamicViews } from '../../unigraph-react';
-import { TabContext, useNameTab } from '../../utils';
+import { TabContext } from '../../utils';
+import { useEntityNameTab } from '../UnigraphCore/useEntityNameTab';
 
 const editorFrameStyle = {
     padding: '12px',
@@ -562,22 +563,18 @@ export function ObjectEditor({ uid }: any) {
     const [currentUid, setCurrentUid] = React.useState(uid || '');
     const [currentObject, setCurrentObject]: any = React.useState(null);
 
-    const [subsId, setSubsId]: any = React.useState(null);
-
     const [allSchemas, setAllSchemas] = React.useState(null);
 
     const tabContext = React.useContext(TabContext);
-    useNameTab('Editor: ', uid);
+    useEntityNameTab({ prefix: 'Editor: ', uid });
 
     useEffectOnce(() => {
         window.unigraph.getSchemas().then((schemas: any) => setAllSchemas(schemas));
     });
 
     React.useEffect(() => {
-        if (subsId) window.unigraph.unsubscribe(subsId);
-        const newSubs = getRandomInt();
+        const subsId = getRandomInt();
         if (currentUid) tabContext.subscribeToObject(currentUid, setCurrentObject, subsId);
-        setSubsId(newSubs);
         return function cleanup() {
             tabContext.unsubscribe(subsId);
         };

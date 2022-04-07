@@ -1,14 +1,12 @@
-import { Chip, TextField, Button } from '@mui/material';
-import { LocalOffer } from '@mui/icons-material';
-import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
-import Icon from '@mdi/react';
 import { mdiTagOutline } from '@mdi/js';
+import Icon from '@mdi/react';
+import { Button, Chip, Divider, TextField } from '@mui/material';
 import React from 'react';
-import { getContrast, NavigationContext } from '../../utils';
-import { DynamicViewRenderer } from '../../global.d';
-import { registerDynamicViews } from '../../unigraph-react';
+import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { BacklinkView } from '../../components/ObjectView/BacklinkView';
+import { DynamicViewRenderer } from '../../global.d';
+import { getContrast } from '../../utils';
 
 const getBgColor = (tag: any) => (tag?.color?.startsWith && tag.color.startsWith('#') ? tag.color : 'unset');
 export const Tag: DynamicViewRenderer = ({ data, callbacks }) => {
@@ -32,19 +30,17 @@ export const Tag: DynamicViewRenderer = ({ data, callbacks }) => {
             style={{
                 backgroundColor: getBgColor(tag),
                 color: getBgColor(tag).startsWith('#') ? getContrast(getBgColor(tag)) : 'unset',
+                cursor: 'pointer',
             }}
             variant="outlined"
             label={tag.name}
-            onClick={() => {
-                console.log(data);
-                window.wsnavigator(`/library/backlink?uid=${data.uid}`);
-            }}
         />
     );
 };
 
 export const TagDetailed: DynamicViewRenderer = ({ data, callbacks }) => {
     const [name, setName] = React.useState('');
+    // useNameTab('Tag: ', data.uid);
 
     React.useEffect(() => {
         const tag = data._value ? unpad(data) : data;
@@ -65,7 +61,8 @@ export const TagDetailed: DynamicViewRenderer = ({ data, callbacks }) => {
                     Rename Tag
                 </Button>
             </div>
-            <BacklinkView data={data} titleBar=" backlinks" />;
+            <Divider />
+            <BacklinkView data={data} titleBar=" backlinks" />
         </div>
     );
 };
