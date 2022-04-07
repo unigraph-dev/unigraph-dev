@@ -146,8 +146,8 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
     React.useEffect(() => {
         const dataText = pullText();
         oldTextRef.current = dataText;
-        if (dataText !== undefined && tabContext.viewId && !callbacks.isEmbed)
-            window.layoutModel.doAction(Actions.renameTab(tabContext.viewId as any, `Note: ${dataText}`));
+        // if (dataText !== undefined && tabContext.viewId && !callbacks.isEmbed)
+        // window.layoutModel.doAction(Actions.renameTab(tabContext.viewId as any, `Note: ${dataText}`));
         if (dataText !== undefined && getCurrentText() !== dataText && !edited.current) {
             setCurrentText(dataText);
         } else if (

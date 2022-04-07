@@ -1,5 +1,6 @@
 import { Typography } from '@mui/material';
 import React from 'react';
+import _ from 'lodash/fp';
 import { withUnigraphSubscription } from '../../unigraph-react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { NavigationContext } from '../../utils';
@@ -13,15 +14,14 @@ function TagList({ data }: any) {
         </div>
     );
 }
+const getLowercaseName = (a: any) => a.get('name').as('primitive').toLowerCase();
 
 export const TagListSubscription = withUnigraphSubscription(
     TagList,
     { schemas: [], defaultData: [], packages: [] },
     {
         afterSchemasLoaded: (subsId: any, tabContext: any, data: any, setData: any) => {
-            tabContext.subscribeToType('$/schema/tag', (result: any) => {
-                setData(result);
-            });
+            tabContext.subscribeToType('$/schema/tag', _.pipe(_.sortBy(getLowercaseName), setData));
         },
     },
 );
