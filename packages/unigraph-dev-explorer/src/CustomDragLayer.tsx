@@ -1,3 +1,4 @@
+import React from 'react';
 import { useDragLayer, XYCoord } from 'react-dnd';
 import { DragHandle } from './examples/notes/DragHandle';
 
@@ -35,6 +36,14 @@ export const CustomDragLayer = () => {
         currentOffset: monitor.getSourceClientOffset(),
         isDragging: monitor.isDragging(),
     }));
+
+    React.useEffect(() => {
+        if (isDragging) {
+            document.body.style.cursor = 'grabbing';
+        } else {
+            document.body.style.cursor = 'auto';
+        }
+    }, [isDragging]);
 
     if (!isDragging) {
         return null;
