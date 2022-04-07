@@ -391,7 +391,7 @@ export interface Unigraph<TT = WebSocket | undefined> {
      * @param params The parameters defined for that executable.
      * @param fnString Whether to return the executable function as a function or string.
      */
-    runExecutableInClient<T>(
+    runExecutableInClient?<T>(
         exec: Executable,
         params: T,
         context?: any,
