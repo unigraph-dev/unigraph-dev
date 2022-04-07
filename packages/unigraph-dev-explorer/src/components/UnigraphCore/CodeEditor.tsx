@@ -82,10 +82,13 @@ export const Runner = ({ uid }: any) => {
     return (
         <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
             <div style={{ flexGrow: 1, height: '100%', width: 'calc(50% - 32px)' }}>
+                <pre style={{ flexGrow: 1, overflow: 'hidden', overflowWrap: 'break-word' }}>
+                    context: JSON object accessible from the code
+                </pre>
                 <Editor defaultLanguage="json" path="params.json" value={json} onChange={setJson as any} />
             </div>
             <Button onClick={runExecutableHandler}>Go</Button>
-            <pre style={{ flexGrow: 1, height: '100%', width: 'calc(50% - 32px)' }}>{response}</pre>
+            <pre style={{ flexGrow: 1, height: '90%', width: 'calc(50% - 32px)' }}>{response}</pre>
         </div>
     );
 };
