@@ -16,6 +16,10 @@
             {
                 "id": "open_omnibar_binding",
                 "src": "entities/open_omnibar_binding.json"
+            },
+            {
+                "id": "settings_page_hotkeys",
+                "src": "entities/settingsPageHotkeys.json"
             }
         ],
         "executables": [
@@ -34,6 +38,27 @@
                 "editable": true,
                 "name": "Open Omnibar (Condition)",
                 "concurrency": 1
+            },
+            {
+                "id": "settings-view-hotkeys",
+                "env": "component/react-jsx",
+                "src": "executables/settingsViewHotkeys.jsx",
+                "editable": true,
+                "imports": [
+                    {
+                        "env": "npm",
+                        "package": "@mui/material",
+                        "import": "Typography",
+                        "as": "Typography"
+                    },
+                    {
+                        "env": "npm",
+                        "package": "@mui/material",
+                        "import": "Button",
+                        "as": "Button"
+                    }
+                ],
+                "name": "Hotkey settings view"
             }
         ]
     }
