@@ -1,0 +1,7 @@
+{
+    "dgraph.type": "Type",
+    "_name": "Hotkey",
+    "_definition": {
+        "type": { "unigraph.id": "$/primitive/string" }
+    }
+}

@@ -1,0 +1,40 @@
+{
+    "displayName": "Unigraph Hotkeys",
+    "version": "0.2.5",
+    "description": "Hotkeys and bindings.",
+    "name": "unigraph.hotkeys",
+    "unigraph": {
+        "entities": [
+            {
+                "id": "open_omnibar_command",
+                "src": "entities/open_omnibar_command.json"
+            },
+            {
+                "id": "open_omnibar_command_handler",
+                "src": "entities/open_omnibar_command_handler.json"
+            },
+            {
+                "id": "open_omnibar_binding",
+                "src": "entities/open_omnibar_binding.json"
+            }
+        ],
+        "executables": [
+            {
+                "id": "open-omnibar-action",
+                "env": "client/js",
+                "src": "executables/openOmnibarAction.js",
+                "editable": true,
+                "name": "Open Omnibar (Action)",
+                "concurrency": 1
+            },
+            {
+                "id": "open-omnibar-condition",
+                "env": "lambda/js",
+                "src": "executables/openOmnibarCondition.js",
+                "editable": true,
+                "name": "Open Omnibar (Condition)",
+                "concurrency": 1
+            }
+        ]
+    }
+}

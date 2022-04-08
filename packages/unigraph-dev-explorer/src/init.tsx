@@ -240,11 +240,12 @@ function initRegistry() {
     window.unigraph.addState('registry/components', {});
     window.unigraph.addState('registry/contextMenu', {});
     window.unigraph.addState('registry/commands', {}); // old commands
-    window.unigraph.addState('registry/uiCommands', {}); // new ui commands
-    window.unigraph.addState('registry/uiCommandHandlers', {}); // new ui command handlers
     window.unigraph.addState('registry/backlinks', {});
     window.unigraph.addState('registry/backlinksCallbacks', {});
     window.unigraph.addState('registry/runningExecutables', []); // a parallel with serverState.runningExecutables
+    window.unigraph.addState('registry/uiCommands', {}); // new ui commands
+    window.unigraph.addState('registry/uiCommandHandlers', {}); // new ui command handlers
+    window.unigraph.addState('registry/hotkeyBindings', {}); // new ui commands
 }
 
 function initBacklinkManager() {

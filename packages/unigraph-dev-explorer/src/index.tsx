@@ -135,6 +135,16 @@ window.unigraph.onReady!(() => {
         { all: true },
     );
 
+    window.unigraph.subscribeToType(
+        '$/schema/hotkey_binding',
+        (data: any[]) => {
+            const bindings = window.unigraph.getState('registry/hotkeyBindings');
+            bindings.setValue(data);
+        },
+        undefined,
+        { all: true },
+    );
+
     initDynamicObjectViews();
     window.reloadCommands();
 

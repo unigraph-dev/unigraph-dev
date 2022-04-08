@@ -1,0 +1,6 @@
+{
+    "type": { "unigraph.id": "$/schema/command_handler" },
+    "command": { "unigraph.id": "$./entity/open_omnibar_command" },
+    "action": { "unigraph.id": "$./executable/open-omnibar-action" },
+    "condition": { "unigraph.id": "$./executable/open-omnibar-condition" }
+}
