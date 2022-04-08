@@ -2,6 +2,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import _ from 'lodash/fp';
 import { init } from './init';
 import { initDefaultComponents } from './pages';
 import * as serviceWorker from './serviceWorker';
@@ -137,10 +138,15 @@ window.unigraph.onReady!(() => {
 
     window.unigraph.subscribeToType(
         '$/schema/hotkey_binding',
-        (data: any[]) => {
-            const bindings = window.unigraph.getState('registry/hotkeyBindings');
-            bindings.setValue(data);
-        },
+        _.pipe(
+            _.keyBy((binding: any) => binding.get('hotkey').as('primitive')),
+            window.unigraph.getState('global/hotkeyBindings').setValue,
+        ),
+        // (data: any[]) => {
+        //     const bindings = window.unigraph.getState('global/hotkeyBindings');
+
+        //     bindings.setValue(data);
+        // },
         undefined,
         { all: true },
     );

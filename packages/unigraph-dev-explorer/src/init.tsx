@@ -143,8 +143,9 @@ export function init(hostname?: string) {
     });
     window.unigraph.addState('global/focused/actions', {});
     /* Example: {'shift+Tab': {'319908': () => {return true;}}} */
-    window.unigraph.addState('global/keyboardShortcuts', {});
+    window.unigraph.addState('global/keyboardShortcuts', {}); // old hotkeys
     window.unigraph.addState('global/activeTab', '');
+    window.unigraph.addState('global/hotkeyBindings', {}); // new hotkeys
 
     if (window.localStorage.getItem('enableAnalytics') === 'true') initAnalyticsIfOptedIn();
 
@@ -245,7 +246,6 @@ function initRegistry() {
     window.unigraph.addState('registry/runningExecutables', []); // a parallel with serverState.runningExecutables
     window.unigraph.addState('registry/uiCommands', {}); // new ui commands
     window.unigraph.addState('registry/uiCommandHandlers', {}); // new ui command handlers
-    window.unigraph.addState('registry/hotkeyBindings', {}); // new ui commands
 }
 
 function initBacklinkManager() {

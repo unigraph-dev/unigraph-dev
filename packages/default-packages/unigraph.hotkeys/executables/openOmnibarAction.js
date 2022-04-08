@@ -1,2 +1,5 @@
-// console.log('closeTabAction', { context });
-console.log('open Omnibar action!');
+unigraph.getState('global/omnibarSummoner').setValue({
+    show: true,
+    tooltip: '',
+    defaultValue: '',
+});
