@@ -1,0 +1,28 @@
+
+  - Summary: User-triggered, context-sensitive actions
+  - Related: [[executable code in Unigraph]]
+  - Architecture
+    - Schemas (defined in `default_packages/unigraph.home/schemas`)
+      - `Command`
+        - name: string
+        - icon: icon_url
+      - `CommandHandler`
+        - command: `Command`
+        - condition: `Executable:lambda` 
+        - action: `Executable:client` 
+    - How they work
+      - Commands are intentions by the user (e.g. "open detailed view", "copy-pasting", "creating/updating/deleting items", "close tab", "find text occurrences in page" )
+      - Command handlers act on a user's command if their conditions match the context (e.g. should a note handler run in an html block? probably not) 
+    - Data flow
+      - Commands in the db are subscribed to and cached in front-end state `'registry/uiCommands'`
+      - You can run a command by calling `unigraph.dispatchCommand(name: string, params: any, context: any)`. 
+        - This function will find the right handler for the command, filtering by their handler conditions and run its action.
+    - In Unigraph core, commands are called from the omnibar, the context menu, shortcuts, and other UI actions.
+  - How to make new commands
+    - Creating a new command as part of a package (check out `default-packages/uiCommands` for examples)
+      - Create a new entity of `$/schema/command` 
+      - Register it in `package.json` 
+      - If you'd like it to do something, you'll have to create a handler entity of `$/schema/command_handler` 
+      - and register it in `package.json`
+      - And create the respective action and condition as executables, registering them in `package.json` also
+  - 

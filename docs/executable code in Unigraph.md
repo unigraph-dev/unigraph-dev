@@ -1,0 +1,36 @@
+
+  - Goals
+    - The Unigraph philosophy is that there shouldn't be a difference between a piece of data and a piece of code.
+    - The Executable manager deals with different ways userspace code in Unigraph are handled
+  - Different types of code
+    - `routine/js`: or known as background tasks.
+      - Three ways to run them:
+        - When a hook happens and it's registered as the recipient of that trigger (with hook-specific parameters)
+        - When an explicit request for that is received (with custom parameters)
+        - When it's registered as a periodic task and the time has arrived (with no parameters)
+    - `lambda/js`: just like routine/js, but it's an expression that's returned to the caller.
+    - `component/react-jsx`: a react functional component that will be returned to the frontend.
+      - It can be run in these cases
+        - When `unigraph.runExecutable` is called for such a component in frontend, a function is returned that has React as a resolved dependency but nothing else.
+          - See also the dependencies part below
+        - Alternatively, it may be registered as a child of some other entity (for example, `$/schema/dynamic_view`). In this case, the corresponding entity handler will help to render it.
+    - `client/js`: run client-side code.
+      - When `unigraph.runExecutable` is called for such an object, it will return a function that you can then call to run it with custom parameters.
+      - Most often these types of code are children of some other entity (like `$/schema/context_menu_item`), and it will be managed automatically.
+    - [[should fix]]: we should add "on start" scripts that are ran when server/client boots up
+  - Dependencies
+    - Importing NPM packages
+      - Server side - currently (Jan 23, 2022) executables can only call libraries that are defined in the package.json of server.
+        - Use `require` to call them
+        - Working on defining imports in the schema of that executable file, [[should fix]]
+      - Client side:
+        - Define dependencies in the schema of the executable first
+        - If running `unigraph.runExecutable`, dependencies will not be wrapped. There are wrapper functions that takes in an executable object and outputs a function with everything imported.
+        - Most of the case they are defined in other entities as children - the other entities will handle them.
+    - Importing other Unigraph packages
+      - Not possible right now, [[should fix]] later
+  - Context and APIs
+    - Executable objects can access their contexts and the Unigraph API via global (comparing to executables) objects:
+      - In JS/TS, they are: `context, unigraph`, of type `ExecContext, Unigraph`.
+      - In JS/TS, you can get type annotations and autocomplete by enforcing your function to the `UnigraphExecutable` generic type with type argument being a map of your named arguments.
+    - Additionally, `context.params` describes all parameters received when invoking the code, and `context.callbacks` (client or frontend only) are all callbacks supplied by the parent component invoking it.

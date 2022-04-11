@@ -1,0 +1,11 @@
+
+  - Basic use cases
+    - Should be able to type plain text, really fast
+    - Should be able to write a bracket (or equivalent) and have the other half autocompleted
+    - Should be able to navigate using totally keyboards (arrow keys, cmd+etc), without using a mouse
+  - Outliner
+    - Should be able to indent a block to its parent
+    - Should be able to outdent a block, even if it's not the last block
+    - Should be able to add a block, if it's the end we should create a new object below, otherwise the top one should be new
+    - Should be able to delete a block, and determine what we should do (merge with parent, merge with last, or just delete)
+  - Example
