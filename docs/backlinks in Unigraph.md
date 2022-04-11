@@ -1,0 +1,21 @@
+
+  - Unigraph provides a standard backlinking support for every app, but apps can also customize it based on specific needs.
+  - **How are backlinks stored**?
+    - By default, backlinks are stored at the `unigraph.origin` property.
+      - This is a unigraph reserved property, so any expand queries will not show it.
+  - **How are they created/deleted**?
+    - During insertion or update, nested object children will add backlinks to their parents.
+      - For example, if `Todo Object A -> Project B -> Tag C`, then `Project B` will be added a backlink, but not by default `Tag C`, unless it's also present in the nested insertion/update.
+      - Apps can also customize this behavior.
+      - This part is handled in [[Unigraph data model & utils]]
+    - We can also manually re-calculate backlinks to objects: this is done by getting all of an object's backlinks, and see if they actually leads to the target object.
+      - Because this is a time-consuming task, it will be scheduled at the background.
+    - OR: propagate backlink changes all the way to parents (later, how should we do that?)
+  - **App-specific ways of dealing with backlinks**
+    - You can specify what backlinks to add to the backlink in the root object by passing in an argument with `unigraph.updateObject`. More on this later.
+  - **How notes editor handles backlinks**
+    - Because notes editor can be highly nested, we only add backlinks to the root of the object for every child block. 
+      - For example, every `$/schema/note_block` entity here will only have a backlink to the root page, not to their parents.
+    - Thus, moving blocks around different roots can be a bit hard.
+      - When we're cutting or copying blocks, we find the list of all child notes and references, and then recalculate backlinks on them (if cut), and put them in the clipboard HTML (both cut and copy).
+      - Then, when we're pasting them, we can look at all of the uids and re-add backlinks to the page root if necessary.

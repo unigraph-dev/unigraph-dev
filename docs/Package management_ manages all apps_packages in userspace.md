@@ -1,0 +1,37 @@
+
+  - Schema management
+  - Executables management: see also [[executable code in Unigraph]]
+  - Updates & versioning
+    - Two ways to update a package:
+      - Overwrite - install a same version of the package
+      - Update - install a newer version of the package, re-linking shorthand refs (i.e. `$/schema/xxx`) to new versions
+        - Currently not possible, working on it - [[should fix]]
+  - namespaces
+    - Namespaces can get quite messy if unmanaged. In Unigraph we use an graph-native reference-based approach with two types of namespaces: shorthand form (starting with `$/schema`) and package form (for example `$/package/unigraph.semantic/0.0.1/schema/`). The default namespace - `unigraph.id` - is called the canonical namespace, and is used in all examples here.
+    - We maintain a dictionary object called `$/meta/namespace_map` that links shorthand references to packages.
+    - For more information about the canonical namespace, see [Unigraph.id](./unigraph_id.md).
+    - For how the sub-namespace of a package is structured, see [Apps](./apps.md).
+    - Examples namespace mappings
+      - \$/package/unigraph.semantic/0.0.1/schema/semantic_properties -> \$/schema/semantic_properties
+      - \$/package/unigraph.semantic/0.0.1/schema/tag -> \$/schema/tag
+      - \$/package/unigraph.semantic/0.0.1/executable/hello -> \$/executable/hello
+      - \$/package/unigraph.semantic/0.0.1/entity/example -> \$/entity/example
+    - Resolving shorthand references
+      - Resolving shorthand references is currently done when loading cache. 
+      
+  - Disabling packages
+    - We need to disable all 3 parts of a package, schemas, executables, and objects
+    - How do we design the user experience of disabling packages?
+      - Mark all {schemas, executables, objects} as `_hide: true`
+      - Remove all shorthands of {executables, objects} from `$/meta/namespace_map`
+    - Reenabling packages
+      - Read the `$/schema/package_manifest` object for info on the package
+    - When packages are disabled:
+      - Scheduled background tasks will not be ran
+      - Associated entities will be hidden (so not being loaded by default)
+      - Schemas associated will be hidden, and not displayed in the total library view
+      - Namespace map will be detached, so items cannot reference by shorthand (can still be referenced by uid)
+  - Onboarding flow for packages
+    - We'll only load the core packages by default
+    - During the onboarding session, we'll let users choose which packages to use and enable them
+    - Related: [[Unigraph with a smaller scope]] - these are the packages we'll feel comfortable letting users to choose from

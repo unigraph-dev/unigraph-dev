@@ -1,0 +1,40 @@
+
+  - Related concepts:
+    - [[view_data type isomorphism|view/data type isomorphism]]
+  - Things to fix
+    - Try to remove some of the spaghetti and unused code caused by tons of iteration. [[should fix]]
+      - data context (and `context` context, confusing, I know)
+    - Try to think about alternative ways to handle state, callback, and context passing.
+  - What's AutoDynamicView (ADV for brevity)?
+    - A wrapper that handles common use cases (see below) and a unified user experience for various types of views.
+  - What does ADV handle? (all of these can be disabled or customized by individual components)
+    - Displaying children entities if needed: like attached notes, semantic properties, etc.
+    - Focus and selection management
+    - Detailed view opening behavior when a user clicks on the view
+    - Drag and drop support
+    - Context menu support (right click)
+    - Keyboard shortcut management (like backspace to delete, etc)
+    - Replacing an object stub (uid and type only) with an actual object and managing its subscription
+    - Show an indicator for the number of backlinks to the object, if any
+    - Recursion prevention
+    - Handles errors occured in the view
+  - What happens when I call `<AutoDynamicView object={obj} />`?
+    - First, ADV will decide which view to use for the object.
+      - Special case: if ADV sees the current object is being defined recursively and it displays children, it will not render anything and throw an error.
+      - First, ADV looks at the `components` prop passed in (optional), and if it finds any, it will use it for the view.
+      - If there isn't any, ADV will look at the global registry of default object views for different types, then use it if there is a match.
+      - If there isn't one, ADV will just display the object as a JSON thing.
+    - Next, ADV will look at if the current object is an object stub. If it is, then it will try to subscribe to the object:
+      - If the view selected in step 1 has a corresponding query method, it will use that query method.
+      - If there isn't any, it will use the default query, which is slower.
+    - Next, ADV will create elements that provide use cases (above), using custom configurations defined by the context.
+      - First, ADV will look at the configurations provided by the caller that's passed in from props (optional).
+      - If there isn't one, ADV will look at the configuration provided by the view determined in step 1.
+        - For custom views, this means the one defined in the package.
+      - Finally, ADV will use the default options.
+    - Lastly, ADV will render the view as determined in step 1.
+      - The object (whether is a stub or a normal one), will be passed into the view under the `data` prop.
+      - All callbacks provided by the prop passed into ADV will be moved to the inner view, and some additonal ones will be set.
+      - Everything passed in as the `attribute` prop will be expanded, with each key-value pair of the attribute dictionary representing a prop of the object.
+      - Finally, style prop will be set to the parent container, variant info (whether it's inline or compact) will be passed into the view, same for focus state.
+      - The componentId (unique for every ADV) will also be passed into view.

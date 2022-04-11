@@ -1,0 +1,140 @@
+
+  - Package: `unigraph-dev-backend`
+    - A Node application that provides all of Unigraph's functionality to different kinds of clients.
+  - Components:
+    - Package management: manages all apps/packages in userspace
+      - Schema management
+      - Executables management: see also [[executable code in Unigraph]]
+      - Updates & versioning
+        - Two ways to update a package:
+          - Overwrite - install a same version of the package
+          - Update - install a newer version of the package, re-linking shorthand refs (i.e. `$/schema/xxx`) to new versions
+            - Currently not possible, working on it - [[should fix]]
+      - namespaces
+        - Namespaces can get quite messy if unmanaged. In Unigraph we use an graph-native reference-based approach with two types of namespaces: shorthand form (starting with `$/schema`) and package form (for example `$/package/unigraph.semantic/0.0.1/schema/`). The default namespace - `unigraph.id` - is called the canonical namespace, and is used in all examples here.
+        - We maintain a dictionary object called `$/meta/namespace_map` that links shorthand references to packages.
+        - For more information about the canonical namespace, see [Unigraph.id](./unigraph_id.md).
+        - For how the sub-namespace of a package is structured, see [Apps](./apps.md).
+        - Examples namespace mappings
+          - \$/package/unigraph.semantic/0.0.1/schema/semantic_properties -> \$/schema/semantic_properties
+          - \$/package/unigraph.semantic/0.0.1/schema/tag -> \$/schema/tag
+          - \$/package/unigraph.semantic/0.0.1/executable/hello -> \$/executable/hello
+          - \$/package/unigraph.semantic/0.0.1/entity/example -> \$/entity/example
+        - Resolving shorthand references
+          - Resolving shorthand references is currently done when loading cache. 
+          
+      - Disabling packages
+        - We need to disable all 3 parts of a package, schemas, executables, and objects
+        - How do we design the user experience of disabling packages?
+          - Mark all {schemas, executables, objects} as `_hide: true`
+          - Remove all shorthands of {executables, objects} from `$/meta/namespace_map`
+        - Reenabling packages
+          - Read the `$/schema/package_manifest` object for info on the package
+        - When packages are disabled:
+          - Scheduled background tasks will not be ran
+          - Associated entities will be hidden (so not being loaded by default)
+          - Schemas associated will be hidden, and not displayed in the total library view
+          - Namespace map will be detached, so items cannot reference by shorthand (can still be referenced by uid)
+      - Onboarding flow for packages
+        - We'll only load the core packages by default
+        - During the onboarding session, we'll let users choose which packages to use and enable them
+        - Related: [[Unigraph with a smaller scope]] - these are the packages we'll feel comfortable letting users to choose from
+    - Hooks: run custom executables whenever conditions are met
+      - Pre-defined hooks: after schema updated, after database changed, after subscription added
+      - Object creation hooks: run after a specific type has a new object created
+      - Custom hooks: can be called by executables
+      - [[should fix]]: talk about other types of hooks (for example, hooks based on object roles)
+    - Subscriptions: real-time updates on data changes
+      - Subscriptions can be ran in 2 cases:
+        - When being polled (now it's every 20 seconds)
+        - When a data change happens anywhere
+        - In the future, there will instead be uid checks for updated objects. [[should fix]]
+      - Updates are posted to websocket clients when the new value is different from the old
+      - How subscriptions are handled
+        - in backend, subscriptions are determined by the Subscription object
+          - Contains a subscription ID, query for the subscription, some metadata about the connection, and whether it's hibernated.
+          - It also contains the current subscription data in order to compare equality.
+        - in frontend, subscriptions are created either manually or by the `useSubscription` hook.
+          - if [[AutoDynamicView]] detects an object is a stub, it will make a subscription based on the uid, type and view.
+          - alternatively, the notes editor subscribes any embedded object on its behalf, and returns the full view & editor info.
+      - Delta subscriptions
+        - Users can subscribe to arbitrarily many objects as delta subscriptions
+          - for example, all backlinks are handled by one big subscription, and when we're getting new backlinks, we just use delta subscription to add an entity.
+        - Delta subscriptions are faster than normal ones
+          - When updating delta subscriptions, only the changed items are fetched instead of everything.
+        - Caveats
+          - Currently only subscribing to UIDs are supported with delta subscriptions.
+      - Ideas of enhancing the subscription experience:
+        - In the future, there will instead be uid checks for updated objects. [[should fix]]
+        - Subscriptions can have children subscriptions, with coupling to the `DataContext`, that augments the stub items from before.
+    - executable code in Unigraph
+      - Goals
+        - The Unigraph philosophy is that there shouldn't be a difference between a piece of data and a piece of code.
+        - The Executable manager deals with different ways userspace code in Unigraph are handled
+      - Different types of code
+        - `routine/js`: or known as background tasks.
+          - Three ways to run them:
+            - When a hook happens and it's registered as the recipient of that trigger (with hook-specific parameters)
+            - When an explicit request for that is received (with custom parameters)
+            - When it's registered as a periodic task and the time has arrived (with no parameters)
+        - `lambda/js`: just like routine/js, but it's an expression that's returned to the caller.
+        - `component/react-jsx`: a react functional component that will be returned to the frontend.
+          - It can be run in these cases
+            - When `unigraph.runExecutable` is called for such a component in frontend, a function is returned that has React as a resolved dependency but nothing else.
+              - See also the dependencies part below
+            - Alternatively, it may be registered as a child of some other entity (for example, `$/schema/dynamic_view`). In this case, the corresponding entity handler will help to render it.
+        - `client/js`: run client-side code.
+          - When `unigraph.runExecutable` is called for such an object, it will return a function that you can then call to run it with custom parameters.
+          - Most often these types of code are children of some other entity (like `$/schema/context_menu_item`), and it will be managed automatically.
+        - [[should fix]]: we should add "on start" scripts that are ran when server/client boots up
+      - Dependencies
+        - Importing NPM packages
+          - Server side - currently (Jan 23, 2022) executables can only call libraries that are defined in the package.json of server.
+            - Use `require` to call them
+            - Working on defining imports in the schema of that executable file, [[should fix]]
+          - Client side:
+            - Define dependencies in the schema of the executable first
+            - If running `unigraph.runExecutable`, dependencies will not be wrapped. There are wrapper functions that takes in an executable object and outputs a function with everything imported.
+            - Most of the case they are defined in other entities as children - the other entities will handle them.
+        - Importing other Unigraph packages
+          - Not possible right now, [[should fix]] later
+      - Context and APIs
+        - Executable objects can access their contexts and the Unigraph API via global (comparing to executables) objects:
+          - In JS/TS, they are: `context, unigraph`, of type `ExecContext, Unigraph`.
+          - In JS/TS, you can get type annotations and autocomplete by enforcing your function to the `UnigraphExecutable` generic type with type argument being a map of your named arguments.
+        - Additionally, `context.params` describes all parameters received when invoking the code, and `context.callbacks` (client or frontend only) are all callbacks supplied by the parent component invoking it.
+    - Searching
+      - Takes in a search object (can be through websocket or through the HTTP api), 
+      - Supported search types:
+        - Graph relations search (X number of hops between entities)
+        - Full-text search (using Dgraph's search API, not very great)
+        - Regex search
+        - UID matching
+        - Type filtering
+    - HTTP callbacks
+      - Listening for GET requests on the `:4001` port. When a request is received, return request body to the caller.
+        - Problem: no way to return custom responses to the requester. [[should fix]]
+        - Problem: no way of registering those as data. Currently we can only call the Unigraph API and it's a promise. We should be able to register them as data and assign callback functions to them
+      - Used mostly for OAuth callbacks. But can also be used as webhook listeners to enable push updates.
+    - Authentication
+      - Currently there isn't any. Anyone with the address can read all of the database.
+      - Including private keys! This [[should fix]] ASAP.
+  - Interactions
+    - Unigraph server-client interaction
+      - An average lifecycle: websocket
+        - A client connects to the server through WebSocket.
+          - It should provide a `browserId`, just a string representing the unique client that the client generates.
+        - If the client is using the official frontend, it will request a bunch of things to the server after the connection is established to update its cache.
+          - Requesting notifications and dynamic views
+          - For efficiency we should also broadcast them to the client as server cache, [[should fix]].
+        - The server will broadcast its cache to the client
+          - Everything that's broadcasted:
+            - namespaceMap
+            - schemaMap
+            - uid_lease
+        - Now the client can freely talk to the server for more data & api calls
+        - Sometimes a client would disconnect - maybe it's a mobile app and it's being suspended, or the user closed the lid of her laptop
+          - When that happens (client closed the connection), the server puts all client subscriptions into hibernation and recycles all leased uids.
+          - When the client reconnects, the server will:
+            - Unhibernate all subscriptions & query them right away
+            - Give the client new UID leases (so not the old ones!)

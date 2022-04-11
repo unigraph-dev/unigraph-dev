@@ -8,9 +8,9 @@ Please join the Discord community below to talk about contributing, or open a Gi
 
 ## Docs
 
-- [Schemas and Objects (overview)](./docs/architectural/schemas_and_objects.md)
-- [Data model](./docs/architectural/data_model.md)
-- [Glossary](./docs/glossary.md)
+- [🧭 Docs home: Unigraph Developer Documentation](https://docs.unigraph.dev/)
+- [Data model](<./docs/Data model.md>)
+- [Glossary](./docs/Glossary.md)
 
 License:
 [MIT](https://github.com/unigraph-dev/unigraph-dev/blob/main/LICENSE)
@@ -163,3 +163,5 @@ To use third-party API integrations, obtain desired API keys and put them in thi
     }
 }
 ```
+
+For how to obtain them, see [the docs page](https://docs.unigraph.dev/Unigraph+Developer+Documentation#%F0%9F%A7%AD+Getting+started).
