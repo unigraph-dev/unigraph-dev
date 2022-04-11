@@ -72,27 +72,6 @@ const ChildrenContainer = styled('div')({
     wordBreak: 'break-word',
 });
 
-/**
- * This need to be large so it doesn't require too much precision for
- * a drag to be detected, but it shouldn't be too large and overlap with other
- * drop targets.
- */
-const dropTargetHeight = 20;
-const DropTarget = styled('div')({
-    position: 'absolute',
-    left: '2rem',
-    right: 0,
-    height: dropTargetHeight,
-});
-
-const DropTargetAfter = styled(DropTarget)({
-    bottom: -dropTargetHeight / 2,
-});
-
-const DropTargetBefore = styled(DropTarget)({
-    top: -dropTargetHeight / 2,
-});
-
 interface DropIndicatorProps {
     show: boolean;
 }
@@ -124,6 +103,8 @@ const DropIndicatorBefore = styled(DropIndicator)({
 const DropIndicatorAfter = styled(DropIndicator)({
     bottom: -dropIndicatorHeight / 2,
 });
+
+type DropHint = 'before' | 'after' | 'none';
 
 /** Describe the object being dragged. */
 interface DragObject {
@@ -194,6 +175,7 @@ export function Outline({
     parentDisplayAs,
 }: OutlineProps) {
     const [hover, setHover] = React.useState(false);
+    const rOutlineEl = React.useRef<HTMLDivElement>(null);
     const rContentEl = React.useRef<HTMLDivElement>(null);
     const onPointerMove = React.useCallback((e: React.PointerEvent) => {
         const contentEl = rContentEl.current;
@@ -245,7 +227,43 @@ export function Outline({
         [parentNoteBlock],
     );
 
-    const onDrop = React.useCallback(
+    const onCollect = React.useCallback((monitor: DropTargetMonitor<DragObject>): DropHint => {
+        if (!monitor.canDrop()) return 'none';
+
+        const outlineEl = rOutlineEl.current;
+        if (!outlineEl) return 'none';
+
+        /** The rectangle of the hovered outline. */
+        const hoverBoundingRect = outlineEl.getBoundingClientRect();
+
+        /** Get vertical middle. */
+        const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+
+        /** Determine mouse position. */
+        const clientOffset = monitor.getClientOffset();
+        if (!clientOffset) return 'none';
+
+        /** Get pixels to the rectangle's top. */
+        const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+
+        /** Don't be greedy. @see https://react-dnd.github.io/react-dnd/examples/nesting/drop-targets */
+        if (!monitor.isOver({ shallow: true })) {
+            return 'none';
+        }
+
+        /** Infer intention. */
+        if (hoverClientY < hoverMiddleY) {
+            return 'before';
+        }
+
+        if (hoverClientY > hoverMiddleY) {
+            return 'after';
+        }
+
+        return 'none';
+    }, []);
+
+    const performDrop = React.useCallback(
         (item: DragObject, side: 'before' | 'after') => {
             console.log('drop', item.uid, 'from', item.parentUid, 'to', parentNoteBlock?.uid, `${side} index`, index);
             /**
@@ -279,46 +297,34 @@ export function Outline({
         [parentNoteBlock, index],
     );
 
-    const onCollect = React.useCallback((monitor: DropTargetMonitor<DragObject>) => {
-        return {
-            shouldShow: !!monitor.isOver() && !!monitor.canDrop(),
-        };
-    }, []);
-
-    const [{ shouldShow: shouldShowDropTargetAfter }, setDropTargetAfter] = useDrop<
-        DragObject,
-        unknown,
-        { shouldShow: boolean }
-    >(
-        () => ({
-            accept: [dndType],
-            drop: (item) => {
-                onDrop(item, 'after');
-            },
-            canDrop,
-            collect: onCollect,
-        }),
-        [onDrop, canDrop, onCollect],
+    const onDrop = React.useCallback(
+        (item: DragObject, monitor: DropTargetMonitor<DragObject>) => {
+            const intent = onCollect(monitor);
+            if (intent !== 'none') performDrop(item, intent);
+        },
+        [onCollect, performDrop],
     );
 
-    const [{ shouldShow: shouldShowDropTargetBefore }, setDropTargetBefore] = useDrop<
-        DragObject,
-        unknown,
-        { shouldShow: boolean }
-    >(
+    const [dropHint, setDropTarget] = useDrop<DragObject, unknown, DropHint>(
         () => ({
             accept: [dndType],
-            drop: (item) => {
-                onDrop(item, 'before');
-            },
             canDrop,
             collect: onCollect,
+            drop: onDrop,
         }),
-        [onDrop, canDrop, onCollect],
+        [canDrop, onCollect, onDrop],
     );
+
+    /**
+     * Use the whole outline as the drop target and infer the action based
+     * on the mouse position. Inspired by the "Sortable" examples
+     * (https://react-dnd.github.io/react-dnd/examples/sortable/simple).
+     */
+    setDropTarget(rOutlineEl);
 
     return (
         <OutlineContainer
+            ref={rOutlineEl}
             onPointerMove={onPointerMove}
             onPointerLeave={onPointerLeave}
             style={{
@@ -366,14 +372,8 @@ export function Outline({
             <ChildrenContainer ref={setDragPreview}>
                 <OutlineContentContext.Provider value={rContentEl}>{children}</OutlineContentContext.Provider>
             </ChildrenContainer>
-            <DropIndicatorAfter show={shouldShowDropTargetAfter} />
-            <DropTargetAfter ref={setDropTargetAfter} />
-            {index === 0 && (
-                <>
-                    <DropIndicatorBefore show={shouldShowDropTargetBefore} />
-                    <DropTargetBefore ref={setDropTargetBefore} />
-                </>
-            )}
+            <DropIndicatorAfter show={dropHint === 'after'} />
+            <DropIndicatorBefore show={dropHint === 'before'} />
         </OutlineContainer>
     );
 }
