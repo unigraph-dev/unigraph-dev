@@ -44,6 +44,7 @@ export function FavoriteBar() {
 
     return (
         <DynamicObjectListView
+            viewOptions={{ backlinkStyle: { transform: 'scale(0.75)' } }}
             items={fav}
             style={{ height: '' }}
             context={favEntity}

@@ -49,6 +49,7 @@ export function AutoDynamicView({
         customBoundingBox,
         allowSemantic = true,
         expandedChildren,
+        backlinkStyle,
     } = finalOptions;
 
     if (!callbacks) callbacks = {};
@@ -85,6 +86,7 @@ export function AutoDynamicView({
         callbacks?.context?.uid,
         shouldGetBacklinks,
         noParents,
+        backlinkStyle,
     );
 
     const viewEl = React.useRef(null);

@@ -8,7 +8,7 @@ export const ViewItem: DynamicViewRenderer = ({ data, callbacks }) => {
 
     return (
         <div style={{ display: 'contents' }}>
-            {/^\p{Extended_Pictographic}$/u.test(unpadded?.icon || '') ? (
+            {/^\p{Extended_Pictographic}|\p{Emoji_Presentation}$/u.test(unpadded?.icon || '') ? (
                 <div style={{ minWidth: '18px', maxWidth: '18px', minHeight: '18px', marginRight: '20px' }}>
                     <span style={{ fontSize: '1.125em' }}>{unpadded?.icon}</span>
                 </div>

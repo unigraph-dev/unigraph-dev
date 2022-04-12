@@ -31,6 +31,10 @@
     width: 0px !important
 }
 
+.flexlayout__tabset_tab_divider:last-child {
+    visibility: hidden;
+}
+
 .flexlayout__tab {
     transition: width 0.5s, max-width 0.5s, height 0.5s, max-height 0.5s, top 0.5s, left 0.5s;
 }
@@ -121,10 +125,11 @@
 }
 
 .flexlayout__border_left_electron {
-    padding-top: 40px;
+    margin-top: 40px;
 }
 
 .flexlayout__tab_border_left_electron {
+    background-color: var(--app-drawer-background-color);
     padding-top: 40px;
 }
 
