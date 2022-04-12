@@ -82,7 +82,6 @@ const hotkeyHandler = (ev: KeyboardEvent, specialEvent?: string) => {
         // now we check if there's a registered shortcut for this key
         const shortcutDict = window.unigraph.getState('global/hotkeyBindings').value;
         const shortcuts = Object.keys(shortcutDict);
-        // console.log('hotkeyHandler', { keyStr, shortcuts, shortcutDict, incl: shortcuts.includes(keyStr) });
         if (shortcuts.includes(keyStr)) {
             const getContextState = () => {
                 const selectedState = window.unigraph.getState('global/selected');
@@ -94,37 +93,17 @@ const hotkeyHandler = (ev: KeyboardEvent, specialEvent?: string) => {
             };
 
             const commandName = _.prop([keyStr, '_value', 'command', '_value', 'unigraph.id'], shortcutDict);
-            console.log('hotkeyHandler', {
-                commandName,
-                keyStr,
-                shortcuts,
-                shortcutDict,
-                contextState: getContextState(),
-            });
-
+            ev.preventDefault();
             // optional chaining here because the function is optional in the common API, because it's present in explorer but not backend
             window.unigraph.dispatchCommand?.(commandName, {}, { contextState: getContextState(), invoker: 'hotkey' });
-
-            // if (hasComponents.length > 0) {
-            //     const matchingComponents = hasComponents.map((el: string) => shortcutDict[keyStr][el]).filter(Boolean);
-            //     const retFns: any[] = [];
-            //     matchingComponents.forEach((callback: any) => {
-            //         const ret = callback(ev);
-            //         if (typeof ret === 'function') retFns.push(ret);
-            //     });
-            //     retFns.forEach((fn: any) => {
-            //         fn(ev);
-            //     });
-            //     console.log(`ran ${matchingComponents.length} callbacks`);
-            // }
         }
     }
 };
 
 export const initKeyboardShortcuts = () => {
-    document.addEventListener('keydown', shortcutHandler);
-    document.addEventListener('keydown', hotkeyHandler);
-    document.addEventListener('cut', (ev: any) => shortcutHandler(ev, 'oncut'));
-    document.addEventListener('copy', (ev: any) => shortcutHandler(ev, 'oncopy'));
+    document.addEventListener('keydown', shortcutHandler); // old hotkey implementation
+    document.addEventListener('keydown', hotkeyHandler); // new command-based hotkeys
+    document.addEventListener('cut', (ev: any) => shortcutHandler(ev, 'oncut')); // old hotkey implementation
+    document.addEventListener('copy', (ev: any) => shortcutHandler(ev, 'oncopy')); // old hotkey implementation
     return true;
 };

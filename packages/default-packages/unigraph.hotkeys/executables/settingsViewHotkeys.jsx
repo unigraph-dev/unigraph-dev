@@ -28,16 +28,23 @@ return (
     <div>
         {/* <Typography variant="h4">Hotkey settings</Typography> */}
         <h1>Hotkey settings</h1>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', flexDirection: 'row', fontWeight: 'bold' }}>
-                <span>Command</span>
-                <span>Binding</span>
+        {hotkeyBindings && hotkeyBindings.length > 0 ? (
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div
+                    style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        flexDirection: 'row',
+                        fontWeight: 'bold',
+                    }}
+                >
+                    <span>Command</span>
+                    <span>Binding</span>
+                </div>
+                {hotkeyBindings.map(hotkeyBindingView)}
             </div>
-            {hotkeyBindings && hotkeyBindings.map(hotkeyBindingView)}
-            {/* 
-        {hotkeyBindings.map((binding) => (
-            <p>binding.get('hotkey').as('primitive')</p>
-        ))} */}
-        </div>
+        ) : (
+            <div>No hotkey bindings</div>
+        )}
     </div>
 );

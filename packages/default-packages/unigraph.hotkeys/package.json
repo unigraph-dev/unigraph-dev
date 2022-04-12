@@ -19,7 +19,7 @@
             },
             {
                 "id": "settings_page_hotkeys",
-                "src": "entities/settingsPageHotkeys.json"
+                "src": "entities/settings_page_hotkeys.json"
             }
         ],
         "executables": [
