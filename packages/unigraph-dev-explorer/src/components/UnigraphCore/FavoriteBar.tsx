@@ -49,9 +49,10 @@ export function FavoriteBar() {
             context={favEntity}
             listUid={favEntity?._value?.children?.uid}
             itemGetter={(el: any) => el._value._value}
-            noBar
+            noBar // TODO: refactor this after the Sortable implemented
+            noDrop
             noRemover
-            itemStyle={{ paddingTop: '4px', paddingBottom: '4px' }}
+            itemStyle={{ paddingTop: '2px', paddingBottom: '2px', marginBottom: '-8px' }}
             defaultFilter={['no-deleted', 'no-noview']}
             itemRemover={(uids) => {
                 window.unigraph.deleteItemFromArray(favEntity?._value?.children?.uid, uids, favEntity.uid);

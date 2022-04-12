@@ -9671,10 +9671,12 @@ flatten@^1.0.2:
   resolved "https://registry.yarnpkg.com/flatten/-/flatten-1.0.3.tgz#c1283ac9f27b368abc1e36d1ff7b04501a30356b"
   integrity sha512-dVsPA/UwQ8+2uoFe5GHtiBMu48dWLTdsuEd7CKGlZlD78r1TTWBvDuFaFGKCo/ZfEr95Uk56vZoX86OsHkUeIg==
 
-flexlayout-react@^0.5.5:
-  version "0.5.5"
-  resolved "https://registry.yarnpkg.com/flexlayout-react/-/flexlayout-react-0.5.5.tgz#e96dbb61bd29868836aff5139d558fb13abf1287"
-  integrity sha512-y8fQQ1nfBdSmBELoD/nEplEIxRZfDtHT1Lg50M4iXkvlF9blnkQktmngiYR2tO/wr6fy2+2cV+tX0HXoeHY8cQ==
+flexlayout-react@^0.6.9:
+  version "0.6.9"
+  resolved "https://registry.yarnpkg.com/flexlayout-react/-/flexlayout-react-0.6.9.tgz#3c48e1a3c159780421d6de73f032fd4bc4b7d92e"
+  integrity sha512-JxRPM3QKb1/8cns8BmJEic3N7SrfCT1RRxt3355eWoZ626slOL4KvUxrmi/xgf/Nv5I8AgZ7j+IsYOkhxl/T5A==
+  dependencies:
+    uuid "^8.3.2"
 
 flush-write-stream@^1.0.0:
   version "1.1.1"
@@ -18949,7 +18951,7 @@ uuid@^3.3.2, uuid@^3.4.0:
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.4.0.tgz#b23e4358afa8a202fe7a100af1f5f883f02007ee"
   integrity sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==
 
-uuid@^8.0.0, uuid@^8.3.0:
+uuid@^8.0.0, uuid@^8.3.0, uuid@^8.3.2:
   version "8.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
   integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==

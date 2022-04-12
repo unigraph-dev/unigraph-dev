@@ -19,9 +19,36 @@ import {
     mdiCogOutline,
     mdiBellOutline,
     mdiHomeOutline,
+    mdiMessageArrowRightOutline,
+    mdiDatabaseEyeOutline,
 } from '@mdi/js';
 import { FavoriteBar } from './UnigraphCore/FavoriteBar';
 import { pointerHoverSx } from '../utils';
+
+const StyledListItemIcon = styled(ListItemIcon)({
+    minWidth: '20px',
+    maxWidth: '20px',
+    minHeight: '20px',
+    maxHeight: '20px',
+    marginRight: '18px',
+    alignItems: 'center',
+});
+
+const StyledListItemText = ({ primary }: any) => (
+    <ListItemText
+        primary={primary}
+        primaryTypographyProps={{ style: { fontSize: '.875rem', letterSpacing: '.2px' } }}
+    />
+);
+
+const StyledListSubheader = styled(ListSubheader)({
+    lineHeight: '36px',
+    textTransform: 'uppercase',
+    fontSize: '12px',
+    letterSpacing: '0.03em',
+    fontWeight: 600,
+    background: 'transparent',
+});
 
 const PREFIX = 'AppDrawer';
 
@@ -32,17 +59,19 @@ const classes = {
 const Root = styled('div')(({ theme }) => ({
     [`& .${classes.drawerPaper}`]: {
         borderRight: 'none',
+        backgroundColor: 'var(--app-drawer-background-color)',
+        transition: 'background-color 0.3s linear',
     },
 }));
 
-const appDrawerHoverSx = { paddingBottom: '4px', paddingTop: '4px', ...pointerHoverSx };
+const appDrawerHoverSx = { paddingBottom: '2px', paddingTop: '2px', ...pointerHoverSx };
 export default function DrawerRouter() {
     const devState = window.unigraph.getState('settings/developerMode');
     const [devMode, setDevMode] = React.useState(devState.value);
     devState.subscribe((newState: boolean) => setDevMode(newState));
 
     return (
-        <Root style={{ height: '100%' }}>
+        <Root style={{ height: '100%', width: '240px' }}>
             <Drawer
                 variant="permanent"
                 classes={{
@@ -57,87 +86,79 @@ export default function DrawerRouter() {
                 }}
             >
                 <List>
-                    <ListSubheader component="div" id="subheader-home">
-                        {' '}
-                        Home{' '}
-                    </ListSubheader>
+                    <div style={{ marginBottom: '12px' }} id="div-home">
+                        <StyledListSubheader id="subheader-home"> HOME </StyledListSubheader>
 
-                    <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/home')}>
-                        <ListItemIcon>
-                            <Icon path={mdiHomeOutline} size={1} />
-                        </ListItemIcon>
-                        <ListItemText primary="Home" />
-                    </ListItem>
+                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/home')}>
+                            <StyledListItemIcon>
+                                <Icon path={mdiHomeOutline} size={1} />
+                            </StyledListItemIcon>
+                            <StyledListItemText primary="Home" />
+                        </ListItem>
 
-                    <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/library')}>
-                        <ListItemIcon>
-                            <Icon path={mdiBookOpenOutline} size={1} />
-                        </ListItemIcon>
-                        <ListItemText primary="Library" />
-                    </ListItem>
+                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/library')}>
+                            <StyledListItemIcon>
+                                <Icon path={mdiBookOpenOutline} size={1} />
+                            </StyledListItemIcon>
+                            <StyledListItemText primary="Library" />
+                        </ListItem>
 
-                    <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/trash')}>
-                        <ListItemIcon>
-                            <Icon path={mdiDeleteOutline} size={1} />
-                        </ListItemIcon>
-                        <ListItemText primary="Trash bin" />
-                    </ListItem>
-                    <ListSubheader component="div" id="subheader-unigraph">
-                        {' '}
-                        Unigraph{' '}
-                    </ListSubheader>
-                    <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/settings')}>
-                        <ListItemIcon>
-                            <Icon path={mdiCogOutline} size={1} />
-                        </ListItemIcon>
-                        <ListItemText primary="Settings" />
-                    </ListItem>
-                    <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/notification-center')}>
-                        <ListItemIcon>
-                            <Icon path={mdiBellOutline} size={1} />
-                        </ListItemIcon>
-                        <ListItemText primary="Notifications" />
-                    </ListItem>
-                    <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/package-manager')}>
-                        <ListItemIcon>
-                            <Icon path={mdiPackageVariantClosed} size={1} />
-                        </ListItemIcon>
-                        <ListItemText primary="Packages" />
-                    </ListItem>
-                    <div style={{ display: devMode ? 'inherit' : 'none' }}>
-                        <ListSubheader component="div" id="subheader-developer-tools">
-                            {' '}
-                            Developer Tools{' '}
-                        </ListSubheader>
-                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/object-editor')}>
-                            <ListItemIcon>
-                                <Icon path={mdiPencilBoxMultipleOutline} size={1} />
-                            </ListItemIcon>
-                            <ListItemText primary="Object Editor" />
-                        </ListItem>
-                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/code-editor')}>
-                            <ListItemIcon>
-                                <Icon path={mdiXml} size={1} />
-                            </ListItemIcon>
-                            <ListItemText primary="Code Editor" />
-                        </ListItem>
-                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/request')}>
-                            <ListItemIcon>
-                                <Comment />
-                            </ListItemIcon>
-                            <ListItemText primary="Request" />
-                        </ListItem>
-                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/datamodel-playground')}>
-                            <ListItemIcon>
-                                <CompareArrows />
-                            </ListItemIcon>
-                            <ListItemText primary="DataModel Playground" />
+                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/trash')}>
+                            <StyledListItemIcon>
+                                <Icon path={mdiDeleteOutline} size={1} />
+                            </StyledListItemIcon>
+                            <StyledListItemText primary="Trash bin" />
                         </ListItem>
                     </div>
-                    <ListSubheader component="div" id="subheader-developer-tools">
-                        {' '}
-                        Favorites{' '}
-                    </ListSubheader>
+                    <div style={{ marginBottom: '12px' }} id="div-unigraph">
+                        <StyledListSubheader id="subheader-unigraph"> UNIGRAPH </StyledListSubheader>
+                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/settings')}>
+                            <StyledListItemIcon>
+                                <Icon path={mdiCogOutline} size={1} />
+                            </StyledListItemIcon>
+                            <StyledListItemText primary="Settings" />
+                        </ListItem>
+                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/notification-center')}>
+                            <StyledListItemIcon>
+                                <Icon path={mdiBellOutline} size={1} />
+                            </StyledListItemIcon>
+                            <StyledListItemText primary="Notifications" />
+                        </ListItem>
+                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/package-manager')}>
+                            <StyledListItemIcon>
+                                <Icon path={mdiPackageVariantClosed} size={1} />
+                            </StyledListItemIcon>
+                            <StyledListItemText primary="Packages" />
+                        </ListItem>
+                    </div>
+                    <div style={{ display: devMode ? 'inherit' : 'none', marginBottom: '12px' }} id="div-devtools">
+                        <StyledListSubheader id="subheader-developer-tools"> DEVELOPER TOOLS </StyledListSubheader>
+                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/object-editor')}>
+                            <StyledListItemIcon>
+                                <Icon path={mdiPencilBoxMultipleOutline} size={1} />
+                            </StyledListItemIcon>
+                            <StyledListItemText primary="Object Editor" />
+                        </ListItem>
+                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/code-editor')}>
+                            <StyledListItemIcon>
+                                <Icon path={mdiXml} size={1} />
+                            </StyledListItemIcon>
+                            <StyledListItemText primary="Code Editor" />
+                        </ListItem>
+                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/request')}>
+                            <StyledListItemIcon>
+                                <Icon path={mdiMessageArrowRightOutline} size={1} />
+                            </StyledListItemIcon>
+                            <StyledListItemText primary="Request" />
+                        </ListItem>
+                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/datamodel-playground')}>
+                            <StyledListItemIcon>
+                                <Icon path={mdiDatabaseEyeOutline} size={1} />
+                            </StyledListItemIcon>
+                            <StyledListItemText primary="DataModel Playground" />
+                        </ListItem>
+                    </div>
+                    <StyledListSubheader id="subheader-developer-tools"> FAVORITES </StyledListSubheader>
                     <FavoriteBar />
                 </List>
             </Drawer>

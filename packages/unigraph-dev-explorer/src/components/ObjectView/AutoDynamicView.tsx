@@ -328,7 +328,7 @@ export function AutoDynamicView({
                                       window.wsnavigator(
                                           `/library/object?uid=${object?.uid}&viewer=${'dynamic-view-detailed'}&type=${
                                               object?.type?.['unigraph.id']
-                                          }`,
+                                          }&name=${object?.get('name')?.as('primitive')}`,
                                       );
                                   })();
                         }
