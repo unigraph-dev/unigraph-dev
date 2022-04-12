@@ -101,7 +101,9 @@ const hotkeyHandler = (ev: KeyboardEvent, specialEvent?: string) => {
                 shortcutDict,
                 contextState: getContextState(),
             });
-            window.unigraph.dispatchCommand(commandName, {}, { contextState: getContextState(), invoker: 'hotkey' });
+
+            // optional chaining here because the function is optional in the common API, because it's present in explorer but not backend
+            window.unigraph.dispatchCommand?.(commandName, {}, { contextState: getContextState(), invoker: 'hotkey' });
 
             // if (hasComponents.length > 0) {
             //     const matchingComponents = hasComponents.map((el: string) => shortcutDict[keyStr][el]).filter(Boolean);
