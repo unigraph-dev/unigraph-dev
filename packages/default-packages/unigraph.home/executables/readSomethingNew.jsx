@@ -49,7 +49,7 @@ return (
                     window.wsnavigator(
                         `/library/object?uid=${
                             window.unigraph.getNamespaceMap()['$/entity/read_later'].uid
-                        }&viewer=${'dynamic-view-detailed'}&type=${
+                        }&viewer=${'dynamic-view-detailed'}&name=Read Later&type=${
                             window.unigraph.getNamespaceMap()['$/entity/read_later'].uid['unigraph.id']
                         }`,
                     )
