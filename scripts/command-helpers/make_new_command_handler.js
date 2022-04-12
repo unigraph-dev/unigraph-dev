@@ -13,9 +13,9 @@ if (!packageName) {
     console.error('No command name!');
 }
 
-const defaultPackagesPath = `${__dirname}/../packages/default-packages`;
+const defaultPackagesPath = `${__dirname}/../../packages/default-packages`;
 
-// check if "unigraph.${packageName}" exists in "../packages/default-packages/"
+// check if "unigraph.${packageName}" exists in "../../packages/default-packages/"
 const packagePath = `${defaultPackagesPath}/unigraph.${packageName}`;
 if (!fs.existsSync(packagePath)) {
     console.error(`${packagePath} does not exist!`);
