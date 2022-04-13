@@ -35,7 +35,7 @@ To update the Docker image, run `docker build` again after `git pull`.
 ```bash
 git clone https://github.com/unigraph-dev/dgraph.git
 cd ./dgraph
-make install  # installs built binary in $GOPATH/bin
+make oss_install  # installs built binary in $GOPATH/bin
 ```
 
 ```bash
