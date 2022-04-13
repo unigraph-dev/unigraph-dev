@@ -10,6 +10,13 @@ import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 
 export const NavigationContext = React.createContext<(location: string) => any>((location: string) => ({}));
 
+export const trivialTypes = [
+    '$/schema/markdown',
+    '$/schema/subentity',
+    '$/schema/interface/textual',
+    '$/schema/person',
+];
+
 export function isValidHttpUrl(string: string) {
     let url;
 

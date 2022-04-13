@@ -7,10 +7,17 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { useSwipeable } from 'react-swipeable';
 import { UnigraphObject, getRandomInt, getRandomId } from 'unigraph-dev-common/lib/utils/utils';
 import { AutoDynamicViewProps } from '../../types/ObjectView.d';
-import { DataContext, DataContextWrapper, isMobile, isMultiSelectKeyPressed, selectUid, TabContext } from '../../utils';
+import {
+    DataContext,
+    DataContextWrapper,
+    isMobile,
+    isMultiSelectKeyPressed,
+    selectUid,
+    TabContext,
+    trivialTypes,
+} from '../../utils';
 import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import { StringObjectViewer } from './BasicObjectViews';
-import { excludableTypes } from './GraphView';
 import { getSubentities, isStub, SubentityDropAcceptor } from './utils';
 import { registerKeyboardShortcut, removeKeyboardShortcut } from '../../keyboardShortcuts';
 import { useFocusDelegate, useSelectionDelegate } from './AutoDynamicView/FocusSelectionDelegate';
@@ -56,7 +63,7 @@ export function AutoDynamicView({
 
     const shouldGetBacklinks =
         !finalOptions.ignoreBacklinks &&
-        (finalOptions.shouldGetBacklinks || (!excludableTypes.includes(object?.type?.['unigraph.id']) && !inline));
+        (finalOptions.shouldGetBacklinks || (!trivialTypes.includes(object?.type?.['unigraph.id']) && !inline));
 
     const dataContext = React.useContext(DataContext);
     const tabContext = React.useContext(TabContext);
