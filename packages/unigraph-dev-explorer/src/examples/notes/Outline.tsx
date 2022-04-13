@@ -317,7 +317,6 @@ export function Outline({
                 let entityIndex = subEntities[realIndex]?._index?.['_value.#i'];
                 if (entityIndex === undefined) entityIndex = parentNoteBlock?._value?.children?.['_value['].length;
 
-                // if (parentNoteBlock && isDescendantOf(parentNoteBlock, item.noteBlock)) return;
                 window.unigraph.updateObject?.(
                     item.parent._value.uid,
                     {
