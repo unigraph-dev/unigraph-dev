@@ -8,9 +8,9 @@ Please join the Discord community below to talk about contributing, or open a Gi
 
 ## Docs
 
-- [Schemas and Objects (overview)](./docs/architectural/schemas_and_objects.md)
-- [Data model](./docs/architectural/data_model.md)
-- [Glossary](./docs/glossary.md)
+- [🧭 Docs home: Unigraph Developer Documentation](https://docs.unigraph.dev/)
+- [Data model](<./docs/Data model.md>)
+- [Glossary](./docs/Glossary.md)
 
 License:
 [MIT](https://github.com/unigraph-dev/unigraph-dev/blob/main/LICENSE)
@@ -23,6 +23,7 @@ We provide an experimental Dockerfile for easy setup:
 
 - Building Unigraph: `docker build -t unigraph-devserver .` (this should take roughly 10 minutes max),
 - Running Unigraph: `docker run -d -p 4002:4002 -v <data directory>:/opt/unigraph -p 4001:4001 -p 3000:3000 -P unigraph-devserver`, 
+- Open `http://localhost:3000` in a Browser that supports JavaScript to access Unigraph. If container is running on a different machine, replace `localhost` accordingly.
 
 To update the Docker image, run `docker build` again after `git pull`.
 
@@ -163,3 +164,5 @@ To use third-party API integrations, obtain desired API keys and put them in thi
     }
 }
 ```
+
+For how to obtain them, see [the docs page](https://docs.unigraph.dev/Unigraph+Developer+Documentation#%F0%9F%A7%AD+Getting+started).

@@ -1,0 +1,18 @@
+
+  - An average lifecycle: websocket
+    - A client connects to the server through WebSocket.
+      - It should provide a `browserId`, just a string representing the unique client that the client generates.
+    - If the client is using the official frontend, it will request a bunch of things to the server after the connection is established to update its cache.
+      - Requesting notifications and dynamic views
+      - For efficiency we should also broadcast them to the client as server cache, [[should fix]].
+    - The server will broadcast its cache to the client
+      - Everything that's broadcasted:
+        - namespaceMap
+        - schemaMap
+        - uid_lease
+    - Now the client can freely talk to the server for more data & api calls
+    - Sometimes a client would disconnect - maybe it's a mobile app and it's being suspended, or the user closed the lid of her laptop
+      - When that happens (client closed the connection), the server puts all client subscriptions into hibernation and recycles all leased uids.
+      - When the client reconnects, the server will:
+        - Unhibernate all subscriptions & query them right away
+        - Give the client new UID leases (so not the old ones!)

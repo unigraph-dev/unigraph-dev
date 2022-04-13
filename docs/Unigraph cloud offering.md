@@ -1,0 +1,15 @@
+
+  - AWS
+    - Before - talked with [[whyrusleeping]] about AWS pricing & unit economics
+      - t3 micro should be good
+    - t3 micro - configuration & usage
+      - Memory is pretty tight so added 1GiB of swap
+      - Using only 384 MiB for dgraph cache, but could be higher
+      - Average CPU idle usage is ~5%, baseline is 10% with t3 micro
+      - Storage is also pretty tight, with initial db setup + swap using 6/8 GiB of default storage
+        - Luckily EBS is pretty cheap
+    - Other options
+      - t3 small - much better performance but is way more expensive ($10/mo with commitment)
+      - t4g small - equivalent to t3 small but ARM, and cheaper ($7.5/mo with commitment)
+  - Related
+    - [[Unigraph unit economics]]

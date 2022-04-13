@@ -1,0 +1,27 @@
+
+  - The idea is to disable packages that are currently not very crucial to the core workflows, and users can re-enable them later. This allows us to be more focused on a smaller set of issues and be more productive.
+    - Our initial set of users are journalists, startup founders, and (low-priority) venture capitalists.
+  - Packages thinking about disabling:
+    - Twitter integration [[Twitter subscriptions]]
+    - Reddit integration [[Unigraph for Reddit]]
+    - RSS reader [[RSS Reader]]
+    - Inbox (after seperating from unigraph coreuser)
+    - NLP & OpenAI API [[NLP for Unigraph]] [[OpenAI API for Unigraph]]
+    - Kanban board [[Unigraph Kanban]]
+  - Core packages left:
+    - Calendar
+    - Notes
+    - Contacts
+    - Todo
+    - Bookmark
+    - Email (without inboxing, but with focus on archiving & linking with contacts, todo, etc)
+    - (Potentially extract search into a new core package?)
+  - (And core services, such as executables, custom views, dynamic views, and search)
+  - During this initial period, we'll put all bugs related to default-disabled packages at a lower priority.
+  - Core Workflows - Main action item
+    - Sophia uses Unigraph like she would Roam
+    - 2 cool, strong use cases:
+      - Doing CRM right
+        - 
+      - Inbox from different sources
+        - emails, todos, bookmarks,

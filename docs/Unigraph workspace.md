@@ -1,0 +1,34 @@
+
+  - What's Unigraph's workspace?
+    - It's a layout/tab management layer that unifies all Unigraph components into one workspace, providing features like sidebars, global search bar (omnibar), and multi-tab support.
+    - Can I use Unigraph without the workspace?
+      - Yes! For example, go to [this page](http://139.59.185.3:3000/?pageName=library/object&type=$/schema/view&uid=0x2ad4) (edit this block to see url) to view today's journal
+  - What's in a workspace?
+    - Unigraph uses [this package](https://github.com/caplin/FlexLayout) for the workspace.
+    - Obviously, there are tabs
+      - Tabs are the most common components in the workspace.
+      - They have a `name` - the title of the page (can be changed later programmatically!)
+      - They have a `component` - a string of either a UID, a shorthand ref (such as `$/schema/inbox`), or a pre-defined string (check out `pages.tsx` for a full list of pre-defined pages).
+      - They have a `config` - a struct of arbitrary type that denotes the current root-level state of the tab. For example, it could be `{searchQuery: "hello"}` to indicate that the current search query is "hello".
+        - Note: these are only set in the beginning and is not linked to React states - [[should fix]]
+    - There are also sidebars
+      - Usually, the left sidebar allows for high-level navigation within the workspace.
+      - The right sidebar gives context information about the current items,
+      - and the bottom sidebar provides ways to organize the workspace.
+      - Of course, these are not set in stone but depend on exact user experiences.
+    - And there is a global search bar.
+      - The search bar is a central place to search for commands, add unigraph objects, and search for existing objects.
+  - How do I share info between tabs?
+    - Currently the best bet is to use the global state management system ([[unigraph frontend state management]]).
+      - You can subscribe to changes with both sides, and post updates from one to another.
+  - Workspace-wide states
+    - Workspace-wide states are denoted with the `global/` prefix in the state manager.
+      - Important ones include:
+        - `global/contextMenu`,
+        - `global/searchPopup`,
+        - `global/selected`
+        - `global/focused`
+  - TabContext
+    - `TabContext.setTitle`: set the current tab title (browser tab title if out of workspace)
+    - `TabContext.viewId`: a number that represents a view in the `window.layoutModel` object for further editing
+    - `TabContext.(subscription function)`: use these functions to scope the subscriptions to the current tab - making unigraph more performant

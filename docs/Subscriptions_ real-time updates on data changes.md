@@ -1,0 +1,23 @@
+
+  - Subscriptions can be ran in 2 cases:
+    - When being polled (now it's every 20 seconds)
+    - When a data change happens anywhere
+    - In the future, there will instead be uid checks for updated objects. [[should fix]]
+  - Updates are posted to websocket clients when the new value is different from the old
+  - How subscriptions are handled
+    - in backend, subscriptions are determined by the Subscription object
+      - Contains a subscription ID, query for the subscription, some metadata about the connection, and whether it's hibernated.
+      - It also contains the current subscription data in order to compare equality.
+    - in frontend, subscriptions are created either manually or by the `useSubscription` hook.
+      - if [[AutoDynamicView]] detects an object is a stub, it will make a subscription based on the uid, type and view.
+      - alternatively, the notes editor subscribes any embedded object on its behalf, and returns the full view & editor info.
+  - Delta subscriptions
+    - Users can subscribe to arbitrarily many objects as delta subscriptions
+      - for example, all backlinks are handled by one big subscription, and when we're getting new backlinks, we just use delta subscription to add an entity.
+    - Delta subscriptions are faster than normal ones
+      - When updating delta subscriptions, only the changed items are fetched instead of everything.
+    - Caveats
+      - Currently only subscribing to UIDs are supported with delta subscriptions.
+  - Ideas of enhancing the subscription experience:
+    - In the future, there will instead be uid checks for updated objects. [[should fix]]
+    - Subscriptions can have children subscriptions, with coupling to the `DataContext`, that augments the stub items from before.
