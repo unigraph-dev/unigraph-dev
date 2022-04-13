@@ -50,6 +50,7 @@ const pages: Record<string, any> = {
     },
     'examples/todo': {
         constructor: (props: any) => <TodoList {...props} />,
+        maximize: true,
         name: 'Todo List',
     },
     'examples/bookmarks': {

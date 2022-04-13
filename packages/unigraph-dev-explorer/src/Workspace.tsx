@@ -36,10 +36,10 @@ import { MobileBar } from './components/UnigraphCore/MobileBar';
 import { CustomDragLayer } from './CustomDragLayer';
 
 export function WorkspacePageComponent({ children, maximize, paddingTop, id, tabCtx }: any) {
-    const [_maximize, setMaximize] = React.useState(maximize);
-    tabCtx.setMaximize = (val: boolean) => {
-        setMaximize(val);
-    };
+    // const [_maximize, setMaximize] = React.useState(maximize);
+    // tabCtx.setMaximize = (val: boolean) => {
+    //     setMaximize(val);
+    // };
     const memoTabCtx = React.useMemo(() => tabCtx, [id]);
 
     return (
@@ -49,15 +49,15 @@ export function WorkspacePageComponent({ children, maximize, paddingTop, id, tab
                     width: '100%',
                     height: '100%',
                     overflow: 'auto',
-                    paddingTop: _maximize || !paddingTop ? '0px' : '12px',
+                    paddingTop: maximize || !paddingTop ? '0px' : '12px',
                 }}
             >
                 <Container
-                    maxWidth={_maximize ? false : 'lg'}
+                    maxWidth={maximize ? false : 'lg'}
                     id={`workspaceContainer${id}`}
                     disableGutters
                     style={{
-                        paddingTop: _maximize || !paddingTop ? '0px' : '12px',
+                        paddingTop: maximize || !paddingTop ? '0px' : '12px',
                         height: '100%',
                         display: 'flex',
                         flexDirection: 'column',

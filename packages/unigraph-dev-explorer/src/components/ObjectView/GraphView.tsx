@@ -5,7 +5,7 @@ import ForceGraph2D from 'react-force-graph-2d';
 import ReactResizeDetector from 'react-resize-detector';
 import _ from 'lodash';
 import { Checkbox, List, ListItem, Typography } from '@mui/material';
-import { TabContext } from '../../utils';
+import { TabContext, trivialTypes as excludableTypes } from '../../utils';
 
 const queryNameIndex = `@filter(type(Entity) AND (NOT eq(<_propertyType>, "inheritance"))) {
     uid 
@@ -20,7 +20,6 @@ const queryNameIndex = `@filter(type(Entity) AND (NOT eq(<_propertyType>, "inher
     <type> { <unigraph.id> }
 }`;
 
-export const excludableTypes = ['$/schema/subentity', '$/schema/interface/textual', '$/schema/markdown'];
 const getExcluded = (id: number) =>
     excludableTypes.reduce((prev, curr, idx) => ((id >> idx) % 2 ? [...prev, curr] : prev), [] as string[]);
 
