@@ -401,17 +401,20 @@ export function DetailedOutlinerBlock({
         }
     }, []);
 
+    /** `subentities` may contain `undefined` for unknown reasons. */
+    const validSubentities = subentities.filter((s: any) => s && s.uid && s.type);
+
     React.useEffect(() => {
         const newNodes = _.unionBy(
             [
                 {
                     uid: data.uid,
                     componentId,
-                    children: isCollapsed ? [] : subentities.map((el: any) => el.uid),
+                    children: isCollapsed ? [] : validSubentities.map((el: any) => el.uid),
                     type: data?.type?.['unigraph.id'],
                     root: !isChildren,
                 },
-                ...subentities
+                ...validSubentities
                     .filter(
                         (el: any) =>
                             !['$/schema/note_block', '$/schema/embed_block'].includes(el.type?.['unigraph.id']),
@@ -430,7 +433,7 @@ export function DetailedOutlinerBlock({
             'uid',
         );
         nodesState.setValue(newNodes);
-    }, [JSON.stringify(subentities.map((el: any) => el.uid).sort()), data.uid, componentId, isCollapsed]);
+    }, [JSON.stringify(validSubentities.map((el: any) => el?.uid).sort()), data.uid, componentId, isCollapsed]);
 
     React.useEffect(() => {
         if (focused && onFocus) {
