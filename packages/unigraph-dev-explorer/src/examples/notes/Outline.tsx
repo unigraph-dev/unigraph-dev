@@ -117,6 +117,8 @@ interface DragObject {
     parentUid: string;
     /** The parent note block. */
     parent: UnigraphObject;
+    /** Index in the list of parent note block. */
+    indexInParent: number;
     /** For future global dnd. */
     itemType: string | undefined;
     /** For future global dnd. */
@@ -201,6 +203,7 @@ export function Outline({
                 uid: noteBlock.uid,
                 parentUid: dataContext.contextUid,
                 parent: dataContext.contextData,
+                indexInParent: index,
                 itemType: noteBlock.type?.['unigraph.id'],
                 tabId: tabContext.viewId,
             },
@@ -220,20 +223,10 @@ export function Outline({
                 }
             },
         }),
-        [noteBlock, dataContext.contextUid, tabContext.viewId],
+        [noteBlock, dataContext.contextUid, tabContext.viewId, index],
     );
 
-    const canDrop = React.useCallback(
-        (item: DragObject) => {
-            /** Prevent dropping a note block into its own descendant note blocks. */
-            return !!parentNoteBlock && !isDescendantOf(parentNoteBlock, item.noteBlock);
-        },
-        [parentNoteBlock],
-    );
-
-    const onCollect = React.useCallback((monitor: DropTargetMonitor<DragObject>): DropHint => {
-        if (!monitor.canDrop()) return 'none';
-
+    const getIntent = React.useCallback((monitor: DropTargetMonitor<DragObject>): DropHint => {
         const outlineEl = rOutlineEl.current;
         if (!outlineEl) return 'none';
 
@@ -266,6 +259,41 @@ export function Outline({
 
         return 'none';
     }, []);
+
+    const onCollect = React.useCallback(
+        (monitor: DropTargetMonitor<DragObject>): DropHint => {
+            if (!monitor.canDrop()) return 'none';
+            return getIntent(monitor);
+        },
+        [getIntent],
+    );
+
+    const canDrop = React.useCallback(
+        (item: DragObject, monitor: DropTargetMonitor<DragObject>) => {
+            /** Prevent dropping a note block into its own descendant note blocks. */
+            if (parentNoteBlock && isDescendantOf(parentNoteBlock, item.noteBlock)) return false;
+
+            /** Prevent dropping before or after itself. (since it is equal to no effect) */
+            if (item.uid === noteBlock.uid) return false;
+
+            /**
+             * Prevent dropping after the previous sibling or before the next sibling.
+             * (since it is equal to no effect)
+             */
+            const intent = getIntent(monitor);
+            if (
+                parentNoteBlock &&
+                item.parentUid === parentNoteBlock.uid &&
+                ((intent === 'after' && index + 1 === item.indexInParent) ||
+                    (intent === 'before' && index - 1 === item.indexInParent))
+            ) {
+                return false;
+            }
+
+            return true;
+        },
+        [parentNoteBlock, noteBlock.uid, getIntent, index],
+    );
 
     const performDrop = React.useCallback(
         (item: DragObject, side: 'before' | 'after') => {
