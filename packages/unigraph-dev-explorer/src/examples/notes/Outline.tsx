@@ -6,7 +6,7 @@ import { styled } from '@mui/styles';
 import { ChevronRight } from '@mui/icons-material';
 
 import { DragHandle } from './DragHandle';
-import { DataContext, TabContext } from '../../utils';
+import { DataContext, DataContextType, TabContext } from '../../utils';
 import { NoteEditorContext, UnigraphObject } from './types';
 import { useOutlineCollapsed } from './useOutlineCollapsed';
 
@@ -118,6 +118,8 @@ interface DragObject {
     parent: UnigraphObject;
     /** Index in the list of parent note block. */
     indexInParent: number;
+    /** The dataContext of the note block. */
+    dataContext: DataContextType;
     /** For future global dnd. */
     itemType: string | undefined;
     /** For future global dnd. */
@@ -205,6 +207,7 @@ export function Outline({
                 indexInParent: index,
                 itemType: noteBlock.type?.['unigraph.id'],
                 tabId: tabContext.viewId,
+                dataContext,
             },
             collect: (monitor) => {
                 if (monitor.isDragging() && window.dragselect && window.dragselect.isDragging()) {
@@ -296,7 +299,17 @@ export function Outline({
 
     const performDrop = React.useCallback(
         (item: DragObject, side: 'before' | 'after') => {
-            console.log('drop', item.uid, 'from', item.parentUid, 'to', parentNoteBlock?.uid, `${side} index`, index);
+            // console.log(
+            //     'drop',
+            //     item.uid,
+            //     'from',
+            //     item.parentUid,
+            //     'to',
+            //     parentNoteBlock?.uid,
+            //     `${side} index`,
+            //     index,
+            //     `, with subsId: ${item.dataContext.subsId}`,
+            // );
             /**
              * Use `reorderItemInArray` if drag and drop in the same array, to prevent
              * wrong result due to add-then-remove race condition.
@@ -362,7 +375,7 @@ export function Outline({
                     },
                     false,
                     false,
-                    editorContext?.callbacks?.subsId,
+                    item.dataContext.subsId || editorContext?.callbacks?.subsId,
                     [],
                     true,
                 );
