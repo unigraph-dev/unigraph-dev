@@ -312,7 +312,7 @@ export function Outline({
                 const toInsert = parentNoteBlock?._value?.children?.['_value[']
                     .map((el: any) => el._value._value.uid)
                     .filter((el: any) => el !== item.uid);
-                toInsert.splice(fromIndex < realIndex ? realIndex : realIndex + 1, 0, item.uid);
+                toInsert.splice(fromIndex <= realIndex ? realIndex : realIndex + 1, 0, item.uid);
                 const t = {
                     children: {
                         '_value[': (parentNoteBlock?._value?.children?.['_value['] || []).map((child: any) => ({
