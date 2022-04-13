@@ -143,6 +143,7 @@
 
 .topleft_bar_with_electron {
     padding-left: 50px;
+    background: linear-gradient(45deg, var(--app-drawer-background-color), transparent 50px);
 }
 
 .flexlayout__tab_button_leading {

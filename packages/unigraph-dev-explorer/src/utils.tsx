@@ -56,12 +56,13 @@ export const isDeveloperMode = () => {
     return window.unigraph.getState('settings/developerMode').value;
 };
 
-type DataContextType = {
+export type DataContextType = {
     contextUid: string;
     contextData?: any;
     parents?: string[];
     viewType?: string;
     expandedChildren: boolean;
+    subsId?: any;
     getParents: (withParents?: boolean) => string[];
 };
 
@@ -73,7 +74,15 @@ export const DataContext = React.createContext<DataContextType>({
     expandedChildren: false,
 });
 
-export const DataContextWrapper = ({ children, contextUid, contextData, parents, viewType, expandedChildren }: any) => {
+export const DataContextWrapper = ({
+    children,
+    contextUid,
+    contextData,
+    parents,
+    viewType,
+    expandedChildren,
+    subsId,
+}: any) => {
     const parentContext = React.useContext(DataContext);
 
     const dataContext = React.useMemo(() => {
@@ -90,8 +99,9 @@ export const DataContextWrapper = ({ children, contextUid, contextData, parents,
                     ...(expandedChildren ? [contextUid] : []),
                 ];
             },
+            subsId: subsId || parentContext.subsId,
         };
-    }, [contextUid, contextData?.uid, viewType, expandedChildren, JSON.stringify(parents?.sort?.())]);
+    }, [contextUid, contextData?.uid, viewType, expandedChildren, JSON.stringify(parents?.sort?.()), subsId]);
 
     return <DataContext.Provider value={dataContext}>{children}</DataContext.Provider>;
 };

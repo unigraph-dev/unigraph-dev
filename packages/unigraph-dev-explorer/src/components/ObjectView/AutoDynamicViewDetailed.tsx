@@ -81,6 +81,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
                     parents={totalParents}
                     viewType="$/schema/dynamic_view_detailed"
                     expandedChildren
+                    subsId={subsId}
                 >
                     <div style={{ display: 'contents' }} id={`object-view-${object.uid}`}>
                         <TabContext.Consumer>

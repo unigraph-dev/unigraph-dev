@@ -316,6 +316,7 @@ export function AutoDynamicView({
                 parents={finalOptions.ignoreBacklinks ? dataContext.parents : totalParents}
                 viewType="$/schema/dynamic_view"
                 expandedChildren={expandedChildren || false}
+                subsId={subsId}
             >
                 <div
                     style={{
