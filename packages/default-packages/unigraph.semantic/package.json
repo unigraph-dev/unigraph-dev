@@ -80,6 +80,13 @@
                 "src": "executables/renameEntity.js",
                 "editable": true,
                 "name": "Renames an entity and update all its references"
+            },
+            {
+                "id": "merge-entities",
+                "env": "routine/js",
+                "src": "executables/mergeEntities.js",
+                "editable": true,
+                "name": "Merges an entity to another"
             }
         ]
     }
