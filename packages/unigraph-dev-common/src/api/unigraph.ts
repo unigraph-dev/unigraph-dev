@@ -573,7 +573,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
             }
 
             subResults[subId] = newObj;
-            // console.log(newObj);
+            console.log(newObj);
 
             // Record state changes
             if (id) {
@@ -585,12 +585,13 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
         deleteRelation: (uid, relation) => {
             sendEvent(connection, 'delete_relation', { uid, relation });
         },
-        reorderItemInArray: (uid, item, relUid, subIds) => {
+        reorderItemInArray: (uid, item, relUid, subIds, eventId) => {
             sendEvent(connection, 'reorder_item_in_array', {
                 uid,
                 item,
                 relUid,
                 subIds,
+                id: eventId,
             });
         },
         deleteItemFromArray: (uid, item, relUid, subIds) => {

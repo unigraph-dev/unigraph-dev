@@ -325,6 +325,7 @@ export interface Unigraph<TT = WebSocket | undefined> {
         item: [number | string, number] | [number | string, number][],
         relationUid?: string,
         subIds?: any[] | any,
+        eventId?: string,
     ): any;
     /**
      * Deletes an item from an array (ordered list).
