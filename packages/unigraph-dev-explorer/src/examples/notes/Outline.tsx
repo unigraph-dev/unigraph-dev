@@ -5,6 +5,7 @@ import { colors } from '@mui/material';
 import { styled } from '@mui/styles';
 import { ChevronRight } from '@mui/icons-material';
 
+import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { DragHandle } from './DragHandle';
 import { DataContext, TabContext } from '../../utils';
 import { NoteEditorContext, UnigraphObject } from './types';
@@ -114,6 +115,8 @@ interface DragObject {
     uid: string;
     /** The parent note block's uid. */
     parentUid: string;
+    /** The parent note block. */
+    parent: UnigraphObject;
     /** For future global dnd. */
     itemType: string | undefined;
     /** For future global dnd. */
@@ -197,6 +200,7 @@ export function Outline({
                 noteBlock,
                 uid: noteBlock.uid,
                 parentUid: dataContext.contextUid,
+                parent: dataContext.contextData,
                 itemType: noteBlock.type?.['unigraph.id'],
                 tabId: tabContext.viewId,
             },
@@ -273,25 +277,102 @@ export function Outline({
             if (item.parentUid === parentNoteBlock?.uid) {
                 const arrayUid = getChildrenComposerArrayUid(parentNoteBlock);
                 if (!arrayUid) return;
-
-                typeof window.unigraph.reorderItemInArray === 'function' &&
-                    window.unigraph.reorderItemInArray(arrayUid, [item.uid, side === 'after' ? index : index - 1]);
+                const realIndex = side === 'after' ? index : index - 1;
+                const fromIndex = (parentNoteBlock?._value?.children?.['_value['] || []).filter(
+                    (obj: any) => obj._value._value.uid === item.uid,
+                )[0]?._index?.['_value.#i'];
+                const toInsert = parentNoteBlock?._value?.children?.['_value[']
+                    .map((el: any) => el._value._value.uid)
+                    .filter((el: any) => el !== item.uid);
+                toInsert.splice(fromIndex < realIndex ? realIndex : realIndex + 1, 0, item.uid);
+                const t = {
+                    children: {
+                        '_value[': (parentNoteBlock?._value?.children?.['_value['] || []).map((child: any) => ({
+                            _index: {
+                                '_value.#i': toInsert.indexOf(child._value._value.uid),
+                            },
+                            _key: child._key,
+                            _value: { uid: child._value.uid },
+                        })),
+                        _displayAs: parentNoteBlock?._value?.children?._displayAs,
+                    },
+                };
+                // send fake update now
+                window.unigraph.updateObject(
+                    parentNoteBlock?._value?.uid,
+                    t,
+                    false,
+                    false,
+                    editorContext?.callbacks?.subsId,
+                    [],
+                    true,
+                );
             } else {
                 const targetNoteBlockUid = parentNoteBlock?.uid;
                 if (!targetNoteBlockUid) return;
+                const realIndex = side === 'after' ? index + 1 : index;
+                const subEntities = (parentNoteBlock?._value?.children?.['_value['] || []).filter(
+                    (child: any) => child?._value?.type['unigraph.id'] === '$/schema/subentity',
+                );
+                let entityIndex = subEntities[realIndex]?._index?.['_value.#i'];
+                if (entityIndex === undefined) entityIndex = parentNoteBlock?._value?.children?.['_value['].length;
 
                 // if (parentNoteBlock && isDescendantOf(parentNoteBlock, item.noteBlock)) return;
-
-                window.unigraph.runExecutable('$/executable/add-item-to-list', {
-                    where: targetNoteBlockUid,
-                    item: item.uid,
-                    indexes: [index],
-                    before: side === 'before',
-                });
-                window.unigraph.runExecutable('$/executable/delete-item-from-list', {
-                    where: item.parentUid,
-                    item: item.uid,
-                });
+                window.unigraph.updateObject?.(
+                    item.parent._value.uid,
+                    {
+                        children: {
+                            _displayAs: item.parent._value.children._displayAs,
+                            '_value[': item.parent._value.children['_value[']
+                                .filter((el: any) => el._value._value.uid !== item.uid)
+                                .map((el: any, indexx: number) => ({
+                                    _index: {
+                                        '_value.#i': indexx,
+                                    },
+                                    _key: el._key,
+                                    _value: { uid: el._value.uid },
+                                })),
+                        },
+                    },
+                    false,
+                    false,
+                    editorContext?.callbacks?.subsId,
+                    [],
+                    true,
+                );
+                window.unigraph.updateObject(
+                    parentNoteBlock?._value?.uid,
+                    {
+                        children: {
+                            '_value[': [
+                                ...(parentNoteBlock?._value?.children?.['_value['] || []).map((child: any) => ({
+                                    _index: {
+                                        '_value.#i':
+                                            child._index?.['_value.#i'] < entityIndex
+                                                ? child._index['_value.#i']
+                                                : child._index['_value.#i'] + 1,
+                                    },
+                                    _key: child._key,
+                                    _value: { uid: child._value.uid },
+                                })),
+                                {
+                                    _index: {
+                                        '_value.#i': entityIndex,
+                                    },
+                                    _value: {
+                                        type: { 'unigraph.id': '$/schema/subentity' },
+                                        _value: { uid: item.uid },
+                                    },
+                                },
+                            ],
+                        },
+                    },
+                    false,
+                    false,
+                    editorContext?.callbacks?.subsId,
+                    [],
+                    true,
+                );
             }
         },
         [parentNoteBlock, index],
