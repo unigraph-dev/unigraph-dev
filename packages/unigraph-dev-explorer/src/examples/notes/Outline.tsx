@@ -5,7 +5,6 @@ import { colors } from '@mui/material';
 import { styled } from '@mui/styles';
 import { ChevronRight } from '@mui/icons-material';
 
-import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { DragHandle } from './DragHandle';
 import { DataContext, TabContext } from '../../utils';
 import { NoteEditorContext, UnigraphObject } from './types';
