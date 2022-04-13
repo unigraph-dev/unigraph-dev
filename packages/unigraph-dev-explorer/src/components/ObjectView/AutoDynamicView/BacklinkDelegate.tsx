@@ -8,6 +8,7 @@ export const useBacklinkDelegate = (
     contextUid: string,
     shouldGetBacklinks: boolean,
     noParents?: boolean,
+    backlinkStyle?: any,
 ) => {
     const [backlinks, setBacklinks] = React.useState<any>([]);
     const [totalParents, setTotalParents] = React.useState<string[] | undefined>();
@@ -69,6 +70,7 @@ export const useBacklinkDelegate = (
                         borderRadius: '6px',
                         whiteSpace: 'nowrap',
                         cursor: 'pointer',
+                        ...backlinkStyle,
                     }}
                     onClick={(ev) => {
                         ev.stopPropagation();

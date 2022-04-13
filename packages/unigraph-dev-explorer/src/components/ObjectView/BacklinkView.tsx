@@ -31,7 +31,7 @@ export function BacklinkView({
 }: any) {
     const [objects, setObjects]: [any[], any] = React.useState([]);
     const [id, setId] = React.useState(Date.now());
-    useEntityNameTab({ prefix: 'Backlinks: ', uid });
+    useEntityNameTab({ prefix: 'Backlinks: ', object: { uid } });
     if (callbacks?.isEmbed) hideHeader = true;
 
     const tabContext = React.useContext(TabContext);

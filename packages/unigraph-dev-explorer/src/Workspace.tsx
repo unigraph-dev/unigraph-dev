@@ -6,7 +6,7 @@ import React from 'react';
 
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 
-import FlexLayout, { Action, Actions, DockLocation, Model, Node, TabNode } from 'flexlayout-react';
+import { Action, Actions, DockLocation, Model, Node, TabNode, Layout } from 'flexlayout-react';
 import 'flexlayout-react/style/light.css';
 import './workspace.css';
 import { Container, CssBaseline, ListItem, Popover, Typography } from '@mui/material';
@@ -14,7 +14,7 @@ import { ThemeProvider, Theme, StyledEngineProvider, createTheme } from '@mui/ma
 
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
-import { Menu, Details } from '@mui/icons-material';
+import { Menu, Details, Home } from '@mui/icons-material';
 import { DndProvider } from 'react-dnd';
 import { TouchBackend } from 'react-dnd-touch-backend';
 
@@ -285,13 +285,14 @@ const dndOpts = {
 };
 
 export function WorkSpace(this: any) {
-    const json = {
+    const json: any = {
         global: {
             tabSetTabStripHeight: 40,
             tabEnableRename: false,
             splitterSize: 1,
             splitterExtra: 12,
             tabEnableRenderOnDemand: true,
+            enableUseVisibility: true,
         },
         borders: [
             {
@@ -377,11 +378,23 @@ export function WorkSpace(this: any) {
         () => (node: Node, config: any) => ({
             // @ts-expect-error: using private API
             viewId: node._attributes.id,
-            setTitle: (title: string) => {
-                if (config.customTitle) {
+            setTitle: (title: string, icon?: any, renamerId?: string) => {
+                // @ts-expect-error: using private API
+                const currNode = window.layoutModel.getNodeById(node._attributes.id);
+                // @ts-expect-error: using private API
+                const curRenamer = currNode._attributes.config?.renamerId;
+                if (config.customTitle || !title?.length || (curRenamer && curRenamer !== renamerId)) {
                     return false;
                 }
-                return false;
+                return window.layoutModel.doAction(
+                    // @ts-expect-error: using private API
+                    Actions.updateNodeAttributes(node._attributes.id, {
+                        name: title,
+                        icon: icon || '',
+                        // @ts-expect-error: using private API
+                        config: { ...currNode._attributes.config, renamerId },
+                    }),
+                );
             },
             setMaximize: (val: boolean) => false,
             isVisible: () =>
@@ -453,7 +466,7 @@ export function WorkSpace(this: any) {
         );
     };
 
-    const [model] = React.useState(FlexLayout.Model.fromJson(json));
+    const [model] = React.useState(Model.fromJson(json));
 
     const memoMDFn: any = {};
     const getMouseDownFn = (id: string) => {
@@ -492,10 +505,11 @@ export function WorkSpace(this: any) {
                             <MobileBar />
                         </div>
 
-                        <FlexLayout.Layout
+                        <Layout
                             model={model}
                             factory={factory}
                             popoutURL="./popout_page.html"
+                            iconFactory={() => '' as any}
                             onAction={(action: Action) => {
                                 if (
                                     action.type === 'FlexLayout_SelectTab' &&
@@ -514,8 +528,9 @@ export function WorkSpace(this: any) {
                                     .setValue(node.isVisible());
                                 setTitleOnRenderTab(model);
                                 const nodeId = node.getId();
+                                const nodeIcon = node.getIcon();
                                 if (nodeId === 'app-drawer') {
-                                    renderValues.content = (
+                                    renderValues.leading = (
                                         <Menu
                                             style={{
                                                 verticalAlign: 'middle',
@@ -524,9 +539,10 @@ export function WorkSpace(this: any) {
                                             key="icon"
                                         />
                                     );
+                                    renderValues.content = '';
                                 }
                                 if (nodeId === 'inspector-pane') {
-                                    renderValues.content = (
+                                    renderValues.leading = (
                                         <Details
                                             style={{
                                                 verticalAlign: 'middle',
@@ -535,15 +551,18 @@ export function WorkSpace(this: any) {
                                             key="icon"
                                         />
                                     );
+                                    renderValues.content = '';
                                 }
                                 if (nodeId === 'category-pane') {
-                                    renderValues.content = [
+                                    renderValues.leading = (
                                         <Icon
                                             path={mdiTagMultipleOutline}
                                             size={1}
                                             style={{ verticalAlign: 'middle' }}
                                             key="icon"
-                                        />,
+                                        />
+                                    );
+                                    renderValues.content = [
                                         <Typography
                                             style={{
                                                 marginLeft: '4px',
@@ -554,6 +573,31 @@ export function WorkSpace(this: any) {
                                         </Typography>,
                                     ];
                                 }
+                                if (!renderValues.leading && typeof nodeIcon === 'string') {
+                                    // Render icon
+                                    if (/^\p{Extended_Pictographic}$/u.test(nodeIcon)) {
+                                        // is emoji
+                                        renderValues.leading = nodeIcon;
+                                    } else {
+                                        // is svg icon
+                                        // TODO
+                                        renderValues.leading = (
+                                            <div
+                                                style={{
+                                                    minWidth: '16px',
+                                                    minHeight: '16px',
+                                                    backgroundImage: `url("${
+                                                        nodeIcon.startsWith('data:image/svg+xml,')
+                                                            ? ''
+                                                            : 'data:image/svg+xml,'
+                                                    }${nodeIcon}")`,
+                                                    opacity: 0.54,
+                                                }}
+                                            />
+                                        );
+                                    }
+                                }
+                                const isFirstRender = !document.getElementById(`tabId${nodeId}`);
                                 renderValues.buttons.push(<div id={`tabId${nodeId}`} key={`tabId${nodeId}`} />);
                                 setTimeout(() => {
                                     const el = document.getElementById(`tabId${nodeId}`);
@@ -564,6 +608,20 @@ export function WorkSpace(this: any) {
                                         el.parentElement.addEventListener('mousedown', fn);
                                     }
                                 }, 0);
+                                window.queueMicrotask(() => {
+                                    const el = document.getElementById(`tabId${nodeId}`);
+
+                                    if (el && el.parentElement && !isFirstRender) {
+                                        el.parentElement.classList.add('rendered_tab_button');
+                                    }
+                                });
+                                setTimeout(() => {
+                                    const el = document.getElementById(`tabId${nodeId}`);
+
+                                    if (el && el.parentElement && isFirstRender) {
+                                        el.parentElement.classList.add('rendered_tab_button');
+                                    }
+                                });
                             }}
                             onRenderTabSet={(tabSetNode, renderValues) => {
                                 if (tabSetNode.getType() === 'tabset') {
@@ -582,6 +640,7 @@ export function WorkSpace(this: any) {
                                                         {
                                                             uid,
                                                             name: node.getName(),
+                                                            icon: node.getIcon(),
                                                             env: 'react-explorer',
                                                             view: node.getComponent(),
                                                             props: JSON.stringify({

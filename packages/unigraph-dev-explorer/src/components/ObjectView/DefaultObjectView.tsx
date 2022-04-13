@@ -10,6 +10,7 @@ import { DefaultObjectContextMenu } from './DefaultObjectContextMenu';
 import { AutoDynamicView } from './AutoDynamicView';
 import { AutoDynamicViewDetailed } from './AutoDynamicViewDetailed';
 import { JsontreeObjectViewer, StringObjectViewer } from './BasicObjectViews';
+import { useDetailedObjNameTab } from '../UnigraphCore/useEntityNameTab';
 
 export const ViewViewDetailed: DynamicViewRenderer = ({ data, callbacks }) => {
     if (data.get('view')?._value?.['dgraph.type'].includes('Executable')) {

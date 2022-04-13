@@ -3,51 +3,77 @@ import React from 'react';
 import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { Actions } from 'flexlayout-react';
 import { TabContext } from '../../utils';
+import { isStub } from '../ObjectView/utils';
 
-const getTypeName = (obj: any): string | undefined => {
+const getType = (obj: any): any | undefined => {
     const typeEntries: any[] = obj?.type?.['_value['] ?? [];
-    return typeEntries.length > 0 ? _.last(typeEntries)._name : undefined;
+    return typeEntries.length > 0 ? _.last(typeEntries) : undefined;
 };
 const getObjOrTypeName = (obj: any) => {
-    const objName = obj?.get('name')?.as('primitive');
-    const typeName = getTypeName(obj);
-    return objName ?? typeName;
+    const objName = obj?.get?.('name')?.as('primitive');
+    const objTextName = obj?.get?.('text')?.as('primitive');
+    const typeName = getType(obj)?._name;
+    return objName ?? objTextName ?? typeName;
 };
-const renameExceptionTypes = ['$/schema/note_block', '$/schema/note_block'];
+
+const getObjOrTypeIcon = (obj: any) => {
+    const objIcon = obj?.get?.('icon')?.as('primitive');
+    const typeIcon = getType(obj)?._icon;
+    return objIcon ?? typeIcon;
+};
+// const renameExceptionTypes = ['$/schema/note_block', '$/schema/note_block'];
+const renameExceptionTypes: string[] = [];
 
 export const useEntityNameTab = ({
     prefix,
-    uid,
     conditionOnObj,
+    object,
 }: {
     prefix: string;
-    uid: string;
     conditionOnObj?: any;
+    object?: any;
 }) => {
     const tabContext = React.useContext(TabContext);
+    const [renamerId] = React.useState(getRandomInt());
+    const renamer = React.useCallback(
+        (obj) => {
+            const tabName = getObjOrTypeName(obj);
+            const tabIcon = getObjOrTypeIcon(obj);
+            if (tabName !== undefined && tabContext.viewId)
+                tabContext.setTitle(`${prefix}${tabName}`, tabIcon, renamerId);
+        },
+        [tabContext, prefix],
+    );
+
     // const [name, setName] = React.useState('Backlink View');
     React.useEffect(() => {
         const subsId = getRandomInt();
-        tabContext.subscribeToObject(
-            uid,
-            (obj: any) => {
-                if (conditionOnObj && !conditionOnObj(obj)) {
-                    return;
-                }
+        if (isStub(object) && object.uid) {
+            tabContext.subscribeToObject(
+                object.uid,
+                (obj: any) => {
+                    if (conditionOnObj && !conditionOnObj(obj)) {
+                        return;
+                    }
 
-                const tabName = getObjOrTypeName(obj);
-                if (tabName !== undefined && tabContext.viewId)
-                    window.layoutModel.doAction(Actions.renameTab(tabContext.viewId as any, `${prefix}${tabName}`));
-            },
-            subsId,
-        );
+                    renamer(obj);
+                },
+                subsId,
+            );
+        } else {
+            renamer(object);
+        }
 
         return function cleanup() {
             tabContext.unsubscribe(subsId);
         };
-    }, []);
+    }, [object]);
 };
 
-export const useDetailedObjNameTab = ({ prefix, uid }: { prefix: string; uid: string }) => {
-    useEntityNameTab({ prefix, uid, conditionOnObj: (obj: any) => !renameExceptionTypes.includes(obj.getType()) });
+export const useDetailedObjNameTab = ({ prefix, object }: { prefix: string; object?: any }) => {
+    useEntityNameTab({
+        prefix,
+        object,
+        conditionOnObj: (obj: any) => !renameExceptionTypes.includes(obj.getType()),
+    });
 };

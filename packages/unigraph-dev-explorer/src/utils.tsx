@@ -24,7 +24,7 @@ export function isValidHttpUrl(string: string) {
 
 export const TabContext = React.createContext({
     viewId: 0,
-    setTitle: (title: string) => {},
+    setTitle: (title: string, icon?: any, renamerId?: any) => {},
     setMaximize: (val: boolean) => {},
     isVisible: () => true as boolean,
 
@@ -91,11 +91,13 @@ export const DataContextWrapper = ({ children, contextUid, contextData, parents,
 
 export const getComponentFromPage = (location: string, params: any = {}) => {
     const pages = window.unigraph.getState('registry/pages');
+    console.log(params);
     if (location.startsWith('/$/'))
         location = `/${(window.unigraph.getNamespaceMap as any)()[location.substring(1)].uid}`;
     return {
         type: 'tab',
         config: params,
+        icon: pages.value[location.slice(1)].icon || params.icon,
         name: pages.value[location.slice(1)].name,
         component: (location.startsWith('/') ? '/pages' : '/pages/') + location,
         enableFloat: 'true',

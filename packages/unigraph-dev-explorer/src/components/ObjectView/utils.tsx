@@ -4,6 +4,7 @@ import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
 export const isStub = (object: any) =>
     object?._stub ||
     (typeof object === 'object' &&
+        object !== null &&
         object.uid &&
         object.type &&
         typeof object.type['unigraph.id'] === 'string' &&

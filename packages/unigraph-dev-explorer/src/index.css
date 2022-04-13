@@ -5,6 +5,10 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --app-drawer-background-color: #f7f7f7;
+
+  background-color: var(--app-drawer-background-color);
 }
 
 code {

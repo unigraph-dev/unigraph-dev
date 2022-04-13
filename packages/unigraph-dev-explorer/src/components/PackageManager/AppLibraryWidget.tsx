@@ -76,7 +76,9 @@ export function AllApps() {
                                 <Icon path={mdiViewQuiltOutline} size={1} />
                             )
                         }
-                        address={`/${el?._value?.view?._value?.uid || el?._value?.view?.['_value.%']?.slice(7)}`}
+                        address={`/${el?._value?.view?._value?.uid || el?._value?.view?.['_value.%']?.slice(7)}?icon=${
+                            el?._value?.icon?._value?.['_value.%'] || ''
+                        }`}
                         text={el?.get('name')?.as('primitive')}
                     />
                 </Grid>
