@@ -490,40 +490,56 @@ export function ObjectEditorSelector({ currentUid, setCurrentUid, style }: any) 
 
     const [currentInputUid, setCurrentInputUid] = React.useState(currentUid || '');
 
-    useEffectOnce(() => {
+    React.useEffect(() => {
         window.unigraph.getReferenceables().then((refs: any) => setReferenceables(refs));
-    });
+    }, []);
+    React.useEffect(() => {
+        console.log('Object Editor', { currentInputUid, currentSchema, currentSchemaSHName });
+    }, [currentInputUid]);
 
     return (
-        <Box sx={{ display: 'inline-flex', flexDirection: 'row', alignItems: 'center' }}>
-            <TextField
-                onChange={(e) => {
-                    setCurrentInputUid(e.target.value);
-                }}
-                value={currentInputUid}
-            />
-            <Button onClick={() => setCurrentUid(currentInputUid)}>Load object</Button>
-            Schema name:{' '}
-            <ReferenceableSelectorControlled
-                referenceables={referenceables}
-                onChange={(schema: string) =>
-                    window.unigraph.getSchemas().then((schemas: Record<string, SchemaDgraph>) => {
-                        setCurrentSchema(schemas[schema]);
-                        setCurrentSchemaSHName(schema);
-                    })
-                }
-                value={currentSchema?._definition?.type['unigraph.id']}
-                sx={{ width: '300px' }}
-            />
-            <Button
-                onClick={async () => {
-                    const returnUid = await window.unigraph.addObject({}, currentSchemaSHName);
-                    setCurrentUid(returnUid);
-                }}
-            >
-                Create with schema
-            </Button>
-        </Box>
+        <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            {/* <div style={{ display: 'flex', flexDirection: 'column' }}>
+                Create a new object
+                <Box sx={{ display: 'inline-flex', flexDirection: 'row', alignItems: 'center' }}>
+                    <ReferenceableSelectorControlled
+                        referenceables={referenceables}
+                        onChange={(schema: string) =>
+                            window.unigraph.getSchemas().then((schemas: Record<string, SchemaDgraph>) => {
+                                setCurrentSchema(schemas[schema]);
+                                setCurrentSchemaSHName(schema);
+                            })
+                        }
+                        value={currentSchema?._definition?.type['unigraph.id']}
+                        sx={{ width: '300px' }}
+                    />
+                    <Button
+                        onClick={async () => {
+                            const returnUid = await window.unigraph.addObject({}, currentSchemaSHName);
+                            console.log('Obj Editor: Added new obj', { returnUid });
+
+                            setCurrentUid(returnUid);
+                        }}
+                    >
+                        Create
+                    </Button>
+                </Box>
+            </div>
+            or */}
+            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                Load an existing object
+                <Box sx={{ display: 'inline-flex', flexDirection: 'row', alignItems: 'center' }}>
+                    <TextField
+                        onChange={(e) => {
+                            setCurrentInputUid(e.target.value);
+                        }}
+                        value={currentInputUid}
+                        label="Object UID"
+                    />
+                    <Button onClick={() => setCurrentUid(currentInputUid)}>Load</Button>
+                </Box>
+            </div>
+        </div>
     );
 }
 
