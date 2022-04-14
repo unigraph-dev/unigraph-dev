@@ -50,7 +50,8 @@ if (!gotTheLock) {
     process.exit(0);
 }
 
-if (!isDev()) autoUpdater.checkForUpdatesAndNotify();
+log.transports.file.level = 'debug';
+autoUpdater.logger = log;
 
 function isUnigraphPortOpen(port) {
     return new Promise((resolve, reject) => {
@@ -215,7 +216,21 @@ function unigraphLoaded() {
 
 let isAppClosing = false;
 
+autoUpdater.on('update-downloaded', async (info) => {
+    const choice = await require('electron').dialog.showMessageBox({
+        type: 'question',
+        buttons: ['OK', 'Quit and update'],
+        title: 'New update downloaded',
+        message: `New update has been downloaded (version ${info.version}), and will be automatically installed after quit.`,
+    });
+    if (choice.response === 1) {
+        isAppClosing = true;
+        autoUpdater.quitAndInstall();
+    }
+});
+
 app.whenReady().then(() => {
+    if (!isDev()) autoUpdater.checkForUpdates();
     tray = new Tray(nativeImage.createFromDataURL(unigraph_trayIcon));
     tray.setToolTip('Unigraph');
     trayMenu = createTrayMenu((newTemplate) => {
