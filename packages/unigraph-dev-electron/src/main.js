@@ -94,9 +94,7 @@ async function startServer(logHandler) {
             return oldConsoleLog(...data);
         };
         alpha = spawn(
-            fixPathForAsarUnpack(
-                path.join(__dirname, '..', 'dgraph', `dgraph${process.arch === 'arm64' ? '_arm64' : ''}`),
-            ),
+            fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', `dgraph${process.arch === 'arm64' ? '' : ''}`)),
             [
                 'alpha',
                 '--wal',
@@ -108,9 +106,7 @@ async function startServer(logHandler) {
             ],
         );
         zero = spawn(
-            fixPathForAsarUnpack(
-                path.join(__dirname, '..', 'dgraph', `dgraph${process.arch === 'arm64' ? '_arm64' : ''}`),
-            ),
+            fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', `dgraph${process.arch === 'arm64' ? '' : ''}`)),
             ['zero', '--wal', path.join(userData, 'zw')],
         );
 
