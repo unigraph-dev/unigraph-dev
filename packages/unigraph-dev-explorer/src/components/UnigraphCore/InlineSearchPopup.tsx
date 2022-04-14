@@ -24,7 +24,7 @@ const ResultDisplay = ({ el }: any) => {
                     }")`,
                 }}
             />
-            <Typography style={{ color: 'grey', marginLeft: '2px' }}>
+            <Typography style={{ color: 'var(--secondary-text-color)', marginLeft: '2px' }}>
                 {window.unigraph.getNamespaceMap?.()?.[el.type]?._name}
             </Typography>
             <Divider
@@ -199,7 +199,7 @@ export function InlineSearch() {
                     style: {
                         maxHeight: '320px',
                         padding: '10px',
-                        borderRadius: '4px',
+                        borderRadius: '6px',
                     },
                 }}
             >

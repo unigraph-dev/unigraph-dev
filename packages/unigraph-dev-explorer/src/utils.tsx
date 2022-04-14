@@ -6,7 +6,7 @@ import stringify from 'json-stable-stringify';
 import _ from 'lodash/fp';
 import React from 'react';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
-import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
+import { isJsonString, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 
 export const NavigationContext = React.createContext<(location: string) => any>((location: string) => ({}));
 
@@ -612,7 +612,7 @@ export const getOrInitLocalStorage = (key: string, defaultValue: any) => {
 
 export const hoverSx = {
     // sx styles (mui v5) for when hovering over components
-    '&:hover': { backgroundColor: 'action.hover' },
+    '&:hover': { backgroundColor: 'action.hover', borderRadius: '4px' },
     '&:active': { backgroundColor: 'action.selected' },
 };
 export const pointerHoverSx = { cursor: 'pointer', ...hoverSx };
@@ -623,4 +623,8 @@ export const globalTheme = {
         primary: { main: '#212121' },
         secondary: { main: '#616161' },
     },
+};
+
+export const getName = (obj: UnigraphObject) => {
+    return (obj?.get?.('name') || obj?.get?.('title') || obj?.get?.('text'))?.as?.('primitive');
 };
