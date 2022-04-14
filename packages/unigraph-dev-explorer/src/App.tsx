@@ -54,6 +54,8 @@ const providedTheme = createTheme(globalTheme);
 
 const dndOpts = {
     enableMouseEvents: true,
+    delayTouchStart: 500,
+    ignoreContextMenu: true,
 };
 
 function AppToWrap() {
