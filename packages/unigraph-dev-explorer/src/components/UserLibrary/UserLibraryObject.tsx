@@ -1,12 +1,21 @@
 import React from 'react';
-import { Actions } from 'flexlayout-react';
 import { TabContext } from '../../utils';
-import { useDetailedObjNameTab, useEntityNameTab } from '../UnigraphCore/useEntityNameTab';
+import { useDetailedObjNameTab } from '../UnigraphCore/useEntityNameTab';
 
 import { AutoDynamicViewDetailed } from '../ObjectView/AutoDynamicViewDetailed';
 import { DefaultObjectView } from '../ObjectView/DefaultObjectView';
 
-export default function DetailedObjectView({ uid, viewer, id, context, components, callbacks, isStub, type }: any) {
+export default function DetailedObjectView({
+    uid,
+    viewer,
+    id,
+    context,
+    components,
+    callbacks,
+    isStub,
+    type,
+    name,
+}: any) {
     // console.log(uid, isStub, type)
     const objectId: any = uid;
 
@@ -24,7 +33,8 @@ export default function DetailedObjectView({ uid, viewer, id, context, component
     });
 
     const tabContext = React.useContext(TabContext);
-    useDetailedObjNameTab({ prefix: '', uid });
+    useDetailedObjNameTab({ prefix: '', object });
+    if (name) tabContext.setTitle(name);
 
     React.useEffect(() => {
         window.unigraph

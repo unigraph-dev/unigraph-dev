@@ -6,9 +6,16 @@ import stringify from 'json-stable-stringify';
 import _ from 'lodash/fp';
 import React from 'react';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
-import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
+import { isJsonString, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 
 export const NavigationContext = React.createContext<(location: string) => any>((location: string) => ({}));
+
+export const trivialTypes = [
+    '$/schema/markdown',
+    '$/schema/subentity',
+    '$/schema/interface/textual',
+    '$/schema/person',
+];
 
 export function isValidHttpUrl(string: string) {
     let url;
@@ -24,7 +31,7 @@ export function isValidHttpUrl(string: string) {
 
 export const TabContext = React.createContext({
     viewId: 0,
-    setTitle: (title: string) => {},
+    setTitle: (title: string, icon?: any, renamerId?: any) => {},
     setMaximize: (val: boolean) => {},
     isVisible: () => true as boolean,
 
@@ -49,12 +56,13 @@ export const isDeveloperMode = () => {
     return window.unigraph.getState('settings/developerMode').value;
 };
 
-type DataContextType = {
+export type DataContextType = {
     contextUid: string;
     contextData?: any;
     parents?: string[];
     viewType?: string;
     expandedChildren: boolean;
+    subsId?: any;
     getParents: (withParents?: boolean) => string[];
 };
 
@@ -66,7 +74,15 @@ export const DataContext = React.createContext<DataContextType>({
     expandedChildren: false,
 });
 
-export const DataContextWrapper = ({ children, contextUid, contextData, parents, viewType, expandedChildren }: any) => {
+export const DataContextWrapper = ({
+    children,
+    contextUid,
+    contextData,
+    parents,
+    viewType,
+    expandedChildren,
+    subsId,
+}: any) => {
     const parentContext = React.useContext(DataContext);
 
     const dataContext = React.useMemo(() => {
@@ -83,19 +99,22 @@ export const DataContextWrapper = ({ children, contextUid, contextData, parents,
                     ...(expandedChildren ? [contextUid] : []),
                 ];
             },
+            subsId: subsId || parentContext.subsId,
         };
-    }, [contextUid, contextData?.uid, viewType, expandedChildren, JSON.stringify(parents?.sort?.())]);
+    }, [contextUid, contextData?.uid, viewType, expandedChildren, JSON.stringify(parents?.sort?.()), subsId]);
 
     return <DataContext.Provider value={dataContext}>{children}</DataContext.Provider>;
 };
 
 export const getComponentFromPage = (location: string, params: any = {}) => {
     const pages = window.unigraph.getState('registry/pages');
+    console.log(params);
     if (location.startsWith('/$/'))
         location = `/${(window.unigraph.getNamespaceMap as any)()[location.substring(1)].uid}`;
     return {
         type: 'tab',
         config: params,
+        icon: pages.value[location.slice(1)].icon || params.icon,
         name: pages.value[location.slice(1)].name,
         component: (location.startsWith('/') ? '/pages' : '/pages/') + location,
         enableFloat: 'true',
@@ -593,7 +612,7 @@ export const getOrInitLocalStorage = (key: string, defaultValue: any) => {
 
 export const hoverSx = {
     // sx styles (mui v5) for when hovering over components
-    '&:hover': { backgroundColor: 'action.hover' },
+    '&:hover': { backgroundColor: 'action.hover', borderRadius: '4px' },
     '&:active': { backgroundColor: 'action.selected' },
 };
 export const pointerHoverSx = { cursor: 'pointer', ...hoverSx };
@@ -604,4 +623,8 @@ export const globalTheme = {
         primary: { main: '#212121' },
         secondary: { main: '#616161' },
     },
+};
+
+export const getName = (obj: UnigraphObject) => {
+    return (obj?.get?.('name') || obj?.get?.('title') || obj?.get?.('text'))?.as?.('primitive');
 };

@@ -31,7 +31,7 @@ import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { TransitionGroup } from 'react-transition-group';
 import { getDynamicViews } from '../../unigraph-react';
 import { AutoDynamicView } from './AutoDynamicView';
-import { DataContext, DataContextWrapper, hoverSx, isMobile, TabContext } from '../../utils';
+import { DataContext, DataContextWrapper, hoverSx, isMobile, TabContext, trivialTypes } from '../../utils';
 import { setupInfiniteScrolling } from './infiniteScrolling';
 import { DragandDrop } from './DragandDrop';
 
@@ -509,8 +509,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
         },
         {
             id: 'no-trivial',
-            fn: (obj) =>
-                ['$/schema/markdown', '$/schema/subentity'].includes(obj?.type?.['unigraph.id']) ? null : obj,
+            fn: (obj) => (trivialTypes.includes(obj?.type?.['unigraph.id']) ? null : obj),
         },
         { id: 'no-hidden', fn: (obj) => obj._hide !== true },
         ...filters,

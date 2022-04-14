@@ -68,6 +68,7 @@ export function TodoTagView({
                     );
                 }
             }}
+            compact
             noRemover
             groupers={groupers}
             {...attributes}

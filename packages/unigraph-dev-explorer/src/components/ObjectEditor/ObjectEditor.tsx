@@ -566,7 +566,7 @@ export function ObjectEditor({ uid }: any) {
     const [allSchemas, setAllSchemas] = React.useState(null);
 
     const tabContext = React.useContext(TabContext);
-    useEntityNameTab({ prefix: 'Editor: ', uid });
+    useEntityNameTab({ prefix: 'Editor: ', object: currentObject });
 
     useEffectOnce(() => {
         window.unigraph.getSchemas().then((schemas: any) => setAllSchemas(schemas));

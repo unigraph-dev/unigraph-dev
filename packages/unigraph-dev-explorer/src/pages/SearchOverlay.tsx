@@ -7,7 +7,7 @@ import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { AutoDynamicView } from '../components/ObjectView/AutoDynamicView';
 import { inlineTextSearch } from '../components/UnigraphCore/InlineSearchPopup';
 import { parseQuery } from '../components/UnigraphCore/UnigraphSearch';
-import { isElectron, typeHasDynamicView } from '../utils';
+import { isElectron, trivialTypes, typeHasDynamicView } from '../utils';
 
 const groups = [
     {
@@ -262,9 +262,7 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
                                 ? res.entities.filter(
                                       (el) =>
                                           typeHasDynamicView(el?.type?.['unigraph.id']) &&
-                                          !['$/schema/markdown', '$/schema/subentity'].includes(
-                                              el?.type?.['unigraph.id'],
-                                          ),
+                                          !trivialTypes.includes(el?.type?.['unigraph.id']),
                                   )
                                 : [null],
                         );
@@ -281,7 +279,7 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
     }, [input]);
 
     const defaultEl = (
-        <div>
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
             <InputBase
                 inputRef={tf}
                 autoFocus
@@ -310,7 +308,7 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
                 }}
                 placeholder="Start typing to search, Arrow keys to navigate, and Enter to select."
             />
-            <div>
+            <div style={{ overflow: 'auto' }} id="searchOverlay_scrollable">
                 {summonerTooltip ? <Typography>{summonerTooltip}</Typography> : []}
                 {entries}
                 {parsed?.type === 'command' || parsed?.type === ''
@@ -438,7 +436,8 @@ export function SearchOverlayPopover({ open, setClose, noShadow }: any) {
                 overflow: 'auto',
                 padding: '16px',
                 borderRadius: '8px',
-                display: searchEnabled ? 'block' : 'none',
+                display: searchEnabled ? 'flex' : 'none',
+                flexDirection: 'column',
             }}
         >
             {searchEnabled ? (

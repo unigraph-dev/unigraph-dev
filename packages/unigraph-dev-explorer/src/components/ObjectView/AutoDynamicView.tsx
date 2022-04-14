@@ -7,10 +7,17 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { useSwipeable } from 'react-swipeable';
 import { UnigraphObject, getRandomInt, getRandomId } from 'unigraph-dev-common/lib/utils/utils';
 import { AutoDynamicViewProps } from '../../types/ObjectView.d';
-import { DataContext, DataContextWrapper, isMobile, isMultiSelectKeyPressed, selectUid, TabContext } from '../../utils';
+import {
+    DataContext,
+    DataContextWrapper,
+    isMobile,
+    isMultiSelectKeyPressed,
+    selectUid,
+    TabContext,
+    trivialTypes,
+} from '../../utils';
 import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import { StringObjectViewer } from './BasicObjectViews';
-import { excludableTypes } from './GraphView';
 import { getSubentities, isStub, SubentityDropAcceptor } from './utils';
 import { registerKeyboardShortcut, removeKeyboardShortcut } from '../../keyboardShortcuts';
 import { useFocusDelegate, useSelectionDelegate } from './AutoDynamicView/FocusSelectionDelegate';
@@ -49,13 +56,14 @@ export function AutoDynamicView({
         customBoundingBox,
         allowSemantic = true,
         expandedChildren,
+        backlinkStyle,
     } = finalOptions;
 
     if (!callbacks) callbacks = {};
 
     const shouldGetBacklinks =
         !finalOptions.ignoreBacklinks &&
-        (finalOptions.shouldGetBacklinks || (!excludableTypes.includes(object?.type?.['unigraph.id']) && !inline));
+        (finalOptions.shouldGetBacklinks || (!trivialTypes.includes(object?.type?.['unigraph.id']) && !inline));
 
     const dataContext = React.useContext(DataContext);
     const tabContext = React.useContext(TabContext);
@@ -85,6 +93,7 @@ export function AutoDynamicView({
         callbacks?.context?.uid,
         shouldGetBacklinks,
         noParents,
+        backlinkStyle,
     );
 
     const viewEl = React.useRef(null);
@@ -307,6 +316,7 @@ export function AutoDynamicView({
                 parents={finalOptions.ignoreBacklinks ? dataContext.parents : totalParents}
                 viewType="$/schema/dynamic_view"
                 expandedChildren={expandedChildren || false}
+                subsId={subsId}
             >
                 <div
                     style={{
@@ -328,7 +338,7 @@ export function AutoDynamicView({
                                       window.wsnavigator(
                                           `/library/object?uid=${object?.uid}&viewer=${'dynamic-view-detailed'}&type=${
                                               object?.type?.['unigraph.id']
-                                          }`,
+                                          }&name=${getObject_()?.get?.('name')?.as('primitive') || ''}`,
                                       );
                                   })();
                         }
@@ -353,10 +363,12 @@ export function AutoDynamicView({
                             noContextMenu
                                 ? () => false
                                 : (event) =>
-                                      onUnigraphContextMenu(event, getObjectRef.current(), contextEntity, {
-                                          ...callbacks,
-                                          componentId,
-                                      })
+                                      isDragging
+                                          ? event.preventDefault()
+                                          : onUnigraphContextMenu(event, getObjectRef.current(), contextEntity, {
+                                                ...callbacks,
+                                                componentId,
+                                            })
                         }
                         {...(attributes || {})}
                         ref={attach}

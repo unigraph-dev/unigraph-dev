@@ -15,13 +15,8 @@ jobs:
         runs-on: ${{ matrix.os }}
         strategy:
             matrix:
-                os: [ubuntu-latest, windows-latest]
+                os: [ubuntu-latest, windows-latest, macos-latest]
                 electron-arch-overrides: ['']
-                include:
-                    - os: macos-latest
-                      electron-arch-overrides: '-c.mac.target.target=default -c.mac.target.arch=x64'
-                    # - os: macos-latest
-                    #   electron-arch-overrides: '-c.mac.target.target=dmg -c.mac.target.arch=arm64'
         env:
             USE_HARD_LINKS: false
         defaults:
@@ -93,7 +88,7 @@ jobs:
                   out-file-path: ./dgraph-download
 
             - uses: robinraju/release-downloader@v1.3
-              if: runner.os == 'macOS' && endsWith(matrix.electron-arch-overrides, 'x64')
+              if: runner.os == 'macOS'
               with:
                   repository: 'unigraph-dev/dgraph'
                   latest: true
@@ -102,7 +97,7 @@ jobs:
                   out-file-path: ./dgraph-download
 
             - uses: robinraju/release-downloader@v1.3
-              if: runner.os == 'macOS' && endsWith(matrix.electron-arch-overrides, 'arm64')
+              if: runner.os == 'macOS'
               with:
                   repository: 'unigraph-dev/dgraph'
                   latest: true
@@ -110,12 +105,16 @@ jobs:
                   token: '${{secrets.PUBLIC_ACCESS_TOKEN}}'
                   out-file-path: ./dgraph-download
 
-            - run: mv ./dgraph-download/dgraph_* ./dgraph-download/dgraph
+            - run: mv ./dgraph-download/dgraph_linux_amd64 ./dgraph-download/dgraph
+              if: runner.os == 'Linux'
 
-            - run: mv ./dgraph-download/dgraph ./dgraph-download/dgraph.exe
+            - run: mv ./dgraph-download/dgraph_darwin_amd64 ./dgraph-download/dgraph && mv ./dgraph-download/dgraph_darwin_arm64 ./dgraph-download/dgraph_arm64
+              if: runner.os == 'macOS'
+
+            - run: mv ./dgraph-download/dgraph_windows_amd64.exe ./dgraph-download/dgraph.exe
               if: runner.os == 'Windows'
 
-            - run: chmod +x ./dgraph-download/dgraph
+            - run: chmod +x ./dgraph-download/dgraph*
               if: runner.os != 'Windows'
 
             # Builds app

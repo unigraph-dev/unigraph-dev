@@ -40,6 +40,7 @@ export const Tag: DynamicViewRenderer = ({ data, callbacks }) => {
 
 export const TagDetailed: DynamicViewRenderer = ({ data, callbacks }) => {
     const [name, setName] = React.useState('');
+    const [uid, setUid] = React.useState('');
     // useNameTab('Tag: ', data.uid);
 
     React.useEffect(() => {
@@ -59,6 +60,18 @@ export const TagDetailed: DynamicViewRenderer = ({ data, callbacks }) => {
                     }}
                 >
                     Rename Tag
+                </Button>
+                <Divider orientation="vertical" flexItem style={{ margin: '0px 8px' }} />
+                <TextField value={uid} onChange={(e) => setUid(e.target.value)} placeholder="UID of tag to merge with">
+                    UID of tag to merge with
+                </TextField>
+                <Button
+                    onClick={async () => {
+                        if (uid.startsWith('0x'))
+                            window.unigraph.runExecutable('$/executable/merge-entities', { from: uid, to: data.uid });
+                    }}
+                >
+                    Merge selected tag into this tag
                 </Button>
             </div>
             <Divider />
