@@ -10,7 +10,7 @@ export function ReferenceableSelectorControlled({ referenceables, value, onChang
             renderInput={(params) => (
                 <TextField
                     {...params}
-                    label="Type"
+                    label="Object Schema"
                     variant="filled"
                     value={value || ''}
                     sx={{
