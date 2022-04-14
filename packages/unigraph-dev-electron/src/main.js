@@ -93,20 +93,26 @@ async function startServer(logHandler) {
             }
             return oldConsoleLog(...data);
         };
-        alpha = spawn(fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', 'dgraph')), [
-            'alpha',
-            '--wal',
-            path.join(userData, 'w'),
-            '--postings',
-            path.join(userData, 'p'),
-            '--tmp',
-            path.join(userData, 't'),
-        ]);
-        zero = spawn(fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', 'dgraph')), [
-            'zero',
-            '--wal',
-            path.join(userData, 'zw'),
-        ]);
+        alpha = spawn(
+            fixPathForAsarUnpack(
+                path.join(__dirname, '..', 'dgraph', `dgraph${process.arch === 'arm64' ? '_arm64' : ''}`),
+            ),
+            [
+                'alpha',
+                '--wal',
+                path.join(userData, 'w'),
+                '--postings',
+                path.join(userData, 'p'),
+                '--tmp',
+                path.join(userData, 't'),
+            ],
+        );
+        zero = spawn(
+            fixPathForAsarUnpack(
+                path.join(__dirname, '..', 'dgraph', `dgraph${process.arch === 'arm64' ? '_arm64' : ''}`),
+            ),
+            ['zero', '--wal', path.join(userData, 'zw')],
+        );
 
         const completedLog = 'Server is ready: OK'; // When this is logged we know it's completed
         const completedULog = 'Unigraph server listening on port';

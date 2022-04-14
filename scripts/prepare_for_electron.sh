@@ -17,3 +17,4 @@ cp ./secrets.env.json packages/unigraph-dev-electron/distnode
 rm -rf packages/unigraph-dev-electron/dgraph
 mkdir packages/unigraph-dev-electron/dgraph
 cp /opt/unigraph/dgraph packages/unigraph-dev-electron/dgraph || cp ./dgraph-download/dgraph packages/unigraph-dev-electron/dgraph 
+cp /opt/unigraph/dgraph_arm64 packages/unigraph-dev-electron/dgraph || cp ./dgraph-download/dgraph_arm64 packages/unigraph-dev-electron/dgraph || true
