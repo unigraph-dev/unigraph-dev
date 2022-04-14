@@ -338,7 +338,7 @@ export function AutoDynamicView({
                                       window.wsnavigator(
                                           `/library/object?uid=${object?.uid}&viewer=${'dynamic-view-detailed'}&type=${
                                               object?.type?.['unigraph.id']
-                                          }&name=${object?.get('name')?.as('primitive')}`,
+                                          }&name=${getObject_()?.get?.('name')?.as('primitive') || ''}`,
                                       );
                                   })();
                         }
@@ -363,10 +363,12 @@ export function AutoDynamicView({
                             noContextMenu
                                 ? () => false
                                 : (event) =>
-                                      onUnigraphContextMenu(event, getObjectRef.current(), contextEntity, {
-                                          ...callbacks,
-                                          componentId,
-                                      })
+                                      isDragging
+                                          ? event.preventDefault()
+                                          : onUnigraphContextMenu(event, getObjectRef.current(), contextEntity, {
+                                                ...callbacks,
+                                                componentId,
+                                            })
                         }
                         {...(attributes || {})}
                         ref={attach}

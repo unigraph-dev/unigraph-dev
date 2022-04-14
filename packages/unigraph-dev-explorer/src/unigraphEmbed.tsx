@@ -17,6 +17,8 @@ import { CustomDragLayer } from './CustomDragLayer';
 
 const dndOpts = {
     enableMouseEvents: true,
+    delayTouchStart: 500,
+    ignoreContextMenu: true,
 };
 
 function UnigraphComponent({ uid }: any) {

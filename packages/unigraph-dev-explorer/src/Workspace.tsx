@@ -282,6 +282,8 @@ const providedTheme = createTheme(globalTheme);
 
 const dndOpts = {
     enableMouseEvents: true,
+    delayTouchStart: 500,
+    ignoreContextMenu: true,
 };
 
 export function WorkSpace(this: any) {
