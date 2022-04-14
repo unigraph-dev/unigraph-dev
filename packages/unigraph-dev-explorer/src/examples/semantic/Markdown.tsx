@@ -245,7 +245,7 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                                                                 matches[0]._value._value.uid
                                                             }&viewer=${'dynamic-view-detailed'}&type=${
                                                                 matches[0]._value._value?.type?.['unigraph.id']
-                                                            }`,
+                                                            }&name=${children[0]}`,
                                                         );
                                                     else if (callbacks?.namespaceLink) {
                                                         window.open(callbacks.namespaceLink(children[0]), '_blank');
@@ -255,7 +255,9 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                                                         addPage(childrenRoot, children[0], callbacks.subsId).then(
                                                             (navUid: any) => {
                                                                 window.wsnavigator(
-                                                                    `/library/object?uid=${navUid}&viewer=${'dynamic-view-detailed'}&type=$/schema/note_block`,
+                                                                    `/library/object?uid=${navUid}&viewer=${'dynamic-view-detailed'}&type=$/schema/note_block&name=${
+                                                                        children[0]
+                                                                    }`,
                                                                 );
                                                             },
                                                         );

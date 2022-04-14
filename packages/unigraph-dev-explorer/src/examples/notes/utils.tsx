@@ -15,6 +15,7 @@ import {
     focusLastDFSNode,
     focusNextDFSNode,
 } from './commands';
+import { NoteEditorContext } from './types';
 
 export const closeScopeCharDict: { [key: string]: string } = {
     '[': ']',
@@ -55,11 +56,6 @@ export const caretToLastLine = (text: string, _caret: number) => {
     return caretInLine;
 };
 
-export const persistCollapsedNodes = (nodes: any) => {
-    const localState = JSON.parse(window.localStorage.getItem('noteblockCollapsedByUid') || '{}');
-    window.localStorage.setItem('noteblockCollapsedByUid', JSON.stringify({ ...localState, ...nodes }));
-};
-
 export const getShortcuts = (data: any, editorContext: any, elindex: any, copyOrCutHandler: any, callbacks: any) => ({
     'shift+Tab': (ev: any) => {
         ev.preventDefault();
@@ -85,7 +81,7 @@ export const getShortcuts = (data: any, editorContext: any, elindex: any, copyOr
     oncut: (ev: any) => copyOrCutHandler(ev, elindex, true),
 });
 
-export const getCallbacks = (callbacks: any, data: any, editorContext: any, elindex: any) => ({
+export const getCallbacks = (callbacks: any, data: any, editorContext: NoteEditorContext, elindex: any) => ({
     ...callbacks,
     ...Object.fromEntries(
         Object.entries(noteBlockCommands).map(([k, v]: any) => [

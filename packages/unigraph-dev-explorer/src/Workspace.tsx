@@ -6,7 +6,7 @@ import React from 'react';
 
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 
-import FlexLayout, { Action, Actions, DockLocation, Model, Node, TabNode } from 'flexlayout-react';
+import { Action, Actions, DockLocation, Model, Node, TabNode, Layout } from 'flexlayout-react';
 import 'flexlayout-react/style/light.css';
 import './workspace.css';
 import { Container, CssBaseline, ListItem, Popover, Typography } from '@mui/material';
@@ -14,9 +14,9 @@ import { ThemeProvider, Theme, StyledEngineProvider, createTheme } from '@mui/ma
 
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
-import { Menu, Details } from '@mui/icons-material';
+import { Menu, Details, Home } from '@mui/icons-material';
 import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';
 
 import MomentUtils from '@date-io/moment';
 // or @mui/lab/Adapter{Dayjs,Luxon,Moment} or any valid date-io adapter
@@ -33,12 +33,13 @@ import { ContextMenu } from './components/UnigraphCore/ContextMenu';
 import { getComponentFromPage, getParameters, globalTheme, isElectron, isSmallScreen, TabContext } from './utils';
 import { SearchOverlayPopover } from './pages/SearchOverlay';
 import { MobileBar } from './components/UnigraphCore/MobileBar';
+import { CustomDragLayer } from './CustomDragLayer';
 
 export function WorkspacePageComponent({ children, maximize, paddingTop, id, tabCtx }: any) {
-    const [_maximize, setMaximize] = React.useState(maximize);
-    tabCtx.setMaximize = (val: boolean) => {
-        setMaximize(val);
-    };
+    // const [_maximize, setMaximize] = React.useState(maximize);
+    // tabCtx.setMaximize = (val: boolean) => {
+    //     setMaximize(val);
+    // };
     const memoTabCtx = React.useMemo(() => tabCtx, [id]);
 
     return (
@@ -48,15 +49,15 @@ export function WorkspacePageComponent({ children, maximize, paddingTop, id, tab
                     width: '100%',
                     height: '100%',
                     overflow: 'auto',
-                    paddingTop: _maximize || !paddingTop ? '0px' : '12px',
+                    paddingTop: maximize || !paddingTop ? '0px' : '12px',
                 }}
             >
                 <Container
-                    maxWidth={_maximize ? false : 'lg'}
+                    maxWidth={maximize ? false : 'lg'}
                     id={`workspaceContainer${id}`}
                     disableGutters
                     style={{
-                        paddingTop: _maximize || !paddingTop ? '0px' : '12px',
+                        paddingTop: maximize || !paddingTop ? '0px' : '12px',
                         height: '100%',
                         display: 'flex',
                         flexDirection: 'column',
@@ -279,14 +280,21 @@ const setTitleOnRenderTab = (model: Model) => {
 
 const providedTheme = createTheme(globalTheme);
 
+const dndOpts = {
+    enableMouseEvents: true,
+    delayTouchStart: 500,
+    ignoreContextMenu: true,
+};
+
 export function WorkSpace(this: any) {
-    const json = {
+    const json: any = {
         global: {
             tabSetTabStripHeight: 40,
             tabEnableRename: false,
             splitterSize: 1,
             splitterExtra: 12,
             tabEnableRenderOnDemand: true,
+            enableUseVisibility: true,
         },
         borders: [
             {
@@ -372,11 +380,23 @@ export function WorkSpace(this: any) {
         () => (node: Node, config: any) => ({
             // @ts-expect-error: using private API
             viewId: node._attributes.id,
-            setTitle: (title: string) => {
-                if (config.customTitle) {
+            setTitle: (title: string, icon?: any, renamerId?: string) => {
+                // @ts-expect-error: using private API
+                const currNode = window.layoutModel.getNodeById(node._attributes.id);
+                // @ts-expect-error: using private API
+                const curRenamer = currNode._attributes.config?.renamerId;
+                if (config.customTitle || !title?.length || (curRenamer && curRenamer !== renamerId)) {
                     return false;
                 }
-                return false;
+                return window.layoutModel.doAction(
+                    // @ts-expect-error: using private API
+                    Actions.updateNodeAttributes(node._attributes.id, {
+                        name: title,
+                        icon: icon || '',
+                        // @ts-expect-error: using private API
+                        config: { ...currNode._attributes.config, renamerId },
+                    }),
+                );
             },
             setMaximize: (val: boolean) => false,
             isVisible: () =>
@@ -448,7 +468,7 @@ export function WorkSpace(this: any) {
         );
     };
 
-    const [model] = React.useState(FlexLayout.Model.fromJson(json));
+    const [model] = React.useState(Model.fromJson(json));
 
     const memoMDFn: any = {};
     const getMouseDownFn = (id: string) => {
@@ -478,7 +498,8 @@ export function WorkSpace(this: any) {
         <StyledEngineProvider injectFirst>
             <ThemeProvider theme={providedTheme}>
                 <LocalizationProvider dateAdapter={AdapterMoment}>
-                    <DndProvider backend={HTML5Backend}>
+                    <DndProvider backend={TouchBackend} options={dndOpts}>
+                        <CustomDragLayer />
                         <div id="global-elements" className="lol1">
                             <SearchOverlayPopover />
                             <ContextMenu />
@@ -486,10 +507,11 @@ export function WorkSpace(this: any) {
                             <MobileBar />
                         </div>
 
-                        <FlexLayout.Layout
+                        <Layout
                             model={model}
                             factory={factory}
                             popoutURL="./popout_page.html"
+                            iconFactory={() => '' as any}
                             onAction={(action: Action) => {
                                 if (
                                     action.type === 'FlexLayout_SelectTab' &&
@@ -499,6 +521,17 @@ export function WorkSpace(this: any) {
                                         component: (window.layoutModel.getNodeById(action.data.tabNode) as any)
                                             ?._attributes?.component,
                                     });
+                                } else if (
+                                    action.type === 'FlexLayout_DeleteTab' &&
+                                    action.data.animationShown !== true
+                                ) {
+                                    console.log('Closing');
+                                    const tabEl = document.getElementById(`tabId${action.data.node}`)?.parentElement;
+                                    tabEl?.classList.remove('rendered_tab_button');
+                                    setTimeout(() => {
+                                        model.doAction({ ...action, data: { ...action.data, animationShown: true } });
+                                    }, 200);
+                                    return undefined;
                                 }
                                 return action;
                             }}
@@ -508,8 +541,9 @@ export function WorkSpace(this: any) {
                                     .setValue(node.isVisible());
                                 setTitleOnRenderTab(model);
                                 const nodeId = node.getId();
+                                const nodeIcon = node.getIcon();
                                 if (nodeId === 'app-drawer') {
-                                    renderValues.content = (
+                                    renderValues.leading = (
                                         <Menu
                                             style={{
                                                 verticalAlign: 'middle',
@@ -518,9 +552,10 @@ export function WorkSpace(this: any) {
                                             key="icon"
                                         />
                                     );
+                                    renderValues.content = '';
                                 }
                                 if (nodeId === 'inspector-pane') {
-                                    renderValues.content = (
+                                    renderValues.leading = (
                                         <Details
                                             style={{
                                                 verticalAlign: 'middle',
@@ -529,15 +564,18 @@ export function WorkSpace(this: any) {
                                             key="icon"
                                         />
                                     );
+                                    renderValues.content = '';
                                 }
                                 if (nodeId === 'category-pane') {
-                                    renderValues.content = [
+                                    renderValues.leading = (
                                         <Icon
                                             path={mdiTagMultipleOutline}
                                             size={1}
                                             style={{ verticalAlign: 'middle' }}
                                             key="icon"
-                                        />,
+                                        />
+                                    );
+                                    renderValues.content = [
                                         <Typography
                                             style={{
                                                 marginLeft: '4px',
@@ -548,6 +586,31 @@ export function WorkSpace(this: any) {
                                         </Typography>,
                                     ];
                                 }
+                                if (!renderValues.leading && typeof nodeIcon === 'string') {
+                                    // Render icon
+                                    if (/^\p{Extended_Pictographic}$/u.test(nodeIcon)) {
+                                        // is emoji
+                                        renderValues.leading = nodeIcon;
+                                    } else {
+                                        // is svg icon
+                                        // TODO
+                                        renderValues.leading = (
+                                            <div
+                                                style={{
+                                                    minWidth: '16px',
+                                                    minHeight: '16px',
+                                                    backgroundImage: `url("${
+                                                        nodeIcon.startsWith('data:image/svg+xml,')
+                                                            ? ''
+                                                            : 'data:image/svg+xml,'
+                                                    }${nodeIcon}")`,
+                                                    opacity: 0.54,
+                                                }}
+                                            />
+                                        );
+                                    }
+                                }
+                                const isFirstRender = !document.getElementById(`tabId${nodeId}`);
                                 renderValues.buttons.push(<div id={`tabId${nodeId}`} key={`tabId${nodeId}`} />);
                                 setTimeout(() => {
                                     const el = document.getElementById(`tabId${nodeId}`);
@@ -558,6 +621,20 @@ export function WorkSpace(this: any) {
                                         el.parentElement.addEventListener('mousedown', fn);
                                     }
                                 }, 0);
+                                window.queueMicrotask(() => {
+                                    const el = document.getElementById(`tabId${nodeId}`);
+
+                                    if (el && el.parentElement && !isFirstRender) {
+                                        el.parentElement.classList.add('rendered_tab_button');
+                                    }
+                                });
+                                setTimeout(() => {
+                                    const el = document.getElementById(`tabId${nodeId}`);
+
+                                    if (el && el.parentElement && isFirstRender) {
+                                        el.parentElement.classList.add('rendered_tab_button');
+                                    }
+                                });
                             }}
                             onRenderTabSet={(tabSetNode, renderValues) => {
                                 if (tabSetNode.getType() === 'tabset') {
@@ -576,6 +653,7 @@ export function WorkSpace(this: any) {
                                                         {
                                                             uid,
                                                             name: node.getName(),
+                                                            icon: node.getIcon(),
                                                             env: 'react-explorer',
                                                             view: node.getComponent(),
                                                             props: JSON.stringify({

@@ -50,7 +50,8 @@ if (!gotTheLock) {
     process.exit(0);
 }
 
-if (!isDev()) autoUpdater.checkForUpdatesAndNotify();
+log.transports.file.level = 'debug';
+autoUpdater.logger = log;
 
 function isUnigraphPortOpen(port) {
     return new Promise((resolve, reject) => {
@@ -92,20 +93,26 @@ async function startServer(logHandler) {
             }
             return oldConsoleLog(...data);
         };
-        alpha = spawn(fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', 'dgraph')), [
-            'alpha',
-            '--wal',
-            path.join(userData, 'w'),
-            '--postings',
-            path.join(userData, 'p'),
-            '--tmp',
-            path.join(userData, 't'),
-        ]);
-        zero = spawn(fixPathForAsarUnpack(path.join(__dirname, '..', 'dgraph', 'dgraph')), [
-            'zero',
-            '--wal',
-            path.join(userData, 'zw'),
-        ]);
+        alpha = spawn(
+            fixPathForAsarUnpack(
+                path.join(__dirname, '..', 'dgraph', `dgraph${process.arch === 'arm64' ? '_arm64' : ''}`),
+            ),
+            [
+                'alpha',
+                '--wal',
+                path.join(userData, 'w'),
+                '--postings',
+                path.join(userData, 'p'),
+                '--tmp',
+                path.join(userData, 't'),
+            ],
+        );
+        zero = spawn(
+            fixPathForAsarUnpack(
+                path.join(__dirname, '..', 'dgraph', `dgraph${process.arch === 'arm64' ? '_arm64' : ''}`),
+            ),
+            ['zero', '--wal', path.join(userData, 'zw')],
+        );
 
         const completedLog = 'Server is ready: OK'; // When this is logged we know it's completed
         const completedULog = 'Unigraph server listening on port';
@@ -215,7 +222,21 @@ function unigraphLoaded() {
 
 let isAppClosing = false;
 
+autoUpdater.on('update-downloaded', async (info) => {
+    const choice = await require('electron').dialog.showMessageBox({
+        type: 'question',
+        buttons: ['OK', 'Quit and update'],
+        title: 'New update downloaded',
+        message: `New update has been downloaded (version ${info.version}), and will be automatically installed after quit.`,
+    });
+    if (choice.response === 1) {
+        isAppClosing = true;
+        autoUpdater.quitAndInstall();
+    }
+});
+
 app.whenReady().then(() => {
+    if (!isDev()) autoUpdater.checkForUpdates();
     tray = new Tray(nativeImage.createFromDataURL(unigraph_trayIcon));
     tray.setToolTip('Unigraph');
     trayMenu = createTrayMenu((newTemplate) => {

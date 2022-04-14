@@ -50,6 +50,7 @@ const pages: Record<string, any> = {
     },
     'examples/todo': {
         constructor: (props: any) => <TodoList {...props} />,
+        maximize: true,
         name: 'Todo List',
     },
     'examples/bookmarks': {
@@ -98,6 +99,7 @@ const pages: Record<string, any> = {
     },
     'library/object': {
         constructor: (props: any) => <DetailedObjectView {...props} />,
+        icon: '_spinning-wheel',
         name: 'Object View',
     },
     'library/backlink': {
@@ -107,6 +109,7 @@ const pages: Record<string, any> = {
     home: {
         constructor: (props: any) => <ExplorerHome {...props} />,
         name: 'Home',
+        icon: "%3Csvg xmlns='http://www.w3.org/2000/svg' style='width:24px;height:24px' viewBox='0 0 24 24'%3E%3Cpath fill='currentColor' d='M12 5.69L17 10.19V18H15V12H9V18H7V10.19L12 5.69M12 3L2 12H5V20H11V14H13V20H19V12H22' /%3E%3C/svg%3E",
         paddingTop: false,
     },
     dashboard: {
