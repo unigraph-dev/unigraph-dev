@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.9](https://github.com/ssalka/unigraph-dev/compare/v0.2.8...v0.2.9) (2022-04-14)
+
+
+### Bug Fixes
+
+* **commands:** fix server compiling ([10884b4](https://github.com/ssalka/unigraph-dev/commit/10884b4b2a6efe967b3eec5f94c6144fca50f71c))
+
+
+### Features
+
+* **commands:** dispatchCommand now able to run lambdas and client execs ([b0848e0](https://github.com/ssalka/unigraph-dev/commit/b0848e0d97aa516630978c4f834c5735b07f42f4))
+* **hotkeys:** call omnibar with new hotkey architecture ([c6e0b33](https://github.com/ssalka/unigraph-dev/commit/c6e0b33d7c208681da30b1ba57a4b4a3d27c2bef))
+
+
+
+
+
 ## [0.2.8](https://github.com/ssalka/unigraph-dev/compare/v0.2.7...v0.2.8) (2022-04-05)
 
 **Note:** Version bump only for package unigraph-dev-backend

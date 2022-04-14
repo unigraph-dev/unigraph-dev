@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.9](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.8...v0.2.9) (2022-04-14)
+
+
+### Features
+
+* **commands:** add command and command handler types ([18c6abc](https://github.com/unigraph-dev/unigraph-dev/commit/18c6abc593fdf2ab8f3baf5fea1c35e88eb6d3e8))
+* **hotkeys:** add hotkey_binding type and example "open_omnibar" action ([be8caae](https://github.com/unigraph-dev/unigraph-dev/commit/be8caae727f2c6e1c5dba70603bd013dd30528b6))
+* **hotkeys:** call omnibar with new hotkey architecture ([c6e0b33](https://github.com/unigraph-dev/unigraph-dev/commit/c6e0b33d7c208681da30b1ba57a4b4a3d27c2bef))
+* **outliner:** support adding items before indexes in another list ([d40cbf3](https://github.com/unigraph-dev/unigraph-dev/commit/d40cbf3667a537f4c2dd8ec9d29267e01c9c4298))
+
+
+
+
+
 ## [0.2.8](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.7...v0.2.8) (2022-04-05)
 
 

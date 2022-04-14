@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.9](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.8...v0.2.9) (2022-04-14)
+
+
+### Bug Fixes
+
+* **electron:** don't use the m1 dgraph build for now ([b79e90b](https://github.com/unigraph-dev/unigraph-dev/commit/b79e90b68315d5a6f22ae6f38dca61589dcc04e2))
+* **electron:** proper autoupdate ([cd7deb3](https://github.com/unigraph-dev/unigraph-dev/commit/cd7deb3dd0551b30d87a207e3e5c85598df65011))
+
+
+
+
+
 ## [0.2.8](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.7...v0.2.8) (2022-04-05)
 
 **Note:** Version bump only for package unigraph-dev-electron

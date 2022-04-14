@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.9](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.8...v0.2.9) (2022-04-14)
+
+
+### Bug Fixes
+
+* add ability to merge tags ([e814e0f](https://github.com/unigraph-dev/unigraph-dev/commit/e814e0f930cd568ea8a23f73771331b76396bea0))
+
+
+
+
+
 ## [0.2.8](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.7...v0.2.8) (2022-04-05)
 
 

@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.9](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.8...v0.2.9) (2022-04-14)
+
+
+### Bug Fixes
+
+* build ([cb44996](https://github.com/unigraph-dev/unigraph-dev/commit/cb4499669e545bec6ea5773e5c62864e8d1d01cf))
+
+
+### Features
+
+* **commands:** add dispatchCommand and getStateMap to unigraph API ([a00d1b6](https://github.com/unigraph-dev/unigraph-dev/commit/a00d1b67e99f0f55cef455cba74d6d71317dcce5))
+* **commands:** dispatchCommand now able to run lambdas and client execs ([b0848e0](https://github.com/unigraph-dev/unigraph-dev/commit/b0848e0d97aa516630978c4f834c5735b07f42f4))
+* **dnd:** speedup editor dnd ([debe1a2](https://github.com/unigraph-dev/unigraph-dev/commit/debe1a2ed4a04156a4ebceaeb66babede0a7f932))
+
+
+
+
+
 ## [0.2.8](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.7...v0.2.8) (2022-04-05)
 
 

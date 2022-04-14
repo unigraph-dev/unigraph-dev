@@ -3,6 +3,64 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.9](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.8...v0.2.9) (2022-04-14)
+
+
+### Bug Fixes
+
+* add ability to merge tags ([e814e0f](https://github.com/unigraph-dev/unigraph-dev/commit/e814e0f930cd568ea8a23f73771331b76396bea0))
+* **codeEditor:** instructions for context object ([a32af2a](https://github.com/unigraph-dev/unigraph-dev/commit/a32af2aa3eea870190a03c35d7de210e3a562281))
+* **commands:** fix server compiling ([10884b4](https://github.com/unigraph-dev/unigraph-dev/commit/10884b4b2a6efe967b3eec5f94c6144fca50f71c))
+* conditional chaining for calling dispatchCommand ([7318ea2](https://github.com/unigraph-dev/unigraph-dev/commit/7318ea2db3d96dfd3a1cf8a2ee5ac88926c421ba))
+* **dnd:** fix dnd on mobile ([51d22e8](https://github.com/unigraph-dev/unigraph-dev/commit/51d22e8f19ff667f31b687dbabb2e04dd7a6325a))
+* **dnd:** fix lingering data of dragged object ([75a1b0e](https://github.com/unigraph-dev/unigraph-dev/commit/75a1b0e85c5de1b803deebf6730fc601bc19d2a3))
+* install "history" package or explorer would fail to compile ([e4fd04d](https://github.com/unigraph-dev/unigraph-dev/commit/e4fd04db44f1f9ebdbe3af698d5fd53f28f593c5))
+* more polish with electron & backlinks ([c06e73f](https://github.com/unigraph-dev/unigraph-dev/commit/c06e73f295f2148ecada9b29de941841777e3a62))
+* **ObjectEditor:** Remove new object creator (too buggy) ([57e96f7](https://github.com/unigraph-dev/unigraph-dev/commit/57e96f78377d57d413fdddec828aebc342696f8b))
+* **outliner:** disable selection box when dragging an outline ([1dc954e](https://github.com/unigraph-dev/unigraph-dev/commit/1dc954ecd45ff746fcbb72a59b66d6044f5a671f))
+* **outliner:** dropping before/after itself should not move ([250277c](https://github.com/unigraph-dev/unigraph-dev/commit/250277c91b18ce46322597013aa42ca677284781))
+* **outliner:** keep collapsed bullets collpased after dnd ([8acb3ac](https://github.com/unigraph-dev/unigraph-dev/commit/8acb3ac6aa572a40f4542b503ca98251dd4b636f))
+* **outliner:** prevent <DragHandle> shrinking ([c606812](https://github.com/unigraph-dev/unigraph-dev/commit/c60681237d35650f2817fc48d3dc3d96d80e3b06))
+* **outliner:** prevent crash when reordering a bullet with children ([e57fcc4](https://github.com/unigraph-dev/unigraph-dev/commit/e57fcc45d8ebeca807f01a0a5728ba764885590d))
+* **outliner:** prevent drop target block focus-to-edit ([02d9d2d](https://github.com/unigraph-dev/unigraph-dev/commit/02d9d2dff567e82b2c28e5c2edba80767ff035ab))
+* **outliner:** prevent drop targets block text editing ([278b100](https://github.com/unigraph-dev/unigraph-dev/commit/278b100a92c13f9618d9fe119496aad74338ad65))
+* **outliner:** prevent useless drops ([48b7bc6](https://github.com/unigraph-dev/unigraph-dev/commit/48b7bc61e83a20fc8aaff3135884a4a282e799ee))
+* **outliner:** prevent wrong order when reorder in the same parent ([5bd4aa5](https://github.com/unigraph-dev/unigraph-dev/commit/5bd4aa5b576f51c125123cbac5fc0f341840eb57))
+* **outliner:** try react-dnd-touch-backend ([7f74785](https://github.com/unigraph-dev/unigraph-dev/commit/7f74785760b01aee5c07261f3fc3e4ee951979e1))
+* **outliner:** tune drag-and-drop ([e024434](https://github.com/unigraph-dev/unigraph-dev/commit/e024434c111385419fb2951e2ecc501356b1f16f))
+* **unigraph:** add animation for tab close ([0d83624](https://github.com/unigraph-dev/unigraph-dev/commit/0d8362407837e65d9f47d1727a74eee1191bbde0))
+* **ux:** more friendly context menu ([a4a4d65](https://github.com/unigraph-dev/unigraph-dev/commit/a4a4d65468481571d93e469f22e1ea1701a005cf))
+
+
+### Features
+
+* **calendar:** activate context menu in calendar events ([6c245e1](https://github.com/unigraph-dev/unigraph-dev/commit/6c245e10ccadcd1ede4cc2b89fa5fe22b29915bd))
+* **commands:** dispatchCommand now able to run lambdas and client execs ([b0848e0](https://github.com/unigraph-dev/unigraph-dev/commit/b0848e0d97aa516630978c4f834c5735b07f42f4))
+* **dnd:** speedup editor dnd ([debe1a2](https://github.com/unigraph-dev/unigraph-dev/commit/debe1a2ed4a04156a4ebceaeb66babede0a7f932))
+* fix several misc ux issues ([3487131](https://github.com/unigraph-dev/unigraph-dev/commit/3487131fabc5d1245fcba5bbe586a89ee97b765c))
+* **frontend:** add icon support, make ui more consistent ([34aca85](https://github.com/unigraph-dev/unigraph-dev/commit/34aca850fe6e6d9f25823492a150b02b98796a51))
+* **hotkeys:** add hotkey_binding type and example "open_omnibar" action ([be8caae](https://github.com/unigraph-dev/unigraph-dev/commit/be8caae727f2c6e1c5dba70603bd013dd30528b6))
+* **hotkeys:** call omnibar with new hotkey architecture ([c6e0b33](https://github.com/unigraph-dev/unigraph-dev/commit/c6e0b33d7c208681da30b1ba57a4b4a3d27c2bef))
+* **hotkeys:** dispatching commands from hotkeys ([6101ea9](https://github.com/unigraph-dev/unigraph-dev/commit/6101ea904f81d0751724b6ed6fd18fe0297dfbb2))
+* **outliner:** add drag handle ([10136b8](https://github.com/unigraph-dev/unigraph-dev/commit/10136b803f31f76e7fe54d62622de847e9afd6fc))
+* **outliner:** add rough support for drag and drop ([aa75365](https://github.com/unigraph-dev/unigraph-dev/commit/aa75365cb0ff277ce224b1b8671fbffcba8c430f))
+* **outliner:** improve button colors ([de01721](https://github.com/unigraph-dev/unigraph-dev/commit/de017210f446c7d26b28541d6a33d2a57875df9e))
+* **outliner:** make DragHandle easier to click ([728f918](https://github.com/unigraph-dev/unigraph-dev/commit/728f918be96e81fa7a7225a13f30b91a50014ac9))
+* **outliner:** prevent dropping into descendants ([abd2945](https://github.com/unigraph-dev/unigraph-dev/commit/abd2945379a17ccc5e90a5e1badc4e101e745b52))
+* **outliner:** show drag handle for every outline ([a4dfe65](https://github.com/unigraph-dev/unigraph-dev/commit/a4dfe65223b80c4783cb7e352f5e01e79fa93d7c))
+* **outliner:** show grab cursor for DragHandle ([fe74ebe](https://github.com/unigraph-dev/unigraph-dev/commit/fe74ebe6e0cdb0472642ab72edc66ddb74bb231d))
+* **outliner:** show grabbing cursor when dragging ([adb6043](https://github.com/unigraph-dev/unigraph-dev/commit/adb6043f5f6e2d95a79a7ebb67c38b8ca5356f16))
+* **outliner:** support adding items before indexes in another list ([d40cbf3](https://github.com/unigraph-dev/unigraph-dev/commit/d40cbf3667a537f4c2dd8ec9d29267e01c9c4298))
+* **outliner:** support reorder to the first item in the same list ([18481da](https://github.com/unigraph-dev/unigraph-dev/commit/18481da73474b9cd75de5030a39869087f41dba7))
+* **semantic:** make ol/ul look consistent with paragraph ([bfd26be](https://github.com/unigraph-dev/unigraph-dev/commit/bfd26bea5a62f14bc078fd5ff5144edc01f7d829))
+* **tabs:** proper names in object view tabs ([28e0a3b](https://github.com/unigraph-dev/unigraph-dev/commit/28e0a3b64e1de49b4a0180bb10ce0536d306e125))
+* **tags:** alphabetical order ([4ca9f0b](https://github.com/unigraph-dev/unigraph-dev/commit/4ca9f0b70bbfe61b7dec13528c980e6d896e463d))
+* **tags:** detailed view name editor ([f26a140](https://github.com/unigraph-dev/unigraph-dev/commit/f26a140ce092d48c3402aaa6e4d965d899c8b941))
+
+
+
+
+
 ## [0.2.8](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.7...v0.2.8) (2022-04-05)
 
 

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.9](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.8...v0.2.9) (2022-04-14)
+
+
+### Features
+
+* **frontend:** add icon support, make ui more consistent ([34aca85](https://github.com/unigraph-dev/unigraph-dev/commit/34aca850fe6e6d9f25823492a150b02b98796a51))
+
+
+
+
+
 ## [0.2.5](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.4...v0.2.5) (2022-03-13)
 
 
