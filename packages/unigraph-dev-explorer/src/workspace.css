@@ -36,11 +36,11 @@
 }
 
 .flexlayout__tab {
-    transition: width 0.5s, max-width 0.5s, height 0.5s, max-height 0.5s, top 0.5s, left 0.5s;
+    transition: width 0.3s, max-width 0.3s, height 0.3s, max-height 0.3s, top 0.3s, left 0.3s;
 }
 
 .flexlayout__tab_border {
-    transition: width 0.5s, max-width 0.5s, height 0.5s, max-height 0.5s, top 0.5s, left 0.5s, visibility 0.5s;
+    transition: width 0.3s, max-width 0.3s, height 0.3s, max-height 0.3s, top 0.3s, left 0.3s, visibility 0.3s;
 }
 
 .flexlayout__tab_button {
