@@ -1,0 +1,10 @@
+{
+    "type": { "unigraph.id": "$/schema/settings_page" },
+    "title": "Hotkey settings",
+    "subtitle": "Customize Unigraph hotkeys by package",
+    "page": {
+        "name": "Hotkey settings",
+        "env": "react-explorer",
+        "view": { "unigraph.id": "$./executable/settings-view-hotkeys" }
+    }
+}

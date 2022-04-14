@@ -1,0 +1,5 @@
+{
+    "type": { "unigraph.id": "$/schema/hotkey_binding" },
+    "hotkey": "ctrl+e",
+    "command": { "unigraph.id": "$./entity/open_omnibar_command" }
+}

@@ -362,10 +362,17 @@ type OmnibarSummonerType = {
 export function SearchOverlayPopover({ open, setClose, noShadow }: any) {
     const [searchEnabled, setSearchEnabled] = React.useState(false);
     const [summonerState, setSummonerState] = React.useState<Partial<OmnibarSummonerType>>({});
+    // const [omnibarSummoner, setOmnibarSummoner] = React.useState<AppState>(() =>
+    //     window.unigraph.getState('global/omnibarSummoner'),
+    // );
     const overlay = React.useRef(null);
     // console.log(open, searchEnabled);
 
     const omnibarSummoner: AppState<Partial<OmnibarSummonerType>> = window.unigraph.getState('global/omnibarSummoner');
+
+    React.useEffect(() => {
+        setSearchEnabled(open);
+    }, []);
 
     React.useEffect(() => {
         setSearchEnabled(open);
@@ -405,8 +412,8 @@ export function SearchOverlayPopover({ open, setClose, noShadow }: any) {
         document.onkeydown = function (evt) {
             evt = evt || window.event;
             if ((evt.ctrlKey || evt.metaKey) && evt.key === 'e' && !isElectron()) {
-                evt.preventDefault();
-                if (open === undefined) setSearchEnabled(!searchEnabled);
+                // evt.preventDefault();
+                // if (open === undefined) setSearchEnabled(!searchEnabled);
             }
             if (searchEnabled && evt.key === 'Escape') {
                 setSearchEnabled(false);
