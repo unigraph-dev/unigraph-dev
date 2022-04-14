@@ -519,6 +519,17 @@ export function WorkSpace(this: any) {
                                         component: (window.layoutModel.getNodeById(action.data.tabNode) as any)
                                             ?._attributes?.component,
                                     });
+                                } else if (
+                                    action.type === 'FlexLayout_DeleteTab' &&
+                                    action.data.animationShown !== true
+                                ) {
+                                    console.log('Closing');
+                                    const tabEl = document.getElementById(`tabId${action.data.node}`)?.parentElement;
+                                    tabEl?.classList.remove('rendered_tab_button');
+                                    setTimeout(() => {
+                                        model.doAction({ ...action, data: { ...action.data, animationShown: true } });
+                                    }, 200);
+                                    return undefined;
                                 }
                                 return action;
                             }}
