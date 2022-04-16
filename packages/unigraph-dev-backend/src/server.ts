@@ -63,7 +63,7 @@ import {
     UnigraphUpsert,
 } from './custom.d';
 import { checkOrCreateDefaultDataModel, createSchemaCache } from './datamodelManager';
-import { Cache } from './caches';
+import { Cache, initCaches, updateClientCache } from './caches';
 import {
     createSubscriptionLocal,
     MsgCallbackFn,
@@ -207,18 +207,7 @@ export default async function startServer(client: DgraphClient) {
                     serverStates.executableSchedule,
                     serverStates,
                 );
-                Object.values(connections).forEach((el) =>
-                    el.send(
-                        stringify(
-                            {
-                                type: 'cache_updated',
-                                name: 'schemaMap',
-                                result: serverStates.caches.schemas.data,
-                            },
-                            { replacer: getCircularReplacer() },
-                        ),
-                    ),
-                );
+                updateClientCache(serverStates, 'schemaMap', serverStates.caches.schemas.data);
             },
         ],
         after_object_changed: [
@@ -285,9 +274,12 @@ export default async function startServer(client: DgraphClient) {
     let debounceId: NodeJS.Timeout;
 
     Object.assign(serverStates, {
+        connections,
+        clientCaches: {},
         caches,
         subscriptions: _subscriptions,
         dgraphClient,
+        finishedStartups: {},
         hooks,
         defaultHooks: hooks,
         namespaceMap,
@@ -302,36 +294,14 @@ export default async function startServer(client: DgraphClient) {
             serverStates.runningExecutables.push(defn);
             clearTimeout(debounceId);
             debounceId = setTimeout(() => {
-                Object.values(connections).forEach((el) => {
-                    el.send(
-                        stringify(
-                            {
-                                type: 'cache_updated',
-                                name: 'runningExecutables',
-                                result: serverStates.runningExecutables,
-                            },
-                            { replacer: getCircularReplacer() },
-                        ),
-                    );
-                });
+                updateClientCache(serverStates, 'runningExecutables', serverStates.runningExecutables);
             }, 250);
         },
         removeRunningExecutable: (id: any) => {
             serverStates.runningExecutables = serverStates.runningExecutables.filter((el: any) => el.id !== id);
             clearTimeout(debounceId);
             debounceId = setTimeout(() => {
-                Object.values(connections).forEach((el) => {
-                    el.send(
-                        stringify(
-                            {
-                                type: 'cache_updated',
-                                name: 'runningExecutables',
-                                result: serverStates.runningExecutables,
-                            },
-                            { replacer: getCircularReplacer() },
-                        ),
-                    );
-                });
+                updateClientCache(serverStates, 'runningExecutables', serverStates.runningExecutables);
             }, 250);
         },
         entityHeadByType: {},
@@ -346,18 +316,7 @@ export default async function startServer(client: DgraphClient) {
         (data) => {
             namespaceMap = data[0];
             serverStates.namespaceMap = data[0];
-            Object.values(connections).forEach((el) => {
-                el.send(
-                    stringify(
-                        {
-                            type: 'cache_updated',
-                            name: 'namespaceMap',
-                            result: data[0],
-                        },
-                        { replacer: getCircularReplacer() },
-                    ),
-                );
-            });
+            updateClientCache(serverStates, 'namespaceMap', data[0]);
         },
         {
             type: 'query',
@@ -1046,26 +1005,7 @@ export default async function startServer(client: DgraphClient) {
             serverStates.leasedUids.push(...(serverStates.clientLeasedUids[connId] || []));
             delete serverStates.clientLeasedUids[connId];
         });
-        ws.send(
-            stringify(
-                {
-                    type: 'cache_updated',
-                    name: 'namespaceMap',
-                    result: serverStates.namespaceMap,
-                },
-                { replacer: getCircularReplacer() },
-            ),
-        );
-        ws.send(
-            stringify(
-                {
-                    type: 'cache_updated',
-                    name: 'schemaMap',
-                    result: serverStates.caches['schemas'].data,
-                },
-                { replacer: getCircularReplacer() },
-            ),
-        );
+        initCaches(serverStates, ws);
         leaseToClient(connId);
         ws.send(
             stringify(

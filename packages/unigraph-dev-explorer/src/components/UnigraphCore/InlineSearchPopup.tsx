@@ -45,6 +45,7 @@ const ResultDisplay = ({ el }: any) => {
 };
 
 export function InlineSearch() {
+    const [isFulltext, setIsFulltext] = React.useState(false);
     const [ctxMenuState, setCtxMenuState] = React.useState<AppState<Partial<SearchPopupState>>>(
         window.unigraph.getState('global/searchPopup'),
     );
@@ -60,6 +61,15 @@ export function InlineSearch() {
 
     const [currentAction, setCurrentAction] = React.useState(0);
 
+    const titleSearch = (key: string) => {
+        const names = (window.unigraph as any).getCache('searchTitles');
+        const results = (names || []).filter((el: any) => el?.name?.toLowerCase().includes(key?.toLowerCase().trim()));
+        setSearchResults(
+            results
+                .sort((a: any, b: any) => new Date(b._updatedAt || 0).getTime() - new Date(a._updatedAt || 0).getTime())
+                .slice(0, 100),
+        );
+    };
     const search = React.useCallback(
         _.debounce((key: string) => {
             if (key !== undefined && key.length > 1) {
@@ -103,8 +113,8 @@ export function InlineSearch() {
             setSearchResults([]);
             setTopResults([]);
         } else setCurrentAction(0);
-        search(state.search as string);
-    }, [state]);
+        (isFulltext ? search : titleSearch)(state.search as string);
+    }, [state.show, state.search, isFulltext]);
 
     const [actionItems, setActionItems] = React.useState<any[]>([]);
     React.useEffect(() => {
