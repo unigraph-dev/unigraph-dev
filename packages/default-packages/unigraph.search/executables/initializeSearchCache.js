@@ -3,6 +3,7 @@ const newTitles = (
         `(func: uid(u1, u2, u3, u4, u5, u6)) @filter(NOT eq(_hide, true) AND type(Entity)) @normalize {
           uid
           _updatedAt: _updatedAt
+          incoming: count(unigraph.origin)
           type { type: <unigraph.id> }
               <unigraph.indexes> {
                   name {
