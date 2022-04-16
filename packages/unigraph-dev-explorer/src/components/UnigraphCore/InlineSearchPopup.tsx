@@ -3,6 +3,7 @@ import React from 'react';
 import { AppState } from 'unigraph-dev-common/lib/types/unigraph';
 import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 import _ from 'lodash';
+import Levenshtein from 'levenshtein';
 import { parseQuery } from './UnigraphSearch';
 import { setSearchPopup } from '../../examples/notes/searchPopup';
 import { SearchPopupState } from '../../global.d';
@@ -64,6 +65,14 @@ export function InlineSearch() {
     const titleSearch = (key: string) => {
         const names = (window.unigraph as any).getCache('searchTitles');
         const results = (names || []).filter((el: any) => el?.name?.toLowerCase().includes(key?.toLowerCase().trim()));
+        if (key?.length)
+            setTopResults(
+                results
+                    .filter((it: any) => it.incoming >= 5)
+                    .sort((a: any, b: any) => b.incoming - a.incoming)
+                    .slice(0, 10),
+            );
+
         setSearchResults(
             results
                 .sort((a: any, b: any) => new Date(b._updatedAt || 0).getTime() - new Date(a._updatedAt || 0).getTime())
@@ -112,6 +121,7 @@ export function InlineSearch() {
         if (!state.show) {
             setSearchResults([]);
             setTopResults([]);
+            setIsFulltext(false);
         } else setCurrentAction(0);
         (isFulltext ? search : titleSearch)(state.search as string);
     }, [state.show, state.search, isFulltext]);
@@ -176,6 +186,10 @@ export function InlineSearch() {
                 ev.preventDefault();
                 ev.stopPropagation();
                 ctxMenuState.setValue({ show: false });
+            } else if (ev.key === 'f' && (ev.ctrlKey || ev.metaKey)) {
+                ev.preventDefault();
+                ev.stopPropagation();
+                setIsFulltext((ft: any) => !ft);
             }
         };
 
@@ -208,42 +222,61 @@ export function InlineSearch() {
                     elevation: 4,
                     style: {
                         maxHeight: '320px',
-                        padding: '10px',
+                        maxWidth: '600px',
+                        padding: '0px',
                         borderRadius: '6px',
+                        display: 'flex',
+                        flexDirection: 'column',
                     },
                 }}
             >
-                {Object.entries(_.groupBy(actionItems, (el: any) => el[2])).map(([key, value]) => {
-                    return (
-                        <>
-                            {key === 'default' ? (
-                                []
-                            ) : (
-                                <Typography style={{ color: 'darkgray', marginTop: '4px' }}>
-                                    {key === 'top' ? 'Top linked' : 'Recently updated'}
-                                </Typography>
-                            )}
-                            {value.map((el: any, index: number) => (
-                                <div
-                                    onClick={el[1]}
-                                    style={{
-                                        ...(el[3] === currentAction
-                                            ? {
-                                                  borderRadius: '2px',
-                                                  backgroundColor: 'gainsboro',
-                                              }
-                                            : {}),
-                                        cursor: 'pointer',
-                                        padding: '2px',
-                                    }}
-                                    id={`globalSearchItem_${el[3] === currentAction ? 'current' : ''}`}
-                                >
-                                    {el[0]}
-                                </div>
-                            ))}
-                        </>
-                    );
-                })}
+                <div style={{ overflowX: 'auto', padding: '8px' }}>
+                    {Object.entries(_.groupBy(actionItems, (el: any) => el[2])).map(([key, value]) => {
+                        return (
+                            <>
+                                {key === 'default' ? (
+                                    []
+                                ) : (
+                                    <Typography style={{ color: 'darkgray', marginTop: '4px' }}>
+                                        {key === 'top'
+                                            ? `${isFulltext ? 'Top linked' : 'Relevant'}`
+                                            : 'Recently updated'}
+                                    </Typography>
+                                )}
+                                {value.map((el: any, index: number) => (
+                                    <div
+                                        onClick={el[1]}
+                                        style={{
+                                            ...(el[3] === currentAction
+                                                ? {
+                                                      borderRadius: '2px',
+                                                      backgroundColor: 'gainsboro',
+                                                  }
+                                                : {}),
+                                            cursor: 'pointer',
+                                            padding: '2px',
+                                        }}
+                                        id={`globalSearchItem_${el[3] === currentAction ? 'current' : ''}`}
+                                    >
+                                        {el[0]}
+                                    </div>
+                                ))}
+                            </>
+                        );
+                    })}
+                </div>
+                <div
+                    style={{
+                        backgroundColor: 'var(--app-drawer-background-color)',
+                        padding: '8px',
+                    }}
+                >
+                    <Typography variant="body2" style={{ color: 'var(--secondary-text-color)' }}>
+                        <kbd>⌘</kbd>+<kbd>F</kbd> {!isFulltext ? 'Fulltext' : 'Title-only'} search
+                        <kbd style={{ marginLeft: '16px' }}>↑</kbd>/<kbd>↓</kbd> Navigate
+                        <kbd style={{ marginLeft: '16px' }}>Enter</kbd> Link text
+                    </Typography>
+                </div>
             </Popover>
         </div>
     );
