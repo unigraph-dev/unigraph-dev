@@ -27,7 +27,7 @@ import { buildExecutable } from './executableManager';
 import { callHooks } from './hooks';
 import { addNotification } from './notifications';
 import { createSubscriptionLocal, createSubscriptionWS, getFragment, resolveSubscriptionUpdate } from './subscriptions';
-import { Cache } from './caches';
+import { Cache, updateClientCache } from './caches';
 import { getQueryString } from './search';
 
 // eslint-disable-next-line import/prefer-default-export
@@ -739,6 +739,9 @@ export function getLocalUnigraphAPI(
             if (!resKeyUid) throw new Error('Invalid sync key - no changes made');
             const deleter = (api.deleteItemFromArray as any)(resKeyUid, uids, resUid, [], false);
             return deleter;
+        },
+        updateClientCache(key: string, newValue: any) {
+            return updateClientCache(states, key, newValue);
         },
     };
 

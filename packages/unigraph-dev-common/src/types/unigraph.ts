@@ -117,7 +117,8 @@ export interface Unigraph<TT = WebSocket | undefined> {
     getStatus(): Promise<any>;
     /** The specified callback will be invoked once initial Unigraph connecton is established. */
     onReady?(callback: () => void): void;
-    onCacheUpdated?(cache: string, callback: (newEl: any) => void): void;
+    onCacheUpdated?(cache: string, callback: (newEl: any) => void, currentCache?: boolean): void;
+    getCache?: (cache: string) => any;
     /**
      * Create a new schema using the json-ts format and add it to cache.
      *
@@ -554,5 +555,13 @@ export interface Unigraph<TT = WebSocket | undefined> {
      * @param uids The list of uids that have been synced successfully.
      */
     acknowledgeSync(resource: string, key: string, uids: any[]): any;
+    /**
+     * Updates client cache with given key and value.
+     * Clients will be immediately notified of this cache update through websocket.
+     *
+     * @param key A string key to identify the cache
+     * @param newValue Tne new value to set
+     */
+    updateClientCache?(key: string, newValue: any): any;
 }
 /** End of unigraph interface */ // Don't remove this line - needed for Monaco to work

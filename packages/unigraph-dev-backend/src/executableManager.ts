@@ -116,6 +116,10 @@ export function initExecutables(
                 buildExecutable(el, { ...context, definition: el, params }, unigraph, states)(),
             );
         }
+        if (key.startsWith('0x') && el.env === 'backend-startup/js' && !states.finishedStartups[key]) {
+            states.finishedStartups[key] = true;
+            buildExecutable(el, { ...context, definition: el, params: {} }, unigraph, states)();
+        }
     });
     states.hooks = _.mergeWith({}, states.defaultHooks, newHooks, mergeWithConcatArray);
 }
@@ -187,6 +191,7 @@ const returnSrcFromEnvClientJs: ExecRunner = (src, context, unigraph) => src;
 
 export const environmentRunners = {
     'routine/js': runEnvRoutineJs,
+    'backend-startup/js': runEnvRoutineJs,
     'lambda/js': runEnvLambdaJs,
     'component/react-jsx': runEnvReactJSX,
     'client/js': returnSrcFromEnvClientJs, // TODO: should we just forbid this in backend?

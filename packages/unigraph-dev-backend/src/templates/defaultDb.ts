@@ -13,6 +13,7 @@ import { pkg as calendar } from 'unigraph-dev-common/lib/data/unigraph.calendar.
 import { pkg as notes } from 'unigraph-dev-common/lib/data/unigraph.notes.pkg';
 import { pkg as contacts } from 'unigraph-dev-common/lib/data/unigraph.contacts.pkg';
 import { pkg as home } from 'unigraph-dev-common/lib/data/unigraph.home.pkg';
+import { pkg as search } from 'unigraph-dev-common/lib/data/unigraph.search.pkg';
 
 // Userspace packages
 import { pkg as onboarding } from 'unigraph-dev-common/lib/data/unigraph.onboarding.pkg';
@@ -350,6 +351,7 @@ export const defaultPackages = [
     execexample,
     coreuser,
     home,
+    search,
     calendar,
     notes,
     contacts,

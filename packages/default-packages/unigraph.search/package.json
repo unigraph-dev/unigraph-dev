@@ -1,0 +1,18 @@
+{
+    "displayName": "Unigraph search",
+    "version": "0.2.9",
+    "description": "Search commons for Unigraph",
+    "name": "unigraph.search",
+    "unigraph": {
+        "executables": [
+            {
+                "id": "initialize-search-cache",
+                "env": "backend-startup/js",
+                "src": "executables/initializeSearchCache.js",
+                "periodic": "* * * * *",
+                "editable": true,
+                "name": "Initializes search cache for backend"
+            }
+        ]
+    }
+}

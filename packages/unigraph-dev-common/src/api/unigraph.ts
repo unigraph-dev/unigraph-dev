@@ -397,11 +397,13 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
                 };
                 sendEvent(connection, 'get_status', {}, id);
             }),
-        onCacheUpdated: (cache, callback) => {
+        onCacheUpdated: (cache, callback, currentCache) => {
             if (Array.isArray(cacheCallbacks[cache])) {
                 cacheCallbacks[cache].push(callback);
             } else cacheCallbacks[cache] = [callback];
+            if (currentCache) callback(caches[cache]);
         },
+        getCache: (cache) => caches[cache],
         createSchema: (schema) =>
             new Promise((resolve, reject) => {
                 const id = getRandomInt();
