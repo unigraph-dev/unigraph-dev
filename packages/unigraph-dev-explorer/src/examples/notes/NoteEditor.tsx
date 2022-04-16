@@ -228,7 +228,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                     getCurrentText(),
                     textInputRef,
                     caret,
-                    async (match: any, newName: string, newUid: string) => {
+                    async (match: any, newName: string, newUid: string, newType: string) => {
                         const parents = getParentsAndReferences(
                             dataRef.current['~_value'],
                             dataRef.current['unigraph.origin'] || [],
@@ -244,11 +244,13 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                         edited.current = true;
                         // resetEdited();
                         setCaret(document, textInputRef.current, match.index + newName.length + 4);
-                        await window.unigraph.updateObject(
+                        window.unigraph.updateObject(
                             locateInlineChildren(dataRef.current).uid,
                             {
                                 _value: {
+                                    uid: locateInlineChildren(dataRef.current)._value.uid,
                                     children: {
+                                        uid: locateInlineChildren(dataRef.current)._value.children?.uid,
                                         '_value[': [
                                             {
                                                 _key: `[[${newName}]]`,
@@ -256,17 +258,18 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                                                     'dgraph.type': ['Interface'],
                                                     type: { 'unigraph.id': '$/schema/interface/semantic' },
                                                     _hide: true,
-                                                    _value: { uid: newUid },
+                                                    _value: { uid: newUid, type: { 'unigraph.id': newType } },
                                                 },
                                             },
                                         ],
                                     },
                                 },
                             },
-                            true,
+                            false,
                             false,
                             callbacks.subsId,
                             parents,
+                            true,
                         );
                         touchParents(data);
                         window.unigraph.getState('global/searchPopup').setValue({ show: false });
