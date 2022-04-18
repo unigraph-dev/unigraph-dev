@@ -76,7 +76,7 @@ export function InlineSearch() {
         setSearchResults(
             results
                 .sort((a: any, b: any) => new Date(b._updatedAt || 0).getTime() - new Date(a._updatedAt || 0).getTime())
-                .slice(0, 100),
+                .slice(0, key?.length > 1 ? 100 : 10),
         );
     };
     const search = React.useCallback(

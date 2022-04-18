@@ -14,7 +14,7 @@ function TagList({ data }: any) {
         </div>
     );
 }
-const getLowercaseName = (a: any) => a.get('name').as('primitive').toLowerCase();
+const getLowercaseName = (a: any) => a?.get('name')?.as('primitive').toLowerCase();
 
 export const TagListSubscription = withUnigraphSubscription(
     TagList,
