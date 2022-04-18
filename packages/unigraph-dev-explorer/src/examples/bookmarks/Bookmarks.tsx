@@ -63,7 +63,7 @@ export const createBookmark = async (text: string, add = true) => {
     return {
         name,
         children: tags.map((tagName) => ({
-            type: { 'unigraph.id': '$/schema/subentity' },
+            type: { 'unigraph.id': '$/schema/interface/semantic' },
             _value: {
                 type: { 'unigraph.id': '$/schema/tag' },
                 name: tagName,

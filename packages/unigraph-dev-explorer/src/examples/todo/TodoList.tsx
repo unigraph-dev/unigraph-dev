@@ -174,6 +174,7 @@ const quickAdder = async (
     refs?: any,
 ) => {
     const parsed = parseTodoObject(inputStr, refs);
+    console.log(parsed);
     if (!preview) {
         // eslint-disable-next-line no-return-await
         const uid = await window.unigraph.addObject(parsed, '$/schema/todo');
