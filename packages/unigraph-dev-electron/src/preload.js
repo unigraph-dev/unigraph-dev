@@ -29,6 +29,20 @@ window.electronPreload = () => {
     ipcRenderer.on('newTabByUrl', (event, tab) => {
         window.wsnavigator(tab);
     });
+    ipcRenderer.on('closeTab', (event) => {
+        const currentTab = window.layoutModel.getActiveTabset().getSelectedNode().getId();
+        if (currentTab === 'home') {
+            // should close the window instead
+            ipcRenderer.send('hideWindow');
+        } else {
+            window.layoutModel.doAction({
+                type: 'FlexLayout_DeleteTab',
+                data: {
+                    node: currentTab,
+                },
+            });
+        }
+    });
 };
 
 ipcRenderer.on('loading_log', (event, newLog) => {

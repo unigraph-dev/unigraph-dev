@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Menu, Tray, nativeImage, globalShortcut, shell } = require('electron');
+const { app, BrowserWindow, Menu, Tray, nativeImage, globalShortcut, shell, MenuItem } = require('electron');
 const path = require('path');
 const os = require('os');
 const child_process = require('child_process');
@@ -13,6 +13,31 @@ const Store = require('electron-store');
 const net = require('net');
 const { electron } = require('process');
 const { createTrayMenu } = require('./tray');
+
+const addMenu = (mainWindow) => {
+    const newMenu = Menu.getApplicationMenu().items.map((it) => {
+        let sm;
+        if (it.submenu?.items?.some((subIt) => subIt.role === 'close')) {
+            console.log('c');
+
+            if (it.submenu?.items?.map)
+                sm = it.submenu.items.map((subIt) =>
+                    subIt.role === 'close'
+                        ? {
+                              accelerator: 'CmdOrCtrl+W',
+                              click: () => {
+                                  mainWindow.webContents.send('closeTab');
+                              },
+                              label: 'Close Tab',
+                          }
+                        : subIt,
+                );
+            else sm = it.submenu.items;
+        }
+        return { ...it, ...(sm ? { submenu: sm } : {}) };
+    });
+    Menu.setApplicationMenu(Menu.buildFromTemplate(newMenu));
+};
 
 const store = new Store();
 
@@ -238,11 +263,12 @@ app.whenReady().then(() => {
     trayMenu = createTrayMenu((newTemplate) => {
         tray.setContextMenu(Menu.buildFromTemplate(newTemplate));
     });
-    globalShortcut.register('Alt+Tab', () => {
-        if (todayWindow) {
-            // todayWindow.isVisible() ? todayWindow.hide() : todayWindow.show();
-        }
-    });
+    // globalShortcut.register('Alt+Tab', () => {
+    //     if (todayWindow) {
+    //         // todayWindow.isVisible() ? todayWindow.hide() : todayWindow.show();
+    //     }
+    // });
+
     globalShortcut.register('CommandOrControl+E', () => {
         if (omnibar) {
             omnibar.isVisible() ? closeOmnibar() : showOmnibar();
@@ -285,6 +311,7 @@ app.whenReady().then(() => {
                 }
             }),
         );
+        addMenu(mainWindow);
         windows.map((el) => el.on('hide', (event) => {}));
         mainWindow.webContents.on('will-navigate', function (e, url) {
             e.preventDefault();
@@ -303,6 +330,10 @@ app.whenReady().then(() => {
 
 ipcMain.on('favorites_updated', (event, args) => {
     if (trayMenu) trayMenu.setFavorites(args);
+});
+
+ipcMain.on('hideWindow', () => {
+    mainWindow.hide();
 });
 // const applescript = require('applescript');
 
