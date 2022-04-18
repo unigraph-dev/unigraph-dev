@@ -1,5 +1,5 @@
 unigraph.getState('global/omnibarSummoner').setValue({
-    show: true,
+    show: !unigraph.getState('global/omnibarSummoner').value?.show,
     tooltip: '',
     defaultValue: '',
 });
