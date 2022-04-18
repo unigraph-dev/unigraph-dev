@@ -393,6 +393,10 @@ export function SearchOverlayPopover({ open, setClose, noShadow }: any) {
     }, [summonerState]);
 
     React.useEffect(() => {
+        setSearchEnabled(!!summonerState.show);
+    }, [summonerState]);
+
+    React.useEffect(() => {
         if (searchEnabled) {
             const listener = (event: MouseEvent) => {
                 const withinBoundaries = overlay && event.composedPath().includes((overlay as any).current);
