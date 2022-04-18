@@ -10,7 +10,7 @@ import { getContrast } from '../../utils';
 
 const getBgColor = (tag: any) => (tag?.color?.startsWith && tag.color.startsWith('#') ? tag.color : 'unset');
 export const Tag: DynamicViewRenderer = ({ data, callbacks }) => {
-    const [tag, setTag] = React.useState(() => (data._value ? unpad(data) : data));
+    const tag = data._value ? unpad(data) : data;
 
     return (
         <Chip

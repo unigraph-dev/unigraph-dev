@@ -40,33 +40,32 @@ function AdderComponent({ input, setInput, open, setClose, callback, summonerToo
         if (allAdders[parsedInput.key]) {
             allAdders[parsedInput.key].adder(parsedInput.val).then((res: any) => {
                 const [object, type] = res;
-                window.unigraph.getSchemas().then((schemas: any) => {
-                    try {
-                        const padded = buildUnigraphEntity(JSON.parse(JSON.stringify(object)), type, schemas);
-                        setToAdd(
-                            <div
-                                onClickCapture={(ev) => {
-                                    ev.stopPropagation();
+                const schemas = (window.unigraph as any).getSchemaMap();
+                try {
+                    const padded = buildUnigraphEntity(JSON.parse(JSON.stringify(object)), type, schemas);
+                    setToAdd(
+                        <div
+                            onClickCapture={(ev) => {
+                                ev.stopPropagation();
+                            }}
+                        >
+                            <AutoDynamicView
+                                object={new UnigraphObject(padded)}
+                                options={{ noDrag: true, noDrop: true, noClickthrough: true }}
+                                style={{
+                                    border: 'gray',
+                                    borderStyle: 'dashed',
+                                    borderWidth: 'thin',
+                                    margin: '2px',
+                                    borderRadius: '8px',
+                                    padding: '4px',
                                 }}
-                            >
-                                <AutoDynamicView
-                                    object={new UnigraphObject(padded)}
-                                    options={{ noDrag: true, noDrop: true, noClickthrough: true }}
-                                    style={{
-                                        border: 'gray',
-                                        borderStyle: 'dashed',
-                                        borderWidth: 'thin',
-                                        margin: '2px',
-                                        borderRadius: '8px',
-                                        padding: '4px',
-                                    }}
-                                />
-                            </div>,
-                        );
-                    } catch (e) {
-                        console.log(e);
-                    }
-                });
+                            />
+                        </div>,
+                    );
+                } catch (e) {
+                    console.log(e);
+                }
             });
         }
     }, [parsedInput]);
