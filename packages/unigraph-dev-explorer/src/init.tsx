@@ -80,6 +80,11 @@ export function init(hostname?: string) {
         browserId,
     };
 
+    // Set up basic anonymized analytics by default
+    if (window.localStorage.getItem('enableAnalytics') === null) {
+        window.localStorage.setItem('enableAnalytics', 'true');
+    }
+
     let userSettings = defaultSettings;
 
     if (!isJsonString(window.localStorage.getItem('userSettings'))) {
@@ -297,10 +302,10 @@ function initBacklinkManager() {
 }
 
 /**
- * Initializes analytics when user explicitly opted in.
+ * Initializes analytics depends on user opt-in status
  *
  * Information we collect:
- * - basic info: time, email (user-given), browser, os, country
+ * - basic info: time, email (user-given, with explicit permission), browser, os, country
  * - user actions: click, keypress - anonimized into 15 second chunks
  *
  * We use them to calculate session length and usage frequency.
