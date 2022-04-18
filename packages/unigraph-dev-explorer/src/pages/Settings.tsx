@@ -95,32 +95,67 @@ export default function Settings() {
                 <ListSubheader component="div" id="nested-list-subheader" key="analyticsHeader">
                     Analytics
                 </ListSubheader>
+                <ListItem
+                    sx={{ ...pointerHoverSx, display: analyticsMode ? '' : 'none' }}
+                    onClick={(e) => false}
+                    key="analyticsOptedIn"
+                >
+                    <ListItemText
+                        id="switch-list-label-analytics-optin-mode"
+                        primary="Opt out of analytics"
+                        secondary="Switch to opt out of analytics. To opt in again, enter your email below."
+                    />
+                    <ListItemSecondaryAction style={{ display: analyticsMode ? '' : 'none' }}>
+                        <Switch
+                            edge="end"
+                            onChange={(e) => {
+                                analyticsState.setValue(!analyticsMode);
+                            }}
+                            checked={analyticsMode}
+                            inputProps={{
+                                'aria-labelledby': 'switch-list-label-optin-analytics-mode',
+                            }}
+                        />
+                    </ListItemSecondaryAction>
+                </ListItem>
                 <ListItem sx={pointerHoverSx} onClick={(e) => false} key="analytics">
                     <ListItemText
                         id="switch-list-label-analytics-mode"
-                        primary="Enable analytics"
+                        primary={!analyticsMode ? 'Enable analytics' : 'Update email'}
                         secondary={
-                            <span>
-                                Opt-in to analytics with mixpanel by entering your email address.
-                                <br />
-                                We will only record your usage length and basic information (OS, country).
-                            </span>
+                            !analyticsMode ? (
+                                <span>
+                                    Opt-in to analytics by clicking &quot;Opt-in&quot;. <br />
+                                    Optionally, you can enter your email address before clicking to associate your
+                                    analytics information with your email.
+                                    <br />
+                                    We will only record your usage length and basic information (OS, country).
+                                </span>
+                            ) : (
+                                <span>
+                                    Associate your analytics information with your email (optional). <br />
+                                    This will allow us to understand how you use Unigraph, and contact you when things
+                                    are broken.
+                                </span>
+                            )
                         }
                     />
                     <ListItemSecondaryAction>
                         <TextField value={email} onChange={(ev) => setEmail(ev.target.value)} />
                         <Button
                             onClick={() => {
-                                analyticsState.setValue(email.length !== 0);
-                                window.localStorage.setItem('email', email);
-                                (window as any).mixpanel.identify(email);
-                                (window as any).mixpanel.people.set({
-                                    $name: email,
-                                    $email: email,
-                                });
+                                analyticsState.setValue(true);
+                                if (email.length > 0) {
+                                    window.localStorage.setItem('email', email);
+                                    (window as any).mixpanel.identify(email);
+                                    (window as any).mixpanel.people.set({
+                                        $name: email,
+                                        $email: email,
+                                    });
+                                }
                             }}
                         >
-                            Opt-in
+                            {!analyticsMode ? 'Opt-in' : 'Update email'}
                         </Button>
                     </ListItemSecondaryAction>
                 </ListItem>
