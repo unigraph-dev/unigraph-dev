@@ -1,7 +1,7 @@
 # This nix expression re-packages the AppImage version of Unigraph for NixOS.
 #
-# It can be directly build from GitHub
-#    $ nix-build github:unigraph-dev/unigraph-dev
+# Use `nix-build` to build the package on your machine.
+#    $ nix-build $PWD
 #    $ ls -l $PWD/result/bin
 
 with import <nixpkgs> {};
