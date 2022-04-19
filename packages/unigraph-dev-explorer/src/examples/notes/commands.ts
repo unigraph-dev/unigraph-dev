@@ -7,6 +7,7 @@ import { parseTodoObject } from '../todo/parseTodoObject';
 import { NoteEditorContext } from './types';
 import { getParentsAndReferences } from '../../components/ObjectView/backlinksUtils';
 import { addCommand, CommandState, getChildrenStubMap, getCurrentFocus } from './history';
+import { isNoteBlockCollapsed } from './useOutlineCollapsed';
 
 export const focusUid = (obj: any, goingUp?: boolean, caret?: number) => {
     // console.log(document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]);
@@ -77,6 +78,7 @@ export const addChildren = (
             focusCaret: -1,
         },
     ]);
+    console.log((window.unigraph as any).getSchemaMap());
     window.unigraph.updateObject(
         data._value.uid,
         {
@@ -174,29 +176,44 @@ export const addChildren = (
     window.unigraph.touch(parents.map((el) => el.uid));
 };
 
-export const splitChild = (data: any, context: NoteEditorContext, index: number, oldtext: string, at: number) => {
-    // console.log(JSON.stringify([data, index, at], null, 4))
-    console.log(getSubentities(data).sort(byElementIndex)[index]?._value?._value);
-    if (
-        oldtext.slice(at) === '' &&
-        !getSubentities(getSubentities(data).sort(byElementIndex)[index]?._value?._value).length
-    ) {
-        addChild(data, context, index, oldtext);
+/**
+ * @param parent The parent note block of the note block to split.
+ * @param context
+ * @param index Index of the note block to split among its siblings.
+ * @param oldText The text of the note block to split.
+ * @param at The position in `oldText` where splitting should take place.
+ */
+export const splitChild = (parent: any, context: NoteEditorContext, index: number, oldText: string, at: number) => {
+    const noteBlockToSplit = getSubentities(parent).sort(byElementIndex)[index]?._value?._value;
+
+    function hasChildren(noteBlock: any) {
+        return getSubentities(noteBlock).length;
+    }
+
+    /** Split a note block that has children and is collapsed. TODO: Undo command. */
+    if (hasChildren(noteBlockToSplit) && isNoteBlockCollapsed(noteBlockToSplit.uid)) {
+        addChildren(parent, context, index, [oldText.slice(at)], oldText.slice(0, at));
         return;
     }
-    const parents = getParents(data);
-    if (!data._hide) parents.push({ uid: data.uid });
+
+    if (oldText.slice(at) === '' && !hasChildren(noteBlockToSplit)) {
+        addChild(parent, context, index, oldText);
+        return;
+    }
+
+    const parents = getParents(parent);
+    if (!parent._hide) parents.push({ uid: parent.uid });
     let currSubentity = -1;
     let isInserted = false;
-    removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
+    removeAllPropsFromObj(parent, ['~_value', '~unigraph.origin', 'unigraph.origin']);
     let toDelete: any = [];
     const undoCommand: CommandState = [];
-    const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
+    const children = getSemanticChildren(parent)?.['_value['].sort(byElementIndex);
     const newChildren = children?.reduce((prev: any[], el: any, elindex: any) => {
         if (el?._value?.type?.['unigraph.id'] === '$/schema/subentity' && ++currSubentity === index) {
             isInserted = true;
             /* */
-            const prevText = oldtext.slice(0, at);
+            const prevText = oldText.slice(0, at);
             const splittedEntity = buildUnigraphEntity(
                 {
                     text: {
@@ -225,12 +242,12 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
             el._value._hide = true;
             el._value._value._hide = true;
             const loc = el._value._value._value.text || el._value._value._value.name;
-            loc._value._value['_value.%'] = oldtext.slice(at);
+            loc._value._value['_value.%'] = oldText.slice(at);
             undoCommand.push({
                 type: 'textual',
                 subsId: context.callbacks.subsId,
                 uid: loc._value._value.uid,
-                oldText: oldtext,
+                oldText,
                 ...getCurrentFocus(),
             });
             // distribute references accordingly
@@ -288,14 +305,14 @@ export const splitChild = (data: any, context: NoteEditorContext, index: number,
     undoCommand.push({
         type: 'children',
         subsId: context.callbacks.subsId,
-        uid: data._value.uid,
-        oldChildrenUid: data._value?.children?.uid,
-        oldData: getChildrenStubMap(data._value?.children),
+        uid: parent._value.uid,
+        oldChildrenUid: parent._value?.children?.uid,
+        oldData: getChildrenStubMap(parent._value?.children),
     });
     addCommand(context.historyState.value, undoCommand);
     window.unigraph.updateObject(
-        data?._value?.uid,
-        { children: { _displayAs: data?._value?.children?._displayAs, '_value[': newChildren } },
+        parent?._value?.uid,
+        { children: { _displayAs: parent?._value?.children?._displayAs, '_value[': newChildren } },
         false,
         false,
         context.callbacks.subsId,

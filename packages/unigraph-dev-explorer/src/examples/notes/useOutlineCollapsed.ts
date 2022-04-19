@@ -45,3 +45,7 @@ export function useOutlineCollapsed(noteBlockUid: string): [boolean, () => void]
     );
     return [isCollapsed, toggleCollapsed];
 }
+
+export function isNoteBlockCollapsed(noteBlockUid: string): boolean {
+    return useOutlineCollapsedMap.getState().collapsedMap[noteBlockUid];
+}
