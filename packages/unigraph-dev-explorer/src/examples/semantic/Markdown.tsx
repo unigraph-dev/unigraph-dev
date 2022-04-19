@@ -60,29 +60,30 @@ const addPage = async (childrenRoot: any, newName: any, subsId: any) => {
         },
         '$/schema/note_block',
     );
-    window.unigraph.updateObject(
-        childrenRoot.uid,
-        {
-            _value: {
-                children: {
-                    '_value[': [
-                        {
-                            _key: `[[${newName}]]`,
-                            _value: {
-                                'dgraph.type': ['Interface'],
-                                type: { 'unigraph.id': '$/schema/interface/semantic' },
-                                _hide: true,
-                                _value: { uid: newUid[0] },
+    if (childrenRoot.uid)
+        window.unigraph.updateObject(
+            childrenRoot.uid,
+            {
+                _value: {
+                    children: {
+                        '_value[': [
+                            {
+                                _key: `[[${newName}]]`,
+                                _value: {
+                                    'dgraph.type': ['Interface'],
+                                    type: { 'unigraph.id': '$/schema/interface/semantic' },
+                                    _hide: true,
+                                    _value: { uid: newUid[0] },
+                                },
                             },
-                        },
-                    ],
+                        ],
+                    },
                 },
             },
-        },
-        true,
-        false,
-        subsId,
-    );
+            true,
+            false,
+            subsId,
+        );
     return newUid[0];
 };
 
@@ -103,7 +104,7 @@ const tryFindLinkToAdd = async (childrenRoot: any, name: string, subsId: any) =>
         }`,
     ]);
     const linkFound = res[0].sort((a: any, b: any) => b.popularity - a.popularity)[0];
-    if (linkFound) {
+    if (linkFound && childrenRoot.uid) {
         console.log('k');
         window.unigraph.updateObject(
             childrenRoot.uid,

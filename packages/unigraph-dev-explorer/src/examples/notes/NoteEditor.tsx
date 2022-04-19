@@ -8,6 +8,11 @@ import { parseUnigraphHtml } from '../../clipboardUtils';
 import { getParentsAndReferences } from '../../components/ObjectView/backlinksUtils';
 import { inlineTextSearch, inlineObjectSearch } from '../../components/UnigraphCore/InlineSearchPopup';
 import { debounce, scrollIntoViewIfNeeded, selectUid, setCaret, TabContext } from '../../utils';
+import {
+    GetChangesForAutoComplete,
+    changesForOpenScopedChar,
+    changesForOpenScopedMarkdownLink,
+} from '../../utils/autocomplete';
 import { htmlToMarkdown } from '../semantic/Markdown';
 import { permanentlyDeleteBlock } from './commands';
 import { addTextualCommand, applyCommand } from './history';
@@ -28,45 +33,6 @@ const TextareaAutosizeStyled = styled(TextareaAutosize)(({ theme }) => ({
         background: 'transparent',
     },
 }));
-
-type ScopeForAutoComplete = { currentText: string; caret: number; middle: string; end: string };
-type ChangesForAutoComplete = { newText: string; newCaret: number; newCaretOffset: number };
-type GetChangesForAutoComplete = (scope: ScopeForAutoComplete, ev: KeyboardEvent) => ChangesForAutoComplete;
-
-const changesForOpenScopedChar = (
-    { currentText, caret, middle, end }: ScopeForAutoComplete,
-    ev: KeyboardEvent,
-): ChangesForAutoComplete => {
-    const isChar = (c: string) => c !== ' ' && c !== '\n' && c !== '\t' && c !== undefined;
-    const nextChar = currentText?.[caret];
-    const shouldNotOpen = middle.length === 0 && isChar(nextChar) && nextChar !== closeScopeCharDict[ev.key];
-
-    return {
-        newText: `${currentText.slice(0, caret)}${ev.key}${middle}${
-            shouldNotOpen ? '' : closeScopeCharDict[ev.key]
-        }${end}${currentText.slice(caret + (middle + end).length)}`,
-        newCaret: caret + 1,
-        newCaretOffset: middle.length,
-    };
-};
-const changesForOpenScopedMarkdownLink = (scope: ScopeForAutoComplete, ev: KeyboardEvent): ChangesForAutoComplete => {
-    const { currentText, caret, middle, end } = scope;
-
-    if (isUrl(middle)) {
-        return {
-            newText: `${currentText.slice(0, caret)}[](${middle})${end}${currentText.slice(
-                caret + (middle + end).length,
-            )}`,
-            newCaret: caret + 1,
-            newCaretOffset: 0,
-        };
-    }
-    return {
-        newText: `${currentText.slice(0, caret)}[${middle}]()${end}${currentText.slice(caret + (middle + end).length)}`,
-        newCaret: caret + middle.length + 3,
-        newCaretOffset: 0,
-    };
-};
 
 const touchParents = (data: any) => {
     const [parents] = getParentsAndReferences(data['~_value'], data['unigraph.origin']);
@@ -426,6 +392,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
         [callbacks],
     );
 
+    // TODO: merge all these into autocomplete.ts in utils
     const handleScopedAutoComplete = React.useCallback(
         (changeTextAndCaret: GetChangesForAutoComplete, ev: KeyboardEvent) => {
             ev.preventDefault();

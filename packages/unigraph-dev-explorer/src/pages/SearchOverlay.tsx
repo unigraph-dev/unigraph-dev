@@ -8,6 +8,7 @@ import { AutoDynamicView } from '../components/ObjectView/AutoDynamicView';
 import { inlineTextSearch } from '../components/UnigraphCore/InlineSearchPopup';
 import { parseQuery } from '../components/UnigraphCore/UnigraphSearch';
 import { isElectron, trivialTypes, typeHasDynamicView } from '../utils';
+import { handleOpenScopedChar } from '../utils/autocomplete';
 
 const groups = [
     {
@@ -82,6 +83,12 @@ function AdderComponent({ input, setInput, open, setClose, callback, summonerToo
                 }}
                 inputRef={tf}
                 value={input}
+                onKeyDown={(ev) => {
+                    if (ev.key === '[')
+                        handleOpenScopedChar(ev as any, tf, input, (ipt: string) => {
+                            setInput(ipt);
+                        });
+                }}
                 onChange={(ev) => {
                     const newContent = ev.target.value;
                     const caret = ev.target.selectionStart || 0;
