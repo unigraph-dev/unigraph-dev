@@ -476,7 +476,7 @@ export function Outline({
                             cx="12"
                             cy="12"
                             r="10"
-                            style={{ fill: isCollapsed ? colors.grey[200] : 'transparent' }}
+                            style={{ fill: showCollapse && isCollapsed ? colors.grey[200] : 'transparent' }}
                         />
                         <circle cx="12" cy="12" r="4" style={{ fill: 'black' }} />
                     </svg>
