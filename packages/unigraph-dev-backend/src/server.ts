@@ -927,6 +927,7 @@ export default async function startServer(client: DgraphClient) {
     };
 
     await Promise.all(Object.values(caches).map((el: Cache<any>) => el.updateNow()));
+    updateClientCache(serverStates, 'schemaMap', serverStates.caches.schemas.data);
 
     initEntityHeads(
         serverStates,
