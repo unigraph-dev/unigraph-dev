@@ -471,13 +471,23 @@ export const deleteChildren = (data: any, context: NoteEditorContext, index: num
     window.unigraph.touch(parents.map((ell) => ell.uid));
 };
 
-export const unsplitChild = async (data: any, context: NoteEditorContext, index: number, currString: string) => {
+/**
+ * @param parent The parent note block of the note block to unsplit.
+ * @param context
+ * @param index Index of the note block to unsplit among its siblings.
+ * @param currString The text of the note block to unsplit.
+ */
+export const unsplitChild = async (parent: any, context: NoteEditorContext, index: number, currString: string) => {
+    const toDelete = getSubentities(parent).sort(byElementIndex)[index]?._value?._value;
+
+    const parents = getParents(parent);
+    if (!parent._hide) parents.push({ uid: parent.uid });
+    const children = getSemanticChildren(parent)?.['_value['].sort(byElementIndex) as any[] | undefined;
+    if (!children) return false;
+
     let currSubentity = -1;
     let prevIndex = -1;
-    const parents = getParents(data);
-    if (!data._hide) parents.push({ uid: data.uid });
-    const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
-    const delAt = children?.reduce((prev: any[], el: any, elindex: any) => {
+    const delAt = children.reduce((prev: any[], el: any, elindex) => {
         if (el?._value?.type?.['unigraph.id'] === '$/schema/subentity') {
             currSubentity++;
             if (currSubentity === index) return elindex;
@@ -486,36 +496,18 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
         }
         return prev;
     }, 0);
-    const numChildParents = children[delAt]?._value?._value?.['~_value']?.length;
-    removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
-    // console.log(index, children[delAt]?._value?._value?._value?.children?.['_value[']);
-    // Index = 0 if current block doesn't have children, merge with parent
-    // Index > 0 and last DFS is last item, should merge with previous
-    if (
-        currString === '' &&
-        !(children[delAt]?._value?._value?._value?.children?.['_value['] || []).filter(
-            (ch: any) => ch?._value?.type?.['unigraph.id'] === '$/schema/subentity',
-        ).length
-    ) {
-        deleteChildren(data, context, [index], true);
-    } else if (
-        index === 0 &&
-        !(children[delAt]?._value?._value?._value?.children?.['_value['] || []).filter(
-            (ch: any) => ch?._value?.type?.['unigraph.id'] === '$/schema/subentity',
-        ).length
-    ) {
-        // Merge with parent
-        // 1. merge text
-        // 2. merge children (remove delAt, shift indexes, add semantic children)
-        const loc = data._value?.text || data._value?.name;
-        const pred = data._value?.text ? 'text' : 'name';
+
+    if (index === 0) {
+        /** Merge `toDelete` with `parent` and lift `toDelete`'s children. */
+        const loc = parent._value?.text || parent._value?.name;
+        const pred = parent._value?.text ? 'text' : 'name';
         const undoCommand: CommandState = [
             {
                 type: 'children',
-                uid: data._value.uid,
+                uid: parent._value.uid,
                 subsId: context.callbacks.subsId,
-                oldChildrenUid: data._value.children?.uid,
-                oldData: data._value?.children,
+                oldChildrenUid: parent._value.children?.uid,
+                oldData: parent._value?.children,
             },
             {
                 type: 'textual',
@@ -553,7 +545,7 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
         addCommand(context.historyState.value, undoCommand);
         // console.log(newText, newChildren);
         window.unigraph.updateObject(
-            data?._value?.uid,
+            parent?._value?.uid,
             {
                 [pred]: {
                     uid: loc?.uid,
@@ -562,7 +554,7 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
                         _value: { uid: loc?._value?._value?.uid, '_value.%': newText },
                     },
                 },
-                children: { _displayAs: data?._value?.children?._displayAs, '_value[': newChildren },
+                children: { _displayAs: parent?._value?.children?._displayAs, '_value[': newChildren },
             },
             false,
             false,
@@ -576,17 +568,21 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
             type: '$/schema/note_block',
             newData: newText,
         });
-    } else if (
-        index > 0 &&
-        getLastDFSNode({ uid: children[delAt]._value._value.uid }, context).uid ===
-            children[prevIndex]?._value?._value?.uid
-    ) {
-        // Merge with previous
-        // 1. merge children text
-        // 2. merge children and grandchildren (for children, remove delAt and prevIndex, then append prevIndex's grandchildren)
-        const loc =
-            children[prevIndex]?._value?._value?._value?.text || children[prevIndex]?._value?._value?._value?.name;
-        const pred = data._value?.text ? 'text' : 'name';
+    } else {
+        /**
+         * Merge `toDelete` with the deepest and last visible descendant of `prevSibling`
+         * and lift `toDelete`'s children.
+         */
+
+        const prevSibling = getSubentities(parent).sort(byElementIndex)[index - 1]?._value?._value;
+        /** The deepest and last visible descendant of `prevSibling`. */
+        const { noteBlock: lastVisible, parent: parentOfLastVisible } = getLastVisibleDescendant(prevSibling, parent);
+        const childrenOfParentOfLastVisible = getSemanticChildren(parentOfLastVisible)?.['_value['].sort(
+            byElementIndex,
+        ) as any[];
+
+        const loc = lastVisible._value?.text || lastVisible._value?.name;
+        const pred = lastVisible._value?.text ? 'text' : 'name';
         const oldText = loc?._value?._value?.['_value.%'] || '';
         const newText = oldText + currString;
         const undoCommand: CommandState = [
@@ -599,23 +595,25 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
             {
                 type: 'children',
                 subsId: context.callbacks.subsId,
-                uid: data._value.uid,
-                oldChildrenUid: data._value?.children?.uid,
-                oldData: data._value?.children,
+                uid: parentOfLastVisible._value.uid,
+                oldChildrenUid: parentOfLastVisible._value?.children?.uid,
+                oldData: parentOfLastVisible._value?.children,
             },
             {
                 type: 'children',
                 subsId: context.callbacks.subsId,
-                uid: children[prevIndex]?._value?._value?._value?.uid,
-                oldChildrenUid: children[prevIndex]?._value?._value?._value?.children
-                    ? children[prevIndex]?._value?._value?._value?.children.uid
+                uid: childrenOfParentOfLastVisible[prevIndex]?._value?._value?._value?.uid,
+                oldChildrenUid: childrenOfParentOfLastVisible[prevIndex]?._value?._value?._value?.children
+                    ? childrenOfParentOfLastVisible[prevIndex]?._value?._value?._value?.children.uid
                     : window.unigraph.leaseUid?.(),
-                oldData: getChildrenStubMap(children[prevIndex]?._value?._value?._value?.children || {}),
+                oldData: getChildrenStubMap(
+                    childrenOfParentOfLastVisible[prevIndex]?._value?._value?._value?.children || {},
+                ),
             },
         ];
         const newChildren = [
-            ...children
-                .map((el: any, iindex: number) =>
+            ...childrenOfParentOfLastVisible
+                .map((el: any, iindex) =>
                     iindex === delAt || iindex === prevIndex
                         ? undefined
                         : {
@@ -628,33 +626,37 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
                 )
                 .filter(Boolean),
             {
-                _index: { uid: children[prevIndex]?._index.uid },
-                _key: children[prevIndex]?._key,
+                _index: { uid: childrenOfParentOfLastVisible[prevIndex]?._index.uid },
+                _key: childrenOfParentOfLastVisible[prevIndex]?._key,
                 _value: {
-                    uid: children[prevIndex]?._value?.uid,
+                    uid: childrenOfParentOfLastVisible[prevIndex]?._value?.uid,
                     _value: {
-                        uid: children[prevIndex]?._value?._value?.uid,
+                        uid: childrenOfParentOfLastVisible[prevIndex]?._value?._value?.uid,
                         _value: {
-                            uid: children[prevIndex]?._value?._value?._value?.uid,
+                            uid: childrenOfParentOfLastVisible[prevIndex]?._value?._value?._value?.uid,
                             [pred]: {
-                                uid: children[prevIndex]?._value?._value?._value?.[pred]?.uid,
+                                uid: childrenOfParentOfLastVisible[prevIndex]?._value?._value?._value?.[pred]?.uid,
                                 _value: {
-                                    uid: children[prevIndex]?._value?._value?._value?.[pred]?._value?.uid,
+                                    uid: childrenOfParentOfLastVisible[prevIndex]?._value?._value?._value?.[pred]
+                                        ?._value?.uid,
                                     _value: {
-                                        uid: children[prevIndex]?._value?._value?._value?.[pred]?._value?._value?.uid,
+                                        uid: childrenOfParentOfLastVisible[prevIndex]?._value?._value?._value?.[pred]
+                                            ?._value?._value?.uid,
                                         '_value.%': newText,
                                     },
                                 },
                             },
                             children: {
                                 '_value[': [
-                                    ...(children[delAt]?._value?._value?._value?.children?.['_value['] || []).map(
-                                        (el: any) => ({
-                                            _key: el._key,
-                                            _value: { uid: el._value.uid },
-                                            _index: { uid: el._index.uid },
-                                        }),
-                                    ),
+                                    ...(
+                                        childrenOfParentOfLastVisible[delAt]?._value?._value?._value?.children?.[
+                                            '_value['
+                                        ] || []
+                                    ).map((el: any) => ({
+                                        _key: el._key,
+                                        _value: { uid: el._value.uid },
+                                        _index: { uid: el._index.uid },
+                                    })),
                                 ],
                             },
                         },
@@ -663,32 +665,243 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
             },
         ];
         addCommand(context.historyState.value, undoCommand);
+        deleteChildren(parent, context, [index], true);
         window.unigraph.updateObject(
-            data?._value?.uid,
-            { children: { _displayAs: data?._value?.children?._displayAs, '_value[': newChildren } },
+            parentOfLastVisible?._value?.uid,
+            { children: { _displayAs: parentOfLastVisible?._value?.children?._displayAs, '_value[': newChildren } },
             false,
             false,
             context.callbacks.subsId,
-            parents,
+            [],
             true,
         );
         window.unigraph.getState('global/focused').setValue({
-            uid: getLastDFSNode({ uid: children[delAt]._value._value.uid }, context).uid,
+            uid: lastVisible.uid,
             caret: oldText.length || 0,
             type: '$/schema/note_block',
             newData: newText,
         });
-    } else return false;
-
-    // const numChildParents = childParentArray ? childParentArray.length : 0;
-    if (numChildParents <= 1) {
-        setTimeout(() => {
-            permanentlyDeleteBlock(children[delAt]._value._value);
-            window.unigraph.touch(getParents(data).map((el) => el.uid));
-        }, 1000);
     }
 
-    return true;
+    /** Get the bottom-most visible note block in a subtree. */
+    function getLastVisibleDescendant(noteBlock: any, parentOfNoteBlock: any): { noteBlock: any; parent: any } {
+        const subentities = getSubentities(noteBlock).sort(byElementIndex);
+        if (!subentities || subentities.length === 0 || isNoteBlockCollapsed(noteBlock.uid)) {
+            return {
+                noteBlock,
+                parent: parentOfNoteBlock,
+            };
+        }
+
+        const lastChildNoteBlock = subentities[subentities.length - 1]?._value?._value;
+        return getLastVisibleDescendant(lastChildNoteBlock, noteBlock);
+    }
+
+    return false;
+
+    // const numChildParents = children[delAt]?._value?._value?.['~_value']?.length;
+    // removeAllPropsFromObj(parent, ['~_value', '~unigraph.origin', 'unigraph.origin']);
+    // // console.log(index, children[delAt]?._value?._value?._value?.children?.['_value[']);
+    // // Index = 0 if current block doesn't have children, merge with parent
+    // // Index > 0 and last DFS is last item, should merge with previous
+    // if (
+    //     currString === '' &&
+    //     !(children[delAt]?._value?._value?._value?.children?.['_value['] || []).filter(
+    //         (ch: any) => ch?._value?.type?.['unigraph.id'] === '$/schema/subentity',
+    //     ).length
+    // ) {
+    //     deleteChildren(parent, context, [index], true);
+    // } else if (
+    //     index === 0 &&
+    //     !(children[delAt]?._value?._value?._value?.children?.['_value['] || []).filter(
+    //         (ch: any) => ch?._value?.type?.['unigraph.id'] === '$/schema/subentity',
+    //     ).length
+    // ) {
+    //     // Merge with parent
+    //     // 1. merge text
+    //     // 2. merge children (remove delAt, shift indexes, add semantic children)
+    //     const loc = parent._value?.text || parent._value?.name;
+    //     const pred = parent._value?.text ? 'text' : 'name';
+    //     const undoCommand: CommandState = [
+    //         {
+    //             type: 'children',
+    //             uid: parent._value.uid,
+    //             subsId: context.callbacks.subsId,
+    //             oldChildrenUid: parent._value.children?.uid,
+    //             oldData: parent._value?.children,
+    //         },
+    //         {
+    //             type: 'textual',
+    //             subsId: context.callbacks.subsId,
+    //             uid: loc?._value?._value?.uid,
+    //             oldText: loc?._value?._value?.['_value.%'],
+    //         },
+    //     ];
+    //     const oldCaret = (loc?._value?._value?.['_value.%'] || '').length;
+    //     const newText = (loc?._value?._value?.['_value.%'] || '') + currString;
+    //     const newChildren = [
+    //         ...children
+    //             .map((el: any, iindex: number) =>
+    //                 iindex === delAt
+    //                     ? undefined
+    //                     : {
+    //                           _key: el._key,
+    //                           _value: {
+    //                               uid: el._value.uid,
+    //                           },
+    //                           _index: {
+    //                               '_value.#i': iindex > delAt ? el._index['_value.#i'] - 1 : el._index['_value.#i'],
+    //                           },
+    //                       },
+    //             )
+    //             .filter(Boolean),
+    //         ...(children[delAt]?._value?._value?._value?.children?.['_value['] || []).map((el: any) => ({
+    //             _key: el._key,
+    //             _value: {
+    //                 uid: el._value.uid,
+    //             },
+    //             _index: { '_value.#i': el._index['_value.#i'] + children.length - 1 },
+    //         })),
+    //     ];
+    //     addCommand(context.historyState.value, undoCommand);
+    //     // console.log(newText, newChildren);
+    //     window.unigraph.updateObject(
+    //         parent?._value?.uid,
+    //         {
+    //             [pred]: {
+    //                 uid: loc?.uid,
+    //                 _value: {
+    //                     uid: loc?._value?.uid,
+    //                     _value: { uid: loc?._value?._value?.uid, '_value.%': newText },
+    //                 },
+    //             },
+    //             children: { _displayAs: parent?._value?.children?._displayAs, '_value[': newChildren },
+    //         },
+    //         false,
+    //         false,
+    //         context.callbacks.subsId,
+    //         parents,
+    //         true,
+    //     );
+    //     window.unigraph.getState('global/focused').setValue({
+    //         uid: getLastDFSNode({ uid: children[delAt]._value._value.uid }, context).uid,
+    //         caret: oldCaret || 0,
+    //         type: '$/schema/note_block',
+    //         newData: newText,
+    //     });
+    // } else if (
+    //     index > 0 &&
+    //     getLastDFSNode({ uid: children[delAt]._value._value.uid }, context).uid ===
+    //         children[prevIndex]?._value?._value?.uid
+    // ) {
+    //     // Merge with previous
+    //     // 1. merge children text
+    //     // 2. merge children and grandchildren (for children, remove delAt and prevIndex, then append prevIndex's grandchildren)
+    //     const loc =
+    //         children[prevIndex]?._value?._value?._value?.text || children[prevIndex]?._value?._value?._value?.name;
+    //     const pred = parent._value?.text ? 'text' : 'name';
+    //     const oldText = loc?._value?._value?.['_value.%'] || '';
+    //     const newText = oldText + currString;
+    //     const undoCommand: CommandState = [
+    //         {
+    //             type: 'textual',
+    //             subsId: context.callbacks.subsId,
+    //             uid: loc?._value?._value?.uid,
+    //             oldText: loc?._value?._value?.['_value.%'],
+    //         },
+    //         {
+    //             type: 'children',
+    //             subsId: context.callbacks.subsId,
+    //             uid: parent._value.uid,
+    //             oldChildrenUid: parent._value?.children?.uid,
+    //             oldData: parent._value?.children,
+    //         },
+    //         {
+    //             type: 'children',
+    //             subsId: context.callbacks.subsId,
+    //             uid: children[prevIndex]?._value?._value?._value?.uid,
+    //             oldChildrenUid: children[prevIndex]?._value?._value?._value?.children
+    //                 ? children[prevIndex]?._value?._value?._value?.children.uid
+    //                 : window.unigraph.leaseUid?.(),
+    //             oldData: getChildrenStubMap(children[prevIndex]?._value?._value?._value?.children || {}),
+    //         },
+    //     ];
+    //     const newChildren = [
+    //         ...children
+    //             .map((el: any, iindex: number) =>
+    //                 iindex === delAt || iindex === prevIndex
+    //                     ? undefined
+    //                     : {
+    //                           _key: el._key,
+    //                           _value: { uid: el._value.uid },
+    //                           _index: {
+    //                               '_value.#i': iindex > delAt ? el._index['_value.#i'] - 1 : el._index['_value.#i'],
+    //                           },
+    //                       },
+    //             )
+    //             .filter(Boolean),
+    //         {
+    //             _index: { uid: children[prevIndex]?._index.uid },
+    //             _key: children[prevIndex]?._key,
+    //             _value: {
+    //                 uid: children[prevIndex]?._value?.uid,
+    //                 _value: {
+    //                     uid: children[prevIndex]?._value?._value?.uid,
+    //                     _value: {
+    //                         uid: children[prevIndex]?._value?._value?._value?.uid,
+    //                         [pred]: {
+    //                             uid: children[prevIndex]?._value?._value?._value?.[pred]?.uid,
+    //                             _value: {
+    //                                 uid: children[prevIndex]?._value?._value?._value?.[pred]?._value?.uid,
+    //                                 _value: {
+    //                                     uid: children[prevIndex]?._value?._value?._value?.[pred]?._value?._value?.uid,
+    //                                     '_value.%': newText,
+    //                                 },
+    //                             },
+    //                         },
+    //                         children: {
+    //                             '_value[': [
+    //                                 ...(children[delAt]?._value?._value?._value?.children?.['_value['] || []).map(
+    //                                     (el: any) => ({
+    //                                         _key: el._key,
+    //                                         _value: { uid: el._value.uid },
+    //                                         _index: { uid: el._index.uid },
+    //                                     }),
+    //                                 ),
+    //                             ],
+    //                         },
+    //                     },
+    //                 },
+    //             },
+    //         },
+    //     ];
+    //     addCommand(context.historyState.value, undoCommand);
+    //     window.unigraph.updateObject(
+    //         parent?._value?.uid,
+    //         { children: { _displayAs: parent?._value?.children?._displayAs, '_value[': newChildren } },
+    //         false,
+    //         false,
+    //         context.callbacks.subsId,
+    //         parents,
+    //         true,
+    //     );
+    //     window.unigraph.getState('global/focused').setValue({
+    //         uid: getLastDFSNode({ uid: children[delAt]._value._value.uid }, context).uid,
+    //         caret: oldText.length || 0,
+    //         type: '$/schema/note_block',
+    //         newData: newText,
+    //     });
+    // } else return false;
+
+    // // const numChildParents = childParentArray ? childParentArray.length : 0;
+    // if (numChildParents <= 1) {
+    //     setTimeout(() => {
+    //         permanentlyDeleteBlock(children[delAt]._value._value);
+    //         window.unigraph.touch(getParents(parent).map((el) => el.uid));
+    //     }, 1000);
+    // }
+
+    // return true;
 };
 
 export const permanentlyDeleteBlock = (data: any, otherUids?: any[]) => {
