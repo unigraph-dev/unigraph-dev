@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.10](https://github.com/ssalka/unigraph-dev/compare/v0.2.9...v0.2.10) (2022-04-20)
+
+
+### Bug Fixes
+
+* related issues with omnibar adding ([acd55ee](https://github.com/ssalka/unigraph-dev/commit/acd55ee5c5891bca4ffb2a20812b7bc5a6bb1d14))
+
+
+### Features
+
+* **search:** add title matching for search capabilities ([d5ba291](https://github.com/ssalka/unigraph-dev/commit/d5ba29139b4561292c199f6f7fc9dbb2d5a5d268))
+
+
+
+
+
 ## [0.2.9](https://github.com/ssalka/unigraph-dev/compare/v0.2.8...v0.2.9) (2022-04-14)
 
 

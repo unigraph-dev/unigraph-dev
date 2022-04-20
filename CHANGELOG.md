@@ -3,6 +3,32 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.2.10](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.9...v0.2.10) (2022-04-20)
+
+
+### Bug Fixes
+
+* **analytics:** analytics opt-out, collect basic info by default ([d7e6c27](https://github.com/unigraph-dev/unigraph-dev/commit/d7e6c2739871b831ebfc5975bcdc211606db4fa7))
+* **editor:** fast backlink creation w/o issues ([9673430](https://github.com/unigraph-dev/unigraph-dev/commit/96734305fd96d8bbdc3723ac4971c0d7cb079f60))
+* **electron:** ctl/cmd+w closes tabs not windows ([2092e41](https://github.com/unigraph-dev/unigraph-dev/commit/2092e4163fc3de9d7351c44e66fd4704516956cc))
+* inline search optimizations ([97dc1c8](https://github.com/unigraph-dev/unigraph-dev/commit/97dc1c816c555a5000e2cde355f763c8c390856f))
+* **notes:** consider collapsed state when splitting child ([97e2c72](https://github.com/unigraph-dev/unigraph-dev/commit/97e2c72373d39f43bd5c838bfd6959c9e5483cab))
+* **notes:** don't show collapsed bullet when there're no children ([304a6aa](https://github.com/unigraph-dev/unigraph-dev/commit/304a6aabc55bea76b0dbc484882a132ec5ac14e0))
+* **omnibar:** fix overlay for omnibar ([4a62051](https://github.com/unigraph-dev/unigraph-dev/commit/4a6205173150fccbdb9f59f979de8ee1b9930f60))
+* **omnibar:** fix quick adder issues ([a7ce8ba](https://github.com/unigraph-dev/unigraph-dev/commit/a7ce8baace87d44eeb5fadf9a449c95181bc0f77))
+* related issues with omnibar adding ([acd55ee](https://github.com/unigraph-dev/unigraph-dev/commit/acd55ee5c5891bca4ffb2a20812b7bc5a6bb1d14))
+
+
+### Features
+
+* **search:** add title matching for search capabilities ([d5ba291](https://github.com/unigraph-dev/unigraph-dev/commit/d5ba29139b4561292c199f6f7fc9dbb2d5a5d268))
+* **search:** enhanced search flow ([1dc69ef](https://github.com/unigraph-dev/unigraph-dev/commit/1dc69efe80ef78e258549c154a168650267a5a91))
+* **search:** use client-side update for search ([82053f7](https://github.com/unigraph-dev/unigraph-dev/commit/82053f7e875502c10b3dce06f164e9eb7583695e))
+
+
+
+
+
 ## [0.2.9](https://github.com/unigraph-dev/unigraph-dev/compare/v0.2.8...v0.2.9) (2022-04-14)
 
 

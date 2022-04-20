@@ -1,6 +1,6 @@
 {
     "name": "unigraph-dev-explorer",
-    "version": "0.2.9",
+    "version": "0.2.10",
     "dependencies": {
         "@babel/core": "7.12.3",
         "@date-io/moment": "1.x",
@@ -90,7 +90,7 @@
         "turndown": "^7.1.1",
         "typeface-roboto": "^1.1.13",
         "typescript": "^4.2.2",
-        "unigraph-dev-common": "^0.2.9",
+        "unigraph-dev-common": "^0.2.10",
         "url-loader": "4.1.1",
         "webpack": "4.44.2",
         "webpack-dev-server": "3.11.1",

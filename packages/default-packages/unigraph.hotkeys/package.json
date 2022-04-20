@@ -1,6 +1,6 @@
 {
     "displayName": "Unigraph Hotkeys",
-    "version": "0.2.9",
+    "version": "0.2.10",
     "description": "Hotkeys and bindings.",
     "name": "unigraph.hotkeys",
     "unigraph": {

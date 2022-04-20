@@ -1,6 +1,6 @@
 {
     "displayName": "Unigraph search",
-    "version": "0.2.9",
+    "version": "0.2.10",
     "description": "Search commons for Unigraph",
     "name": "unigraph.search",
     "unigraph": {
