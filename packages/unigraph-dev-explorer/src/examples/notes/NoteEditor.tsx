@@ -220,6 +220,12 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                                         '_value[': [
                                             {
                                                 _key: `[[${newName}]]`,
+                                                _index: {
+                                                    '_value.#i':
+                                                        locateInlineChildren(dataRef.current)._value?.children?.[
+                                                            '_value['
+                                                        ]?.length || 0,
+                                                },
                                                 _value: {
                                                     'dgraph.type': ['Interface'],
                                                     type: { 'unigraph.id': '$/schema/interface/semantic' },
