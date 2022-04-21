@@ -138,6 +138,7 @@ export function init(hostname?: string) {
         window.localStorage.setItem('enableAnalytics', JSON.stringify(val));
     });
 
+    window.unigraph.addState('global/subscriptionCache', {});
     window.unigraph.addState('global/selected', []);
     window.unigraph.addState('global/selectionStart', false);
     window.unigraph.addState('global/focused', {

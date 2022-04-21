@@ -20,8 +20,6 @@ import { onUnigraphContextMenu } from '../../components/ObjectView/DefaultObject
 import { noteQuery, noteQueryDetailed } from './noteQuery';
 import { getParentsAndReferences } from '../../components/ObjectView/backlinksUtils';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
-import { removeAllPropsFromObj, scrollIntoViewIfNeeded, TabContext } from '../../utils';
-import { DragandDrop } from '../../components/ObjectView/DragandDrop';
 import { setClipboardHandler } from '../../clipboardUtils';
 import { getCallbacks, getSubentities, getShortcuts, noteBlockCommands } from './utils';
 import { PlaceholderNoteBlock } from './NoteBlockViews';
@@ -32,6 +30,7 @@ import { HistoryState } from './history';
 import { Outline, OutlineContentContext } from './Outline';
 import { UnigraphObject as PlainUnigraphObject } from './types';
 import { useOutlineCollapsed } from './useOutlineCollapsed';
+import { removeAllPropsFromObj, scrollIntoViewIfNeeded, TabContext } from '../../utils';
 
 const childrenComponents = {
     '$/schema/note_block': {

@@ -31,6 +31,7 @@ const Bullet = styled('div')({
     ...controlStyles,
     position: 'relative',
     top: '0.125rem',
+    left: '0.3rem',
     '& > svg > circle': {
         transition: 'fill 0.1s ease-in',
     },
@@ -68,7 +69,7 @@ const ChildrenLeftBorder = styled('div')({
 
 const ChildrenContainer = styled('div')({
     flexGrow: 1,
-    marginLeft: '0.3rem',
+    marginLeft: '0.6rem',
     wordBreak: 'break-word',
 });
 
