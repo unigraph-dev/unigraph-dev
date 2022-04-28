@@ -9,8 +9,10 @@ export const setSearchPopup = (boxRef: any, searchString: string, onSelected: an
             {
                 label: (search: string) => `Create new page named ${search}`,
                 onSelected: async (search: string) => {
-                    const newUid = await window.unigraph.addObject(
+                    const newUid = (window.unigraph as any).leaseUid();
+                    window.unigraph.addObject(
                         {
+                            uid: newUid,
                             text: {
                                 _value: search,
                                 type: { 'unigraph.id': '$/schema/markdown' },
@@ -19,14 +21,16 @@ export const setSearchPopup = (boxRef: any, searchString: string, onSelected: an
                         '$/schema/note_block',
                     );
                     // console.log(newUid);
-                    return [newUid[0], '$/schema/note_block'];
+                    return [newUid, '$/schema/note_block'];
                 },
             },
             {
                 label: (search: string) => `Create new tag and page named ${search}`,
                 onSelected: async (search: string) => {
-                    const newTagUid = await window.unigraph.addObject(
+                    const newUid = (window.unigraph as any).leaseUid();
+                    window.unigraph.addObject(
                         {
+                            uid: newUid,
                             name: search,
                         },
                         '$/schema/tag',
@@ -43,14 +47,14 @@ export const setSearchPopup = (boxRef: any, searchString: string, onSelected: an
                                         'unigraph.id': '$/schema/interface/semantic',
                                     },
                                     _value: {
-                                        uid: newTagUid[0],
+                                        uid: newUid,
                                     },
                                 },
                             ],
                         },
                         '$/schema/note_block',
                     );
-                    return [newTagUid[0], '$/schema/tag'];
+                    return [newUid, '$/schema/tag'];
                 },
             },
         ],
