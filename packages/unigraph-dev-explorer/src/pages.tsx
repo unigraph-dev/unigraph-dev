@@ -33,6 +33,7 @@ import ExplorerDashboard from './pages/ExplorerDashboard';
 import { SearchOverlayPopover } from './pages/SearchOverlay';
 import { SubscriptionsView } from './pages/SubscriptionsView';
 import { Feeds } from './components/UnigraphFeeds/Feeds';
+import { UIExtensionManager } from './components/ExtensionManager/UIExtensionManager';
 
 const pages: Record<string, any> = {
     'datamodel-playground': {
@@ -159,6 +160,10 @@ const pages: Record<string, any> = {
     'current-events': {
         constructor: (props: any) => <CurrentEvents {...props} />,
         name: 'Current Events',
+    },
+    'ui-extension-manager': {
+        constructor: () => <UIExtensionManager />,
+        name: 'UI Extension Manager',
     },
     calendar: {
         constructor: (props: any) => <Calendar {...props} />,

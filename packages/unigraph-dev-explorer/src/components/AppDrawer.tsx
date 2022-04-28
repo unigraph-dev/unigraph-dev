@@ -21,6 +21,7 @@ import {
     mdiHomeOutline,
     mdiMessageArrowRightOutline,
     mdiDatabaseEyeOutline,
+    mdiCubeSend,
 } from '@mdi/js';
 import { FavoriteBar } from './UnigraphCore/FavoriteBar';
 import { pointerHoverSx } from '../utils';
@@ -156,6 +157,12 @@ export default function DrawerRouter() {
                                 <Icon path={mdiDatabaseEyeOutline} size={1} />
                             </StyledListItemIcon>
                             <StyledListItemText primary="DataModel Playground" />
+                        </ListItem>
+                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/ui-extension-manager')}>
+                            <StyledListItemIcon>
+                                <Icon path={mdiCubeSend} size={1} />
+                            </StyledListItemIcon>
+                            <StyledListItemText primary="UI Extension Manager" />
                         </ListItem>
                     </div>
                     <StyledListSubheader id="subheader-developer-tools"> FAVORITES </StyledListSubheader>

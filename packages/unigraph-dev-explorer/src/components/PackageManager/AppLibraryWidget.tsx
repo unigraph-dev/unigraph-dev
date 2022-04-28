@@ -38,9 +38,10 @@ export function AllApps() {
         tabContext.subscribeToType(
             '$/schema/view',
             (views: any) => {
-                setTotalViews(views.filter((el: any) => el['unigraph.id']?.length > 0));
+                setTotalViews(views.filter((el: any) => el['unigraph.id']?.length > 0 || el._isShortcut === true));
             },
             viewId,
+            { all: true },
         );
 
         return function cleanup() {
@@ -69,7 +70,11 @@ export function AllApps() {
                                     style={{
                                         minWidth: '24px',
                                         minHeight: '24px',
-                                        backgroundImage: `url("${el?._value?.icon?._value?.['_value.%']}")`,
+                                        backgroundImage: `${
+                                            el?._value?.icon?._value?.['_value.%']?.startsWith('data:image/svg+xml,')
+                                                ? 'url("'
+                                                : 'url("data:image/svg+xml,'
+                                        }${el?._value?.icon?._value?.['_value.%']}")`,
                                     }}
                                 />
                             ) : (
