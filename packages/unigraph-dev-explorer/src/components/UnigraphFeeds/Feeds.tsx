@@ -25,7 +25,7 @@ export function Feeds() {
                 _stub: true,
                 type: { 'unigraph.id': '$/schema/list' },
             }}
-            attributes={{ reverse: true }}
+            attributes={{ reverse: true, compact: true }}
             onLoad={onUpdate}
         />
     );
