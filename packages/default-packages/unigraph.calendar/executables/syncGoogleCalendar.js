@@ -1,5 +1,32 @@
 const { google } = require('googleapis');
 
+const gcalColorMap = {
+    '#AC725E': '#795548',
+    '#D06B64': '#e67c73',
+    '#F83A22': '#d50000',
+    '#FA573C': '#f4511e',
+    '#FF7537': '#ef6c00',
+    '#FFAD46': '#f09300',
+    '#42D692': '#009688',
+    '#16A765': '#0b8043',
+    '#7BD148': '#7cb342',
+    '#B3DC6C': '#c0ca33',
+    '#FBE983': '#e4c441',
+    '#FAD165': '#f6bf26',
+    '#92E1C0': '#33b679',
+    '#9FE1E7': '#039be5',
+    '#9FC6E7': '#4285f4',
+    '#4986E7': '#3f51b5',
+    '#9A9CFF': '#7986cb',
+    '#B99AFF': '#b39ddb',
+    '#C2C2C2': '#616161',
+    '#CABDBF': '#a79b8e',
+    '#CCA6AC': '#ad1457',
+    '#F691B2': '#d81b60',
+    '#CD74E6': '#8e24aa',
+    '#A47AE2': '#9e69af',
+};
+
 const gmailClientId = unigraph.getSecret('google', 'client_id');
 const gmailClientSecret = unigraph.getSecret('google', 'client_secret');
 const fetch = require('node-fetch');
@@ -73,8 +100,8 @@ if (account?.uid) {
         .map((cal) => {
             return {
                 id: cal.id,
-                foreground_color: cal.foregroundColor,
-                color: cal.backgroundColor,
+                foreground_color: gcalColorMap[cal.foregroundColor.toUpperCase()] || cal.foregroundColor,
+                color: gcalColorMap[cal.backgroundColor.toUpperCase()] || cal.backgroundColor,
                 name: { type: { 'unigraph.id': '$/schema/markdown' }, _value: cal.summary },
             };
         });

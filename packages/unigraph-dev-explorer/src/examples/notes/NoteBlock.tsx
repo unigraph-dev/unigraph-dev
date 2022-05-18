@@ -177,27 +177,29 @@ export function ParentsAndReferences({ data }: any) {
 
     return (
         <div style={{ marginTop: '36px' }}>
-            <DynamicObjectListView
-                items={parents.map((el: any) => ({ ...el, _stub: true }))}
-                context={data}
-                compact
-                noDrop
-                titleBar=" parents"
-                loadAll
-                noHoverHighlight
-                components={{
-                    '$/schema/note_block': {
-                        view: NoChildrenReferenceNoteView,
-                        query: noteQueryDetailed,
-                        options: {
-                            noClickthrough: true,
-                            noSubentities: true,
-                            noContextMenu: true,
-                            noBacklinks: true,
+            {parents.length > 0 ? (
+                <DynamicObjectListView
+                    items={parents.map((el: any) => ({ ...el, _stub: true }))}
+                    context={data}
+                    compact
+                    noDrop
+                    titleBar=" parents"
+                    loadAll
+                    noHoverHighlight
+                    components={{
+                        '$/schema/note_block': {
+                            view: NoChildrenReferenceNoteView,
+                            query: noteQueryDetailed,
+                            options: {
+                                noClickthrough: true,
+                                noSubentities: true,
+                                noContextMenu: true,
+                                noBacklinks: true,
+                            },
                         },
-                    },
-                }}
-            />
+                    }}
+                />
+            ) : undefined}
             <DynamicObjectListView
                 items={references.map((el: any) => ({ ...el, _stub: true }))}
                 context={data}

@@ -223,38 +223,43 @@ export function getParameters(search: string) {
     return params;
 }
 
-/**
- * Get the contrasting color for any hex color
- * (c) 2019 Chris Ferdinandi, MIT License, https://gomakethings.com
- * Derived from work by Brian Suda, https://24ways.org/2010/calculating-color-contrast/
- * @param  {String} hexcolor A hexcolor value
- * @return {String} The contrasting color (black or white)
- */
-export const getContrast = function (hexcolor: string) {
-    // If a leading # is provided, remove it
-    if (hexcolor.slice(0, 1) === '#') {
-        hexcolor = hexcolor.slice(1);
+export function getContrast(hex: string) {
+    // eslint-disable-next-line inclusive-language/use-inclusive-words -- link url
+    /*
+    From this W3C document: http://www.webmasterworld.com/r.cgi?f=88&d=9769&url=http://www.w3.org/TR/AERT#color-contrast
+    
+    Color brightness is determined by the following formula: 
+    ((Red value X 299) + (Green value X 587) + (Blue value X 114)) / 1000
+
+I know this could be more compact, but I think this is easier to read/explain.
+    
+    */
+
+    const threshold = 160; /* about half of 256. Lower threshold equals more dark text on dark background  */
+
+    const hRed = hexToR(hex);
+    const hGreen = hexToG(hex);
+    const hBlue = hexToB(hex);
+
+    function hexToR(h: string) {
+        return parseInt(cutHex(h).substring(0, 2), 16);
+    }
+    function hexToG(h: string) {
+        return parseInt(cutHex(h).substring(2, 4), 16);
+    }
+    function hexToB(h: string) {
+        return parseInt(cutHex(h).substring(4, 6), 16);
+    }
+    function cutHex(h: string) {
+        return h.charAt(0) === '#' ? h.substring(1, 7) : h;
     }
 
-    // If a three-character hexcode, make six-character
-    if (hexcolor.length === 3) {
-        hexcolor = hexcolor
-            .split('')
-            .map((hex) => hex + hex)
-            .join('');
+    const cBrightness = (hRed * 299 + hGreen * 587 + hBlue * 114) / 1000;
+    if (cBrightness > threshold) {
+        return '#000000';
     }
-
-    // Convert to RGB value
-    const r = parseInt(hexcolor.substr(0, 2), 16);
-    const g = parseInt(hexcolor.substr(2, 2), 16);
-    const b = parseInt(hexcolor.substr(4, 2), 16);
-
-    // Get YIQ ratio
-    const yiq = (r * 299 + g * 587 + b * 114) / 1000;
-
-    // Check contrast
-    return yiq >= 128 ? 'black' : 'white';
-};
+    return '#ffffff';
+}
 
 export function download(filename: string, text: string) {
     const element = document.createElement('a');

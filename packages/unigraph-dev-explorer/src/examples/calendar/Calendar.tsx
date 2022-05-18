@@ -7,7 +7,7 @@ import { Calendar as BigCalendar, DateLocalizer, momentLocalizer, stringOrDate, 
 import moment from 'moment';
 import {} from 'lodash';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
-import { isValidHttpUrl, TabContext } from '../../utils';
+import { getContrast, isValidHttpUrl, TabContext } from '../../utils';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { CalendarViewEvent, TodoUni, CalendarEventUni, JournalUni, DatedObject } from './calendar-types';
@@ -83,13 +83,14 @@ const CalendarEventInline = ({ data, callbacks }: any) => {
     return (
         <div style={{ display: 'flex' }}>
             <div>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                    {CalendarColor({ data, callbacks })}
-                    <Typography variant="body1" style={{ marginRight: '8px' }}>
+                <div
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                    }}
+                >
+                    <Typography variant="body1" style={{ marginRight: '8px', fontSize: '14px' }}>
                         {data.get('name').as('primitive')}
-                    </Typography>
-                    <Typography variant="body2" style={{ color: 'gray' }}>
-                        {data.get('location').as('primitive')}
                     </Typography>
                 </div>
                 <div
@@ -165,14 +166,15 @@ const queryDatedWithinTimeRange = (start: string, end: string) => {
 };
 
 const getDateAsUTC = (ev: any) => new Date(ev);
+const getDateAsLocal = (ev: any) => new Date(new Date(ev).getTime() + new Date(ev).getTimezoneOffset() * 60 * 1000);
 
 const todoToBigCalendarEvent = (datedObj: TodoUni): CalendarViewEvent => {
     const start = datedObj.get('time_frame/start/datetime').as('primitive');
     const end = datedObj.get('time_frame/end/datetime').as('primitive');
     return {
         title: datedObj.get('name').as('primitive'),
-        start: getDateAsUTC(new Date(start).toString() !== getMinDate().toString() ? start : end),
-        end: getDateAsUTC(new Date(end).toString() !== getMaxDate().toString() ? end : start),
+        start: getDateAsLocal(new Date(start).toString() !== getMinDate().toString() ? start : end),
+        end: getDateAsLocal(new Date(end).toString() !== getMaxDate().toString() ? end : start),
         allDay: true,
         unigraphObj: datedObj,
     };
@@ -181,27 +183,21 @@ const todoToBigCalendarEvent = (datedObj: TodoUni): CalendarViewEvent => {
 const journalToBigCalendarEvent = (datedObj: JournalUni): CalendarViewEvent => {
     return {
         title: datedObj.get('note/text').as('primitive'),
-        start: getDateAsUTC(datedObj.get('date/datetime').as('primitive')),
-        end: getDateAsUTC(datedObj.get('date/datetime').as('primitive')),
+        start: getDateAsLocal(datedObj.get('date/datetime').as('primitive')),
+        end: getDateAsLocal(datedObj.get('date/datetime').as('primitive')),
         allDay: true,
         unigraphObj: datedObj,
     };
 };
 
 const calendarEventToBigCalendarEvent = (datedObj: CalendarEventUni): CalendarViewEvent => {
-    const allDay = datedObj.get('time_frame/start/all_day');
-    if (allDay) {
-        console.log('calendarEventToBigCalendarEvent', {
-            allDay,
-            end: datedObj.get('time_frame/end/datetime').as('primitive'),
-            start: datedObj.get('time_frame/start/datetime').as('primitive'),
-        });
-    }
+    const allDay = datedObj.get('time_frame/start/all_day')?.as('primitive') || false;
+    const getDate = allDay ? getDateAsLocal : getDateAsUTC;
     return {
         title: datedObj.get('name').as('primitive'),
-        start: getDateAsUTC(datedObj.get('time_frame/start/datetime').as('primitive')),
-        end: getDateAsUTC(datedObj.get('time_frame/end/datetime').as('primitive')),
-        allDay: allDay ? allDay.as('primitive') : false,
+        start: getDate(datedObj.get('time_frame/start/datetime').as('primitive')),
+        end: getDate(datedObj.get('time_frame/end/datetime').as('primitive')),
+        allDay,
         unigraphObj: datedObj,
     };
 };
@@ -219,11 +215,13 @@ const isInRange = curry((range: any, timeframe: any) => {
 });
 
 const datedObjToBigCalendarEvent = curry((datedObj: any, timeframe: any) => {
+    const allDay = datedObj.get('time_frame/start/all_day')?.as('primitive') || false;
+    const getDate = allDay ? getDateAsLocal : getDateAsUTC;
     return {
         title: datedObj.get('name')?.as('primitive') || false,
-        start: getDateAsUTC(timeframe.get('start/datetime')?.as('primitive') || false),
-        end: getDateAsUTC(timeframe.get('end/datetime')?.as('primitive') || false),
-        allDay: datedObj.get('time_frame/start/all_day')?.as('primitive') || false,
+        start: getDate(timeframe.get('start/datetime')?.as('primitive') || false),
+        end: getDate(timeframe.get('end/datetime')?.as('primitive') || false),
+        allDay,
         unigraphObj: datedObj,
     };
 });
@@ -263,7 +261,7 @@ const unigraphBigCalendarEventComponent = ({ event, ...props }: any) => {
             options={{ inline: true }}
             callbacks={{ noDate: true, isEmbed: true }}
             // components={{ '$/schema/calendar_event': { view: CalendarEventInCalendar as any } }}
-            style={{ transform: 'scale(0.8)', transformOrigin: 'left' }}
+            style={{ transformOrigin: 'left' }}
         />
     );
 };
@@ -355,10 +353,19 @@ export function Calendar() {
                 timeslots={2}
                 scrollToTime={new Date(1970, 1, 1, 7, 0, 0)}
                 components={{ event: unigraphBigCalendarEventComponent }}
-                eventPropGetter={(event: any, start: stringOrDate, end: stringOrDate, isSelected: boolean) => ({
-                    // style: { backgroundColor: '#f8f8f8', color: 'black', border: '1px', borderColor: 'black' },
-                    style: { backgroundColor: '#f8f8f8', color: 'black', border: '5px', borderColor: 'black' },
-                })}
+                eventPropGetter={(event: any, start: stringOrDate, end: stringOrDate, isSelected: boolean) => {
+                    const bgColor =
+                        new UnigraphObject(event.unigraphObj).get('calendar/color')?.as?.('primitive') || '#3174ad';
+                    return {
+                        style: {
+                            backgroundColor: bgColor,
+                            color: getContrast(bgColor),
+                            border: '4px',
+                            borderRadius: '4px',
+                            padding: '4px',
+                        },
+                    };
+                }}
                 defaultView={currentView}
                 onRangeChange={onRangeChange}
             />

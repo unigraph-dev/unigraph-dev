@@ -21,7 +21,7 @@ export const Tag: DynamicViewRenderer = ({ data, callbacks }) => {
                     size={0.75}
                     style={{
                         filter:
-                            getBgColor(tag) === 'unset' || getContrast(getBgColor(tag)) === 'black'
+                            getBgColor(tag) === 'unset' || getContrast(getBgColor(tag)) === '#000000'
                                 ? 'unset'
                                 : 'invert(1)',
                     }}
