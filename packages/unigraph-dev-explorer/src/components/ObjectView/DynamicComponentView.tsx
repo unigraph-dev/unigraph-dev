@@ -9,7 +9,7 @@ import { AutoDynamicViewDetailed } from './AutoDynamicViewDetailed';
 import { DynamicObjectListView } from './DynamicObjectListView';
 import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import { BacklinkView } from './BacklinkView';
-import { TabContext } from '../../utils';
+import { isSmallScreen, TabContext } from '../../utils';
 
 export const globalImports = {
     HelloWorld: () => <p>Hello world!!!</p>,
@@ -25,6 +25,7 @@ export const globalImports = {
     BacklinkView,
     Sugar,
     TabContext,
+    isSmallScreen,
 };
 
 export const DynamicComponentView: DynamicViewRenderer = ({ data, callbacks }) => {

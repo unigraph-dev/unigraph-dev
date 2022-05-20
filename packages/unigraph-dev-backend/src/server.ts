@@ -254,6 +254,7 @@ export default async function startServer(client: DgraphClient) {
                     afterObjectUpdatedHooks(
                         serverStates,
                         objectUpdatedHooks,
+                        serverStates.hooks['after_object_updated/all'],
                         client,
                         context.changedUids as any,
                         context.caches.uid_lists.data,

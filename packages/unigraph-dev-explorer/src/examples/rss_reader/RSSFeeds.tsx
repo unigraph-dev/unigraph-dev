@@ -158,11 +158,28 @@ const RSSItem: DynamicViewRenderer = ({ data, callbacks }) => {
                                 })()}
                             </div>
                         </div>
-                        {unpadded?.content?.abstract ? (
-                            <div style={{ color: 'black' }}>{`${unpadded.content.abstract}...`}</div>
-                        ) : (
-                            ''
-                        )}
+                        <div
+                            style={{
+                                display: 'inline',
+                                alignItems: 'center',
+                                overflowWrap: 'break-word',
+                                color: 'gray',
+                            }}
+                        >
+                            {data?._value?.children?.['_value[']?.map
+                                ? data._value.children['_value['].map((it: any) => (
+                                      <AutoDynamicView
+                                          object={new UnigraphObject(it._value)}
+                                          callbacks={callbacks}
+                                          options={{ inline: true }}
+                                          style={{ verticalAlign: 'middle' }}
+                                      />
+                                  ))
+                                : []}
+                            <p style={{ fontSize: '0.875rem', display: 'contents' }}>
+                                {typeof unpadded.content?.abstract === 'string' ? unpadded.content?.abstract : []}
+                            </p>
+                        </div>
                     </div>
                 }
             />

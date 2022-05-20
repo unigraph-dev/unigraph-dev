@@ -84,17 +84,27 @@ export const Tweet: DynamicViewRenderer = ({ data, callbacks }) => {
                         const elObj = el._value._value;
                         if (elObj.type['unigraph.id'] === '$/schema/icon_url') {
                             return (
-                                <img
-                                    src={elObj['_value.%']}
-                                    style={{
-                                        maxWidth: '240px',
-                                        borderRadius: '8px',
-                                    }}
-                                    alt=""
-                                />
+                                <div>
+                                    <img
+                                        src={elObj['_value.%']}
+                                        style={{
+                                            maxWidth: '240px',
+                                            borderRadius: '8px',
+                                        }}
+                                        alt=""
+                                    />
+                                </div>
                             );
                         }
-                        return <AutoDynamicView object={new UnigraphObject(elObj)} callbacks={{ context: data }} />;
+                        return (
+                            <div>
+                                <AutoDynamicView
+                                    object={new UnigraphObject(elObj)}
+                                    callbacks={{ context: data }}
+                                    options={{ inline: true }}
+                                />
+                            </div>
+                        );
                     })}
                 </div>
             </div>

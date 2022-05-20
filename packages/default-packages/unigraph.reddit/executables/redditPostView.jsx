@@ -59,6 +59,18 @@ return (
                 {data.get('name').as('primitive')}
             </Typography>
             <div style={{ display: 'flex', color: 'gray' }}>
+                <div style={{ alignSelf: 'center', marginRight: '6px' }}>
+                    {(data?._value?.children?.['_value['] || []).map((el) => {
+                        const elObj = el._value._value;
+                        return (
+                            <AutoDynamicView
+                                object={new UnigraphObject(elObj)}
+                                callbacks={{ context: data }}
+                                options={{ inline: true }}
+                            />
+                        );
+                    })}
+                </div>
                 {innerExpanded ? (
                     <RemoveCircle
                         onClick={() => {

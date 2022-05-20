@@ -2,7 +2,6 @@ import _ from 'lodash';
 import { Cache } from './caches';
 import DgraphClient from './dgraphClient';
 import { Subscription } from './custom.d';
-import { mergeWithConcatArray } from './utils';
 
 /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
 export type Hooks = Record<string, Function[]>
@@ -12,7 +11,12 @@ export async function callHooks<T>(hooks: Hooks, type: string, context: T) {
 }
 
 export function addHook(hooks: Hooks, type: string, fn: any) {
-    return _.mergeWith({}, hooks, {[type]: [fn]}, mergeWithConcatArray);
+    if (Array.isArray(hooks[type])) {
+        hooks[type].push(fn);
+    } else {
+        hooks[type] = [fn];
+    }
+    return hooks;
 }
 
 // Default hooks
@@ -92,12 +96,13 @@ export function createUidListCache(
 export async function afterObjectUpdatedHooks (
     states: any, 
     hooks: Record<string, any[]>, 
+    hooksAllUpdated: any[],
     client: DgraphClient, 
     changedUids: string[],
     uidLists: Record<string, string[]>
 ) {
     // console.log(hooks, changedUids, uidLists);
-    if (Object.keys(hooks).length === 0) return;
+    if (Object.keys(hooks).length === 0 && !hooksAllUpdated?.length) return;
     Object.keys(hooks).map((uidListName) => {
         if (!hooks[uidListName]?.length) return;
         const list = uidLists[uidListName];
@@ -105,4 +110,5 @@ export async function afterObjectUpdatedHooks (
         if (totalChangedUids.length === 0) return;
         hooks[uidListName].forEach(it => it({uids: totalChangedUids}));
     })
+    hooksAllUpdated.forEach(it => it({uids: changedUids}));
 }
