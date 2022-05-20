@@ -108,10 +108,11 @@ function ImportItem({ data }: any) {
 }
 
 const lang: any = {
-    'component/react-jsx': 'jsx',
+    'component/react-jsx': 'javascript',
     'routine/js': 'javascript',
     'lambda/js': 'javascript',
     'client/js': 'javascript',
+    'client/css': 'css',
 };
 
 const ext: any = {
@@ -119,6 +120,7 @@ const ext: any = {
     'routine/js': '.js',
     'lambda/js': '.js',
     'client/js': '.js',
+    'client/css': '.css',
 };
 
 export function ExecutableCodeEditor({ data, options }: any) {
@@ -253,7 +255,7 @@ export function ExecutableCodeEditor({ data, options }: any) {
             </div>
             <div style={{ flexGrow: 1, height: '100%' }}>
                 <Editor
-                    defaultLanguage="javascript"
+                    defaultLanguage={lang[unpadded.env]}
                     beforeMount={(monaco) => {
                         monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
                             noSemanticValidation: false,

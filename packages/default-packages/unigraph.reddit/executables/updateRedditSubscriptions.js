@@ -66,9 +66,11 @@ if (account?.uid) {
         },
     });
     const subJson = await subs.json();
+    const subreddits = {};
     const updatedObjs = subJson.data.children
         .map((el) => el.data)
         .map((el) => {
+            subreddits[el.subreddit] = true;
             return {
                 _updatedAt: new Date(el.created * 1000).toISOString(),
                 name: {
@@ -88,6 +90,25 @@ if (account?.uid) {
                 id: el.name,
             };
         });
+    // Maps subreddits to their descriptions
+    const subredditDescriptions = await Promise.all(
+        Object.keys(subreddits).map((el) =>
+            (async () => {
+                const resp = await fetch(`https://oauth.reddit.com/r/${el}/about.json`, {
+                    headers: {
+                        Authorization: `bearer ${token}`,
+                    },
+                });
+                const json = await resp.json();
+                return {
+                    name: el,
+                    description: { type: { 'unigraph.id': '$/schema/markdown' }, _value: json.data.public_description },
+                };
+            })(),
+        ),
+    );
+    await unigraph.addObject(subredditDescriptions, '$/schema/subreddit');
+
     // Add these items to Unigraph
     const getQuery = (id) => `(func: uid(redd)) @cascade { 
         uid

@@ -17,6 +17,12 @@
                 "_indexAs": "name"
             },
             {
+                "_key": "description",
+                "_definition": {
+                    "type": { "unigraph.id": "$/primitive/string" }
+                }
+            },
+            {
                 "_key": "color",
                 "_definition": {
                     "type": { "unigraph.id": "$/schema/color" }

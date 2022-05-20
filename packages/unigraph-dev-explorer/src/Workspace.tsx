@@ -35,7 +35,7 @@ import { SearchOverlayPopover } from './pages/SearchOverlay';
 import { MobileBar } from './components/UnigraphCore/MobileBar';
 import { CustomDragLayer } from './CustomDragLayer';
 
-export function WorkspacePageComponent({ children, maximize, paddingTop, id, tabCtx }: any) {
+export function WorkspacePageComponent({ children, maximize, paddingTop, id, tabCtx, view }: any) {
     // const [_maximize, setMaximize] = React.useState(maximize);
     // tabCtx.setMaximize = (val: boolean) => {
     //     setMaximize(val);
@@ -51,10 +51,13 @@ export function WorkspacePageComponent({ children, maximize, paddingTop, id, tab
                     overflow: 'auto',
                     paddingTop: maximize || !paddingTop ? '0px' : '12px',
                 }}
+                id={`workspaceFrame${id}`}
+                className={`workspace-frame workspace-frame-${view}`}
             >
                 <Container
                     maxWidth={maximize ? false : 'lg'}
                     id={`workspaceContainer${id}`}
+                    className="workspace-container"
                     disableGutters
                     style={{
                         paddingTop: maximize || !paddingTop ? '0px' : '12px',
@@ -450,6 +453,7 @@ export function WorkSpace(this: any) {
                 paddingTop={page.paddingTop}
                 id={node._attributes.id}
                 tabCtx={tabCtx(node, config)}
+                view={component}
             >
                 {node._attributes.floating ? (
                     <div id="global-elements" className="lol1">

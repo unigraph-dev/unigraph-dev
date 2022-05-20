@@ -139,6 +139,7 @@ export function init(hostname?: string) {
     });
 
     window.unigraph.addState('global/subscriptionCache', {});
+    window.unigraph.addState('global/executableMap', {});
     window.unigraph.addState('global/selected', []);
     window.unigraph.addState('global/selectionStart', false);
     window.unigraph.addState('global/focused', {
@@ -155,6 +156,7 @@ export function init(hostname?: string) {
 
     if (window.localStorage.getItem('enableAnalytics') === 'true') initAnalyticsIfOptedIn();
 
+    initExecutableHooks();
     initContextMenu();
     initRegistry();
     initBacklinkManager();
@@ -163,6 +165,22 @@ export function init(hostname?: string) {
     initKeyboardShortcuts();
 
     registerListQuickAdder();
+}
+
+function initExecutableHooks() {
+    window.unigraph.onCacheUpdated?.('executableMap', (cacheResult: any) => {
+        window.unigraph.getState('global/executableMap').setValue(cacheResult);
+    });
+
+    const styleSheet = document.createElement('style');
+    styleSheet.id = 'executable-styles';
+    document.head.appendChild(styleSheet);
+    window.unigraph.getState('global/executableMap').subscribe((val: any) => {
+        const csses = Object.values(val).filter((el: any) => el.env === 'client/css');
+        console.log('csses ', csses);
+        const elem = document.getElementById('executable-styles');
+        if (elem) elem.innerHTML = csses.map((el: any) => el.src).join('\n');
+    });
 }
 
 function initSelect() {

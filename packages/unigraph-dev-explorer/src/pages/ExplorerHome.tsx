@@ -58,6 +58,7 @@ export function HomeSection({ data }: any) {
                         setFlushCondition(true);
                     }, 500);
                 }}
+                className="unigraph-home-section"
             >
                 <AutoDynamicViewDetailed object={new UnigraphObject(data.get('view')._value)} />
             </Card>
@@ -70,6 +71,7 @@ export function HomeSection({ data }: any) {
                         setFlushCondition(true);
                     }, 500);
                 }}
+                className="unigraph-home-section"
             >
                 <Typography variant="h6" gutterBottom>
                     {data.get('view/name').as('primitive')}

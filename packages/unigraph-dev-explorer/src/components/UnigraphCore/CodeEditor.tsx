@@ -44,6 +44,7 @@ export function NewUserCode({}) {
                     <MenuItem value="component/react-jsx">component/react-jsx</MenuItem>
                     <MenuItem value="lambda/js">lambda/js</MenuItem>
                     <MenuItem value="client/js">client/js</MenuItem>
+                    <MenuItem value="client/css">client/css</MenuItem>
                 </Select>
             </FormControl>
 

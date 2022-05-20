@@ -17,6 +17,12 @@
                 "_indexAs": "name"
             },
             {
+                "_key": "description",
+                "_definition": {
+                    "type": { "unigraph.id": "$/schema/interface/textual" }
+                }
+            },
+            {
                 "_key": "children",
                 "_definition": {
                     "type": {

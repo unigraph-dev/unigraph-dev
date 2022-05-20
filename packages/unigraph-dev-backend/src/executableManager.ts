@@ -17,7 +17,7 @@ import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/util
 import { Executable, ExecContext } from 'unigraph-dev-common/lib/types/executableTypes';
 import { ExecRunner, runEnvLambdaJs } from 'unigraph-dev-common/lib/utils/executableUtils';
 import { addHook } from './hooks';
-import { Cache } from './caches';
+import { Cache, updateClientCache } from './caches';
 import DgraphClient from './dgraphClient';
 import { mergeWithConcatArray } from './utils';
 
@@ -53,6 +53,8 @@ export function createExecutableCache(
             Object.entries(newdata2).forEach(([k, v]) => {
                 if (k.startsWith('$/executable') && !cache.data[k]) cache.data[k] = unpad(v);
             });
+
+            updateClientCache(states, 'executableMap', cache.data);
 
             done(false, null);
         });
