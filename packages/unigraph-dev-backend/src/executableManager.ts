@@ -54,7 +54,11 @@ export function createExecutableCache(
                 if (k.startsWith('$/executable') && !cache.data[k]) cache.data[k] = unpad(v);
             });
 
-            updateClientCache(states, 'executableMap', cache.data);
+            updateClientCache(
+                states,
+                'executableMap',
+                Object.fromEntries(Object.entries(cache.data).filter(([k, v]: any) => v.env?.startsWith?.('client/'))),
+            );
 
             done(false, null);
         });
