@@ -472,7 +472,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
     noBar,
     noRemover,
     noDrop,
-    compact,
+    compact = true,
     itemStyle,
     subscribeOptions,
     loadAll,

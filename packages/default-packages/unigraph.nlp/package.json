@@ -32,12 +32,30 @@
                 "src": "executables/summarizeCreativeWork.js",
                 "editable": true,
                 "on_hook": "after_creative_work_updated"
+            },
+            {
+                "name": "Get text representation of entity",
+                "env": "routine/js",
+                "id": "get-text-representation",
+                "src": "executables/getTextRepresentation.js",
+                "editable": true
+            },
+            {
+                "name": "Summarizer: for GPT-3",
+                "env": "component/react-jsx",
+                "id": "summarizer-component",
+                "src": "executables/summarizer.jsx",
+                "editable": true
             }
         ],
         "entities": [
             {
                 "id": "prompt_preset_tldr",
                 "src": "entities/promptPresetTldr.json"
+            },
+            {
+                "id": "summarize_entity_context_menu",
+                "src": "entities/summarize_entity_context_menu.json"
             }
         ]
     }

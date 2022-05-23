@@ -6,7 +6,7 @@ import Sugar from 'sugar';
 import { Link } from '@mui/icons-material';
 import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { DynamicViewRenderer } from '../../global.d';
-import { getComponentFromPage, getOrInitLocalStorage } from '../../utils';
+import { getComponentFromPage, getOrInitLocalStorage, timeSince } from '../../utils';
 import { DynamicObjectListView } from '../../components/ObjectView/DynamicObjectListView';
 import { registerDetailedDynamicViews, registerDynamicViews, withUnigraphSubscription } from '../../unigraph-react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
@@ -84,11 +84,13 @@ const EmailMessage: DynamicViewRenderer = ({ data, callbacks }) => {
                             options={{ inline: true }}
                         />
                     </strong>,
+                    <span>
+                        , <span style={{ color: 'gray' }}>{timeSince(new Date(unpadded?.message?.date_received))}</span>
+                    </span>,
                     <br />,
                     data?.get('name')?.as('primitive'),
                 ]}
                 secondary={[
-                    Sugar.Date.relative(new Date(unpadded?.message?.date_received)),
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <Link
                             style={{ display: data?._externalUrl ? '' : 'none', marginRight: '4px' }}

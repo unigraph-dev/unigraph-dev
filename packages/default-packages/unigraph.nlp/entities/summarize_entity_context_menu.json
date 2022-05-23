@@ -1,0 +1,12 @@
+{
+    "type": { "unigraph.id": "$/schema/context_menu_item" },
+    "name": "Summarize entity (WIP)",
+    "item_type": { "unigraph.id": "$/schema/any" },
+    "view": {
+        "name": "Summarizer",
+        "env": "react-explorer",
+        "view": {
+            "unigraph.id": "$./executable/summarizer-component"
+        }
+    }
+}
