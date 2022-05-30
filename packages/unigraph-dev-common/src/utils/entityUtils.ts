@@ -238,7 +238,7 @@ function buildUnigraphEntityPart(
 
                     case '$/primitive/datetime':
                         predicate = '_value.%dt';
-                        unigraphPartValue = rawPart;
+                        unigraphPartValue = new Date(rawPart).toJSON();
                         break;
 
                     default:
@@ -599,6 +599,8 @@ export function processAutoref(entity: any, schema = 'any', schemas: Record<stri
                             return accu;
                         }, {}) || {}; // TODO: Redundent code, abstract it somehow!
 
+                    let checkedUnique = false;
+
                     kv.forEach(([key, value]) => {
                         if (key === 'unigraph.id') {
                             // Add autoref by unigraph.id
@@ -613,7 +615,8 @@ export function processAutoref(entity: any, schema = 'any', schemas: Record<stri
                             delete currentEntity['unigraph.id'];
                         } else if (Object.keys(keysMap).includes(key)) {
                             const localSchema = keysMap[key];
-                            if (localSchema['_unique']) {
+                            if (localSchema['_unique'] && !checkedUnique) {
+                                checkedUnique = true;
                                 // This should be a unique criterion, add an autoref upsert
                                 paddedEntity['$ref'] = {
                                     query: [

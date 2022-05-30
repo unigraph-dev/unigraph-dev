@@ -94,6 +94,9 @@ export function wrapUpsertFromUpdater(
         if (hasUidHere && hasUidHere.startsWith('0x')) {
             queries.pop();
         }
+        if (Object.keys(origNow).includes('$ref')) {
+            queries.pop();
+        }
         if (typeof origNow === 'object' && Array.isArray(origNow)) {
             // TODO: document expected behavior: when upserting an array, elements are always appended.
             if (typeof origNow[0] === 'object') {
@@ -135,7 +138,7 @@ export function wrapUpsertFromUpdater(
             }
             return origNow;
         }
-        if (typeof origNow == 'object' && !Array.isArray(origNow)) {
+        if (typeof origNow == 'object' && !Array.isArray(origNow) && !Object.keys(origNow).includes('$ref')) {
             const res = Object.fromEntries([
                 ...Object.entries(origNow).map(([key, value]) => {
                     if (key !== '_value[' && key !== '$ref' && key !== 'type') {

@@ -139,11 +139,13 @@ export default class DgraphClient {
     let updatedUids: string[] = [];
     if (!data.appends.length && !data.mutations.length && !data.queries.length) return [];
     try {
+      const queriedUidReq: string[] = [];
       const mutations: Mutation[] = [...data.mutations, ...data.appends].map((obj: any, index) => {
         const mu = new dgraph.Mutation();
         const newJson = (data.mutations.includes(obj) && obj && !obj.uid) ? {...obj, uid: `_:upsert${index}`} : obj;
-        if (data.mutations.includes(obj) && obj?.uid?.startsWith('uid(')) {
+        if (data.mutations.includes(obj) && obj?.uid?.startsWith('uid(') && !queriedUidReq.includes(obj.uid)) {
           // log the mutation uid as a request
+          queriedUidReq.push(obj.uid);
           data.queries.push('uidreq' + obj.uid.slice(4, -1) + "(func: " + obj.uid + ") { uid }");
         }
         mu.setSetJson(newJson);
