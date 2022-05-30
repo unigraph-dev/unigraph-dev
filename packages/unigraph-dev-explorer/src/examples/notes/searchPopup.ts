@@ -1,6 +1,7 @@
 export const setSearchPopup = (boxRef: any, searchString: string, onSelected: any, hideHidden?: boolean) => {
     window.unigraph.getState('global/searchPopup').setValue({
         show: true,
+        preview: true,
         search: searchString,
         anchorEl: boxRef.current,
         hideHidden,

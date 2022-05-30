@@ -9,7 +9,6 @@ const corePackages = [
     'unigraph.core',
     'unigraph.coreuser',
     'unigraph.home',
-    'unigraph.notes',
     'unigraph.onboarding',
 ];
 

@@ -1,3 +1,4 @@
+import { OpenInFull } from '@mui/icons-material';
 import { Card, Typography } from '@mui/material';
 import React from 'react';
 import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
@@ -10,7 +11,7 @@ type HomeSection = {
     condition: () => Promise<boolean>;
 };
 
-export function HomeSection({ data }: any) {
+export function HomeSection({ data, max }: any) {
     const [shouldDisplay, setShouldDisplay] = React.useState(false);
     const [flushCondition, setFlushCondition] = React.useState(true);
     const tabContext = React.useContext(TabContext);
@@ -51,7 +52,7 @@ export function HomeSection({ data }: any) {
     return shouldDisplay ? (
         data.get('view/maximize')?.as('primitive') ? (
             <Card
-                style={{ margin: '12px' }}
+                style={{ margin: '12px', flexGrow: 1 }}
                 variant="outlined"
                 onClick={() => {
                     setTimeout(() => {
@@ -64,7 +65,7 @@ export function HomeSection({ data }: any) {
             </Card>
         ) : (
             <Card
-                style={{ padding: '16px', margin: '12px' }}
+                style={{ padding: '16px', margin: '12px', flexGrow: 1 }}
                 variant="outlined"
                 onClick={() => {
                     setTimeout(() => {
@@ -86,6 +87,7 @@ export function HomeSection({ data }: any) {
 
 export default function ExplorerHome({ id }: any) {
     const [sections, setSections] = React.useState<Partial<any>[]>([]);
+    const [max, setMax] = React.useState();
     const tabContext = React.useContext(TabContext);
     React.useEffect(() => {
         const subsId = getRandomInt();
@@ -104,10 +106,32 @@ export default function ExplorerHome({ id }: any) {
     }, []);
 
     return (
-        <div>
-            {sections.map((el) => (
-                <HomeSection data={el} key={el.uid} />
-            ))}
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            {sections.map((el) =>
+                !max || max === el.uid ? (
+                    <div style={{ display: 'flex', height: max ? '100%' : undefined }}>
+                        <div
+                            className={max ? '' : 'showOnHover'}
+                            style={{
+                                backgroundColor: 'white',
+                                borderRadius: '14px',
+                                height: '28px',
+                                width: '28px',
+                                padding: '4px',
+                                position: 'absolute',
+                                transform: 'translate(-36px, 20px)',
+                            }}
+                            onClick={() => {
+                                if (!max) setMax(el.uid);
+                                else setMax(undefined);
+                            }}
+                        >
+                            <OpenInFull fontSize="small" style={{ opacity: 0.67 }} />
+                        </div>
+                        <HomeSection data={el} key={el.uid} max={!!max} />
+                    </div>
+                ) : null,
+            )}
         </div>
     );
 }

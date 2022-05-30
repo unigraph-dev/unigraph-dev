@@ -18,7 +18,7 @@ const removeContextEntities = (tweet: any, entities: any[]) => {
 };
 
 export const Tweet: DynamicViewRenderer = ({ data, callbacks }) => {
-    const twid = data.get('from_user/twitter_id').as('primitive');
+    const twid = data.get('from_user/twitter_id')?.as('primitive');
     const nslnk = externalNamespaces.filter((el) => el.participants.includes(twid))[0]?.createLink;
 
     return (
@@ -45,12 +45,12 @@ export const Tweet: DynamicViewRenderer = ({ data, callbacks }) => {
                     }
                 >
                     <Avatar
-                        src={data.get('from_user/profile_image').as('primitive')}
+                        src={data.get('from_user/profile_image')?.as('primitive')}
                         onClick={() => {
                             window.open(
-                                `https://twitter.com/${data.get('from_user/username').as('primitive')}/status/${data
+                                `https://twitter.com/${data.get('from_user/username')?.as('primitive')}/status/${data
                                     .get('twitter_id')
-                                    .as('primitive')}`,
+                                    ?.as('primitive')}`,
                                 '_blank',
                             );
                             if (callbacks?.removeFromContext && callbacks?.removeOnEnter) callbacks.removeFromContext();
@@ -62,10 +62,10 @@ export const Tweet: DynamicViewRenderer = ({ data, callbacks }) => {
             <div>
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                     <Typography variant="body1" style={{ marginRight: '8px' }}>
-                        <strong>{data.get('from_user/name').as('primitive')}</strong>
+                        <strong>{data.get('from_user/name')?.as('primitive')}</strong>
                     </Typography>
                     <Typography variant="body2" style={{ color: 'gray' }}>
-                        @{data.get('from_user/username').as('primitive')}
+                        @{data.get('from_user/username')?.as('primitive')}
                         {', '}
                         {Sugar.Date.relative(new Date(data._updatedAt || data._timestamp._updatedAt))}
                     </Typography>

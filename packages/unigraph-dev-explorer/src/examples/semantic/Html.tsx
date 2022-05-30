@@ -178,7 +178,7 @@ export const Html: DynamicViewRenderer = ({ data, context, callbacks }) => {
             />
             <div
                 style={{
-                    display: 'flex',
+                    display: callbacks.noBar ? 'none' : 'flex',
                     height: '48px',
                     width: '100%',
                     overflow: 'auto',

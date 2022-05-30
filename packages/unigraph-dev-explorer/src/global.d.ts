@@ -72,6 +72,7 @@ declare type SearchPopupState = {
     anchorEl?: any;
     show: boolean;
     search?: string;
+    preview?: boolean;
     hideHidden?: boolean;
     onSelected?: (newName: string, newUid: string, newType?: string) => any;
     default: {

@@ -389,6 +389,11 @@ export const isMobile = () =>
  */
 export const isSmallScreen = () => window.innerWidth <= 720;
 
+/**
+ * Whether the window is a large screen for layouting.
+ */
+export const isLargeScreen = () => window.innerWidth >= 1500;
+
 export const selectUid = (uid: string, exclusive = true) => {
     const selected = window.unigraph.getState('global/selected');
     const newUid = selected.value?.includes?.(uid)

@@ -7,6 +7,8 @@ import Levenshtein from 'levenshtein';
 import { parseQuery } from './UnigraphSearch';
 import { setSearchPopup } from '../../examples/notes/searchPopup';
 import { SearchPopupState } from '../../global.d';
+import { AutoDynamicViewDetailed } from '../ObjectView/AutoDynamicViewDetailed';
+import { isLargeScreen } from '../../utils';
 
 const ResultDisplay = ({ el }: any) => {
     return (
@@ -140,6 +142,7 @@ export function InlineSearch() {
                         });
                     },
                     'default',
+                    el,
                 ]),
                 ...topResults.map((el: any) => [
                     <ResultDisplay el={el} />,
@@ -149,6 +152,7 @@ export function InlineSearch() {
                         state.onSelected?.(el.name, el.uid, el.type);
                     },
                     'top',
+                    el,
                 ]),
                 ...searchResults.map((el: any) => [
                     <ResultDisplay el={el} />,
@@ -158,6 +162,7 @@ export function InlineSearch() {
                         state.onSelected?.(el.name, el.uid, el.type);
                     },
                     'recent',
+                    el,
                 ]),
             ].map((el: any, index: number) => [...el, index]),
         );
@@ -222,7 +227,6 @@ export function InlineSearch() {
                     elevation: 4,
                     style: {
                         maxHeight: '320px',
-                        maxWidth: '600px',
                         padding: '0px',
                         borderRadius: '6px',
                         display: 'flex',
@@ -230,40 +234,60 @@ export function InlineSearch() {
                     },
                 }}
             >
-                <div style={{ overflowX: 'auto', padding: '8px' }}>
-                    {Object.entries(_.groupBy(actionItems, (el: any) => el[2])).map(([key, value]) => {
-                        return (
-                            <>
-                                {key === 'default' ? (
-                                    []
-                                ) : (
-                                    <Typography style={{ color: 'darkgray', marginTop: '4px' }}>
-                                        {key === 'top'
-                                            ? `${isFulltext ? 'Top linked' : 'Relevant'}`
-                                            : 'Recently updated'}
-                                    </Typography>
-                                )}
-                                {value.map((el: any, index: number) => (
-                                    <div
-                                        onClick={el[1]}
-                                        style={{
-                                            ...(el[3] === currentAction
-                                                ? {
-                                                      borderRadius: '2px',
-                                                      backgroundColor: 'gainsboro',
-                                                  }
-                                                : {}),
-                                            cursor: 'pointer',
-                                            padding: '2px',
+                <div style={{ display: 'flex', overflowX: 'auto', height: '100%', width: '100%' }}>
+                    <div style={{ overflowX: 'auto', padding: '8px', maxWidth: '600px', flexGrow: 1 }}>
+                        {Object.entries(_.groupBy(actionItems, (el: any) => el[2])).map(([key, value]) => {
+                            return (
+                                <>
+                                    {key === 'default' ? (
+                                        []
+                                    ) : (
+                                        <Typography style={{ color: 'darkgray', marginTop: '4px' }}>
+                                            {key === 'top'
+                                                ? `${isFulltext ? 'Top linked' : 'Relevant'}`
+                                                : 'Recently updated'}
+                                        </Typography>
+                                    )}
+                                    {value.map((el: any, index: number) => (
+                                        <div
+                                            onClick={el[1]}
+                                            style={{
+                                                ...(el[4] === currentAction
+                                                    ? {
+                                                          borderRadius: '2px',
+                                                          backgroundColor: 'gainsboro',
+                                                      }
+                                                    : {}),
+                                                cursor: 'pointer',
+                                                padding: '2px',
+                                            }}
+                                            id={`globalSearchItem_${el[4] === currentAction ? 'current' : ''}`}
+                                        >
+                                            {el[0]}
+                                        </div>
+                                    ))}
+                                </>
+                            );
+                        })}
+                    </div>
+                    {ctxMenuState.value.preview && isLargeScreen() ? (
+                        <>
+                            <Divider flexItem variant="middle" orientation="vertical" />
+                            <div style={{ width: '500px', minHeight: '500px', overflowY: 'auto' }}>
+                                {actionItems[currentAction]?.[3]?.uid ? (
+                                    <AutoDynamicViewDetailed
+                                        object={{
+                                            uid: actionItems[currentAction]?.[3]?.uid,
+                                            type: { 'unigraph.id': actionItems[currentAction]?.[3]?.type },
+                                            _stub: true,
                                         }}
-                                        id={`globalSearchItem_${el[3] === currentAction ? 'current' : ''}`}
-                                    >
-                                        {el[0]}
-                                    </div>
-                                ))}
-                            </>
-                        );
-                    })}
+                                    />
+                                ) : (
+                                    '...'
+                                )}
+                            </div>
+                        </>
+                    ) : null}
                 </div>
                 <div
                     style={{
