@@ -29,6 +29,7 @@ import { pkg as openai } from 'unigraph-dev-common/lib/data/unigraph.openai.pkg'
 import { pkg as kanban } from 'unigraph-dev-common/lib/data/unigraph.kanban.pkg';
 import { pkg as uiCommands } from 'unigraph-dev-common/lib/data/unigraph.ui_commands.pkg';
 import { pkg as hotkeys } from 'unigraph-dev-common/lib/data/unigraph.hotkeys.pkg';
+import { pkg as synthesis } from 'unigraph-dev-common/lib/data/synthesis.db.pkg';
 
 export const defaultTypes = `<_value>: uid @reverse .
 <_value.#i>: int .
@@ -368,4 +369,5 @@ export const defaultPackages = [
     kanban,
     uiCommands,
     hotkeys,
+    synthesis,
 ];

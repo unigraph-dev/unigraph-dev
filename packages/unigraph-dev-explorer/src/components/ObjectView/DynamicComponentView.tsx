@@ -10,6 +10,7 @@ import { DynamicObjectListView } from './DynamicObjectListView';
 import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import { BacklinkView } from './BacklinkView';
 import { isSmallScreen, TabContext } from '../../utils';
+import { setSearchPopup } from '../../examples/notes/searchPopup';
 
 export const globalImports = {
     HelloWorld: () => <p>Hello world!!!</p>,
@@ -26,6 +27,7 @@ export const globalImports = {
     Sugar,
     TabContext,
     isSmallScreen,
+    setSearchPopup,
 };
 
 export const DynamicComponentView: DynamicViewRenderer = ({ data, callbacks }) => {
