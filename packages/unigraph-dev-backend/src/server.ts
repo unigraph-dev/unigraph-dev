@@ -88,6 +88,7 @@ import { getLocalUnigraphAPI } from './localUnigraphApi';
 import { addNotification } from './notifications';
 import { perfLogAfterDbTransaction, perfLogStartDbTransaction, perfLogStartPreprocessing } from './logging';
 import { createPackageCache, addUnigraphPackage, disablePackage, enablePackage } from './packageManager';
+import { processAuthRequest } from './authManager';
 
 const PORT = 4002;
 const PORT_HTTP = 4001;
@@ -964,6 +965,12 @@ export default async function startServer(client: DgraphClient) {
         let revival = false;
         connections[connId] = ws;
         const clientBrowserId = new URL(req.url || '/', 'https://localhost').searchParams.get('browserId') || connId;
+        const password = new URL(req.url || '/', 'https://localhost').searchParams.get('password') || undefined;
+        const authResult = processAuthRequest('password', password);
+        if (authResult?.success === false) {
+            ws.close(4004, JSON.stringify(authResult));
+            return;
+        }
         if (
             !Object.keys(historialClients).includes(clientBrowserId) ||
             !new URL(req.url || '/', 'https://localhost').searchParams.get('revival')

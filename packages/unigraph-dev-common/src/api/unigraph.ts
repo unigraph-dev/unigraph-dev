@@ -91,7 +91,7 @@ export function getRandomInt() {
     return Math.floor(Math.random() * Math.floor(1000000));
 }
 
-export default function unigraph(url: string, browserId: string): Unigraph<WebSocket | undefined> {
+export default function unigraph(url: string, browserId: string, password?: string): Unigraph<WebSocket | undefined> {
     const connection: { current: WebSocket | undefined } = {
         current: undefined,
     };
@@ -274,6 +274,7 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
     function connect() {
         const urlString = new URL(url);
         urlString.searchParams.append('browserId', browserId);
+        urlString.searchParams.append('password', password || '');
         const isRevival = getState('unigraph/connected').value !== undefined;
         if (getState('unigraph/connected').value !== undefined) urlString.searchParams.append('revival', 'true');
         if (connection.current?.readyState !== 3 /* CLOSED */ && connection.current) return;
@@ -281,16 +282,23 @@ export default function unigraph(url: string, browserId: string): Unigraph<WebSo
 
         connection.current.onopen = () => {
             getState('unigraph/connected').setValue(true);
+            getState('unauthorized').setValue(undefined);
             if (retries) clearInterval(retries);
             if (!isRevival && readyCallback) readyCallback();
             msgQueue.forEach((el) => connection.current?.send(el));
             msgQueue.length = 0;
         };
-        connection.current.onclose = () => {
+        connection.current.onclose = (event) => {
+            console.log(event);
             getState('unigraph/connected').setValue(false);
-            retries = setInterval(() => {
-                connect();
-            }, RETRY_CONNECTION_INTERVAL);
+            if (event.code === 4004) {
+                // closing because unauthorized, should prompt
+                getState('unauthorized').setValue(JSON.parse(event.reason));
+            } else {
+                retries = setInterval(() => {
+                    connect();
+                }, RETRY_CONNECTION_INTERVAL);
+            }
 
             // remove uid leases since they are no longer valid at server
             caches.uid_lease = [];

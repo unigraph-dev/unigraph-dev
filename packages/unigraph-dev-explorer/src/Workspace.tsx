@@ -34,6 +34,7 @@ import { getComponentFromPage, getParameters, globalTheme, isElectron, isSmallSc
 import { SearchOverlayPopover } from './pages/SearchOverlay';
 import { MobileBar } from './components/UnigraphCore/MobileBar';
 import { CustomDragLayer } from './CustomDragLayer';
+import { AuthPrompt } from './pages/AuthPrompt';
 
 export function WorkspacePageComponent({ children, maximize, paddingTop, id, tabCtx, view }: any) {
     // const [_maximize, setMaximize] = React.useState(maximize);
@@ -457,6 +458,7 @@ export function WorkSpace(this: any) {
             >
                 {node._attributes.floating ? (
                     <div id="global-elements" className="lol1">
+                        <AuthPrompt />
                         <SearchOverlayPopover />
                         <ContextMenu />
                         <InlineSearch />
@@ -505,6 +507,7 @@ export function WorkSpace(this: any) {
                     <DndProvider backend={TouchBackend} options={dndOpts}>
                         <CustomDragLayer />
                         <div id="global-elements" className="lol1">
+                            <AuthPrompt />
                             <SearchOverlayPopover />
                             <ContextMenu />
                             <InlineSearch />
