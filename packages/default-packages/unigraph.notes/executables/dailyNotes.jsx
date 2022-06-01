@@ -6,9 +6,11 @@ const utcTime = getUtcTime(d).toISOString();
 const tabContext = React.useContext(TabContext);
 const [today, setToday] = React.useState(getStartOfDay(d).toISOString());
 const [note, setNote] = React.useState({});
+const [subsId, setSubsId] = React.useState(getRandomInt());
 
 React.useEffect(() => {
-    const subsId = getRandomInt();
+    const newSubs = getRandomInt();
+    setSubsId(newSubs);
 
     tabContext.subscribeToQuery(
         `(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted)) AND (NOT eq(<_hide>, true))) @cascade {
@@ -37,15 +39,50 @@ React.useEffect(() => {
             setNote(results?.[0]);
         },
 
-        subsId,
+        newSubs,
 
         { noExpand: true },
     );
 
     return function cleanup() {
-        tabContext.unsubscribe(subsId);
+        tabContext.unsubscribe(newSubs);
     };
 }, [today]);
+
+const [templates, setTemplates] = React.useState([]);
+React.useEffect(() => {
+    const tempSubs = getRandomInt();
+    tabContext.subscribeToQuery(
+        `(func: uid(${window.unigraph.getNamespaceMap()['$/entity/templates_list'].uid})) @normalize {
+            _value {
+                children {
+                    <_value[> {
+                        _value {
+                            _value {
+                                id: uid
+                                _value {
+                                    text {
+                                        _value {
+                                            _value {
+                                                name: <_value.%>
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }`,
+        (res) => {
+            setTemplates(res);
+        },
+        tempSubs,
+        { noExpand: true },
+    );
+    return () => tabContext.unsubscribe(tempSubs);
+}, []);
 
 const [hoveredOffset, setHoveredOffset] = React.useState(-1);
 const WeekView = React.useCallback(
@@ -109,6 +146,36 @@ const WeekView = React.useCallback(
     [today, hoveredOffset],
 );
 
+const addDailyNote = (template) => {
+    const leasedUid = window.unigraph.leaseUid();
+    window.unigraph.addObject(
+        {
+            date: {
+                datetime: getUtcTime(new Date(today)).toISOString(),
+                all_day: true,
+                timezone: 'local',
+            },
+            note: {
+                uid: leasedUid,
+                text: {
+                    _value: getDateStr(new Date(today)),
+                    type: { 'unigraph.id': '$/schema/markdown' },
+                },
+            },
+        },
+        '$/schema/journal',
+        false,
+        template ? [] : [subsId],
+    );
+    if (template) {
+        window.unigraph.runExecutable('$/executable/apply-template', {
+            templateUid: template,
+            uid: leasedUid,
+            subsId,
+        });
+    }
+};
+
 return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', padding: '16px' }}>
@@ -132,31 +199,28 @@ return (
                 ) : note ? (
                     <div style={{ margin: '16px', color: 'gray' }}>Loading...</div>
                 ) : (
-                    <div>
+                    <div style={{ display: 'flex' }}>
                         <Button
                             style={{ textTransform: 'none', marginTop: '8px', margin: '16px' }}
                             variant="outlined"
-                            onClick={() => {
-                                window.unigraph.addObject(
-                                    {
-                                        date: {
-                                            datetime: getUtcTime(new Date(today)).toISOString(),
-                                            all_day: true,
-                                            timezone: 'local',
-                                        },
-                                        note: {
-                                            text: {
-                                                _value: getDateStr(new Date(today)),
-                                                type: { 'unigraph.id': '$/schema/markdown' },
-                                            },
-                                        },
-                                    },
-                                    '$/schema/journal',
-                                );
-                            }}
+                            onClick={() => addDailyNote()}
                         >
                             + Add daily note
                         </Button>
+                        {templates.length > 0 ? (
+                            <>
+                                <Divider orientation="vertical" flexItem variant="middle" />
+                                {templates.map((el) => (
+                                    <Button
+                                        style={{ textTransform: 'none', marginTop: '8px', margin: '16px' }}
+                                        variant="outlined"
+                                        onClick={() => addDailyNote(el.id)}
+                                    >
+                                        + Add template: {el.name}
+                                    </Button>
+                                ))}
+                            </>
+                        ) : null}
                     </div>
                 )
             }

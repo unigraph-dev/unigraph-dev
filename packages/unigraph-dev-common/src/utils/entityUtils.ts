@@ -115,7 +115,7 @@ function buildUnigraphEntityPart(
     let unigraphPartValue: any;
     let predicate = '_value';
     let noPredicate = false;
-    const rawPartUnigraphType = getUnigraphType(rawPart, localSchema?.type?.['unigraph.id']);
+
     // console.log(localSchema, rawPart)
 
     if (localSchema.type?.['unigraph.id'] === '$/schema/any' && typeof rawPart?.type?.['unigraph.id'] === 'string') {
@@ -126,6 +126,15 @@ function buildUnigraphEntityPart(
     } else if (localSchema.type?.['unigraph.id'] === '$/schema/any' && !isRef(rawPart)) {
         throw new TypeError('`$/schema/any` directive must have a corresponding type declaration in object!');
     }
+
+    // TODO: put all raw part annotations here
+    let rawPartAnnotation;
+    if (localSchema?.type?.['unigraph.id'] === '$/composer/Array' && rawPart?._value && Array.isArray(rawPart._value)) {
+        rawPartAnnotation = rawPart?.$context || [];
+        rawPart = rawPart._value;
+    }
+
+    const rawPartUnigraphType = getUnigraphType(rawPart, localSchema?.type?.['unigraph.id']);
 
     if (
         rawPart?.type?.['unigraph.id'] &&
@@ -169,6 +178,7 @@ function buildUnigraphEntityPart(
                         });
                         unigraphPartValue = {
                             ...propDesc,
+                            ...(rawPartAnnotation || {}),
                             type: {
                                 'unigraph.id': '$/composer/Array',
                             },
@@ -290,6 +300,7 @@ function buildUnigraphEntityPart(
                         try {
                             return [defn, buildUnigraphEntityPart(rawPart, options, schemaMap, defn)];
                         } catch (e: any) {
+                            console.log(e);
                             return undefined;
                         }
                     })

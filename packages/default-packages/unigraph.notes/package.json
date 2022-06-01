@@ -38,6 +38,10 @@
             {
                 "id": "notes_view",
                 "src": "entities/notes_view.json"
+            },
+            {
+                "id": "templates_list",
+                "src": "entities/templates_list.json"
             }
         ],
         "executables": [
@@ -80,6 +84,13 @@
                 "src": "executables/attachNote.js",
                 "editable": true,
                 "name": "Attach note to an item"
+            },
+            {
+                "id": "apply-template",
+                "env": "routine/js",
+                "src": "executables/applyTemplate.js",
+                "editable": true,
+                "name": "Apply note template"
             }
         ]
     }
