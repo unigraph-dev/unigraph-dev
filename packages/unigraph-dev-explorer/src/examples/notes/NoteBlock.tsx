@@ -434,7 +434,13 @@ export function DetailedOutlinerBlock({
             'uid',
         );
         nodesState.setValue(newNodes);
-    }, [JSON.stringify(validSubentities.map((el: any) => el?.uid).sort()), data.uid, componentId, isCollapsed]);
+    }, [
+        JSON.stringify(validSubentities.map((el: any) => el?.uid).sort()),
+        data.uid,
+        componentId,
+        isCollapsed,
+        nodesState,
+    ]);
 
     React.useEffect(() => {
         if (focused && onFocus) {

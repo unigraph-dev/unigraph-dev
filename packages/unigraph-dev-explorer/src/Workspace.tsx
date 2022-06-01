@@ -291,6 +291,8 @@ const dndOpts = {
 };
 
 export function WorkSpace(this: any) {
+    const homePage = JSON.parse(window.localStorage.getItem('userSettings') || '')?.homePage || 'home';
+
     const json: any = {
         global: {
             tabSetTabStripHeight: 40,
@@ -367,7 +369,7 @@ export function WorkSpace(this: any) {
                     selected: 0,
                     children: [
                         {
-                            ...getComponentFromPage('/home'),
+                            ...getComponentFromPage(`/${homePage}`),
                             enableClose: false,
                             id: 'home',
                             enableDrag: false,

@@ -50,6 +50,12 @@ export default function Settings() {
         window.localStorage.setItem('userSettings', JSON.stringify(newSettings));
     };
 
+    const handleHomePageSelection = (value: string) => {
+        const newSettings = { ...settings, homePage: value };
+        setSettings(newSettings);
+        window.localStorage.setItem('userSettings', JSON.stringify(newSettings));
+    };
+
     const handleClose = () => {
         setAnchorEl([null]);
         window.localStorage.setItem('userSettings', JSON.stringify(settings));
@@ -69,6 +75,7 @@ export default function Settings() {
                 <ListItem sx={pointerHoverSx} onClick={(e) => handleClick(e, 0)} key="connection">
                     <ListItemText primary="Server address" secondary={`Current address: ${settings.serverLocation}`} />
                 </ListItem>
+
                 <ListSubheader component="div" id="nested-list-subheader" key="window">
                     Window Management
                 </ListSubheader>
@@ -92,6 +99,30 @@ export default function Settings() {
                         </Select>
                     </ListItemSecondaryAction>
                 </ListItem>
+
+                <ListSubheader component="div" id="nested-list-subheader" key="homepage">
+                    Home page
+                </ListSubheader>
+                <ListItem sx={pointerHoverSx} onClick={(e) => false} key="home-page">
+                    <ListItemText
+                        id="switch-list-label-new-window"
+                        primary="Home page"
+                        secondary="Choose the page when Unigraph is launched."
+                    />
+                    <ListItemSecondaryAction>
+                        <Select
+                            labelId="demo-simple-select-outlined-label"
+                            id="demo-simple-select-outlined"
+                            value={settings.homePage ? settings.homePage : 'home'}
+                            onChange={(event) => handleHomePageSelection(event.target.value as string)}
+                            label="home-page"
+                        >
+                            <MenuItem value="home">Default home page</MenuItem>
+                            <MenuItem value="dashboard">Customizable personal dashboard</MenuItem>
+                        </Select>
+                    </ListItemSecondaryAction>
+                </ListItem>
+
                 <ListSubheader component="div" id="nested-list-subheader" key="analyticsHeader">
                     Analytics
                 </ListSubheader>

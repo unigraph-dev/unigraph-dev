@@ -138,7 +138,7 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
     const MarkdownComponent = React.useMemo(() => {
         return (
             <Typography
-                variant={!isHeading ? 'body1' : 'h4'}
+                variant={!isHeading ? 'body1' : 'h6'}
                 style={{
                     opacity: data['_value.%'] || isHeading ? 'unset' : '0',
                 }}

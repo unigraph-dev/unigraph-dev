@@ -26,6 +26,7 @@ import { init as tdInit } from './examples/todo/TodoList';
 import { init as twInit } from './examples/twitter/Tweet';
 import { UserSettings } from './global';
 import { initKeyboardShortcuts } from './keyboardShortcuts';
+import { HomeSection } from './pages/ExplorerHome';
 import { registerQuickAdder } from './unigraph-react';
 import { getParents, isMobile, isMultiSelectKeyPressed } from './utils';
 
@@ -75,6 +76,7 @@ export function init(hostname?: string) {
     const defaultSettings: UserSettings = {
         serverLocation: defaultServer,
         newWindow: 'new-tab',
+        homePage: 'home',
         nativeNotifications: true,
         developerMode: false,
         browserId,
@@ -262,6 +264,7 @@ function initRegistry() {
         '$/schema/executable': { view: CodeOrComponentView },
         '$/schema/view': { view: ViewViewDetailed },
         '$/schema/list': { view: ListObjectView, query: ListObjectQuery },
+        '$/schema/home_section': { view: HomeSection },
     });
     window.unigraph.addState('registry/quickAdder', {});
     window.unigraph.addState('registry/pages', {});

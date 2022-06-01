@@ -78,17 +78,28 @@ export function Pinboard({ data, callbacks }: any) {
                         isDraggable={!isMobile() && !layoutLocked}
                         isResizable={!layoutLocked}
                         onLayoutChange={(newLayout: any, layouts) => {
+                            // console.log(newLayout);
                             window.unigraph.runExecutable('$/executable/update-pinboard-layout', {
                                 where: data.uid,
-                                newLayout: newLayout.lg,
+                                newLayout,
                             });
                         }}
                     >
                         {data._value._value.children['_value['].map((el: any) => (
                             <div key={el._value._value.uid}>
-                                <UnigraphWidget>
+                                <UnigraphWidget
+                                    style={{
+                                        padding:
+                                            new UnigraphObject(el._value._value)
+                                                .get('view/maximize')
+                                                ?.as('primitive') ||
+                                            new UnigraphObject(el._value._value).get('maximize')?.as('primitive')
+                                                ? ''
+                                                : '16px',
+                                    }}
+                                >
                                     <AutoDynamicViewDetailed
-                                        object={new UnigraphObject(el._value._value)}
+                                        object={new UnigraphObject({ ...el._value._value, _stub: true })}
                                         callbacks={callbacks}
                                     />
                                 </UnigraphWidget>
@@ -102,5 +113,11 @@ export function Pinboard({ data, callbacks }: any) {
 }
 
 export const init = () => {
-    registerDetailedDynamicViews({ '$/schema/pinboard': { view: Pinboard } });
+    registerDetailedDynamicViews({
+        '$/schema/pinboard': {
+            view: Pinboard,
+            query: (uid: string) =>
+                `(func: uid(${uid})) @recurse(depth: 15) { uid <unigraph.id> expand(_userpredicate_) }`,
+        },
+    });
 };

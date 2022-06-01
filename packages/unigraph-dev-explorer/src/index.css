@@ -12,6 +12,10 @@ body {
   background-color: var(--app-drawer-background-color);
 }
 
+.MuiListSubheader-root {
+  background: transparent;
+}
+
 kbd {
   background-color: #eee;
     border-radius: 3px;

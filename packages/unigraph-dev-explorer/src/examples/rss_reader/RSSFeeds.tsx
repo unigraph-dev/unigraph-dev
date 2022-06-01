@@ -188,7 +188,9 @@ const RSSItem: DynamicViewRenderer = ({ data, callbacks }) => {
 };
 
 function RSSItemDetailed({ data, callbacks }: any) {
-    return <Html context={data} data={data?.get('content/text')?._value?._value} />;
+    const fullText = data?.get('item_data/creative_work/text')?._value?._value;
+
+    return <Html context={data} data={fullText || data?.get('content/text')?._value?._value} />;
 }
 
 const RSSFeed: DynamicViewRenderer = ({ data, callbacks }) => {

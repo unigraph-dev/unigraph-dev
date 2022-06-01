@@ -28,6 +28,7 @@ declare type DynamicViewRenderer = (data: Record<string, any>, callbacks: Dynami
 declare type UserSettings = {
     serverLocation: string;
     newWindow: 'new-tab' | 'new-pane' | 'new-popout';
+    homePage: 'home' | 'dashboard';
     nativeNotifications: boolean;
     developerMode: boolean;
     browserId: string;

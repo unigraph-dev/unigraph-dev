@@ -3,6 +3,7 @@ import { Card, Typography } from '@mui/material';
 import React from 'react';
 import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 import { AutoDynamicViewDetailed } from '../components/ObjectView/AutoDynamicViewDetailed';
+import { registerDetailedDynamicViews } from '../unigraph-react';
 import { TabContext } from '../utils';
 
 type HomeSection = {
@@ -11,7 +12,22 @@ type HomeSection = {
     condition: () => Promise<boolean>;
 };
 
-export function HomeSection({ data, max }: any) {
+function HomeSectionUnstable({ data }: any) {
+    return data.get('view/maximize')?.as('primitive') ? (
+        <AutoDynamicViewDetailed object={new UnigraphObject(data.get('view')._value)} />
+    ) : (
+        <>
+            <Typography variant="h6" gutterBottom>
+                {data.get('view/name').as('primitive')}
+            </Typography>
+            <AutoDynamicViewDetailed object={new UnigraphObject(data.get('view')._value)} />
+        </>
+    );
+}
+
+export const HomeSection = React.memo(HomeSectionUnstable, (prev, curr) => prev.uid === curr.uid);
+
+export function HomeSectionFrame({ data, max }: any) {
     const [shouldDisplay, setShouldDisplay] = React.useState(false);
     const [flushCondition, setFlushCondition] = React.useState(true);
     const tabContext = React.useContext(TabContext);
@@ -50,36 +66,22 @@ export function HomeSection({ data, max }: any) {
 
     // eslint-disable-next-line no-nested-ternary
     return shouldDisplay ? (
-        data.get('view/maximize')?.as('primitive') ? (
-            <Card
-                style={{ margin: '12px', flexGrow: 1 }}
-                variant="outlined"
-                onClick={() => {
-                    setTimeout(() => {
-                        setFlushCondition(true);
-                    }, 500);
-                }}
-                className="unigraph-home-section"
-            >
-                <AutoDynamicViewDetailed object={new UnigraphObject(data.get('view')._value)} />
-            </Card>
-        ) : (
-            <Card
-                style={{ padding: '16px', margin: '12px', flexGrow: 1 }}
-                variant="outlined"
-                onClick={() => {
-                    setTimeout(() => {
-                        setFlushCondition(true);
-                    }, 500);
-                }}
-                className="unigraph-home-section"
-            >
-                <Typography variant="h6" gutterBottom>
-                    {data.get('view/name').as('primitive')}
-                </Typography>
-                <AutoDynamicViewDetailed object={new UnigraphObject(data.get('view')._value)} />
-            </Card>
-        )
+        <Card
+            style={{
+                margin: '12px',
+                padding: !data.get('view/maximize')?.as('primitive') ? '16px' : '',
+                flexGrow: 1,
+            }}
+            variant="outlined"
+            onClick={() => {
+                setTimeout(() => {
+                    setFlushCondition(true);
+                }, 500);
+            }}
+            className="unigraph-home-section"
+        >
+            <HomeSection data={data} />
+        </Card>
     ) : (
         <span />
     );
@@ -128,7 +130,7 @@ export default function ExplorerHome({ id }: any) {
                         >
                             <OpenInFull fontSize="small" style={{ opacity: 0.67 }} />
                         </div>
-                        <HomeSection data={el} key={el.uid} max={!!max} />
+                        <HomeSectionFrame data={el} key={el.uid} max={!!max} />
                     </div>
                 ) : null,
             )}
