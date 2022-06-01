@@ -80,6 +80,7 @@ declare type EventCreateUnigraphObject = {
     schema: string | undefined;
     padding: boolean | undefined;
     subIds: any[] | any;
+    bulk: boolean | undefined;
 };
 
 /**

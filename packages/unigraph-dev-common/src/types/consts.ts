@@ -1,6 +1,6 @@
 export const typeMap: Record<string, string> = {
     object: '_value',
-    number: '_value.#',
+    number: '_value.#i',
     bigint: '_value.#i',
     undefined: '_value',
     null: '_value',

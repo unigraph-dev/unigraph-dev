@@ -72,13 +72,13 @@ export function InlineSearch() {
                 results
                     .filter((it: any) => it.incoming >= 5)
                     .sort((a: any, b: any) => b.incoming - a.incoming)
-                    .slice(0, 10),
+                    .slice(0, 20),
             );
 
         setSearchResults(
             results
                 .sort((a: any, b: any) => new Date(b._updatedAt || 0).getTime() - new Date(a._updatedAt || 0).getTime())
-                .slice(0, key?.length > 1 ? 100 : 10),
+                .slice(0, key?.length > 1 ? 100 : 20),
         );
     };
     const search = React.useCallback(
@@ -226,15 +226,16 @@ export function InlineSearch() {
                 PaperProps={{
                     elevation: 4,
                     style: {
-                        maxHeight: '320px',
+                        maxHeight: '536px',
                         padding: '0px',
                         borderRadius: '6px',
                         display: 'flex',
                         flexDirection: 'column',
+                        overflowX: 'hidden',
                     },
                 }}
             >
-                <div style={{ display: 'flex', overflowX: 'auto', height: '100%', width: '100%' }}>
+                <div style={{ display: 'flex', overflowX: 'hidden', height: '100%', width: '100%' }}>
                     <div style={{ overflowX: 'auto', padding: '8px', maxWidth: '600px', flexGrow: 1 }}>
                         {Object.entries(_.groupBy(actionItems, (el: any) => el[2])).map(([key, value]) => {
                             return (
@@ -281,6 +282,7 @@ export function InlineSearch() {
                                             type: { 'unigraph.id': actionItems[currentAction]?.[3]?.type },
                                             _stub: true,
                                         }}
+                                        key={actionItems[currentAction]?.[3]?.uid}
                                     />
                                 ) : (
                                     '...'

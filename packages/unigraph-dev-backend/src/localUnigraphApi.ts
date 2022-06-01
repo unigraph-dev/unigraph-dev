@@ -123,7 +123,7 @@ export function getLocalUnigraphAPI(
                 return prev;
             }, []);
         },
-        addObject: async (object, schema, padded, subIds) => {
+        addObject: async (object, schema, padded, subIds, bulk) => {
             clearEmpties(object);
             // console.log(JSON.stringify(object, null, 4));
             const objects = Array.isArray(object) ? object : [object];
@@ -144,6 +144,7 @@ export function getLocalUnigraphAPI(
                 caches: states.caches,
                 subIds,
                 changedUids,
+                bulk,
             });
             return uids;
         },

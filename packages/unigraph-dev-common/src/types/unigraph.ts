@@ -214,8 +214,9 @@ export interface Unigraph<TT = WebSocket | undefined> {
      * @param schema Schema of that object, must be valid. Such as: `$/schema/abc`
      * @param padded Whether the object is already in padded format (the Unigraph data model, with `_value` etc.)
      * @param subIds What subscriptions to update after the addition. If not set, all subscriptions will be updated.
+     * @param bulk If set to true, some checks will be bypassed.
      */
-    addObject(object: any, schema: string, padded?: boolean, subIds?: any[]): any;
+    addObject(object: any, schema: string, padded?: boolean, subIds?: any[], bulk?: boolean): any;
     /**
      * Reach into the namespace map cache and get a UID corresponding to the name.
      *

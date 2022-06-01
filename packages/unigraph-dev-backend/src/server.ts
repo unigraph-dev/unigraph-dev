@@ -214,24 +214,26 @@ export default async function startServer(client: DgraphClient) {
         after_object_changed: [
             async (context: HookAfterObjectChangedParams) => {
                 if (context.subIds && !Array.isArray(context.subIds)) context.subIds = [context.subIds];
-                pollSubscriptions(
-                    context.subscriptions,
-                    dgraphClient,
-                    pollCallback,
-                    context.subIds,
-                    serverStates,
-                    context.ofUpdate,
-                );
-                // TODO: conditionally call this updateNow because we have a list of changed UIDs
-                await context.caches.executables.updateNow();
-                await context.caches.uid_lists.updateNow();
-                initExecutables(
-                    Object.entries(context.caches.executables.data),
-                    {},
-                    localApi,
-                    serverStates.executableSchedule,
-                    serverStates,
-                );
+                if (!context.bulk) {
+                    pollSubscriptions(
+                        context.subscriptions,
+                        dgraphClient,
+                        pollCallback,
+                        context.subIds,
+                        serverStates,
+                        context.ofUpdate,
+                    );
+                    // TODO: conditionally call this updateNow because we have a list of changed UIDs
+                    await context.caches.executables.updateNow();
+                    await context.caches.uid_lists.updateNow();
+                    initExecutables(
+                        Object.entries(context.caches.executables.data),
+                        {},
+                        localApi,
+                        serverStates.executableSchedule,
+                        serverStates,
+                    );
+                }
 
                 // Call after_object_created hooks with uids cached
                 const objectCreatedHooks: any = {};
@@ -262,10 +264,12 @@ export default async function startServer(client: DgraphClient) {
                     );
                 }
 
-                lock.acquire('caches/head', async (done: any) => {
-                    await afterObjectCreatedHooks(serverStates, objectCreatedHooks, client);
-                    done(false, null);
-                });
+                if (!context.bulk)
+                    lock.acquire('caches/head', async (done: any) => {
+                        await afterObjectCreatedHooks(serverStates, objectCreatedHooks, client);
+                        done(false, null);
+                    });
+                else afterObjectCreatedHooks(serverStates, objectCreatedHooks, client);
 
                 checkLeasedUid();
             },
@@ -554,7 +558,7 @@ export default async function startServer(client: DgraphClient) {
                 return false;
             }
             localApi
-                .addObject(event.object, event.schema, event.padding, event.subIds)
+                .addObject(event.object, event.schema, event.padding, event.subIds, event.bulk)
                 .then((uids: any[]) => {
                     ws.send(makeResponse(event, true, { results: uids }));
                 })

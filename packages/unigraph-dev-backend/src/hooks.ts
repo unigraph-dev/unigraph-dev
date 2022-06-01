@@ -35,6 +35,7 @@ export type HookAfterObjectChangedParams = {
     subIds?: any[],
     ofUpdate?: any,
     changedUids?: string[],
+    bulk?: boolean,
 }
 
 export async function initEntityHeads (states: any, schemas: string[], client: DgraphClient) {

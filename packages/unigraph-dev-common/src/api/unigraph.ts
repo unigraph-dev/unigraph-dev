@@ -521,7 +521,7 @@ export default function unigraph(url: string, browserId: string, password?: stri
                 };
                 sendEvent(connection, 'get_object', { uidOrName, options, id });
             }),
-        addObject: (object, schema, padding?: any, subIds?: any, id?: any) =>
+        addObject: (object, schema, padding?: any, subIds?: any, id?: any, bulk?: any) =>
             new Promise((resolve, reject) => {
                 id = id || getRandomInt();
                 callbacks[id] = (response: any) => {
@@ -534,6 +534,7 @@ export default function unigraph(url: string, browserId: string, password?: stri
                     id,
                     padding,
                     subIds,
+                    bulk,
                 });
             }),
         deleteObject: (uid, permanent?) => {

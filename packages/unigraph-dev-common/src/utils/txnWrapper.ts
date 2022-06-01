@@ -13,18 +13,18 @@ function buildDgraphFunctionFromRefQuery(query: { key: string; value: string }[]
     const innerRefs: string[] = [];
     query.forEach(({ key, value }: any) => {
         const refTarget = key.replace(/["%@\\]/g, '');
-        const refQuery = value.replace(/["]/g, '');
+        const refQuery = typeof value === 'string' ? `"${value.replace(/["]/g, '')}"` : value;
         if (refTarget === 'unigraph.id') {
-            string += `AND eq(${refTarget}, "${refQuery}")`;
-            string1 = `eq(${refTarget}, "${refQuery}")`;
+            string += `AND eq(${refTarget}, ${refQuery})`;
+            string1 = `eq(${refTarget}, ${refQuery})`;
         } else if (refTarget === 'type/unigraph.id') {
             // innerRefs.push(`type @filter(eq(<unigraph.id>, "${refQuery}"))`);
             typeSelectorName = `typeSelector${getRandomInt().toString()}`;
-            typeSelector = `var(func: eq(<unigraph.id>, "${refQuery}")) { <~type> { ${typeSelectorName} as uid } }`;
+            typeSelector = `var(func: eq(<unigraph.id>, ${refQuery})) { <~type> { ${typeSelectorName} as uid } }`;
         } else {
             // Referencing a field (not unigraph.id), do manual padding!
             // TODO: Support deep nested references
-            innerRefs.push(`_value { ${refTarget} @filter(eq(<${typeMap[typeof refQuery]}>, "${refQuery}")) }`);
+            innerRefs.push(`_value { ${refTarget} @filter(eq(<${typeMap[typeof refQuery]}>, ${refQuery})) }`);
         }
     });
     if (innerRefs.length) {
