@@ -1065,6 +1065,17 @@ export default async function startServer(client: DgraphClient) {
                 fn(req.query, res as any);
             }
         });
+
+        httpserver.post('/' + key, (req, res) => {
+            // console.log(req.get('Content-Type'));
+            if (req.is('application/json')) {
+                console.log('json ', req.body);
+                fn(req.body, res as any);
+            } else if (Object.keys(req.query).length > 0) {
+                console.log(req.query);
+                fn(req.query, res as any);
+            }
+        });
     });
 
     httpserver.get('/', (req, res) => {

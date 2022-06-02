@@ -398,7 +398,7 @@ export function WorkSpace(this: any) {
                     // @ts-expect-error: using private API
                     Actions.updateNodeAttributes(node._attributes.id, {
                         name: title,
-                        icon: icon || '',
+                        ...(icon ? { icon } : {}),
                         // @ts-expect-error: using private API
                         config: { ...currNode._attributes.config, renamerId },
                     }),

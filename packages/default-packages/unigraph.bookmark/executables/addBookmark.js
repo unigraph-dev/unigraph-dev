@@ -1,4 +1,4 @@
-const { url } = context.params;
+const { url, addToInbox } = context.params;
 const tags = context.params.tags ? context.params.tags : [];
 const ctx = context.params.context;
 const scrape = require('html-metadata');
@@ -97,6 +97,12 @@ if (result.favicon?.startsWith('/')) {
 }
 
 const uid = await unigraph.addObject(result, '$/schema/web_bookmark');
+
+if (addToInbox)
+    unigraph.runExecutable('$/executable/add-item-to-list', {
+        where: '$/entity/inbox',
+        item: uid,
+    });
 
 setTimeout(() => {
     unigraph.callHook('after_bookmark_updated', { uids: [uid[0]] });
