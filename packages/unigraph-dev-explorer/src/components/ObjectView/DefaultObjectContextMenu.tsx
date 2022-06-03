@@ -314,7 +314,7 @@ export const onUnigraphContextMenu = (
         schemaMenuContent: [],
         extraContent: extra,
         callbacks,
-        windowName: window.name,
+        windowName: event.currentTarget?.ownerDocument?.defaultView?.name,
         ...(callbacks?.removeFromContext ? { removeFromContext: callbacks.removeFromContext } : {}),
     });
 

@@ -4,6 +4,7 @@ export const setSearchPopup = (boxRef: any, searchString: string, onSelected: an
         preview: true,
         search: searchString,
         anchorEl: boxRef.current,
+        window: boxRef.current?.ownerDocument?.defaultView?.name,
         hideHidden,
         onSelected,
         default: [

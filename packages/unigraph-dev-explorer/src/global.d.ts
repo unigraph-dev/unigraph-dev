@@ -71,6 +71,7 @@ declare type ContextMenuState = {
 declare type SearchPopupState = {
     anchorPosition?: { top: number; left: number };
     anchorEl?: any;
+    windowName?: any;
     show: boolean;
     search?: string;
     preview?: boolean;

@@ -47,7 +47,8 @@ const ResultDisplay = ({ el }: any) => {
     );
 };
 
-export function InlineSearch() {
+export function InlineSearch({ window }: any) {
+    if (!window) window = document.defaultView;
     const [isFulltext, setIsFulltext] = React.useState(false);
     const [ctxMenuState, setCtxMenuState] = React.useState<AppState<Partial<SearchPopupState>>>(
         window.unigraph.getState('global/searchPopup'),
@@ -210,7 +211,7 @@ export function InlineSearch() {
             <Popover
                 id="context-menu-search"
                 anchorReference="anchorEl"
-                open={state.show!}
+                open={state.show! && window.name === state.windowName}
                 anchorEl={state.anchorEl}
                 onClose={handleClose}
                 disableAutoFocus

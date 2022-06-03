@@ -340,22 +340,22 @@ export function WorkSpace(this: any) {
                 ],
             },
             /* {
-                type: 'border',
-                location: 'right',
-                id: 'border-right',
-                selected: -1,
-                children: [
-                    {
-                        type: 'tab',
-                        enableClose: false,
-                        minSize: 700,
-                        maxSize: 700,
-                        name: 'Inspector',
-                        id: 'inspector-pane',
-                        component: '/pages/inspector',
-                    },
-                ],
-            }, */
+                 type: 'border',
+                 location: 'right',
+                 id: 'border-right',
+                 selected: -1,
+                 children: [
+                     {
+                         type: 'tab',
+                         enableClose: false,
+                         minSize: 700,
+                         maxSize: 700,
+                         name: 'Inspector',
+                         id: 'inspector-pane',
+                         component: '/pages/inspector',
+                     },
+                 ],
+             }, */
         ],
         layout: {
             type: 'row',
@@ -460,21 +460,80 @@ export function WorkSpace(this: any) {
             >
                 {node._attributes.floating ? (
                     <div id="global-elements" className="lol1">
-                        <AuthPrompt />
-                        <SearchOverlayPopover />
-                        <ContextMenu />
-                        <InlineSearch />
-                        <MobileBar />
+                        <ContextMenu window={node._window ?? window} />
+                        <InlineSearch window={node._window ?? window} />
                     </div>
                 ) : (
                     []
                 )}
-                <WorkspaceInnerEl config={{ id: config.id, ...(config.viewConfig || {}) }} component={component} />
+                <WorkspaceInnerEl
+                    config={{ id: config.id, ...(config.viewConfig || {}) }}
+                    component={component}
+                    key="innerEl"
+                />
             </WorkspacePageComponent>
         ) : (
             <WorkspaceInnerEl config={{ id: config.id, ...(config.viewConfig || {}) }} component={component} />
         );
     };
+
+    // Monitor changes in stylesheets and update popout windows if necessary
+    React.useEffect(() => {
+        new MutationObserver((mutationCallback) => {
+            const popoutWindows: Window[] = [];
+            window.layoutModel.visitNodes((node) => {
+                if ((node as any)._window) popoutWindows.push((node as any)._window);
+            });
+            if (!popoutWindows.length) return;
+
+            const el = document.createElement('style');
+            el.id = 'unigraph-popout-inherited-styles';
+            for (const styleSheet of document.styleSheets) {
+                if (styleSheet.href) {
+                    // prefer links since they will keep paths to images etc
+                    const styleElement = document.createElement('link');
+                    styleElement.type = styleSheet.type;
+                    styleElement.rel = 'stylesheet';
+                    styleElement.href = styleSheet.href;
+                    el.appendChild(styleElement);
+                } else if (styleSheet.rules) {
+                    const style = document.createElement('style');
+                    for (const rule of styleSheet.rules) {
+                        style.appendChild(document.createTextNode(rule.cssText));
+                    }
+                    el.appendChild(style);
+                }
+            }
+
+            for (const window of popoutWindows) {
+                const elem = window.document.getElementById('unigraph-popout-inherited-styles');
+                if (elem) window.document.head.replaceChild(el, elem);
+            }
+        }).observe(document, {
+            childList: true,
+            subtree: true,
+        });
+    }, []);
+
+    // Monkey patch getElementById to get elements from popouts too
+    React.useLayoutEffect(() => {
+        const oldGetElementById = document.getElementById.bind(document);
+
+        document.getElementById = (id: string) => {
+            const res = oldGetElementById(id);
+            if (res) return res;
+            const popoutWindows: Window[] = [];
+            window.layoutModel.visitNodes((node) => {
+                if ((node as any)._window) popoutWindows.push((node as any)._window);
+            });
+            if (!popoutWindows.length) return res;
+            for (const ww of popoutWindows) {
+                const windowRes = ww.document.getElementById(id);
+                if (windowRes) return windowRes;
+            }
+            return res;
+        };
+    }, []);
 
     const [model] = React.useState(Model.fromJson(json));
 
@@ -526,6 +585,7 @@ export function WorkSpace(this: any) {
                                     action.type === 'FlexLayout_SelectTab' &&
                                     window.localStorage.getItem('enableAnalytics') === 'true'
                                 ) {
+                                    console.log('hihihi');
                                     window.mixpanel?.track('selectTab', {
                                         component: (window.layoutModel.getNodeById(action.data.tabNode) as any)
                                             ?._attributes?.component,

@@ -25,8 +25,9 @@ const addMenu = (mainWindow) => {
                     subIt.role === 'close'
                         ? {
                               accelerator: 'CmdOrCtrl+W',
-                              click: () => {
-                                  mainWindow.webContents.send('closeTab');
+                              click: (_, window) => {
+                                  if (window.webContents.getURL().includes('popout_page')) window.close();
+                                  else mainWindow.webContents.send('closeTab');
                               },
                               label: 'Close Tab',
                           }

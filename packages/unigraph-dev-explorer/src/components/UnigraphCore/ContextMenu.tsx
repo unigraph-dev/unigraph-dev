@@ -85,7 +85,8 @@ const ItemDescriptorNormal = ({ uid, object, objectType }: any) => {
     );
 };
 
-export function ContextMenu() {
+export function ContextMenu({ window }: any) {
+    if (!window) window = document.defaultView;
     const thisRef = React.useRef(null);
 
     const [ctxMenuState, setCtxMenuState] = React.useState<AppState<Partial<ContextMenuState>>>(

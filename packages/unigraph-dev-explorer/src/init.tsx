@@ -183,7 +183,6 @@ function initExecutableHooks() {
     document.head.appendChild(styleSheet);
     window.unigraph.getState('global/executableMap').subscribe((val: any) => {
         const csses = Object.values(val).filter((el: any) => el.env === 'client/css');
-        console.log('csses ', csses);
         const elem = document.getElementById('executable-styles');
         if (elem) elem.innerHTML = csses.map((el: any) => el.src).join('\n');
     });

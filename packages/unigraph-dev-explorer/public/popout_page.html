@@ -2,13 +2,30 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
     <meta name="theme-color" content="#ffffff" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-touch-fullscreen" content="yes">
+    <style id="unigraph-popout-inherited-styles"></style>
+    <style>
+      html{
+        margin:0;
+        padding:0;
+        overflow: hidden;
+      }
+      body{
+        position: absolute;
+        width:100%;
+        height:100%;
+        overflow: auto;
+      }
+    </style>
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <script>window.unigraph = window.opener.unigraph;</script>
-    <title>React App</title>
+    <title></title>
   </head>
-  <body style="height: calc(100%)">
+  <body style="height: 100vh; width: 100vw; background-color: #ffffff;">
+    <div id="root"></div>
   </body>
 </html>

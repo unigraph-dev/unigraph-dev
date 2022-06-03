@@ -2,6 +2,7 @@ import React from 'react';
 import { buildGraph, getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { byElementIndex, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import Sugar from 'sugar';
+import stringify from 'json-stable-stringify';
 import { DynamicViewRenderer } from '../../global.d';
 import { getComponentFromExecutable } from '../../unigraph-react';
 import { AutoDynamicView } from './AutoDynamicView';
@@ -37,7 +38,7 @@ export const DynamicComponentView: DynamicViewRenderer = ({ data, callbacks }) =
         getComponentFromExecutable(data, callbacks?.props || {}, globalImports).then((comp: any) => {
             if (comp) setPreviewComponent(React.createElement(comp, callbacks?.props || {}, []));
         });
-    }, [data]);
+    }, [data?._updatedAt, stringify(callbacks?.props)]);
 
     return previewComponent;
 };
