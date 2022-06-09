@@ -28,6 +28,7 @@ React.useEffect(() => {
             setTotalItems(res);
         },
         id,
+        { noExpand: true },
     );
 
     tabContext.subscribeToQuery(
@@ -38,6 +39,7 @@ React.useEffect(() => {
             setListUid(res[0]._value.children.uid);
         },
         id + 1,
+        { noExpand: true },
     );
 
     return function cleanup() {

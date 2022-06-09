@@ -281,7 +281,7 @@ export default class DgraphClient {
       .newTxn({ readOnly: true })
       .queryWithVars(query, vars).catch(e => {console.log(e); return e});
     const tns = res.getLatency().getTotalNs();
-    if (tns > 400000000) console.log(`[PERF] Slow - Transaction complete - but took ${tns / 1000000.0} ms. ` + query.slice(0, 100) + '...')
+    if (tns > 400000000) console.log(`[PERF] Slow - Transaction complete - but took ${tns / 1000000.0} ms. ` + query.slice(0, 1000) + '...')
     return withTxn ? [(res as dgraph.Response).getTxn()?.getStartTs(), Object.values(res.getJson())] : Object.values(res.getJson());
   }
 

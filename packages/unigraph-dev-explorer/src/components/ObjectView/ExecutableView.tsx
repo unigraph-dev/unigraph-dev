@@ -1,5 +1,5 @@
-import { ListItemIcon, ListItemText } from '@mui/material';
-import { PlayArrow, OpenInNew, TrendingFlat } from '@mui/icons-material';
+import { Badge, ListItemIcon, ListItemText } from '@mui/material';
+import { PlayArrow, OpenInNew, TrendingFlat, Repeat } from '@mui/icons-material';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { DynamicViewRenderer } from '../../global.d';
 import { ExecutableCodeEditor } from './DefaultCodeEditor';
@@ -49,7 +49,20 @@ export const Executable: DynamicViewRenderer = ({ data, callbacks }) => {
     return (
         <>
             <ListItemIcon style={{ paddingLeft: '8px' }} onClick={actions[unpadded.env]}>
-                {icons[unpadded.env]}
+                {unpadded.periodic ? (
+                    <Badge
+                        overlap="circular"
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'right',
+                        }}
+                        badgeContent={<Repeat fontSize="small" />}
+                    >
+                        {icons[unpadded.env]}
+                    </Badge>
+                ) : (
+                    icons[unpadded.env]
+                )}
             </ListItemIcon>
             <ListItemText primary={`Run code: ${unpadded.name}`} secondary={`Environment: ${unpadded.env}`} />
         </>

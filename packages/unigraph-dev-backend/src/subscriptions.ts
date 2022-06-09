@@ -179,7 +179,11 @@ export function mergeSubscriptions(
     // object queries: options must be equal
     const groupsObjectQueries: Record<string, [QueryObject, Subscription[]]> = {};
     objectQueries.forEach((el: Subscription) => {
-        const key = `${stringify((el.query as any)?.options)}`;
+        let key = `${stringify((el.query as any)?.options)}`;
+        if (!(el.query as QueryObject).options?.queryAsType && !(el.query as QueryObject).options?.queryFn) {
+            // We shouldn't group any of the recursive queries, since that might be slow
+            key += getRandomId();
+        }
         if (!groupsObjectQueries[key]) {
             groupsObjectQueries[key] = [JSON.parse(JSON.stringify(el.query)), [el]];
             if (!Array.isArray(groupsObjectQueries[key][0].uid)) {
@@ -228,6 +232,11 @@ export function mergeSubscriptions(
             });
         });
 
+    console.log(`[Subscription] Refreshing subscriptions...`);
+    console.log(
+        `[Subscription] Total of ${typeQueries.length} type queries, ${objectQueries.length} object queries, and ${queryQueries.length} query queries,`,
+    );
+    console.log(`[Subscription] Merged into ${totalMerged.length} queries.`);
     return totalMerged;
 }
 

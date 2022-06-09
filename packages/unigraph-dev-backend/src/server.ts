@@ -176,7 +176,7 @@ export default async function startServer(client: DgraphClient) {
             pollSubscriptions(a, b, c, d, e);
             pendingIds = [];
         },
-        100,
+        25,
         { leading: false, trailing: true },
     );
     const debouncedPollSubscriptions = (subs: any, cclient: any, callback: any, ids: any, states: any) => {
