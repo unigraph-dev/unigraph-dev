@@ -35,6 +35,7 @@ import { SearchOverlayPopover } from './pages/SearchOverlay';
 import { MobileBar } from './components/UnigraphCore/MobileBar';
 import { CustomDragLayer } from './CustomDragLayer';
 import { AuthPrompt } from './pages/AuthPrompt';
+import { useUnigraphState } from './unigraph-react';
 
 export function WorkspacePageComponent({ children, maximize, paddingTop, id, tabCtx, view }: any) {
     // const [_maximize, setMaximize] = React.useState(maximize);
@@ -89,12 +90,7 @@ const WorkspaceInnerEl_ = ({ config, component }: any) => {
 const WorkspaceInnerEl = React.memo(WorkspaceInnerEl_, (a, b) => JSON.stringify(a) === JSON.stringify(b));
 
 function ConnectionIndicator() {
-    const [connected, setConnected] = React.useState(false);
-    React.useMemo(() => {
-        window.unigraph.getState('unigraph/connected').subscribe((conn) => {
-            setConnected(conn);
-        });
-    }, []);
+    const connected = useUnigraphState('unigraph/connected');
     return (
         <span
             style={{

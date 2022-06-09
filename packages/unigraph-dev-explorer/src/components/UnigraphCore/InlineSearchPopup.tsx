@@ -211,7 +211,7 @@ export function InlineSearch({ window }: any) {
             <Popover
                 id="context-menu-search"
                 anchorReference="anchorEl"
-                open={state.show! && window.name === state.windowName}
+                open={state.show! && (state.windowName === undefined || window.name === state.windowName)}
                 anchorEl={state.anchorEl}
                 onClose={handleClose}
                 disableAutoFocus

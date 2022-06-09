@@ -43,6 +43,18 @@ export function withUnigraphSubscription(
     };
 }
 
+export const useUnigraphState = (name: string) => {
+    const [state, setState] = React.useState(window.unigraph.getState(name).value);
+
+    React.useEffect(() => {
+        window.unigraph.getState(name).subscribe(setState);
+
+        return () => window.unigraph.getState(name).subscribe(setState);
+    }, []);
+
+    return state;
+};
+
 const addViewToRegistry = (state: any, views: Record<string, any>): void => {
     const finalViews = Object.fromEntries(
         Object.entries(views).map((entry) => (entry[1].view ? entry : [entry[0], { view: entry[1] }])),

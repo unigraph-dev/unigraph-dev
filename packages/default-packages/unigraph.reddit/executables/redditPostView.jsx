@@ -2,6 +2,16 @@ const { data, callbacks, inline } = params;
 const [innerExpanded, setInnerExpanded] = React.useState(false);
 const hide = data.get('thumbnail').as('primitive') === 'self' && data.get('selftext').as('primitive') === '';
 
+const [extraData, setExtraData] = React.useState({});
+
+React.useEffect(() => {
+    if (data?.get('url')?.as('primitive')?.startsWith('https://www.reddit.com/gallery/')) {
+        fetch(`https://www.reddit.com/by_id/${data?.get('id')?.as('primitive')}/.json`)
+            .then((el) => el.json())
+            .then((json) => setExtraData(json?.data?.children?.[0]?.data));
+    }
+}, []);
+
 const getThumbnail = (url) => {
     if (url === 'image') {
         return (
@@ -25,6 +35,36 @@ const getThumbnail = (url) => {
         );
     }
     return <Avatar variant="rounded" src={url} />;
+};
+
+const getDetail = (url) => {
+    if (url.startsWith('https://v.redd.it/')) {
+        return (
+            <ReactPlayer url={`${url}/HLSPlaylist.m3u8`} style={{ maxWidth: '100%' }} controls playing muted alt="" />
+        );
+    }
+    if (url.startsWith('https://youtu.be/')) {
+        return <ReactPlayer url={url} style={{ maxWidth: '100%' }} controls playing muted alt="" />;
+    }
+    if (url.startsWith('https://www.reddit.com/gallery/')) {
+        console.log(Object.values(extraData?.media_metadata || {}));
+        return (
+            <ImageGallery
+                items={Object.values(extraData?.media_metadata || {}).map((el) => ({
+                    original: htmlDecode(el?.p?.pop?.()?.u),
+                    thumbnail: htmlDecode(el?.s?.u),
+                }))}
+            />
+        );
+    }
+    if (url.startsWith('https://imgur.com/')) {
+        return <img src={`${url}.png`} style={{ maxWidth: '100%' }} alt="" />;
+    }
+    if (url.startsWith('https://gfycat.com/')) {
+        const finalUrl = url.replace('https://gfycat.com/', 'https://gfycat.com/ifr/');
+        return <iframe src={`${finalUrl}?controls=0`} style={{ maxWidth: '100%' }} alt="" frameBorder={0} />;
+    }
+    return <img src={url} style={{ maxWidth: '100%' }} alt="" />;
 };
 
 return (
@@ -116,11 +156,11 @@ return (
                 </div>
             </div>
             {innerExpanded ? (
-                <div>
+                <div style={{ marginLeft: isSmallScreen() ? '-56px' : '' }}>
                     {data.get('selftext').as('primitive').length ? (
                         <AutoDynamicView object={new UnigraphObject(data.get('selftext')._value._value)} />
                     ) : (
-                        <img src={data.get('url').as('primitive')} style={{ maxWidth: '100%' }} alt="" />
+                        getDetail(data.get('url').as('primitive'))
                     )}
                 </div>
             ) : (

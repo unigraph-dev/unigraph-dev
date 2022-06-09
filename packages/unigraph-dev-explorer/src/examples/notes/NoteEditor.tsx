@@ -257,9 +257,9 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                     caret,
                     async (match: any, newName: string, newUid: string, newType: string) => {
                         if (!['$/schema/note_block', '$/schema/embed_block'].includes(newType)) {
-                            callbacks['replace-child-with-embed-uid'](newUid);
+                            callbacks['replace-child-with-embed-uid'](newUid, newType);
                         } else {
-                            callbacks['replace-child-with-uid'](newUid);
+                            callbacks['replace-child-with-uid'](newUid, newType);
                             setTimeout(() => {
                                 // callbacks['add-child']();
                                 permanentlyDeleteBlock(dataRef.current);

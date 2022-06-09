@@ -122,7 +122,7 @@ export function ContextMenu({ window }: any) {
             <Popover
                 id="context-menu"
                 anchorReference="anchorPosition"
-                open={state.show! && window.name === state.windowName}
+                open={state.show! && (state.windowName === undefined || window.name === state.windowName)}
                 anchorPosition={state.anchorPosition}
                 onClose={handleClose}
                 container={thisRef.current}

@@ -376,6 +376,12 @@ export const isElectron = () => {
     return userAgent.indexOf(' electron/') > -1 && window.electronShell;
 };
 
+// Ref: https://stackoverflow.com/a/34064434
+export function htmlDecode(input: string) {
+    const doc = new DOMParser().parseFromString(input, 'text/html');
+    return doc.documentElement.textContent;
+}
+
 /**
  * Whether this is a mobile device with touch capacity.
  * Not to be confused with isSmallScreen which checks width.

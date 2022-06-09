@@ -1,4 +1,7 @@
 import React from 'react';
+import ReactPlayer from 'react-player';
+import ImageGallery from 'react-image-gallery';
+import 'react-image-gallery/styles/css/image-gallery.css';
 import { buildGraph, getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { byElementIndex, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import Sugar from 'sugar';
@@ -10,7 +13,7 @@ import { AutoDynamicViewDetailed } from './AutoDynamicViewDetailed';
 import { DynamicObjectListView } from './DynamicObjectListView';
 import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import { BacklinkView } from './BacklinkView';
-import { isSmallScreen, TabContext } from '../../utils';
+import { isSmallScreen, TabContext, htmlDecode } from '../../utils';
 import { setSearchPopup } from '../../examples/notes/searchPopup';
 
 export const globalImports = {
@@ -29,6 +32,9 @@ export const globalImports = {
     TabContext,
     isSmallScreen,
     setSearchPopup,
+    ReactPlayer,
+    ImageGallery,
+    htmlDecode,
 };
 
 export const DynamicComponentView: DynamicViewRenderer = ({ data, callbacks }) => {

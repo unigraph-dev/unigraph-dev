@@ -1153,7 +1153,13 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
     window.unigraph.touch(parents.map((el) => el.uid));
 };
 
-export const replaceChildWithEmbedUid = async (data: any, context: NoteEditorContext, index: number, uid: string) => {
+export const replaceChildWithEmbedUid = async (
+    data: any,
+    context: NoteEditorContext,
+    index: number,
+    uid: string,
+    type?: string,
+) => {
     // console.log(index);
     let currSubentity = -1;
     const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
@@ -1178,7 +1184,7 @@ export const replaceChildWithEmbedUid = async (data: any, context: NoteEditorCon
                         _value: {
                             uid: el._value._value._value.uid,
                             content: {
-                                _value: { uid },
+                                _value: { uid, ...(type ? { type: { 'unigraph.id': type } } : {}) },
                             },
                         },
                     },
@@ -1205,11 +1211,19 @@ export const replaceChildWithEmbedUid = async (data: any, context: NoteEditorCon
         false,
         false,
         context.callbacks.subsId,
+        undefined,
+        true,
     );
     window.unigraph.touch(getParents(data).map((el) => el.uid));
 };
 
-export const replaceChildWithUid = async (data: any, context: NoteEditorContext, index: number, uid: string) => {
+export const replaceChildWithUid = async (
+    data: any,
+    context: NoteEditorContext,
+    index: number,
+    uid: string,
+    type?: string,
+) => {
     // console.log(index);
     let currSubentity = -1;
     const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
@@ -1226,7 +1240,7 @@ export const replaceChildWithUid = async (data: any, context: NoteEditorContext,
                 _value: {
                     // subentity
                     uid: el._value.uid,
-                    _value: { uid },
+                    _value: { uid, ...(type ? { type: { 'unigraph.id': type } } : {}) },
                 },
             };
             return [...prev, newel];
@@ -1250,6 +1264,8 @@ export const replaceChildWithUid = async (data: any, context: NoteEditorContext,
         false,
         false,
         context.callbacks.subsId,
+        undefined,
+        true,
     );
     window.unigraph.touch(getParents(data).map((el) => el.uid));
 };
