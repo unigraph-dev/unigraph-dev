@@ -644,3 +644,13 @@ export const globalTheme = {
 export const getName = (obj: UnigraphObject) => {
     return (obj?.get?.('name') || obj?.get?.('title') || obj?.get?.('text'))?.as?.('primitive');
 };
+
+/**
+ * Try to perform a haptic feedback if we're on iOS.
+ */
+export function tryHapticFeedback() {
+    (window as any)?.webkit?.messageHandlers?.observer?.postMessage?.({
+        event: 'haptic',
+        type: 'success',
+    });
+}

@@ -20,7 +20,7 @@ import {
     Box,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { ExpandMore, ClearAll, InboxOutlined, ExpandLess } from '@mui/icons-material';
+import { ExpandMore, ClearAll, InboxOutlined, ExpandLess, ThreeSixty } from '@mui/icons-material';
 import _ from 'lodash';
 import React, { useEffect } from 'react';
 import { useDrop } from 'react-dnd';
@@ -29,11 +29,22 @@ import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { TransitionGroup } from 'react-transition-group';
+import { SwipeableList, SwipeableListItem, ActionAnimations } from '@sandstreamdev/react-swipeable-list';
 import { getDynamicViews } from '../../unigraph-react';
 import { AutoDynamicView } from './AutoDynamicView';
-import { DataContext, DataContextWrapper, hoverSx, isMobile, TabContext, trivialTypes } from '../../utils';
+import {
+    DataContext,
+    DataContextWrapper,
+    hoverSx,
+    isMobile,
+    TabContext,
+    trivialTypes,
+    tryHapticFeedback,
+} from '../../utils';
 import { setupInfiniteScrolling } from './infiniteScrolling';
 import { DragandDrop } from './DragandDrop';
+import '@sandstreamdev/react-swipeable-list/dist/styles.css';
+import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
 
 const PREFIX = 'DynamicObjectListView';
 
@@ -118,13 +129,23 @@ function DynamicListItem({
     itemStyle,
     viewOptions,
     noHoverHighlight,
+    _swipableClassName,
+    _swipableRest,
 }: any) {
     const [itemHovered, setItemHovered] = React.useState<boolean>(false);
+    const [swipeActionable, setSwipeActionable] = React.useState<boolean>(false);
     const isRemoverActive = React.useCallback(() => {
-        return !(itemRemover === _.noop || isMobile() || noRemover);
+        return !(itemRemover === _.noop || noRemover);
     }, [itemRemover, noRemover]);
+
+    React.useEffect(() => {
+        if (swipeActionable) {
+            tryHapticFeedback();
+        }
+    }, [swipeActionable]);
     return (
         <ListItem
+            className={_swipableClassName}
             sx={noHoverHighlight ? {} : hoverSx}
             style={{
                 ...(compact ? { paddingTop: '2px', paddingBottom: '2px' } : {}),
@@ -133,45 +154,73 @@ function DynamicListItem({
             onMouseOver={() => setItemHovered(true)}
             onMouseLeave={() => setItemHovered(false)}
         >
-            <AutoDynamicView
-                options={{ ...(typeof viewOptions === 'function' ? viewOptions(item) : viewOptions), compact }}
-                object={new UnigraphObject(item)}
-                components={components}
-                callbacks={{
-                    ...callbacks,
-                    context,
-                    removeOnEnter,
-                    removeFromContext: (where: undefined | 'left' | 'right') => {
-                        const uids = {
-                            left: itemUids.slice(0, index),
-                            right: undefined,
-                            '': undefined,
-                        }[where || ''] || [item.uid];
-                        itemRemover(uids);
+            <SwipeableListItem
+                swipeLeft={
+                    isRemoverActive()
+                        ? {
+                              content: <div>Delete</div>,
+                              action: () => {
+                                  itemRemover([item.uid]);
+                              },
+                              actionAnimation: ActionAnimations.REMOVE,
+                          }
+                        : undefined
+                }
+                swipeRight={{
+                    content: <div>Menu</div>,
+                    action: () => {
+                        onUnigraphContextMenu({ clientX: 0, clientY: 0 } as any, item, context, { ...callbacks });
                     },
                 }}
-            />
-            {isRemoverActive() && (
-                <ListItemIcon
-                    onClick={() => {
-                        itemRemover([item.uid]);
+                {..._swipableRest}
+                blockSwipe={!isMobile()}
+                threshold={0.33}
+                onSwipeProgress={(percent) => setSwipeActionable(percent > 33)}
+            >
+                <AutoDynamicView
+                    options={{
+                        ...(typeof viewOptions === 'function' ? viewOptions(item) : viewOptions),
+                        compact,
+                        noSwipe: !isMobile(),
                     }}
-                    sx={{
-                        cursor: 'pointer',
-                        minWidth: 'auto',
-                        padding: '5px',
-                        borderRadius: '50%',
-                        display: itemHovered ? '' : 'none',
-                        '&:hover': {
-                            display: '',
-                            backgroundColor: 'action.selected',
+                    object={new UnigraphObject(item)}
+                    components={components}
+                    callbacks={{
+                        ...callbacks,
+                        context,
+                        removeOnEnter,
+                        removeFromContext: (where: undefined | 'left' | 'right') => {
+                            const uids = {
+                                left: itemUids.slice(0, index),
+                                right: undefined,
+                                '': undefined,
+                            }[where || ''] || [item.uid];
+                            itemRemover(uids);
                         },
-                        '&:active': { backgroundColor: 'action.active' },
                     }}
-                >
-                    <ClearAll />
-                </ListItemIcon>
-            )}
+                />
+                {isRemoverActive() && !isMobile ? (
+                    <ListItemIcon
+                        onClick={() => {
+                            itemRemover([item.uid]);
+                        }}
+                        sx={{
+                            cursor: 'pointer',
+                            minWidth: 'auto',
+                            padding: '5px',
+                            borderRadius: '50%',
+                            display: itemHovered ? '' : 'none',
+                            '&:hover': {
+                                display: '',
+                                backgroundColor: 'action.selected',
+                            },
+                            '&:active': { backgroundColor: 'action.active' },
+                        }}
+                    >
+                        <ClearAll />
+                    </ListItemIcon>
+                ) : null}
+            </SwipeableListItem>
         </ListItem>
     );
 }
@@ -226,6 +275,8 @@ function DynamicListBasic({
     itemStyle,
     viewOptions,
     noHoverHighlight,
+    _swipableClassName,
+    _swipableRest,
 }: any) {
     const tabContext = React.useContext(TabContext);
     return (
@@ -255,6 +306,8 @@ function DynamicListBasic({
                     components={components}
                     viewOptions={viewOptions}
                     noHoverHighlight={noHoverHighlight}
+                    _swipableClassName={_swipableClassName}
+                    _swipableRest={_swipableRest}
                 />
             ))}
         </DragandDrop>
@@ -280,6 +333,8 @@ function DynamicList({
     itemStyle,
     viewOptions,
     noHoverHighlight,
+    _swipableClassName,
+    _swipableRest,
 }: any) {
     const tabContext = React.useContext(TabContext);
     const [loadedItems, setLoadedItems] = React.useState<any[]>([]);
@@ -364,6 +419,8 @@ function DynamicList({
                         components={components}
                         viewOptions={viewOptions}
                         noHoverHighlight={noHoverHighlight}
+                        _swipableClassName={_swipableClassName}
+                        _swipableRest={_swipableRest}
                     />
                 ))}
             </DragandDrop>
@@ -727,46 +784,18 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                     )}
                 </div>
                 <div style={{ flexGrow: 1, overflowY: 'auto' }} id={`scrollableDiv${parId}`}>
-                    {!groupBy.length
-                        ? React.createElement(isStub && !loadAll ? DynamicList : DynamicListBasic, {
-                              reverse: reverseOrder,
-                              items: procItems,
-                              context,
-                              listUid,
-                              callbacks,
-                              itemRemover,
-                              itemUids: procItems.map((el) => el.uid),
-                              itemGetter,
-                              parId,
-                              noRemover,
-                              compact,
-                              itemStyle,
-                              subscribeOptions,
-                              removeOnEnter,
-                              components,
-                              viewOptions,
-                              noHoverHighlight,
-                          })
-                        : groupers[groupBy](procItems.map(itemGetter)).map((el: Group) => (
-                              <>
-                                  <ListSubheader
-                                      style={{
-                                          padding: compact ? '2px' : '',
-                                          lineHeight: compact ? '1.2em' : '',
-                                      }}
-                                  >
-                                      {el.name}
-                                  </ListSubheader>
-                                  {React.createElement(isStub && !loadAll ? DynamicList : DynamicListBasic, {
+                    <SwipeableList>
+                        {({ className, ...rest }) =>
+                            !(groupBy as any).length
+                                ? React.createElement(isStub && !loadAll ? DynamicList : DynamicListBasic, {
                                       reverse: reverseOrder,
-                                      items: el.items,
+                                      items: procItems,
                                       context,
                                       listUid,
                                       callbacks,
                                       itemRemover,
-                                      itemUids: el.items.map((ell) => ell.uid),
-                                      itemGetter: _.identity,
-                                      infinite: false,
+                                      itemUids: procItems.map((el) => el.uid),
+                                      itemGetter,
                                       parId,
                                       noRemover,
                                       compact,
@@ -776,9 +805,45 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                       components,
                                       viewOptions,
                                       noHoverHighlight,
-                                  })}
-                              </>
-                          ))}
+                                      _swipableClassName: className,
+                                      _swipableRest: rest,
+                                  })
+                                : groupers[groupBy as any](procItems.map(itemGetter)).map((el: Group) => (
+                                      <>
+                                          <ListSubheader
+                                              style={{
+                                                  padding: compact ? '2px' : '',
+                                                  lineHeight: compact ? '1.2em' : '',
+                                              }}
+                                          >
+                                              {el.name}
+                                          </ListSubheader>
+                                          {React.createElement(isStub && !loadAll ? DynamicList : DynamicListBasic, {
+                                              reverse: reverseOrder,
+                                              items: el.items,
+                                              context,
+                                              listUid,
+                                              callbacks,
+                                              itemRemover,
+                                              itemUids: el.items.map((ell) => ell.uid),
+                                              itemGetter: _.identity,
+                                              infinite: false,
+                                              parId,
+                                              noRemover,
+                                              compact,
+                                              itemStyle,
+                                              subscribeOptions,
+                                              removeOnEnter,
+                                              components,
+                                              viewOptions,
+                                              noHoverHighlight,
+                                              _swipableClassName: className,
+                                              _swipableRest: rest,
+                                          })}
+                                      </>
+                                  ))
+                        }
+                    </SwipeableList>
                 </div>
             </DataContextWrapper>
         </Root>

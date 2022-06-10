@@ -57,6 +57,7 @@ export function AutoDynamicView({
         allowSemantic = true,
         expandedChildren,
         backlinkStyle,
+        noSwipe,
     } = finalOptions;
 
     if (!callbacks) callbacks = {};
@@ -188,13 +189,15 @@ export function AutoDynamicView({
     );
 
     const handlers = useSwipeable({
-        onSwipedRight: (eventData) =>
-            onUnigraphContextMenu(
-                { clientX: eventData.absX, clientY: eventData.absY } as any,
-                getObjectRef.current(),
-                contextEntity,
-                { ...callbacks, componentId },
-            ),
+        onSwipedRight: (eventData) => {
+            if (!noSwipe)
+                onUnigraphContextMenu(
+                    { clientX: eventData.absX, clientY: eventData.absY } as any,
+                    getObjectRef.current(),
+                    contextEntity,
+                    { ...callbacks, componentId },
+                );
+        },
     });
 
     const contextEntity = typeof callbacks?.context === 'object' ? callbacks.context : null;
@@ -211,7 +214,7 @@ export function AutoDynamicView({
                 setIsRecursion(false);
             }
 
-            if (!noDrag) drag(domElement);
+            if (!noDrag && !isMobile()) drag(domElement);
             if (!noDrop) drop(domElement);
             if (isMobile() && !noContextMenu) handlers.ref(domElement);
             viewEl.current = domElement;

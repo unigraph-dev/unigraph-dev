@@ -14,6 +14,7 @@
         "@mui/material": "^5.4.1",
         "@mui/styles": "^5.4.1",
         "@pmmmwh/react-refresh-webpack-plugin": "0.4.3",
+        "@sandstreamdev/react-swipeable-list": "^1.0.1",
         "@svgr/webpack": "5.5.0",
         "@types/react-grid-layout": "^1.1.1",
         "@types/react-splitter-layout": "^3.0.1",

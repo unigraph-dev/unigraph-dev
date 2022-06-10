@@ -59,3 +59,7 @@ span.wikilink:hover {
 .rbc-event-label {
   display: none !important;
 }
+
+.swipeable-list-item__content {
+  background-color: transparent !important;
+}

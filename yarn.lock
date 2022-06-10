@@ -4083,6 +4083,11 @@
   resolved "https://registry.yarnpkg.com/@rushstack/eslint-patch/-/eslint-patch-1.1.0.tgz#7f698254aadf921e48dda8c0a6b304026b8a9323"
   integrity sha512-JLo+Y592QzIE+q7Dl2pMUtt4q8SKYI5jDrZxrozEQxnGVOyYE+GWK9eLkwTaeN9DDctlaRAQ3TBmzZ1qdLE30A==
 
+"@sandstreamdev/react-swipeable-list@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@sandstreamdev/react-swipeable-list/-/react-swipeable-list-1.0.1.tgz#054055d2e0168793db07df37716f324a59132d50"
+  integrity sha512-JfR9zZYqqC1wqfhH3bXNUqND7iCpqzM+WiMymnIzR8ciURTbX9HJr0fbpKrtyfiLmLE1uAhES4kuG/JtfqwE7g==
+
 "@sheerun/mutationobserver-shim@^0.3.2":
   version "0.3.3"
   resolved "https://registry.yarnpkg.com/@sheerun/mutationobserver-shim/-/mutationobserver-shim-0.3.3.tgz#5405ee8e444ed212db44e79351f0c70a582aae25"

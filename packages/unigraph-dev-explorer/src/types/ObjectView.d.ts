@@ -19,6 +19,8 @@ export type AutoDynamicViewProps = {
 };
 
 export type DynamicViewOptions = {
+    /** If set to true, object will not have a swipable menu. */
+    noSwipe?: boolean;
     /** If set to true, AutoDynamicView will not navigate to detailed view even if it has one. */
     noClickthrough?: boolean;
     /** If set to true, AutoDynamicView will not display subentity & annotation. */
