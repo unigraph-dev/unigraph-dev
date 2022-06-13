@@ -931,20 +931,40 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
         const paths: any[] = findAllUids(data, callbacks?.context?.uid).map((el) => el[1]);
         console.log(paths);
         const refinedPaths = paths
-            .map((path) =>
-                path.filter(
-                    (el: any) =>
-                        el?.type?.['unigraph.id'] &&
-                        !['$/schema/subentity', '$/schema/interface/semantic'].includes(el?.type?.['unigraph.id']),
-                ),
+            .filter(
+                (path) =>
+                    path.filter(
+                        (el: any, index: number) =>
+                            el._key &&
+                            path[index + 1]?.type?.['unigraph.id'] === '$/schema/interface/semantic' &&
+                            path[index + 1]?._value.uid !== callbacks?.context?.uid,
+                    ).length === 0,
             )
             .filter(
                 (path) =>
                     path.filter(
-                        (el: any) =>
-                            ['$/schema/note_block', '$/schema/embed_block'].includes(el?.type?.['unigraph.id']) &&
-                            el?._hide !== true,
-                    ).length <= 2,
+                        (el: any, index: number) =>
+                            el.type?.['unigraph.id'] === '$/schema/embed_block' &&
+                            el?._value?.children?.uid &&
+                            path[index + 2].uid === el._value.children.uid,
+                    ).length === 0,
+            )
+            .filter(
+                (path) =>
+                    !(
+                        path.length === 6 &&
+                        path[5]?.uid === callbacks?.context?.uid &&
+                        path[5]?.type?.['unigraph.id'] === '$/schema/tag'
+                    ),
+            )
+            .map((path) =>
+                path.filter(
+                    (el: any) =>
+                        el?.['dgraph.type']?.includes('Entity') ||
+                        el.uid === callbacks?.context?.uid ||
+                        (el?.type?.['unigraph.id']?.startsWith('$/schema/') &&
+                            !['$/schema/subentity', '$/schema/interface/semantic'].includes(el?.type?.['unigraph.id'])),
+                ),
             );
         setRefObjects(refinedPaths.map((refinedPath) => refinedPath[refinedPath.length - 2]));
         setPathNames(
@@ -983,6 +1003,11 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
                             'get-semantic-properties': () => data,
                         }}
                     />
+                    <div style={{ float: 'right' }}>
+                        {otherChildren.map((el: any) => (
+                            <AutoDynamicView object={el} options={{ inline: true }} />
+                        ))}
+                    </div>
                 </Typography>
                 {refObjects?.map((refObject: any, index: number) => (
                     <div style={{ marginBottom: '16px' }}>
@@ -1005,11 +1030,6 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
                             )}
                         </div>
                     </div>
-                ))}
-            </div>
-            <div>
-                {otherChildren.map((el: any) => (
-                    <AutoDynamicView object={el} options={{ inline: true }} />
                 ))}
             </div>
         </div>

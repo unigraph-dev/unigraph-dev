@@ -32,6 +32,7 @@ import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
 import { getDynamicViews } from '../../unigraph-react';
 import { TabContext } from '../../utils';
 import { useEntityNameTab } from '../UnigraphCore/useEntityNameTab';
+import { JsontreeObjectViewer } from '../ObjectView/BasicObjectViews';
 
 const editorFrameStyle = {
     padding: '12px',
@@ -290,10 +291,7 @@ const TypedObjectPartEditor: any = {
         );
     },
     default: ({ localSchema, localObject, setLocalObject, schemaMap }: any) => (
-        <Typography>
-            Object part, uid:
-            {localObject?.uid}
-        </Typography>
+        <JsontreeObjectViewer object={localObject} options={{}} />
     ),
     '$/primitive/number': ({ localSchema, localObject, setLocalObject, schemaMap }: any) => {
         const [currentInputValue, setCurrentInputValue] = React.useState(localObject['_value.#i']);
@@ -545,7 +543,7 @@ export function ObjectEditorSelector({ currentUid, setCurrentUid, style }: any) 
 
 function ObjectEditorBody({ currentObject, setCurrentObject, schemaMap }: any) {
     const currentSchema =
-        currentObject.type['_value[']?.[0]?._definition || schemaMap[currentObject.type['unigraph.id']]._definition;
+        currentObject.type['_value[']?.[0]?._definition || schemaMap[currentObject.type?.['unigraph.id']]?._definition;
 
     return (
         <div style={{ display: 'flex' }}>

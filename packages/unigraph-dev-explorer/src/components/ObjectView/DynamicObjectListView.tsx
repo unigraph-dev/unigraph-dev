@@ -137,6 +137,19 @@ function DynamicListItem({
     const isRemoverActive = React.useCallback(() => {
         return !(itemRemover === _.noop || noRemover);
     }, [itemRemover, noRemover]);
+    const finalCallback = {
+        ...callbacks,
+        context,
+        removeOnEnter,
+        removeFromContext: (where: undefined | 'left' | 'right') => {
+            const uids = {
+                left: itemUids.slice(0, index),
+                right: undefined,
+                '': undefined,
+            }[where || ''] || [item.uid];
+            itemRemover(uids);
+        },
+    };
 
     React.useEffect(() => {
         if (swipeActionable) {
@@ -169,7 +182,7 @@ function DynamicListItem({
                 swipeRight={{
                     content: <div>Menu</div>,
                     action: () => {
-                        onUnigraphContextMenu({ clientX: 0, clientY: 0 } as any, item, context, { ...callbacks });
+                        onUnigraphContextMenu({ clientX: 0, clientY: 0 } as any, item, context, finalCallback);
                     },
                 }}
                 {..._swipableRest}
@@ -185,21 +198,9 @@ function DynamicListItem({
                     }}
                     object={new UnigraphObject(item)}
                     components={components}
-                    callbacks={{
-                        ...callbacks,
-                        context,
-                        removeOnEnter,
-                        removeFromContext: (where: undefined | 'left' | 'right') => {
-                            const uids = {
-                                left: itemUids.slice(0, index),
-                                right: undefined,
-                                '': undefined,
-                            }[where || ''] || [item.uid];
-                            itemRemover(uids);
-                        },
-                    }}
+                    callbacks={finalCallback}
                 />
-                {isRemoverActive() && !isMobile ? (
+                {isRemoverActive() && !isMobile() ? (
                     <ListItemIcon
                         onClick={() => {
                             itemRemover([item.uid]);

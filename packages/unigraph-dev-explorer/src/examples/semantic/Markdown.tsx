@@ -204,7 +204,8 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                                     window.unigraph.getNamespaceMap?.()?.[
                                         matches[0]?._value?._value?.type?.['unigraph.id']
                                     ];
-                                if (!objDef) {
+                                const obj = matches[0];
+                                if (!objDef && !obj) {
                                     if (timeout.current) clearTimeout(timeout.current);
                                     timeout.current = setTimeout(
                                         () =>
