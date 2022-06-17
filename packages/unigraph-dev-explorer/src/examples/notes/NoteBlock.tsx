@@ -30,7 +30,13 @@ import { HistoryState } from './history';
 import { Outline, OutlineContentContext } from './Outline';
 import { UnigraphObject as PlainUnigraphObject } from './types';
 import { useOutlineCollapsed } from './useOutlineCollapsed';
-import { removeAllPropsFromObj, scrollIntoViewIfNeeded, TabContext } from '../../utils';
+import {
+    DataContext,
+    DataContextWrapper,
+    removeAllPropsFromObj,
+    scrollIntoViewIfNeeded,
+    TabContext,
+} from '../../utils';
 
 const childrenComponents = {
     '$/schema/note_block': {
@@ -61,6 +67,7 @@ const BlockChild = ({ elindex, shortcuts, displayAs, callbacks, el }: any) => (
             expandedChildren: true,
             noSubentities: ['$/schema/note_block', '$/schema/embed_block'].includes(el.type?.['unigraph.id']),
             noBacklinks: ['$/schema/note_block', '$/schema/embed_block'].includes(el.type?.['unigraph.id']),
+            shouldGetBacklinks: !['$/schema/embed_block'].includes(el.type?.['unigraph.id']),
         }}
         object={el}
         index={elindex}
@@ -768,6 +775,7 @@ export function DetailedEmbedBlock({ data, isChildren, callbacks, focused, index
 
     const [getObject, subsId] = useSubscriptionDelegate(
         data.get('content')?._value?.uid,
+        data.get('content')?._value?.type?.['unigraph.id'],
         window.unigraph.getState('registry/dynamicView').value?.[data.get('content')?._value?.type?.['unigraph.id']],
         data.get('content')?._value,
     );
@@ -778,6 +786,8 @@ export function DetailedEmbedBlock({ data, isChildren, callbacks, focused, index
         editor.pullText = todoItemPlugin.pullText.bind(null, getObject());
         editor.pushText = todoItemPlugin.pushText.bind(null, subsId, getObject());
     }
+
+    const [BacklinkComponent, setBacklinkComponent] = React.useState<any>(null);
 
     const onKeyDownHandler = React.useCallback(
         (
@@ -848,6 +858,9 @@ export function DetailedEmbedBlock({ data, isChildren, callbacks, focused, index
             isEditing && !editor.hook ? undefined : (
                 <AutoDynamicView
                     object={getObject()}
+                    components={{
+                        '$/schema/view': { view: ViewViewDetailed },
+                    }}
                     attributes={{
                         isHeading: !(isChildren || callbacks.isEmbed),
                     }}
@@ -857,6 +870,7 @@ export function DetailedEmbedBlock({ data, isChildren, callbacks, focused, index
                         noDrop: true,
                         noClickthrough: true,
                         shouldGetBacklinks: true,
+                        noBacklinks: true,
                     }}
                     callbacks={{
                         'get-semantic-properties': () => data,
@@ -864,16 +878,17 @@ export function DetailedEmbedBlock({ data, isChildren, callbacks, focused, index
                         subsId,
                         isEditing,
                     }}
+                    setBacklinkComponent={setBacklinkComponent}
                 />
             ),
-        [data, isChildren, callbacks.isEmbed, getObject],
+        [data, isChildren, callbacks.isEmbed, getObject, BacklinkComponent],
     );
 
     return (
         <DetailedOutlinerBlock
             data={data}
             isChildren={isChildren}
-            callbacks={callbacks}
+            callbacks={{ ...callbacks, BacklinkComponent }}
             focused={focused}
             index={index}
             componentId={componentId}
@@ -921,6 +936,7 @@ export function DetailedEmbedBlock({ data, isChildren, callbacks, focused, index
 
 export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
     const [subentities, otherChildren] = getSubentities(data);
+    const dataContext = React.useContext(DataContext);
 
     const [pathNames, setPathNames] = React.useState<any[]>([]);
     const [refObjects, setRefObjects] = React.useState([{}]);
@@ -1009,28 +1025,47 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
                         ))}
                     </div>
                 </Typography>
-                {refObjects?.map((refObject: any, index: number) => (
-                    <div style={{ marginBottom: '16px' }}>
-                        <Typography style={{ color: 'gray' }}>{pathNames[index]?.join(' > ')}</Typography>
-                        <div style={{ marginLeft: '16px' }}>
-                            {noChildren ? (
-                                []
-                            ) : (
-                                <Outline noteBlock={refObject} index={index}>
-                                    <AutoDynamicView
-                                        object={refObject}
-                                        callbacks={{ ...callbacks, isEmbed: true }}
-                                        options={{ noClickthrough: true, noSubentities: true }}
-                                        components={childrenComponents}
-                                        attributes={{
-                                            isChildren: true,
-                                        }}
-                                    />
-                                </Outline>
-                            )}
+                <DataContextWrapper
+                    contextUid={data?.uid}
+                    contextData={data}
+                    parents={dataContext.parents}
+                    viewType="$/schema/dynamic_view"
+                    expandedChildren
+                    subsId={callbacks.subsId}
+                >
+                    {refObjects?.map((refObject: any, index: number) => (
+                        <div style={{ marginBottom: '16px' }}>
+                            <Typography style={{ color: 'gray' }}>{pathNames[index]?.join(' > ')}</Typography>
+                            <div style={{ marginLeft: '16px' }}>
+                                {noChildren ? (
+                                    []
+                                ) : (
+                                    <Outline noteBlock={refObject} index={index}>
+                                        <AutoDynamicView
+                                            object={refObject}
+                                            callbacks={{ ...callbacks, isEmbed: true }}
+                                            options={{
+                                                noClickthrough: true,
+                                                noSubentities: true,
+                                                expandedChildren: true,
+                                                noBacklinks: ['$/schema/note_block', '$/schema/embed_block'].includes(
+                                                    refObject.type?.['unigraph.id'],
+                                                ),
+                                                shouldGetBacklinks: !['$/schema/embed_block'].includes(
+                                                    refObject.type?.['unigraph.id'],
+                                                ),
+                                            }}
+                                            components={childrenComponents}
+                                            attributes={{
+                                                isChildren: true,
+                                            }}
+                                        />
+                                    </Outline>
+                                )}
+                            </div>
                         </div>
-                    </div>
-                ))}
+                    ))}
+                </DataContextWrapper>
             </div>
         </div>
     );

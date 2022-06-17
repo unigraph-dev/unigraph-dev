@@ -21,6 +21,7 @@ const getObjectCache = (uid: string, objectView: any) => getSubsCache().value[ge
 
 export const useSubscriptionDelegate: (...args: any) => [() => any, number] = (
     uid: string,
+    type: string,
     objectView: any,
     object: any,
 ) => {
@@ -54,14 +55,19 @@ export const useSubscriptionDelegate: (...args: any) => [() => any, number] = (
         if (isObjectStub && object?.uid !== uidRef.current) {
             // console.log(tabContext);
             // if (subsId) tabContext.unsubscribe(subsId);
-            const query = getQueryFromObjectView(objectView);
+            const query = objectView?.query?.('QUERYFN_TEMPLATE');
             tabContext.subscribe(
                 {
                     type: 'object',
                     uid: [object?.uid],
-                    options: {
-                        queryFn: query,
-                    },
+                    // eslint-disable-next-line no-nested-ternary
+                    options: query
+                        ? {
+                              queryFn: query,
+                          }
+                        : type && objectView
+                        ? { queryAsType: type }
+                        : undefined,
                 },
                 (newObjects: any[]) => {
                     uidRef.current = object?.uid;

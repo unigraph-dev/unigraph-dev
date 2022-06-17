@@ -16,6 +16,7 @@ export type AutoDynamicViewProps = {
     onClick?: any;
     shortcuts?: any;
     options?: DynamicViewOptions;
+    setBacklinkComponent?: any;
 };
 
 export type DynamicViewOptions = {

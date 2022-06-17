@@ -47,6 +47,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
 
     const [getObject, subsId] = useSubscriptionDelegate(
         object?.uid,
+        object?.type?.['unigraph.id'],
         DynamicViewsDetailed[object?.type?.['unigraph.id']],
         object,
         onLoad,

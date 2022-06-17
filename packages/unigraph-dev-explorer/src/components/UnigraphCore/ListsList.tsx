@@ -28,9 +28,6 @@ export function MiniListView({ data }: any) {
                 onContextMenu={(event) => onUnigraphContextMenu(event, data)}
                 variant="outlined"
                 style={{ padding: '8px', display: 'flex' }}
-                onClick={() => {
-                    window.wsnavigator(`/library/object?uid=${data.uid}&isStub=true&type=$/schema/list`);
-                }}
             >
                 <List style={{ marginRight: '8px' }} />
                 <Typography>

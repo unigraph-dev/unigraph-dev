@@ -16,7 +16,7 @@ export const useBacklinkDelegate = (
 
     React.useEffect(() => {
         if (uid?.startsWith('0x') && shouldGetBacklinks) {
-            // console.log(object?.uid, dataContext.getParents(true));
+            // console.log(uid, dataContext.getParents(true));
             const cb = (newBacklinks: any) => {
                 const [pars, refs] = getParentsAndReferences(
                     newBacklinks['~_value'],
@@ -55,7 +55,7 @@ export const useBacklinkDelegate = (
         }
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         return () => {};
-    }, [uid, shouldGetBacklinks, JSON.stringify(dataContext?.getParents(true)?.sort())]);
+    }, [uid, contextUid, shouldGetBacklinks, JSON.stringify(dataContext?.getParents(true)?.sort())]);
 
     const BacklinkComponent = React.useMemo(
         () =>
@@ -70,6 +70,7 @@ export const useBacklinkDelegate = (
                         borderRadius: '6px',
                         whiteSpace: 'nowrap',
                         cursor: 'pointer',
+                        height: 'fit-content',
                         ...backlinkStyle,
                     }}
                     onClick={(ev) => {

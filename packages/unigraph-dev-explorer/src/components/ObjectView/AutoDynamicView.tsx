@@ -33,6 +33,7 @@ export function AutoDynamicView({
     style,
     onClick,
     shortcuts,
+    setBacklinkComponent,
     ...props
 }: AutoDynamicViewProps) {
     const [DynamicViews, setDynamicViews] = React.useState({
@@ -73,6 +74,7 @@ export function AutoDynamicView({
     const [isRecursion, setIsRecursion] = React.useState<any>(false);
     const [getObject_, subsId] = useSubscriptionDelegate(
         object?.uid,
+        object?.type?.['unigraph.id'],
         DynamicViews[object?.type?.['unigraph.id']],
         object,
     );
@@ -231,6 +233,10 @@ export function AutoDynamicView({
         },
         [componentId],
     );
+
+    React.useEffect(() => {
+        if (noBacklinks && setBacklinkComponent) setBacklinkComponent(BacklinkComponent);
+    }, [noBacklinks, setBacklinkComponent, BacklinkComponent]);
 
     const finalCallbacks = React.useMemo(() => {
         // console.log('callbacks recreated, ', object?.uid);

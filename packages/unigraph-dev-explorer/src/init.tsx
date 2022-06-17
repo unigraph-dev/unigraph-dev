@@ -257,7 +257,7 @@ function initRegistry() {
         '$/schema/subentity': { view: SubentityView },
         '$/schema/view': { view: ViewItem },
         '$/schema/package_manifest': { view: PackageManifestView },
-        '$/schema/list': { view: MiniListView },
+        '$/schema/list': { view: MiniListView, query: ListObjectQuery },
     });
     window.unigraph.addState('registry/dynamicViewDetailed', {
         '$/schema/executable': { view: CodeOrComponentView },
