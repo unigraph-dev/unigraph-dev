@@ -20,6 +20,13 @@
                 "name": "Incremental reader view"
             },
             {
+                "id": "annotation-view",
+                "env": "component/react-jsx",
+                "src": "executables/annotationView.jsx",
+                "editable": true,
+                "name": "Annotation view"
+            },
+            {
                 "id": "incremental-reader-view-detailed",
                 "env": "component/react-jsx",
                 "src": "executables/incrementalReaderViewDetailed.jsx",
@@ -45,6 +52,10 @@
             {
                 "id": "incremental_reader_item",
                 "src": "schemas/incremental_reader_item.json"
+            },
+            {
+                "id": "annotation",
+                "src": "schemas/annotation.json"
             }
         ],
         "entities": [
@@ -55,6 +66,10 @@
             {
                 "id": "incremental_reader_view",
                 "src": "entities/incremental_reader_view.json"
+            },
+            {
+                "id": "annotation_view",
+                "src": "entities/annotation_view.json"
             },
             {
                 "id": "incremental_reader_view_detailed",

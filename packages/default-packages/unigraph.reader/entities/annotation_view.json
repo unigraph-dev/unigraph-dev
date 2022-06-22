@@ -1,0 +1,6 @@
+{
+    "type": { "unigraph.id": "$/schema/object_view" },
+    "name": "Annotation view",
+    "item_type": { "unigraph.id": "$/schema/annotation" },
+    "view": { "unigraph.id": "$./executable/annotation-view" }
+}

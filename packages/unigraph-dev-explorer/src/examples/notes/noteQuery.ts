@@ -6,6 +6,7 @@ const getQuery: (depth: number) => string = (depth: number) => {
         uid
         _hide
         <~_value> {
+            _propertyType
             type { <unigraph.id> }
             <unigraph.origin> @filter(NOT eq(_hide, true)) {
                 type { <unigraph.id> }

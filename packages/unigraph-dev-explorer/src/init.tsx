@@ -245,6 +245,7 @@ function initSelect() {
 function initContextMenu() {
     window.unigraph.addState('global/contextMenu', { show: false });
     window.unigraph.addState('global/searchPopup', { show: false });
+    window.unigraph.addState('global/viewPopup', { show: false });
     window.unigraph.addState('registry/omnibarSummoner', {});
 }
 

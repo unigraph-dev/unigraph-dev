@@ -36,6 +36,7 @@ import { MobileBar } from './components/UnigraphCore/MobileBar';
 import { CustomDragLayer } from './CustomDragLayer';
 import { AuthPrompt } from './pages/AuthPrompt';
 import { useUnigraphState } from './unigraph-react';
+import { ViewPopup } from './components/UnigraphCore/ViewPopup';
 
 export function WorkspacePageComponent({ children, maximize, paddingTop, id, tabCtx, view }: any) {
     // const [_maximize, setMaximize] = React.useState(maximize);
@@ -379,58 +380,57 @@ export function WorkSpace(this: any) {
     const pages = window.unigraph.getState('registry/pages');
 
     const tabCtx = React.useMemo(
-        () => (node: Node, config: any) => ({
+        () => (node: Node, config: any) => {
             // @ts-expect-error: using private API
-            viewId: node._attributes.id,
-            setTitle: (title: string, icon?: any, renamerId?: string) => {
-                // @ts-expect-error: using private API
-                const currNode = window.layoutModel.getNodeById(node._attributes.id);
-                // @ts-expect-error: using private API
-                const curRenamer = currNode._attributes.config?.renamerId;
-                if (config.customTitle || !title?.length || (curRenamer && curRenamer !== renamerId)) {
-                    return false;
-                }
-                return window.layoutModel.doAction(
+            const { id } = node._attributes;
+            return {
+                viewId: id,
+                setTitle: (title: string, icon?: any, renamerId?: string) => {
+                    const currNode = window.layoutModel.getNodeById(id);
                     // @ts-expect-error: using private API
-                    Actions.updateNodeAttributes(node._attributes.id, {
-                        name: title,
-                        ...(icon ? { icon } : {}),
-                        // @ts-expect-error: using private API
-                        config: { ...currNode._attributes.config, renamerId },
-                    }),
-                );
-            },
-            setMaximize: (val: boolean) => false,
-            isVisible: () =>
-                // @ts-expect-error: using private API
-                window.layoutModel.getNodeById(node._attributes.id)?.isVisible(),
+                    const curRenamer = currNode._attributes.config?.renamerId;
+                    if (config.customTitle || !title?.length || (curRenamer && curRenamer !== renamerId)) {
+                        return false;
+                    }
+                    return window.layoutModel.doAction(
+                        Actions.updateNodeAttributes(id, {
+                            name: title,
+                            ...(icon ? { icon } : {}),
+                            // @ts-expect-error: using private API
+                            config: { ...currNode._attributes.config, renamerId },
+                        }),
+                    );
+                },
+                setMaximize: (val: boolean) => false,
+                isVisible: () => window.layoutModel.getNodeById(id)?.isVisible(),
 
-            subscribeToType: (name: any, callback: any, eventId?: any, options?: any) => {
-                const subsState = window.unigraph.getState(`tabs/${(node as any)._attributes.id}/subscriptions`);
-                subsState.setValue([...(subsState.value || []), eventId]);
-                return window.unigraph.subscribeToType(name, callback, eventId, options);
-            },
-            subscribeToObject: (uid: any, callback: any, eventId?: any, options?: any) => {
-                const subsState = window.unigraph.getState(`tabs/${(node as any)._attributes.id}/subscriptions`);
-                subsState.setValue([...(subsState.value || []), eventId]);
-                return window.unigraph.subscribeToObject(uid, callback, eventId, options);
-            },
-            subscribeToQuery: (fragment: any, callback: any, eventId?: any, options?: any) => {
-                const subsState = window.unigraph.getState(`tabs/${(node as any)._attributes.id}/subscriptions`);
-                subsState.setValue([...(subsState.value || []), eventId]);
-                return window.unigraph.subscribeToQuery(fragment, callback, eventId, options);
-            },
-            subscribe: (query: any, callback: any, eventId?: any, update?: any) => {
-                const subsState = window.unigraph.getState(`tabs/${(node as any)._attributes.id}/subscriptions`);
-                subsState.setValue([...(subsState.value || []), eventId]);
-                return window.unigraph.subscribe(query, callback, eventId, update);
-            },
-            unsubscribe: (id: any) => {
-                const subsState = window.unigraph.getState(`tabs/${(node as any)._attributes.id}/subscriptions`);
-                subsState.setValue(_.difference(subsState.value || [], [id]));
-                return window.unigraph.unsubscribe(id);
-            },
-        }),
+                subscribeToType: (name: any, callback: any, eventId?: any, options?: any) => {
+                    const subsState = window.unigraph.getState(`tabs/${id}/subscriptions`);
+                    subsState.setValue([...(subsState.value || []), eventId]);
+                    return window.unigraph.subscribeToType(name, callback, eventId, options);
+                },
+                subscribeToObject: (uid: any, callback: any, eventId?: any, options?: any) => {
+                    const subsState = window.unigraph.getState(`tabs/${id}/subscriptions`);
+                    subsState.setValue([...(subsState.value || []), eventId]);
+                    return window.unigraph.subscribeToObject(uid, callback, eventId, options);
+                },
+                subscribeToQuery: (fragment: any, callback: any, eventId?: any, options?: any) => {
+                    const subsState = window.unigraph.getState(`tabs/${id}/subscriptions`);
+                    subsState.setValue([...(subsState.value || []), eventId]);
+                    return window.unigraph.subscribeToQuery(fragment, callback, eventId, options);
+                },
+                subscribe: (query: any, callback: any, eventId?: any, update?: any) => {
+                    const subsState = window.unigraph.getState(`tabs/${id}/subscriptions`);
+                    subsState.setValue([...(subsState.value || []), eventId]);
+                    return window.unigraph.subscribe(query, callback, eventId, update);
+                },
+                unsubscribe: (subsId: any) => {
+                    const subsState = window.unigraph.getState(`tabs/${id}/subscriptions`);
+                    subsState.setValue(_.difference(subsState.value || [], [subsId]));
+                    return window.unigraph.unsubscribe(subsId);
+                },
+            };
+        },
         [],
     );
 
@@ -457,6 +457,7 @@ export function WorkSpace(this: any) {
                 {node._attributes.floating ? (
                     <div id="global-elements" className="lol1">
                         <ContextMenu window={node._window ?? window} />
+                        <ViewPopup window={node._window ?? window} />
                         <InlineSearch window={node._window ?? window} />
                     </div>
                 ) : (
@@ -568,6 +569,7 @@ export function WorkSpace(this: any) {
                             <SearchOverlayPopover />
                             <ContextMenu />
                             <InlineSearch />
+                            <ViewPopup />
                             <MobileBar />
                         </div>
 

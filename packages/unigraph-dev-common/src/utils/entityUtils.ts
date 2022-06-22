@@ -447,7 +447,7 @@ export function makeQueryFragmentFromType(
     function removeDups(entries: any) {
         if (entries['expand(_userpredicate_)']) {
             Object.keys(entries).forEach((el) => {
-                if (el !== 'uid' && el !== 'expand(_userpredicate_)' && el !== 'unigraph.id') delete entries[el];
+                if (el !== 'uid' && el !== 'expand(_userpredicate_)' && !el.startsWith('unigraph.')) delete entries[el];
             });
         }
     }
@@ -459,7 +459,7 @@ export function makeQueryFragmentFromType(
         let type = localSchema.type['unigraph.id'];
 
         if (type === '$/schema/any') {
-            entries = { uid: {}, 'unigraph.id': {}, 'expand(_userpredicate_)': makePart(localSchema, depth + 1) };
+            entries = { uid: {}, 'unigraph.id': {}, 'expand(_userpredicate_)': makePart(localSchema, depth + 1), "unigraph.indexes": makePart(localSchema, Math.max(maxDepth - 5, depth + 1)) };
         } else if (type.startsWith('$/schema/')) {
             entries = _.merge(entries, { _value: makePart(schemaMap[type]._definition, depth + 1, true) });
         }
@@ -477,7 +477,7 @@ export function makeQueryFragmentFromType(
                         return ret;
                     }
                 });
-                entries = _.merge(entries, { _value: _.merge({}, ...properties) });
+                entries = _.merge(entries, { _value: _.merge({}, ...properties) }, {"unigraph.indexes": makePart({type: {'unigraph.id': '$/schema/any'}}, Math.max(maxDepth - 5, depth + 1))});
                 break;
 
             case '$/composer/Union':
@@ -536,7 +536,7 @@ export function makeQueryFragmentFromType(
         if (entries['<_value[>']) removeDups(entries['<_value[>']);
         return entries;
     }
-    const localSchema = schemaMap[schemaName]._definition;
+    const localSchema = schemaMap[schemaName]?._definition || { type: { 'unigraph.id': '$/schema/any' }};
     let res = makePart(localSchema, 0, true);
     //console.log(JSON.stringify(res, null, 4))
     let ret = toString ? '{' + jsonToGraphQLQuery(res) + '}' : res;

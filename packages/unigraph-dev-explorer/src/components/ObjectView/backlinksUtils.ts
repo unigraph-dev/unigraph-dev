@@ -1,6 +1,7 @@
 export const backlinkQuery = `(func: uid(QUERYFN_TEMPLATE)) {
     uid
     <~_value> {
+        _propertyType
         type { <unigraph.id> }
         <unigraph.origin> @filter(NOT eq(_hide, true) AND type(Entity)) {
             type { <unigraph.id> }
@@ -16,7 +17,7 @@ export const backlinkQuery = `(func: uid(QUERYFN_TEMPLATE)) {
 export const getParentsAndReferences = (reverseValue: any[], unigraphOrigin: any[], currentUid?: string) => {
     const possibleParents =
         reverseValue
-            ?.filter((el) => el?.type?.['unigraph.id'] === '$/schema/subentity')
+            ?.filter((el) => el?.type?.['unigraph.id'] === '$/schema/subentity' || el?._propertyType === 'inheritance')
             .map((val) => val?.['unigraph.origin']?.map((ell: any) => ell?.uid) || [])
             .flat() || [];
     const parents = (unigraphOrigin || [])

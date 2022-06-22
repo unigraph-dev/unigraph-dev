@@ -75,7 +75,7 @@ const onPropertyEdit = (edit: InteractionProps, pad: boolean) => {
 };
 
 export function JsontreeObjectViewer({ object, options }: { object: any; options: ObjectViewOptions }) {
-    const [showPadded, setShowPadded] = React.useState(false);
+    const [showPadded, setShowPadded] = React.useState(!options?.unpad);
     const onedit = (props: InteractionProps) => onPropertyEdit(props, !showPadded);
 
     return (

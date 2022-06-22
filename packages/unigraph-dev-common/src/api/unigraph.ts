@@ -461,7 +461,7 @@ export default function unigraph(url: string, browserId: string, password?: stri
                     else reject(response);
                 };
                 subscriptions[id] = (result: any, skipBuild?: boolean) => {
-                    const fn = skipBuild ? _.identity : buildGraph;
+                    const fn = skipBuild ? buildGraph : buildGraph;
                     result.length === 1
                         ? callback((fn as any)(result.map((el: any) => new UnigraphObject(el) as any))[0])
                         : callback((fn as any)(result.map((el: any) => new UnigraphObject(el) as any)));

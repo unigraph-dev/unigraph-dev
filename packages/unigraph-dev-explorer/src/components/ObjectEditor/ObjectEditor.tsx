@@ -291,7 +291,7 @@ const TypedObjectPartEditor: any = {
         );
     },
     default: ({ localSchema, localObject, setLocalObject, schemaMap }: any) => (
-        <JsontreeObjectViewer object={localObject} options={{}} />
+        <JsontreeObjectViewer object={localObject} options={{ unpad: false }} />
     ),
     '$/primitive/number': ({ localSchema, localObject, setLocalObject, schemaMap }: any) => {
         const [currentInputValue, setCurrentInputValue] = React.useState(localObject['_value.#i']);
@@ -543,7 +543,8 @@ export function ObjectEditorSelector({ currentUid, setCurrentUid, style }: any) 
 
 function ObjectEditorBody({ currentObject, setCurrentObject, schemaMap }: any) {
     const currentSchema =
-        currentObject.type['_value[']?.[0]?._definition || schemaMap[currentObject.type?.['unigraph.id']]?._definition;
+        currentObject.type?.['_value[']?.[0]?._definition ||
+        schemaMap[currentObject.type?.['unigraph.id']]?._definition;
 
     return (
         <div style={{ display: 'flex' }}>

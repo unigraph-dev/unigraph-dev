@@ -12,6 +12,8 @@ import { InlineSearch } from './components/UnigraphCore/InlineSearchPopup';
 import { SearchOverlayPopover } from './pages/SearchOverlay';
 import { MobileBar } from './components/UnigraphCore/MobileBar';
 import { CustomDragLayer } from './CustomDragLayer';
+import { ViewPopup } from './components/UnigraphCore/ViewPopup';
+import { AuthPrompt } from './pages/AuthPrompt';
 
 declare module '@mui/styles/defaultTheme' {
     // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -70,7 +72,9 @@ function AppToWrap() {
             <DndProvider backend={TouchBackend} options={dndOpts}>
                 <CustomDragLayer />
                 <div id="global-elements">
+                    <AuthPrompt />
                     <ContextMenu />
+                    <ViewPopup />
                     <InlineSearch />
                     <MobileBar />
                 </div>

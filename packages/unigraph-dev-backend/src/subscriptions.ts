@@ -66,7 +66,7 @@ export function getFragment(query: Query, states: any) {
             ? makeQueryFragmentFromType(options.queryAsType, states.caches.schemas.data, options?.depth)
             : `@recurse${
                   options?.depth ? `(depth: ${options?.depth})` : ''
-              } { uid unigraph.id expand(_userpredicate_) }`;
+              } { uid unigraph.id unigraph.indexes expand(_userpredicate_) }`;
         const frag = options?.queryFn
             ? options.queryFn.replace('QUERYFN_TEMPLATE', Array.isArray(uid) ? uid.join(', ') : uid)
             : `(func: uid(${Array.isArray(uid) ? uid.join(', ') : uid})) 
