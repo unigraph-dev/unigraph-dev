@@ -1,6 +1,6 @@
 import _ from 'lodash/fp';
 import React from 'react';
-import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { Actions } from 'flexlayout-react';
 import { TabContext } from '../../utils';
 import { isStub } from '../ObjectView/utils';
@@ -10,10 +10,9 @@ const getType = (obj: any): any | undefined => {
     return typeEntries.length > 0 ? _.last(typeEntries) : undefined;
 };
 const getObjOrTypeName = (obj: any) => {
-    const objName = obj?.get?.('name')?.as('primitive');
-    const objTextName = obj?.get?.('text')?.as('primitive');
+    const objName = new UnigraphObject(obj?.['unigraph.indexes'])?.get?.('name')?.as('primitive');
     const typeName = getType(obj)?._name;
-    return objName ?? objTextName ?? typeName;
+    return objName ?? typeName;
 };
 
 const getObjOrTypeIcon = (obj: any) => {
@@ -59,6 +58,20 @@ export const useEntityNameTab = ({
                     renamer(obj);
                 },
                 subsId,
+                {
+                    queryFn: `(func: uid(QUERYFN_TEMPLATE)) {
+                        uid 
+                        unigraph.indexes {
+                            uid
+                            name {
+                                uid 
+                                expand(_userpredicate_) { uid expand(_userpredicate_) { uid expand(_userpredicate_) { 
+                                    uid expand(_userpredicate_) { uid expand(_userpredicate_) { uid expand(_userpredicate_) } } } } }
+                            }
+                        }
+                        <type> { <unigraph.id> <_value[> { _name _icon } }
+                    }`,
+                },
             );
         } else {
             renamer(object);
