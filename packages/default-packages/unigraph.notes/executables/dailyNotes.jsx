@@ -16,6 +16,15 @@ React.useEffect(() => {
         `(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted)) AND (NOT eq(<_hide>, true))) @cascade {
             uid
             type @filter(eq(<unigraph.id>, "$/schema/journal")) { <unigraph.id> }
+            _value {
+                note {
+                    _value {
+                        uid
+                        type { <unigraph.id> }
+                        _stub: math(1)
+                    }
+                }
+            }
         }
         point as var(func: uid(partf)) @cascade {
             _value {
@@ -92,7 +101,6 @@ const WeekView = React.useCallback(
                 <span
                     onClick={() => {
                         setToday(Sugar.Date.addDays(new Date(today), -1).toISOString());
-                        setNote({});
                     }}
                     style={{ color: 'rgb(145, 145, 168)', alignSelf: 'center', cursor: 'pointer' }}
                 >
@@ -119,7 +127,6 @@ const WeekView = React.useCallback(
                             onMouseLeave={() => setHoveredOffset(-1)}
                             onClick={() => {
                                 setToday(Sugar.Date.addDays(new Date(start), offset).toISOString());
-                                setNote({});
                             }}
                         >
                             <span style={{ color: selected ? '#3668ff' : '#9191a8' }}>
@@ -134,7 +141,6 @@ const WeekView = React.useCallback(
                 <span
                     onClick={() => {
                         setToday(Sugar.Date.addDays(new Date(today), 1).toISOString());
-                        setNote({});
                     }}
                     style={{ color: 'rgb(145, 145, 168)', alignSelf: 'center', cursor: 'pointer' }}
                 >
@@ -194,7 +200,7 @@ return (
                 // eslint-disable-next-line no-nested-ternary
                 note && note?.type?.['unigraph.id'] === '$/schema/journal' ? (
                     <div style={{ display: 'flex' }}>
-                        <AutoDynamicViewDetailed object={note} />
+                        <AutoDynamicViewDetailed object={note._value.note._value} />
                     </div>
                 ) : note ? (
                     <div style={{ margin: '16px', color: 'gray' }}>Loading...</div>

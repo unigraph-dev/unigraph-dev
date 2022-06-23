@@ -13,7 +13,7 @@ import cron from 'node-cron';
 import _ from 'lodash';
 import { PackageDeclaration } from 'unigraph-dev-common/lib/types/packages';
 import Babel from '@babel/core';
-import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
+import { buildGraph, getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { Executable, ExecContext } from 'unigraph-dev-common/lib/types/executableTypes';
 import { ExecRunner, runEnvLambdaJs } from 'unigraph-dev-common/lib/utils/executableUtils';
 import { addHook } from './hooks';
@@ -147,6 +147,7 @@ export const runEnvRoutineJs: ExecRunner = (src, context, unigraph) => {
     const fn = new AsyncFunction(
         'require',
         'unpad',
+        'buildGraph',
         'context',
         'unigraph',
         'console',
@@ -159,7 +160,7 @@ export const runEnvRoutineJs: ExecRunner = (src, context, unigraph) => {
             content: "Error was: " + e.toString() + e.stack }
         )
     }`,
-    ).bind(this, require, unpad, context, unigraph, scopedConsole, UnigraphObject);
+    ).bind(this, require, unpad, buildGraph, context, unigraph, scopedConsole, UnigraphObject);
 
     return !context.showConsole
         ? fn

@@ -14,7 +14,7 @@ import {
     changesForOpenScopedMarkdownLink,
 } from '../../utils/autocomplete';
 import { htmlToMarkdown } from '../semantic/Markdown';
-import { permanentlyDeleteBlock } from './commands';
+import { addChild, permanentlyDeleteBlock } from './commands';
 import { addTextualCommand, applyCommand } from './history';
 import { caretFromLastLine, caretToLastLine, closeScopeCharDict, setFocusedCaret } from './utils';
 
@@ -474,7 +474,13 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
                         edited.current = false;
                         inputDebounced.current.cancel();
                         const currentText = getCurrentText() || pullText();
-                        callbacks['split-child']?.(currentText, caret);
+                        if (callbacks['split-child']) {
+                            // Has parent element, so we could display split entity easily
+                            callbacks['split-child']?.(currentText, caret);
+                        } else {
+                            // Should put everything in children instead
+                            addChild(dataRef.current, editorContext, 0, '');
+                        }
                         // setCurrentText(currentText.slice(caret));
                         setCaretPostRender(0);
                     } else if (ev.ctrlKey || ev.metaKey) {

@@ -1,7 +1,18 @@
 const { data, callbacks, ...props } = params;
 return (
     <div>
-        <div style={{ display: 'flex' }}>
+        <div
+            style={{ display: 'flex', cursor: 'pointer' }}
+            onClick={(ev) => {
+                ev.stopPropagation();
+                ev.preventDefault();
+                window.wsnavigator(
+                    `/library/object?uid=${data._value.source._value.uid}&viewer=${'dynamic-view-detailed'}&type=${
+                        data._value.source._value.type['unigraph.id']
+                    }`,
+                );
+            }}
+        >
             <div
                 style={{
                     height: '24px',
@@ -19,6 +30,8 @@ return (
                 marginLeft: '5px',
                 borderLeft: `4px solid ${data.get('color').as('primitive')}`,
                 paddingLeft: '18px',
+                fontStyle: 'italic',
+                fontColor: 'gray',
             }}
         >
             {data.get('text').as('primitive')}

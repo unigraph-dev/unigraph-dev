@@ -1,6 +1,7 @@
 const { uid, templateUid, subsId } = context.params;
 
 const templateObj = await unigraph.getObject(templateUid);
+buildGraph([templateObj]);
 
 const applyTemplateRecursive = (_obj, isTop = true) => {
     const obj = new UnigraphObject(_obj);

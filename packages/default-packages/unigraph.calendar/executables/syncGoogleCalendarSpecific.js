@@ -238,7 +238,7 @@ const syncGoogleCalendarSpecific = async () => {
     const calendarUid = context?.params?.uid;
     const { calendar } = context;
     const unigraphCalendar = await unigraph.getObject(calendarUid);
-    const calendarName = unigraphCalendar._value.name._value._value['_value.%'];
+    // const calendarName = unigraphCalendar._value.name._value._value['_value.%'];
 
     // Uncomment to debug:
     const syncToken = unigraphCalendar._value?.sync_token?.['_value.%'] || undefined;

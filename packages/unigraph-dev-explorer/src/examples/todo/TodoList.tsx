@@ -124,21 +124,14 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
 
     // console.log(data.uid, unpadded)
     return (
-        <div style={{ display: 'flex' }}>
-            {checkbox}
+        <div style={{ display: 'flex', flexWrap: callbacks?.isEmbed ? 'wrap' : 'nowrap' }}>
+            {callbacks.isEmbed && !callbacks.isEditing ? null : checkbox}
             {
                 // eslint-disable-next-line no-nested-ternary
-                callbacks.isEditing ? (
-                    []
-                ) : callbacks.isEmbed ? (
+                callbacks.isEditing ? null : callbacks.isEmbed ? (
                     [
-                        NameDisplay,
-                        <Divider
-                            orientation="vertical"
-                            style={{ marginLeft: '4px', marginRight: '4px' }}
-                            key="divider"
-                        />,
-                        SecondaryDisplay,
+                        <div style={{ display: 'flex' }}>{[checkbox, NameDisplay]}</div>,
+                        <div style={{ display: 'flex', marginLeft: '6px' }}>{SecondaryDisplay}</div>,
                     ]
                 ) : (
                     <ListItemText

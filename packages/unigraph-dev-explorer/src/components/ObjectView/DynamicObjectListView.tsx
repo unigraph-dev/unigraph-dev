@@ -389,7 +389,14 @@ function DynamicList({
             dataLength={loadedItems.length}
             next={setupProps?.next || (() => undefined)}
             hasMore={loadedItems.length < items.length}
-            loader=""
+            loader={
+                <div className="lds-ellipsis" style={{ marginLeft: '16px' }}>
+                    <div />
+                    <div />
+                    <div />
+                    <div />
+                </div>
+            }
             scrollableTarget={`scrollableDiv${parId}`}
             endMessage=""
             ref={scrollerRef}
