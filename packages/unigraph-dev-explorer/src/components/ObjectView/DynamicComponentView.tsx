@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactPlayer from 'react-player';
 import ImageGallery from 'react-image-gallery';
+import ReactResizeDetector from 'react-resize-detector';
 import 'react-image-gallery/styles/css/image-gallery.css';
 import { buildGraph, getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { byElementIndex, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
@@ -35,6 +36,7 @@ export const globalImports = {
     ReactPlayer,
     ImageGallery,
     htmlDecode,
+    ReactResizeDetector,
 };
 
 export const DynamicComponentView: DynamicViewRenderer = ({ data, callbacks }) => {

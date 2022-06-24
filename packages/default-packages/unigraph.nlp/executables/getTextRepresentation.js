@@ -9,6 +9,9 @@ Subreddit: r/${data._value.subreddit._value._value.name['_value.%']}
 Subreddit description: ${new UnigraphObject(data).get('subreddit/description')?.as('primitive')}`,
     '$/schema/web_bookmark': (data) => `Title: ${new UnigraphObject(data).get('name')?.as('primitive')}
 Abstract: ${new UnigraphObject(data).get('creative_work/abstract')?.as('primitive')}`,
+    '$/schema/youtube_video': (data) => `YouTube video: ${new UnigraphObject(data).get('title')?.as('primitive')}
+Description: ${new UnigraphObject(data).get('description')?.as('primitive')}
+Channel: ${new UnigraphObject(data).get('channel/name')?.as('primitive')}`,
     '$/schema/email_message': (data) => {
         const { Readability } = require('@mozilla/readability');
         const { JSDOM } = require('jsdom');

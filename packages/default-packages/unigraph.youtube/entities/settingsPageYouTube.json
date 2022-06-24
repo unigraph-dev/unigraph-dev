@@ -1,0 +1,10 @@
+{
+    "type": { "unigraph.id": "$/schema/settings_page" },
+    "title": "YouTube settings",
+    "subtitle": "Connect your YouTube account to Unigraph",
+    "page": {
+        "name": "YouTube settings",
+        "env": "react-explorer",
+        "view": { "unigraph.id": "$./executable/settings-view-youtube" }
+    }
+}

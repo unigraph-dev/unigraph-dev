@@ -1,0 +1,6 @@
+{
+    "type": { "unigraph.id": "$/schema/object_view" },
+    "name": "YouTube video view",
+    "item_type": { "unigraph.id": "$/schema/youtube_video" },
+    "view": { "unigraph.id": "$./executable/youtube-video-view" }
+}

@@ -17,6 +17,7 @@ const includedTypes = [
     '$/schema/reddit_post',
     '$/schema/rss_item',
     '$/schema/tag',
+    '$/schema/youtube_video',
 ];
 
 // these will be added later

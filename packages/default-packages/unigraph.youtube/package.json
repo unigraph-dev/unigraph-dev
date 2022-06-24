@@ -1,0 +1,101 @@
+{
+    "displayName": "Unigraph for YouTube",
+    "version": "0.2.5",
+    "description": "Sync Unigraph with YouTube.",
+    "name": "unigraph.youtube",
+    "unigraph": {
+        "schemas": [
+            {
+                "id": "youtube_video",
+                "src": "schemas/youtube_video.json"
+            },
+            {
+                "id": "youtube_channel",
+                "src": "schemas/youtube_channel.json"
+            }
+        ],
+        "executables": [
+            {
+                "id": "add-youtube-account",
+                "env": "routine/js",
+                "src": "executables/addYouTubeAccount.js",
+                "editable": true,
+                "name": "Adds a YouTube account"
+            },
+            {
+                "id": "get-youtube-video-info",
+                "env": "routine/js",
+                "src": "executables/getYouTubeVideoInfo.js",
+                "editable": true,
+                "name": "Get info of a specific youtube video"
+            },
+            {
+                "id": "update-youtube-subscriptions",
+                "env": "routine/js",
+                "src": "executables/updateYouTubeSubscriptions.js",
+                "periodic": "*/2 * * * *",
+                "editable": true,
+                "name": "Update youtube subscriptions every 2 minutes",
+                "concurrency": 1
+            },
+            {
+                "id": "settings-view-youtube",
+                "env": "component/react-jsx",
+                "src": "executables/settingsViewYouTube.jsx",
+                "editable": true,
+                "imports": [
+                    {
+                        "env": "npm",
+                        "package": "@mui/material",
+                        "import": "Typography",
+                        "as": "Typography"
+                    },
+                    {
+                        "env": "npm",
+                        "package": "@mui/material",
+                        "import": "Button",
+                        "as": "Button"
+                    }
+                ],
+                "name": "YouTube settings view"
+            },
+            {
+                "id": "youtube-video-view",
+                "env": "component/react-jsx",
+                "src": "executables/youtubeVideoView.jsx",
+                "editable": true,
+                "imports": [
+                    {
+                        "env": "npm",
+                        "package": "@mui/material",
+                        "import": "Typography",
+                        "as": "Typography"
+                    },
+                    {
+                        "env": "npm",
+                        "package": "@mui/material",
+                        "import": "Badge",
+                        "as": "Badge"
+                    },
+                    {
+                        "env": "npm",
+                        "package": "@mui/material",
+                        "import": "Avatar",
+                        "as": "Avatar"
+                    }
+                ],
+                "name": "YouTube video view"
+            }
+        ],
+        "entities": [
+            {
+                "id": "settings_page_youtube",
+                "src": "entities/settingsPageYouTube.json"
+            },
+            {
+                "id": "youtube_video_view",
+                "src": "entities/youtube_video_view.json"
+            }
+        ]
+    }
+}
