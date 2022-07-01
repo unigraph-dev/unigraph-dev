@@ -1,5 +1,10 @@
 const { data, callbacks } = params;
 
+const [noteUid, setNoteUid] = React.useState(
+    data._value.children['_value['].filter((el) => el._value._value.type?.['unigraph.id'] === '$/schema/note_block')[0]
+        ?._value._value.uid,
+);
+
 return (
     <div>
         <Card variant="outlined" style={{ margin: '16px', padding: '16px' }}>
@@ -19,14 +24,16 @@ return (
                 <span style={{ color: 'gray', marginRight: '8px' }}>Remarks</span>
                 {data?._value?.children?.['_value[']?.map ? (
                     <div style={{ display: 'inline', marginRight: '8px' }}>
-                        {data._value.children['_value['].map((it) => (
-                            <AutoDynamicView
-                                object={new UnigraphObject(it._value)}
-                                callbacks={callbacks}
-                                options={{ inline: true }}
-                                style={{ verticalAlign: 'middle' }}
-                            />
-                        ))}
+                        {data._value.children['_value[']
+                            .filter((el) => el._value.type?.['unigraph.id'] === '$/schema/interface/semantic')
+                            .map((it) => (
+                                <AutoDynamicView
+                                    object={new UnigraphObject(it._value)}
+                                    callbacks={callbacks}
+                                    options={{ inline: true }}
+                                    style={{ verticalAlign: 'middle' }}
+                                />
+                            ))}
                     </div>
                 ) : (
                     []
@@ -63,6 +70,56 @@ return (
                     }}
                 />
             </Typography>
+        </Card>
+        <Card variant="outlined" style={{ margin: '16px' }}>
+            <Typography gutterBottom style={{ paddingLeft: '16px', paddingTop: '16px' }}>
+                Notes
+            </Typography>
+            {noteUid ? (
+                <div style={{ margin: '-16px', marginBottom: '16px' }}>
+                    <AutoDynamicViewDetailed
+                        object={{ uid: noteUid, _stub: true, type: { 'unigraph.id': '$/schema/note_block' } }}
+                        attributes={{ noText: true, noReferences: true }}
+                    />
+                </div>
+            ) : (
+                <Button
+                    style={{ margin: '16px' }}
+                    variant="outlined"
+                    onClick={async () => {
+                        const newNoteUid = unigraph.leaseUid();
+                        await unigraph.updateObject(
+                            data.uid,
+                            {
+                                children: [
+                                    {
+                                        type: { 'unigraph.id': '$/schema/subentity' },
+                                        _value: {
+                                            type: { 'unigraph.id': '$/schema/note_block' },
+                                            _value: {
+                                                $context: {
+                                                    uid: newNoteUid,
+                                                },
+                                                text: {
+                                                    _value: data?.get('name')?.as('primitive') || '',
+                                                    type: { 'unigraph.id': '$/schema/markdown' },
+                                                },
+                                            },
+                                        },
+                                    },
+                                ],
+                            },
+                            undefined,
+                            undefined,
+                            callbacks.subsId,
+                            [{ uid: data.uid }],
+                        );
+                        setNoteUid(newNoteUid);
+                    }}
+                >
+                    + Add note
+                </Button>
+            )}
         </Card>
         <div style={{ margin: '16px' }}>
             <Typography>Backlinks</Typography>

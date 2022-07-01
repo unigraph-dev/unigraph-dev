@@ -386,10 +386,12 @@ export function AutoDynamicView({
                         {noBacklinks ? [] : BacklinkComponent}
                     </div>
 
-                    {!noSubentities && getSubentities(getObjectRef.current())?.length > 0 ? (
+                    {!noSubentities && !inline && getSubentities(getObjectRef.current())?.length > 0 ? (
                         <div style={{ width: '100%', paddingLeft: '12px' }}>
                             <Typography
-                                onClick={() => {
+                                onClick={(ev) => {
+                                    ev.preventDefault();
+                                    ev.stopPropagation();
                                     setShowSubentities(!showSubentities);
                                 }}
                                 variant="body2"

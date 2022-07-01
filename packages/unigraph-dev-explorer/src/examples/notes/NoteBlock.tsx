@@ -247,18 +247,24 @@ function NoteViewTextWrapper({
     isRoot,
     isEditing,
     onContextMenu,
+    noText,
     callbacks,
 }: {
     children: React.ReactNode;
     semanticChildren: React.ReactNode;
     isRoot: boolean;
     isEditing: boolean;
+    noText?: any;
     onContextMenu: React.MouseEventHandler;
     callbacks: any;
 }) {
     return (
         <div
-            style={{ display: 'flex', alignItems: 'center' }}
+            style={{
+                display: 'flex',
+                alignItems: 'center',
+                ...(noText ? { position: 'absolute', opacity: 0, pointerEvents: 'none' } : {}),
+            }}
             onContextMenu={isRoot || isEditing ? undefined : onContextMenu}
         >
             {children}
@@ -314,7 +320,9 @@ const ChildrenIndicator = React.memo(function ChildrenIndicator({
 
 export function DetailedOutlinerBlock({
     data,
+    noText,
     isChildren,
+    noReferences,
     callbacks,
     focused,
     index,
@@ -515,6 +523,7 @@ export function DetailedOutlinerBlock({
             >
                 <NoteViewTextWrapper
                     isRoot={!isChildren}
+                    noText={noText}
                     isEditing={isEditing}
                     onContextMenu={onContextMenu}
                     callbacks={callbacks}
@@ -611,7 +620,7 @@ export function DetailedOutlinerBlock({
                         copyOrCutHandler={copyOrCutHandler}
                     />
                 )}
-                {!isChildren ? <ParentsAndReferences data={data} /> : []}
+                {!isChildren && !noReferences ? <ParentsAndReferences data={data} /> : []}
             </div>
         </NoteViewPageWrapper>
     );
@@ -620,6 +629,8 @@ export function DetailedOutlinerBlock({
 export function DetailedNoteBlock({
     data,
     isChildren,
+    noReferences,
+    noText,
     callbacks,
     options,
     focused,
@@ -687,6 +698,8 @@ export function DetailedNoteBlock({
         <DetailedOutlinerBlock
             data={data}
             isChildren={isChildren}
+            noReferences={noReferences}
+            noText={noText}
             callbacks={callbacks}
             options={options}
             focused={focused}
