@@ -104,6 +104,16 @@ export type MergedSubscription = {
     resolver: (updated: any, ofUpdate?: any, txn?: string) => void;
 };
 
+function getUids(obj: any, uids: string[] = []) {
+    if (Array.isArray(obj)) {
+        obj.forEach((el) => getUids(el, uids));
+    } else if (obj && typeof obj === 'object') {
+        if (obj.uid) uids.push(obj.uid);
+        Object.values(obj).forEach((el) => getUids(el, uids));
+    }
+    return uids;
+}
+
 export function mergeSubscriptions(
     toMerge: Subscription[],
     msgCallback: MsgCallbackFn,
@@ -209,6 +219,7 @@ export function mergeSubscriptions(
             el[0].uid = totalUids;
             return el;
         })
+        .filter((el) => el[0].uid.length !== 0)
         .forEach(([query, subs]) => {
             totalMerged.push({
                 subscriptions: subs,
@@ -221,6 +232,7 @@ export function mergeSubscriptions(
                         const updatedIts = updated.filter((it: any) => {
                             return resolvedUid && (resolvedUid === it.uid || resolvedUid.includes(it.uid));
                         });
+                        el.uids = getUids(updatedIts);
                         if (
                             updatedIts.length !==
                             (Array.isArray((el.query as QueryObject).uid) ? (el.query as QueryObject).uid.length : 1)
@@ -252,8 +264,23 @@ export async function pollSubscriptions(
     ids: any[] | undefined,
     serverStates: any,
     ofUpdate?: any,
+    uids?: string[],
 ) {
-    if (!ids) ids = subs.map((el) => el.id);
+    if (!ids) {
+        if (uids) {
+            ids = subs
+                .map((sub) => {
+                    if (!sub.uids) return sub.id;
+                    if (_.intersection(uids, sub.uids).length !== 0) {
+                        return sub.id;
+                    }
+                    return undefined;
+                })
+                .filter(Boolean);
+        } else {
+            ids = subs.map((el) => el.id);
+        }
+    }
     const mergedSubs = mergeSubscriptions(subs.filter(Boolean), msgCallback, ids, serverStates);
     // console.log(JSON.stringify(mergedSubs, null, 4));
     mergedSubs.forEach(async (el, index) => {

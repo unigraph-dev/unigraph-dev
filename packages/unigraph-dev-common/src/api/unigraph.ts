@@ -212,10 +212,10 @@ export default function unigraph(url: string, browserId: string, password?: stri
     const runExecutable = <T>(uidOrExec: any, params: T, context?: any, fnString?: boolean) => {
         // Routs through backend if passed a uid, tries to run in client otherwise (should be passed a Unigraph Object of an Executable)
         if (typeof uidOrExec === 'string') {
-            return runExecutableInServer(uidOrExec, params, context, fnString, true);
+            return runExecutableInServer(uidOrExec, params, context, fnString);
         }
         // client only runs client and lambda execs
-        return runExecutableInClient(uidOrExec, params, context, fnString, true);
+        return runExecutableInClient(uidOrExec, params, context, fnString);
     };
 
     const dispatchCommand = (name: string, params: any, context: any) => {

@@ -171,17 +171,25 @@ export default async function startServer(client: DgraphClient) {
 
     let pendingIds: any[] = [];
     const poller = _.debounce(
-        (a, b, c, d, e) => {
+        (a, b, c, d, e, f, g) => {
             // console.log(`updating `, d);
-            pollSubscriptions(a, b, c, d, e);
+            pollSubscriptions(a, b, c, d, e, f, g);
             pendingIds = [];
         },
         25,
         { leading: false, trailing: true },
     );
-    const debouncedPollSubscriptions = (subs: any, cclient: any, callback: any, ids: any, states: any) => {
+    const debouncedPollSubscriptions = (
+        subs: any,
+        cclient: any,
+        callback: any,
+        ids: any,
+        states: any,
+        ofUpdate: any,
+        uids: any,
+    ) => {
         pendingIds.push(...(Array.isArray(ids) ? ids : [ids]));
-        poller(subs, cclient, callback, pendingIds, states);
+        poller(subs, cclient, callback, pendingIds, states, ofUpdate, uids);
     };
 
     const hooks: Hooks = {
@@ -193,6 +201,8 @@ export default async function startServer(client: DgraphClient) {
                     pollCallback,
                     context.ids,
                     serverStates,
+                    undefined,
+                    undefined,
                 );
             },
         ],
@@ -222,9 +232,17 @@ export default async function startServer(client: DgraphClient) {
                         context.subIds,
                         serverStates,
                         context.ofUpdate,
+                        context.changedUids,
                     );
-                    // TODO: conditionally call this updateNow because we have a list of changed UIDs
-                    await context.caches.executables.updateNow();
+                    if (
+                        _.intersection(
+                            context.changedUids,
+                            Object.values(context.caches.executables?.data).map((el: any) => el?.uid),
+                        ).length !== 0
+                    ) {
+                        console.log('[Caches] Updated executable uids, updating...');
+                        await context.caches.executables.updateNow();
+                    }
                     await context.caches.uid_lists.updateNow();
                     initExecutables(
                         Object.entries(context.caches.executables.data),

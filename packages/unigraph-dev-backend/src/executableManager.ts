@@ -35,7 +35,7 @@ export function createExecutableCache(
     };
 
     cache.updateNow = async () => {
-        states.lock.acquire('caches/exec', async (done: any) => {
+        await states.lock.acquire('caches/exec', async (done: any) => {
             const newdata = await client.getExecutables();
             const newdata2 = await client.getSchemasFromTable();
 
@@ -54,14 +54,14 @@ export function createExecutableCache(
                 if (k.startsWith('$/executable') && !cache.data[k]) cache.data[k] = unpad(v);
             });
 
-            updateClientCache(
-                states,
-                'executableMap',
-                Object.fromEntries(Object.entries(cache.data).filter(([k, v]: any) => v.env?.startsWith?.('client/'))),
-            );
-
             done(false, null);
         });
+
+        updateClientCache(
+            states,
+            'executableMap',
+            Object.fromEntries(Object.entries(cache.data).filter(([k, v]: any) => v.env?.startsWith?.('client/'))),
+        );
     };
 
     cache.updateNow();

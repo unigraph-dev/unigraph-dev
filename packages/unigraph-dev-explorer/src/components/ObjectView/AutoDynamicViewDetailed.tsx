@@ -89,6 +89,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
                             {({ viewId, setTitle }) =>
                                 React.createElement(DynamicViewsDetailed[object.type['unigraph.id']].view, {
                                     data: getObject(),
+                                    key: object?.uid,
                                     callbacks: {
                                         viewId,
                                         setTitle,

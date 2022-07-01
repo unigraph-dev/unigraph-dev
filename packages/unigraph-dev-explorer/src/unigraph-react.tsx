@@ -170,6 +170,7 @@ export const getComponentFromExecutable = async (data: any, params: any, globalI
         refstr.push(key);
         refval.push(value);
     });
+    console.log(data.uid, { ret: ret?.return_function_component });
     // eslint-disable-next-line no-new-func
     const retFn = new Function('React', ...refstr, `return ${ret?.return_function_component}`)(React, ...refval);
     // Build the component with imports!

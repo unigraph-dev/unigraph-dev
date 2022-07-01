@@ -30,6 +30,7 @@ declare type Subscription = {
     clientId?: string;
     hibernated?: boolean;
     queryTime?: number;
+    uids?: string[];
 };
 
 /**
