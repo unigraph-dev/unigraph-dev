@@ -45,7 +45,7 @@ function initDynamicObjectViews() {
                 registerDynamicViews({ [typeId]: { view } });
             });
         },
-        undefined,
+        99999998,
         { all: false },
     );
 
@@ -63,7 +63,7 @@ function initDynamicObjectViews() {
                 });
             });
         },
-        undefined,
+        99999999,
         { all: false },
     );
 

@@ -241,7 +241,7 @@ export default async function startServer(client: DgraphClient) {
                         ).length !== 0
                     ) {
                         console.log('[Caches] Updated executable uids, updating...');
-                        await context.caches.executables.updateNow();
+                        await (context.caches.executables.updateNow as any)(context.changedUids);
                     }
                     await context.caches.uid_lists.updateNow();
                     initExecutables(

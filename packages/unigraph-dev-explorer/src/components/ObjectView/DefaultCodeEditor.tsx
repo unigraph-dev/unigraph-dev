@@ -132,7 +132,13 @@ export function ExecutableCodeEditor({ data, options }: any) {
     const [previewComponent, setPreviewComponent] = React.useState<any>('');
 
     const updateCode = (newSrc: string) => {
-        window.unigraph.updateObject(data.uid, { src: newSrc });
+        window.unigraph.updateObject(
+            data.uid,
+            { src: newSrc },
+            undefined,
+            undefined,
+            unpadded.env.endsWith('/react-jsx') ? [99999998, 99999999] : undefined,
+        );
     };
 
     function handleEditorChange(value: any, event: any) {

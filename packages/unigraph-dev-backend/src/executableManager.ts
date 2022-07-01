@@ -34,10 +34,10 @@ export function createExecutableCache(
         subscribe: (listener) => null,
     };
 
-    cache.updateNow = async () => {
+    cache.updateNow = async (uids?: string[]) => {
         await states.lock.acquire('caches/exec', async (done: any) => {
-            const newdata = await client.getExecutables();
-            const newdata2 = await client.getSchemasFromTable();
+            const newdata = await client.getExecutables(uids);
+            const newdata2 = await client.getSchemasFromTable(uids);
 
             cache.data = newdata.reduce((prev, obj) => {
                 obj = unpad(obj);
@@ -48,7 +48,7 @@ export function createExecutableCache(
                     prev[obj.uid] = obj;
                 }
                 return prev;
-            }, {});
+            }, cache.data);
 
             Object.entries(newdata2).forEach(([k, v]) => {
                 if (k.startsWith('$/executable') && !cache.data[k]) cache.data[k] = unpad(v);
