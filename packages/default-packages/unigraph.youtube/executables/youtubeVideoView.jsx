@@ -86,7 +86,7 @@ return (
                     </Typography>
                     <div style={{ display: 'flex', color: 'gray', alignItems: 'center', marginTop: '6px' }}>
                         <img
-                            src={data.get('channel/profile_image').as('primitive')}
+                            src={data.get('channel/profile_image')?.as('primitive')}
                             style={{ height: '32px', borderRadius: '16px' }}
                         />
                         <Typography variant="body1" style={{ marginLeft: '8px', fontSize: '14px', marginRight: '4px' }}>
@@ -94,7 +94,7 @@ return (
                         </Typography>
                         •
                         <Typography variant="body1" style={{ marginLeft: '4px', fontSize: '14px', marginRight: '4px' }}>
-                            {Sugar.Date.relative(new Date(data._updatedAt))}
+                            {Sugar.Date.relative(new Date(data._updatedAt || data._createdAt))}
                         </Typography>
                         •
                         <Typography variant="body1" style={{ marginLeft: '4px', fontSize: '14px', marginRight: '4px' }}>

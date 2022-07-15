@@ -31,6 +31,21 @@ var(func: eq(<unigraph.id>, "$/schema/internet_account")) {
     ])
 )[0];
 
+function toDuration(duration) {
+    const sec_num = parseInt(duration, 10); // don't forget the second param
+    const hours = Math.floor(sec_num / 3600);
+    let minutes = Math.floor((sec_num - hours * 3600) / 60);
+    let seconds = sec_num - hours * 3600 - minutes * 60;
+
+    if (minutes < 10) {
+        minutes = `0${minutes}`;
+    }
+    if (seconds < 10) {
+        seconds = `0${seconds}`;
+    }
+    return `${(hours ? `${hours}:` : '') + minutes}:${seconds}`;
+}
+
 if (!accounts[0]?.uid || accounts?.length !== 1 || !(accounts[0]?._youtubeiCredentials?.length >= 20)) {
     console.log(accounts);
     return;
@@ -67,6 +82,134 @@ youtube.ev.on('update-credentials', (data) => {
 });
 
 await youtube.signIn(creds);
+
+async function syncRlwithWl() {
+    const subsFeed = await youtube.getPlaylist('WL', { client: 'YOUTUBE' });
+    const wlIts = (subsFeed?.items || []).map((el) => el.id);
+    const rlIts = (
+        (
+            await unigraph.getQueries([
+                `(func: uid(${unigraph.getNamespaceMapUid('$/entity/read_later')})) {
+        uid
+        _value {
+            children {
+                <_value[> {
+                    _value {
+                        _value {
+                            uid
+                            _shouldInWL
+                            _value {
+                                youtube_id {
+                                    <_value.%>
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }`,
+            ])
+        )[0]?.[0]?._value?.children?.['_value['] || []
+    )
+        ?.map((el) => ({
+            uid: el?._value?._value?.uid,
+            _shouldInWL: el?._value?._value?._shouldInWL || false,
+            youtube_id: el?._value?._value?._value?.youtube_id['_value.%'],
+        }))
+        ?.filter((el) => el.uid && el.youtube_id);
+
+    // Sync up
+    const rlNotInWl = rlIts.filter((el) => !wlIts.includes(el.youtube_id));
+    const toAdd = [];
+    const toDel = [];
+    await Promise.all(
+        rlNotInWl.map(async ({ uid, youtube_id, _shouldInWL }) => {
+            if (_shouldInWL) {
+                // Should remove the flag, and remove from local RL
+                await unigraph.updateTriplets([`<${uid}> <_shouldInWL> * .`], true, []);
+                toDel.push(uid);
+            } else {
+                // Should add the flag, and add to WL
+                await unigraph.updateTriplets([`<${uid}> <_shouldInWL> "true"^^<xs:boolean> .`], false, []);
+                toAdd.push(youtube_id);
+            }
+        }),
+    );
+    await youtube.playlist.addVideos('WL', toAdd);
+    await unigraph.runExecutable('$/executable/delete-item-from-list', {
+        where: '$/entity/read_later',
+        item: toDel,
+    });
+
+    // Sync down
+    const wlNotInRl = wlIts.filter((el) => !rlIts.map((el) => el.youtube_id).includes(el));
+    const locallyRemovedVideos =
+        (
+            await unigraph.getQueries([
+                `(func: uid(parLst)) @filter(type(Entity) AND (NOT type(Deleted)) AND (NOT eq(<_hide>, true))) @cascade {
+        uid
+        _shouldInWL
+        _value {
+            youtube_id {
+                <_value.%>
+            }
+        }
+    }
+    var(func: eq(<unigraph.id>, "$/schema/youtube_video")) {
+        <~type> { parLst as uid }
+    }`,
+            ])
+        )[0] || [];
+    const locallyRemovedVideosId = locallyRemovedVideos.map((el) => el._value.youtube_id['_value.%']);
+
+    const videoDetails = await Promise.all(wlNotInRl.map((id) => youtube.getDetails(id)));
+    const videos = [];
+    const toDelRemote = [];
+    videoDetails.map((video) => {
+        if (!locallyRemovedVideosId.includes(video.id)) {
+            videos.push({
+                $context: {
+                    _shouldInWL: true,
+                },
+                channel: {
+                    name: video.metadata.channel_name,
+                    url: video.metadata.channel_url,
+                    youtube_id: video.metadata.channel_id,
+                },
+                _updatedAt: new Date(video.metadata.publish_date).toJSON(),
+                description: video.description,
+                duration: toDuration(video.metadata.length_seconds),
+                thumbnail: video.thumbnail.url,
+                title: video.title,
+                youtube_id: video.id,
+            });
+        } else {
+            const uids = locallyRemovedVideos
+                .filter((el) => el._value.youtube_id['_value.%'] === video.id)
+                .map((el) => el.uid);
+            if (uids.length)
+                unigraph.updateTriplets(
+                    uids.map((uid) => `<${uid}> <_shouldInWL> * .`),
+                    true,
+                    [],
+                );
+            toDelRemote.push(video.id);
+        }
+    });
+
+    if (toDelRemote.length) await youtube.playlist.removeVideos('WL', toDelRemote);
+
+    if (videos.length) {
+        const uids = await unigraph.addObject(videos, '$/schema/youtube_video', undefined, []);
+        await unigraph.runExecutable('$/executable/add-item-to-list', {
+            where: '$/entity/read_later',
+            item: uids,
+        });
+    }
+}
+
+syncRlwithWl();
 
 const subsFeed = await youtube.actions.browse('FEsubscriptions');
 const videos =
@@ -121,7 +264,7 @@ const videos =
             _updatedAt: Sugar.Date.create(el.metadata.published).toJSON() || undefined,
         }));
 
-const idx = videos.findIndex((el) => el.youtube_id === accounts[0]?._youtubeiLastFeedId);
+const idx = videos.findIndex((el) => accounts[0]._youtubeiLastFeedId.split('|').includes(el.youtube_id));
 const newVideos = videos.slice(0, idx === -1 ? undefined : idx);
 const fullNewVideos = (await Promise.all(newVideos.map((el) => youtube.getDetails(el.youtube_id)))).map((el, idx) => ({
     ...newVideos[idx],
@@ -138,7 +281,7 @@ if (fullNewVideos[0]?.youtube_id) {
     await unigraph.updateObject(
         accounts[0].uid,
         {
-            _youtubeiLastFeedId: fullNewVideos[0].youtube_id,
+            _youtubeiLastFeedId: videos.map((el) => el.youtube_id).join('|'),
         },
         false,
         false,

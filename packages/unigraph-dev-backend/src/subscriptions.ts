@@ -233,11 +233,10 @@ export function mergeSubscriptions(
                             return resolvedUid && (resolvedUid === it.uid || resolvedUid.includes(it.uid));
                         });
                         el.uids = getUids(updatedIts);
-                        if (
-                            updatedIts.length !==
-                            (Array.isArray((el.query as QueryObject).uid) ? (el.query as QueryObject).uid.length : 1)
-                        )
-                            return;
+                        const origQueryUids = Array.isArray((el.query as QueryObject).uid)
+                            ? (el.query as QueryObject).uid
+                            : [(el.query as QueryObject).uid];
+                        if (updatedIts.length !== _.uniq(origQueryUids).length) return;
                         callbackIfChanged(updatedIts, el, ofUpdate, updated, txn);
                     });
                 },
@@ -282,6 +281,7 @@ export async function pollSubscriptions(
         }
     }
     const mergedSubs = mergeSubscriptions(subs.filter(Boolean), msgCallback, ids, serverStates);
+    // console.log(ids, uids, mergedSubs);
     // console.log(JSON.stringify(mergedSubs, null, 4));
     mergedSubs.forEach(async (el, index) => {
         let query: string;
