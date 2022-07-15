@@ -3,6 +3,15 @@ import { subscribeToBacklinks } from '../../../unigraph-react';
 import { DataContext, typeHasDynamicView } from '../../../utils';
 import { getParentsAndReferences } from '../backlinksUtils';
 
+const getLinkFrequency = (links: any[]) => {
+    const freq: any = {};
+    links.forEach((link) => {
+        if (!freq[link.type['unigraph.id']]) freq[link.type['unigraph.id']] = 0;
+        freq[link.type['unigraph.id']] += 1;
+    });
+    return Object.entries(freq);
+};
+
 export const useBacklinkDelegate = (
     uid: string,
     contextUid: string,
@@ -67,9 +76,11 @@ export const useBacklinkDelegate = (
                         marginLeft: 'auto',
                         background: 'lightgray',
                         padding: '2px 6px',
+                        paddingRight: '2px',
                         borderRadius: '6px',
                         whiteSpace: 'nowrap',
                         cursor: 'pointer',
+                        display: 'flex',
                         height: 'fit-content',
                         ...backlinkStyle,
                     }}
@@ -79,7 +90,23 @@ export const useBacklinkDelegate = (
                         window.wsnavigator(`/library/backlink?uid=${uid}`);
                     }}
                 >
-                    {(noParents ? 0 : backlinks?.[0]?.length || 0) + (backlinks?.[1]?.length || 0)}
+                    {getLinkFrequency([...(noParents ? [] : backlinks?.[0] || []), ...(backlinks?.[1] || [])]).map(
+                        (el) => (
+                            <div style={{ display: 'flex', alignItems: 'center', marginRight: '4px', opacity: 0.54 }}>
+                                <div
+                                    style={{
+                                        height: '16px',
+                                        width: '16px',
+                                        backgroundImage: `url("data:image/svg+xml,${
+                                            window.unigraph.getNamespaceMap?.()?.[el[0]]?._icon
+                                        }"`,
+                                        marginRight: '4px',
+                                    }}
+                                />
+                                {el[1]}
+                            </div>
+                        ),
+                    )}
                 </div>
             ) : (
                 []
