@@ -219,8 +219,16 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                                 }
                                 return (
                                     <>
-                                        <span style={{ color: 'darkgray' }}>[[</span>
+                                        <span
+                                            style={{ color: 'darkgray' }}
+                                            className="wikilink-bracket-left wikilink-brackets"
+                                            data-target={children[0]}
+                                        >
+                                            [[
+                                        </span>
                                         <div
+                                            className="wikilink-icon"
+                                            data-target={children[0]}
                                             style={{
                                                 display: 'inline-flex',
                                                 minWidth: '16px',
@@ -235,6 +243,7 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                                             // eslint-disable-next-line react/no-children-prop
                                             React.createElement('span', {
                                                 className,
+                                                'data-target': children[0],
                                                 children,
                                                 contentEditable: true,
                                                 suppressContentEditableWarning: true,
@@ -279,7 +288,13 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                                                 },
                                             })
                                         }
-                                        <span style={{ color: 'darkgray' }}>]]</span>
+                                        <span
+                                            style={{ color: 'darkgray' }}
+                                            className="wikilink-bracket-right wikilink-brackets"
+                                            data-target={children[0]}
+                                        >
+                                            ]]
+                                        </span>
                                     </>
                                 );
                             }

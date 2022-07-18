@@ -11,6 +11,10 @@ import { parseTodoObject } from './parseTodoObject';
 import { todoDefaultMenuItems, TodoMenuItems, TodoMenuSidebar } from './TodoSidebar';
 import { ATodoList, completeTodoQueryBody, maxDateStamp } from './utils';
 
+const isImmediate = (data: any) =>
+    new Date(data.get('time_frame/end/datetime')?.as('primitive')).getTime() - new Date().getTime() <=
+    1000 * 60 * 60 * 24; // Less than a day
+
 export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline, isEmbed }) => {
     const NameDisplay = React.useMemo(
         () => (
@@ -69,6 +73,7 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
                     ? [
                           <Chip
                               size="small"
+                              color={isImmediate(data) ? 'warning' : undefined}
                               icon={<CalendarToday />}
                               label={`End: ${Sugar.Date.relative(
                                   new Date(data.get('time_frame/end/datetime')?.as('primitive')),
