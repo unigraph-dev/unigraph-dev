@@ -109,31 +109,23 @@ export const init = () => {
     });
 
     registerContextMenuItems('$/schema/note_block', [
-        (uid: any, object: any, handleClose: any, callbacks: any) => (
-            <MenuItem
-                style={contextMenuItemStyle}
-                onClick={() => {
-                    handleClose();
-                    callbacks['convert-child-to-todo']();
-                }}
-            >
-                Convert note as TODO
-            </MenuItem>
-        ),
-        (uid: any, object: any, handleClose: any, callbacks: any) => {
-            // outliner, paragraph, numbered
-            const displayAs = object?._value?.children?._displayAs || 'outliner';
-            return (
-                <MenuItem
-                    style={contextMenuItemStyle}
-                    onClick={() => {
-                        handleClose();
-                        setChildrenDisplayAs(object, callbacks, displayAs === 'outliner' ? 'paragraph' : 'outliner');
-                    }}
-                >
-                    Display children as bullets/paragraphs
-                </MenuItem>
-            );
+        {
+            text: 'Convert note as TODO',
+            onClick: (uid: any, object: any, handleClose: any, callbacks: any) => {
+                handleClose();
+                callbacks['convert-child-to-todo']();
+            },
+        },
+        {
+            text: 'Display children as bullets/paragraphs',
+            onClick: (uid: any, object: any, handleClose: any, callbacks: any) => {
+                handleClose();
+                setChildrenDisplayAs(
+                    object,
+                    callbacks,
+                    (object?._value?.children?._displayAs || 'outliner') === 'outliner' ? 'paragraph' : 'outliner',
+                );
+            },
         },
     ]);
 };

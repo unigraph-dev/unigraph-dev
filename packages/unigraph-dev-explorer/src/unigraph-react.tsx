@@ -122,8 +122,8 @@ export const registerQuickAdder = (adders: Record<string, any>): void => {
 export const registerContextMenuItems = (schema: string, items: any[]): void => {
     const state = (window as any).unigraph.getState('registry/contextMenu');
     state.setValue({
-        ...state,
-        [schema]: [...(state[schema] || []), ...items],
+        ...state.value,
+        [schema]: [...(state.value?.[schema] || []), ...items],
     });
     window.reloadCommands();
 };

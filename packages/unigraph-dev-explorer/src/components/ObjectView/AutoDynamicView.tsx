@@ -6,9 +6,10 @@ import { useDrag, useDrop } from 'react-dnd';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useSwipeable } from 'react-swipeable';
 import { UnigraphObject, getRandomInt, getRandomId } from 'unigraph-dev-common/lib/utils/utils';
-import { AutoDynamicViewProps } from '../../types/ObjectView.d';
+import { AutoDynamicViewProps, ComponentData, DynamicViewOptions } from '../../types/ObjectView.d';
 import {
     DataContext,
+    DataContextType,
     DataContextWrapper,
     isMobile,
     isMultiSelectKeyPressed,
@@ -100,6 +101,21 @@ export function AutoDynamicView({
     );
 
     const viewEl = React.useRef(null);
+
+    const dataRef = React.useRef<ComponentData | null>(null);
+    dataRef.current = {
+        uid: object?.uid,
+        type: object?.type?.['unigraph.id'] || getObject_()?.type?.['unigraph.id'],
+        componentId,
+        getObject: getObject_,
+        isSelected: isSelected as boolean,
+        isFocused: isFocused as boolean,
+        totalParents,
+        dataContext,
+        tabContext,
+        callbacks,
+        options: finalOptions,
+    };
 
     React.useEffect(() => {
         const cb = (newIts: any) =>
@@ -216,6 +232,8 @@ export function AutoDynamicView({
                 setIsRecursion(false);
             }
 
+            if (domElement) domElement.dataRef = dataRef;
+
             if (!noDrag && !isMobile()) drag(domElement);
             if (!noDrop) drop(domElement);
             if (isMobile() && !noContextMenu) handlers.ref(domElement);
@@ -265,6 +283,7 @@ export function AutoDynamicView({
         ) {
             return React.createElement(DynamicViews[object.type['unigraph.id']].view, {
                 data: getObjectRef.current(),
+                style,
                 key: object?.uid,
                 ...props,
                 callbacks: finalCallbacks,

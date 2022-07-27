@@ -16,6 +16,7 @@ declare global {
         reloadCommands: () => any;
         mixpanel?: any;
         dragselect: any;
+        getComponentDataById?: any;
     }
 }
 

@@ -186,6 +186,7 @@ export function ParentsAndReferences({ data }: any) {
         <div style={{ marginTop: '36px' }}>
             {parents.length > 0 ? (
                 <DynamicObjectListView
+                    inline
                     items={parents.map((el: any) => ({ ...el, _stub: true }))}
                     context={data}
                     compact
@@ -208,6 +209,7 @@ export function ParentsAndReferences({ data }: any) {
                 />
             ) : undefined}
             <DynamicObjectListView
+                inline
                 items={references.map((el: any) => ({ ...el, _stub: true }))}
                 context={data}
                 compact
@@ -684,7 +686,7 @@ export function DetailedNoteBlock({
                 attributes={{
                     isHeading: !(isChildren || callbacks.isEmbed),
                 }}
-                style={{ display: isEditing ? 'none' : '' }}
+                style={isEditing ? { display: 'none' } : undefined}
                 options={{ inline: true, noDrag: true, noContextMenu: true, noClickthrough: true }}
                 callbacks={{
                     'get-semantic-properties': () => dataRef.current,

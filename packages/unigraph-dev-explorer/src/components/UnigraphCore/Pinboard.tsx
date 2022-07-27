@@ -1,5 +1,5 @@
 import { Responsive } from 'react-grid-layout';
-import { MenuItem } from '@mui/material';
+import { MenuItem, Typography } from '@mui/material';
 import React from 'react';
 import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 import { registerDetailedDynamicViews } from '../../unigraph-react';
@@ -10,6 +10,7 @@ import '../../pages/home.css';
 import { AutoDynamicViewDetailed } from '../ObjectView/AutoDynamicViewDetailed';
 import { onUnigraphContextMenu } from '../ObjectView/DefaultObjectContextMenu';
 import WidthProvider from '../../utils/WidthProvider';
+import { ctxMenuFont } from './ContextMenu';
 
 const ResponsiveGridLayout: any = WidthProvider(Responsive);
 
@@ -50,7 +51,9 @@ export function Pinboard({ data, callbacks }: any) {
                                 setLayoutLocked(!layoutLocked);
                             }}
                         >
-                            {layoutLocked ? 'Unlock' : 'Lock'} pinboard layout
+                            <Typography style={ctxMenuFont}>
+                                {layoutLocked ? 'Unlock' : 'Lock'} pinboard layout
+                            </Typography>
                         </MenuItem>
                     ),
                 )

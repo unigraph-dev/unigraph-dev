@@ -18,6 +18,10 @@ import {
     Divider,
     Autocomplete,
     Box,
+    Badge,
+    BadgeProps,
+    Chip,
+    Stack,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { ExpandMore, ClearAll, InboxOutlined, ExpandLess, ThreeSixty } from '@mui/icons-material';
@@ -28,6 +32,16 @@ import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
+import {
+    mdiArrowDown,
+    mdiArrowUp,
+    mdiFilterOutline,
+    mdiViewListOutline,
+    mdiFormatListBulletedType,
+    mdiPlus,
+    mdiTable,
+} from '@mdi/js';
+import Icon from '@mdi/react';
 import { TransitionGroup } from 'react-transition-group';
 import { SwipeableList, SwipeableListItem, ActionAnimations } from '@sandstreamdev/react-swipeable-list';
 import { getDynamicViews } from '../../unigraph-react';
@@ -45,6 +59,7 @@ import { setupInfiniteScrolling } from './infiniteScrolling';
 import { DragandDrop } from './DragandDrop';
 import '@sandstreamdev/react-swipeable-list/dist/styles.css';
 import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
+import { DynamicObjectTableView } from './DynamicObjectTableView';
 
 const PREFIX = 'DynamicObjectListView';
 
@@ -128,6 +143,7 @@ function DynamicListItem({
     compact,
     itemStyle,
     viewOptions,
+    removeItemsFromView,
     noHoverHighlight,
     _swipableClassName,
     _swipableRest,
@@ -141,13 +157,16 @@ function DynamicListItem({
         ...callbacks,
         context,
         removeOnEnter,
-        removeFromContext: (where: undefined | 'left' | 'right') => {
-            const uids = {
-                left: itemUids.slice(0, index),
-                right: undefined,
-                '': undefined,
-            }[where || ''] || [item.uid];
+        removeFromContext: (where: undefined | 'left' | 'right' | string[]) => {
+            const uids = Array.isArray(where)
+                ? where
+                : {
+                      left: itemUids.slice(0, index),
+                      right: undefined,
+                      '': undefined,
+                  }[where || ''] || [item.uid];
             itemRemover(uids);
+            removeItemsFromView(uids);
         },
     };
 
@@ -257,6 +276,7 @@ export type DynamicObjectListViewProps = {
     initialTab?: string;
     viewOptions?: any;
     noHoverHighlight?: boolean;
+    inline?: boolean;
 };
 
 function DynamicListBasic({
@@ -275,6 +295,7 @@ function DynamicListBasic({
     components,
     itemStyle,
     viewOptions,
+    removeItemsFromView,
     noHoverHighlight,
     _swipableClassName,
     _swipableRest,
@@ -306,6 +327,7 @@ function DynamicListBasic({
                     removeOnEnter={removeOnEnter}
                     components={components}
                     viewOptions={viewOptions}
+                    removeItemsFromView={removeItemsFromView}
                     noHoverHighlight={noHoverHighlight}
                     _swipableClassName={_swipableClassName}
                     _swipableRest={_swipableRest}
@@ -334,6 +356,7 @@ function DynamicList({
     itemStyle,
     viewOptions,
     noHoverHighlight,
+    removeItemsFromView,
     _swipableClassName,
     _swipableRest,
 }: any) {
@@ -382,7 +405,7 @@ function DynamicList({
 
     React.useEffect(() => {
         setupProps?.onUpdate(items.map((el: any) => itemGetter(el).uid));
-    }, [JSON.stringify(items.map((el: any) => itemGetter(el).uid).sort())]);
+    }, [JSON.stringify(items.map((el: any) => itemGetter(el).uid))]);
 
     return (
         <InfiniteScroll
@@ -426,6 +449,7 @@ function DynamicList({
                         removeOnEnter={removeOnEnter}
                         components={components}
                         viewOptions={viewOptions}
+                        removeItemsFromView={removeItemsFromView}
                         noHoverHighlight={noHoverHighlight}
                         _swipableClassName={_swipableClassName}
                         _swipableRest={_swipableRest}
@@ -510,6 +534,15 @@ export function TabButton({ children, isSelected, onClick, sx }: any) {
     );
 }
 
+const StyledBadge = styled(Badge)<BadgeProps>(({ theme }) => ({
+    '& .MuiBadge-badge': {
+        right: -3,
+        top: 3,
+        border: `2px solid ${theme.palette.background.paper}`,
+        padding: '0 4px',
+    },
+}));
+
 /**
  * Component for a list of objects with various functionalities.
  *
@@ -546,6 +579,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
     itemAdder,
     initialTab,
     viewOptions,
+    inline,
     noHoverHighlight,
 }) => {
     const tabContext = React.useContext(TabContext);
@@ -607,11 +641,20 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
         if (allItems.length === 0) setCurrentTab(initialTab || '');
     }, [reverseOrder, items, filtersUsed, currentTab]);
 
+    const removeItemsFromView = React.useCallback(
+        (toRemove: string[]) => {
+            setProcItems(procItems.filter((el) => !toRemove.includes(itemGetter(el)?.uid)));
+        },
+        [procItems, itemGetter],
+    );
+
     const contextRef = React.useRef(context);
     // eslint-disable-next-line no-return-assign
     React.useEffect(() => (contextRef.current = context), [context]);
     const [parId] = React.useState(getRandomInt());
     const [dndContext] = React.useState(tabContext.viewId || parId);
+
+    const [viewAs, setViewAs] = React.useState<'list' | 'table'>('list');
 
     const [{ canDrop }, drop] = useDrop(() => ({
         // @ts-expect-error: already checked for namespace map
@@ -652,206 +695,156 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
             ref={drop}
         >
             <DataContextWrapper contextUid={context?.uid} contextData={context} parents={[]} expandedChildren>
-                <div style={{ display: 'flex' }}>
-                    {noBar ? (
-                        []
-                    ) : (
-                        <>
-                            <Accordion
-                                expanded={optionsOpen}
+                {noBar ? (
+                    []
+                ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', padding: '8px' }}>
+                        <Typography style={{ whiteSpace: 'nowrap', color: 'gray', fontSize: '15px' }}>
+                            {totalItems.length}
+                            {titleBar || ' items'}
+                        </Typography>
+                        <Divider
+                            variant="middle"
+                            orientation="vertical"
+                            flexItem
+                            sx={{
+                                height: 'auto',
+                                marginLeft: '8px',
+                                marginRight: '8px',
+                            }}
+                        />
+                        <Stack direction="row" spacing={1}>
+                            <Chip
+                                icon={
+                                    <StyledBadge badgeContent={4} color="primary" style={{ marginRight: '8px' }}>
+                                        <Icon path={mdiFormatListBulletedType} size={0.75} />
+                                    </StyledBadge>
+                                }
+                                label="Types"
                                 variant="outlined"
-                                style={{
-                                    flexGrow: 1,
-                                    minWidth: 0,
-                                    margin: '8px',
-                                }}
-                            >
-                                <AccordionSummary
-                                    expandIcon={React.createElement(optionsOpen ? ExpandLess : ExpandMore, {
-                                        onClick: () => setOptionsOpen(!optionsOpen),
-                                        sx: {
-                                            cursor: 'pointer',
-                                            borderRadius: '16px',
-                                            '&:hover': {
-                                                backgroundColor: '#f5f5f5',
-                                            },
-                                        },
-                                    })}
-                                    aria-controls="panel1bh-content"
-                                    id="panel1bh-header"
-                                    classes={{ content: classes.content }}
-                                    style={{ cursor: 'initial' }}
-                                >
-                                    <TabButton
-                                        isSelected={
-                                            currentTab === '' &&
-                                            groupersDefault.type?.(totalItems.map(itemGetter))?.length > 1
-                                        }
-                                        onClick={() => {
-                                            setCurrentTab('');
-                                        }}
-                                    >
-                                        <Typography style={{ whiteSpace: 'nowrap' }}>
-                                            {totalItems.length}
-                                            {titleBar || ' items'}
-                                        </Typography>
-                                    </TabButton>
-                                    <MultiTypeDescriptor
-                                        items={totalItems.map(itemGetter)}
-                                        selectedTab={currentTab}
-                                        setSelectedTab={setCurrentTab}
-                                    />
-                                </AccordionSummary>
-                                {optionsOpen ? (
-                                    <AccordionDetails>
-                                        <List>
-                                            <ListItem>
-                                                <Typography>Group items by</Typography>
-                                                <Select
-                                                    value={groupBy}
-                                                    onChange={(ev) => {
-                                                        setGroupBy(ev.target.value as string);
-                                                    }}
-                                                    style={{ marginLeft: '24px' }}
-                                                    displayEmpty
-                                                >
-                                                    <MenuItem value="">None</MenuItem>
-                                                    {Object.keys(groupers).map((el) => (
-                                                        <MenuItem value={el}>{el}</MenuItem>
-                                                    ))}
-                                                </Select>
-                                            </ListItem>
-                                            <ListItem>
-                                                <FormControlLabel
-                                                    control={
-                                                        <Switch
-                                                            checked={reverseOrder}
-                                                            onChange={() => setReverseOrder(!reverseOrder)}
-                                                            name="moveToInbox"
-                                                        />
-                                                    }
-                                                    label="Latest items on top"
-                                                />
-                                            </ListItem>
-                                            <ListItem>
-                                                <Autocomplete
-                                                    multiple
-                                                    value={filtersUsed}
-                                                    onChange={(event, newValue) => {
-                                                        setFiltersUsed(newValue);
-                                                    }}
-                                                    id="filter-selector"
-                                                    options={totalFilters.map((el) => el.id)}
-                                                    style={{ width: 300 }}
-                                                    renderInput={(params) => (
-                                                        <TextField
-                                                            {...params}
-                                                            label="Filter presets"
-                                                            variant="outlined"
-                                                        />
-                                                    )}
-                                                />
-                                            </ListItem>
-                                            <ListItem
-                                                style={{
-                                                    display: context?.uid && !noRemover ? '' : 'none',
-                                                }}
-                                            >
-                                                <Button
-                                                    onClick={() => {
-                                                        window.wsnavigator(`/graph?uid=${context.uid}`);
-                                                    }}
-                                                >
-                                                    Show Graph view
-                                                </Button>
-                                            </ListItem>
-                                        </List>
-                                    </AccordionDetails>
-                                ) : (
-                                    []
-                                )}
-                            </Accordion>
-                            <IconButton
-                                onClick={() => itemRemover(procItems.map((el, idx) => itemGetter(el).uid))}
-                                style={{
-                                    display: itemRemover === _.noop ? 'none' : '',
-                                }}
-                                size="large"
-                            >
-                                <ClearAll />
-                            </IconButton>
-                            <IconButton
-                                style={{
-                                    display: canDrop && ((!noDrop && contextRef.current) || itemAdder) ? '' : 'none',
-                                }}
-                                size="large"
-                            >
-                                <InboxOutlined />
-                            </IconButton>
-                        </>
-                    )}
-                </div>
+                                size="small"
+                            />
+                            <Chip
+                                onClick={() => setReverseOrder(!reverseOrder)}
+                                icon={<Icon path={reverseOrder ? mdiArrowUp : mdiArrowDown} size={0.75} />}
+                                label="Last Edited"
+                                variant="outlined"
+                                size="small"
+                            />
+                            <Chip
+                                onClick={() => (viewAs === 'list' ? setViewAs('table') : setViewAs('list'))}
+                                icon={<Icon path={viewAs === 'list' ? mdiViewListOutline : mdiTable} size={0.75} />}
+                                label="View As"
+                                variant="outlined"
+                                size="small"
+                            />
+                        </Stack>
+                        <Divider
+                            variant="middle"
+                            orientation="vertical"
+                            flexItem
+                            sx={{
+                                height: 'auto',
+                                marginLeft: '8px',
+                                marginRight: '8px',
+                            }}
+                        />
+                        <Icon path={mdiFilterOutline} size={0.75} style={{ marginRight: '4px' }} />
+                        <Stack direction="row" spacing={1} style={{ flexGrow: 1 }}>
+                            <div style={{ display: 'flex', color: 'gray' }}>
+                                <Icon path={mdiPlus} size={0.75} />
+                                <Typography style={{ marginLeft: '2px', fontSize: '14px' }}>Add filter</Typography>
+                            </div>
+                        </Stack>
+                        <IconButton
+                            onClick={() => itemRemover(procItems.map((el, idx) => itemGetter(el).uid))}
+                            style={{
+                                display: itemRemover === _.noop ? 'none' : '',
+                            }}
+                            size="small"
+                        >
+                            <ClearAll />
+                        </IconButton>
+                        <IconButton
+                            style={{
+                                display: canDrop && ((!noDrop && contextRef.current) || itemAdder) ? '' : 'none',
+                            }}
+                            size="small"
+                        >
+                            <InboxOutlined />
+                        </IconButton>
+                    </div>
+                )}
                 <div style={{ flexGrow: 1, overflowY: 'auto' }} id={`scrollableDiv${parId}`}>
-                    <SwipeableList>
-                        {({ className, ...rest }) =>
-                            !(groupBy as any).length
-                                ? React.createElement(isStub && !loadAll ? DynamicList : DynamicListBasic, {
-                                      reverse: reverseOrder,
-                                      items: procItems,
-                                      context,
-                                      listUid,
-                                      callbacks,
-                                      itemRemover,
-                                      itemUids: procItems.map((el) => el.uid),
-                                      itemGetter,
-                                      parId,
-                                      noRemover,
-                                      compact,
-                                      itemStyle,
-                                      subscribeOptions,
-                                      removeOnEnter,
-                                      components,
-                                      viewOptions,
-                                      noHoverHighlight,
-                                      _swipableClassName: className,
-                                      _swipableRest: rest,
-                                  })
-                                : groupers[groupBy as any](procItems.map(itemGetter)).map((el: Group) => (
-                                      <>
-                                          <ListSubheader
-                                              style={{
-                                                  padding: compact ? '2px' : '',
-                                                  lineHeight: compact ? '1.2em' : '',
-                                              }}
-                                          >
-                                              {el.name}
-                                          </ListSubheader>
-                                          {React.createElement(isStub && !loadAll ? DynamicList : DynamicListBasic, {
-                                              reverse: reverseOrder,
-                                              items: el.items,
-                                              context,
-                                              listUid,
-                                              callbacks,
-                                              itemRemover,
-                                              itemUids: el.items.map((ell) => ell.uid),
-                                              itemGetter: _.identity,
-                                              infinite: false,
-                                              parId,
-                                              noRemover,
-                                              compact,
-                                              itemStyle,
-                                              subscribeOptions,
-                                              removeOnEnter,
-                                              components,
-                                              viewOptions,
-                                              noHoverHighlight,
-                                              _swipableClassName: className,
-                                              _swipableRest: rest,
-                                          })}
-                                      </>
-                                  ))
-                        }
-                    </SwipeableList>
+                    {viewAs === 'list' ? (
+                        <SwipeableList>
+                            {({ className, ...rest }) =>
+                                !(groupBy as any).length
+                                    ? React.createElement(isStub && !loadAll ? DynamicList : DynamicListBasic, {
+                                          reverse: reverseOrder,
+                                          items: procItems,
+                                          context,
+                                          listUid,
+                                          callbacks,
+                                          itemRemover,
+                                          itemUids: procItems.map((el) => el.uid),
+                                          itemGetter,
+                                          parId,
+                                          noRemover,
+                                          compact,
+                                          itemStyle,
+                                          subscribeOptions,
+                                          removeOnEnter,
+                                          components,
+                                          viewOptions,
+                                          removeItemsFromView,
+                                          noHoverHighlight,
+                                          _swipableClassName: className,
+                                          _swipableRest: rest,
+                                      })
+                                    : groupers[groupBy as any](procItems.map(itemGetter)).map((el: Group) => (
+                                          <>
+                                              <ListSubheader
+                                                  style={{
+                                                      padding: compact ? '2px' : '',
+                                                      lineHeight: compact ? '1.2em' : '',
+                                                  }}
+                                              >
+                                                  {el.name}
+                                              </ListSubheader>
+                                              {React.createElement(
+                                                  isStub && !loadAll ? DynamicList : DynamicListBasic,
+                                                  {
+                                                      reverse: reverseOrder,
+                                                      items: el.items,
+                                                      context,
+                                                      listUid,
+                                                      callbacks,
+                                                      itemRemover,
+                                                      itemUids: el.items.map((ell) => ell.uid),
+                                                      itemGetter: _.identity,
+                                                      infinite: false,
+                                                      parId,
+                                                      noRemover,
+                                                      compact,
+                                                      itemStyle,
+                                                      subscribeOptions,
+                                                      removeOnEnter,
+                                                      components,
+                                                      viewOptions,
+                                                      removeItemsFromView,
+                                                      noHoverHighlight,
+                                                      _swipableClassName: className,
+                                                      _swipableRest: rest,
+                                                  },
+                                              )}
+                                          </>
+                                      ))
+                            }
+                        </SwipeableList>
+                    ) : (
+                        <DynamicObjectTableView items={procItems.map(itemGetter)} inline={inline} context={context} />
+                    )}
                 </div>
             </DataContextWrapper>
         </Root>

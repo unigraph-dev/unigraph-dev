@@ -20,6 +20,7 @@ import {
     getObjectContextMenuQuery,
     onDynamicContextMenu,
     onUnigraphContextMenu,
+    UnigraphMenuItem,
 } from '../../components/ObjectView/DefaultObjectContextMenu';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { DynamicViewRenderer } from '../../global.d';
@@ -38,14 +39,14 @@ export type Style = {
 };
 
 export function HtmlStyleChooser({ style, onStyleChange, data, context, callbacks }: any) {
-    const [shortcuts, setShortcuts] = React.useState<any[]>([]);
+    const [shortcuts, setShortcuts] = React.useState<UnigraphMenuItem[]>([]);
 
     React.useEffect(() => {
-        window.unigraph.getQueries([getObjectContextMenuQuery(data.type['unigraph.id'], true)]).then((res: any) => {
-            const items = res[0];
-            console.log(items);
-            setShortcuts(items);
-        });
+        setShortcuts(
+            window.unigraph
+                .getState('registry/contextMenu')
+                .value['$/schema/html'].filter((el: UnigraphMenuItem) => el.shortcut),
+        );
     }, []);
 
     return (
@@ -58,19 +59,10 @@ export function HtmlStyleChooser({ style, onStyleChange, data, context, callback
                         <Button
                             variant="outlined"
                             onClick={() => {
-                                console.log(callbacks);
-                                onDynamicContextMenu(it, data.uid, data, callbacks, context.uid);
+                                it.onClick(data.uid, data, () => false, callbacks, context.uid);
                             }}
                         >
-                            <div
-                                style={{
-                                    width: '24px',
-                                    height: '24px',
-                                    backgroundImage: `url("${
-                                        it?._value?.icon?._value?.['_value.%'] || 'about:blank'
-                                    }")`,
-                                }}
-                            />
+                            {it.icon}
                         </Button>
                     ))}
                 </ButtonGroup>

@@ -49,7 +49,16 @@ export const TagDetailed: DynamicViewRenderer = ({ data, callbacks }) => {
     }, [data]);
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '8px', alignItems: 'left' }}>
+        <div
+            style={{
+                display: 'flex',
+                flexDirection: 'column',
+                marginBottom: '8px',
+                alignItems: 'left',
+                overflowY: 'hidden',
+                height: '100%',
+            }}
+        >
             <div style={{ display: 'flex', marginBottom: '8px', alignItems: 'left' }}>
                 <TextField value={name} onChange={(e) => setName(e.target.value)} placeholder="Tag Name">
                     Tag Name

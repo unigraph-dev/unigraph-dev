@@ -62,10 +62,16 @@ export type DynamicViewRendererProps = {
     options?: DynamicViewOptions;
 };
 
-export type ContextMenuGenerator = (
-    uid: string,
-    object: any,
-    handleClose: () => any,
-    callbacks?: any,
-    contextUid?: string,
-) => React.ReactElement<any>;
+export type ComponentData = {
+    uid: string;
+    type: string;
+    componentId: string;
+    getObject: () => any;
+    isSelected: boolean;
+    isFocused: boolean;
+    totalParents?: string[] | JSX.Element;
+    dataContext: DataContextType;
+    tabContext: any;
+    callbacks: any;
+    options?: DynamicViewOptions;
+};

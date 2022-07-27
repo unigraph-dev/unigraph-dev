@@ -6,7 +6,6 @@ import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
 import { DynamicViewRenderer } from '../../global.d';
 import { ExecutableCodeEditor } from './DefaultCodeEditor';
-import { DefaultObjectContextMenu } from './DefaultObjectContextMenu';
 import { AutoDynamicView } from './AutoDynamicView';
 import { AutoDynamicViewDetailed } from './AutoDynamicViewDetailed';
 import { JsontreeObjectViewer, StringObjectViewer } from './BasicObjectViews';
@@ -36,26 +35,7 @@ const DefaultObjectView: FC<DefaultObjectViewProps> = ({ object, options, callba
 
     const finalObject = options.unpad ? unpad(object) : object;
     let FinalObjectViewer;
-    const ContextMenuButton: any = options.showContextMenu ? (
-        <IconButton
-            aria-label="context-menu"
-            onClick={(ev) => {
-                setContextMenu(
-                    <DefaultObjectContextMenu
-                        uid={object.uid}
-                        object={object}
-                        anchorEl={ev.currentTarget}
-                        handleClose={() => {
-                            setContextMenu(null);
-                        }}
-                    />,
-                );
-            }}
-            size="large"
-        >
-            <MoreVert />
-        </IconButton>
-    ) : null;
+    const ContextMenuButton: any = null;
 
     switch (options.viewer) {
         case 'dynamic-view':

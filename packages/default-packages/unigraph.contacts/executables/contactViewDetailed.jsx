@@ -123,7 +123,7 @@ return (
         </Card>
         <div style={{ margin: '16px' }}>
             <Typography>Backlinks</Typography>
-            <BacklinkView data={data} hideHeader />
+            <BacklinkView data={data} hideHeader inline />
         </div>
     </div>
 );

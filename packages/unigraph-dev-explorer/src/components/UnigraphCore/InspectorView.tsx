@@ -12,7 +12,7 @@ function ObjectOverview({ data }: any) {
     return (
         <div style={{ padding: '8px' }}>
             <span style={{ display: 'flex', alignItems: 'center' }}>
-                <ListItemIcon style={{ minWidth: '32px', alignSelf: 'baseline' }}>
+                <ListItemIcon style={{ minWidth: '19px', alignSelf: 'baseline' }}>
                     <Icon path={mdiCubeOutline} size={0.8} style={{ margin: '4px' }} />
                 </ListItemIcon>
                 <Typography>{name ? `${name} (${data.uid})` : data.uid}</Typography>
@@ -32,7 +32,7 @@ function ObjectOverview({ data }: any) {
                 ) : (
                     <ListItemIcon
                         style={{
-                            minWidth: '32px',
+                            minWidth: '19px',
                             marginLeft: '12px',
                         }}
                     >
@@ -42,7 +42,7 @@ function ObjectOverview({ data }: any) {
                 <Typography>{objDef?._name || data?.type?.['unigraph.id']}</Typography>
             </span>
             <span style={{ display: 'flex', alignItems: 'center' }}>
-                <ListItemIcon style={{ minWidth: '32px' }}>
+                <ListItemIcon style={{ minWidth: '19px' }}>
                     <Icon path={mdiTimelineClockOutline} size={0.8} style={{ margin: '4px' }} />
                 </ListItemIcon>
                 <Typography>{timeSince(new Date(data._updatedAt))}</Typography>

@@ -26,6 +26,7 @@ export function BacklinkView({
     callbacks,
     reverse,
     uid,
+    inline,
     titleBar = ' backlinks',
     ...attributes
 }: any) {
@@ -54,6 +55,7 @@ export function BacklinkView({
 
     return (
         <DynamicObjectListView
+            inline={inline}
             items={objects}
             titleBar={titleBar}
             context={data || { uid }}

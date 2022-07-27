@@ -5,6 +5,7 @@ import _ from 'lodash';
 import { unigraph } from 'unigraph-dev-common';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { getRandomInt, isJsonString } from 'unigraph-dev-common/lib/utils/utils';
+import { AutoDynamicView } from './components/ObjectView/AutoDynamicView';
 import { backlinkQuery } from './components/ObjectView/backlinksUtils';
 import { BasicPersonView, DefaultSkeleton } from './components/ObjectView/BasicObjectViews';
 import { ViewViewDetailed } from './components/ObjectView/DefaultObjectView';
@@ -259,6 +260,18 @@ function initRegistry() {
         '$/schema/view': { view: ViewItem },
         '$/schema/package_manifest': { view: PackageManifestView },
         '$/schema/list': { view: MiniListView, query: ListObjectQuery },
+        '$/schema/interface/textual': {
+            view: (args: any) => {
+                const res: any = {};
+                Object.entries(args).forEach(([key, value]: any) => {
+                    if (key !== 'data') res[key] = value;
+                });
+                return <AutoDynamicView object={args.data._value} {...res} />;
+            },
+        },
+        '$/schema/note': {
+            view: (args: any) => <Typography style={{ ...(args.style || {}) }}>{args.data?.['_value.%']}</Typography>,
+        },
     });
     window.unigraph.addState('registry/dynamicViewDetailed', {
         '$/schema/executable': { view: CodeOrComponentView },

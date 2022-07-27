@@ -5228,6 +5228,23 @@ adjust-sourcemap-loader@3.0.0:
     loader-utils "^2.0.0"
     regex-parser "^2.2.11"
 
+ag-grid-community@^28.0.0:
+  version "28.0.2"
+  resolved "https://registry.yarnpkg.com/ag-grid-community/-/ag-grid-community-28.0.2.tgz#72ec5e47793f5fcb657be2c79bd94be57a75bd87"
+  integrity sha512-yMcDf6QhoKsuUBNklVOS2pAPzG697aNwffaCYr6HKCqEDBqhW7fTtX2iQPD4SZ7/fk/sNX8RSFAI+nTrrjDKFw==
+
+ag-grid-enterprise@^28.0.0:
+  version "28.0.2"
+  resolved "https://registry.yarnpkg.com/ag-grid-enterprise/-/ag-grid-enterprise-28.0.2.tgz#083e53ebd824eac1703f83a3e49fd764c00f0fb4"
+  integrity sha512-V1KEk3OuYKW4zARBRIplPpAX6vWYRpaiNDyqd9ZpzWk7Ms5X+xGMZLsjbSzI+9QX2HAcs2HvXO0+zQO1UkXe2w==
+
+ag-grid-react@^28.0.0:
+  version "28.0.0"
+  resolved "https://registry.yarnpkg.com/ag-grid-react/-/ag-grid-react-28.0.0.tgz#f8774cbc8aeb20abbc507bc23fbdaaa987a52175"
+  integrity sha512-voKc4Q44YAVRZXUQeOPXfO049ak67t5AOy8RTjf1sIv9eZ9O6liVZzNjkWY3pel1cGgTMTqNPWSpQYxBhOe0UA==
+  dependencies:
+    prop-types "^15.8.1"
+
 agent-base@6, agent-base@^6.0.2:
   version "6.0.2"
   resolved "https://registry.yarnpkg.com/agent-base/-/agent-base-6.0.2.tgz#49fff58577cfee3f37176feab4c22e00f86d7f77"
@@ -6016,10 +6033,10 @@ before-after-hook@^2.2.0:
   resolved "https://registry.yarnpkg.com/before-after-hook/-/before-after-hook-2.2.2.tgz#a6e8ca41028d90ee2c24222f201c90956091613e"
   integrity sha512-3pZEU3NT5BFUo/AD5ERPWOgQOCZITni6iavr5AUw5AUwQjMlI0kzu5btnyD39AF0gUEsDPwJT+oY1ORBJijPjQ==
 
-bezier-js@^4.1.1:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/bezier-js/-/bezier-js-4.1.1.tgz#414df656833104e86765c0fa5e31439fb3e83a34"
-  integrity sha512-oVOS6SSFFFlfnZdzC+lsfvhs/RRcbxJ47U04M4s5QIBaJmr3YWmTIL3qmrOK9uW+nUUcl9Jccmo/xpTrG+bBoQ==
+bezier-js@4.0.3, bezier-js@^4.1.1:
+  version "4.0.3"
+  resolved "https://registry.yarnpkg.com/bezier-js/-/bezier-js-4.0.3.tgz#9e076d66f609bca9fc08dd22201596d52d3cc49d"
+  integrity sha512-w85AFcZ7EkszFgxuHYQ2/BI2G7H5bEotZD9vcg8+Hx4S8zF2odJBoFSFvGbcFDH5ScSxG27/IhW03SigVmkXNQ==
 
 bfj@^7.0.2:
   version "7.0.2"

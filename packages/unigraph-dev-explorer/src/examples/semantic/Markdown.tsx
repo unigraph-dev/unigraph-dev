@@ -132,7 +132,7 @@ const tryFindLinkToAdd = async (childrenRoot: any, name: string, subsId: any) =>
     }
 };
 
-export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) => {
+export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading, style }) => {
     const timeout = React.useRef<any>(0);
 
     const MarkdownComponent = React.useMemo(() => {
@@ -141,6 +141,7 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                 variant={!isHeading ? 'body1' : 'h6'}
                 style={{
                     opacity: data['_value.%'] || isHeading ? 'unset' : '0',
+                    ...(style || {}),
                 }}
             >
                 <ReactMarkdown
@@ -319,6 +320,7 @@ export const Markdown: DynamicViewRenderer = ({ data, callbacks, isHeading }) =>
                 (el: any) => el?._key,
             ),
         ),
+        style,
     ]);
     return MarkdownComponent;
 };

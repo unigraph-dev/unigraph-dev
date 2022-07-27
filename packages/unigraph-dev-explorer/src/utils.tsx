@@ -7,6 +7,7 @@ import _ from 'lodash/fp';
 import React from 'react';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { isJsonString, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
+import { ComponentData } from './types/ObjectView';
 
 export const NavigationContext = React.createContext<(location: string) => any>((location: string) => ({}));
 
@@ -633,7 +634,7 @@ export const hoverSx = {
 };
 export const pointerHoverSx = { cursor: 'pointer', ...hoverSx };
 
-export const contextMenuItemStyle = { paddingTop: '4px', paddingBottom: '4px' };
+export const contextMenuItemStyle = { padding: '12px', paddingTop: '5px', paddingBottom: '5px' };
 export const globalTheme = {
     palette: {
         primary: { main: '#212121' },
@@ -642,7 +643,12 @@ export const globalTheme = {
 };
 
 export const getName = (obj: UnigraphObject) => {
-    return (obj?.get?.('name') || obj?.get?.('title') || obj?.get?.('text'))?.as?.('primitive');
+    return (
+        obj?.get?.('unigraph.indexes/name') ||
+        obj?.get?.('name') ||
+        obj?.get?.('title') ||
+        obj?.get?.('text')
+    )?.as?.('primitive');
 };
 
 /**
@@ -654,3 +660,7 @@ export function tryHapticFeedback() {
         type: 'success',
     });
 }
+
+export const getComponentById = (id: string) => document.querySelector(`[data-component="${id}"]`);
+export const getComponentDataById = (id: string) => (getComponentById(id) as any).dataRef.current as ComponentData;
+window.getComponentDataById = getComponentDataById;

@@ -1,10 +1,19 @@
 import _ from 'lodash/fp';
+import { getComponentDataById } from './utils';
 
 export type Shortcut = { key: string; ctrlKey?: boolean; altKey?: boolean; shiftKey?: boolean };
-export const shortcutToString = (shortcut: KeyboardEvent | Shortcut) =>
-    `${shortcut.ctrlKey || (shortcut as KeyboardEvent).metaKey ? 'ctrl+' : ''}${shortcut.altKey ? 'alt+' : ''}${
+export const shortcutToString = (shortcut: KeyboardEvent) => {
+    const primaryKey =
+        shortcut.key === 'Dead' || (shortcut.altKey && shortcut.code.startsWith('Key') && shortcut.code.length === 4)
+            ? shortcut.code.replace('Key', '').toLowerCase()
+            : shortcut.key;
+
+    const str = `${shortcut.ctrlKey || shortcut.metaKey ? 'ctrl+' : ''}${shortcut.altKey ? 'alt+' : ''}${
         shortcut.shiftKey ? 'shift+' : ''
-    }${shortcut.key}`;
+    }${primaryKey}`;
+    console.log(str);
+    return str;
+};
 
 /**
  * Registers a keyboard shortcut for a given component ID
@@ -13,7 +22,11 @@ export const shortcutToString = (shortcut: KeyboardEvent | Shortcut) =>
  * @param callback the function we'll call when the shortcut is triggered.
  * @returns
  */
-export const registerKeyboardShortcut = (componentId: string, shortcut: string, callback: (ev: any) => void) => {
+export const registerKeyboardShortcut = (
+    componentId: string,
+    shortcut: string,
+    callback: (ev: any, components?: any[]) => void,
+) => {
     const shortcutDict = window.unigraph.getState('global/keyboardShortcuts').value;
     if (!shortcutDict[shortcut]) {
         shortcutDict[shortcut] = { [componentId]: callback };
@@ -59,6 +72,7 @@ const shortcutHandler = (ev: KeyboardEvent, specialEvent?: string) => {
             }
             if (hasComponents.length > 0) {
                 const matchingComponents = hasComponents.map((el: string) => shortcutDict[keyStr][el]).filter(Boolean);
+
                 const retFns: any[] = [];
                 matchingComponents.forEach((callback: any) => {
                     const ret = callback(ev);
@@ -67,6 +81,10 @@ const shortcutHandler = (ev: KeyboardEvent, specialEvent?: string) => {
                 retFns.forEach((fn: any) => {
                     fn(ev);
                 });
+                if (shortcutDict[keyStr].any) {
+                    shortcutDict[keyStr].any(ev, hasComponents);
+                    console.log(`ran generic callback on ${hasComponents.length} objects`);
+                }
                 console.log(`ran ${matchingComponents.length} callbacks`);
             }
         }
@@ -105,5 +123,53 @@ export const initKeyboardShortcuts = () => {
     document.addEventListener('keydown', hotkeyHandler); // new command-based hotkeys
     document.addEventListener('cut', (ev: any) => shortcutHandler(ev, 'oncut')); // old hotkey implementation
     document.addEventListener('copy', (ev: any) => shortcutHandler(ev, 'oncopy')); // old hotkey implementation
+
+    // TODO: move shortcuts here to new command-based impl
+    registerKeyboardShortcut('any', 'alt+i', (ev: any, components?: any[]) => {
+        const uids = (components || []).map((comp) => getComponentDataById(comp).uid);
+        if (!uids.length) return;
+        window.unigraph.getState('global/selected').setValue([]);
+        window.unigraph.runExecutable('$/executable/add-item-to-list', {
+            where: '$/entity/inbox',
+            item: uids,
+        });
+    });
+
+    registerKeyboardShortcut('any', 'alt+r', (ev: any, components?: any[]) => {
+        const uids = (components || []).map((comp) => getComponentDataById(comp).uid);
+        if (!uids.length) return;
+        window.unigraph.getState('global/selected').setValue([]);
+        window.unigraph.runExecutable('$/executable/add-item-to-list', {
+            where: '$/entity/read_later',
+            item: uids,
+        });
+    });
+
+    registerKeyboardShortcut('any', 'alt+e', (ev: any, components?: any[]) => {
+        const uids = (components || []).map((comp) => getComponentDataById(comp).uid);
+        if (uids.length !== 1) return;
+        window.unigraph.getState('global/selected').setValue([]);
+        window.wsnavigator(`/object-editor?uid=${uids[0]}`);
+    });
+
+    registerKeyboardShortcut('any', 'alt+shift+d', (ev: any, components?: any[]) => {
+        if (!components || !components.length) return;
+        window.unigraph.getState('global/selected').setValue([]);
+        const uids = (components || []).map((comp) => getComponentDataById(comp).uid);
+        const { callbacks } = getComponentDataById(components[0]);
+        const ctx = getComponentDataById(components[0]).dataContext.contextData;
+        const otherCtx = (components || [])
+            .map((comp) => getComponentDataById(comp).dataContext.contextUid)
+            .filter((el) => el !== ctx.uid);
+        console.log(uids, ctx, otherCtx);
+        if (otherCtx.length || !callbacks.removeFromContext) return;
+        callbacks.removeFromContext(uids);
+    });
+
+    registerKeyboardShortcut('any', 'Escape', (ev: any, components?: any[]) => {
+        if (window.unigraph.getState('global/selected').value.length)
+            window.unigraph.getState('global/selected').setValue([]);
+    });
+
     return true;
 };

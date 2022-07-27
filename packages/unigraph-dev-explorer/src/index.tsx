@@ -3,6 +3,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import _ from 'lodash/fp';
+import { ListItemIcon } from '@mui/material';
+import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { init } from './init';
 import { initDefaultComponents } from './pages';
 import * as serviceWorker from './serviceWorker';
@@ -10,7 +12,17 @@ import * as serviceWorker from './serviceWorker';
 import App from './App';
 import { WorkSpace } from './Workspace';
 import { DynamicComponentView, getComponentAsView } from './components/ObjectView/DynamicComponentView';
-import { getComponentFromExecutable, registerDetailedDynamicViews, registerDynamicViews } from './unigraph-react';
+import {
+    getComponentFromExecutable,
+    registerContextMenuItems,
+    registerDetailedDynamicViews,
+    registerDynamicViews,
+} from './unigraph-react';
+import {
+    onDynamicContextMenu,
+    UnigraphMenuItem,
+    updateCustomContextMenu,
+} from './components/ObjectView/DefaultObjectContextMenu';
 
 if (window.localStorage.getItem('debug-performance') === 'true') {
     console.log('a');
@@ -35,6 +47,16 @@ if (typeof window.electronPreload === 'function') window.electronPreload();
 render(new URLSearchParams(window.location.search).get('pageName') ? <App /> : <WorkSpace />);
 
 function initDynamicObjectViews() {
+    window.unigraph.subscribeToType(
+        '$/schema/context_menu_item',
+        (items: any[]) => {
+            // console.log(items);
+            updateCustomContextMenu(items);
+        },
+        99999997,
+        { all: false },
+    );
+
     window.unigraph.subscribeToType(
         '$/schema/object_view',
         (views: any[]) => {

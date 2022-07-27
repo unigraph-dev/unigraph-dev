@@ -17,7 +17,7 @@ import {
     mdiGraphOutline,
     mdiBookOutline,
 } from '@mdi/js';
-import { AutoDynamicViewCallbacks, ContextMenuGenerator } from '../../types/ObjectView.d';
+import { AutoDynamicViewCallbacks } from '../../types/ObjectView.d';
 import {
     contextMenuItemStyle,
     isDeveloperMode,
@@ -26,188 +26,170 @@ import {
     selectUid,
     typeHasDetailedView,
 } from '../../utils';
+import { registerContextMenuItems } from '../../unigraph-react';
 
-export const defaultContextMenu: Array<ContextMenuGenerator> = [
-    (uid, object, handleClose, callbacks) =>
-        typeHasDetailedView(object?.type?.['unigraph.id']) ? (
-            <MenuItem
-                style={contextMenuItemStyle}
-                onClick={() => {
-                    // window.unigraph.dispatchCommand('open-detailed-view', object, { uiCaller: 'ContextMenu', uid });
-                    handleClose();
-                    window.wsnavigator(
-                        `/library/object?uid=${uid}&viewer=dynamic-view-detailed&type=${object?.type?.['unigraph.id']}`,
-                    );
-                }}
-            >
-                <ListItemIcon style={{ minWidth: '32px' }}>
-                    <Icon path={mdiViewDayOutline} size={0.8} />
-                </ListItemIcon>
-                <ListItemText>View object details</ListItemText>
-            </MenuItem>
-        ) : (
-            <></>
+export type UnigraphMenuItem = {
+    text: string;
+    secondary?: string;
+    icon?: any;
+    onClick: (
+        uid: string,
+        object: Record<string, any>,
+        handleClose: () => void,
+        callbacks?: Record<string, any>,
+        contextUid?: string,
+    ) => void;
+    show?: () => boolean;
+    shortcut?: boolean;
+};
+
+export type ContextMenuGenerator = (
+    uid: string,
+    object: any,
+    handleClose: () => any,
+    callbacks?: any,
+    contextUid?: string,
+) => UnigraphMenuItem;
+
+export const defaultContextMenu: Array<UnigraphMenuItem> = [
+    {
+        text: 'View object details',
+        icon: (
+            <ListItemIcon style={{ minWidth: '19px' }}>
+                <Icon path={mdiViewDayOutline} size={0.8} />
+            </ListItemIcon>
         ),
-    (uid, object, handleClose, callbacks) =>
-        isDeveloperMode() ? (
-            <MenuItem
-                style={contextMenuItemStyle}
-                onClick={() => {
-                    handleClose();
-                    window.wsnavigator(`/library/object?uid=${uid}&viewer=${'json-tree'}`);
-                }}
-            >
-                <ListItemIcon style={{ minWidth: '32px' }}>
-                    <Icon path={mdiFileTreeOutline} size={0.8} />
-                </ListItemIcon>
-                <ListItemText>View object as JSON tree</ListItemText>
-            </MenuItem>
-        ) : (
-            <></>
+        onClick: (uid, object, handleClose, callbacks, contextUid) => {
+            handleClose();
+            window.wsnavigator(
+                `/library/object?uid=${uid}&viewer=dynamic-view-detailed&type=${object?.type?.['unigraph.id']}`,
+            );
+        },
+    },
+    {
+        text: 'View object as JSON tree',
+        icon: (
+            <ListItemIcon style={{ minWidth: '19px' }}>
+                <Icon path={mdiFileTreeOutline} size={0.8} />
+            </ListItemIcon>
         ),
-    (uid, object, handleClose, callbacks) =>
-        isDeveloperMode() ? (
-            <MenuItem
-                style={contextMenuItemStyle}
-                onClick={() => {
-                    handleClose();
-                    window.wsnavigator(`/object-editor?uid=${uid}`);
-                }}
-            >
-                <ListItemIcon style={{ minWidth: '32px' }}>
-                    <Icon path={mdiVectorPolylineEdit} size={0.8} />
-                </ListItemIcon>
-                <ListItemText>Edit object in editor</ListItemText>
-            </MenuItem>
-        ) : (
-            <></>
+        onClick: (uid, object, handleClose, callbacks, contextUid) => {
+            handleClose();
+            window.wsnavigator(`/library/object?uid=${uid}&viewer=${'json-tree'}`);
+        },
+        show: () => isDeveloperMode(),
+    },
+    {
+        text: 'Edit object in editor',
+        secondary: '⌥E',
+        icon: (
+            <ListItemIcon style={{ minWidth: '19px' }}>
+                <Icon path={mdiVectorPolylineEdit} size={0.8} />
+            </ListItemIcon>
         ),
-    (uid, object, handleClose, callbacks) => (
-        <MenuItem
-            style={contextMenuItemStyle}
-            onClick={() => {
-                handleClose();
-                window.unigraph.runExecutable('$/executable/add-item-to-list', {
-                    where: '$/entity/inbox',
-                    item: uid,
-                });
-            }}
-        >
-            <ListItemIcon style={{ minWidth: '32px' }}>
+        onClick: (uid, object, handleClose, callbacks, contextUid) => {
+            handleClose();
+            window.wsnavigator(`/object-editor?uid=${uid}`);
+        },
+        show: () => isDeveloperMode(),
+    },
+    {
+        text: 'Add item to inbox',
+        secondary: '⌥I',
+        icon: (
+            <ListItemIcon style={{ minWidth: '19px' }}>
                 <Icon path={mdiInboxArrowDownOutline} size={0.8} />
             </ListItemIcon>
-            <ListItemText>Add item to inbox</ListItemText>
-        </MenuItem>
-    ),
-    (uid, object, handleClose, callbacks) => (
-        <MenuItem
-            style={contextMenuItemStyle}
-            onClick={() => {
-                handleClose();
-                window.unigraph.runExecutable('$/executable/add-item-to-list', {
-                    where: '$/entity/read_later',
-                    item: uid,
-                });
-            }}
-        >
-            <ListItemIcon style={{ minWidth: '32px' }}>
+        ),
+        onClick: (uid, object, handleClose, callbacks, contextUid) => {
+            handleClose();
+            window.unigraph.runExecutable('$/executable/add-item-to-list', {
+                where: '$/entity/inbox',
+                item: uid,
+            });
+        },
+    },
+    {
+        text: 'Add item to read later',
+        secondary: '⌥R',
+        icon: (
+            <ListItemIcon style={{ minWidth: '19px' }}>
                 <Icon path={mdiBookOutline} size={0.8} />
             </ListItemIcon>
-            <ListItemText>Add item to read later</ListItemText>
-        </MenuItem>
-    ),
-    (uid, object, handleClose, callbacks) => (
-        <MenuItem
-            style={contextMenuItemStyle}
-            onClick={() => {
-                handleClose();
-                window.wsnavigator(`/library/backlink?uid=${uid}`);
-            }}
-        >
-            <ListItemIcon style={{ minWidth: '32px' }}>
+        ),
+        onClick: (uid, object, handleClose, callbacks, contextUid) => {
+            handleClose();
+            window.unigraph.runExecutable('$/executable/add-item-to-list', {
+                where: '$/entity/read_later',
+                item: uid,
+            });
+        },
+    },
+    {
+        text: 'View backlinks',
+        icon: (
+            <ListItemIcon style={{ minWidth: '19px' }}>
                 <Icon path={mdiLinkBoxVariantOutline} size={0.8} />
             </ListItemIcon>
-            <ListItemText>View backlinks</ListItemText>
-        </MenuItem>
-    ),
-    (uid, object, handleClose, callbacks) => (
-        <MenuItem
-            style={contextMenuItemStyle}
-            onClick={() => {
-                handleClose();
-                window.unigraph.deleteObject(uid);
-            }}
-        >
-            <ListItemIcon style={{ minWidth: '32px' }}>
+        ),
+        onClick: (uid, object, handleClose, callbacks, contextUid) => {
+            handleClose();
+            window.wsnavigator(`/library/backlink?uid=${uid}`);
+        },
+    },
+    {
+        text: 'Delete item',
+        icon: (
+            <ListItemIcon style={{ minWidth: '19px' }}>
                 <Icon path={mdiDeleteOutline} size={0.8} />
             </ListItemIcon>
-            <ListItemText>Delete item</ListItemText>
-        </MenuItem>
-    ),
-    (uid, object, handleClose, callbacks) => (
-        <MenuItem
-            style={contextMenuItemStyle}
-            onClick={() => {
-                handleClose();
-                window.wsnavigator(`/graph?uid=${uid}`);
-            }}
-        >
-            <ListItemIcon style={{ minWidth: '32px' }}>
+        ),
+        onClick: (uid, object, handleClose, callbacks, contextUid) => {
+            handleClose();
+            window.unigraph.deleteObject(uid);
+        },
+    },
+    {
+        text: 'Show Graph view',
+        icon: (
+            <ListItemIcon style={{ minWidth: '19px' }}>
                 <Icon path={mdiGraphOutline} size={0.8} />
             </ListItemIcon>
-            <ListItemText>Show Graph view</ListItemText>
-        </MenuItem>
-    ),
+        ),
+        onClick: (uid, object, handleClose, callbacks, contextUid) => {
+            handleClose();
+            window.wsnavigator(`/graph?uid=${uid}`);
+        },
+    },
 ];
 
-export const defaultContextContextMenu: Array<ContextMenuGenerator> = [
-    (uid, object, handleClose, callbacks) => (
-        <MenuItem
-            style={contextMenuItemStyle}
-            onClick={() => {
-                handleClose();
-                callbacks?.removeFromContext?.();
-            }}
-        >
-            <ListItemIcon style={{ minWidth: '32px' }}>
+export const defaultContextContextMenu: Array<UnigraphMenuItem> = [
+    {
+        text: 'Remove item from context',
+        secondary: '⇧⌥D',
+        icon: (
+            <ListItemIcon style={{ minWidth: '19px' }}>
                 <Icon path={mdiCloseBoxOutline} size={0.8} />
             </ListItemIcon>
-            <ListItemText>Remove item from context</ListItemText>
-        </MenuItem>
-    ),
-    (uid, object, handleClose, callbacks) => (
-        <MenuItem
-            style={contextMenuItemStyle}
-            onClick={() => {
-                handleClose();
-                callbacks?.removeFromContext?.('left');
-            }}
-        >
-            <ListItemIcon style={{ minWidth: '32px' }}>
+        ),
+        onClick: (uid, object, handleClose, callbacks, contextUid) => {
+            handleClose();
+            callbacks?.removeFromContext?.();
+        },
+    },
+    {
+        text: 'Remove all items above (on the left) from context',
+        icon: (
+            <ListItemIcon style={{ minWidth: '19px' }}>
                 <Icon path={mdiCloseBoxMultipleOutline} size={0.8} />
             </ListItemIcon>
-            <ListItemText>Remove all items above (on the left) from context</ListItemText>
-        </MenuItem>
-    ),
+        ),
+        onClick: (uid, object, handleClose, callbacks, contextUid) => {
+            handleClose();
+            callbacks?.removeFromContext?.('left');
+        },
+    },
 ];
-
-export function DefaultObjectContextMenu({
-    uid,
-    object,
-    anchorEl,
-    handleClose,
-}: {
-    uid: string;
-    object: any;
-    anchorEl: null | HTMLElement;
-    handleClose: any;
-}) {
-    return (
-        <Menu id={`context-menu-${uid}`} anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
-            <>{defaultContextMenu.map((el) => el(uid, object, handleClose))}</>
-        </Menu>
-    );
-}
 
 export const getObjectContextMenuQuery = (schema: string, onlyShortcuts = false) => `(func: uid(uids)) @recurse{
     uid
@@ -317,48 +299,31 @@ export const onUnigraphContextMenu = (
         windowName: event.currentTarget?.ownerDocument?.defaultView?.name,
         ...(callbacks?.removeFromContext ? { removeFromContext: callbacks.removeFromContext } : {}),
     });
+};
 
-    // TODO: Currently lazy-loaded context menus. Should we eagarly load them in the future?
-    if (object.type?.['unigraph.id']) {
-        window.unigraph.getQueries([getObjectContextMenuQuery(object.type['unigraph.id'])]).then((res: any) => {
-            const items = res[0];
-            console.log(items);
-            window.unigraph.getState('global/contextMenu').setValue({
-                ...window.unigraph.getState('global/contextMenu').value,
-                schemaMenuContent: items.map(
-                    (el: any) =>
-                        function (uid: string, object: any, onfire: () => any, callbacks?: any, contextUid?: string) {
-                            return (
-                                <MenuItem
-                                    style={contextMenuItemStyle}
-                                    onClick={() => {
-                                        onfire();
-                                        onDynamicContextMenu(el, uid, object, callbacks, contextUid);
-                                    }}
-                                >
-                                    {new UnigraphObject(el).get('icon')?.as('primitive') ? (
-                                        <ListItemIcon
-                                            style={{
-                                                minWidth: '19px',
-                                                minHeight: '19px',
-                                                marginRight: '12px',
-                                                backgroundImage: `url("data:image/svg+xml,${new UnigraphObject(el)
-                                                    .get('icon')
-                                                    ?.as('primitive')}")`,
-                                                opacity: 0.54,
-                                            }}
-                                        />
-                                    ) : (
-                                        []
-                                    )}
-                                    <ListItemText>
-                                        {new UnigraphObject(el).get('name').as('primitive') || ''}
-                                    </ListItemText>
-                                </MenuItem>
-                            );
-                        },
-                ),
-            });
-        });
-    }
+export const updateCustomContextMenu = (items: any[]) => {
+    items.map((el: any) => {
+        registerContextMenuItems(new UnigraphObject(el).get('item_type')._value['unigraph.id'], [
+            {
+                text: new UnigraphObject(el).get('name').as('primitive') || '',
+                icon: new UnigraphObject(el).get('icon')?.as('primitive') ? (
+                    <ListItemIcon
+                        style={{
+                            minWidth: '19px',
+                            minHeight: '19px',
+                            backgroundImage: `url("data:image/svg+xml,${new UnigraphObject(el)
+                                .get('icon')
+                                ?.as('primitive')}")`,
+                            opacity: 0.54,
+                        }}
+                    />
+                ) : null,
+                onClick: (uid, object, handleClose, callbacks, contextUid) => {
+                    handleClose();
+                    onDynamicContextMenu(el, uid, object, callbacks, contextUid);
+                },
+                shortcut: new UnigraphObject(el).get('is_shortcut')?.as('primitive') || false,
+            } as UnigraphMenuItem,
+        ]);
+    });
 };
