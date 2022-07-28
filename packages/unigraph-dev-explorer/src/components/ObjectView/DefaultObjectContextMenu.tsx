@@ -179,6 +179,7 @@ export const defaultContextContextMenu: Array<UnigraphMenuItem> = [
     },
     {
         text: 'Remove all items above (on the left) from context',
+        secondary: '⇧⌥F',
         icon: (
             <ListItemIcon style={{ minWidth: '19px' }}>
                 <Icon path={mdiCloseBoxMultipleOutline} size={0.8} />

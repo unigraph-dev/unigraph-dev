@@ -11,7 +11,6 @@ export const shortcutToString = (shortcut: KeyboardEvent) => {
     const str = `${shortcut.ctrlKey || shortcut.metaKey ? 'ctrl+' : ''}${shortcut.altKey ? 'alt+' : ''}${
         shortcut.shiftKey ? 'shift+' : ''
     }${primaryKey}`;
-    console.log(str);
     return str;
 };
 
@@ -161,9 +160,16 @@ export const initKeyboardShortcuts = () => {
         const otherCtx = (components || [])
             .map((comp) => getComponentDataById(comp).dataContext.contextUid)
             .filter((el) => el !== ctx.uid);
-        console.log(uids, ctx, otherCtx);
         if (otherCtx.length || !callbacks.removeFromContext) return;
         callbacks.removeFromContext(uids);
+    });
+
+    registerKeyboardShortcut('any', 'alt+shift+f', (ev: any, components?: any[]) => {
+        if (!components || components.length !== 1) return;
+        window.unigraph.getState('global/selected').setValue([]);
+        const { callbacks } = getComponentDataById(components[0]);
+        if (!callbacks.removeFromContext) return;
+        callbacks.removeFromContext('left');
     });
 
     registerKeyboardShortcut('any', 'Escape', (ev: any, components?: any[]) => {
