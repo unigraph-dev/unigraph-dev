@@ -228,8 +228,8 @@ var(func: eq(<unigraph.id>, "$/schema/context_menu_item")) {
 
 export const onDynamicContextMenu = (data: any, uid: string, object: any, callbacks?: any, contextUid?: string) => {
     const view = data._value?.view?._value;
-    console.log(view);
     const onClick = data._value?.on_click?._value;
+    console.log(view, onClick);
     if (
         view &&
         view?._value?.view?._value?.['dgraph.type']?.includes?.('Executable') &&
@@ -242,7 +242,7 @@ export const onDynamicContextMenu = (data: any, uid: string, object: any, callba
             enableFloat: 'true',
             config: { object, contextUid },
         });
-    } else if (onClick && onClick['dgraph.type']?.includes?.('Executable')) {
+    } else if (onClick && onClick?.type?.['unigraph.id'] === '$/schema/executable') {
         window.unigraph.runExecutable(onClick.uid, { uid, contextUid }, undefined, true).then((ret: any) => {
             if (ret?.return_function_component !== undefined) {
                 // Not a component, but custom code to be run here

@@ -698,7 +698,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                 {noBar ? (
                     []
                 ) : (
-                    <div style={{ display: 'flex', alignItems: 'center', padding: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', padding: '8px', overflowX: 'auto' }}>
                         <Typography style={{ whiteSpace: 'nowrap', color: 'gray', fontSize: '15px' }}>
                             {totalItems.length}
                             {titleBar || ' items'}
