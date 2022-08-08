@@ -26,77 +26,83 @@ var(func: eq(<unigraph.id>, "$/schema/bookmark_handler")) {
     ])
 )[0];
 
-const good = handlers.filter((el) => new RegExp(el.md).exec(url) != null);
-if (good.length !== 0) return [await unigraph.runExecutable(good[0].huid, { url })];
+let uid;
 
-let res;
+const matchedHandlers = handlers.filter((el) => new RegExp(el.md).exec(url) != null);
+if (matchedHandlers.length !== 0) {
+    uid = [await unigraph.runExecutable(matchedHandlers[0].huid, { url })];
+} else {
+    let res;
 
-const tryScrape = () =>
-    new Promise(async (resolve, reject) => {
-        setTimeout(() => {
-            reject();
-        }, 10000); // Timeout after 10 seconds
-        try {
-            res = await scrape({
-                url,
-                headers: { 'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)' },
-            });
-        } catch (e) {
+    const tryScrape = () =>
+        new Promise(async (resolve, reject) => {
+            setTimeout(() => {
+                reject();
+            }, 10000); // Timeout after 10 seconds
             try {
                 res = await scrape({
                     url,
                     headers: {
-                        'User-Agent':
-                            'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36',
+                        'User-Agent': 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
                     },
                 });
             } catch (e) {
-                reject();
+                try {
+                    res = await scrape({
+                        url,
+                        headers: {
+                            'User-Agent':
+                                'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36',
+                        },
+                    });
+                } catch (e) {
+                    reject();
+                }
             }
-        }
-        resolve(res);
-    });
+            resolve(res);
+        });
 
-try {
-    res = await tryScrape();
-} catch (e) {
-    // Timeout or not being able to resolve, should just return.
-    return [undefined];
-}
+    try {
+        res = await tryScrape();
+    } catch (e) {
+        // Timeout or not being able to resolve, should just return.
+        return [undefined];
+    }
 
-const result = {
-    name: res?.general?.title || res?.openGraph?.title || res?.twitter?.title,
-    url,
-    favicon:
-        res?.general?.icons?.pop().href ||
-        res?.general?.icons?.[0]?.href ||
-        res?.openGraph?.image?.url ||
-        res?.twitter?.image?.src ||
-        res?.twitter?.image,
-    children: tags.map((tagName) => {
-        return {
-            type: { 'unigraph.id': '$/schema/interface/semantic' },
-            _value: {
-                type: { 'unigraph.id': '$/schema/tag' },
-                name: tagName,
+    const result = {
+        name: res?.general?.title || res?.openGraph?.title || res?.twitter?.title,
+        url,
+        favicon:
+            res?.general?.icons?.pop().href ||
+            res?.general?.icons?.[0]?.href ||
+            res?.openGraph?.image?.url ||
+            res?.twitter?.image?.src ||
+            res?.twitter?.image,
+        children: tags.map((tagName) => {
+            return {
+                type: { 'unigraph.id': '$/schema/interface/semantic' },
+                _value: {
+                    type: { 'unigraph.id': '$/schema/tag' },
+                    name: tagName,
+                },
+            };
+        }),
+        creative_work: {
+            abstract: {
+                type: { 'unigraph.id': '$/schema/html' },
+                _value: res?.general?.description || res?.openGraph?.description || res?.twitter?.description || '',
             },
-        };
-    }),
-    creative_work: {
-        abstract: {
-            type: { 'unigraph.id': '$/schema/html' },
-            _value: res?.general?.description || res?.openGraph?.description || res?.twitter?.description || '',
         },
-    },
-    ...(ctx ? { $context: ctx } : {}),
-};
+        ...(ctx ? { $context: ctx } : {}),
+    };
 
-if (result.favicon?.startsWith('/')) {
-    const site = new URL(url);
-    result.favicon = site.origin + result.favicon;
+    if (result.favicon?.startsWith('/')) {
+        const site = new URL(url);
+        result.favicon = site.origin + result.favicon;
+    }
+
+    uid = await unigraph.addObject(result, '$/schema/web_bookmark');
 }
-
-const uid = await unigraph.addObject(result, '$/schema/web_bookmark');
 
 if (addToInbox)
     unigraph.runExecutable('$/executable/add-item-to-list', {

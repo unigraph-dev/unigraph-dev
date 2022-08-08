@@ -24,7 +24,14 @@ import MomentUtils from '@date-io/moment';
 import AdapterMoment from '@mui/lab/AdapterMoment';
 
 import Icon from '@mdi/react';
-import { mdiFormTextarea, mdiStarPlusOutline, mdiSync, mdiTagMultipleOutline } from '@mdi/js';
+import {
+    mdiFormTextarea,
+    mdiStarPlusOutline,
+    mdiSync,
+    mdiTagMultipleOutline,
+    mdiRelationManyToMany,
+    mdiMagnify,
+} from '@mdi/js';
 import _ from 'lodash';
 import { styled } from '@mui/styles';
 import { components } from './pages';
@@ -190,6 +197,7 @@ const getFinalJson = (model: Model, initJson: any) => {
 const newWindowActions = {
     'new-tab': (model: Model, initJson: any) => {
         const newJson = getFinalJson(model, initJson);
+        console.log(newJson);
         model.doAction(Actions.addNode(newJson, 'workspace-main-tabset', DockLocation.CENTER, -1));
     },
     'new-pane': (model: Model, initJson: any) => {
@@ -336,23 +344,52 @@ export function WorkSpace(this: any) {
                     },
                 ],
             },
-            /* {
-                 type: 'border',
-                 location: 'right',
-                 id: 'border-right',
-                 selected: -1,
-                 children: [
-                     {
-                         type: 'tab',
-                         enableClose: false,
-                         minSize: 700,
-                         maxSize: 700,
-                         name: 'Inspector',
-                         id: 'inspector-pane',
-                         component: '/pages/inspector',
-                     },
-                 ],
-             }, */
+            {
+                type: 'border',
+                location: 'right',
+                id: 'border-right',
+                selected: -1,
+                size: 700,
+                minSize: 700,
+                children: [
+                    {
+                        config: {
+                            viewConfig: {
+                                uid: (window.unigraph as any).getNamespaceMap()[
+                                    '$/executable/similarity-searcher-component'
+                                ].uid,
+                                viewer: 'dynamic-view-detailed',
+                                type: '$/schema/executable',
+                                props: { trackActiveDetailedView: true },
+                            },
+                        },
+                        component: '/pages/library/object',
+                        type: 'tab',
+                        enableClose: false,
+                        minSize: 700,
+                        name: 'Similarity',
+                        id: 'similarity-pane',
+                    },
+                    {
+                        config: {
+                            viewConfig: {
+                                uid: (window.unigraph as any).getNamespaceMap()[
+                                    '$/executable/semantic-searcher-component'
+                                ].uid,
+                                viewer: 'dynamic-view-detailed',
+                                type: '$/schema/executable',
+                                props: { trackActiveSearchQuery: true },
+                            },
+                        },
+                        component: '/pages/library/object',
+                        type: 'tab',
+                        enableClose: false,
+                        minSize: 700,
+                        name: 'Search',
+                        id: 'search-pane',
+                    },
+                ],
+            },
         ],
         layout: {
             type: 'row',
@@ -558,6 +595,23 @@ export function WorkSpace(this: any) {
 
     window.wsnavigator = workspaceNavigator.bind(this, model);
 
+    React.useEffect(() => {
+        let cleanup: () => any = () => false;
+        window.unigraph.getState('global/activeTab').subscribe((tabId: string) => {
+            if (cleanup) cleanup();
+            const activeTabDetailedViews = window.unigraph.addState(`${tabId}/detailedViews`, []);
+            const onDVUpdate = (newDVs: any[]) => {
+                if (newDVs?.length === 1) {
+                    window.unigraph.getState('global/activeDetailedView').setValue(newDVs[0].uid);
+                }
+            };
+            activeTabDetailedViews.subscribe(onDVUpdate, true);
+            cleanup = () => {
+                activeTabDetailedViews.unsubscribe(onDVUpdate);
+            };
+        });
+    }, []);
+
     return (
         <StyledEngineProvider injectFirst>
             <ThemeProvider theme={providedTheme}>
@@ -652,6 +706,28 @@ export function WorkSpace(this: any) {
                                             {renderValues.content}
                                         </Typography>,
                                     ];
+                                }
+                                if (nodeId === 'similarity-pane') {
+                                    renderValues.leading = (
+                                        <Icon
+                                            path={mdiRelationManyToMany}
+                                            size={1}
+                                            style={{ verticalAlign: 'middle', transform: 'rotate(270deg)' }}
+                                            key="icon"
+                                        />
+                                    );
+                                    renderValues.content = '';
+                                }
+                                if (nodeId === 'search-pane') {
+                                    renderValues.leading = (
+                                        <Icon
+                                            path={mdiMagnify}
+                                            size={1}
+                                            style={{ verticalAlign: 'middle', transform: 'rotate(270deg)' }}
+                                            key="icon"
+                                        />
+                                    );
+                                    renderValues.content = '';
                                 }
                                 if (!renderValues.leading && typeof nodeIcon === 'string') {
                                     // Render icon
