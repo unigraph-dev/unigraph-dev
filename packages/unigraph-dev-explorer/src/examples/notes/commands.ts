@@ -9,6 +9,27 @@ import { getParentsAndReferences } from '../../components/ObjectView/backlinksUt
 import { addCommand, CommandState, getChildrenStubMap, getCurrentFocus } from './history';
 import { isNoteBlockCollapsed } from './useOutlineCollapsed';
 
+export const touchTree = (nodesState: { uid: string; children: string[]; root: boolean }[], sourceUid: string) => {
+    const parentsMap: Record<string, string[]> = {};
+
+    nodesState.forEach((node) => {
+        node.children.forEach((el) => {
+            if (Array.isArray(parentsMap[el])) parentsMap[el].push(node.uid);
+            else parentsMap[el] = [node.uid];
+        });
+    });
+
+    function search(currentUid: string, found: string[]) {
+        if (found.includes(currentUid)) return; // recursion
+        found.push(currentUid);
+        if (parentsMap[currentUid]) parentsMap[currentUid].forEach((parent) => search(parent, found));
+    }
+
+    const found: string[] = [];
+    search(sourceUid, found);
+    return found;
+};
+
 export const focusUid = (obj: any, goingUp?: boolean, caret?: number) => {
     // console.log(document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]);
     // (document.getElementById(`object-view-${uid}`)?.children[0]?.children[0]?.children[0]?.children[0]?.children[0]?.children[0] as any)?.click();
@@ -173,7 +194,7 @@ export const addChildren = (
         !uidMode,
     );
     focusUid(myUid, false, -1);
-    window.unigraph.touch(parents.map((el) => el.uid));
+    window.unigraph.touch(touchTree(context.nodesState.value, data.uid));
 };
 
 /**
@@ -319,7 +340,7 @@ export const splitChild = (parent: any, context: NoteEditorContext, index: numbe
         parents,
         true,
     );
-    window.unigraph.touch(parents.map((el) => el.uid));
+    window.unigraph.touch(touchTree(context.nodesState.value, parent.uid));
     if (toDelete.length)
         window.unigraph.deleteItemFromArray(toDelete[0], toDelete[1], toDelete[2], context.callbacks.subsId);
 };
@@ -468,7 +489,7 @@ export const deleteChildren = (data: any, context: NoteEditorContext, index: num
             }
         });
     }, 1000);
-    window.unigraph.touch(parents.map((ell) => ell.uid));
+    window.unigraph.touch(touchTree(context.nodesState.value, data.uid));
 };
 
 export const unsplitChild = async (data: any, context: NoteEditorContext, index: number, currString: string) => {
@@ -839,7 +860,7 @@ export const indentChildren = (data: any, context: NoteEditorContext, index: num
         parents,
         true,
     );
-    window.unigraph.touch(parents.map((el) => el.uid));
+    window.unigraph.touch(touchTree(context.nodesState.value, data.uid));
     if (context?.edited?.current) context.edited.current = true;
 
     // context.setCommand(() => () => focusUid(newUid._value.uid));
@@ -998,7 +1019,7 @@ export const unindentChildren = async (data: any, context: NoteEditorContext, pa
             window.unigraph.recalculateBacklinks(_.uniq(recalcParents), recalcBacklinkUids);
         }, 1000);
     }
-    window.unigraph.touch(parents.map((el) => el.uid));
+    window.unigraph.touch(touchTree(context.nodesState.value, data.uid));
     if (context?.edited?.current) context.edited.current = true;
     // context.setCommand(() => () => focusUid(newChildren[parent + 1]._value._value.uid));
 };
@@ -1150,7 +1171,7 @@ export const convertChildToTodo = async (data: any, context: NoteEditorContext, 
         undefined,
         eventId,
     );
-    window.unigraph.touch(parents.map((el) => el.uid));
+    window.unigraph.touch(touchTree(context.nodesState.value, data.uid));
 };
 
 export const replaceChildWithEmbedUid = async (

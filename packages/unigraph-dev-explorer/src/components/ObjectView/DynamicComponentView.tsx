@@ -39,12 +39,12 @@ export const globalImports = {
     ReactResizeDetector,
 };
 
-export const DynamicComponentView: DynamicViewRenderer = ({ data, callbacks }) => {
+export const DynamicComponentView: DynamicViewRenderer = ({ data, callbacks, props }) => {
     const [previewComponent, setPreviewComponent] = React.useState<any>('Loading...');
 
     React.useEffect(() => {
         getComponentFromExecutable(data, callbacks?.props || {}, globalImports).then((comp: any) => {
-            if (comp) setPreviewComponent(React.createElement(comp, callbacks?.props || {}, []));
+            if (comp) setPreviewComponent(React.createElement(comp, props || callbacks?.props || {}, []));
         });
     }, [data?._updatedAt, stringify(callbacks?.props)]);
 

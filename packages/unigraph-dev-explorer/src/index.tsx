@@ -23,6 +23,7 @@ import {
     UnigraphMenuItem,
     updateCustomContextMenu,
 } from './components/ObjectView/DefaultObjectContextMenu';
+import { UnigraphRecovery } from './pages/UnigraphRecovery';
 
 if (window.localStorage.getItem('debug-performance') === 'true') {
     console.log('a');
@@ -44,7 +45,10 @@ initDefaultComponents();
 
 if (typeof window.electronPreload === 'function') window.electronPreload();
 
-render(new URLSearchParams(window.location.search).get('pageName') ? <App /> : <WorkSpace />);
+window.unigraph.getState('unigraph/recovery').subscribe((newState: boolean) => {
+    if (newState === true) render(<UnigraphRecovery />);
+    else render(new URLSearchParams(window.location.search).get('pageName') ? <App /> : <WorkSpace />);
+}, true);
 
 function initDynamicObjectViews() {
     window.unigraph.subscribeToType(

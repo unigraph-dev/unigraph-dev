@@ -7,3 +7,8 @@ export function mergeWithConcatArray(objValue: any, srcValue: any) {
     }
     return undefined;
 }
+
+export const processQueryTemplate = (template: string, schemaCache: any) =>
+    template.replace(/\$unigraph.id{(\$\/[^}]*)}/g, (match, capture) => {
+        return schemaCache.dataAlt[0]?.[capture].uid;
+    });

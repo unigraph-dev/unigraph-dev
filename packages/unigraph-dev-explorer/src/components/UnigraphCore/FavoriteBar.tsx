@@ -18,6 +18,7 @@ export function FavoriteBar() {
             '$/entity/favorite_bar',
             (newFav: any) => {
                 const children = newFav?._value?.children?.['_value['];
+                setFavEntity(newFav);
                 if (children) {
                     children.sort(byElementIndex);
                     setFav(children);
@@ -27,12 +28,11 @@ export function FavoriteBar() {
                             return {
                                 name: unpadded.name,
                                 component: unpadded.view,
-                                config: JSON.parse(unpadded.props).config,
+                                config: unpadded.props ? JSON.parse(unpadded.props).config : undefined,
                             };
                         }),
                     );
                 }
-                setFavEntity(newFav);
             },
             id,
         );

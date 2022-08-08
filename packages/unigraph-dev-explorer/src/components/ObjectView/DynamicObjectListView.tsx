@@ -145,6 +145,7 @@ function DynamicListItem({
     viewOptions,
     removeItemsFromView,
     noHoverHighlight,
+    componentRight,
     _swipableClassName,
     _swipableRest,
 }: any) {
@@ -193,6 +194,7 @@ function DynamicListItem({
                               content: <div>Delete</div>,
                               action: () => {
                                   itemRemover([item.uid]);
+                                  removeItemsFromView([item.uid]);
                               },
                               actionAnimation: ActionAnimations.REMOVE,
                           }
@@ -223,6 +225,7 @@ function DynamicListItem({
                     <ListItemIcon
                         onClick={() => {
                             itemRemover([item.uid]);
+                            removeItemsFromView([item.uid]);
                         }}
                         sx={{
                             cursor: 'pointer',
@@ -240,6 +243,7 @@ function DynamicListItem({
                         <ClearAll />
                     </ListItemIcon>
                 ) : null}
+                {typeof componentRight === 'function' ? componentRight({ data: item, context }) : null}
             </SwipeableListItem>
         </ListItem>
     );
@@ -275,6 +279,7 @@ export type DynamicObjectListViewProps = {
     components?: any;
     initialTab?: string;
     viewOptions?: any;
+    componentRight?: ({ data, callbacks }: any) => JSX.Element;
     noHoverHighlight?: boolean;
     inline?: boolean;
 };
@@ -297,6 +302,7 @@ function DynamicListBasic({
     viewOptions,
     removeItemsFromView,
     noHoverHighlight,
+    componentRight,
     _swipableClassName,
     _swipableRest,
 }: any) {
@@ -326,6 +332,7 @@ function DynamicListBasic({
                     noRemover={noRemover}
                     removeOnEnter={removeOnEnter}
                     components={components}
+                    componentRight={componentRight}
                     viewOptions={viewOptions}
                     removeItemsFromView={removeItemsFromView}
                     noHoverHighlight={noHoverHighlight}
@@ -355,6 +362,7 @@ function DynamicList({
     components,
     itemStyle,
     viewOptions,
+    componentRight,
     noHoverHighlight,
     removeItemsFromView,
     _swipableClassName,
@@ -449,6 +457,7 @@ function DynamicList({
                         removeOnEnter={removeOnEnter}
                         components={components}
                         viewOptions={viewOptions}
+                        componentRight={componentRight}
                         removeItemsFromView={removeItemsFromView}
                         noHoverHighlight={noHoverHighlight}
                         _swipableClassName={_swipableClassName}
@@ -576,6 +585,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
     loadAll,
     removeOnEnter,
     components,
+    componentRight,
     itemAdder,
     initialTab,
     viewOptions,
@@ -708,7 +718,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                         }}
                     >
                         <Typography style={{ whiteSpace: 'nowrap', color: 'gray', fontSize: '15px' }}>
-                            {totalItems.length}
+                            {procItems.length}
                             {titleBar || ' items'}
                         </Typography>
                         <Divider
@@ -804,6 +814,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                           subscribeOptions,
                                           removeOnEnter,
                                           components,
+                                          componentRight,
                                           viewOptions,
                                           removeItemsFromView,
                                           noHoverHighlight,
@@ -839,6 +850,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                                       subscribeOptions,
                                                       removeOnEnter,
                                                       components,
+                                                      componentRight,
                                                       viewOptions,
                                                       removeItemsFromView,
                                                       noHoverHighlight,

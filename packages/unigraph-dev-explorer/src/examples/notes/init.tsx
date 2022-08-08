@@ -32,7 +32,12 @@ export const init = () => {
     });
     registerDynamicViews({
         '$/schema/journal': {
-            view: (props: any) => NoteBlock({ ...props, data: new UnigraphObject(props.data._value.note._value) }),
+            view: (props: any) =>
+                NoteBlock({
+                    ...props,
+                    data: new UnigraphObject(props.data._value.note._value),
+                    callbacks: { ...props.callbacks, isJournal: true },
+                }),
             query: journalQuery,
         },
     });

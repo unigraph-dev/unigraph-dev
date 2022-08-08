@@ -80,7 +80,7 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
             );
             editorContext.historyState.setValue(newHist);
         }
-        const ret = oldTextRef.current === text && !isFlushing ? undefined : pushText(text, isFlushing);
+        const ret = oldTextRef.current === text && !isFlushing ? undefined : pushText(text, isFlushing, editorContext);
         oldTextRef.current = text;
         if (ret && !isFlushing) {
             touchParents(dataRef.current);

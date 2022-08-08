@@ -1,6 +1,10 @@
 import _ from 'lodash';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 
+const matchUids = (old: any[], newstuff: any[]) => {
+    return old.map((el) => el.uid) === newstuff.map((el) => el.uid);
+};
+
 /**
  * Manages the data side of an infinite scrolling view.
  * Deals with subscribing/unsubscribing objects in response to the user's action.
@@ -23,8 +27,15 @@ export const setupInfiniteScrolling = (
         subsId: getRandomInt(),
     };
 
-    const onStateUpdated = () => {
-        stateCallback(states.results);
+    const onStateUpdated = (newResults: any[]) => {
+        try {
+            if (!matchUids(states.results, newResults)) {
+                stateCallback(newResults);
+                states.results = newResults;
+            }
+        } catch (e) {
+            console.log(states.results, newResults, ' matchUid error ', e);
+        }
     };
 
     const onUserNext = (updating: boolean) => {
@@ -54,9 +65,10 @@ export const setupInfiniteScrolling = (
 
     const onUpdate = (newUids: string[]) => {
         if (_.isEqual(uids, newUids)) return;
+        const availableUids = _.intersection(uids, newUids);
         uids = newUids;
         states.chunks = _.chunk(uids, chunk);
-        states.results = [];
+        onStateUpdated(states.results.filter((el) => availableUids.includes(el.uid)));
         onUserNext(true);
     };
 
@@ -82,8 +94,7 @@ export const setupInfiniteScrolling = (
                       uidsMap[el.uid] = el;
                   })
                 : (uidsMap[results.uid] = results);
-            states.results = states.currentSubs.map((el: any) => uidsMap[el]);
-            onStateUpdated();
+            onStateUpdated(states.currentSubs.map((el: any) => uidsMap[el]));
         },
         states.subsId,
         subscribeOptions,

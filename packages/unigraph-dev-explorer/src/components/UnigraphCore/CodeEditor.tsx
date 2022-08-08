@@ -44,6 +44,7 @@ export function NewUserCode({}) {
                     <MenuItem value="component/react-jsx">component/react-jsx</MenuItem>
                     <MenuItem value="lambda/js">lambda/js</MenuItem>
                     <MenuItem value="client/js">client/js</MenuItem>
+                    <MenuItem value="client-startup/js">client-startup/js</MenuItem>
                     <MenuItem value="client/css">client/css</MenuItem>
                 </Select>
             </FormControl>
@@ -205,7 +206,7 @@ export function CodeEditor({ id }: any) {
                                     <Collapse in={currentPackage === el}>
                                         <List style={{ overflow: 'auto' }}>
                                             {execcontent
-                                                .filter((it: any) => it['unigraph.id']?.startsWith(el))
+                                                .filter((it: any) => it['unigraph.id']?.startsWith(`${el}/`))
                                                 .map((it: any) => (
                                                     <ListItem
                                                         sx={pointerHoverSx}

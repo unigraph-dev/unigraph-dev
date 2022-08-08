@@ -11,6 +11,14 @@ import { AutoDynamicViewDetailed } from './AutoDynamicViewDetailed';
 import { JsontreeObjectViewer, StringObjectViewer } from './BasicObjectViews';
 import { useDetailedObjNameTab } from '../UnigraphCore/useEntityNameTab';
 
+const getProps = (data: UnigraphObject) => {
+    try {
+        return JSON.parse(data?.get('props')?.as('primitive'))?.props || {};
+    } catch (e) {
+        return {};
+    }
+};
+
 export const ViewViewDetailed: DynamicViewRenderer = ({ data, callbacks }) => {
     if (data.get('view')?._value?.['dgraph.type'].includes('Executable')) {
         return <AutoDynamicViewDetailed object={new UnigraphObject(data.get('view')._value)} callbacks={callbacks} />;
@@ -19,7 +27,7 @@ export const ViewViewDetailed: DynamicViewRenderer = ({ data, callbacks }) => {
         const pages = window.unigraph.getState('registry/pages').value;
         return pages[data.get('view').as('primitive').replace('/pages/', '')].constructor({
             ...JSON.parse(data.get('props').as('primitive')).config,
-            callbacks,
+            callbacks: { ...callbacks, props: getProps(data) },
         });
     }
     const widgets = window.unigraph.getState('registry/widgets').value;

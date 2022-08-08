@@ -3,32 +3,32 @@ import { MouseEventHandler } from 'react';
 import { Typography } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { styled } from '@mui/styles';
-import { mdiNoteOutline } from '@mdi/js';
+import { mdiNotebookOutline, mdiNoteOutline, mdiText } from '@mdi/js';
 import { Icon } from '@mdi/react';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { getParentsAndReferences } from '../../components/ObjectView/backlinksUtils';
 import { getSubentities } from './utils';
 
-export function NoteBlock({ data, inline }: any) {
+export function NoteBlock({ data, inline, callbacks }: any) {
     const [parents, references] = getParentsAndReferences(
         data['~_value'],
         (data['unigraph.origin'] || []).filter((el: any) => el.uid !== data.uid),
     );
     const [subentities, otherChildren] = getSubentities(data);
+    const { isJournal } = callbacks;
 
     return (
         <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
             <div style={{ flexGrow: 1 }}>
                 <Typography variant="body1">
-                    {data?._hide ? (
-                        []
-                    ) : (
-                        <Icon
-                            path={mdiNoteOutline}
-                            size={0.8}
-                            style={{ opacity: 0.54, marginRight: '4px', verticalAlign: 'text-bottom' }}
-                        />
-                    )}
+                    <Icon
+                        path={
+                            // eslint-disable-next-line no-nested-ternary
+                            isJournal ? mdiNotebookOutline : data._hide ? mdiText : mdiNoteOutline
+                        }
+                        size={0.8}
+                        style={{ opacity: 0.54, marginRight: '4px', verticalAlign: 'text-bottom' }}
+                    />
                     <AutoDynamicView
                         object={data.get('text')?._value._value}
                         options={{ noDrag: true, noDrop: true, inline: true, noContextMenu: true }}

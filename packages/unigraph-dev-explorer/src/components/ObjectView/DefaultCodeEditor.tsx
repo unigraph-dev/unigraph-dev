@@ -112,6 +112,7 @@ const lang: any = {
     'routine/js': 'javascript',
     'lambda/js': 'javascript',
     'client/js': 'javascript',
+    'client-startup/js': 'javascript',
     'client/css': 'css',
 };
 
@@ -120,6 +121,7 @@ const ext: any = {
     'routine/js': '.js',
     'lambda/js': '.js',
     'client/js': '.js',
+    'client-startup/js': '.js',
     'client/css': '.css',
 };
 

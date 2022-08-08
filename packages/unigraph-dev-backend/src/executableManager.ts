@@ -26,6 +26,7 @@ export function createExecutableCache(
     context: Partial<ExecContext>,
     unigraph: Unigraph,
     states: any,
+    isRecoveryMode?: boolean,
 ): Cache<any> {
     const cache: Cache<any> = {
         data: {},
@@ -51,7 +52,8 @@ export function createExecutableCache(
             }, cache.data);
 
             Object.entries(newdata2).forEach(([k, v]) => {
-                if (k.startsWith('$/executable') && !cache.data[k]) cache.data[k] = unpad(v);
+                const obj = unpad(v);
+                if (k.startsWith('$/executable') && obj.uid && obj.type) cache.data[k] = obj;
             });
 
             done(false, null);
@@ -60,7 +62,7 @@ export function createExecutableCache(
         updateClientCache(
             states,
             'executableMap',
-            Object.fromEntries(Object.entries(cache.data).filter(([k, v]: any) => v.env?.startsWith?.('client/'))),
+            Object.fromEntries(Object.entries(cache.data).filter(([k, v]: any) => v.env?.startsWith?.('client'))),
         );
     };
 
@@ -81,7 +83,16 @@ export function buildExecutable(exec: Executable, context: ExecContext, unigraph
                     slug: exec['unigraph.id'],
                     since: new Date(),
                 });
-                const ret = await fn();
+                let ret;
+                try {
+                    ret = await fn();
+                } catch (e: any) {
+                    unigraph.addNotification({
+                        from: 'Executable manager',
+                        name: `Failed to run executable ${context.definition['unigraph.id']}`,
+                        content: `Error was: ${e.toString()}${e.stack}`,
+                    });
+                }
                 states.removeRunningExecutable(execId);
                 return ret;
             };
@@ -144,15 +155,16 @@ export const runEnvRoutineJs: ExecRunner = (src, context, unigraph) => {
               },
           }
         : console;
-    const fn = new AsyncFunction(
-        'require',
-        'unpad',
-        'buildGraph',
-        'context',
-        'unigraph',
-        'console',
-        'UnigraphObject',
-        `try {${src}
+    try {
+        const fn = new AsyncFunction(
+            'require',
+            'unpad',
+            'buildGraph',
+            'context',
+            'unigraph',
+            'console',
+            'UnigraphObject',
+            `try {${src}
 } catch (e) {
         unigraph.addNotification({
             from: "Executable manager", 
@@ -160,14 +172,21 @@ export const runEnvRoutineJs: ExecRunner = (src, context, unigraph) => {
             content: "Error was: " + e.toString() + e.stack }
         )
     }`,
-    ).bind(this, require, unpad, buildGraph, context, unigraph, scopedConsole, UnigraphObject);
-
-    return !context.showConsole
-        ? fn
-        : async () => ({
-              _return: await fn(),
-              _logs: logs,
-          });
+        ).bind(this, require, unpad, buildGraph, context, unigraph, scopedConsole, UnigraphObject);
+        return !context.showConsole
+            ? fn
+            : async () => ({
+                  _return: await fn(),
+                  _logs: logs,
+              });
+    } catch (e: any) {
+        unigraph.addNotification({
+            from: 'Executable manager',
+            name: `Failed to parse executable ${context.definition['unigraph.id']}`,
+            content: `Error was: ${e.toString()}${e.stack}`,
+        });
+        return () => false;
+    }
 };
 
 export const runEnvReactJSX: ExecRunner = (src, context, unigraph) => {

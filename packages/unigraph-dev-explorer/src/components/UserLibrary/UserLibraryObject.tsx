@@ -12,6 +12,7 @@ export default function DetailedObjectView({
     context,
     components,
     callbacks,
+    props,
     isStub,
     type,
     name,
@@ -108,6 +109,7 @@ export default function DetailedObjectView({
                 callbacks={{ ...callbacks, subsId: myid, viewId: id }}
                 context={contextObj}
                 components={components}
+                props={props}
             />
         </React.Fragment>
     );

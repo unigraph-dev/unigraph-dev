@@ -94,7 +94,7 @@ const PORT = 4002;
 const PORT_HTTP = 4001;
 const verbose = 5;
 
-export default async function startServer(client: DgraphClient) {
+export default async function startServer(client: DgraphClient, isRecoveryMode?: boolean) {
     let app: Application;
     const dgraphClient = client;
 
@@ -211,13 +211,14 @@ export default async function startServer(client: DgraphClient) {
                 await context.caches.schemas.updateNow();
                 await context.caches.packages.updateNow();
                 await context.caches.executables.updateNow();
-                initExecutables(
-                    Object.entries(context.caches.executables.data),
-                    {},
-                    localApi,
-                    serverStates.executableSchedule,
-                    serverStates,
-                );
+                if (!isRecoveryMode)
+                    initExecutables(
+                        Object.entries(context.caches.executables.data),
+                        {},
+                        localApi,
+                        serverStates.executableSchedule,
+                        serverStates,
+                    );
                 updateClientCache(serverStates, 'schemaMap', serverStates.caches.schemas.data);
             },
         ],
@@ -240,17 +241,18 @@ export default async function startServer(client: DgraphClient) {
                             Object.values(context.caches.executables?.data).map((el: any) => el?.uid),
                         ).length !== 0
                     ) {
-                        console.log('[Caches] Updated executable uids, updating...');
+                        console.log('[Caches] Updated executable uids, updating... - ', context.changedUids);
                         await (context.caches.executables.updateNow as any)(context.changedUids);
+                        if (!isRecoveryMode)
+                            initExecutables(
+                                Object.entries(context.caches.executables.data),
+                                {},
+                                localApi,
+                                serverStates.executableSchedule,
+                                serverStates,
+                            );
                     }
                     await context.caches.uid_lists.updateNow();
-                    initExecutables(
-                        Object.entries(context.caches.executables.data),
-                        {},
-                        localApi,
-                        serverStates.executableSchedule,
-                        serverStates,
-                    );
                 }
 
                 // Call after_object_created hooks with uids cached
@@ -374,7 +376,7 @@ export default async function startServer(client: DgraphClient) {
     caches.packages = createPackageCache(client);
     const localApi = getLocalUnigraphAPI(client, serverStates);
     serverStates.localApi = localApi;
-    caches.executables = createExecutableCache(client, { hello: 'world' }, localApi, serverStates);
+    caches.executables = createExecutableCache(client, { hello: 'world' }, localApi, serverStates, isRecoveryMode);
     caches.uid_lists = createUidListCache(client);
 
     setInterval(() => {
@@ -418,7 +420,7 @@ export default async function startServer(client: DgraphClient) {
                 .then((res) => {
                     callHooks(serverStates.hooks, 'after_object_changed', {
                         subscriptions: serverStates.subscriptions,
-                        caches,
+                        caches: serverStates.caches,
                         ofUpdate: event.id,
                     });
                     ws.send(makeResponse(event, true));
@@ -476,7 +478,7 @@ export default async function startServer(client: DgraphClient) {
         },
 
         ensure_unigraph_schema(event: EventEnsureUnigraphSchema, ws: IWebsocket) {
-            const names = Object.keys(caches.schemas.data);
+            const names = Object.keys(serverStates.caches.schemas.data);
             if (names.includes(event.name)) {
                 ws.send(makeResponse(event, true));
             } else {
@@ -503,7 +505,7 @@ export default async function startServer(client: DgraphClient) {
                 dgraphClient
                     .createUnigraphUpsert(upsert)
                     .then(async (_) => {
-                        await callHooks(serverStates.hooks, 'after_schema_updated', { caches: caches });
+                        await callHooks(serverStates.hooks, 'after_schema_updated', { caches: serverStates.caches });
                         ws.send(makeResponse(event, true));
                         done(false, null);
                     })
@@ -516,16 +518,16 @@ export default async function startServer(client: DgraphClient) {
 
         ensure_unigraph_package: function (event: EventEnsureUnigraphPackage, ws: IWebsocket) {
             lock.acquire('caches/schema', function (done: Function) {
-                const names = Object.keys(caches['packages'].data);
+                const names = Object.keys(serverStates.caches['packages'].data);
                 if (names.includes(event.packageName)) {
                     ws.send(makeResponse(event, true));
                     done(false, null);
                 } else {
                     // Falls back to add package
                     const eventb: any = { ...event, package: event.fallback };
-                    addUnigraphPackage(dgraphClient, eventb.package, caches)
+                    addUnigraphPackage(dgraphClient, eventb.package, serverStates.caches)
                         .then(async (_) => {
-                            await callHooks(serverStates.hooks, 'after_schema_updated', { caches: caches });
+                            await callHooks(serverStates.hooks, 'after_schema_updated', { caches: serverStates.caches });
                             done(false, null);
                             //console.log("Hooks called")
                             ws.send(makeResponse(eventb, true));
@@ -542,7 +544,7 @@ export default async function startServer(client: DgraphClient) {
             lock.acquire('caches/schema', function (done: Function) {
                 addUnigraphPackage(dgraphClient, event.package, serverStates.caches, event.update)
                     .then(async (_) => {
-                        await callHooks(serverStates.hooks, 'after_schema_updated', { caches: caches });
+                        await callHooks(serverStates.hooks, 'after_schema_updated', { caches: serverStates.caches });
                         done(false, null);
                         //console.log("Hooks called")
                         ws.send(makeResponse(event, true));
@@ -589,7 +591,7 @@ export default async function startServer(client: DgraphClient) {
                 .then((_: any) => {
                     callHooks(serverStates.hooks, 'after_object_changed', {
                         subscriptions: serverStates.subscriptions,
-                        caches: caches,
+                        caches: serverStates.caches,
                         subIds: event.subIds,
                         ofUpdate: event.id,
                     });
@@ -651,7 +653,7 @@ export default async function startServer(client: DgraphClient) {
                             }
                             callHooks(serverStates.hooks, 'after_object_changed', {
                                 subscriptions: serverStates.subscriptions,
-                                caches: caches,
+                                caches: serverStates.caches,
                                 subIds: event.subIds,
                                 ofUpdate: event.id,
                                 changedUids,
@@ -666,7 +668,7 @@ export default async function startServer(client: DgraphClient) {
                 if (event.pad !== false) {
                     const origObject = (await dgraphClient.queryUID(event.uid))[0];
                     const schema = origObject['type']['unigraph.id'];
-                    const paddedUpdater = buildUnigraphEntity(event.newObject, schema, caches['schemas'].data, true, {
+                    const paddedUpdater = buildUnigraphEntity(event.newObject, schema, serverStates.caches['schemas'].data, true, {
                         validateSchema: true,
                         isUpdate: true,
                         states: {},
@@ -675,7 +677,7 @@ export default async function startServer(client: DgraphClient) {
                     finalUpdater = processAutoref(
                         { ...paddedUpdater, uid: event.uid, 'unigraph.origin': origin },
                         schema,
-                        caches['schemas'].data,
+                        serverStates.caches['schemas'].data,
                     );
                     //console.log(upsert);
                     console.log(JSON.stringify(finalUpdater, null, 4));
@@ -699,7 +701,7 @@ export default async function startServer(client: DgraphClient) {
                     .then(([res, changedUids]) => {
                         callHooks(serverStates.hooks, 'after_object_changed', {
                             subscriptions: serverStates.subscriptions,
-                            caches: caches,
+                            caches: serverStates.caches,
                             subIds: event.subIds,
                             ofUpdate: event.id,
                             changedUids,
@@ -742,8 +744,8 @@ export default async function startServer(client: DgraphClient) {
                 dgraph: await dgraphClient.getStatus(),
                 unigraph: {
                     cache: {
-                        length: Object.values(caches).length,
-                        names: Object.keys(caches),
+                        length: Object.values(serverStates.caches).length,
+                        names: Object.keys(serverStates.caches),
                     },
                     subscription: {
                         length: serverStates.subscriptions.length,
@@ -761,7 +763,7 @@ export default async function startServer(client: DgraphClient) {
 
         get_packages: async function (event: EventGetPackages, ws: IWebsocket) {
             // TODO: Option to get only a couple of schemas in cache
-            ws.send(makeResponse(event, true, { packages: caches['packages'].data }));
+            ws.send(makeResponse(event, true, { packages: serverStates.caches['packages'].data }));
         },
 
         proxy_fetch: async function (event: EventProxyFetch, ws: IWebsocket) {
@@ -809,7 +811,7 @@ export default async function startServer(client: DgraphClient) {
                 .then(([res, changedUids]) => {
                     callHooks(serverStates.hooks, 'after_object_changed', {
                         subscriptions: serverStates.subscriptions,
-                        caches: caches,
+                        caches: serverStates.caches,
                         ofUpdate: event.id,
                         changedUids,
                     });
@@ -838,12 +840,12 @@ export default async function startServer(client: DgraphClient) {
         /* Userspace methods: eventually, users can install apps that extend their own methods into here. */
 
         add_notification: async function (event: EventAddNotification, ws: IWebsocket) {
-            await addNotification(event.item, caches, dgraphClient).catch((e) =>
+            await addNotification(event.item, serverStates.caches, dgraphClient).catch((e) =>
                 ws.send(makeResponse(event, false, { error: e })),
             );
             callHooks(serverStates.hooks, 'after_object_changed', {
                 subscriptions: serverStates.subscriptions,
-                caches: caches,
+                caches: serverStates.caches,
                 ofUpdate: event.id,
             });
             ws.send(makeResponse(event, true));
@@ -897,7 +899,7 @@ export default async function startServer(client: DgraphClient) {
             );
             callHooks(serverStates.hooks, 'after_object_changed', {
                 subscriptions: serverStates.subscriptions,
-                caches: caches,
+                caches: serverStates.caches,
             });
             ws.send(makeResponse(event, true, { result: res }));
         },
@@ -908,7 +910,7 @@ export default async function startServer(client: DgraphClient) {
             );
             callHooks(serverStates.hooks, 'after_object_changed', {
                 subscriptions: serverStates.subscriptions,
-                caches: caches,
+                caches: serverStates.caches,
             });
             ws.send(makeResponse(event, true, { result: res }));
         },
@@ -950,7 +952,7 @@ export default async function startServer(client: DgraphClient) {
 
     };
 
-    await Promise.all(Object.values(caches).map((el: Cache<any>) => el.updateNow()));
+    await Promise.all(Object.values(serverStates.caches as Record<string, Cache<any>>).map((el: Cache<any>) => el.updateNow()));
     updateClientCache(serverStates, 'schemaMap', serverStates.caches.schemas.data);
 
     initEntityHeads(
@@ -968,7 +970,7 @@ export default async function startServer(client: DgraphClient) {
         console.log('\nUnigraph server listening on port', PORT);
     });
 
-    initExecutables(
+    if (!isRecoveryMode) initExecutables(
         Object.entries(serverStates.caches['executables'].data),
         {},
         localApi,
@@ -1038,6 +1040,7 @@ export default async function startServer(client: DgraphClient) {
         });
         initCaches(serverStates, ws);
         leaseToClient(connId);
+        ws.send(stringify({type: 'hello', ...(isRecoveryMode ? {recovery: true} : {})}))
         ws.send(
             stringify(
                 {
@@ -1113,7 +1116,7 @@ export default async function startServer(client: DgraphClient) {
     const debugServer = repl.start('unigraph> ');
     // @ts-ignore /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
     debugServer.context.unigraph = {
-        caches: caches,
+        caches: serverStates.caches,
         dgraphClient: client,
         server: server,
         subscriptions: serverStates.subscriptions,

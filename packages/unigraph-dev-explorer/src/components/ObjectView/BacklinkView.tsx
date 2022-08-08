@@ -59,23 +59,20 @@ export function BacklinkView({
             items={objects}
             titleBar={titleBar}
             context={data || { uid }}
-            itemRemover={(uids: any) => {
+            itemRemover={(uids) => {
                 if (!forward) {
-                    window.unigraph.deleteRelation(data?.uid || uid, {
-                        'unigraph.origin': uids.map((el: string) => ({
-                            uid: el,
-                        })),
-                    });
+                    window.unigraph.updateTriplets(
+                        uids.map((currUid) => `<${data.uid}> <unigraph.origin> <${currUid}> .`),
+                        true,
+                    );
                 } else {
-                    if (!Array.isArray(uids)) uids = [uids];
-                    uids.filter((el: any) => typeof el === 'string').forEach((el: any) =>
-                        window.unigraph.deleteRelation(el, {
-                            'unigraph.origin': { uid: data?.uid || uid },
-                        }),
+                    window.unigraph.updateTriplets(
+                        uids.map((currUid) => `<${currUid}> <unigraph.origin> <${data.uid}> .`),
+                        true,
                     );
                 }
             }}
-            callbacks={{ ...callbacks, isBacklink: true }}
+            callbacks={{ ...callbacks, isBacklink: true, references: objects }}
             noRemover
             noHoverHighlight
             viewOptions={(object: any) => {

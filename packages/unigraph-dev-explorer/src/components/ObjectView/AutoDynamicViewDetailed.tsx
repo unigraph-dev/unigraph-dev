@@ -22,6 +22,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
     attributes,
     onLoad,
     useFallback = true,
+    props,
 }) => {
     const tabContext = React.useContext(TabContext);
 
@@ -30,7 +31,23 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
         ...(components || {}),
     });
 
-    const [componentId, setComponentId] = React.useState(getRandomId());
+    const [componentId] = React.useState(getRandomId());
+
+    React.useEffect(() => {
+        // TODO: big hax, fix soon
+        if (!object?.uid || object?.type?.['unigraph.id'] === '$/schema/view') return () => false;
+        const trueUid = object?.type?.['unigraph.id'] === '$/schema/html' ? context?.uid : object?.uid;
+        if (!trueUid) return () => false;
+        const dvdState = window.unigraph.addState(`${tabContext.viewId}/detailedViews`, []);
+
+        dvdState.setValue([...dvdState.value, { uid: trueUid, component: componentId }]);
+
+        return function cleanup() {
+            dvdState.setValue(
+                dvdState.value.filter((el: { uid: string; component: string }) => el.component !== componentId),
+            );
+        };
+    }, [tabContext.viewId, componentId, object?.uid, object?.type?.['unigraph.id'], context?.uid]);
 
     const [isFocused, removeFocusOnUnmount] = useFocusDelegate(object?.uid, componentId);
     const [totalParents] = useBacklinkDelegate(object?.uid, callbacks?.context?.uid, true, false);
@@ -103,6 +120,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
                                     context,
                                     ...(attributes || {}),
                                     focused: isFocused,
+                                    props,
                                 })
                             }
                         </TabContext.Consumer>

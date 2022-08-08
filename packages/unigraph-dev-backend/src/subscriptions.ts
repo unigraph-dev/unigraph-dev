@@ -7,6 +7,7 @@ import { makeQueryFragmentFromType } from 'unigraph-dev-common/lib/utils/entityU
 import { buildExecutable } from './executableManager';
 import DgraphClient, { queries } from './dgraphClient';
 import { IWebsocket, Subscription } from './custom.d';
+import { processQueryTemplate } from './utils';
 
 /**
  * Should get from executable (query.fragment is executable)
@@ -77,9 +78,7 @@ export function getFragment(query: Query, states: any) {
         template = '';
     }
 
-    return template.replace(/\$unigraph.id{(\$\/[^}]*)}/g, (match, capture) => {
-        return states.caches.schemas.dataAlt[0]?.[capture].uid;
-    });
+    return processQueryTemplate(template, states.caches.schemas);
 }
 
 export function buildPollingQuery(subs: { id: any; query: any }[], states: any) {

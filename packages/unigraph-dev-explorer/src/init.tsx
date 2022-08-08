@@ -4,7 +4,7 @@ import DragSelect from 'dragselect';
 import _ from 'lodash';
 import { unigraph } from 'unigraph-dev-common';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
-import { getRandomInt, isJsonString } from 'unigraph-dev-common/lib/utils/utils';
+import { getRandomInt, isJsonString, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { AutoDynamicView } from './components/ObjectView/AutoDynamicView';
 import { backlinkQuery } from './components/ObjectView/backlinksUtils';
 import { BasicPersonView, DefaultSkeleton } from './components/ObjectView/BasicObjectViews';
@@ -183,9 +183,30 @@ function initExecutableHooks() {
     styleSheet.id = 'executable-styles';
     document.head.appendChild(styleSheet);
     window.unigraph.getState('global/executableMap').subscribe((val: any) => {
+        // Client CSS
         const csses = Object.values(val).filter((el: any) => el.env === 'client/css');
         const elem = document.getElementById('executable-styles');
         if (elem) elem.innerHTML = csses.map((el: any) => el.src).join('\n');
+
+        // Client JS
+        const codes = Object.values(val).filter((el: any) => el.env === 'client-startup/js');
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        const AsyncFunction = Object.getPrototypeOf(async () => false).constructor;
+        const fns = codes.map((el: any) => {
+            try {
+                const fn = new AsyncFunction('require', 'unpad', 'unigraph', 'UnigraphObject', el.src).bind(
+                    window,
+                    require,
+                    unpad,
+                    window.unigraph,
+                    UnigraphObject,
+                );
+                return fn;
+            } catch (e: any) {
+                return () => false;
+            }
+        });
+        fns.forEach((el: any) => el());
     });
 }
 

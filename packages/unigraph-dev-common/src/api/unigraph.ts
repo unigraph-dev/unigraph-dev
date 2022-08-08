@@ -281,7 +281,6 @@ export default function unigraph(url: string, browserId: string, password?: stri
         connection.current = new WebSocket(urlString.toString());
 
         connection.current.onopen = () => {
-            getState('unigraph/connected').setValue(true);
             getState('unauthorized').setValue(undefined);
             if (retries) clearInterval(retries);
             if (!isRevival && readyCallback) readyCallback();
@@ -316,6 +315,10 @@ export default function unigraph(url: string, browserId: string, password?: stri
                 return false;
             }
             // messages.push(parsed);
+            if (parsed.type === 'hello') {
+                getState('unigraph/recovery').setValue(!!parsed.recovery);
+                getState('unigraph/connected').setValue(true);
+            }
             eventTarget.dispatchEvent(new Event('onmessage', parsed));
             if (parsed.type === 'response' && parsed.id && callbacks[parsed.id]) callbacks[parsed.id](parsed);
             if (parsed.type === 'cache_updated' && parsed.name) {
@@ -376,7 +379,12 @@ export default function unigraph(url: string, browserId: string, password?: stri
             id,
             ...params,
         });
-        if (getState('unigraph/connected').value === true && conn.current) conn.current.send(msg);
+        if (
+            getState('unigraph/connected').value === true &&
+            addState('unigraph/recovery', null).value !== null &&
+            conn.current
+        )
+            conn.current.send(msg);
         else {
             msgQueue.push(msg);
             connect();

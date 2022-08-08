@@ -15,7 +15,7 @@ import { AppState } from 'unigraph-dev-common/lib/types/unigraph';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { ViewViewDetailed } from '../../components/ObjectView/DefaultObjectView';
 
-import { copyChildToClipboard } from './commands';
+import { copyChildToClipboard, touchTree } from './commands';
 import { onUnigraphContextMenu } from '../../components/ObjectView/DefaultObjectContextMenu';
 import { noteQuery, noteQueryDetailed } from './noteQuery';
 import { getParentsAndReferences } from '../../components/ObjectView/backlinksUtils';
@@ -37,6 +37,7 @@ import {
     scrollIntoViewIfNeeded,
     TabContext,
 } from '../../utils';
+import { Markdown } from '../semantic/Markdown';
 
 const childrenComponents = {
     '$/schema/note_block': {
@@ -189,6 +190,7 @@ export function ParentsAndReferences({ data }: any) {
                     inline
                     items={parents.map((el: any) => ({ ...el, _stub: true }))}
                     context={data}
+                    callbacks={{ references }}
                     compact
                     noDrop
                     titleBar=" parents"
@@ -215,8 +217,23 @@ export function ParentsAndReferences({ data }: any) {
                 compact
                 noDrop
                 titleBar=" linked references"
+                callbacks={{ references }}
+                viewOptions={{
+                    style: {
+                        padding: '12px',
+                        border: '1px solid lightgray',
+                        borderRadius: '8px',
+                    },
+                }}
                 loadAll
                 noHoverHighlight
+                noRemover
+                itemRemover={(uids) =>
+                    window.unigraph.updateTriplets(
+                        uids.map((el) => `<${data.uid}> <unigraph.origin> <${el}> .`),
+                        true,
+                    )
+                }
                 components={{
                     '$/schema/note_block': {
                         view: ReferenceNoteView,
@@ -711,7 +728,8 @@ export function DetailedNoteBlock({
             pullText={(uid: boolean) =>
                 new UnigraphObject(data).get('text')?.as('primitiveRef')?.[uid ? 'uid' : '_value.%']
             }
-            pushText={(text: string) => {
+            pushText={(text: string, __: any, editorContext: any) => {
+                window.unigraph.touch(touchTree(editorContext.nodesState.value, data?.uid));
                 return data._hide
                     ? window.unigraph.updateObject(
                           new UnigraphObject(data).get('text')._value._value.uid,
@@ -949,12 +967,13 @@ export function DetailedEmbedBlock({ data, isChildren, callbacks, focused, index
     );
 }
 
-export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
+export const ReferenceNoteView = ({ data, callbacks, noChildren, componentId }: any) => {
     const [subentities, otherChildren] = getSubentities(data);
     const dataContext = React.useContext(DataContext);
 
     const [pathNames, setPathNames] = React.useState<any[]>([]);
     const [refObjects, setRefObjects] = React.useState([{}]);
+    const [nestedReferences, setNestedReferences] = React.useState<boolean[]>([]);
 
     React.useEffect(() => {
         removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
@@ -997,26 +1016,57 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
                             !['$/schema/subentity', '$/schema/interface/semantic'].includes(el?.type?.['unigraph.id'])),
                 ),
             );
+        const nRef = refinedPaths.map((path) => {
+            let idx = false;
+            path.slice(1).forEach((obj: any, index: any) => {
+                if (
+                    idx === false &&
+                    callbacks.references.map((el: any) => el.uid).includes(obj.uid) &&
+                    ['$/schema/note_block', '$/schema/embed_block'].includes(obj.type?.['unigraph.id'])
+                )
+                    idx = index + 1;
+            });
+            return idx;
+        });
+        setNestedReferences(nRef);
+
         setRefObjects(refinedPaths.map((refinedPath) => refinedPath[refinedPath.length - 2]));
         setPathNames(
-            refinedPaths.map((refinedPath: any) =>
-                refinedPath
-                    .map((el: any) => new UnigraphObject(el)?.get('text')?.as('primitive'))
-                    .filter(Boolean)
-                    .slice(0, noChildren ? undefined : -1),
-            ),
+            refinedPaths.map((refinedPath: any, index) => {
+                const textPaths = refinedPath.map((el: any) => [
+                    new UnigraphObject(el)?.get('text')?._value?._value,
+                    el,
+                ]);
+                if (nRef[index] === false) {
+                    return textPaths
+                        .filter((el: any) => el[0] !== undefined)
+                        .slice(0, noChildren ? undefined : -1)
+                        .slice(1);
+                }
+                return textPaths
+                    .filter((_el: any, idx: number) => (nRef[index] as any) >= idx)
+                    .filter((el: any) => el[0] !== undefined)
+                    .slice(1);
+            }),
         );
     }, [data]);
 
     return (
         <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-            <div style={{ flexGrow: 1 }}>
+            <div
+                style={{
+                    flexGrow: 1,
+                }}
+            >
                 <Typography
                     variant="body1"
                     style={{ cursor: 'pointer' }}
                     onClick={(ev) => {
                         window.wsnavigator(`/library/object?uid=${data.uid}&type=${data?.type?.['unigraph.id']}`);
                     }}
+                    onContextMenu={(ev) =>
+                        onUnigraphContextMenu(ev, data, callbacks?.context, { ...callbacks, componentId })
+                    }
                 >
                     {data?._hide ? (
                         []
@@ -1049,10 +1099,45 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren }: any) => {
                     subsId={callbacks.subsId}
                 >
                     {refObjects?.map((refObject: any, index: number) => (
-                        <div style={{ marginBottom: '16px' }}>
-                            <Typography style={{ color: 'gray' }}>{pathNames[index]?.join(' > ')}</Typography>
+                        <div style={{ marginTop: index === 0 ? undefined : '16px' }}>
+                            <div>
+                                {(pathNames[index] || []).map((obj: any, idx: number) => {
+                                    const [mdObject, ctx] = obj;
+                                    return (
+                                        <>
+                                            <span
+                                                style={{
+                                                    fontSize: '12px',
+                                                    display: 'inline-block',
+                                                    padding: '0px 6px',
+                                                    transform: 'translateY(-1px)',
+                                                    color: '#a0a0a0',
+                                                }}
+                                            >
+                                                {' > '}
+                                            </span>
+                                            {ctx?._hide ? null : (
+                                                <Icon
+                                                    path={mdiNoteOutline}
+                                                    size={0.7}
+                                                    style={{
+                                                        opacity: 0.54,
+                                                        marginRight: '4px',
+                                                        verticalAlign: 'text-bottom',
+                                                    }}
+                                                />
+                                            )}
+                                            <Markdown
+                                                data={mdObject}
+                                                callbacks={{ ...callbacks, 'get-semantic-properties': () => ctx }}
+                                                style={{ display: 'contents', color: 'gray', fontSize: '14px' }}
+                                            />
+                                        </>
+                                    );
+                                })}
+                            </div>
                             <div style={{ marginLeft: '16px' }}>
-                                {noChildren ? (
+                                {noChildren || nestedReferences[index] !== false ? (
                                     []
                                 ) : (
                                     <Outline noteBlock={refObject} index={index}>

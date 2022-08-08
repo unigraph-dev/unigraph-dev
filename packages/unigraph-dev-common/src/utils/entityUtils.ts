@@ -1,6 +1,6 @@
 import { jsonToGraphQLQuery } from 'json-to-graphql-query';
 import _ from 'lodash';
-import { buildGraph, getCircularReplacer } from './utils';
+import { buildGraph, deepMerge, getCircularReplacer } from './utils';
 import {
     ComposerUnionInstance,
     Definition,
@@ -450,16 +450,19 @@ export function makeQueryFragmentFromType(
                 if (el !== 'uid' && el !== 'expand(_userpredicate_)' && !el.startsWith('unigraph.')) delete entries[el];
             });
         }
+        Object.values(entries).forEach((el) => {
+            removeDups(el);
+        });
     }
 
     function makePart(localSchema: Definition | any, depth = 0, isRoot = false, uidOnly = false) {
         if (depth > maxDepth) return {};
-        let entries: any = { uid: {}, 'unigraph.id': {}, type: { 'unigraph.id': {} }, _hide: {} };
+        let entries: any = { uid: {}, 'unigraph.id': {}, 'dgraph.type': {}, type: { 'unigraph.id': {} }, _hide: {} };
         if (!localSchema?.type?.['unigraph.id']) return {};
         let type = localSchema.type['unigraph.id'];
 
         if (type === '$/schema/any') {
-            entries = { uid: {}, 'unigraph.id': {}, 'expand(_userpredicate_)': makePart(localSchema, depth + 1), "unigraph.indexes": makePart(localSchema, Math.max(maxDepth - 5, depth + 1)) };
+            entries = { uid: {}, 'unigraph.id': {}, 'expand(_userpredicate_)': makePart(localSchema, depth + 1), "unigraph.indexes": { uid: {}, "expand(_userpredicate_)": { uid: {} } } };
         } else if (type.startsWith('$/schema/')) {
             entries = _.merge(entries, { _value: makePart(schemaMap[type]._definition, depth + 1, true) });
         }
@@ -473,27 +476,36 @@ export function makeQueryFragmentFromType(
                         return ret;
                     } else {
                         let ret: any = {};
-                        ret[p._key] = makePart(p._definition, depth + 1, false, true);
+                        ret[p._key] = makePart(p._definition, depth + 1);
                         return ret;
                     }
                 });
-                entries = _.merge(entries, { _value: _.merge({}, ...properties) }, {"unigraph.indexes": makePart({type: {'unigraph.id': '$/schema/any'}}, Math.max(maxDepth - 5, depth + 1))});
+                entries = _.merge(entries, { _value: _.merge({}, ...properties) }, {"unigraph.indexes": { uid: {}, "expand(_userpredicate_)": { uid: {} }}});
                 break;
 
             case '$/composer/Union':
-                /*
+                
                 let defn = localSchema as ComposerUnionInstance;
-                const options = defn._parameters._definitions.map(defnel => {
+                let val = {};
+                defn._parameters._definitions.forEach(defnel => {
                     let children: any = makePart(defnel, depth+1)
-                    entries = _.merge(entries, children);
+                    const primitiveKeys = Object.keys(children).filter(el => el.startsWith('<_value.'));
+                    if (primitiveKeys.length >= 1) {
+                        primitiveKeys.forEach(el => {
+                            entries[el] = {};
+                            delete children[el];
+                        })
+                    }
+                    val = deepMerge(val, children, false);
                     //console.log(children)
                 });
-                entries = {"_value": entries}*/
+                deepMerge(entries, val, false);
+                /*
                 entries = {
                     uid: {},
                     'unigraph.id': {},
                     'expand(_userpredicate_)': makePart({ type: { 'unigraph.id': '$/schema/any' } }, depth + 1),
-                };
+                };*/
                 break;
 
             case '$/composer/Array':
@@ -532,13 +544,13 @@ export function makeQueryFragmentFromType(
                 break;
         }
         if (isRoot && !entries['expand(_userpredicate_)']) _.merge(entries, timestampQuery);
-        removeDups(entries);
         if (entries['<_value[>']) removeDups(entries['<_value[>']);
         return entries;
     }
     const localSchema = schemaMap[schemaName]?._definition || { type: { 'unigraph.id': '$/schema/any' }};
     let res = makePart(localSchema, 0, true);
-    //console.log(JSON.stringify(res, null, 4))
+    removeDups(res);
+    // console.log(JSON.stringify(res, null, 4))
     let ret = toString ? '{' + jsonToGraphQLQuery(res) + '}' : res;
     return ret;
 }

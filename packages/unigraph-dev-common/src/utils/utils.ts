@@ -25,7 +25,7 @@ function getPath(obj: any, path: string | string[]): any {
  * @param target
  * @param source
  */
-export const deepMerge = (target: any, source: any) => {
+export const deepMerge = (target: any, source: any, checkUid = true) => {
     const recurse = (targ: any, src: any) => {
         if (_.isArray(targ) && !_.isArray(src)) {
             src = [src];
@@ -58,7 +58,7 @@ export const deepMerge = (target: any, source: any) => {
             return [...finPrims, ...finObjs];
         }
 
-        if (targ?.uid && src?.uid && targ.uid !== src.uid) {
+        if (checkUid && targ?.uid && src?.uid && targ.uid !== src.uid) {
             return src;
         }
 

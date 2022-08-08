@@ -60,7 +60,10 @@ export function AutoDynamicView({
         expandedChildren,
         backlinkStyle,
         noSwipe,
+        style: optionStyle,
     } = finalOptions;
+
+    style = { ...(style || {}), ...optionStyle };
 
     if (!callbacks) callbacks = {};
 

@@ -119,3 +119,40 @@ span.wikilink:hover {
     transform: translate(24px, 0);
   }
 }
+
+.meter-progress { 
+  height: 5px;
+  position: relative;
+  background: #f3efe6;
+  overflow: hidden;
+}
+
+.progress-1s {
+  animation: progressBar 1s;
+  animation-fill-mode: both;
+  height: 100%;
+  display: block;
+}
+
+.progress-2s {
+  animation: progressBar 2s;
+  animation-fill-mode: both;
+  height: 100%;
+  display: block;
+}
+
+.progress-5s {
+  animation: progressBar 5s;
+  animation-fill-mode: both;
+  height: 100%;
+  display: block;
+}
+
+@keyframes progressBar {
+0% { width: 0; }
+100% { width: 100%; }
+}
+
+.react-markdown {
+  display: contents;
+}

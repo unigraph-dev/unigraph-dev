@@ -29,6 +29,7 @@ import { addNotification } from './notifications';
 import { createSubscriptionLocal, createSubscriptionWS, getFragment, resolveSubscriptionUpdate } from './subscriptions';
 import { Cache, updateClientCache } from './caches';
 import { getQueryString } from './search';
+import { processQueryTemplate } from './utils';
 
 // eslint-disable-next-line import/prefer-default-export
 export function getLocalUnigraphAPI(
@@ -200,7 +201,9 @@ export function getLocalUnigraphAPI(
                 if (commonVars) batchedQueries[i].push(commonVars);
                 res.push(
                     // eslint-disable-next-line no-await-in-loop
-                    ...(await client.queryDgraph(`query {${batchedQueries[i].join('\n')}}`)),
+                    ...(await client.queryDgraph(
+                        processQueryTemplate(`query {${batchedQueries[i].join('\n')}}`, states.caches.schemas),
+                    )),
                 );
             }
             return res;
