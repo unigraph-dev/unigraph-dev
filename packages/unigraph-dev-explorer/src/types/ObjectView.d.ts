@@ -1,5 +1,5 @@
 import React from 'react';
-import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
+import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 
 export type AutoDynamicViewCallbacks = {
     context?: any;

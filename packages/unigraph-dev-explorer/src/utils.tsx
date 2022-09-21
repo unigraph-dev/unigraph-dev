@@ -13,6 +13,7 @@ export const NavigationContext = React.createContext<(location: string) => any>(
 
 export const trivialTypes = [
     '$/schema/markdown',
+    '$/schema/note',
     '$/schema/subentity',
     '$/schema/interface/textual',
     '$/schema/person',
@@ -115,7 +116,7 @@ export const getComponentFromPage = (location: string, params: any = {}) => {
     return {
         type: 'tab',
         config: params,
-        icon: pages.value[location.slice(1)].icon || params.icon,
+        icon: pages.value[location.slice(1)]?.icon || params.icon,
         name: pages.value[location.slice(1)].name,
         component: (location.startsWith('/') ? '/pages' : '/pages/') + location,
         enableFloat: 'true',
@@ -257,9 +258,9 @@ I know this could be more compact, but I think this is easier to read/explain.
 
     const cBrightness = (hRed * 299 + hGreen * 587 + hBlue * 114) / 1000;
     if (cBrightness > threshold) {
-        return '#000000';
+        return '#666666';
     }
-    return '#ffffff';
+    return '#eeeeee';
 }
 
 export function download(filename: string, text: string) {
@@ -640,6 +641,9 @@ export const globalTheme = {
         primary: { main: '#212121' },
         secondary: { main: '#616161' },
     },
+    typography: {
+        fontFamily: ['"Inter"', 'sans-serif'].join(','),
+    },
 };
 
 export const getName = (obj: UnigraphObject) => {
@@ -664,3 +668,6 @@ export function tryHapticFeedback() {
 export const getComponentById = (id: string) => document.querySelector(`[data-component="${id}"]`);
 export const getComponentDataById = (id: string) => (getComponentById(id) as any).dataRef.current as ComponentData;
 window.getComponentDataById = getComponentDataById;
+
+export const getIcon = (path: string) =>
+    `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' style='width:24px;height:24px' viewBox='0 0 24 24'%3E%3Cpath fill='currentColor' d='${path}' /%3E%3C/svg%3E`;

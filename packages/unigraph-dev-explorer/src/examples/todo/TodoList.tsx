@@ -39,6 +39,7 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
                           ?.filter((it: any) => !it._key)
                           .map((it: any) => (
                               <AutoDynamicView
+                                  key={it.uid}
                                   object={new UnigraphObject(it._value)}
                                   callbacks={callbacks}
                                   options={{ inline: true }}
@@ -51,6 +52,7 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
                     ? [
                           <Chip
                               size="small"
+                              key="priority"
                               icon={<PriorityHigh />}
                               label={`Priority ${data.get('priority')?.as('primitive')}`}
                           />,
@@ -61,6 +63,7 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
                     ? [
                           <Chip
                               size="small"
+                              key="timestart"
                               icon={<CalendarToday />}
                               label={`Start: ${Sugar.Date.relative(
                                   new Date(data.get('time_frame/start/datetime')?.as('primitive')),
@@ -73,6 +76,7 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
                     ? [
                           <Chip
                               size="small"
+                              key="timeend"
                               color={isImmediate(data) ? 'warning' : undefined}
                               icon={<CalendarToday />}
                               label={`End: ${Sugar.Date.relative(
@@ -135,8 +139,12 @@ export const TodoItem: DynamicViewRenderer = ({ data, callbacks, compact, inline
                 // eslint-disable-next-line no-nested-ternary
                 callbacks.isEditing ? null : callbacks.isEmbed ? (
                     [
-                        <div style={{ display: 'flex' }}>{[checkbox, NameDisplay]}</div>,
-                        <div style={{ display: 'flex', marginLeft: '6px' }}>{SecondaryDisplay}</div>,
+                        <div style={{ display: 'flex' }} key="primary">
+                            {[checkbox, NameDisplay]}
+                        </div>,
+                        <div style={{ display: 'flex', marginLeft: '6px' }} key="secondary">
+                            {SecondaryDisplay}
+                        </div>,
                     ]
                 ) : (
                     <ListItemText

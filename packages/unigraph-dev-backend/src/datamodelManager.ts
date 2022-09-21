@@ -7,7 +7,11 @@
 
 import { insertsToUpsert } from 'unigraph-dev-common/lib/utils/txnWrapper';
 import { ComposerUnionInstance } from 'unigraph-dev-common/lib/types/json-ts';
-import { buildGraphFromMap, processAutorefUnigraphId } from 'unigraph-dev-common/lib/utils/entityUtils';
+import {
+    buildGraphFromMap,
+    makeQueryFragmentFromType,
+    processAutorefUnigraphId,
+} from 'unigraph-dev-common/lib/utils/entityUtils';
 import { Cache } from './caches';
 import { defaultPackages, defaultTypes, defaultUserlandSchemas } from './templates/defaultDb';
 import DgraphClient from './dgraphClient';
@@ -91,7 +95,7 @@ export async function checkOrCreateDefaultDataModel(client: DgraphClient) {
 export function createSchemaCache(client: DgraphClient): Cache<any> {
     const cache: Cache<any> = {
         data: {},
-        dataAlt: [{}],
+        dataAlt: [{}, {}],
         updateNow: async () => null,
         cacheType: 'manual',
         subscribe: (listener) => null,
@@ -140,6 +144,15 @@ export function createSchemaCache(client: DgraphClient): Cache<any> {
             }
         });
         cache.data = buildGraphFromMap(cache.data);
+
+        const t = new Date().getTime();
+        cache.dataAlt![1] = Object.fromEntries(
+            Object.keys(cache.data).map((schemaName) => [
+                schemaName,
+                makeQueryFragmentFromType(schemaName, cache.data),
+            ]),
+        );
+        console.log(`Building query templates took ${new Date().getTime() - t} ms.`);
     };
 
     cache.updateNow();

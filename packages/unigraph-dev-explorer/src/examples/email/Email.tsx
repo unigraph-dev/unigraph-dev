@@ -28,7 +28,14 @@ type AEmail = {
 };
 
 const EmailListBody: React.FC<{ data: any[] }> = ({ data }) => (
-    <DynamicObjectListView items={data} context={null} compact />
+    <DynamicObjectListView
+        items={data}
+        context={null}
+        compact
+        subscribeOptions={{
+            queryAsType: '$/schema/email_message',
+        }}
+    />
 );
 
 const EmailMessageDetailed: DynamicViewRenderer = ({ data, callbacks }) => {
@@ -61,7 +68,6 @@ const EmailMessage: DynamicViewRenderer = ({ data, callbacks }) => {
                 ev.stopPropagation();
                 ev.preventDefault();
                 window.newTab(
-                    window.layoutModel,
                     getComponentFromPage('/library/object', {
                         uid: data.uid,
                         type: data?.type?.['unigraph.id'],

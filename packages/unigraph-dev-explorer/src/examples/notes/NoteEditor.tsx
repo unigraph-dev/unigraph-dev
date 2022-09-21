@@ -65,10 +65,28 @@ export const useNoteEditor: (...args: any) => [any, (text: string) => void, () =
     inputterRef.current = (text: string, isFlushing?: boolean) => {
         if (data?._value?.children?.['_value[']) {
             const deadLinks: any = [];
+            const deadLinksUids: any = [];
             data._value.children['_value['].forEach((el: any) => {
-                if (el && el._key && !text.includes(el._key)) deadLinks.push(el.uid);
+                if (el && el._key && !text.includes(el._key)) {
+                    deadLinks.push(el.uid);
+                    if (el?._value?._value?.uid) deadLinksUids.push(el._value._value.uid);
+                }
             });
-            if (deadLinks.length) window.unigraph.deleteItemFromArray(data._value.children.uid, deadLinks, data.uid);
+            if (deadLinks.length) {
+                window.unigraph.deleteItemFromArray(data._value.children.uid, deadLinks, data.uid);
+                const [parents] = getParentsAndReferences(
+                    dataRef.current['~_value'],
+                    dataRef.current['unigraph.origin'],
+                );
+                if (!dataRef.current._hide) parents.push({ uid: data.uid });
+                // console.log(parents, dataRef.current);
+                setTimeout(() => {
+                    window.unigraph.recalculateBacklinks(
+                        parents.map((el) => el.uid),
+                        deadLinksUids,
+                    );
+                }, 500);
+            }
         }
         const textUid = pullText(true);
         if (textUid.startsWith('0x') && oldTextRef.current !== undefined) {

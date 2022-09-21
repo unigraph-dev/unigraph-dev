@@ -515,6 +515,7 @@ export function makeQueryFragmentFromType(
                         '<_value[>': {
                             ...makePart(localSchema._parameters._element, depth + 1),
                             '<_index>': { '<_value.#i>': {}, '<_value.#>': {} },
+                            '<_key>': {},
                         },
                     },
                 );

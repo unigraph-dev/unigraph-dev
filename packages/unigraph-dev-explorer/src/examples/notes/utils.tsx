@@ -134,9 +134,9 @@ export const getSubentities = (data: any) => {
     } else {
         [subentities, otherChildren] = data?._value?.children?.['_value['].sort(byElementIndex).reduce(
             (prev: any, el: any) => {
-                if (el?._value?.type?.['unigraph.id'] !== '$/schema/subentity' && !el?._key)
+                if (el?._value && el?._value?.type?.['unigraph.id'] !== '$/schema/subentity' && !el?._key)
                     return [prev[0], [...prev[1], el._value]];
-                if (!el?._key) return [[...prev[0], el?._value._value], prev[1]];
+                if (!el?._key) return [[...prev[0], el?._value?._value], prev[1]];
                 return prev;
             },
             [[], []],

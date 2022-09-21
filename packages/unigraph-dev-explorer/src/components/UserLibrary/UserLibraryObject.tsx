@@ -87,30 +87,26 @@ export default function DetailedObjectView({
     }, [uid]);
 
     return viewerId !== 'dynamic-view-detailed' ? (
-        <React.Fragment key={object?.uid}>
-            <DefaultObjectView
-                object={object}
-                options={{
-                    viewer: viewerId,
-                    canEdit: true,
-                    unpad: !showPadded,
-                    viewId: id,
-                }}
-                callbacks={{ subsId: myid }}
-            />
-        </React.Fragment>
+        <DefaultObjectView
+            object={object}
+            options={{
+                viewer: viewerId,
+                canEdit: true,
+                unpad: !showPadded,
+                viewId: id,
+            }}
+            callbacks={{ subsId: myid }}
+        />
     ) : (
-        <React.Fragment key={object?.uid}>
-            <AutoDynamicViewDetailed
-                object={object}
-                options={{
-                    viewId: id,
-                }}
-                callbacks={{ ...callbacks, subsId: myid, viewId: id }}
-                context={contextObj}
-                components={components}
-                props={props}
-            />
-        </React.Fragment>
+        <AutoDynamicViewDetailed
+            object={object}
+            options={{
+                viewId: id,
+            }}
+            callbacks={{ ...callbacks, subsId: myid, viewId: id }}
+            context={contextObj}
+            components={components}
+            props={props}
+        />
     );
 }

@@ -9,6 +9,7 @@ export function SubentityView({ data, callbacks }: any) {
     return (
         <Chip
             size="small"
+            style={{ color: '#666666' }}
             icon={
                 <div
                     style={{
@@ -22,7 +23,7 @@ export function SubentityView({ data, callbacks }: any) {
                 />
             }
             variant="outlined"
-            label={`Child: ${objDef?._name}`}
+            label="Child"
         />
     );
 }

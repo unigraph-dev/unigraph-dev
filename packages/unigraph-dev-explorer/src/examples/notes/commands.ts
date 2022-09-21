@@ -496,6 +496,7 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
     let currSubentity = -1;
     let prevIndex = -1;
     const parents = getParents(data);
+    console.log(parents, data);
     if (!data._hide) parents.push({ uid: data.uid });
     const children = getSemanticChildren(data)?.['_value['].sort(byElementIndex);
     const delAt = children?.reduce((prev: any[], el: any, elindex: any) => {
@@ -705,9 +706,20 @@ export const unsplitChild = async (data: any, context: NoteEditorContext, index:
     if (numChildParents <= 1) {
         setTimeout(() => {
             permanentlyDeleteBlock(children[delAt]._value._value);
-            window.unigraph.touch(getParents(data).map((el) => el.uid));
+            window.unigraph.touch(parents.map((el) => el.uid));
         }, 1000);
     }
+
+    console.log(parents);
+    setTimeout(() => {
+        console.log(parents);
+        window.unigraph.recalculateBacklinks(
+            _.uniq(parents.map((el) => el.uid)),
+            (children[delAt]?._value?._value?._value?.children?.['_value['] || []).map(
+                (el: any) => el._value._value.uid,
+            ),
+        );
+    }, 1000);
 
     return true;
 };

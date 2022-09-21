@@ -3,26 +3,15 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import _ from 'lodash/fp';
-import { ListItemIcon } from '@mui/material';
-import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { init } from './init';
 import { initDefaultComponents } from './pages';
 import * as serviceWorker from './serviceWorker';
 
 import App from './App';
 import { WorkSpace } from './Workspace';
-import { DynamicComponentView, getComponentAsView } from './components/ObjectView/DynamicComponentView';
-import {
-    getComponentFromExecutable,
-    registerContextMenuItems,
-    registerDetailedDynamicViews,
-    registerDynamicViews,
-} from './unigraph-react';
-import {
-    onDynamicContextMenu,
-    UnigraphMenuItem,
-    updateCustomContextMenu,
-} from './components/ObjectView/DefaultObjectContextMenu';
+import { getComponentAsView } from './components/ObjectView/DynamicComponentView';
+import { registerDetailedDynamicViews, registerDynamicViews } from './unigraph-react';
+import { updateCustomContextMenu } from './components/ObjectView/DefaultObjectContextMenu';
 import { UnigraphRecovery } from './pages/UnigraphRecovery';
 
 if (window.localStorage.getItem('debug-performance') === 'true') {
@@ -96,6 +85,17 @@ function initDynamicObjectViews() {
     window.unigraph.subscribeToType(
         '$/schema/view',
         async (views: any[]) => {
+            const iconKvs = views
+                .map((el) => {
+                    let key =
+                        el?._value?.view?._value?.type?.['unigraph.id'] === '$/schema/executable'
+                            ? el._value.view._value.uid
+                            : el?._value?.view?.['_value.%'];
+                    if (key.startsWith('/pages/')) key = key.slice(7);
+
+                    return [key, el?._value?.icon?._value?.['_value.%']];
+                })
+                .filter((el) => el[1]);
             const resolvedViews = await Promise.all(
                 views
                     .filter((el) => el?._value?.view?._value?.type?.['unigraph.id'] === '$/schema/executable')
@@ -108,14 +108,19 @@ function initDynamicObjectViews() {
                     ]),
             );
             const currPages = window.unigraph.getState('registry/pages');
-            currPages.setValue({
+            const newVal: Record<string, any> = {
                 ...currPages.value,
                 ...Object.fromEntries(resolvedViews),
+            };
+            iconKvs.forEach(([key, icon]) => {
+                if (newVal[key]) newVal[key].icon = icon;
             });
+            console.log(iconKvs);
+            currPages.setValue(newVal);
             window.reloadCommands();
         },
         undefined,
-        { all: false },
+        { all: true },
     );
 }
 
@@ -133,7 +138,6 @@ window.unigraph.onReady!(() => {
 
     const semanticChildrenState = window.unigraph.addState('referenceables/semantic_children', []);
     window.unigraph.getSchemas(['$/schema/interface/semantic']).then((schemas: any) => {
-        console.log(schemas);
         semanticChildrenState.setValue(
             (schemas['$/schema/interface/semantic']?._definition as any)?._parameters?._definitions.map(
                 (el: any) => el?.type?.['unigraph.id'],

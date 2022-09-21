@@ -1,6 +1,6 @@
 /* eslint-disable no-bitwise */
 import React from 'react';
-import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
+import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import ForceGraph2D from 'react-force-graph-2d';
 import ReactResizeDetector from 'react-resize-detector';
 import _ from 'lodash';

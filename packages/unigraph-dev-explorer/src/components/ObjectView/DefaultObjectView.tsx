@@ -3,7 +3,7 @@ import { MoreVert } from '@mui/icons-material';
 import React, { FC } from 'react';
 
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
-import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
+import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { DynamicViewRenderer } from '../../global.d';
 import { ExecutableCodeEditor } from './DefaultCodeEditor';
 import { AutoDynamicView } from './AutoDynamicView';

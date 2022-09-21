@@ -10,7 +10,8 @@ import {
     Typography,
 } from '@mui/material';
 import React from 'react';
-import { getExecutableId, UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
+import { getExecutableId } from 'unigraph-dev-common/lib/api/unigraph';
+import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { pkg as rssReaderPackage } from 'unigraph-dev-common/lib/data/unigraph.rss_reader.pkg';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { Description, Link, OpenInBrowserOutlined } from '@mui/icons-material';
@@ -106,7 +107,6 @@ const RSSItem: DynamicViewRenderer = ({ data, callbacks }) => {
                                     const htmlUid = data?.get('content/text')?._value?._value?.uid;
                                     if (htmlUid)
                                         window.newTab(
-                                            window.layoutModel,
                                             getComponentFromPage('/library/object', {
                                                 uid: htmlUid,
                                                 context: data.uid,
@@ -125,7 +125,6 @@ const RSSItem: DynamicViewRenderer = ({ data, callbacks }) => {
                                         const htmlUid = data?.get('item_data/creative_work/text')?._value?._value?.uid;
                                         if (htmlUid)
                                             window.newTab(
-                                                window.layoutModel,
                                                 getComponentFromPage('/library/object', {
                                                     uid: htmlUid,
                                                     context: data.uid,

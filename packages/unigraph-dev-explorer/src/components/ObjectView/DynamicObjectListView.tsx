@@ -28,8 +28,7 @@ import { ExpandMore, ClearAll, InboxOutlined, ExpandLess, ThreeSixty } from '@mu
 import _ from 'lodash';
 import React, { useEffect } from 'react';
 import { useDrop } from 'react-dnd';
-import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
-import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import { UnigraphObject, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import { byElementIndex } from 'unigraph-dev-common/lib/utils/entityUtils';
 import {
@@ -714,6 +713,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                             alignItems: 'center',
                             padding: '8px',
                             overflowX: 'auto',
+                            overflowY: 'hidden',
                             minHeight: '50px',
                         }}
                     >
@@ -822,7 +822,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                           _swipableRest: rest,
                                       })
                                     : groupers[groupBy as any](procItems.map(itemGetter)).map((el: Group) => (
-                                          <>
+                                          <React.Fragment key={el.name}>
                                               <ListSubheader
                                                   style={{
                                                       padding: compact ? '2px' : '',
@@ -858,7 +858,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                                       _swipableRest: rest,
                                                   },
                                               )}
-                                          </>
+                                          </React.Fragment>
                                       ))
                             }
                         </SwipeableList>

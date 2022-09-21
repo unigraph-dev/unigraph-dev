@@ -1,7 +1,7 @@
 import { Responsive } from 'react-grid-layout';
 import { MenuItem, Typography } from '@mui/material';
 import React from 'react';
-import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
+import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { registerDetailedDynamicViews } from '../../unigraph-react';
 import { isMobile } from '../../utils';
 import { UnigraphWidget } from './UnigraphWidget';

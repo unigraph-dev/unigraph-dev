@@ -21,7 +21,7 @@ export const Tag: DynamicViewRenderer = ({ data, callbacks }) => {
                     size={0.75}
                     style={{
                         filter:
-                            getBgColor(tag) === 'unset' || getContrast(getBgColor(tag)) === '#000000'
+                            getBgColor(tag) === 'unset' || getContrast(getBgColor(tag)) === '#666666'
                                 ? 'unset'
                                 : 'invert(1)',
                     }}
@@ -29,7 +29,7 @@ export const Tag: DynamicViewRenderer = ({ data, callbacks }) => {
             }
             style={{
                 backgroundColor: getBgColor(tag),
-                color: getBgColor(tag).startsWith('#') ? getContrast(getBgColor(tag)) : 'unset',
+                color: getBgColor(tag).startsWith('#') ? getContrast(getBgColor(tag)) : '#666666',
                 cursor: 'pointer',
             }}
             variant="outlined"

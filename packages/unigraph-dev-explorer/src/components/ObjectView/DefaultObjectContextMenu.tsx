@@ -3,7 +3,7 @@
 import { ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material';
 import _ from 'lodash';
 import React from 'react';
-import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
+import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import Icon from '@mdi/react';
 import {
     mdiCloseBoxOutline,
@@ -236,7 +236,7 @@ export const onDynamicContextMenu = (data: any, uid: string, object: any, callba
         view?._value?.view?._value?.['dgraph.type']?.includes?.('Executable') &&
         view?._value.view?._value?._value?.env?.['_value.%']?.startsWith?.('component')
     ) {
-        window.newTab(window.layoutModel, {
+        window.newTab({
             type: 'tab',
             name: view?._value?.name?.['_value.%'] || 'Custom view',
             component: `/pages/${view._value.view._value.uid}`,

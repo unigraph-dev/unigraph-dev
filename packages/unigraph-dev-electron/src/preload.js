@@ -18,7 +18,7 @@ window.electronPreload = () => {
         ipcRenderer.send('favorites_updated', newFavs);
     });
     ipcRenderer.on('newTab', (event, tab) => {
-        window.newTab(window.layoutModel, {
+        window.newTab({
             type: 'tab',
             config: tab.config,
             name: tab.name,

@@ -53,7 +53,14 @@ const getMetadata = (localObject: any) =>
     Object.entries(localObject)
         .map(([k, v]) => (k.startsWith('_') && !k.startsWith('_value') ? [k, v] : undefined))
         .filter((el) => el !== undefined);
-function MetadataDisplay({ metadata }: any) {
+function MetadataDisplay({ metadata, uid }: any) {
+    const handleDelete = React.useCallback(
+        (pred: string) => {
+            window.unigraph.updateTriplets([`<${uid}> <${pred}> * .`], true);
+        },
+        [uid],
+    );
+
     return metadata.length ? (
         <div>
             <Typography>Metadata:</Typography>
@@ -61,6 +68,12 @@ function MetadataDisplay({ metadata }: any) {
                 <div style={{ display: 'flex' }}>
                     <Typography style={{ marginRight: '8px' }}>{el[0]}</Typography>
                     <Typography style={{ color: 'gray' }}>{JSON.stringify(el[1])}</Typography>
+                    <Typography
+                        style={{ marginLeft: '8px', textDecoration: 'underline', color: 'gray', cursor: 'pointer' }}
+                        onClick={() => handleDelete(el[0])}
+                    >
+                        x
+                    </Typography>
                 </div>
             ))}
         </div>
@@ -110,7 +123,7 @@ const TypedObjectPartEditor: any = {
                         onChange={() => (viewOrEdit === 'view' ? setViewOrEdit('edit') : setViewOrEdit('view'))}
                     />
                 </div>
-                <MetadataDisplay metadata={metadata} />
+                <MetadataDisplay metadata={metadata} uid={localObject.uid} />
                 {viewOrEdit === 'view' ? (
                     <AutoDynamicView object={new UnigraphObject(localObject)} />
                 ) : (
@@ -264,7 +277,7 @@ const TypedObjectPartEditor: any = {
                         }}
                     />
                 </div>
-                <MetadataDisplay metadata={metadata} />
+                <MetadataDisplay metadata={metadata} uid={localObject.uid} />
                 {localObject['_value[']?.map((el: any) => (
                     <div
                         style={{
@@ -418,7 +431,7 @@ const TypedObjectPartEditor: any = {
                         onChange={() => (viewOrEdit === 'view' ? setViewOrEdit('edit') : setViewOrEdit('view'))}
                     />
                 </div>
-                <MetadataDisplay metadata={metadata} />
+                <MetadataDisplay metadata={metadata} uid={localObject.uid} />
                 <div
                     style={{
                         ...editorHeader,

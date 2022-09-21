@@ -253,12 +253,32 @@ function getObjectAsRecursivePrimitive(object: any, getRef?: boolean) {
     return targetValue;
 }
 
+function getObjectAsRecursiveSubentity(object: any, getRef?: boolean) {
+    let targetValue: any;
+    if (object?.type?.['unigraph.id'] === '$/schema/subentity' && object._value) {
+        targetValue = getRef ? object : object._value;
+    } else
+        Object.keys(object).forEach((el) => {
+            if (el === '_value' && typeof object[el] === 'object') {
+                const subObj = getObjectAsRecursiveSubentity(object[el], getRef);
+                if (subObj !== undefined) targetValue = subObj;
+            }
+        });
+    return targetValue;
+}
+
 export const getObjectAs = (object: any, type: 'primitive') => {
     if (type === 'primitive') {
         return getObjectAsRecursivePrimitive(object);
     }
     if (type === 'primitiveRef') {
         return getObjectAsRecursivePrimitive(object, true);
+    }
+    if (type === 'subentity') {
+        return getObjectAsRecursiveSubentity(object);
+    }
+    if (type === 'subentityRef') {
+        return getObjectAsRecursiveSubentity(object, true);
     }
     return object;
 };
@@ -279,6 +299,20 @@ export class UnigraphObject extends Object {
             console.log(this);
             return e;
         }
+    };
+
+    map = (fn: any) => {
+        if (Array.isArray((this as any)?.['_value['])) {
+            return (this as any)['_value['].map((el: any) => fn(new UnigraphObject(el)));
+        }
+        return undefined;
+    };
+
+    forEach = (fn: any) => {
+        if (Array.isArray((this as any)?.['_value['])) {
+            return (this as any)['_value['].forEach((el: any) => fn(new UnigraphObject(el)));
+        }
+        return undefined;
     };
 
     // eslint-disable-next-line class-methods-use-this

@@ -72,7 +72,7 @@ export default function DrawerRouter() {
     devState.subscribe((newState: boolean) => setDevMode(newState));
 
     return (
-        <Root style={{ height: '100%', width: '240px' }}>
+        <Root style={{ height: '100%', minWidth: '240px', width: '100%' }}>
             <Drawer
                 variant="permanent"
                 classes={{

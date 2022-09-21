@@ -101,29 +101,29 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
                     expandedChildren
                     subsId={subsId}
                 >
-                    <div style={{ display: 'contents' }} id={`object-view-${object.uid}`}>
-                        <TabContext.Consumer>
-                            {({ viewId, setTitle }) =>
-                                React.createElement(DynamicViewsDetailed[object.type['unigraph.id']].view, {
-                                    data: getObject(),
-                                    key: object?.uid,
-                                    callbacks: {
-                                        viewId,
-                                        setTitle,
-                                        ...(callbacks || {}),
-                                    },
-                                    options: {
-                                        viewId,
-                                        setTitle,
-                                        ...(options || {}),
-                                    },
-                                    context,
-                                    ...(attributes || {}),
-                                    focused: isFocused,
-                                    props,
-                                })
-                            }
-                        </TabContext.Consumer>
+                    <div
+                        style={{ display: 'contents' }}
+                        id={`object-view-${object.uid}`}
+                        key={`object-view-${object.uid}`}
+                    >
+                        {React.createElement(DynamicViewsDetailed[object.type['unigraph.id']].view, {
+                            data: getObject(),
+                            key: object?.uid,
+                            callbacks: {
+                                viewId: tabContext.viewId,
+                                setTitle: tabContext.setTitle,
+                                ...(callbacks || {}),
+                            },
+                            options: {
+                                viewId: tabContext.viewId,
+                                setTitle: tabContext.setTitle,
+                                ...(options || {}),
+                            },
+                            context,
+                            ...(attributes || {}),
+                            focused: isFocused,
+                            props,
+                        })}
                     </div>
                 </DataContextWrapper>
             </ErrorBoundary>

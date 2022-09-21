@@ -1,7 +1,7 @@
 import { Divider, Popover, Typography } from '@mui/material';
 import React from 'react';
 import { AppState } from 'unigraph-dev-common/lib/types/unigraph';
-import { UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
+import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import _ from 'lodash';
 import Levenshtein from 'levenshtein';
 import { parseQuery } from './UnigraphSearch';
@@ -9,8 +9,9 @@ import { setSearchPopup } from '../../examples/notes/searchPopup';
 import { SearchPopupState } from '../../global.d';
 import { AutoDynamicViewDetailed } from '../ObjectView/AutoDynamicViewDetailed';
 import { isLargeScreen } from '../../utils';
+import { quickTitleSearch } from '../../utils/titleSearch';
 
-const ResultDisplay = ({ el }: any) => {
+export const ResultDisplay = ({ el }: any) => {
     return (
         <div style={{ display: 'inline-flex' }}>
             <div
@@ -57,6 +58,9 @@ export function InlineSearch({ window }: any) {
         window.unigraph.getState('global/searchPopup').value,
     );
 
+    // TODO: Temporarily disable preview by default until we fix it
+    const [previewEnabled, setPreviewEnabled] = React.useState<boolean>(false /*! !ctxMenuState.value.preview */);
+
     React.useEffect(() => {
         setState(ctxMenuState.value);
         ctxMenuState.subscribe((v) => setState(v));
@@ -65,21 +69,15 @@ export function InlineSearch({ window }: any) {
 
     const [currentAction, setCurrentAction] = React.useState(0);
 
-    const titleSearch = (key: string) => {
-        const names = (window.unigraph as any).getCache('searchTitles');
-        const results = (names || []).filter((el: any) => el?.name?.toLowerCase().includes(key?.toLowerCase().trim()));
-        if (key?.length)
-            setTopResults(
-                results
-                    .filter((it: any) => it.incoming >= 5)
-                    .sort((a: any, b: any) => b.incoming - a.incoming)
-                    .slice(0, 20),
-            );
+    const [searchResults, setSearchResults] = React.useState<any[]>([]);
+    const [topResults, setTopResults] = React.useState<any[]>([]);
 
-        setSearchResults(
-            results
-                .sort((a: any, b: any) => new Date(b._updatedAt || 0).getTime() - new Date(a._updatedAt || 0).getTime())
-                .slice(0, key?.length > 1 ? 100 : 20),
+    const titleSearch = (key: string) => {
+        quickTitleSearch(
+            key,
+            (res, isTop) => (isTop ? setTopResults(res) : setSearchResults(res)),
+            20,
+            key?.length ? 100 : 20,
         );
     };
     const search = React.useCallback(
@@ -118,8 +116,6 @@ export function InlineSearch({ window }: any) {
 
     const handleClose = React.useCallback(() => ctxMenuState.setValue({ show: false }), [ctxMenuState]);
 
-    const [searchResults, setSearchResults] = React.useState<any[]>([]);
-    const [topResults, setTopResults] = React.useState<any[]>([]);
     React.useEffect(() => {
         if (!state.show) {
             setSearchResults([]);
@@ -196,6 +192,10 @@ export function InlineSearch({ window }: any) {
                 ev.preventDefault();
                 ev.stopPropagation();
                 setIsFulltext((ft: any) => !ft);
+            } else if (ev.key === 'p' && (ev.ctrlKey || ev.metaKey)) {
+                ev.preventDefault();
+                ev.stopPropagation();
+                setPreviewEnabled((pv: any) => !pv);
             }
         };
 
@@ -272,7 +272,7 @@ export function InlineSearch({ window }: any) {
                             );
                         })}
                     </div>
-                    {ctxMenuState.value.preview && isLargeScreen() ? (
+                    {previewEnabled && isLargeScreen() ? (
                         <>
                             <Divider flexItem variant="middle" orientation="vertical" />
                             <div style={{ width: '500px', minHeight: '500px', overflowY: 'auto' }}>
@@ -301,6 +301,8 @@ export function InlineSearch({ window }: any) {
                     <Typography variant="body2" style={{ color: 'var(--secondary-text-color)' }}>
                         <kbd>⌘</kbd>+<kbd>F</kbd> {!isFulltext ? 'Fulltext' : 'Title-only'} search
                         <kbd style={{ marginLeft: '16px' }}>↑</kbd>/<kbd>↓</kbd> Navigate
+                        <kbd style={{ marginLeft: '16px' }}>⌘</kbd>+<kbd>P</kbd> {!previewEnabled ? 'Show' : 'Hide'}{' '}
+                        preview
                         <kbd style={{ marginLeft: '16px' }}>Enter</kbd> Link text
                     </Typography>
                 </div>

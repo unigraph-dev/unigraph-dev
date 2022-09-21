@@ -21,7 +21,7 @@ export const Executable: DynamicViewRenderer = ({ data, callbacks }) => {
         },
         'component/react-jsx': () => {
             // Open in new
-            window.newTab(window.layoutModel, {
+            window.newTab({
                 type: 'tab',
                 name: 'Component preview',
                 component: `/pages/library/object`,

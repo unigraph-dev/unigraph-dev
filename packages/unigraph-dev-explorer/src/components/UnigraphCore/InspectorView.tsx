@@ -2,7 +2,7 @@ import { Divider, ListItemIcon, Typography } from '@mui/material';
 import { mdiCubeOutline, mdiDatabaseOutline, mdiTimelineClockOutline } from '@mdi/js';
 import Icon from '@mdi/react';
 import React from 'react';
-import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
+import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { TabContext, timeSince } from '../../utils';
 
 function ObjectOverview({ data }: any) {

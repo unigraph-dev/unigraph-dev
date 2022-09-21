@@ -146,7 +146,6 @@ export const BookmarkItem: DynamicViewRenderer = ({ data, callbacks }) => {
                                 const htmlUid = data?.get('creative_work/text')?._value?._value?.uid;
                                 if (htmlUid)
                                     window.newTab(
-                                        window.layoutModel,
                                         getComponentFromPage('/library/object', {
                                             uid: htmlUid,
                                             context: data.uid,

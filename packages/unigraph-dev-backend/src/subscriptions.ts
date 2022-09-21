@@ -2,8 +2,7 @@
 import _ from 'lodash';
 import stringify from 'json-stable-stringify';
 import { Query, QueryObject, QueryType } from 'unigraph-dev-common/lib/types/unigraph';
-import { buildGraph, getCircularReplacer, getRandomId, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
-import { makeQueryFragmentFromType } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { getCircularReplacer, getRandomId, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import { buildExecutable } from './executableManager';
 import DgraphClient, { queries } from './dgraphClient';
 import { IWebsocket, Subscription } from './custom.d';
@@ -46,7 +45,7 @@ export function getFragment(query: Query, states: any) {
                 ? '@recurse { uid <unigraph.id> expand(_userpredicate_) } '
                 : metadataOnly
                 ? ' { uid <dgraph.type> type { <unigraph.id> } _updatedAt _createdAt _hide } '
-                : queryAs || makeQueryFragmentFromType(query.name, states.caches.schemas.data, depth)
+                : queryAs || states.caches.schemas.dataAlt[1]?.[query.name]
         }
         var(func: eq(<unigraph.id>, "${query.name}")) {
         <~type> {
@@ -64,7 +63,7 @@ export function getFragment(query: Query, states: any) {
             uid = uid.map((u: any) => (typeof u === 'string' && u.startsWith('$/') ? states.namespaceMap[u].uid : u));
         }
         const queryBody = options?.queryAsType
-            ? makeQueryFragmentFromType(options.queryAsType, states.caches.schemas.data, options?.depth)
+            ? states.caches.schemas.dataAlt[1]?.[options.queryAsType]
             : `@recurse${
                   options?.depth ? `(depth: ${options?.depth})` : ''
               } { uid unigraph.id unigraph.indexes expand(_userpredicate_) }`;

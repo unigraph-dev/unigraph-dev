@@ -16,6 +16,7 @@ import React from 'react';
 import rangy from 'rangy';
 import 'rangy/lib/rangy-serializer';
 import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
+import { useResizeDetector } from 'react-resize-detector';
 import {
     getObjectContextMenuQuery,
     onDynamicContextMenu,
@@ -28,13 +29,15 @@ import { TabContext } from '../../utils';
 
 const makeCSS = (style: Style) => `body {
         line-height: ${style.text.lineHeight};
-        font-family: '${style.text.fontFamily}'
+        font-family: '${style.text.fontFamily}';
+        font-size: ${style.text.fontSize};
     }`;
 
 export type Style = {
     text: {
         lineHeight: string;
         fontFamily: string;
+        fontSize: string;
     };
 };
 
@@ -85,6 +88,23 @@ export function HtmlStyleChooser({ style, onStyleChange, data, context, callback
                 </ToggleButton>
             </ToggleButtonGroup>
             <ToggleButtonGroup
+                value={style?.text?.fontSize}
+                onChange={(ev, newStyle) => {
+                    onStyleChange(_.merge({}, style, { text: { fontSize: newStyle } }));
+                }}
+                exclusive
+            >
+                <ToggleButton value="1em">
+                    <span style={{ transform: 'scale(0.7)' }}>A</span>
+                </ToggleButton>
+                <ToggleButton value="1.1em">
+                    <span>A</span>
+                </ToggleButton>
+                <ToggleButton value="1.2em">
+                    <span style={{ transform: 'scale(1.3)' }}>A</span>
+                </ToggleButton>
+            </ToggleButtonGroup>
+            <ToggleButtonGroup
                 value={style?.text?.fontFamily}
                 onChange={(ev, newStyle) => {
                     onStyleChange(_.merge({}, style, { text: { fontFamily: newStyle } }));
@@ -132,6 +152,7 @@ export const Html: DynamicViewRenderer = ({ data, context, callbacks }) => {
     const [style, setStyle] = React.useState<Style>({
         text: {
             lineHeight: '1.5',
+            fontSize: '1em',
             fontFamily: 'Georgia',
         },
     });
@@ -153,6 +174,8 @@ export const Html: DynamicViewRenderer = ({ data, context, callbacks }) => {
             ?.map((el: any) => new UnigraphObject(el?._value?._value))
             ?.filter(Boolean);
     }, [context]);
+
+    const { width, ref } = useResizeDetector();
 
     const [loaded, setLoaded] = React.useState(false);
     React.useEffect(() => {
@@ -209,7 +232,7 @@ export const Html: DynamicViewRenderer = ({ data, context, callbacks }) => {
                 ifrBody?.removeChild?.(el);
             });
         };
-    }, [loaded, style, annotations]);
+    }, [loaded, style, annotations, width]);
 
     return (
         <div
@@ -219,6 +242,7 @@ export const Html: DynamicViewRenderer = ({ data, context, callbacks }) => {
                 display: 'flex',
                 flexDirection: 'column',
             }}
+            ref={ref}
         >
             {context ? (
                 <>
@@ -270,9 +294,8 @@ export const Html: DynamicViewRenderer = ({ data, context, callbacks }) => {
                                 },
                                 '$/schema/annotation',
                                 undefined,
-                                callbacks?.subsId,
+                                [],
                             );
-                            console.log(annotationUid);
                             window.unigraph.runExecutable('$/executable/add-item-to-list', {
                                 where: context.uid,
                                 item: annotationUid,

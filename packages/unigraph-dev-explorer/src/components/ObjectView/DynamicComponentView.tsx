@@ -16,6 +16,8 @@ import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import { BacklinkView } from './BacklinkView';
 import { isSmallScreen, TabContext, htmlDecode } from '../../utils';
 import { setSearchPopup } from '../../examples/notes/searchPopup';
+import { inlineTextSearch } from '../UnigraphCore/InlineSearchPopup';
+import { handleOpenScopedChar } from '../../utils/autocomplete';
 
 export const globalImports = {
     HelloWorld: () => <p>Hello world!!!</p>,
@@ -37,6 +39,8 @@ export const globalImports = {
     ImageGallery,
     htmlDecode,
     ReactResizeDetector,
+    inlineTextSearch,
+    handleOpenScopedChar,
 };
 
 export const DynamicComponentView: DynamicViewRenderer = ({ data, callbacks, props }) => {

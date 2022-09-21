@@ -8,7 +8,8 @@ ${data._value.selftext._value._value['_value.%']}
 Subreddit: r/${data._value.subreddit._value._value.name['_value.%']}
 Subreddit description: ${new UnigraphObject(data).get('subreddit/description')?.as('primitive')}`,
     '$/schema/web_bookmark': (data) => `Title: ${new UnigraphObject(data).get('name')?.as('primitive')}
-Abstract: ${new UnigraphObject(data).get('creative_work/abstract')?.as('primitive')}`,
+Abstract: ${new UnigraphObject(data).get('creative_work/abstract')?.as('primitive')}
+Content: ${new UnigraphObject(data).get('creative_work/text')?.as('primitive')}`,
     '$/schema/youtube_video': (data) => `YouTube video: ${new UnigraphObject(data).get('title')?.as('primitive')}
 Description: ${new UnigraphObject(data).get('description')?.as('primitive')}
 Channel: ${new UnigraphObject(data).get('channel/name')?.as('primitive')}`,
@@ -41,6 +42,19 @@ ${text}`;
         `Tag: ${new UnigraphObject(data).get('name')?.as('primitive')}, description: ${new UnigraphObject(data)
             .get('description')
             ?.as('primitive')}`,
+    '$/schema/todo': (data) => {
+        const name = new UnigraphObject(data).get('name')?.as('primitive');
+        const tags = (new UnigraphObject(data).get('children')?.['_value['] || [])
+            .filter(
+                (el) =>
+                    el?._value?.type?.['unigraph.id'] === '$/schema/interface/semantic' &&
+                    el?._value?._value?.type?.['unigraph.id'] === '$/schema/tag',
+            )
+            .map((el) => new UnigraphObject(el._value._value).get('name')?.as('primitive'))
+            .filter((el) => el?.length)
+            .map((el) => `#${el}`);
+        return `Todo item: ${name}${tags.length ? `\nTags: ${tags.join(', ')}` : ``}`;
+    },
 };
 
 let data = objects;

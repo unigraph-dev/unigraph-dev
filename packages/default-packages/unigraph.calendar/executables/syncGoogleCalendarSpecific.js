@@ -249,7 +249,17 @@ const syncGoogleCalendarSpecific = async () => {
     // });
     // syncToken = undefined;
 
-    const { items, nextSyncToken } = await sync(calendar, unigraphCalendar, syncToken);
+    let syncResults;
+    try {
+        syncResults = await sync(calendar, unigraphCalendar, syncToken);
+    } catch (e) {
+        if (e.message?.includes('Sync token is no longer valid')) {
+            console.log('Getting a new token...');
+            syncResults = await sync(calendar, unigraphCalendar, undefined);
+        }
+    }
+
+    const { items, nextSyncToken } = syncResults;
     // const { items, nextSyncToken } = await syncDebug(calendar, unigraphCalendar, syncToken);
     // console.log('items', { itemsLen: items.length, calendarName });
 

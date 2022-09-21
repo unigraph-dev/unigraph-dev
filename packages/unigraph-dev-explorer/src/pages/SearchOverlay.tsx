@@ -1,3 +1,4 @@
+import { mdiOpenInNew, mdiPlus } from '@mdi/js';
 import { Card, InputBase, Typography } from '@mui/material';
 import _ from 'lodash';
 import React from 'react';
@@ -5,10 +6,11 @@ import { AppState } from 'unigraph-dev-common/lib/types/unigraph';
 import { buildUnigraphEntity } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { AutoDynamicView } from '../components/ObjectView/AutoDynamicView';
-import { inlineTextSearch } from '../components/UnigraphCore/InlineSearchPopup';
+import { inlineTextSearch, ResultDisplay } from '../components/UnigraphCore/InlineSearchPopup';
 import { parseQuery } from '../components/UnigraphCore/UnigraphSearch';
-import { isElectron, trivialTypes, typeHasDynamicView } from '../utils';
+import { getIcon, isElectron, isSmallScreen, trivialTypes, typeHasDynamicView } from '../utils';
 import { handleOpenScopedChar } from '../utils/autocomplete';
+import { quickTitleSearch } from '../utils/titleSearch';
 
 const groups = [
     {
@@ -76,7 +78,7 @@ function AdderComponent({ input, setInput, open, setClose, callback, summonerToo
             <InputBase
                 style={{
                     width: '100%',
-                    borderRadius: '4px',
+                    borderRadius: '6px 10px',
                     backgroundColor: 'whitesmoke',
                     padding: '8px',
                     margin: '0px, -4px',
@@ -127,7 +129,7 @@ function AdderComponent({ input, setInput, open, setClose, callback, summonerToo
                     }
                 }}
             />
-            <div>
+            <div style={{ padding: '6px' }}>
                 {summonerTooltip ? <Typography>{summonerTooltip}</Typography> : []}
                 <Typography>{`Adding ${parsedInput.key} (Enter to add)`}</Typography>
                 {toAdd || []}
@@ -150,6 +152,7 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
     const [entries, setEntries] = React.useState<any[]>([]);
 
     const [entities, setEntities] = React.useState<any[]>([]);
+    const [quickResults, setQuickResults] = React.useState<any[]>([]);
     const [commands, setCommands] = React.useState<any[]>([]);
     const [finalCommands, setFinalCommands] = React.useState<any[]>([]);
     const [selectedIndex, setSelectedIndex] = React.useState(0);
@@ -183,6 +186,9 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
     }, [input]);
 
     React.useEffect(() => {
+        const withDefault = (el: any) =>
+            el.icon?.includes("svg xmlns='") ? el.icon : getIcon(el.group === 'adder' ? mdiPlus : mdiOpenInNew);
+
         const displayCommands = groups
             .filter((grp: any) => commands.filter((el: any) => el.group === grp.key).length > 0)
             .map((grp: any) => [
@@ -204,6 +210,22 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
                                     display: 'flex',
                                 }}
                             >
+                                <div
+                                    style={{
+                                        minHeight: '18px',
+                                        minWidth: '18px',
+                                        height: '18px',
+                                        width: '18px',
+                                        alignSelf: 'center',
+                                        marginRight: '12px',
+                                        opacity: 0.54,
+                                        backgroundImage: `${
+                                            withDefault(el).startsWith('data:image/svg+xml,')
+                                                ? 'url("'
+                                                : 'url("data:image/svg+xml,'
+                                        }${withDefault(el)}")`,
+                                    }}
+                                />
                                 <Typography style={{ flexGrow: 1 }}>{el.name}</Typography>
                                 <Typography style={{ color: 'gray' }}>{el.about}</Typography>
                             </div>
@@ -212,6 +234,30 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
                     })),
             ])
             .flat();
+        if (quickResults.length) {
+            displayCommands.push({
+                type: 'group',
+                element: <Typography style={{ color: 'gray' }}>Quick search</Typography>,
+            });
+            displayCommands.push(
+                ...quickResults.map((el) => ({
+                    type: 'command',
+                    element: (
+                        <div
+                            onClick={(ev) => {
+                                window.wsnavigator(`/library/object?uid=${el.uid}&type=${el.type}`);
+                            }}
+                            style={{
+                                cursor: 'pointer',
+                                display: 'contents',
+                            }}
+                        >
+                            <ResultDisplay el={el} />
+                        </div>
+                    ),
+                })),
+            );
+        }
         displayCommands.push(
             { type: 'group', element: <Typography style={{ color: 'gray' }}>Search results</Typography> },
             ...(entities[0] === null
@@ -221,7 +267,7 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
                           element: <Typography>No results</Typography>,
                       },
                   ]
-                : (entities as any[]).slice(0, 20).map((datael: any) => ({
+                : (entities as any[]).slice(0, 10).map((datael: any) => ({
                       type: 'command',
                       element: (
                           <AutoDynamicView
@@ -241,7 +287,7 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
                 Object.assign(el, { index });
             });
         setFinalCommands(displayCommands);
-    }, [commands, entities]);
+    }, [commands, entities, quickResults]);
 
     React.useEffect(() => {
         if (parsed?.type === 'command') {
@@ -276,12 +322,16 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
             } else {
                 setEntities([]);
             }
-        }, 200),
+        }, 800),
         [],
     );
 
     React.useEffect(() => {
         search(input);
+
+        const quickRes: any[] = [];
+        quickTitleSearch(input, (res) => quickRes.push(...res));
+        setQuickResults(_.uniqBy(quickRes, 'uid'));
     }, [input]);
 
     const defaultEl = (
@@ -291,7 +341,7 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
                 autoFocus
                 style={{
                     width: '100%',
-                    padding: '4px',
+                    padding: '6px 10px',
                     borderRadius: '4px',
                     backgroundColor: 'whitesmoke',
                     margin: '0px, -4px',
@@ -314,7 +364,7 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
                 }}
                 placeholder="Start typing to search, Arrow keys to navigate, and Enter to select."
             />
-            <div style={{ overflow: 'auto' }} id="searchOverlay_scrollable">
+            <div style={{ overflow: 'auto', padding: '6px' }} id="searchOverlay_scrollable">
                 {summonerTooltip ? <Typography>{summonerTooltip}</Typography> : []}
                 {entries}
                 {parsed?.type === 'command' || parsed?.type === ''
@@ -322,7 +372,7 @@ export function SearchOverlay({ open, setClose, callback, summonerTooltip, defau
                           <div
                               style={{
                                   backgroundColor: el.index === selectedIndex ? '#e8e8e8' : '',
-                                  padding: '4px',
+                                  padding: '6px 4px',
                                   borderRadius: '4px',
                               }}
                               id={`omnibarItem_${el.index === selectedIndex ? 'current' : ''}`}
@@ -438,13 +488,14 @@ export function SearchOverlayPopover({ open, setClose, noShadow }: any) {
             style={{
                 zIndex: 99,
                 position: 'absolute',
-                width: 'calc(100% - 128px)',
-                maxWidth: '800px',
-                left: 'max(64px, 50% - 400px)',
-                top: '64px',
-                maxHeight: '60%',
+                width: isSmallScreen() ? '90%' : '800px',
+                maxWidth: isSmallScreen() ? '90%' : '800px',
+                left: isSmallScreen() ? '5%' : 'max(64px, 50% - 400px)',
+                right: isSmallScreen() ? '5%' : 'max(64px, 50% - 400px)',
+                top: isSmallScreen() ? '16px' : '192px',
+                height: isSmallScreen() ? '100%' : '60%',
                 overflow: 'auto',
-                padding: '16px',
+                padding: '8px',
                 borderRadius: '8px',
                 display: searchEnabled ? 'flex' : 'none',
                 flexDirection: 'column',

@@ -10,15 +10,14 @@ import { Action, Actions, DockLocation, Model, Node, TabNode, Layout } from 'fle
 import 'flexlayout-react/style/light.css';
 import './workspace.css';
 import { Container, CssBaseline, ListItem, Popover, Typography } from '@mui/material';
-import { ThemeProvider, Theme, StyledEngineProvider, createTheme } from '@mui/material/styles';
+import { ThemeProvider, StyledEngineProvider, createTheme } from '@mui/material/styles';
 
 import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
-import { Menu, Details, Home } from '@mui/icons-material';
+import { Menu, Details } from '@mui/icons-material';
 import { DndProvider } from 'react-dnd';
 import { TouchBackend } from 'react-dnd-touch-backend';
 
-import MomentUtils from '@date-io/moment';
 // or @mui/lab/Adapter{Dayjs,Luxon,Moment} or any valid date-io adapter
 // import AdapterDateFns from '@mui/lab/AdapterDateFns';
 import AdapterMoment from '@mui/lab/AdapterMoment';
@@ -161,7 +160,7 @@ function ExecutablesIndicator() {
                 }}
             >
                 {totalExecutables.map((el: any) => (
-                    <ListItem>
+                    <ListItem key={`${el.since}-${el.name}`}>
                         {el.name},{new Date(el.since).toLocaleString()}
                     </ListItem>
                 ))}
@@ -220,7 +219,11 @@ window.closeTab = (tabId: any) => {
     window.layoutModel.doAction(action);
 };
 
-const newTab = (model: Model, initJson: any) => {
+const newTab = (model: Model | any, initJson?: any) => {
+    if (initJson === undefined && window.layoutModel) {
+        initJson = model;
+        model = window.layoutModel;
+    }
     if (initJson.component && window.localStorage.getItem('enableAnalytics') === 'true') {
         window.mixpanel?.track('selectTab', {
             component: initJson.component,
@@ -248,7 +251,7 @@ const workspaceNavigator = (model: Model, location: string) => {
     }
     const search = `?${location.split('?')[1]}`;
     const loc = location.split('?')[0];
-    newTab(model, getComponentFromPage(loc, getParameters(search.slice(1))));
+    newTab(getComponentFromPage(loc, getParameters(search.slice(1))));
 };
 
 const mainTabsetId = 'workspace-main-tabset';
@@ -298,6 +301,52 @@ const dndOpts = {
 export function WorkSpace(this: any) {
     const homePage = JSON.parse(window.localStorage.getItem('userSettings') || '')?.homePage || 'home';
 
+    const sidebar = {
+        type: 'border',
+        location: 'right',
+        id: 'border-right',
+        selected: -1,
+        size: 500,
+        minSize: 500,
+        children: [
+            {
+                config: {
+                    viewConfig: {
+                        uid: (window.unigraph as any).getNamespaceMap()['$/executable/similarity-searcher-component']
+                            ?.uid,
+                        viewer: 'dynamic-view-detailed',
+                        type: '$/schema/executable',
+                        props: { trackActiveDetailedView: true },
+                    },
+                },
+                component: '/pages/library/object',
+                type: 'tab',
+                enableClose: false,
+                name: 'Similarity',
+                id: 'similarity-pane',
+            },
+            {
+                config: {
+                    viewConfig: {
+                        uid: (window.unigraph as any).getNamespaceMap()['$/executable/semantic-searcher-component']
+                            ?.uid,
+                        viewer: 'dynamic-view-detailed',
+                        type: '$/schema/executable',
+                        props: { trackActiveSearchQuery: true },
+                    },
+                },
+                component: '/pages/library/object',
+                type: 'tab',
+                enableClose: false,
+                name: 'Search',
+                id: 'search-pane',
+            },
+        ],
+    };
+    const hasSemanticSearchPackage = (window.unigraph as any).getNamespaceMap()[
+        '$/executable/similarity-searcher-component'
+    ]?.uid;
+
     const json: any = {
         global: {
             tabSetTabStripHeight: 40,
@@ -308,25 +357,6 @@ export function WorkSpace(this: any) {
             enableUseVisibility: true,
         },
         borders: [
-            {
-                type: 'border',
-                location: 'left',
-                id: 'border-left',
-                selected: isSmallScreen() ? -1 : 0,
-                minSize: 240,
-                size: 240,
-                children: [
-                    {
-                        type: 'tab',
-                        enableClose: false,
-                        minSize: 700,
-                        maxSize: 700,
-                        name: 'App Drawer',
-                        id: 'app-drawer',
-                        component: '/components/appdrawer',
-                    },
-                ],
-            },
             {
                 type: 'border',
                 location: 'bottom',
@@ -344,52 +374,30 @@ export function WorkSpace(this: any) {
                     },
                 ],
             },
-            {
-                type: 'border',
-                location: 'right',
-                id: 'border-right',
-                selected: -1,
-                size: 700,
-                minSize: 700,
-                children: [
-                    {
-                        config: {
-                            viewConfig: {
-                                uid: (window.unigraph as any).getNamespaceMap()[
-                                    '$/executable/similarity-searcher-component'
-                                ].uid,
-                                viewer: 'dynamic-view-detailed',
-                                type: '$/schema/executable',
-                                props: { trackActiveDetailedView: true },
-                            },
-                        },
-                        component: '/pages/library/object',
-                        type: 'tab',
-                        enableClose: false,
-                        minSize: 700,
-                        name: 'Similarity',
-                        id: 'similarity-pane',
-                    },
-                    {
-                        config: {
-                            viewConfig: {
-                                uid: (window.unigraph as any).getNamespaceMap()[
-                                    '$/executable/semantic-searcher-component'
-                                ].uid,
-                                viewer: 'dynamic-view-detailed',
-                                type: '$/schema/executable',
-                                props: { trackActiveSearchQuery: true },
-                            },
-                        },
-                        component: '/pages/library/object',
-                        type: 'tab',
-                        enableClose: false,
-                        minSize: 700,
-                        name: 'Search',
-                        id: 'search-pane',
-                    },
-                ],
-            },
+            ...(isSmallScreen()
+                ? []
+                : [
+                      {
+                          type: 'border',
+                          location: 'left',
+                          id: 'border-left',
+                          selected: isSmallScreen() ? -1 : 0,
+                          minSize: 240,
+                          size: 240,
+                          children: [
+                              {
+                                  type: 'tab',
+                                  enableClose: false,
+                                  minSize: 700,
+                                  maxSize: 700,
+                                  name: 'App Drawer',
+                                  id: 'app-drawer',
+                                  component: '/components/appdrawer',
+                              },
+                          ],
+                      },
+                      ...(hasSemanticSearchPackage ? [sidebar] : []),
+                  ]),
         ],
         layout: {
             type: 'row',
@@ -400,8 +408,19 @@ export function WorkSpace(this: any) {
                     id: mainTabsetId,
                     enableDeleteWhenEmpty: false,
                     weight: 50,
-                    selected: 0,
+                    selected: isSmallScreen() ? 1 : 0,
                     children: [
+                        ...(isSmallScreen()
+                            ? [
+                                  {
+                                      type: 'tab',
+                                      enableClose: false,
+                                      name: 'App Drawer',
+                                      id: 'app-drawer',
+                                      component: '/components/appdrawer',
+                                  },
+                              ]
+                            : []),
                         {
                             ...getComponentFromPage(`/${homePage}`),
                             enableClose: false,

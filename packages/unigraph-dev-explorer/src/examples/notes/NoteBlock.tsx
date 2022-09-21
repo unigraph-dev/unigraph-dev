@@ -33,11 +33,14 @@ import { useOutlineCollapsed } from './useOutlineCollapsed';
 import {
     DataContext,
     DataContextWrapper,
+    isSmallScreen,
     removeAllPropsFromObj,
     scrollIntoViewIfNeeded,
     TabContext,
 } from '../../utils';
 import { Markdown } from '../semantic/Markdown';
+
+const noteRefStyle = { display: 'contents', color: 'gray', fontSize: '14px' };
 
 const childrenComponents = {
     '$/schema/note_block': {
@@ -255,7 +258,11 @@ function NoteViewPageWrapper({ children, isRoot }: any) {
     return !isRoot ? (
         children
     ) : (
-        <div style={{ height: '100%', width: '100%', padding: '1rem 2rem', overflow: 'auto' }}>{children}</div>
+        <div
+            style={{ height: '100%', width: '100%', padding: isSmallScreen() ? '1rem' : '1rem 2rem', overflow: 'auto' }}
+        >
+            {children}
+        </div>
     );
 }
 
@@ -550,6 +557,7 @@ export function DetailedOutlinerBlock({
                         .filter((el: any) => el?.type)
                         .map((el: any) => (
                             <AutoDynamicView
+                                key={el.uid}
                                 object={
                                     ['$/schema/note_block', '$/schema/embed_block'].includes(el.type?.['unigraph.id'])
                                         ? el
@@ -979,7 +987,6 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren, componentId }: 
         removeAllPropsFromObj(data, ['~_value', '~unigraph.origin', 'unigraph.origin']);
         const targetObj = data;
         const paths: any[] = findAllUids(data, callbacks?.context?.uid).map((el) => el[1]);
-        console.log(paths);
         const refinedPaths = paths
             .filter(
                 (path) =>
@@ -1010,7 +1017,6 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren, componentId }: 
             .map((path) =>
                 path.filter(
                     (el: any) =>
-                        el?.['dgraph.type']?.includes('Entity') ||
                         el.uid === callbacks?.context?.uid ||
                         (el?.type?.['unigraph.id']?.startsWith('$/schema/') &&
                             !['$/schema/subentity', '$/schema/interface/semantic'].includes(el?.type?.['unigraph.id'])),
@@ -1130,7 +1136,7 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren, componentId }: 
                                             <Markdown
                                                 data={mdObject}
                                                 callbacks={{ ...callbacks, 'get-semantic-properties': () => ctx }}
-                                                style={{ display: 'contents', color: 'gray', fontSize: '14px' }}
+                                                style={noteRefStyle}
                                             />
                                         </>
                                     );

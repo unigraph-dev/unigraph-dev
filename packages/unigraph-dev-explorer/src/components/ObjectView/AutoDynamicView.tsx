@@ -31,7 +31,7 @@ export function AutoDynamicView({
     components,
     attributes,
     options,
-    style,
+    style: propStyle,
     onClick,
     shortcuts,
     setBacklinkComponent,
@@ -63,7 +63,9 @@ export function AutoDynamicView({
         style: optionStyle,
     } = finalOptions;
 
-    style = { ...(style || {}), ...optionStyle };
+    const style = React.useMemo(() => {
+        return { ...(propStyle || {}), ...optionStyle };
+    }, [propStyle, optionStyle]);
 
     if (!callbacks) callbacks = {};
 
@@ -425,7 +427,7 @@ export function AutoDynamicView({
                             {showSubentities ? (
                                 <ul>
                                     {getSubentities(getObjectRef.current()).map((el: any, index: number) => (
-                                        <li>
+                                        <li key={el.uid}>
                                             <AutoDynamicView
                                                 object={new UnigraphObject(el._value)}
                                                 components={components}

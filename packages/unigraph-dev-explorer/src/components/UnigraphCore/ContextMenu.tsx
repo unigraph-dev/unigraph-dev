@@ -133,6 +133,7 @@ export const UnigraphContextMenuItem = ({
 }) => {
     return (
         <MenuItem
+            dense
             style={contextMenuItemStyle}
             onClick={() => data.onClick(uid, object, handleClose, callbacks, contextUid)}
         >

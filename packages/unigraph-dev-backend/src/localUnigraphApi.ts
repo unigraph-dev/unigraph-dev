@@ -7,7 +7,6 @@ import { buildGraph, getCircularReplacer, getRandomInt } from 'unigraph-dev-comm
 import { Unigraph } from 'unigraph-dev-common/lib/types/unigraph';
 import {
     processAutorefUnigraphId,
-    makeQueryFragmentFromType,
     clearEmpties,
     buildUnigraphEntity,
     processAutoref,
@@ -158,7 +157,7 @@ export function getLocalUnigraphAPI(
                 name === 'any'
                     ? queryAny
                     : `query {entities(func: uid(par${eventId})) 
-            ${makeQueryFragmentFromType(name, states.caches.schemas.data)}
+            ${states.caches.schemas.dataAlt?.[1][name]}
             par${eventId} as var(func: has(type)) @filter((NOT type(Deleted)) AND type(Entity)) @cascade {
                 type @filter(eq(<unigraph.id>, "${name}"))
             }}`;

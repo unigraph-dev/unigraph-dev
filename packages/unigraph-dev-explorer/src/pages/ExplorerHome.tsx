@@ -1,7 +1,7 @@
 import { OpenInFull } from '@mui/icons-material';
 import { Card, Typography } from '@mui/material';
 import React from 'react';
-import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/api/unigraph';
+import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
 import { AutoDynamicViewDetailed } from '../components/ObjectView/AutoDynamicViewDetailed';
 import { registerDetailedDynamicViews } from '../unigraph-react';
 import { TabContext } from '../utils';

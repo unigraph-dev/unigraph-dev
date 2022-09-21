@@ -1,3 +1,15 @@
+import {
+    mdiAppsBox,
+    mdiBellOutline,
+    mdiBookOpenOutline,
+    mdiCogOutline,
+    mdiDeleteOutline,
+    mdiFeatureSearchOutline,
+    mdiInboxOutline,
+    mdiPackageVariantClosed,
+    mdiPencilBoxMultipleOutline,
+    mdiXml,
+} from '@mdi/js';
 import Settings from './pages/Settings';
 import { Inbox } from './components/UnigraphInbox/Inbox';
 import { Bookmarks } from './examples/bookmarks/Bookmarks';
@@ -34,6 +46,7 @@ import { SearchOverlayPopover } from './pages/SearchOverlay';
 import { SubscriptionsView } from './pages/SubscriptionsView';
 import { Feeds } from './components/UnigraphFeeds/Feeds';
 import { UIExtensionManager } from './components/ExtensionManager/UIExtensionManager';
+import { getIcon } from './utils';
 
 const pages: Record<string, any> = {
     'datamodel-playground': {
@@ -73,6 +86,7 @@ const pages: Record<string, any> = {
     library: {
         constructor: (props: any) => <UserLibraryAll {...props} />,
         name: 'Library',
+        icon: getIcon(mdiBookOpenOutline),
     },
     graph: {
         constructor: (props: any) => <GraphView {...props} />,
@@ -81,10 +95,12 @@ const pages: Record<string, any> = {
     trash: {
         constructor: (props: any) => <TrashView {...props} />,
         name: 'Trash Bin',
+        icon: getIcon(mdiDeleteOutline),
     },
     settings: {
         constructor: (props: any) => <Settings {...props} />,
         name: 'Settings',
+        icon: getIcon(mdiCogOutline),
     },
     'settings/twitter': {
         constructor: (props: any) => <TwitterSettings {...props} />,
@@ -97,6 +113,7 @@ const pages: Record<string, any> = {
     'package-manager': {
         constructor: (props: any) => <PackageManager {...props} />,
         name: 'Package Manager',
+        icon: getIcon(mdiPackageVariantClosed),
     },
     'library/object': {
         constructor: (props: any) => <DetailedObjectView {...props} />,
@@ -123,6 +140,7 @@ const pages: Record<string, any> = {
     inbox: {
         constructor: (props: any) => <Inbox {...props} />,
         name: 'Inbox',
+        icon: getIcon(mdiInboxOutline),
     },
     feeds: {
         constructor: (props: any) => <Feeds {...props} />,
@@ -132,11 +150,13 @@ const pages: Record<string, any> = {
         constructor: (props: any) => <ObjectEditor {...props} />,
         maximize: true,
         name: 'Object Editor',
+        icon: getIcon(mdiPencilBoxMultipleOutline),
     },
     'code-editor': {
         constructor: (props: any) => <CodeEditor {...props} />,
         name: 'Code Editor',
         maximize: true,
+        icon: getIcon(mdiXml),
     },
     'subscriptions-view': {
         constructor: (props: any) => <SubscriptionsView {...props} />,
@@ -145,15 +165,18 @@ const pages: Record<string, any> = {
     'app-library': {
         constructor: (props: any) => <AppLibrary {...props} />,
         name: 'App Library',
+        icon: getIcon(mdiAppsBox),
     },
     'notification-center': {
         constructor: (props: any) => <NotificationCenter {...props} />,
         name: 'Notification Center',
+        icon: getIcon(mdiBellOutline),
     },
     search: {
         constructor: (props: any) => <UnigraphSearch {...props} />,
         name: 'Search',
         paddingTop: true,
+        icon: getIcon(mdiFeatureSearchOutline),
     },
     'notes-list': {
         constructor: (props: any) => <NotesList {...props} />,

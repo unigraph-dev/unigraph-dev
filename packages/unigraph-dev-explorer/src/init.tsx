@@ -35,7 +35,8 @@ window.reloadCommands = () => {
     const commandsState = window.unigraph.getState('registry/commands');
 
     const pageCommands = Object.entries(window.unigraph.getState('registry/pages').value).map(([k, v]: any) => ({
-        name: `Open: ${v.name}`,
+        name: `${v.name}`,
+        icon: v.icon,
         about: `Open the page ${v.name}`,
         onClick: (ev: any, setInput: any, setClose: any) => {
             window.wsnavigator(`/${k}`);
@@ -47,7 +48,7 @@ window.reloadCommands = () => {
     const adderCommands = Object.entries(window.unigraph.getState('registry/quickAdder').value)
         .map(([k, v]: any) => {
             if ((v.alias || []).includes(k)) return false;
-            const matches = [k, ...(v.alias || [])].map((el: string) => `+${el}`).join(' / ');
+            const matches = [k, ...(v.alias || [])].map((el: string) => `${el}`).join(' / ');
             return {
                 name: `${matches}: ${v.description}`,
                 about: 'Add a Unigraph object',

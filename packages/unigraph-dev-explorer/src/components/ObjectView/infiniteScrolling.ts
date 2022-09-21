@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 
 const matchUids = (old: any[], newstuff: any[]) => {
-    return old.map((el) => el.uid) === newstuff.map((el) => el.uid);
+    return JSON.stringify(old.map((el) => el?.uid)) === JSON.stringify(newstuff.map((el) => el?.uid));
 };
 
 /**
@@ -89,7 +89,7 @@ export const setupInfiniteScrolling = (
         toSub,
         (results: any[] | any) => {
             const uidsMap: any = {};
-            results.forEach
+            Array.isArray(results)
                 ? results.forEach((el: any) => {
                       uidsMap[el.uid] = el;
                   })

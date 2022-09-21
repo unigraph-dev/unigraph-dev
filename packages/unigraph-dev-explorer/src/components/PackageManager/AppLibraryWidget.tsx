@@ -62,7 +62,7 @@ export function AllApps() {
                 <AppShortcut avatar={<Icon path={mdiInboxOutline} size={1} />} address="/inbox" text="Inbox" />
             </Grid>
             {totalViews.map((el: any) => (
-                <Grid item xs={3} lg={2}>
+                <Grid item xs={3} lg={2} key={el.uid}>
                     <AppShortcut
                         avatar={
                             el?._value?.icon ? (

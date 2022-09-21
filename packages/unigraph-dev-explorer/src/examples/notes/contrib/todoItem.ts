@@ -78,6 +78,7 @@ const editorPlugin = {
                 .filter((el: any) => el?._value?._value?.type?.['unigraph.id'] !== '$/schema/tag')
                 .map((el: any) => ({ uid: el.uid })),
         ];
+        const originalChildren = (data._value?.children?.['_value['] || []).map((el: any) => el?._value?._value?.uid);
         let tf;
         try {
             if (todoObject.time_frame)
@@ -125,7 +126,10 @@ const editorPlugin = {
                 : {}),
         };
         // console.log(newObject);
-        return window.unigraph.updateObject(data._value.uid, newObject, false, false, subsId, []);
+        setTimeout(() => {
+            window.unigraph.recalculateBacklinks([data.uid], originalChildren.filter(Boolean));
+        }, 500);
+        return window.unigraph.updateObject(data._value.uid, newObject, false, false, subsId, [{ uid: data.uid }]);
     },
 };
 

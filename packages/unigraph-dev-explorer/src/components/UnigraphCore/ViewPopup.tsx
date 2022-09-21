@@ -49,6 +49,7 @@ export function ViewPopup({ window }: any) {
     return (
         <div>
             <Popover
+                style={{ zIndex: 1000 }}
                 id="view-popup"
                 anchorReference="anchorPosition"
                 open={state.show && (state.windowName === undefined || window.name === state.windowName)}
