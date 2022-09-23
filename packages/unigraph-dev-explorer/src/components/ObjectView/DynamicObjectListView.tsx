@@ -1,22 +1,11 @@
 import {
-    Accordion,
-    AccordionSummary,
     Typography,
-    AccordionDetails,
-    List,
     ListItem,
-    Select,
-    MenuItem,
     IconButton,
     ListItemIcon,
     ListSubheader,
-    FormControlLabel,
-    Switch,
-    Button,
-    TextField,
     Slide,
     Divider,
-    Autocomplete,
     Box,
     Badge,
     BadgeProps,
@@ -24,9 +13,9 @@ import {
     Stack,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { ExpandMore, ClearAll, InboxOutlined, ExpandLess, ThreeSixty } from '@mui/icons-material';
+import { ClearAll, InboxOutlined } from '@mui/icons-material';
 import _ from 'lodash';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useDrop } from 'react-dnd';
 import { UnigraphObject, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
 import InfiniteScroll from 'react-infinite-scroll-component';
@@ -45,20 +34,13 @@ import { TransitionGroup } from 'react-transition-group';
 import { SwipeableList, SwipeableListItem, ActionAnimations } from '@sandstreamdev/react-swipeable-list';
 import { getDynamicViews } from '../../unigraph-react';
 import { AutoDynamicView } from './AutoDynamicView';
-import {
-    DataContext,
-    DataContextWrapper,
-    hoverSx,
-    isMobile,
-    TabContext,
-    trivialTypes,
-    tryHapticFeedback,
-} from '../../utils';
+import { DataContextWrapper, hoverSx, isMobile, TabContext, trivialTypes, tryHapticFeedback } from '../../utils';
 import { setupInfiniteScrolling } from './infiniteScrolling';
 import { DragandDrop } from './DragandDrop';
 import '@sandstreamdev/react-swipeable-list/dist/styles.css';
 import { onUnigraphContextMenu } from './DefaultObjectContextMenu';
 import { DynamicObjectTableView } from './DynamicObjectTableView';
+import { useIsInViewport } from '../../utils/useIsInViewport';
 
 const PREFIX = 'DynamicObjectListView';
 
@@ -129,7 +111,9 @@ const groupersDefault: Record<string, Grouper> = {
 
 function DynamicListItem({
     reverse,
+    autoRemove,
     listUid,
+    parRef,
     item,
     index,
     context,
@@ -144,6 +128,7 @@ function DynamicListItem({
     viewOptions,
     removeItemsFromView,
     noHoverHighlight,
+    scrollOver,
     componentRight,
     _swipableClassName,
     _swipableRest,
@@ -170,6 +155,16 @@ function DynamicListItem({
         },
     };
 
+    const itemRef = React.useRef(null);
+    const isScrolledOver = useIsInViewport(itemRef, parRef);
+    const [hasScrolledOver, setHasScrolledOver] = React.useState(false);
+    React.useEffect(() => {
+        setHasScrolledOver(!!isScrolledOver);
+    }, [isScrolledOver]);
+    React.useEffect(() => {
+        if (hasScrolledOver) scrollOver();
+    }, [hasScrolledOver]);
+
     React.useEffect(() => {
         if (swipeActionable) {
             tryHapticFeedback();
@@ -177,10 +172,12 @@ function DynamicListItem({
     }, [swipeActionable]);
     return (
         <ListItem
+            ref={itemRef}
             className={_swipableClassName}
             sx={noHoverHighlight ? {} : hoverSx}
             style={{
                 ...(compact ? { paddingTop: '2px', paddingBottom: '2px' } : {}),
+                ...(hasScrolledOver && autoRemove ? { filter: 'opacity(50%)' } : {}),
                 ...itemStyle,
             }}
             onMouseOver={() => setItemHovered(true)}
@@ -281,6 +278,7 @@ export type DynamicObjectListViewProps = {
     componentRight?: ({ data, callbacks }: any) => JSX.Element;
     noHoverHighlight?: boolean;
     inline?: boolean;
+    autoRemove?: boolean;
 };
 
 function DynamicListBasic({
@@ -344,6 +342,7 @@ function DynamicListBasic({
 }
 
 function DynamicList({
+    autoRemove,
     reverse,
     items,
     context,
@@ -375,14 +374,43 @@ function DynamicList({
         onUpdate: any;
     } | null>(null);
     const scrollerRef = React.useRef<any>(null);
+    const [scrollerHeight, setScrollerHeight] = React.useState(0);
+    const observer = React.useMemo(
+        () =>
+            new ResizeObserver((entries: any) => {
+                if (entries[0]) setScrollerHeight(entries[0].contentRect.height);
+            }),
+        [],
+    );
+    React.useEffect(() => {
+        if (scrollerRef.current === null) return () => false;
+        observer.observe(scrollerRef.current?.el);
+        return () => {
+            observer.disconnect();
+        };
+    }, [scrollerRef]);
+
+    const [myItems, setMyItems] = React.useState([]);
+    const newParRef = React.useRef(false);
+    React.useEffect(() => {
+        if (!autoRemove) setMyItems(items.map((el: any) => itemGetter(el).uid));
+        else {
+            const newItems = _.difference(
+                items.map((el: any) => itemGetter(el).uid),
+                myItems,
+            );
+            setMyItems([...newItems, ...myItems]);
+        }
+        newParRef.current = false;
+    }, [autoRemove, JSON.stringify(items.map((el: any) => itemGetter(el).uid))]);
 
     React.useEffect(() => {
         if (setupProps?.cleanup) setupProps.cleanup();
         let newProps: any;
-        if (items.length) {
+        if (myItems.length) {
             newProps = setupInfiniteScrolling(
-                items.map((el: any) => itemGetter(el).uid),
-                infinite ? 15 : items.length,
+                myItems,
+                infinite ? 15 : myItems.length,
                 (its: any[]) => {
                     setLoadedItems(its);
                 },
@@ -396,14 +424,14 @@ function DynamicList({
         return function cleanup() {
             newProps?.cleanup();
         };
-    }, [items.length === 0]);
+    }, [myItems.length === 0]);
 
     React.useEffect(() => {
         // eslint-disable-next-line max-len
         requestAnimationFrame(() => {
             if (
                 scrollerRef.current?._infScroll?.scrollHeight < scrollerRef.current?.el?.clientHeight &&
-                loadedItems.length < items.length
+                loadedItems.length < myItems.length
             ) {
                 setupProps?.next();
             }
@@ -411,14 +439,22 @@ function DynamicList({
     }, [loadedItems.length]);
 
     React.useEffect(() => {
-        setupProps?.onUpdate(items.map((el: any) => itemGetter(el).uid));
-    }, [JSON.stringify(items.map((el: any) => itemGetter(el).uid))]);
+        setupProps?.onUpdate(myItems);
+    }, [JSON.stringify(myItems)]);
+
+    const scrollOver = React.useCallback(
+        (uid?: string) => {
+            if (!autoRemove || !uid) return;
+            itemRemover(uid);
+        },
+        [loadedItems, autoRemove],
+    );
 
     return (
         <InfiniteScroll
             dataLength={loadedItems.length}
             next={setupProps?.next || (() => undefined)}
-            hasMore={loadedItems.length < items.length}
+            hasMore={loadedItems.length < myItems.length}
             loader={
                 <div className="lds-ellipsis" style={{ marginLeft: '16px' }}>
                     <div />
@@ -428,7 +464,13 @@ function DynamicList({
                 </div>
             }
             scrollableTarget={`scrollableDiv${parId}`}
-            endMessage=""
+            endMessage={
+                autoRemove ? (
+                    <div style={{ height: scrollerHeight, textAlign: 'center', paddingTop: '16px' }}>
+                        All caught up!
+                    </div>
+                ) : undefined
+            }
             ref={scrollerRef}
         >
             <DragandDrop
@@ -450,9 +492,10 @@ function DynamicList({
                         compact={compact}
                         itemStyle={itemStyle}
                         callbacks={callbacks}
-                        itemUids={items.map((ell: any) => itemGetter(ell).uid)}
+                        itemUids={myItems}
                         itemRemover={itemRemover}
                         noRemover={noRemover}
+                        parRef={scrollerRef}
                         removeOnEnter={removeOnEnter}
                         components={components}
                         viewOptions={viewOptions}
@@ -461,6 +504,8 @@ function DynamicList({
                         noHoverHighlight={noHoverHighlight}
                         _swipableClassName={_swipableClassName}
                         _swipableRest={_swipableRest}
+                        autoRemove={autoRemove}
+                        scrollOver={() => scrollOver(el?.uid)}
                     />
                 ))}
             </DragandDrop>
@@ -566,6 +611,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
     items,
     groupers,
     groupBy,
+    autoRemove,
     listUid,
     context,
     callbacks,
@@ -809,6 +855,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                           itemGetter,
                                           parId,
                                           noRemover,
+                                          autoRemove,
                                           compact,
                                           itemStyle,
                                           subscribeOptions,

@@ -23,7 +23,7 @@ export const globalImports = {
     HelloWorld: () => <p>Hello world!!!</p>,
     AutoDynamicView: (props: any) => <AutoDynamicView {...props} />,
     AutoDynamicViewDetailed: (props: any) => <AutoDynamicViewDetailed {...props} />,
-    DynamicObjectListView: (props: any) => <DynamicObjectListView {...props} />,
+    DynamicObjectListView,
     UnigraphObject,
     buildGraph,
     unpad,

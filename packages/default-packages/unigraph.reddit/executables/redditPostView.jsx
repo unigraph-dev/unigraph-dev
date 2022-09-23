@@ -98,7 +98,7 @@ return (
             <Typography variant="body1" style={{ marginRight: '8px' }}>
                 {data.get('name').as('primitive')}
             </Typography>
-            <div style={{ display: 'flex', color: 'gray' }}>
+            <div style={{ display: 'flex', color: 'gray', alignItems: 'baseline' }}>
                 <div style={{ alignSelf: 'center', marginRight: '6px' }}>
                     {(data?._value?.children?.['_value['] || []).map((el) => {
                         const elObj = el._value._value;
@@ -118,7 +118,7 @@ return (
                         }}
                         style={{
                             alignSelf: 'center',
-                            marginRight: '8px',
+                            marginRight: '4px',
                             display: hide ? 'none' : '',
                         }}
                     />
@@ -128,32 +128,39 @@ return (
                             setInnerExpanded(!innerExpanded);
                         }}
                         style={{
-                            alignSelf: 'center',
-                            marginRight: '8px',
+                            alignSelf: 'normal',
+                            marginRight: '4px',
                             display: hide ? 'none' : '',
+                            transform: 'scale(0.8)',
                         }}
                     />
                 )}
-                <div>
-                    <Typography variant="body2">
-                        Submitted
-                        {Sugar.Date.relative(new Date(data._updatedAt || data._timestamp._updatedAt))} to r/
-                        {data.get('subreddit/name').as('primitive')}
-                    </Typography>
-                    <div
-                        style={{
-                            color: 'gray',
-                            textDecoration: 'underline',
-                            cursor: 'pointer',
-                        }}
-                        onClick={() => {
-                            if (callbacks?.removeFromContext && callbacks?.removeOnEnter) callbacks.removeFromContext();
-                            window.open(data.get('permalink').as('primitive'), '_blank');
-                        }}
+                <Typography
+                    variant="body2"
+                    style={{
+                        textDecoration: 'underline',
+                        cursor: 'pointer',
+                        marginRight: '4px',
+                    }}
+                    onClick={() => {
+                        if (callbacks?.removeFromContext && callbacks?.removeOnEnter) callbacks.removeFromContext();
+                        window.open(data.get('permalink').as('primitive'), '_blank');
+                    }}
+                >
+                    Comment
+                </Typography>
+                •
+                <Typography variant="body2" style={{ marginLeft: '4px' }}>
+                    Submitted {Sugar.Date.relative(new Date(data._updatedAt || data._timestamp._updatedAt))} to r/
+                    <span
+                        style={{ textDecoration: 'underline', cursor: 'pointer' }}
+                        onClick={() =>
+                            window.open(`https://reddit.com/r/${data.get('subreddit/name').as('primitive')}`, '_blank')
+                        }
                     >
-                        Comment
-                    </div>
-                </div>
+                        {data.get('subreddit/name').as('primitive')}
+                    </span>
+                </Typography>
             </div>
             {innerExpanded ? (
                 <div style={{ marginLeft: isSmallScreen() ? '-56px' : '' }}>
