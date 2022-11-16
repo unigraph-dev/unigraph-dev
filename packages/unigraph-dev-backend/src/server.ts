@@ -1124,5 +1124,11 @@ export default async function startServer(client: DgraphClient, isRecoveryMode?:
         serverStates: serverStates,
     };
 
+    process.on('unhandledRejection', error => {
+        console.log('unhandledRejection', error);
+        localApi.addNotification({from: 'unigraph', content: JSON.stringify(error), name: 'unhandledRejection'});
+    });
+      
+
     return [app!, server] as const;
 }
