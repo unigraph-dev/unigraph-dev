@@ -21,6 +21,13 @@
                 "id": "speed-reader",
                 "src": "executables/speed_reader.jsx",
                 "editable": true
+            },
+            {
+                "id": "push-notification",
+                "env": "routine/js",
+                "src": "executables/push_notification.js",
+                "editable": true,
+                "name": "Send a push notification"
             }
         ],
         "entities": [

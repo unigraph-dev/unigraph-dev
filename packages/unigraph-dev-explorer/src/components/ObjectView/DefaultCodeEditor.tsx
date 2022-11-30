@@ -113,6 +113,7 @@ const lang: any = {
     'lambda/js': 'javascript',
     'client/js': 'javascript',
     'client-startup/js': 'javascript',
+    'backend-startup/js': 'javascript',
     'client/css': 'css',
 };
 
@@ -122,6 +123,7 @@ const ext: any = {
     'lambda/js': '.js',
     'client/js': '.js',
     'client-startup/js': '.js',
+    'backend-startup/js': '.js',
     'client/css': '.css',
 };
 

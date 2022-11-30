@@ -15,6 +15,7 @@ coverage/
 
 # Secrets
 secrets.env.json
+apns_privkey.p8
 
 # Etc
 packages/unigraph-dev-backend/exports.json
