@@ -23,11 +23,9 @@ import { ExpandMore, Save } from '@mui/icons-material';
 import { Actions } from 'flexlayout-react';
 import { useEffectOnce } from 'react-use';
 
-loader.config({ paths: { vs: './vendor/monaco-editor_at_0.31.1/' } });
+import unigraphDecl from 'unigraph-dev-common/lib/types/unigraph.d.ts?raw';
 
-const unigraphDecl: string =
-    // eslint-disable-next-line import/no-webpack-loader-syntax
-    require('!!raw-loader!unigraph-dev-common/lib/types/unigraph.d.ts').default;
+loader.config({ paths: { vs: './vendor/monaco-editor_at_0.31.1/' } });
 
 const beginStr = '/** Unigraph interface */';
 const endStr = '/** End of unigraph interface */';

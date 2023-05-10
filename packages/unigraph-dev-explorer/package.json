@@ -1,6 +1,7 @@
 {
     "name": "unigraph-dev-explorer",
     "version": "0.2.10",
+    "type": "module",
     "dependencies": {
         "@babel/core": "7.12.3",
         "@date-io/moment": "1.x",
@@ -99,6 +100,9 @@
         "typescript": "^4.2.2",
         "unigraph-dev-common": "^0.2.10",
         "url-loader": "4.1.1",
+        "vite": "^4.3.5",
+        "vite-plugin-svgr": "^3.2.0",
+        "vite-tsconfig-paths": "^4.2.0",
         "webpack": "4.44.2",
         "webpack-dev-server": "3.11.1",
         "webpack-manifest-plugin": "2.2.0",
@@ -106,6 +110,7 @@
         "zustand": "^3.7.1"
     },
     "devDependencies": {
+        "@originjs/vite-plugin-commonjs": "^1.0.3",
         "@testing-library/jest-dom": "^4.2.4",
         "@testing-library/react": "^9.3.2",
         "@testing-library/user-event": "^7.1.2",
@@ -120,14 +125,18 @@
         "@types/react-image-gallery": "^1.0.5",
         "@types/turndown": "^5.0.1",
         "@types/uuid": "^8.3.0",
+        "@vitejs/plugin-react": "^4.0.0",
         "@welldone-software/why-did-you-render": "^6.2.3",
+        "autoprefixer": "^10.4.14",
+        "postcss": "^8.4.23",
         "raw-loader": "^4.0.2",
-        "tailwindcss": "^3.3.2"
+        "tailwindcss": "^3.3.2",
+        "vite-plugin-commonjs": "^0.7.0"
     },
     "scripts": {
-        "tailwind-cli": "tailwindcss -i src/tailwind.css -o public/tw.css --watch",
-        "start": "concurrently \"yarn tailwind-cli\" \"node scripts/start.js\"",
-        "build": "node scripts/build.js",
+        "start": "vite",
+        "build": "tsc && vite build",
+        "serve": "vite preview",
         "test": "node scripts/test.js",
         "prepare": "node scripts/build.js --lib"
     },
