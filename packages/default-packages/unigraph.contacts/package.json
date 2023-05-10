@@ -44,25 +44,25 @@
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "ListItemIcon",
-                        "as": "ListItemIcon"
+                        "import_as": "ListItemIcon"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "ListItemText",
-                        "as": "ListItemText"
+                        "import_as": "ListItemText"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Typography",
-                        "as": "Typography"
+                        "import_as": "Typography"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Avatar",
-                        "as": "Avatar"
+                        "import_as": "Avatar"
                     }
                 ]
             },
@@ -77,19 +77,19 @@
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "TextField",
-                        "as": "TextField"
+                        "import_as": "TextField"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Button",
-                        "as": "Button"
+                        "import_as": "Button"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Typography",
-                        "as": "Typography"
+                        "import_as": "Typography"
                     }
                 ]
             },
@@ -104,49 +104,49 @@
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Typography",
-                        "as": "Typography"
+                        "import_as": "Typography"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Card",
-                        "as": "Card"
+                        "import_as": "Card"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "TextField",
-                        "as": "TextField"
+                        "import_as": "TextField"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Button",
-                        "as": "Button"
+                        "import_as": "Button"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "MenuItem",
-                        "as": "MenuItem"
+                        "import_as": "MenuItem"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material/icons",
                         "import": "MoreVert",
-                        "as": "MoreVert"
+                        "import_as": "MoreVert"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Grid",
-                        "as": "Grid"
+                        "import_as": "Grid"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Avatar",
-                        "as": "Avatar"
+                        "import_as": "Avatar"
                     }
                 ]
             }

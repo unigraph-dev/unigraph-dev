@@ -286,7 +286,7 @@ export function getLocalUnigraphAPI(
                     changedUids,
                 });
             } catch (e) {
-                console.log(e, uid, newObject);
+                console.log(e, uid);
             }
         },
         deleteRelation: async (uid, relation) => {

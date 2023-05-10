@@ -21,7 +21,7 @@
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Typography",
-                        "as": "Typography"
+                        "import_as": "Typography"
                     }
                 ],
                 "editable": true

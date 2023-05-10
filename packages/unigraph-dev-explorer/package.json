@@ -121,10 +121,12 @@
         "@types/turndown": "^5.0.1",
         "@types/uuid": "^8.3.0",
         "@welldone-software/why-did-you-render": "^6.2.3",
-        "raw-loader": "^4.0.2"
+        "raw-loader": "^4.0.2",
+        "tailwindcss": "^3.3.2"
     },
     "scripts": {
-        "start": "node scripts/start.js",
+        "tailwind-cli": "tailwindcss -i src/tailwind.css -o public/tw.css --watch",
+        "start": "concurrently \"yarn tailwind-cli\" \"node scripts/start.js\"",
         "build": "node scripts/build.js",
         "test": "node scripts/test.js",
         "prepare": "node scripts/build.js --lib"

@@ -48,13 +48,13 @@
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Typography",
-                        "as": "Typography"
+                        "import_as": "Typography"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Button",
-                        "as": "Button"
+                        "import_as": "Button"
                     }
                 ],
                 "name": "YouTube settings view"
@@ -69,19 +69,19 @@
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Typography",
-                        "as": "Typography"
+                        "import_as": "Typography"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Badge",
-                        "as": "Badge"
+                        "import_as": "Badge"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Avatar",
-                        "as": "Avatar"
+                        "import_as": "Avatar"
                     }
                 ],
                 "name": "YouTube video view"

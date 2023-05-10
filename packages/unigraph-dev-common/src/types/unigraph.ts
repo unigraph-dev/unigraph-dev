@@ -78,6 +78,7 @@ export type QueryRaw = {
     fragment: string;
     options?: {
         noExpand?: boolean;
+        skipBuild?: boolean;
     };
 };
 

@@ -141,14 +141,14 @@ const buildRefs = (
         env: string;
         package: string;
         import: string | undefined;
-        as: string;
+        import_as: string;
     }[],
 ) => {
     const refStrings: any[] = [];
     const refValues: any[] = [];
     refs.forEach((el) => {
         if (el.env === 'npm' && Object.keys(refsMap).includes(el.package)) {
-            refStrings.push(el.as);
+            refStrings.push(el.import_as);
             // @ts-expect-error: checked for inclusion
             const module: any = refsMap[el.package]?.();
             refValues.push(el.import ? module[el.import] : module);
@@ -163,7 +163,7 @@ export const getComponentFromExecutable = async (data: any, params: any, globalI
         env: el?._value?.env['_value.%'],
         package: el?._value?.package['_value.%'],
         import: el?._value?.import?.['_value.%'],
-        as: el?._value?.as['_value.%'],
+        import_as: el?._value?.import_as['_value.%'],
     }));
     const [refstr, refval] = buildRefs(imports);
     Object.entries(globalImports).forEach(([key, value]) => {

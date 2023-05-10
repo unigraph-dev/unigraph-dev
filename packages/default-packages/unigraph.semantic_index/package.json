@@ -59,25 +59,25 @@
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "TextField",
-                        "as": "TextField"
+                        "import_as": "TextField"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Button",
-                        "as": "Button"
+                        "import_as": "Button"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Divider",
-                        "as": "Divider"
+                        "import_as": "Divider"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Card",
-                        "as": "Card"
+                        "import_as": "Card"
                     }
                 ]
             },
@@ -92,25 +92,25 @@
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "TextField",
-                        "as": "TextField"
+                        "import_as": "TextField"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Button",
-                        "as": "Button"
+                        "import_as": "Button"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Divider",
-                        "as": "Divider"
+                        "import_as": "Divider"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Card",
-                        "as": "Card"
+                        "import_as": "Card"
                     }
                 ]
             },
@@ -132,31 +132,31 @@
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Typography",
-                        "as": "Typography"
+                        "import_as": "Typography"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Divider",
-                        "as": "Divider"
+                        "import_as": "Divider"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/icons-material",
                         "import": "Tag",
-                        "as": "Tag"
+                        "import_as": "Tag"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/icons-material",
                         "import": "Launch",
-                        "as": "Launch"
+                        "import_as": "Launch"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/icons-material",
                         "import": "ChevronRight",
-                        "as": "ChevronRight"
+                        "import_as": "ChevronRight"
                     }
                 ]
             }

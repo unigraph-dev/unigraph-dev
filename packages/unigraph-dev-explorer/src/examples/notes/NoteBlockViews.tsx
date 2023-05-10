@@ -27,7 +27,7 @@ export function NoteBlock({ data, inline, callbacks }: any) {
                             isJournal ? mdiNotebookOutline : data._hide ? mdiText : mdiNoteOutline
                         }
                         size={0.8}
-                        style={{ opacity: 0.54, marginRight: '4px', verticalAlign: 'text-bottom' }}
+                        style={{ opacity: 0.54, marginRight: '4px', verticalAlign: 'text-bottom', display: 'inline' }}
                     />
                     <AutoDynamicView
                         object={data.get('text')?._value._value}

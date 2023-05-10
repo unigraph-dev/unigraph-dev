@@ -52,9 +52,11 @@ export const useSubscriptionDelegate: (...args: any) => [() => any, number] = (
     const uidRef = React.useRef(undefined);
     React.useEffect(() => {
         const newSubs = getRandomInt();
+        console.log('sanity');
         if (isObjectStub && object?.uid !== uidRef.current) {
             // console.log(tabContext);
             // if (subsId) tabContext.unsubscribe(subsId);
+            console.log(objectView);
             const query = objectView?.query?.('QUERYFN_TEMPLATE');
             tabContext.subscribe(
                 {

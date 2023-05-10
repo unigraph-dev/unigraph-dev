@@ -28,10 +28,34 @@ const getEod = (date) => {
 start = start ? new Date(start) : new Date();
 const end = new Date(start.getTime() + 1000 * 60 * 60 * 24 * days);
 
-return `(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted)) AND (NOT eq(<_hide>, true))) @recurse {
+return `(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted)) AND (NOT eq(<_hide>, true))) {
     uid
-    <unigraph.id>
-    expand(_userpredicate_)
+    type { uid <unigraph.id> }
+    dgraph.type
+    _stub: math(1)
+    <~unigraph.origin> @filter(uid(frames)) {
+        uid
+    }
+    _value {
+        start {
+            _value {
+                _value {
+                    datetime {
+                        <_value.%dt>
+                    }
+                }
+            }
+        }
+        end {
+            _value {
+                _value {
+                    datetime {
+                        <_value.%dt>
+                    }
+                }
+            }
+        }
+    }
 }
 frames as var(func: uid(partf)) @cascade {
     _value {

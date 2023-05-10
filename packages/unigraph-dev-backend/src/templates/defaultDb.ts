@@ -197,7 +197,7 @@ export const packageExecutableSchema = {
                                     },
                                 },
                                 {
-                                    _key: 'as',
+                                    _key: 'import_as',
                                     _definition: {
                                         type: {
                                             'unigraph.id': '$/primitive/string',

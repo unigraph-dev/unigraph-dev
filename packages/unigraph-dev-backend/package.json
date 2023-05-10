@@ -47,15 +47,12 @@
         "lodash": "^4.17.20",
         "luxon": "^2.0.2",
         "mailparser": "^3.2.0",
-        "nblas": "^2.1.9",
-        "nlapack": "^2.0.4",
         "node-cron": "^3.0.0",
         "node-fetch": "^2.6.1",
         "oauth": "^0.9.15",
         "rrule": "^2.6.8",
         "rss-parser": "^3.12.0",
         "sugar": "^2.0.6",
-        "vectorious": "^6.1.4",
         "ws": "^7.4.5",
         "youtubei.js": "^1.4.3"
     }

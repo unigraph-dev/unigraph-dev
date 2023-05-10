@@ -461,6 +461,11 @@ export function makeQueryFragmentFromType(
         if (!localSchema?.type?.['unigraph.id']) return {};
         let type = localSchema.type['unigraph.id'];
 
+        if (type?.startsWith('$/schema/') && type !== '$/schema/any' && !schemaMap[type]) {
+            console.error(`Schema ${type} not found!`);
+            type = '$/schema/any';
+        }
+
         if (type === '$/schema/any') {
             entries = { uid: {}, 'unigraph.id': {}, 'expand(_userpredicate_)': makePart(localSchema, depth + 1), "unigraph.indexes": { uid: {}, "expand(_userpredicate_)": { uid: {} } } };
         } else if (type.startsWith('$/schema/')) {
@@ -472,11 +477,11 @@ export function makeQueryFragmentFromType(
                 const properties = localSchema._properties.map((p: any) => {
                     if (!p._isDetailed) {
                         let ret: any = {};
-                        ret[p._key] = makePart(p._definition, depth + 1);
+                        ret[`<${p._key}>`] = makePart(p._definition, depth + 1);
                         return ret;
                     } else {
                         let ret: any = {};
-                        ret[p._key] = makePart(p._definition, depth + 1);
+                        ret[`<${p._key}>`] = makePart(p._definition, depth + 1);
                         return ret;
                     }
                 });
@@ -552,7 +557,7 @@ export function makeQueryFragmentFromType(
     let res = makePart(localSchema, 0, true);
     removeDups(res);
     // console.log(JSON.stringify(res, null, 4))
-    let ret = toString ? '{' + jsonToGraphQLQuery(res) + '}' : res;
+    let ret = toString ? '{' + jsonToGraphQLQuery(res, {pretty: true}) + '}' : res;
     return ret;
 }
 

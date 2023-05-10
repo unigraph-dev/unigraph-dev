@@ -16,7 +16,7 @@ const sortDatedObjects = (a: any, b: any) => {
 const getEntitiesWithTimeframe = (timeframe: any, allEntities: any) => {
     return allEntities
         .filter((el: any) => el.type['unigraph.id'] !== '$/schema/time_frame')
-        .filter((el: any) => JSON.stringify(unpad(el, false)).includes(timeframe._value.uid));
+        .filter((el: any) => JSON.stringify(el).includes(timeframe.uid));
 };
 
 const groupByTimeFrameStart = (els: any[]) => {
@@ -26,11 +26,13 @@ const groupByTimeFrameStart = (els: any[]) => {
     groups[Sugar.Date.medium(new Date())] = [];
     const timeframes = els.filter((el) => el.type['unigraph.id'] === '$/schema/time_frame');
     timeframes.forEach((el) => {
+        console.log(el);
         const dd = Sugar.Date.medium(new Date(new UnigraphObject(el).get('start/datetime').as('primitive')));
         if (groups[dd]) groups[dd].push(el);
         else groups[dd] = [el];
     });
     // 2. Go through groups and find all entities associated with these timeframes
+    console.log(groups, els);
 
     const finalGroups: any = Object.entries(groups)
         .sort((a, b) => Sugar.Date.create(a[0]).getTime() - Sugar.Date.create(b[0]).getTime())
@@ -55,7 +57,7 @@ export function CurrentEvents() {
                 setCurrentEvents(res as any[]);
             },
             id,
-            { noExpand: true },
+            { noExpand: true, skipBuild: true },
         );
 
         return function cleanup() {

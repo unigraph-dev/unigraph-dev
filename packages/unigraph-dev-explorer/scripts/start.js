@@ -99,9 +99,6 @@ checkBrowsers(paths.appPath, isInteractive)
             if (err) {
                 return console.log(err);
             }
-            if (isInteractive) {
-                clearConsole();
-            }
 
             if (env.raw.FAST_REFRESH && semver.lt(react.version, '16.10.0')) {
                 console.log(

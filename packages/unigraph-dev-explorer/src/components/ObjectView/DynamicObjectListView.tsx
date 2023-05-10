@@ -878,33 +878,30 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                               >
                                                   {el.name}
                                               </ListSubheader>
-                                              {React.createElement(
-                                                  isStub && !loadAll ? DynamicList : DynamicListBasic,
-                                                  {
-                                                      reverse: reverseOrder,
-                                                      items: el.items,
-                                                      context,
-                                                      listUid,
-                                                      callbacks,
-                                                      itemRemover,
-                                                      itemUids: el.items.map((ell) => ell.uid),
-                                                      itemGetter: _.identity,
-                                                      infinite: false,
-                                                      parId,
-                                                      noRemover,
-                                                      compact,
-                                                      itemStyle,
-                                                      subscribeOptions,
-                                                      removeOnEnter,
-                                                      components,
-                                                      componentRight,
-                                                      viewOptions,
-                                                      removeItemsFromView,
-                                                      noHoverHighlight,
-                                                      _swipableClassName: className,
-                                                      _swipableRest: rest,
-                                                  },
-                                              )}
+                                              {React.createElement(DynamicListBasic, {
+                                                  reverse: reverseOrder,
+                                                  items: el.items,
+                                                  context,
+                                                  listUid,
+                                                  callbacks,
+                                                  itemRemover,
+                                                  itemUids: el.items.map((ell) => ell.uid),
+                                                  itemGetter: _.identity,
+                                                  infinite: false,
+                                                  parId,
+                                                  noRemover,
+                                                  compact,
+                                                  itemStyle,
+                                                  subscribeOptions,
+                                                  removeOnEnter,
+                                                  components,
+                                                  componentRight,
+                                                  viewOptions,
+                                                  removeItemsFromView,
+                                                  noHoverHighlight,
+                                                  _swipableClassName: className,
+                                                  _swipableRest: rest,
+                                              })}
                                           </React.Fragment>
                                       ))
                             }

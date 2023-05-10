@@ -146,12 +146,20 @@ export function createSchemaCache(client: DgraphClient): Cache<any> {
         cache.data = buildGraphFromMap(cache.data);
 
         const t = new Date().getTime();
-        cache.dataAlt![1] = Object.fromEntries(
-            Object.keys(cache.data).map((schemaName) => [
-                schemaName,
-                makeQueryFragmentFromType(schemaName, cache.data),
-            ]),
-        );
+        try {
+            cache.dataAlt![1] = Object.fromEntries(
+                Object.keys(cache.data).map((schemaName) => [
+                    schemaName,
+                    makeQueryFragmentFromType(schemaName, cache.data),
+                ]),
+            );
+        } catch (e) {
+            console.log(e);
+            console.log(cache.data);
+            console.log(cache.dataAlt![1]);
+            throw new Error('Failed to build query templates!');
+        }
+
         console.log(`Building query templates took ${new Date().getTime() - t} ms.`);
     };
 

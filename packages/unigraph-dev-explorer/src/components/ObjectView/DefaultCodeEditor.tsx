@@ -246,7 +246,7 @@ export function ExecutableCodeEditor({ data, options }: any) {
                                                             env,
                                                             package: pkg,
                                                             import: impt,
-                                                            as: imptAs,
+                                                            import_as: imptAs,
                                                         },
                                                     ],
                                                 });

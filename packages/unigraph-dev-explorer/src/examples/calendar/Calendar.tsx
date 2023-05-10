@@ -6,6 +6,7 @@ import { unionBy, isString, has, flow, propEq, curry, unionWith } from 'lodash/f
 import { Calendar as BigCalendar, DateLocalizer, momentLocalizer, stringOrDate, View } from 'react-big-calendar';
 import moment from 'moment';
 import {} from 'lodash';
+import { makeQueryFragmentFromType } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { getContrast, isValidHttpUrl, TabContext } from '../../utils';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
@@ -129,10 +130,104 @@ export function TimeFrame({ data, callbacks }: any) {
 }
 
 const queryDatedWithinTimeRange = (start: string, end: string) => {
-    return `calendarObjs(func: uid(calendarObjs)) @filter(type(Entity) AND (NOT type(Deleted)) AND (NOT eq(<_hide>, true))) @recurse(depth:8){ 
+    return `calendarObjs(func: uid(calendarObjs)) @filter(type(Entity) AND (NOT type(Deleted)) AND (NOT eq(<_hide>, true))) {
         uid
-        <unigraph.id> 
-        expand(_userpredicate_) 
+        type { <unigraph.id> }
+        dgraph.type
+        _stub: math(1)
+        _value {
+            <calendar> {
+                _value {
+                    _value {
+                        <color> {
+                            uid
+                            _value {
+                                <_value.%>
+                            }
+                        }
+                    }
+                }
+            }
+            date {
+                _value {
+                    _value {
+                        datetime {
+                            <_value.%dt>
+                        }
+                    }
+                }
+            }
+            name {
+                _value {
+                    _value {
+                        <_value.%>
+                    }
+                }
+            }
+            time_frame {
+                _value {
+                    _value {
+                        start {
+                            _value {
+                                _value {
+                                    datetime {
+                                        <_value.%dt>
+                                    }
+                                }
+                            }
+                        }
+                        end {
+                            _value {
+                                _value {
+                                    datetime {
+                                        <_value.%dt>
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            recurrence {
+                <_value[> {
+                    uid
+                    dgraph.type
+                    type {
+                        unigraph.id
+                    }
+                    _hide
+                    _value @filter(uid(timedObjs)) {
+                        uid
+                        dgraph.type
+                        type {
+                            unigraph.id
+                        }
+                        _hide
+                        _value {
+                            start {
+                                _value {
+                                    _value {
+                                        datetime {
+                                            <_value.%dt>
+                                        }
+                                    }
+                                }
+                            }
+                            end {
+                                _value {
+                                    _value {
+                                        datetime {
+                                            <_value.%dt>
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    <_key>
+                }
+            }
+        }
     }
    timepoints(func: eq(<unigraph.id>, "$/schema/time_point")) {
         <~type> {
@@ -182,7 +277,7 @@ const todoToBigCalendarEvent = (datedObj: TodoUni): CalendarViewEvent => {
 
 const journalToBigCalendarEvent = (datedObj: JournalUni): CalendarViewEvent => {
     return {
-        title: datedObj.get('note/text').as('primitive'),
+        title: datedObj.get('note/text')?.as('primitive') || '...',
         start: getDateAsLocal(datedObj.get('date/datetime').as('primitive')),
         end: getDateAsLocal(datedObj.get('date/datetime').as('primitive')),
         allDay: true,
@@ -227,7 +322,7 @@ const datedObjToBigCalendarEvent = curry((datedObj: any, timeframe: any) => {
 });
 const recurrentCalendarEventToBigCalendarEventsInRange = curry(
     (range: CalendarViewRange | null, datedObj: DatedObject): CalendarViewEvent[] => {
-        const timeframes = datedObj.get('recurrence')?.['_value['];
+        const timeframes = datedObj.get('recurrence')?.['_value[']?.filter((el: any) => el._value);
         if (timeframes?.length) {
             return buildGraph(timeframes).filter(isInRange(range)).map(datedObjToBigCalendarEvent(datedObj));
         }
@@ -311,7 +406,7 @@ export function Calendar() {
                 );
             },
             id,
-            { metadataOnly: true },
+            { noExpand: true },
         );
 
         return function cleanup() {

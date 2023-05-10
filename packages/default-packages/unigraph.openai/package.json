@@ -23,48 +23,48 @@
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "TextField",
-                        "as": "TextField"
+                        "import_as": "TextField"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Button",
-                        "as": "Button"
+                        "import_as": "Button"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Typography",
-                        "as": "Typography"
+                        "import_as": "Typography"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Card",
-                        "as": "Card"
+                        "import_as": "Card"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Select",
-                        "as": "Select"
+                        "import_as": "Select"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "MenuItem",
-                        "as": "MenuItem"
+                        "import_as": "MenuItem"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material/icons",
-                        "as": "Icons"
+                        "import_as": "Icons"
                     },
                     {
                         "env": "npm",
                         "package": "@mui/material",
                         "import": "Divider",
-                        "as": "Divider"
+                        "import_as": "Divider"
                     }
                 ]
             },

@@ -485,7 +485,7 @@ export default function unigraph(url: string, browserId: string, password?: stri
                     else reject(response);
                 };
                 subscriptions[id] = (result: any[], skipBuild?: boolean) => {
-                    const fn = skipBuild ? _.identity : buildGraph;
+                    const fn = skipBuild || options?.skipBuild === true ? _.identity : buildGraph;
                     callback((fn as any)(result.map((el: any) => new UnigraphObject(el) as any)));
                 };
                 sendEvent(connection, 'subscribe_to_query', { queryFragment: fragment, options }, id);
