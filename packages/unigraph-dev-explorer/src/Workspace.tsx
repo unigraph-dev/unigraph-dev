@@ -384,6 +384,7 @@ export function WorkSpace(this: any) {
                           selected: isSmallScreen() ? -1 : 0,
                           minSize: 240,
                           size: 240,
+                          barSize: -1,
                           children: [
                               {
                                   type: 'tab',

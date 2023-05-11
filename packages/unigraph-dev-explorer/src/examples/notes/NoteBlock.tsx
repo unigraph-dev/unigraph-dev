@@ -286,6 +286,7 @@ function NoteViewTextWrapper({
 }) {
     return (
         <div
+            className="py-0.5"
             style={{
                 display: 'flex',
                 alignItems: 'center',

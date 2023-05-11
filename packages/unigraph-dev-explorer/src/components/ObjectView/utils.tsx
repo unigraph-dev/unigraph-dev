@@ -44,7 +44,7 @@ export function SubentityDropAcceptor({ uid, display }: any) {
                 display: display ? '' : 'none',
                 width: '100%',
                 height: '6px',
-                marginTop: '-3px',
+                marginTop: '-6px',
             }}
         >
             <div

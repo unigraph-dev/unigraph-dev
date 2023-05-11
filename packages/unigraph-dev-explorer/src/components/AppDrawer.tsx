@@ -36,10 +36,7 @@ const StyledListItemIcon = styled(ListItemIcon)({
 });
 
 const StyledListItemText = ({ primary }: any) => (
-    <ListItemText
-        primary={primary}
-        primaryTypographyProps={{ style: { fontSize: '.875rem', letterSpacing: '.2px' } }}
-    />
+    <span className="text-slate-600 text-[13px] font-medium">{primary}</span>
 );
 
 const StyledListSubheader = styled(ListSubheader)({
@@ -72,7 +69,7 @@ export default function DrawerRouter() {
     devState.subscribe((newState: boolean) => setDevMode(newState));
 
     return (
-        <Root style={{ height: '100%', minWidth: '240px', width: '100%' }}>
+        <Root style={{ height: '100%', minWidth: '240px', width: '100%' }} className="pl-0.5">
             <Drawer
                 variant="permanent"
                 classes={{
@@ -87,85 +84,102 @@ export default function DrawerRouter() {
                 }}
             >
                 <List>
-                    <div style={{ marginBottom: '12px' }} id="div-home">
-                        <StyledListSubheader id="subheader-home"> HOME </StyledListSubheader>
+                    <div style={{ marginBottom: '16px' }} id="div-home">
+                        <span className="font-semibold text-gray-500/80 text-xs tracking-wide pl-4">Home</span>
 
-                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/home')}>
-                            <StyledListItemIcon>
-                                <Icon path={mdiHomeOutline} size={1} />
-                            </StyledListItemIcon>
+                        <ListItem sx={appDrawerHoverSx} className="my-1.5" onClick={() => window.wsnavigator('/home')}>
+                            <Icon className="mr-2.5 text-gray-500" path={mdiHomeOutline} size={0.68} />
                             <StyledListItemText primary="Home" />
                         </ListItem>
 
-                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/library')}>
-                            <StyledListItemIcon>
-                                <Icon path={mdiBookOpenOutline} size={1} />
-                            </StyledListItemIcon>
+                        <ListItem
+                            sx={appDrawerHoverSx}
+                            onClick={() => window.wsnavigator('/library')}
+                            className="my-1.5"
+                        >
+                            <Icon className="mr-2.5 text-gray-500" path={mdiBookOpenOutline} size={0.68} />
                             <StyledListItemText primary="Library" />
                         </ListItem>
 
-                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/trash')}>
-                            <StyledListItemIcon>
-                                <Icon path={mdiDeleteOutline} size={1} />
-                            </StyledListItemIcon>
+                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/trash')} className="my-1.5">
+                            <Icon className="mr-2.5 text-gray-500" path={mdiDeleteOutline} size={0.68} />
                             <StyledListItemText primary="Trash bin" />
                         </ListItem>
                     </div>
-                    <div style={{ marginBottom: '12px' }} id="div-unigraph">
-                        <StyledListSubheader id="subheader-unigraph"> UNIGRAPH </StyledListSubheader>
-                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/settings')}>
-                            <StyledListItemIcon>
-                                <Icon path={mdiCogOutline} size={1} />
-                            </StyledListItemIcon>
+                    <div style={{ marginBottom: '16px' }} id="div-unigraph">
+                        <span className="font-semibold text-gray-500/80 text-xs tracking-wide pl-4">Unigraph</span>
+                        <ListItem
+                            sx={appDrawerHoverSx}
+                            onClick={() => window.wsnavigator('/settings')}
+                            className="my-1.5"
+                        >
+                            <Icon className="mr-2.5 text-gray-500" path={mdiCogOutline} size={0.68} />
                             <StyledListItemText primary="Settings" />
                         </ListItem>
-                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/notification-center')}>
-                            <StyledListItemIcon>
-                                <Icon path={mdiBellOutline} size={1} />
-                            </StyledListItemIcon>
+                        <ListItem
+                            sx={appDrawerHoverSx}
+                            onClick={() => window.wsnavigator('/notification-center')}
+                            className="my-1.5"
+                        >
+                            <Icon className="mr-2.5 text-gray-500" path={mdiBellOutline} size={0.68} />
                             <StyledListItemText primary="Notifications" />
                         </ListItem>
-                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/package-manager')}>
-                            <StyledListItemIcon>
-                                <Icon path={mdiPackageVariantClosed} size={1} />
-                            </StyledListItemIcon>
+                        <ListItem
+                            sx={appDrawerHoverSx}
+                            onClick={() => window.wsnavigator('/package-manager')}
+                            className="my-1.5"
+                        >
+                            <Icon className="mr-2.5 text-gray-500" path={mdiPackageVariantClosed} size={0.68} />
                             <StyledListItemText primary="Packages" />
                         </ListItem>
                     </div>
-                    <div style={{ display: devMode ? 'inherit' : 'none', marginBottom: '12px' }} id="div-devtools">
-                        <StyledListSubheader id="subheader-developer-tools"> DEVELOPER TOOLS </StyledListSubheader>
-                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/object-editor')}>
-                            <StyledListItemIcon>
-                                <Icon path={mdiPencilBoxMultipleOutline} size={1} />
-                            </StyledListItemIcon>
+                    <div style={{ display: devMode ? 'inherit' : 'none', marginBottom: '16px' }} id="div-devtools">
+                        <span className="font-semibold text-gray-500/80 text-xs tracking-wide pl-4">
+                            Developer Tools
+                        </span>
+                        <ListItem
+                            sx={appDrawerHoverSx}
+                            onClick={() => window.wsnavigator('/object-editor')}
+                            className="my-1.5"
+                        >
+                            <Icon className="mr-2.5 text-gray-500" path={mdiPencilBoxMultipleOutline} size={0.68} />
                             <StyledListItemText primary="Object Editor" />
                         </ListItem>
-                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/code-editor')}>
-                            <StyledListItemIcon>
-                                <Icon path={mdiXml} size={1} />
-                            </StyledListItemIcon>
+                        <ListItem
+                            sx={appDrawerHoverSx}
+                            onClick={() => window.wsnavigator('/code-editor')}
+                            className="my-1.5"
+                        >
+                            <Icon className="mr-2.5 text-gray-500" path={mdiXml} size={0.68} />
                             <StyledListItemText primary="Code Editor" />
                         </ListItem>
-                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/request')}>
-                            <StyledListItemIcon>
-                                <Icon path={mdiMessageArrowRightOutline} size={1} />
-                            </StyledListItemIcon>
+                        <ListItem
+                            sx={appDrawerHoverSx}
+                            onClick={() => window.wsnavigator('/request')}
+                            className="my-1.5"
+                        >
+                            <Icon className="mr-2.5 text-gray-500" path={mdiMessageArrowRightOutline} size={0.68} />
                             <StyledListItemText primary="Request" />
                         </ListItem>
-                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/datamodel-playground')}>
-                            <StyledListItemIcon>
-                                <Icon path={mdiDatabaseEyeOutline} size={1} />
-                            </StyledListItemIcon>
+                        <ListItem
+                            sx={appDrawerHoverSx}
+                            onClick={() => window.wsnavigator('/datamodel-playground')}
+                            className="my-1.5"
+                        >
+                            <Icon className="mr-2.5 text-gray-500" path={mdiDatabaseEyeOutline} size={0.68} />
                             <StyledListItemText primary="DataModel Playground" />
                         </ListItem>
-                        <ListItem sx={appDrawerHoverSx} onClick={() => window.wsnavigator('/ui-extension-manager')}>
-                            <StyledListItemIcon>
-                                <Icon path={mdiCubeSend} size={1} />
-                            </StyledListItemIcon>
+                        <ListItem
+                            sx={appDrawerHoverSx}
+                            onClick={() => window.wsnavigator('/ui-extension-manager')}
+                            className="my-1.5"
+                        >
+                            <Icon className="mr-2.5 text-gray-500" path={mdiCubeSend} size={0.68} />
                             <StyledListItemText primary="UI Extension Manager" />
                         </ListItem>
                     </div>
-                    <StyledListSubheader id="subheader-developer-tools"> FAVORITES </StyledListSubheader>
+                    <span className="font-semibold text-gray-500/80 text-xs tracking-wide pl-4">Favorites</span>
+                    <div className="mb-1.5" />
                     <FavoriteBar />
                 </List>
             </Drawer>

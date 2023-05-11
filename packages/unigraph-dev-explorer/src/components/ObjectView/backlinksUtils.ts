@@ -1,14 +1,14 @@
 export const backlinkQuery = `(func: uid(QUERYFN_TEMPLATE)) {
     uid
-    <~_value> {
+    <~_value> (first: -1000) {
         _propertyType
         type { <unigraph.id> }
-        <unigraph.origin> @filter(NOT eq(_hide, true) AND type(Entity)) {
+        <unigraph.origin> (first: -1000) @filter(NOT eq(_hide, true) AND type(Entity)) {
             type { <unigraph.id> }
             uid
         }
     }
-    <unigraph.origin> @filter(NOT eq(_hide, true) AND type(Entity)) {
+    <unigraph.origin> (first: -1000) @filter(NOT eq(_hide, true) AND type(Entity))  {
         type { <unigraph.id> }
         uid
     }

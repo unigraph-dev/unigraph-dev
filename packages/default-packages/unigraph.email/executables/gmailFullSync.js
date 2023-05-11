@@ -19,6 +19,7 @@ const account = (
                 }
             }
         }
+        username { <_value.%> }
         access_token { <_value.%> }
         token_expires_in { <_value.%dt> }
         refresh_token { <_value.%> }
@@ -69,10 +70,12 @@ if (account?.uid) {
     });
 
     const newMsgs = [];
+    const newMsgsIds = [];
+    let totalMsgs = 0;
     const syncPage = async (pageToken) => {
         const res = await gmail.users.messages.list({
             userId: 'me',
-            maxResults: 40,
+            maxResults: 100,
             pageToken,
         });
         const messages = res.data.messages.map((el) => el.id);
@@ -102,25 +105,37 @@ if (account?.uid) {
         const pageFullMsgs = await Promise.all(
             pageMsg.map((id) => gmail.users.messages.get({ userId: 'me', id, format: 'raw' })),
         );
-        newMsgs.push(...pageFullMsgs);
-        console.log(`${newMsgs.length} emails loaded!`);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        totalMsgs += pageFullMsgs.length;
+        if (pageFullMsgs.length)
+            await unigraph.runExecutable('$/executable/add-email', {
+                dont_check_unique: true,
+                messages: pageFullMsgs.map((el) => {
+                    return {
+                        message: Buffer.from(el.data.raw, 'base64').toString(),
+                        externalUrl: `https://mail.google.com/mail/u/${account._value.username['_value.%']}/#all/${el.data.id}`,
+                        read: !el.data.labelIds?.includes?.('UNREAD') || true,
+                        inbox: el.data.labelIds?.includes?.('INBOX') || false,
+                    };
+                }),
+            });
+        console.log(`${totalMsgs} emails synced!`);
+        if (pageFullMsgs.length) await new Promise((resolve) => setTimeout(resolve, 1000));
         if (res.data.nextPageToken) await syncPage(res.data.nextPageToken);
     };
 
     await syncPage();
     console.log(`Trying to sync ${newMsgs.length} previous emails...`);
 
-    if (newMsgs.length)
-        unigraph.runExecutable('$/executable/add-email', {
-            dont_check_unique: true,
-            messages: newMsgs.map((el) => {
-                return {
-                    message: Buffer.from(el.data.raw, 'base64').toString(),
-                    read: !el.data.labelIds?.includes?.('UNREAD') || true,
-                };
-            }),
-        });
+    // if (newMsgs.length)
+    //     unigraph.runExecutable('$/executable/add-email', {
+    //         dont_check_unique: true,
+    //         messages: newMsgs.map((el) => {
+    //             return {
+    //                 message: Buffer.from(el.data.raw, 'base64').toString(),
+    //                 read: !el.data.labelIds?.includes?.('UNREAD') || true,
+    //             };
+    //         }),
+    //     });
 
     // Now we can sync gmail inboxes
 }

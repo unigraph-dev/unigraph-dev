@@ -149,3 +149,7 @@
 .flexlayout__tab_button_leading {
     margin-right: 4px;
 }
+
+.flexlayout__border_left {
+    max-width: 0px;
+}

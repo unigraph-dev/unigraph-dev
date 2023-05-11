@@ -16,7 +16,7 @@ const appItemStyle = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    p: '16px',
+    p: '10px',
     cursor: 'pointer',
     ...hoverSx,
 } as const;
@@ -24,8 +24,8 @@ const appItemStyle = {
 export function AppShortcut({ avatar, address, text }: AppShortcutProps) {
     return (
         <Box sx={appItemStyle} onClick={() => window.wsnavigator(address)}>
-            {avatar}
-            {text}
+            <div className="mb-1.5 p-2 rounded-lg bg-indigo-50 ring-1 ring-gray-200 text-indigo-900">{avatar}</div>
+            <span className="font-medium text-[13px] text-slate-600">{text}</span>
         </Box>
     );
 }
@@ -51,26 +51,33 @@ export function AllApps() {
 
     return (
         <Grid container spacing={2}>
-            <Grid item xs={3} lg={2}>
+            <Grid item xs={3} lg={1.5}>
                 <AppShortcut
-                    avatar={<Icon path={mdiFeatureSearchOutline} size={1} />}
+                    avatar={<Icon path={mdiFeatureSearchOutline} size={0.83} />}
                     address="/search"
                     text="Search"
                 />
             </Grid>
-            <Grid item xs={3} lg={2}>
-                <AppShortcut avatar={<Icon path={mdiInboxOutline} size={1} />} address="/inbox" text="Inbox" />
+            <Grid item xs={3} lg={1.5}>
+                <AppShortcut avatar={<Icon path={mdiInboxOutline} size={0.83} />} address="/inbox" text="Inbox" />
             </Grid>
             {totalViews.map((el: any) => (
-                <Grid item xs={3} lg={2} key={el.uid}>
+                <Grid item xs={3} lg={1.5} key={el.uid}>
                     <AppShortcut
                         avatar={
                             el?._value?.icon ? (
                                 <ListItemIcon
+                                    className="bg-indigo-900"
                                     style={{
-                                        minWidth: '24px',
-                                        minHeight: '24px',
-                                        backgroundImage: `${
+                                        display: 'flex',
+                                        minWidth: '20px',
+                                        minHeight: '20px',
+                                        WebkitMaskImage: `${
+                                            el?._value?.icon?._value?.['_value.%']?.startsWith('data:image/svg+xml,')
+                                                ? 'url("'
+                                                : 'url("data:image/svg+xml,'
+                                        }${el?._value?.icon?._value?.['_value.%']}")`,
+                                        maskImage: `${
                                             el?._value?.icon?._value?.['_value.%']?.startsWith('data:image/svg+xml,')
                                                 ? 'url("'
                                                 : 'url("data:image/svg+xml,'
@@ -88,8 +95,8 @@ export function AllApps() {
                     />
                 </Grid>
             ))}
-            <Grid item xs={3} lg={2}>
-                <AppShortcut avatar={<Icon path={mdiAppsBox} size={1} />} address="/app-library" text="All Apps" />
+            <Grid item xs={3} lg={1.5}>
+                <AppShortcut avatar={<Icon path={mdiAppsBox} size={0.83} />} address="/app-library" text="All Apps" />
             </Grid>
         </Grid>
     );

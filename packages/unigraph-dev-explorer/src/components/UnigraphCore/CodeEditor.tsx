@@ -160,7 +160,7 @@ export function CodeEditor({ id }: any) {
     return (
         <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
             <div style={{ flexGrow: 1, height: 'calc(100% - 24px)' }}>
-                <SplitterLayout vertical secondaryInitialSize={0} customClassName="bottom-48" ref={bigSplitterRef}>
+                <SplitterLayout vertical secondaryInitialSize={0} ref={bigSplitterRef}>
                     <SplitterLayout primaryIndex={1} secondaryInitialSize={360} ref={splitterRef}>
                         <div>
                             {/* User code */}
