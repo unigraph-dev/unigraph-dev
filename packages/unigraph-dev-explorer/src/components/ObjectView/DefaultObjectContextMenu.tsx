@@ -1,6 +1,6 @@
 /* eslint-disable react/jsx-no-useless-fragment */
 /* eslint-disable no-shadow */
-import { ListItemIcon, ListItemText, Menu, MenuItem } from '@mui/material';
+import { ListItemIcon } from '@mui/material';
 import _ from 'lodash';
 import React from 'react';
 import { UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
@@ -18,14 +18,7 @@ import {
     mdiBookOutline,
 } from '@mdi/js';
 import { AutoDynamicViewCallbacks } from '../../types/ObjectView.d';
-import {
-    contextMenuItemStyle,
-    isDeveloperMode,
-    isMultiSelectKeyPressed,
-    runClientExecutable,
-    selectUid,
-    typeHasDetailedView,
-} from '../../utils';
+import { isDeveloperMode, isMultiSelectKeyPressed, runClientExecutable, selectUid } from '../../utils';
 import { registerContextMenuItems } from '../../unigraph-react';
 
 export type UnigraphMenuItem = {

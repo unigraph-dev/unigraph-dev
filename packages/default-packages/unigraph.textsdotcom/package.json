@@ -1,0 +1,72 @@
+{
+    "displayName": "Texts.com integration",
+    "version": "0.2.5",
+    "description": "Sync your converations with Texts.com",
+    "name": "unigraph.textsdotcom",
+    "unigraph": {
+        "schemas": [
+            {
+                "id": "text_thread",
+                "src": "schemas/text_thread.json"
+            },
+            {
+                "id": "text_message",
+                "src": "schemas/text_message.json"
+            }
+        ],
+        "entities": [
+            {
+                "id": "text_message_view",
+                "src": "entities/text_message_view.json"
+            },
+            {
+                "id": "text_thread_view",
+                "src": "entities/text_thread_view.json"
+            },
+            {
+                "id": "text_thread_detailed_view",
+                "src": "entities/text_thread_detailed_view.json"
+            }
+        ],
+        "executables": [
+            {
+                "id": "sync-texts",
+                "env": "routine/js",
+                "src": "executables/syncTexts.js",
+                "periodic": "*/1 * * * *",
+                "editable": true,
+                "name": "Sync with Texts.com every minute",
+                "concurrency": 1
+            },
+            {
+                "id": "text-message-view",
+                "env": "component/react-jsx",
+                "src": "executables/textMessageView.jsx",
+                "editable": true,
+                "name": "Text message view"
+            },
+            {
+                "id": "text-thread-view",
+                "env": "component/react-jsx",
+                "src": "executables/textThreadView.jsx",
+                "editable": true,
+                "name": "Text thread view",
+                "imports": [
+                    {
+                        "env": "npm",
+                        "package": "react-time-ago",
+                        "import": "",
+                        "import_as": "ReactTimeAgo"
+                    }
+                ]
+            },
+            {
+                "id": "text-thread-detailed-view",
+                "env": "component/react-jsx",
+                "src": "executables/textThreadDetailedView.jsx",
+                "editable": true,
+                "name": "Text thread detailed view"
+            }
+        ]
+    }
+}

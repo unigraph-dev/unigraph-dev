@@ -1,3 +1,5 @@
+import { mdiPackageVariantClosed } from '@mdi/js';
+import Icon from '@mdi/react';
 import { Button, FormControlLabel, Paper, Switch, Typography } from '@mui/material';
 import React from 'react';
 import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
@@ -15,26 +17,25 @@ const corePackages = [
 export const PackageManifestView = ({ data }: any) => {
     const pkgName = data?.get('package_name')?.as('primitive');
     return (
-        <Paper variant="outlined" style={{ margin: '4px', padding: '16px', width: '100%' }}>
-            <Typography style={{ marginBottom: '6px' }}>
-                <span style={{ color: 'gray', marginRight: '8px' }}>Name</span>
-                {data?.get('name')?.as('primitive')}
-            </Typography>
-            <Typography style={{ marginBottom: '6px' }}>
-                <span style={{ color: 'gray', marginRight: '8px' }}>Description</span>
-                {data?.get('description')?.as('primitive')}
-            </Typography>
-            <Typography style={{ marginBottom: '6px' }}>
-                <span style={{ color: 'gray', marginRight: '8px' }}>Package name</span>
-                {pkgName}
-            </Typography>
-            <Typography style={{ marginBottom: '6px' }}>
-                <span style={{ color: 'gray', marginRight: '8px' }}>Version</span>
-                {data?.get('version')?.as('primitive')}
-            </Typography>
+        <Paper variant="outlined" style={{ margin: '4px', width: '100%' }} className="flex gap-2 px-4 py-3">
+            <div className="flex-grow">
+                <p className="font-medium text-slate-800">{data?.get('name')?.as('primitive')}</p>
+                <p className="text-sm text-slate-500">{data?.get('description')?.as('primitive')}</p>
+                <p className="flex gap-1.5 text-sm items-center text-gray-500 mt-2">
+                    <Icon className="text-gray-500" path={mdiPackageVariantClosed} size={0.68} />
+                    <span>{pkgName}</span>
+                    <span>v{data?.get('version')?.as('primitive')}</span>
+                </p>
+            </div>
+
             <FormControlLabel
                 style={{
                     display: pkgName && corePackages.includes(pkgName) ? 'none' : '',
+                }}
+                componentsProps={{
+                    typography: {
+                        className: 'text-sm text-slate-500',
+                    },
                 }}
                 control={
                     <Switch
@@ -45,6 +46,7 @@ export const PackageManifestView = ({ data }: any) => {
                                 : window.unigraph.disablePackage?.(pkgName)
                         }
                         name="disableOrEnablePackage"
+                        size="small"
                     />
                 }
                 label={`Click to ${data._hide ? 'enable' : 'disable'} package`}

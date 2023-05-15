@@ -1,0 +1,7 @@
+{
+    "type": { "unigraph.id": "$/schema/object_view_detailed" },
+    "name": "Text thread view detailied",
+    "maximize": true,
+    "item_type": { "unigraph.id": "$/schema/text_thread" },
+    "view": { "unigraph.id": "$./executable/text-thread-detailed-view" }
+}

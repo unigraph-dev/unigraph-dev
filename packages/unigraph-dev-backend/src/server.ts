@@ -1122,6 +1122,7 @@ export default async function startServer(client: DgraphClient, isRecoveryMode?:
         subscriptions: serverStates.subscriptions,
         localApi: localApi,
         serverStates: serverStates,
+        disablePackage,
     };
 
     process.on('unhandledRejection', error => {

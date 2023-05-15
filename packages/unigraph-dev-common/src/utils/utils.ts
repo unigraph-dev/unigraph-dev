@@ -267,7 +267,23 @@ function getObjectAsRecursiveSubentity(object: any, getRef?: boolean) {
     return targetValue;
 }
 
-export const getObjectAs = (object: any, type: 'primitive') => {
+function getObjectAsRecursiveType(object: any, type: string) {
+    let targetValue: any;
+    if (object.type?.['unigraph.id'] === type) {
+        targetValue = object;
+    }
+    Object.keys(object).forEach((el: any) => {
+        if (el.type?.['unigraph.id'] === type) {
+            targetValue = object[el];
+        } else if (el.startsWith('_value') && typeof object[el] === 'object') {
+            const subObj = getObjectAsRecursiveType(object[el], type);
+            if (subObj || subObj === '' || subObj === 0 || subObj === false) targetValue = subObj;
+        }
+    });
+    return targetValue;
+}
+
+export const getObjectAs = (object: any, type: 'primitive' | 'items' | string) => {
     if (type === 'primitive') {
         return getObjectAsRecursivePrimitive(object);
     }
@@ -279,6 +295,12 @@ export const getObjectAs = (object: any, type: 'primitive') => {
     }
     if (type === 'subentityRef') {
         return getObjectAsRecursiveSubentity(object, true);
+    }
+    if (type === 'items' && object?.['_value[']) {
+        return object['_value['].map((el: any) => el._value);
+    }
+    if (type?.startsWith('$/schema/')) {
+        return getObjectAsRecursiveType(object, type);
     }
     return object;
 };

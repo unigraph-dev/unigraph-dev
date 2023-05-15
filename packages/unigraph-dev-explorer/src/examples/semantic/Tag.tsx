@@ -3,39 +3,27 @@ import Icon from '@mdi/react';
 import { Button, Chip, Divider, TextField } from '@mui/material';
 import React from 'react';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { HashtagIcon } from '@heroicons/react/24/outline';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { BacklinkView } from '../../components/ObjectView/BacklinkView';
 import { DynamicViewRenderer } from '../../global.d';
 import { getContrast } from '../../utils';
 
 const getBgColor = (tag: any) => (tag?.color?.startsWith && tag.color.startsWith('#') ? tag.color : 'unset');
+
+export const TagChip = ({ tag }: { tag: string }) => {
+    return (
+        <span className="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800 outline outline-1 outline-yellow-200">
+            <HashtagIcon className="h-3 w-3 -ml-0.5 mr-1" />
+            {tag}
+        </span>
+    );
+};
+
 export const Tag: DynamicViewRenderer = ({ data, callbacks }) => {
     const tag = data._value ? unpad(data) : data;
 
-    return (
-        <Chip
-            size="small"
-            icon={
-                <Icon
-                    path={mdiTagOutline}
-                    size={0.75}
-                    style={{
-                        filter:
-                            getBgColor(tag) === 'unset' || getContrast(getBgColor(tag)) === '#666666'
-                                ? 'unset'
-                                : 'invert(1)',
-                    }}
-                />
-            }
-            style={{
-                backgroundColor: getBgColor(tag),
-                color: getBgColor(tag).startsWith('#') ? getContrast(getBgColor(tag)) : '#666666',
-                cursor: 'pointer',
-            }}
-            variant="outlined"
-            label={tag.name}
-        />
-    );
+    return <TagChip tag={tag.name} />;
 };
 
 export const TagDetailed: DynamicViewRenderer = ({ data, callbacks }) => {

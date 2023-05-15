@@ -1,0 +1,6 @@
+{
+    "type": { "unigraph.id": "$/schema/object_view" },
+    "name": "Text thread view",
+    "item_type": { "unigraph.id": "$/schema/text_thread" },
+    "view": { "unigraph.id": "$./executable/text-thread-view" }
+}

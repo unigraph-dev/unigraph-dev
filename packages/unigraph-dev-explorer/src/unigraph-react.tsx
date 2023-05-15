@@ -8,8 +8,9 @@
  */
 import _ from 'lodash';
 import React from 'react';
-import { UnigraphContext, UnigraphHooks } from 'unigraph-dev-common/lib/types/unigraph';
-import { getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import { UnigraphContext } from 'unigraph-dev-common/lib/types/unigraph';
+import { getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
+import * as HeroIcons from '@heroicons/react/24/outline';
 import { TabContext } from './utils';
 
 export function withUnigraphSubscription(
@@ -134,6 +135,7 @@ const refsMap = {
     '@mui/lab': () => require('@mui/lab'),
     '@material-ui/core': () => require('@mui/material'),
     '@material-ui/icons': () => require('@mui/icons-material'),
+    'react-time-ago': () => require('react-time-ago'),
 };
 
 const buildRefs = (
@@ -159,6 +161,7 @@ const buildRefs = (
 
 export const getComponentFromExecutable = async (data: any, params: any, globalImports: Record<string, any> = {}) => {
     const ret = await (window as any).unigraph.runExecutable(data['unigraph.id'] || data.uid, params, {}, true);
+    const src = new UnigraphObject(data)?.get('src')?.as('primitive') || '';
     const imports = (data?._value?.imports?.['_value['] || []).map((el: any) => ({
         env: el?._value?.env['_value.%'],
         package: el?._value?.package['_value.%'],
@@ -170,6 +173,20 @@ export const getComponentFromExecutable = async (data: any, params: any, globalI
         refstr.push(key);
         refval.push(value);
     });
+    refstr.push('HeroIcons');
+    refval.push(HeroIcons);
+    window.twinstance
+        .generateStylesFromContent('@tailwind base;\n@tailwind components;\n@tailwind utilities;', [src])
+        .then((tailwindStyles: string) => {
+            let styleNode = document.querySelector(`#style-${data.uid}`);
+            if (!styleNode) {
+                styleNode = document.createElement('style');
+                styleNode.id = `style-${data.uid}`;
+                document.head.appendChild(styleNode);
+            }
+            styleNode!.innerHTML = tailwindStyles;
+        });
+
     console.log(data.uid, { ret: ret?.return_function_component });
     // eslint-disable-next-line no-new-func
     const retFn = new Function('React', ...refstr, `return ${ret?.return_function_component}`)(React, ...refval);

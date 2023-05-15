@@ -47,25 +47,33 @@ export const Executable: DynamicViewRenderer = ({ data, callbacks }) => {
     };
 
     return (
-        <>
-            <ListItemIcon style={{ paddingLeft: '8px' }} onClick={actions[unpadded.env]}>
-                {unpadded.periodic ? (
-                    <Badge
-                        overlap="circular"
-                        anchorOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'right',
-                        }}
-                        badgeContent={<Repeat fontSize="small" />}
-                    >
-                        {icons[unpadded.env]}
-                    </Badge>
-                ) : (
-                    icons[unpadded.env]
-                )}
-            </ListItemIcon>
-            <ListItemText primary={`Run code: ${unpadded.name}`} secondary={`Environment: ${unpadded.env}`} />
-        </>
+        <div className="flex items-center">
+            <div
+                className="p-0.5 rounded-lg bg-indigo-50 ring-1 ring-gray-200 text-indigo-900"
+                onClick={actions[unpadded.env]}
+            >
+                <div className="scale-75">
+                    {unpadded.periodic ? (
+                        <Badge
+                            overlap="circular"
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'right',
+                            }}
+                            badgeContent={<Repeat fontSize="small" />}
+                        >
+                            {icons[unpadded.env]}
+                        </Badge>
+                    ) : (
+                        icons[unpadded.env]
+                    )}
+                </div>
+            </div>
+            <div className="flex flex-col ml-4">
+                <span className="text-sm font-medium text-slate-700">{`${unpadded.name}`}</span>
+                <span className="mt-0.5 text-[13px] text-slate-600">{`Environment: ${unpadded.env}`}</span>
+            </div>
+        </div>
     );
 };
 

@@ -54,41 +54,41 @@ export async function checkOrCreateDefaultDataModel(client: DgraphClient) {
         }
     } else {
         // Look at all packages and see if there's any updates
-        const pkgVerQueryRes = await client.queryDgraph(`query { pkgs(func: uid(uu)) @filter(type(Entity)) {
-            uid
-          <unigraph.id>
-            _value {
-                    version {
-                        <_value.%>
-            }
-          }
-      }
-          var(func: eq(<unigraph.id>, "$/schema/package_manifest")) {
-                uu as <~type>
-        } }`);
-        const pkgVersions = pkgVerQueryRes[0].map((it: any) => ({
-            uid: it.uid,
-            pkgName: it['unigraph.id'].split('/')[2],
-            version: it._value.version['_value.%'],
-        }));
-        const nsmapUid = (
-            await client.queryDgraph(`query { nsMap(func: eq(<unigraph.id>, "$/meta/namespace_map")) { uid } }`)
-        )[0][0].uid;
-        const tempSchemaCache = createSchemaCache(client);
-        const packageList = Object.fromEntries(defaultPackages.map((el: any) => [el.pkgManifest.package_name, el]));
-        // TODO add also packages from packageList that aren't in pkgVersions
-        const pkgsToUpdate = pkgVersions
-            .filter((it: any) => packageList[it.pkgName] && packageList[it.pkgName]?.pkgManifest.version !== it.version)
-            .map((it: any) => packageList[it.pkgName]);
-        for (let i = 0; i < pkgsToUpdate.length; i += 1) {
-            await updatePackage(
-                client,
-                { namespaceMap: { uid: nsmapUid }, caches: { schemas: tempSchemaCache } },
-                pkgsToUpdate[i],
-            );
-            await tempSchemaCache.updateNow();
-        }
-        console.log(`Updated ${pkgsToUpdate.length} packages!`);
+        //     const pkgVerQueryRes = await client.queryDgraph(`query { pkgs(func: uid(uu)) @filter(type(Entity)) {
+        //         uid
+        //       <unigraph.id>
+        //         _value {
+        //                 version {
+        //                     <_value.%>
+        //         }
+        //       }
+        //   }
+        //       var(func: eq(<unigraph.id>, "$/schema/package_manifest")) {
+        //             uu as <~type>
+        //     } }`);
+        //     const pkgVersions = pkgVerQueryRes[0].map((it: any) => ({
+        //         uid: it.uid,
+        //         pkgName: it['unigraph.id'].split('/')[2],
+        //         version: it._value.version['_value.%'],
+        //     }));
+        //     const nsmapUid = (
+        //         await client.queryDgraph(`query { nsMap(func: eq(<unigraph.id>, "$/meta/namespace_map")) { uid } }`)
+        //     )[0][0].uid;
+        //     const tempSchemaCache = createSchemaCache(client);
+        //     const packageList = Object.fromEntries(defaultPackages.map((el: any) => [el.pkgManifest.package_name, el]));
+        //     // TODO add also packages from packageList that aren't in pkgVersions
+        //     const pkgsToUpdate = pkgVersions
+        //         .filter((it: any) => packageList[it.pkgName] && packageList[it.pkgName]?.pkgManifest.version !== it.version)
+        //         .map((it: any) => packageList[it.pkgName]);
+        //     for (let i = 0; i < pkgsToUpdate.length; i += 1) {
+        //         await updatePackage(
+        //             client,
+        //             { namespaceMap: { uid: nsmapUid }, caches: { schemas: tempSchemaCache } },
+        //             pkgsToUpdate[i],
+        //         );
+        //         await tempSchemaCache.updateNow();
+        //     }
+        //     console.log(`Updated ${pkgsToUpdate.length} packages!`);
     }
 }
 

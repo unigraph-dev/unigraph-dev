@@ -362,4 +362,5 @@ export const updatePackage = async (client: DgraphClient, states: any, pkg: Pack
     await purgeOldVersions(client, states, pkg);
     await addUnigraphPackage(client, pkg, states.caches);
     await enablePackage(client, states, pkg.pkgManifest.package_name);
+    await disablePackage(client, states, pkg.pkgManifest.package_name, false, true, pkg.pkgManifest.version);
 };

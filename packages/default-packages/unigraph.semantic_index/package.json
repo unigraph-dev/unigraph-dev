@@ -4,12 +4,7 @@
     "description": "Semantic indexing for Unigraph",
     "name": "unigraph.semantic_index",
     "unigraph": {
-        "entities": [
-            {
-                "id": "smart_feed_view",
-                "src": "entities/smart_feed_view.json"
-            }
-        ],
+        "entities": [],
         "executables": [
             {
                 "name": "Build semantic index for entities",
@@ -20,13 +15,6 @@
                 "on_hook": "after_object_updated/all"
             },
             {
-                "name": "Auto-tagging based on semantic embeddings",
-                "env": "routine/js",
-                "id": "auto-tag-entity",
-                "src": "executables/autoTagging.js",
-                "editable": true
-            },
-            {
                 "name": "Do semantic search",
                 "env": "routine/js",
                 "id": "do-semantic-search",
@@ -34,19 +22,13 @@
                 "editable": true
             },
             {
-                "name": "Get pinecone status",
+                "name": "Index notes",
                 "env": "routine/js",
-                "id": "get-pinecone-status",
-                "src": "executables/getPineconeStatus.js",
-                "editable": true
-            },
-            {
-                "name": "After entity updated, process autotagging or update tags",
-                "env": "routine/js",
-                "id": "process-autotagging",
-                "src": "executables/processAutotagging.js",
+                "id": "index-notes",
+                "src": "executables/indexNotes.js",
+                "periodic": "*/1 * * * *",
                 "editable": true,
-                "on_hook": "after_object_updated/all"
+                "concurrency": 1
             },
             {
                 "name": "Semantic searcher",
@@ -111,52 +93,6 @@
                         "package": "@mui/material",
                         "import": "Card",
                         "import_as": "Card"
-                    }
-                ]
-            },
-            {
-                "name": "Semantic management utility",
-                "env": "component/react-jsx",
-                "id": "semantic-utility-component",
-                "src": "executables/semanticUtility.jsx",
-                "editable": true
-            },
-            {
-                "name": "Smart feed component",
-                "env": "component/react-jsx",
-                "id": "smart-feed-component",
-                "src": "executables/smartFeedComponent.jsx",
-                "editable": true,
-                "imports": [
-                    {
-                        "env": "npm",
-                        "package": "@mui/material",
-                        "import": "Typography",
-                        "import_as": "Typography"
-                    },
-                    {
-                        "env": "npm",
-                        "package": "@mui/material",
-                        "import": "Divider",
-                        "import_as": "Divider"
-                    },
-                    {
-                        "env": "npm",
-                        "package": "@mui/icons-material",
-                        "import": "Tag",
-                        "import_as": "Tag"
-                    },
-                    {
-                        "env": "npm",
-                        "package": "@mui/icons-material",
-                        "import": "Launch",
-                        "import_as": "Launch"
-                    },
-                    {
-                        "env": "npm",
-                        "package": "@mui/icons-material",
-                        "import": "ChevronRight",
-                        "import_as": "ChevronRight"
                     }
                 ]
             }

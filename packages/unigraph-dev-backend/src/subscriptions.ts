@@ -241,11 +241,13 @@ export function mergeSubscriptions(
             });
         });
 
-    console.log(`[Subscription] Refreshing subscriptions...`);
-    console.log(
-        `[Subscription] Total of ${typeQueries.length} type queries, ${objectQueries.length} object queries, and ${queryQueries.length} query queries,`,
-    );
-    console.log(`[Subscription] Merged into ${totalMerged.length} queries.`);
+    if (totalMerged.length > 10) {
+        console.log(`[Subscription] Refreshing subscriptions...`);
+        console.log(
+            `[Subscription] Total of ${typeQueries.length} type queries, ${objectQueries.length} object queries, and ${queryQueries.length} query queries,`,
+        );
+        console.log(`[Subscription] Merged into ${totalMerged.length} queries.`);
+    }
     return totalMerged;
 }
 

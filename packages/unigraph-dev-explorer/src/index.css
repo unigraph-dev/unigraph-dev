@@ -7,7 +7,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  --app-drawer-background-color: #f7f7f7;
+  --app-drawer-background-color: theme(colors.stone.50) ;
   --secondary-text-color: #37352f80;
 
   background-color: var(--app-drawer-background-color);

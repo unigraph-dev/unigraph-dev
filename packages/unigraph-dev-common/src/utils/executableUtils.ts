@@ -20,7 +20,6 @@ export const runEnvLambdaJs: ExecRunner = (src, context, unigraph) => {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     const AsyncFunction = Object.getPrototypeOf(async () => false).constructor;
     const fn = new AsyncFunction(
-        'require',
         'unpad',
         'context',
         'unigraph',
@@ -34,7 +33,7 @@ export const runEnvLambdaJs: ExecRunner = (src, context, unigraph) => {
                     content: "Error was: " + e.toString() + e.stack }
                 )
             }`,
-    ).bind(this, require, unpad, context, unigraph, console);
+    ).bind(this, unpad, context, unigraph, console);
 
     // Ignoring async lambdas for now
     // return async () => await fn();
@@ -45,7 +44,6 @@ export const runEnvClientJs: ExecRunner = (src, context, unigraph) => {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     const AsyncFunction = eval('Object.getPrototypeOf(async function () {}).constructor');
     const fn = new AsyncFunction(
-        'require',
         'unpad',
         'context',
         'unigraph',
@@ -57,7 +55,7 @@ export const runEnvClientJs: ExecRunner = (src, context, unigraph) => {
                 content: "Error was: " + e.toString() + e.stack }
             )
     }`,
-    ).bind(this, require, unpad, context, unigraph);
+    ).bind(this, unpad, context, unigraph);
     // Ignoring async client executables for now
     // return async () => await fn();
     return () => fn();

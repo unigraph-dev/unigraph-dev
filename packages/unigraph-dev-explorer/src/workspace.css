@@ -153,3 +153,7 @@
 .flexlayout__border_left {
     max-width: 0px;
 }
+
+.flexlayout__border_button_content {
+    @apply text-xs
+}

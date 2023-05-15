@@ -312,22 +312,6 @@ export function WorkSpace(this: any) {
             {
                 config: {
                     viewConfig: {
-                        uid: (window.unigraph as any).getNamespaceMap()['$/executable/similarity-searcher-component']
-                            ?.uid,
-                        viewer: 'dynamic-view-detailed',
-                        type: '$/schema/executable',
-                        props: { trackActiveDetailedView: true },
-                    },
-                },
-                component: '/pages/library/object',
-                type: 'tab',
-                enableClose: false,
-                name: 'Similarity',
-                id: 'similarity-pane',
-            },
-            {
-                config: {
-                    viewConfig: {
                         uid: (window.unigraph as any).getNamespaceMap()['$/executable/semantic-searcher-component']
                             ?.uid,
                         viewer: 'dynamic-view-detailed',
@@ -711,20 +695,13 @@ export function WorkSpace(this: any) {
                                     renderValues.leading = (
                                         <Icon
                                             path={mdiTagMultipleOutline}
-                                            size={1}
+                                            size={0.8}
                                             style={{ verticalAlign: 'middle' }}
                                             key="icon"
                                         />
                                     );
                                     renderValues.content = [
-                                        <Typography
-                                            style={{
-                                                marginLeft: '4px',
-                                                display: 'inline',
-                                            }}
-                                        >
-                                            {renderValues.content}
-                                        </Typography>,
+                                        <span className="text-sm font-medium ml-1">{renderValues.content}</span>,
                                     ];
                                 }
                                 if (nodeId === 'similarity-pane') {

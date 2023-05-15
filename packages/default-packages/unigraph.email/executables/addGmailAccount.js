@@ -13,7 +13,11 @@ const oauth2Client = new google.auth.OAuth2(
     'http://127.0.0.1:4001/callback?key=gmail',
 );
 
-const scopes = ['https://mail.google.com/', 'https://www.googleapis.com/auth/calendar'];
+const scopes = [
+    'https://mail.google.com/',
+    'https://www.googleapis.com/auth/calendar',
+    'https://www.googleapis.com/auth/contacts',
+];
 
 google.options({ auth: oauth2Client });
 

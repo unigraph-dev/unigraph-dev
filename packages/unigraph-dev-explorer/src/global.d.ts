@@ -17,6 +17,7 @@ declare global {
         mixpanel?: any;
         dragselect: any;
         getComponentDataById?: any;
+        twinstance: any;
     }
 }
 

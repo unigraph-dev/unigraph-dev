@@ -26,6 +26,7 @@ React.useEffect(async () => {
         const res = await window.unigraph.runExecutable('$/executable/do-semantic-search', {
             similarity: originUid,
         });
+        console.log(res);
         setRes(res);
         setIsSearching(false);
     }
@@ -55,36 +56,46 @@ React.useEffect(async () => {
 
 return (
     <div style={{ height: '100%', flexDirection: 'column', display: 'flex' }}>
-        <div style={{ display: originUid || params.trackActiveDetailedView ? 'none' : 'flex' }}>
-            <TextField
-                variant="outlined"
-                label="Prompt"
-                value={search}
-                onChange={(ev) => setSearch(ev.target.value)}
-                onKeyDown={async (e) => {
-                    if (e.keyCode == 13) {
-                        setIsSearching(true);
-                        const res = await window.unigraph.runExecutable('$/executable/do-semantic-search', {
-                            similarity: search,
-                        });
-                        setRes(res);
-                        setIsSearching(false);
-                    }
-                }}
-                style={{ height: '100%', width: '100%' }}
-            />
-            <Button
+        <div className="mt-2 mx-3 flex rounded-md shadow-sm">
+            <div className="relative flex flex-grow items-stretch focus-within:z-10">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                    <HeroIcons.MagnifyingGlassIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                </div>
+                <input
+                    type="search"
+                    name="search"
+                    id="text"
+                    className="block w-full rounded-none rounded-l-md border-0 py-1.5 pl-10 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    placeholder={'"texts about summer travel planning"'}
+                    value={search}
+                    onChange={(ev) => setSearch(ev.target.value)}
+                    onKeyDown={async (e) => {
+                        if (e.keyCode == 13) {
+                            setIsSearching(true);
+                            const res = await window.unigraph.runExecutable('$/executable/do-semantic-search', {
+                                search,
+                            });
+                            console.log({ res });
+                            setRes(res);
+                            setIsSearching(false);
+                        }
+                    }}
+                />
+            </div>
+            <button
+                type="button"
+                className="relative -ml-px inline-flex items-center gap-x-1.5 rounded-r-md px-3 py-2 text-sm font-semibold text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
                 onClick={async () => {
                     setIsSearching(true);
                     const res = await window.unigraph.runExecutable('$/executable/do-semantic-search', {
-                        similarity: search,
+                        search,
                     });
                     setRes(res);
                     setIsSearching(false);
                 }}
             >
                 Search
-            </Button>
+            </button>
         </div>
         {isSearching ? (
             <div className="meter-progress">
@@ -95,23 +106,6 @@ return (
         ) : (
             <div style={{ height: '5px', width: '100%', display: 'block' }} />
         )}
-        <Divider />
-        {!(originUid || params.trackActiveDetailedView) ? (
-            <div
-                style={{
-                    flexGrow: 1,
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    overflow: 'auto',
-                }}
-            >
-                <Card style={{ height: '90%', width: '90%', overflow: 'auto' }}>
-                    <DynamicObjectListView items={toDisplay} defaultFilter={[]} />
-                </Card>
-            </div>
-        ) : (
-            <DynamicObjectListView items={toDisplay} defaultFilter={['no-hidden']} />
-        )}
+        <DynamicObjectListView items={toDisplay} defaultFilter={[]} />
     </div>
 );

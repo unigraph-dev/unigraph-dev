@@ -1,3 +1,4 @@
+/* eslint-disable import/order */
 import { Avatar, Typography } from '@mui/material';
 import React from 'react';
 import { buildGraph, getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
@@ -7,12 +8,14 @@ import { Calendar as BigCalendar, DateLocalizer, momentLocalizer, stringOrDate, 
 import moment from 'moment';
 import {} from 'lodash';
 import { makeQueryFragmentFromType } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { ClockIcon } from '@heroicons/react/24/outline';
 import { AutoDynamicView } from '../../components/ObjectView/AutoDynamicView';
 import { getContrast, isValidHttpUrl, TabContext } from '../../utils';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { CalendarViewEvent, TodoUni, CalendarEventUni, JournalUni, DatedObject } from './calendar-types';
 import { getMaxDate, getMinDate } from '../todo/utils';
+import ReactTimeAgo from 'react-time-ago';
 
 const CalendarColor = ({ data, inline }: any) => {
     return (
@@ -37,9 +40,9 @@ const CalendarEventBig = ({ data, callbacks }: any) => {
         <div style={{ display: 'flex' }}>
             {CalendarColor({ data, callbacks })}
             <div>
-                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <Typography variant="body1" style={{ marginRight: '8px' }}>
-                        <strong>{data.get('name').as('primitive')}</strong>
+                <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', marginBottom: '-2px' }}>
+                    <Typography variant="body1" style={{ marginRight: '8px' }} className="font-semibold">
+                        {data.get('name').as('primitive')}
                     </Typography>
                     <Typography
                         variant="body2"
@@ -54,11 +57,28 @@ const CalendarEventBig = ({ data, callbacks }: any) => {
                         {loc}
                     </Typography>
                 </div>
-                <AutoDynamicView
-                    object={new UnigraphObject(data.get('time_frame')._value)}
-                    callbacks={callbacks}
-                    options={{ noDrag: true, noDrop: true, noContextMenu: false, inline: true }}
-                />
+                <div>
+                    {data.get('time_frame/start/datetime').as('primitive') &&
+                        new Date().getTime() <
+                            new Date(data.get('time_frame/start/datetime').as('primitive')).getTime() &&
+                        new Date(data.get('time_frame/start/datetime').as('primitive')).getTime() -
+                            new Date().getTime() <
+                            1000 * 60 * 60 && (
+                            <span className="mr-2 inline-flex items-center rounded-full bg-yellow-100 px-2 py-[1px] text-xs font-medium text-yellow-800 outline outline-1 outline-yellow-200">
+                                <ClockIcon className="h-3 w-3 -ml-0.5 mr-1" />
+                                <ReactTimeAgo date={new Date(data.get('time_frame/start/datetime').as('primitive'))} />
+                            </span>
+                        )}
+                    <AutoDynamicView
+                        attributes={{
+                            className: 'text-slate-500',
+                        }}
+                        style={{ fontSize: '14px', fontWeight: 500, color: '' }}
+                        object={new UnigraphObject(data.get('time_frame')._value)}
+                        callbacks={callbacks}
+                        options={{ noDrag: true, noDrop: true, noContextMenu: false, inline: true }}
+                    />
+                </div>
                 <div
                     style={{
                         display: data?._value?.children?.['_value[']?.map ? '' : 'none',

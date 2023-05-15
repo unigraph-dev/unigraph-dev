@@ -1,6 +1,6 @@
 {
     "displayName": "Unigraph Contacts",
-    "version": "0.2.6",
+    "version": "0.2.7",
     "description": "Contacts management with Unigraph",
     "name": "unigraph.contacts",
     "unigraph": {
@@ -149,6 +149,15 @@
                         "import_as": "Avatar"
                     }
                 ]
+            },
+            {
+                "id": "sync-google-contacts",
+                "env": "routine/js",
+                "src": "executables/syncGoogleContacts.js",
+                "periodic": "*/2 * * * *",
+                "editable": true,
+                "name": "Sync Google contacts every 2 minutes",
+                "concurrency": 1
             }
         ],
         "entities": [

@@ -52,9 +52,31 @@ function getObjectAsRecursivePrimitive(object: any) {
     return targetValue;
 }
 
-export const getObjectAs = (object: any, type: 'primitive') => {
+function getObjectAsRecursiveType(object: any, type: string) {
+    let targetValue: any;
+    if (object.type?.['unigraph.id'] === type) {
+        targetValue = object;
+    }
+    Object.keys(object).forEach((el: any) => {
+        if (el.type?.['unigraph.id'] === type) {
+            targetValue = object[el];
+        } else if (el.startsWith('_value') && typeof object[el] === 'object') {
+            const subObj = getObjectAsRecursiveType(object[el], type);
+            if (subObj || subObj === '' || subObj === 0 || subObj === false) targetValue = subObj;
+        }
+    });
+    return targetValue;
+}
+
+export const getObjectAs = (object: any, type: 'primitive' | 'values' | string) => {
     if (type === 'primitive') {
         return getObjectAsRecursivePrimitive(object);
+    }
+    if (type === 'values' && object?.['_value[']) {
+        return object['_value['].map((el: any) => el._value);
+    }
+    if (type?.startsWith('$/schema/')) {
+        return getObjectAsRecursiveType(object, type);
     }
     return object;
 };

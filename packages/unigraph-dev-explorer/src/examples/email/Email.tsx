@@ -76,39 +76,35 @@ const EmailMessage: DynamicViewRenderer = ({ data, callbacks }) => {
                 if (callbacks?.removeFromContext && callbacks?.removeOnEnter) callbacks.removeFromContext();
             }}
         >
-            <ListItemAvatar>
-                <Avatar src={fromPerson?.get('profile_image')?.as('primitive') || ''}>
-                    {data.get('message/sender')['_value['][0]?._value?.identifier?.['_value.%']?.[0]?.toUpperCase?.()}
-                </Avatar>
-            </ListItemAvatar>
-            <ListItemText
-                primary={[
-                    <strong>
+            <Avatar
+                src={fromPerson?.get('profile_image')?.as('primitive') || ''}
+                sx={{ width: 32, height: 32 }}
+                onClick={(ev) => {
+                    ev.stopPropagation();
+                    window.open(data._externalUrl, '_blank');
+                }}
+            >
+                {data.get('message/sender')['_value['][0]?._value?.identifier?.['_value.%']?.[0]?.toUpperCase?.()}
+            </Avatar>
+            <div className="flex flex-col ml-4">
+                <div>
+                    <span className="text-[15px] font-medium mr-4 mt-1">{data?.get('name')?.as('primitive')}</span>
+                    <span className="text-[15px] font-medium text-slate-600 mr-4 ">
                         <AutoDynamicView
                             object={fromPerson}
                             callbacks={{ identifier: ider }}
                             options={{ inline: true }}
                         />
-                    </strong>,
-                    <span>
-                        , <span style={{ color: 'gray' }}>{timeSince(new Date(unpadded?.message?.date_received))}</span>
-                    </span>,
-                    <br />,
-                    data?.get('name')?.as('primitive'),
-                ]}
-                secondary={[
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <Link
-                            style={{ display: data?._externalUrl ? '' : 'none', marginRight: '4px' }}
-                            onClick={(ev) => {
-                                ev.stopPropagation();
-                                window.open(data._externalUrl, '_blank');
-                            }}
-                        />
-                        {`${unpadded.content?.abstract}...`}
-                    </div>,
-                ]}
-            />
+                    </span>
+                    <span className="text-[15px] text-slate-500">
+                        {timeSince(new Date(unpadded?.message?.date_received))}
+                    </span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center' }} className="text-sm text-slate-600 mb-1">
+                    {`${unpadded.content?.abstract}...`}
+                </div>
+            </div>
         </div>
     );
 };

@@ -1,3 +1,4 @@
+/* eslint-disable new-cap */
 import {
     Button,
     Collapse,
@@ -19,13 +20,42 @@ import { getRandomInt } from 'unigraph-dev-common/lib/api/unigraph';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import _ from 'lodash';
 import Editor, { loader } from '@monaco-editor/react';
-import { isJsonString } from 'unigraph-dev-common/lib/utils/utils';
-import { ExecutableCodeEditor } from '../ObjectView/DefaultCodeEditor';
-import DetailedObjectView from '../UserLibrary/UserLibraryObject';
-import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
-import { hoverSx, pointerHoverSx, TabContext } from '../../utils';
+import { isJsonString, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
+import { mdiPackage, mdiPackageVariantClosed } from '@mdi/js';
+import Icon from '@mdi/react';
 
-loader.config({ paths: { vs: './vendor/monaco-editor_at_0.31.1/' } });
+import * as mmonaco from 'monaco-editor';
+import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
+import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
+import cssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker';
+import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
+import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
+import { hoverSx, pointerHoverSx, TabContext } from '../../utils';
+import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
+import DetailedObjectView from '../UserLibrary/UserLibraryObject';
+import { ExecutableCodeEditor } from '../ObjectView/DefaultCodeEditor';
+
+// eslint-disable-next-line no-restricted-globals
+self.MonacoEnvironment = {
+    // eslint-disable-next-line no-shadow
+    getWorker(_, label) {
+        if (label === 'json') {
+            return new jsonWorker();
+        }
+        if (label === 'css' || label === 'scss' || label === 'less') {
+            return new cssWorker();
+        }
+        if (label === 'html' || label === 'handlebars' || label === 'razor') {
+            return new htmlWorker();
+        }
+        if (label === 'typescript' || label === 'javascript') {
+            return new tsWorker();
+        }
+        return new editorWorker();
+    },
+};
+
+loader.config({ monaco: mmonaco });
 
 export function NewUserCode({}) {
     const [displayName, setDisplayName] = React.useState('');
@@ -99,6 +129,7 @@ export function CodeEditor({ id }: any) {
     const [execcontent, setexecContent]: any = React.useState([]);
     const [userExecContent, setUserExecContent]: any = React.useState([]);
     const [execPackages, setExecPackages]: any = React.useState([]);
+    const [packages, setPackages]: any = React.useState([]);
     const [currentUid, setCurrentUid]: any = React.useState('');
 
     const currentView = React.useMemo(
@@ -134,10 +165,19 @@ export function CodeEditor({ id }: any) {
                 });
                 setexecContent(namedEx);
                 setUserExecContent(userEx);
-                const packages = _.uniq(namedEx.map((el) => el['unigraph.id'].split('/').slice(0, 3).join('/'))).sort();
-                setExecPackages(packages);
+                const pkgs = _.uniq(namedEx.map((el) => el['unigraph.id'].split('/').slice(0, 3).join('/'))).sort();
+                setExecPackages(pkgs);
             },
             subsId,
+        );
+
+        tabContext.subscribeToType(
+            '$/schema/package_manifest',
+            (pkgs: any[]) => {
+                setPackages(pkgs);
+            },
+            id,
+            { showHidden: true },
         );
 
         return function cleanup() {
@@ -200,7 +240,27 @@ export function CodeEditor({ id }: any) {
                                             ...pointerHoverSx,
                                         }}
                                     >
-                                        <ListItemText primary={el} />
+                                        <div className="flex-grow flex items-center">
+                                            <Icon
+                                                path={mdiPackageVariantClosed}
+                                                size={0.8}
+                                                className="text-slate-600"
+                                            />
+                                            <div className="flex flex-col ml-4">
+                                                <span className="text-sm text-slate-800 font-medium">
+                                                    {packages
+                                                        .find(
+                                                            (pkg: UnigraphObject) =>
+                                                                `$/package/${pkg
+                                                                    .get('package_name')
+                                                                    .as('primitive')}` === el,
+                                                        )
+                                                        .get('name')
+                                                        .as('primitive')}
+                                                </span>
+                                                <span className="text-[13px] text-slate-600 mt-0.5">{el}</span>
+                                            </div>
+                                        </div>
                                         {currentPackage === el ? <ExpandLess /> : <ExpandMore />}
                                     </ListItem>
                                     <Collapse in={currentPackage === el}>

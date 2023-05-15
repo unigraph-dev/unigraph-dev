@@ -18,22 +18,24 @@ const includedTypes = [
     '$/schema/rss_item',
     '$/schema/tag',
     '$/schema/youtube_video',
+    '$/schema/todo',
 ];
 
 // these will be added later
-const expandedTypes = ['$/schema/contact', '$/schema/calendar_event', '$/schema/todo', '$/schema/note_block'];
+const expandedTypes = ['$/schema/contact', '$/schema/calendar_event', '$/schema/note_block'];
 
 const eligibles = its.filter((el) => el._hide !== true && includedTypes.includes(el.type?.['unigraph.id']));
 
 if (!eligibles.length) return;
 
-const fetch = require('node-fetch');
+const { encode, decode } = require('gpt-3-encoder');
+const { ChromaClient, OpenAIEmbeddingFunction } = require('chromadb');
 
 const apikey = unigraph.getSecret('openai', 'api_key');
-const apiurl2 = `https://api.openai.com/v1/engines/text-search-curie-doc-001/embeddings`;
-const endpoint = unigraph.getSecret('pinecone', 'endpoint_url');
-const pineconeKey = unigraph.getSecret('pinecone', 'api_key');
-const { encode, decode } = require('gpt-3-encoder');
+
+const chromaClient = new ChromaClient();
+const embedder = new OpenAIEmbeddingFunction(apikey);
+const collection = await chromaClient.getOrCreateCollection('unigraph', {}, embedder);
 
 const typeGroups = eligibles.reduce((prev, curr) => {
     const currType = curr.type?.['unigraph.id'];
@@ -44,50 +46,31 @@ const typeGroups = eligibles.reduce((prev, curr) => {
 
 const res = (
     await Promise.all(
-        Object.entries(typeGroups).map(([typeName, uids]) => {
-            return unigraph.runExecutable('$/executable/get-text-representation', {
+        Object.entries(typeGroups).map(async ([typeName, uids]) => {
+            const its = await unigraph.runExecutable('$/executable/get-text-representation', {
                 uids,
                 typeName,
             });
+            return its.map((el) => ({ ...el, type: typeName }));
         }),
     )
 ).reduce((prev, curr) => [...prev, ...curr], []);
 
 if (res.length) {
     // console.log(res);
-    const tokens = res.map((el) => decode(encode(el.text).slice(0, 2000)));
+    const tokens = res.map((el) => decode(encode(el.text).slice(0, 8100)));
 
-    const response2 = await fetch(apiurl2, {
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${apikey}`,
-        },
-        method: 'POST',
-        body: JSON.stringify({
-            input: tokens,
-        }),
-    });
-    const data2 = await response2.json();
-    if (!data2.data) throw new Error(JSON.stringify(data2));
-    const pineconeData2 = data2.data.map((el) => ({ values: el.embedding, id: res[el.index].uid }));
+    await collection.add(
+        res.map((el) => el.uid), // UID's
+        undefined, // embeddings,
+        res.map((el) => ({
+            type: el.type,
+        })),
+        tokens,
+    );
 
-    const response4 = await fetch(`${endpoint}/vectors/upsert`, {
-        headers: {
-            'Content-Type': 'application/json',
-            'Api-Key': pineconeKey,
-        },
-        method: 'POST',
-        body: JSON.stringify({
-            vectors: pineconeData2,
-            namespace: 'search',
-        }),
-    });
-    const data4 = await response4.json();
+    console.log(`[Semantic Index] Successfully added ${res.length} items to Chroma.`);
 
-    if (data4?.upsertedCount === res.length) {
-        console.log(`[Semantic Index] Successfully added ${res.length} items to pinecone endpoint at ${endpoint}`);
-    }
-
-    const triplets = res.map((el) => `<${el.uid}> <_embedding> "${endpoint}" .`);
+    const triplets = res.map((el) => `<${el.uid}> <_embedding> "chromadb" .`);
     await unigraph.updateTriplets(triplets, undefined, []);
 }

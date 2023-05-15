@@ -311,7 +311,17 @@ export function AutoDynamicView({
             );
         }
         return '';
-    }, [isRecursion, object, attributes, DynamicViews, isFocused, BacklinkComponent, getObject_]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [
+        JSON.stringify(style),
+        isRecursion,
+        object,
+        attributes,
+        DynamicViews,
+        isFocused,
+        BacklinkComponent,
+        getObject_,
+    ]);
 
     return (
         <ErrorBoundary
@@ -321,10 +331,7 @@ export function AutoDynamicView({
             // eslint-disable-next-line react/no-unstable-nested-components
             FallbackComponent={({ error }) => (
                 <div
-                    style={{
-                        backgroundColor: 'floralwhite',
-                        borderRadius: '8px',
-                    }}
+                    className="m-0.5 bg-yellow-100 px-3 py-2 ring-1 ring-yellow-500 rounded-md"
                     onContextMenu={
                         noContextMenu
                             ? () => false
@@ -335,11 +342,12 @@ export function AutoDynamicView({
                                   })
                     }
                 >
-                    <Typography>
-                        Error in AutoDynamicView: (for object
-                        {object?.uid})
-                    </Typography>
-                    <p>{error.message}</p>
+                    <p className="mb-1">
+                        <span className="text-yellow-900 font-medium text-sm">
+                            Error in AutoDynamicView: (for object {object?.uid})
+                        </span>
+                    </p>
+                    <pre className="text-sm">{error.message}</pre>
                 </div>
             )}
         >

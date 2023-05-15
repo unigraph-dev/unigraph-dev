@@ -1067,6 +1067,7 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren, componentId }: 
             >
                 <Typography
                     variant="body1"
+                    className="mb-0.5"
                     style={{ cursor: 'pointer' }}
                     onClick={(ev) => {
                         window.wsnavigator(`/library/object?uid=${data.uid}&type=${data?.type?.['unigraph.id']}`);
@@ -1079,12 +1080,14 @@ export const ReferenceNoteView = ({ data, callbacks, noChildren, componentId }: 
                         []
                     ) : (
                         <Icon
+                            className="inline"
                             path={mdiNoteOutline}
-                            size={0.8}
-                            style={{ opacity: 0.54, marginRight: '4px', verticalAlign: 'text-bottom' }}
+                            size={0.65}
+                            style={{ opacity: 0.54, marginRight: '6px', verticalAlign: 'middle', paddingBottom: '2px' }}
                         />
                     )}
                     <AutoDynamicView
+                        style={{ fontSize: '14px', fontWeight: 500, color: '#64748b' /* text-slate-500 */ }}
                         object={data.get('text')?._value._value}
                         options={{ inline: true, noDrag: true, noDrop: true, noContextMenu: true }}
                         callbacks={{

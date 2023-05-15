@@ -1,8 +1,6 @@
 import { Button, Typography } from '@mui/material';
 import React from 'react';
-import Editor, { loader } from '@monaco-editor/react';
-
-loader.config({ paths: { vs: './vendor/monaco-editor_at_0.31.1/' } });
+import Editor from '@monaco-editor/react';
 
 const templateRequests = {
     'get-all-objects-with-id': `{

@@ -4,7 +4,7 @@ import ImageGallery from 'react-image-gallery';
 import ReactResizeDetector from 'react-resize-detector';
 import 'react-image-gallery/styles/css/image-gallery.css';
 import { buildGraph, getRandomInt, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
-import { byElementIndex, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
+import { byElementIndex, byUpdatedAt, unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import Sugar from 'sugar';
 import stringify from 'json-stable-stringify';
 import { DynamicViewRenderer } from '../../global.d';
@@ -29,6 +29,7 @@ export const globalImports = {
     unpad,
     getRandomInt,
     byElementIndex,
+    byUpdatedAt,
     onUnigraphContextMenu,
     BacklinkView,
     Sugar,

@@ -34,6 +34,7 @@ export function TrashView() {
             }}
             compact
             context={{ uid: 'Trash' }}
+            defaultFilter="no-filter"
         />
     );
 }

@@ -48,7 +48,8 @@ export function StringObjectViewer({ object }: { object: any }) {
     );
 }
 
-export const BasicPersonView = ({ data }: any) => data['_value.%'];
+export const BasicPersonView = ({ data }: any) =>
+    data['_value.%'].startsWith('<') ? data['_value.%'].slice(1, -1) : data['_value.%'].split('<')[0].trim();
 
 export function DefaultSkeleton() {
     return (

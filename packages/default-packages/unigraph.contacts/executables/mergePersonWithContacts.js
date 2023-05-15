@@ -1,4 +1,5 @@
 const { uids } = context.params;
+const _ = require('lodash');
 
 // Find all potentially duplicate emails
 const entities = await unigraph.getQueries(
@@ -9,7 +10,7 @@ const emails = entities
     .map((el) => el[0])
     .map((el) => [el?.['~_value']?.[0]?.uid, (el?.['_value.%'] || '').match(/<(.*)>/g)?.[0]?.slice(1, -1), el.uid])
     .filter((el) => el[0] && el[1]);
-const contacts = await unigraph.getQueries(
+const contactsEmails = await unigraph.getQueries(
     emails.map(
         (el) => `(func: uid(parUids)) @cascade {
     uid
@@ -26,7 +27,27 @@ const contacts = await unigraph.getQueries(
     uids.length,
     `var(func: eq(<unigraph.id>, "$/schema/contact")) { <~type> {parUids as uid} }`,
 );
-const replacer = emails.map((el, index) => [el[0], contacts[index]?.[0]?.uid, el[2]]).filter((el) => el[1]);
+const contactsPhones = await unigraph.getQueries(
+    emails.map(
+        (el) => `(func: uid(parUids)) @cascade {
+    uid
+    _value {
+        phones {
+            <_value[> @filter(eq(<_value.%>, "${el[1]}")) {
+                <_value.%>
+            }
+        }
+    }
+}`,
+    ),
+    false,
+    uids.length,
+    `var(func: eq(<unigraph.id>, "$/schema/contact")) { <~type> {parUids as uid} }`,
+);
+const contacts = [...contactsEmails, ...contactsPhones];
+const replacer = [...emails, ...emails]
+    .map((el, index) => [el[0], contacts[index]?.[0]?.uid, el[2]])
+    .filter((el) => el[1]);
 for (let i = 0; i < replacer.length; ++i) {
     await unigraph.updateObject(
         replacer[i][0],
@@ -38,7 +59,4 @@ for (let i = 0; i < replacer.length; ++i) {
         [],
     );
 }
-await unigraph.deleteObject(
-    replacer.map((el) => el[2]),
-    true,
-);
+await unigraph.deleteObject(_.uniq(replacer.map((el) => el[2])), true);

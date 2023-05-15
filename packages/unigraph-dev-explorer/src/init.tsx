@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+import { Tailwindcss } from '@mhsdesign/jit-browser-tailwindcss';
 import { Typography } from '@mui/material';
 import DragSelect from 'dragselect';
 import _ from 'lodash';
 import { unigraph } from 'unigraph-dev-common';
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { getRandomInt, isJsonString, UnigraphObject } from 'unigraph-dev-common/lib/utils/utils';
+import TimeAgo from 'javascript-time-ago';
+import en from 'javascript-time-ago/locale/en.json';
 import { AutoDynamicView } from './components/ObjectView/AutoDynamicView';
 import { backlinkQuery } from './components/ObjectView/backlinksUtils';
 import { BasicPersonView, DefaultSkeleton } from './components/ObjectView/BasicObjectViews';
@@ -171,6 +174,9 @@ export function init(hostname?: string) {
     initPackages();
     initSelect();
     initKeyboardShortcuts();
+    initTailwindEngine();
+
+    TimeAgo.addDefaultLocale(en);
 
     registerListQuickAdder();
 }
@@ -445,3 +451,47 @@ const registerListQuickAdder = () => {
         },
     });
 };
+
+function initTailwindEngine() {
+    const worker = new Worker(new URL('dynamicTailwind.worker.js', import.meta.url).pathname, {
+        type: 'module',
+    });
+
+    let messageCount = 0;
+
+    // eslint-disable-next-line no-shadow
+    const createMessenger = (worker: Worker) => {
+        return (type: string, payload: any): Promise<any> => {
+            // eslint-disable-next-line no-plusplus
+            const id = messageCount++;
+            const responseFromWorker = new Promise((resolve) => {
+                const listener = (e: MessageEvent) => {
+                    if (e.data.id !== id) {
+                        return;
+                    }
+                    worker.removeEventListener('message', listener);
+                    resolve(e.data.payload);
+                };
+                worker.addEventListener('message', listener);
+            });
+            worker.postMessage({
+                id,
+                type,
+                payload,
+            });
+            return responseFromWorker;
+        };
+    };
+
+    const postMessage = createMessenger(worker);
+
+    const tailwindcss: Tailwindcss = {
+        async setTailwindConfig(tailwindConfig) {
+            await postMessage('setTailwindConfig', { tailwindConfig });
+        },
+        async generateStylesFromContent(css, content) {
+            return postMessage('generateStylesFromContent', { css, content });
+        },
+    };
+    window.twinstance = tailwindcss;
+}

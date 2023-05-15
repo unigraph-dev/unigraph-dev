@@ -68,10 +68,10 @@ function UserLibraryAll({ id }: any) {
             window.unigraph.subscribeToType(
                 currentType,
                 (result: any[]) => {
-                    setData(result.reverse());
+                    setData(result.sort((a, b) => new Date(b._updatedAt).getTime() - new Date(a._updatedAt).getTime()));
                 },
                 subsId,
-                { metadataOnly: true, first: -500 },
+                { metadataOnly: true, first: -1500 },
             );
         }
         return function cleanup() {
@@ -99,7 +99,7 @@ function UserLibraryAll({ id }: any) {
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             <MultiTypeDescriptor itemGroups={itemGroups} currentType={currentType} setCurrentType={setCurrentType} />
             {currentType.length ? (
-                <DynamicObjectListView items={data} context={null} defaultFilter={[]} compact noBar />
+                <DynamicObjectListView items={data} context={null} defaultFilter={[]} compact />
             ) : (
                 <div>
                     <Typography style={{ margin: '12px' }}>Select a type to see items</Typography>

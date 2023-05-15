@@ -1,11 +1,9 @@
 import React, { useEffect } from 'react';
 import { Typography } from '@mui/material';
-import Editor, { loader } from '@monaco-editor/react';
+import Editor from '@monaco-editor/react';
 import { buildUnigraphEntity, processAutoref } from 'unigraph-dev-common/lib/utils/entityUtils';
 import { useEffectOnce } from 'react-use';
 import { ReferenceableSelectorControlled } from '../components/ObjectView/ReferenceableSelector';
-
-loader.config({ paths: { vs: './vendor/monaco-editor_at_0.31.1/' } });
 
 export default function DataModelPlayground() {
     const [origData, setOrigData] = React.useState('{}');

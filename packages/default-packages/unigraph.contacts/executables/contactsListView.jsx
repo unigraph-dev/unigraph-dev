@@ -96,6 +96,6 @@ return (
             </Button>
         </div>
 
-        <DynamicObjectListView items={contacts.map((el) => new UnigraphObject(el))} context={null} compact />
+        <DynamicObjectListView items={contacts.map((el) => new UnigraphObject(el))} context={null} />
     </>
 );

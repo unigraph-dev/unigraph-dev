@@ -14,21 +14,19 @@ export type ANotification = {
 };
 
 export const Notification: DynamicViewRenderer = ({ data, callbacks }) => {
-    const unpadded: ANotification = unpad(data);
-
     return (
         <ListItemText
-            primary={unpadded.name}
+            primary={data.get('name')?.as('primitive')}
             secondary={
                 <>
                     <Typography component="span" variant="body2" color="textPrimary" style={{ paddingRight: '4px' }}>
                         <span style={{ color: 'gray' }}>From: </span>
-                        {unpadded.from}
+                        {data.get('from').as('primitive')}
                         <span style={{ color: 'gray' }}>, updated: </span>
-                        {timeago.format(new Date(unpadded?._updatedAt))}
+                        {timeago.format(new Date(data._updatedAt))}
                     </Typography>
                     <Typography variant="body2" style={{ whiteSpace: 'pre' }}>
-                        {unpadded.content}
+                        {data.get('content').as('primitive')}
                     </Typography>
                 </>
             }

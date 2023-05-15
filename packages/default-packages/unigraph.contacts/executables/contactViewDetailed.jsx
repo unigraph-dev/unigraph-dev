@@ -1,8 +1,9 @@
 const { data, callbacks } = params;
 
 const [noteUid, setNoteUid] = React.useState(
-    data._value.children['_value['].filter((el) => el._value._value.type?.['unigraph.id'] === '$/schema/note_block')[0]
-        ?._value._value.uid,
+    data._value.children?.['_value['].filter(
+        (el) => el._value._value.type?.['unigraph.id'] === '$/schema/note_block',
+    )[0]?._value._value.uid,
 );
 
 return (
