@@ -95,21 +95,28 @@ const rehypePlugins: any[] = [rehypeKatex, rehypeRaw];
 
 const tryFindLinkToAdd = async (hostObject: any, name: string, subsId: any) => {
     if (!hostObject) return;
-    const res = await window.unigraph.getQueries([
-        `(func: uid(parentUid)) {
-            uid
-            type {<unigraph.id>}
-            popularity: count(<unigraph.origin>)
-        }
-        k as var(func: eq(<_value.%>, "${name}")) {
-            <_value.%>
-            type {<unigraph.id>}
-            unigraph.origin @filter(type(Entity) AND not uid(k)) {
-                    parentUid as uid
+    let linkFound;
+    if (name?.startsWith('0x')) {
+        linkFound = { uid: name };
+    } else {
+        const res = await window.unigraph.getQueries([
+            `(func: uid(parentUid)) {
+                uid
+                type {<unigraph.id>}
+                popularity: count(<unigraph.origin>)
             }
-        }`,
-    ]);
-    const linkFound = res[0].sort((a: any, b: any) => b.popularity - a.popularity)[0];
+            k as var(func: eq(<_value.%>, "${name}")) {
+                <_value.%>
+                type {<unigraph.id>}
+                unigraph.origin @filter(type(Entity) AND not uid(k)) {
+                        parentUid as uid
+                }
+            }`,
+        ]);
+        // eslint-disable-next-line prefer-destructuring
+        linkFound = res[0].sort((a: any, b: any) => b.popularity - a.popularity)[0];
+    }
+
     if (linkFound && hostObject.uid) {
         await window.unigraph.updateObject(
             hostObject.uid,

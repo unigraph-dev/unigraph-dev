@@ -46,6 +46,7 @@
         "mixpanel-browser": "^2.42.0",
         "moment": "^2.29.1",
         "monaco-editor": "^0.38.0",
+        "monaco-tailwindcss": "^0.6.0",
         "postcss-flexbugs-fixes": "4.2.1",
         "postcss-normalize": "8.0.1",
         "postcss-preset-env": "6.7.0",

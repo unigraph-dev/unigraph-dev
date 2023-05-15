@@ -81,6 +81,7 @@ import {
     HookAfterSubscriptionAddedParams,
     Hooks,
     initEntityHeads,
+    setupGlobalUpdatedHooks,
 } from './hooks';
 import { getAsyncLock } from './asyncManager';
 import { createExecutableCache, initExecutables } from './executableManager';
@@ -192,6 +193,7 @@ export default async function startServer(client: DgraphClient, isRecoveryMode?:
         poller(subs, cclient, callback, pendingIds, states, ofUpdate, uids);
     };
 
+    const guHooks = setupGlobalUpdatedHooks();
     const hooks: Hooks = {
         after_subscription_added: [
             async (context: HookAfterSubscriptionAddedParams) => {
@@ -281,6 +283,10 @@ export default async function startServer(client: DgraphClient, isRecoveryMode?:
                         client,
                         context.changedUids as any,
                         context.caches.uid_lists.data,
+                    );
+                    guHooks.regGlobalUpdatedHooks(
+                        context.changedUids as any,
+                        serverStates.hooks['after_object_updated/all'],
                     );
                 }
 

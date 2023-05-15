@@ -97,7 +97,7 @@ export function createUidListCache(
 export async function afterObjectUpdatedHooks (
     states: any, 
     hooks: Record<string, any[]>, 
-    hooksAllUpdated: any[],
+    hooksAllUpdated: any[], // TODO: remove this
     client: DgraphClient, 
     changedUids: string[],
     uidLists: Record<string, string[]>
@@ -111,5 +111,30 @@ export async function afterObjectUpdatedHooks (
         if (totalChangedUids.length === 0) return;
         hooks[uidListName].forEach(it => it({uids: totalChangedUids}));
     })
-    hooksAllUpdated.forEach(it => it({uids: changedUids}));
+    // hooksAllUpdated.forEach(it => it({uids: changedUids}));
+}
+
+// Set up debounced hooks call for global updated hooks
+export function setupGlobalUpdatedHooks () {
+    let changedUids: string[] = [];
+    const debouncedCall = _.debounce((hooksAllUpdated, changedUids) => {
+        const toCallUids: string[] = [...changedUids];
+        changedUids.length = 0;
+
+        hooksAllUpdated.forEach((it: any) => it({uids: toCallUids}));
+    }, 6000, {
+        leading: false,
+        trailing: true,
+        maxWait: 12000,
+    });
+    
+    return {
+        regGlobalUpdatedHooks: function (
+            tchangedUids: string[],
+            hooksAllUpdated: any[],
+        ) {
+            changedUids = _.uniq([...changedUids, ...tchangedUids]);
+            debouncedCall(hooksAllUpdated, changedUids);
+        }
+    }
 }

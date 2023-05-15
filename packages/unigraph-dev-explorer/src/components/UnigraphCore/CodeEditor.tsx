@@ -1,6 +1,5 @@
 /* eslint-disable new-cap */
 import {
-    Button,
     Collapse,
     Divider,
     FormControl,
@@ -25,35 +24,19 @@ import { mdiPackage, mdiPackageVariantClosed } from '@mdi/js';
 import Icon from '@mdi/react';
 
 import * as mmonaco from 'monaco-editor';
-import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
-import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
-import cssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker';
-import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
-import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
+import {
+    BarsArrowUpIcon,
+    BarsArrowDownIcon,
+    CheckIcon,
+    PlayIcon,
+    ViewColumnsIcon,
+    ArrowRightIcon,
+} from '@heroicons/react/24/outline';
 import { hoverSx, pointerHoverSx, TabContext } from '../../utils';
 import { AutoDynamicView } from '../ObjectView/AutoDynamicView';
 import DetailedObjectView from '../UserLibrary/UserLibraryObject';
 import { ExecutableCodeEditor } from '../ObjectView/DefaultCodeEditor';
-
-// eslint-disable-next-line no-restricted-globals
-self.MonacoEnvironment = {
-    // eslint-disable-next-line no-shadow
-    getWorker(_, label) {
-        if (label === 'json') {
-            return new jsonWorker();
-        }
-        if (label === 'css' || label === 'scss' || label === 'less') {
-            return new cssWorker();
-        }
-        if (label === 'html' || label === 'handlebars' || label === 'razor') {
-            return new htmlWorker();
-        }
-        if (label === 'typescript' || label === 'javascript') {
-            return new tsWorker();
-        }
-        return new editorWorker();
-    },
-};
+import { Button } from '../lib/Button';
 
 loader.config({ monaco: mmonaco });
 
@@ -98,33 +81,6 @@ export function NewUserCode({}) {
     );
 }
 
-export const Runner = ({ uid }: any) => {
-    const [json, setJson] = React.useState('');
-    const [response, setResponse] = React.useState("Press 'Go' to see results");
-
-    const runExecutableHandler = React.useCallback(() => {
-        if (uid)
-            window.unigraph
-                .runExecutable(uid, isJsonString(json) ? JSON.parse(json) : undefined, { showConsole: true }, true)
-                .then((res) => {
-                    setResponse(JSON.stringify(res, null, 2));
-                });
-    }, [uid, json]);
-
-    return (
-        <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-            <div style={{ flexGrow: 1, height: '100%', width: 'calc(50% - 32px)' }}>
-                <pre style={{ flexGrow: 1, overflow: 'hidden', overflowWrap: 'break-word' }}>
-                    context: JSON object accessible from the code
-                </pre>
-                <Editor defaultLanguage="json" path="params.json" value={json} onChange={setJson as any} />
-            </div>
-            <Button onClick={runExecutableHandler}>Go</Button>
-            <pre style={{ flexGrow: 1, height: '90%', width: 'calc(50% - 32px)' }}>{response}</pre>
-        </div>
-    );
-};
-
 export function CodeEditor({ id }: any) {
     const [execcontent, setexecContent]: any = React.useState([]);
     const [userExecContent, setUserExecContent]: any = React.useState([]);
@@ -132,6 +88,7 @@ export function CodeEditor({ id }: any) {
     const [packages, setPackages]: any = React.useState([]);
     const [currentUid, setCurrentUid]: any = React.useState('');
 
+    const actionsRef = React.useRef<any>({});
     const currentView = React.useMemo(
         () => (
             <DetailedObjectView
@@ -140,7 +97,7 @@ export function CodeEditor({ id }: any) {
                 components={{
                     '$/schema/executable': { view: ExecutableCodeEditor },
                 }}
-                callbacks={{ isEmbed: true }}
+                callbacks={{ isEmbed: true, actions: actionsRef }}
             />
         ),
         [currentUid, id],
@@ -148,6 +105,23 @@ export function CodeEditor({ id }: any) {
 
     const [isUserCollapseOpen, setIsUserCollapseOpen] = React.useState(false);
     const [currentPackage, setCurrentPackage] = React.useState('');
+
+    const [json, setJson] = React.useState('');
+    const [response, setResponse] = React.useState("Press 'Run' to see results");
+
+    const runExecutableHandler = React.useCallback(() => {
+        if (currentUid)
+            window.unigraph
+                .runExecutable(
+                    currentUid,
+                    isJsonString(json) ? JSON.parse(json) : undefined,
+                    { showConsole: true },
+                    true,
+                )
+                .then((res) => {
+                    setResponse(JSON.stringify(res, null, 2));
+                });
+    }, [currentUid, json]);
 
     const tabContext = React.useContext(TabContext);
 
@@ -186,10 +160,6 @@ export function CodeEditor({ id }: any) {
     });
 
     const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
-    const splitterRef = React.useRef<any>(null);
-    React.useEffect(() => {
-        splitterRef?.current.setState({ secondaryPaneSize: sidebarCollapsed ? 0 : 360 });
-    }, [sidebarCollapsed]);
 
     const [runnerCollapsed, setRunnerCollapsed] = React.useState(true);
     const bigSplitterRef = React.useRef<any>(null);
@@ -199,10 +169,14 @@ export function CodeEditor({ id }: any) {
 
     return (
         <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ flexGrow: 1, height: 'calc(100% - 24px)' }}>
+            <div style={{ flexGrow: 1 }}>
                 <SplitterLayout vertical secondaryInitialSize={0} ref={bigSplitterRef}>
-                    <SplitterLayout primaryIndex={1} secondaryInitialSize={360} ref={splitterRef}>
-                        <div>
+                    <div className="flex h-full overflow-hidden">
+                        <div
+                            className={`flex-shrink-0 max-w-[340px] h-full overflow-y-auto${
+                                sidebarCollapsed ? ' hidden' : ''
+                            }`}
+                        >
                             {/* User code */}
                             <ListItem
                                 onClick={() => {
@@ -286,25 +260,66 @@ export function CodeEditor({ id }: any) {
                                 </>
                             ))}
                         </div>
-                        {currentUid ? currentView : ''}
-                    </SplitterLayout>
-                    <Runner uid={currentUid} />
+                        {!sidebarCollapsed && <Divider flexItem orientation="vertical" />}
+                        <div className="h-full" style={{ width: sidebarCollapsed ? '100%' : 'calc(100% - 341px)' }}>
+                            <div className="h-full">{currentUid ? currentView : ''}</div>
+                            <div className="h-10 flex gap-2 px-2 py-1 absolute bottom-0 right-0 bg-transparent">
+                                <Button onClick={(ev) => setSidebarCollapsed(!sidebarCollapsed)}>
+                                    <ViewColumnsIcon className="h-4 w-4" />
+                                    Sidebar
+                                </Button>
+                                <Button
+                                    onClick={(ev) => {
+                                        setRunnerCollapsed(!runnerCollapsed);
+                                        // if (runnerCollapsed) setSidebarCollapsed(true);
+                                    }}
+                                >
+                                    {runnerCollapsed ? (
+                                        <BarsArrowUpIcon className="h-4 w-4" />
+                                    ) : (
+                                        <BarsArrowDownIcon className="h-4 w-4" />
+                                    )}
+                                    Runner
+                                </Button>
+                                {currentUid.length > 0 && (
+                                    <>
+                                        <Button
+                                            onClick={() => {
+                                                actionsRef.current.save();
+                                            }}
+                                        >
+                                            <CheckIcon className="h-4 w-4" />
+                                            Save
+                                        </Button>
+                                        <Button onClick={runExecutableHandler}>
+                                            <PlayIcon className="h-4 w-4" />
+                                            Run
+                                        </Button>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+                        <div style={{ flexGrow: 1, height: '100%', width: '50%' }}>
+                            <Editor
+                                defaultLanguage="json"
+                                path="params.json"
+                                value={json}
+                                onChange={setJson as any}
+                                className="my-2"
+                            />
+                        </div>
+                        <ArrowRightIcon className="h-4 w-4 text-slate-500" />
+                        <div
+                            style={{ flexGrow: 1, height: 'calc(100% - 16px)', width: '50%' }}
+                            className="ml-4 mx-2 px-3 py-2 bg-gray-50 ring-1 ring-gray-200 rounded-lg overflow-auto"
+                        >
+                            <pre className="text-sm ">{response}</pre>
+                        </div>
+                    </div>
                 </SplitterLayout>
-            </div>
-            <div style={{ height: '48px' }}>
-                <Divider />
-                <Button variant="outlined" onClick={(ev) => setSidebarCollapsed(!sidebarCollapsed)}>
-                    Toggle sidebar
-                </Button>
-                <Button
-                    variant="outlined"
-                    onClick={(ev) => {
-                        setRunnerCollapsed(!runnerCollapsed);
-                        if (runnerCollapsed) setSidebarCollapsed(true);
-                    }}
-                >
-                    Toggle runner
-                </Button>
+                <div className="h-1 absolute bottom-0 w-full bg-white" />
             </div>
         </div>
     );

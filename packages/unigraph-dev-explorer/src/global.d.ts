@@ -18,6 +18,7 @@ declare global {
         dragselect: any;
         getComponentDataById?: any;
         twinstance: any;
+        twFlag?: boolean;
     }
 }
 

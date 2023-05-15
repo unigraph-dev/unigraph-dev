@@ -4,7 +4,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import { unpad } from 'unigraph-dev-common/lib/utils/entityUtils';
 import Editor, { loader } from '@monaco-editor/react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
     Accordion,
     AccordionDetails,
@@ -23,6 +23,7 @@ import {
 import { ExpandMore, Save } from '@mui/icons-material';
 import { Actions } from 'flexlayout-react';
 import { useEffectOnce } from 'react-use';
+import { configureMonacoTailwindcss, tailwindcssData } from 'monaco-tailwindcss';
 
 import * as mmonaco from 'monaco-editor';
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
@@ -30,8 +31,12 @@ import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
 import cssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker';
 import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
-
 import unigraphDecl from 'unigraph-dev-common/lib/types/unigraph.d.ts?raw';
+import { ClockIcon, CodeBracketSquareIcon, PlayIcon } from '@heroicons/react/24/outline';
+import ReactTimeAgo from 'react-time-ago';
+import { mdiPackageVariantClosed } from '@mdi/js';
+import Icon from '@mdi/react';
+import tailwindcssWorker from './tailwindcss.worker.js?worker';
 
 // eslint-disable-next-line no-restricted-globals
 self.MonacoEnvironment = {
@@ -47,6 +52,10 @@ self.MonacoEnvironment = {
         }
         if (label === 'typescript' || label === 'javascript') {
             return new tsWorker();
+        }
+        if (label === 'tailwindcss') {
+            console.log('uewiruewiurfioewuroieoruewio');
+            return new tailwindcssWorker();
         }
         return new editorWorker();
     },
@@ -159,7 +168,7 @@ const ext: any = {
 //     }
 // }
 
-export function ExecutableCodeEditor({ data, options }: any) {
+export function ExecutableCodeEditor({ data, options, callbacks }: any) {
     const unpadded = unpad(data);
 
     const [currentCode, setCurrentCode] = React.useState(unpadded.src);
@@ -182,6 +191,14 @@ export function ExecutableCodeEditor({ data, options }: any) {
     function handleEditorChange(value: any, event: any) {
         setCurrentCode(value);
     }
+
+    useEffect(() => {
+        if (callbacks?.actions?.current) {
+            callbacks.actions.current.save = () => {
+                updateCode(currentCode);
+            };
+        }
+    }, [callbacks, currentCode]);
 
     useEffectOnce(() => {
         if (options?.viewId) {
@@ -208,26 +225,36 @@ export function ExecutableCodeEditor({ data, options }: any) {
                     expanded={optionsOpen}
                     onChange={() => setOptionsOpen(!optionsOpen)}
                     variant="outlined"
-                    style={{ flexGrow: 1, marginBottom: '16px' }}
+                    style={{ flexGrow: 1, marginBottom: '4px' }}
+                    className="border-none"
                 >
                     <AccordionSummary expandIcon={<ExpandMore />} aria-controls="panel1bh-content" id="panel1bh-header">
-                        <Typography style={{ flexBasis: '50%', flexShrink: 0 }}>{unpadded.name}</Typography>
-                        <Typography color="textSecondary">{unpadded.env}</Typography>
+                        <div className="flex flex-col">
+                            <p>
+                                <span className="mr-2 inline-flex items-center rounded-full bg-gray-50 px-2 py-[1px] text-xs font-medium text-gray-600 outline outline-1 outline-gray-200">
+                                    <PlayIcon className="h-3 w-3 -ml-0.5 mr-1" />
+                                    {unpadded.env}
+                                </span>
+                                <span className="text-[15px] text-gray-800 font-medium">{unpadded.name}</span>
+                            </p>
+                            <p className="-mt-[1px]">
+                                <span className="text-xs text-gray-600">
+                                    <ClockIcon className="inline h-[12px] w-[12px] mr-1 mb-0.5" />
+                                    <ReactTimeAgo date={new Date(data._updatedAt)} />
+                                </span>
+                                {data?.['unigraph.id']?.length > 0 && (
+                                    <span className="text-xs text-gray-600 ml-3">
+                                        <CodeBracketSquareIcon className="inline h-[12px] w-[12px] mr-1" />
+                                        <pre className="inline text-[11px]">
+                                            $/executable/{data['unigraph.id'].split('/executable/')[1]}
+                                        </pre>
+                                    </span>
+                                )}
+                            </p>
+                        </div>
                     </AccordionSummary>
                     <AccordionDetails>
                         <List style={{ width: '100%' }}>
-                            <ListItem>
-                                <Typography
-                                    style={{
-                                        flexBasis: '33.33%',
-                                        flexShrink: 0,
-                                        maxWidth: '240px',
-                                    }}
-                                >
-                                    unigraph.id
-                                </Typography>
-                                <Typography color="textSecondary">{unpadded['unigraph.id'] || 'none'}</Typography>
-                            </ListItem>
                             <ListItem>
                                 <Typography
                                     style={{
@@ -293,15 +320,30 @@ export function ExecutableCodeEditor({ data, options }: any) {
                         {previewComponent}
                     </AccordionDetails>
                 </Accordion>
-                <IconButton onClick={() => updateCode(currentCode)} size="large">
-                    <Save />
-                </IconButton>
+                {/* callbacks.isEmbed !== true && (
+                    <IconButton onClick={() => updateCode(currentCode)} size="large">
+                        <Save />
+                    </IconButton>
+                ) */}
             </div>
             <div style={{ flexGrow: 1, height: '100%' }}>
                 <Editor
                     defaultLanguage={lang[unpadded.env]}
                     beforeMount={(monaco) => {
                         // monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
+
+                        monaco.languages.css.cssDefaults.setOptions({
+                            data: {
+                                dataProviders: {
+                                    tailwindcssData,
+                                },
+                            },
+                        });
+
+                        if (!window.twFlag) {
+                            configureMonacoTailwindcss(monaco);
+                            window.twFlag = true;
+                        }
 
                         monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
                             noSemanticValidation: false,
