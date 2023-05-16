@@ -9,12 +9,13 @@ with import <nixpkgs> {};
 let
   pname = "unigraph";
   name = "${pname}-${version}";
-  version = "0.2.9";
+  version = "0.2.10";
   
   src = builtins.fetchurl {
     url =
       "https://github.com/unigraph-dev/unigraph-dev/releases/download/v${version}/Unigraph-${version}.AppImage";
     sha256 = {
+      "0.2.10" = "06b644cc35e5ad3a3d7bd132a4f21560a83ba5e262491bac6682eebade9ac8d5";
       "0.2.9" = "976f60304a8c03c96cf662bc5f4d064e2e65f5bc8e9f5a13a92c7be7b940fb44";
       "0.2.8" = "509b4b5cfe69f348410be5ff7babd44d12a0f52c76217b89f6a7101f51a92abd";
       "0.2.7" = "0ccfa292a09cacf9491e2378fd64631ab08cadbc4d246a12a752b85146947fb6";
