@@ -24,6 +24,7 @@ export const useSubscriptionDelegate: (...args: any) => [() => any, number] = (
     type: string,
     objectView: any,
     object: any,
+    forceQueryFull?: boolean,
 ) => {
     const tabContext = React.useContext(TabContext);
 
@@ -65,7 +66,7 @@ export const useSubscriptionDelegate: (...args: any) => [() => any, number] = (
                         ? {
                               queryFn: query,
                           }
-                        : type && objectView
+                        : type && objectView && !forceQueryFull
                         ? { queryAsType: type }
                         : undefined,
                 },

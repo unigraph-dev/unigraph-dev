@@ -62,6 +62,7 @@ export const AutoDynamicViewDetailed: DynamicViewRenderer = ({
         };
     }, []);
 
+    // console.log('AutoDynamicViewDetailed', object?.uid, object?.type?.['unigraph.id'], object);
     const [getObject, subsId] = useSubscriptionDelegate(
         object?.uid,
         object?.type?.['unigraph.id'],

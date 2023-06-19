@@ -6,7 +6,7 @@
     "description": "A local-first and universal graph database, knowledge engine, and workspace",
     "main": "src/main.js",
     "scripts": {
-        "start": "electron . --dev",
+        "start": "FRONTEND_LOCATION=localhost electron . --dev",
         "dist": "USE_HARD_LINKS=false electron-builder"
     },
     "homepage": "./",

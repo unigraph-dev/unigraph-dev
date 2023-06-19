@@ -83,18 +83,32 @@ export function WorkspacePageComponent({ children, maximize, paddingTop, id, tab
     );
 }
 
-const WorkspaceInnerEl_ = ({ config, component }: any) => {
-    const pages = window.unigraph.getState('registry/pages');
-    if (component.startsWith('/pages/')) {
-        const page = pages.value[component.replace('/pages/', '') as string];
-        return page.constructor(config);
-    }
-    if (component.startsWith('/components/')) {
-        return components[component.replace('/components/', '') as string].constructor(config.viewConfig);
-    }
-    return () => '';
+const WorkspaceInnerEl = ({ config, component }: any) => {
+    const [pages, setPages] = React.useState<any>({});
+    const pagesState = window.unigraph.getState('registry/pages');
+    React.useEffect(() => {
+        const fn = (thing: any) => {
+            setPages(thing);
+        };
+        pagesState.subscribe(fn, true);
+        return () => pagesState.unsubscribe(fn);
+    }, []);
+
+    const pageVal = component.startsWith('/pages/') ? pages[component.replace('/pages/', '') as string] : undefined;
+
+    const ret = React.useMemo(() => {
+        if (component.startsWith('/pages/')) {
+            const page = pageVal;
+            return page?.constructor ? React.createElement(page?.constructor, config) : null;
+        }
+        if (component.startsWith('/components/')) {
+            return components[component.replace('/components/', '') as string].constructor(config.viewConfig);
+        }
+        return () => '';
+    }, [pageVal !== undefined, pageVal?._updatedAt, component, JSON.stringify(config)]);
+
+    return ret;
 };
-const WorkspaceInnerEl = React.memo(WorkspaceInnerEl_, (a, b) => JSON.stringify(a) === JSON.stringify(b));
 
 function ConnectionIndicator() {
     const connected = useUnigraphState('unigraph/connected');
@@ -174,7 +188,7 @@ function ExecutablesIndicator() {
                     console.log('aaaa');
                 }}
             >
-                <Icon path={mdiSync} size={0.7} style={{ verticalAlign: 'middle' }} key="icon" />
+                <Icon path={mdiSync} size={0.7} style={{ verticalAlign: 'middle', display: 'inline' }} key="icon" />
                 {totalExecutables.length}
             </div>
         </div>

@@ -500,25 +500,16 @@ export default async function startServer(client: DgraphClient, isRecoveryMode?:
          */
         create_unigraph_schema(event: EventCreateUnigraphSchema, ws: IWebsocket) {
             /* eslint-disable */ // TODO: Temporarily appease the linter, remember to fix it later
-            lock.acquire('caches/schema', function (done: Function) {
+            lock.acquire('caches/schema', async function (done: Function) {
                 const schema = event.schema;
-                const schemaAutoref = processAutorefUnigraphId(schema);
-                const upsert: UnigraphUpsert = insertsToUpsert(
-                    [schemaAutoref],
-                    undefined,
-                    serverStates.caches['schemas'].dataAlt![0],
-                );
-                dgraphClient
-                    .createUnigraphUpsert(upsert)
-                    .then(async (_) => {
-                        await callHooks(serverStates.hooks, 'after_schema_updated', { caches: serverStates.caches });
-                        ws.send(makeResponse(event, true));
-                        done(false, null);
-                    })
+                await localApi
+                    .createSchema(schema)
                     .catch((e) => {
                         ws.send(makeResponse(event, false, { error: e.toString() }));
                         done(true, null);
                     });
+                ws.send(makeResponse(event, true));
+                done(false, null);
             });
         },
 
@@ -835,6 +826,18 @@ export default async function startServer(client: DgraphClient, isRecoveryMode?:
                         send: (it: string) => {
                             ws.send(it);
                         },
+                        ...(event.streamed_id ? {
+                            stream: (msg: any) => {
+                                ws.send(stringify(
+                                    {
+                                        type: 'response',
+                                        id: event.streamed_id,
+                                        body: msg,
+                                    },
+                                    { replacer: getCircularReplacer() },
+                                ))
+                            }
+                        } : {}),
                         ...event.context,
                     },
                     undefined,

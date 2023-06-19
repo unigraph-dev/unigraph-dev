@@ -22,6 +22,8 @@ import {
     mdiMessageArrowRightOutline,
     mdiDatabaseEyeOutline,
     mdiCubeSend,
+    mdiCube,
+    mdiCubeOutline,
 } from '@mdi/js';
 import { FavoriteBar } from './UnigraphCore/FavoriteBar';
 import { pointerHoverSx } from '../utils';

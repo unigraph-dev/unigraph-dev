@@ -412,6 +412,15 @@ export interface Unigraph<TT = WebSocket | undefined> {
      */
     runExecutable<T>(uid: string, params: T, context?: any, fnString?: boolean, bypassCache?: boolean): Promise<any>;
     /**
+     * Runs a backend executable/routine but with the result streamed through a callback function.
+     *
+     * @param uid The global executable id of the form `$/package/xxx/xxx/executable/abc`, or simply a database-wide UID.
+     * You can use the global function `getExecutableId` to find it.
+     * @param params The parameters defined for that executable.
+     * @param fnString Whether to return the executable function as a function or string.
+     */
+    runExecutableStreamed?<T>(uid: string, params: T, callback: (msg: any) => any): Promise<any>;
+    /**
      * Adds a notification to the global notification list.
      *
      * @param item Of type UnigraphNotification: `{from: "<sender>", name: "<title>", content: "<content>"}`

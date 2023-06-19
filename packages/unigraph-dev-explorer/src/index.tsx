@@ -103,6 +103,7 @@ function initDynamicObjectViews() {
                         el._value.view._value.uid,
                         {
                             name: el._value.name['_value.%'],
+                            _updatedAt: el?._value?.view?._value?._updatedAt,
                             constructor: await getComponentAsView(el._value.view._value, {}),
                         },
                     ]),
@@ -115,7 +116,6 @@ function initDynamicObjectViews() {
             iconKvs.forEach(([key, icon]) => {
                 if (newVal[key]) newVal[key].icon = icon;
             });
-            console.log(iconKvs);
             currPages.setValue(newVal);
             window.reloadCommands();
         },

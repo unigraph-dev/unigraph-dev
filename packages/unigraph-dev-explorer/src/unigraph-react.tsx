@@ -136,6 +136,7 @@ const refsMap = {
     '@material-ui/core': () => require('@mui/material'),
     '@material-ui/icons': () => require('@mui/icons-material'),
     'react-time-ago': () => require('react-time-ago'),
+    'react-markdown': () => require('react-markdown'),
 };
 
 const buildRefs = (

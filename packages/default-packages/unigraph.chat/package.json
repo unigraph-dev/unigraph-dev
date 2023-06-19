@@ -1,0 +1,24 @@
+{
+    "displayName": "Unigraph Chat",
+    "version": "0.2.7",
+    "description": "Chat UI experiments with Unigraph",
+    "name": "unigraph.chat",
+    "unigraph": {
+        "schemas": [],
+        "executables": [
+            {
+                "name": "Unigraph Chat",
+                "env": "component/react-jsx",
+                "id": "unigraph-chat",
+                "src": "executables/unigraphChat.jsx",
+                "editable": true
+            }
+        ],
+        "entities": [
+            {
+                "id": "unigraph_chat_shortcut",
+                "src": "entities/unigraph_chat_shortcut.json"
+            }
+        ]
+    }
+}

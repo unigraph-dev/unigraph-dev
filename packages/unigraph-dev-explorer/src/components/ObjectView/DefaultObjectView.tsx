@@ -21,7 +21,16 @@ const getProps = (data: UnigraphObject) => {
 
 export const ViewViewDetailed: DynamicViewRenderer = ({ data, callbacks }) => {
     if (data.get('view')?._value?.['dgraph.type'].includes('Executable')) {
-        return <AutoDynamicViewDetailed object={new UnigraphObject(data.get('view')._value)} callbacks={callbacks} />;
+        return (
+            <AutoDynamicViewDetailed
+                object={{
+                    uid: data.get('view')._value.uid,
+                    _stub: 1,
+                    type: data.get('view')._value.type,
+                }}
+                callbacks={callbacks}
+            />
+        );
     }
     if (data.get('view').as('primitive')?.startsWith?.('/pages')) {
         const pages = window.unigraph.getState('registry/pages').value;

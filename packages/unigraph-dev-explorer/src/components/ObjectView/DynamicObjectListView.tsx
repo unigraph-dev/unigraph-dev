@@ -736,6 +736,11 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
         }),
     }));
 
+    const groupedItems = React.useMemo(
+        () => groupers[groupBy as any]?.(procItems.map(itemGetter)),
+        [groupBy, procItems, itemGetter, groupers],
+    );
+
     return (
         <Root
             style={{
@@ -868,7 +873,7 @@ export const DynamicObjectListView: React.FC<DynamicObjectListViewProps> = ({
                                           _swipableClassName: className,
                                           _swipableRest: rest,
                                       })
-                                    : groupers[groupBy as any](procItems.map(itemGetter)).map((el: Group) => (
+                                    : groupedItems?.map((el: Group) => (
                                           <React.Fragment key={el.name}>
                                               <ListSubheader
                                                   style={{

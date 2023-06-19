@@ -3,7 +3,12 @@
 
 /* eslint-disable default-param-last */
 /* eslint-disable max-len */
-import { buildGraph, getCircularReplacer, getRandomInt } from 'unigraph-dev-common/lib/utils/utils';
+import {
+    buildGraph,
+    getCircularReplacer,
+    getRandomInt,
+    getRefQueryUnigraphId,
+} from 'unigraph-dev-common/lib/utils/utils';
 import { Unigraph } from 'unigraph-dev-common/lib/types/unigraph';
 import {
     processAutorefUnigraphId,
@@ -58,6 +63,8 @@ export function getLocalUnigraphAPI(
         },
         createSchema: async (schemain) => {
             const autorefSchema = processAutorefUnigraphId(schemain);
+
+            // Upsert schema
             const upsert: UnigraphUpsert = insertsToUpsert(
                 [autorefSchema],
                 undefined,
@@ -65,6 +72,33 @@ export function getLocalUnigraphAPI(
             );
             await client.createUnigraphUpsert(upsert);
             await states.caches.schemas.updateNow();
+
+            // Update registry if we're upserting a local schema
+            if (schemain?.['unigraph.id']?.startsWith('$/package/local/0.0.0/schema/')) {
+                console.log("Updating registry, because we're upserting a local schema!");
+                // To update: 1) namespace map directly to upserted schema; 2) shorthand reference;
+                // Similar to how we do it in packageManager
+                const upsert2: UnigraphUpsert = insertsToUpsert(
+                    [
+                        {
+                            ...getRefQueryUnigraphId(`$/${schemain['unigraph.id'].split('/').slice(4).join('/')}`),
+                            'dgraph.type': ['Type'],
+                            '_value[': getRefQueryUnigraphId(schemain['unigraph.id']),
+                        },
+                        {
+                            ...getRefQueryUnigraphId('$/meta/namespace_map'),
+                            [`$/${schemain['unigraph.id'].split('/').slice(4).join('/')}`]: getRefQueryUnigraphId(
+                                schemain['unigraph.id'],
+                            ),
+                        },
+                    ],
+                    undefined,
+                    states.caches.schemas.dataAlt![0],
+                );
+                await client.createUnigraphUpsert(upsert2);
+                await states.caches.schemas.updateNow();
+            }
+
             await states.caches.packages.updateNow();
             callHooks(states.hooks, 'after_schema_updated', { caches });
         },

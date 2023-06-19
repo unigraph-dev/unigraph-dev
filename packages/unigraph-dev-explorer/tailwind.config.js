@@ -14,5 +14,8 @@ module.exports = {
       }
     }
   },
-  plugins: [],
+  safelist: ['prose'],
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
 }

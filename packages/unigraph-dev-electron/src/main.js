@@ -222,13 +222,13 @@ function unigraphLoaded() {
             if (!isDev()) {
                 mainWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'));
             } else {
-                mainWindow.loadURL(`http://${frontendLocation}:3000/`);
+                mainWindow.loadURL(`http://${frontendLocation}:5173/`);
             }
         }
         if (todayWindow) {
             //! isDev() ?
             // todayWindow.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'), { query: { "pageName": "today" } }) :
-            // todayWindow.loadURL('http://' + frontendLocation + ':3000/?pageName=today');
+            // todayWindow.loadURL('http://' + frontendLocation + ':5173/?pageName=today');
             // todayWindow.hide();
         }
         if (omnibar) {
@@ -236,7 +236,7 @@ function unigraphLoaded() {
                 ? omnibar.loadFile(path.join(__dirname, '..', 'buildweb', 'index.html'), {
                       query: { pageName: 'omnibar' },
                   })
-                : omnibar.loadURL(`http://${frontendLocation}:3000/?pageName=omnibar`);
+                : omnibar.loadURL(`http://${frontendLocation}:5173/?pageName=omnibar`);
             omnibar.hide();
         }
     }, 0);

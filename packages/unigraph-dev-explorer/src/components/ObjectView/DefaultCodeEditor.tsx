@@ -32,7 +32,7 @@ import cssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker';
 import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
 import unigraphDecl from 'unigraph-dev-common/lib/types/unigraph.d.ts?raw';
-import { ClockIcon, CodeBracketSquareIcon, PlayIcon } from '@heroicons/react/24/outline';
+import { ClockIcon, CodeBracketSquareIcon, PlayIcon, VariableIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import ReactTimeAgo from 'react-time-ago';
 import { mdiPackageVariantClosed } from '@mdi/js';
 import Icon from '@mdi/react';
@@ -184,7 +184,7 @@ export function ExecutableCodeEditor({ data, options, callbacks }: any) {
             { src: newSrc },
             undefined,
             undefined,
-            unpadded.env.endsWith('/react-jsx') ? [99999998, 99999999] : undefined,
+            // unpadded.env.endsWith('/react-jsx') ? [99999998, 99999999] : undefined,
         );
     };
 
@@ -230,11 +230,14 @@ export function ExecutableCodeEditor({ data, options, callbacks }: any) {
                 >
                     <AccordionSummary expandIcon={<ExpandMore />} aria-controls="panel1bh-content" id="panel1bh-header">
                         <div className="flex flex-col">
-                            <p>
+                            <p className="flex items-center">
                                 <span className="mr-2 inline-flex items-center rounded-full bg-gray-50 px-2 py-[1px] text-xs font-medium text-gray-600 outline outline-1 outline-gray-200">
                                     <PlayIcon className="h-3 w-3 -ml-0.5 mr-1" />
                                     {unpadded.env}
                                 </span>
+                                {currentCode !== data.get('src').as('primitive') && (
+                                    <span className="mr-1.5 w-1.5 h-1.5 rounded-full bg-blue-500" />
+                                )}
                                 <span className="text-[15px] text-gray-800 font-medium">{unpadded.name}</span>
                             </p>
                             <p className="-mt-[1px]">
@@ -250,6 +253,10 @@ export function ExecutableCodeEditor({ data, options, callbacks }: any) {
                                         </pre>
                                     </span>
                                 )}
+                                <span className="text-xs text-gray-600 ml-2">
+                                    <VariableIcon className="inline h-[12px] w-[12px] mr-1" />
+                                    <pre className="inline text-[11px]">{data.uid}</pre>
+                                </span>
                             </p>
                         </div>
                     </AccordionSummary>
@@ -364,10 +371,17 @@ export function ExecutableCodeEditor({ data, options, callbacks }: any) {
                                 // TODO: import references
                             }
                         });
+
                         // throw new Error('Not implemented');
                     }}
                     onMount={(editor, monaco) => {
                         editorRef.current = editor;
+
+                        // eslint-disable-next-line no-bitwise
+                        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+                            // alert('saving');
+                            updateCode(editor.getValue());
+                        });
                     }}
                     path={`file:///${data.uid || 'main'}${ext[unpadded.env]}`}
                     defaultValue={currentCode}

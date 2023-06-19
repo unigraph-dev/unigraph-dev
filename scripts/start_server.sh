@@ -31,5 +31,5 @@ par=$( cd $(dirname $0) ; pwd -P )
 eval 'mkdir $data || true'
 eval 'cd $data && $dgraph alpha --limit "mutations-nquad=2560000; query-edge=2560000;" &'
 eval 'cd $data && $dgraph zero &'
-#sleep 10
-#eval 'cd $par && yarn backend-start'
+sleep 10
+eval 'cd $par && yarn backend-start'

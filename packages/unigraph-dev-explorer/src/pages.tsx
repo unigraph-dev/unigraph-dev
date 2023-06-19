@@ -3,6 +3,7 @@ import {
     mdiBellOutline,
     mdiBookOpenOutline,
     mdiCogOutline,
+    mdiCubeOutline,
     mdiDeleteOutline,
     mdiFeatureSearchOutline,
     mdiInboxOutline,

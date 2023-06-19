@@ -125,12 +125,12 @@
 }
 
 .flexlayout__border_left_electron {
-    margin-top: 40px;
+    margin-top: 32px;
 }
 
 .flexlayout__tab_border_left_electron {
     background-color: var(--app-drawer-background-color);
-    padding-top: 40px;
+    padding-top: 32px;
 }
 
 .flexlayout__tab_toolbar {

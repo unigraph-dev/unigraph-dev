@@ -17,6 +17,10 @@ body {
   background: transparent;
 }
 
+.no-scroll::-webkit-scrollbar {
+  display: none;
+}
+
 kbd {
   background-color: #eee;
     border-radius: 3px;

@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /* eslint-disable default-param-last */
 
 // FIXME: This file is ambiguous in purpose! Move utils to utils folder and keep this a small interface with a window object.
@@ -182,9 +183,19 @@ export default function unigraph(url: string, browserId: string, password?: stri
         context?: any,
         fnString?: boolean,
         bypassCache?: boolean,
+        streamed?: any,
     ) =>
         new Promise((resolve, reject) => {
             const id = getRandomInt();
+            let streamed_id: any;
+            if (streamed) {
+                streamed_id = getRandomInt();
+                callbacks[streamed_id] = (response: any) => {
+                    if (response.body) {
+                        streamed(response.body);
+                    }
+                };
+            }
             callbacks[id] = (response: any) => {
                 if (response.success) {
                     if (response.returns?.return_function_component !== undefined && !fnString) {
@@ -199,7 +210,12 @@ export default function unigraph(url: string, browserId: string, password?: stri
                     }
                 } else reject(response);
             };
-            sendEvent(connection, 'run_executable', { uid, params: params || {}, bypassCache, context }, id);
+            sendEvent(
+                connection,
+                'run_executable',
+                { uid, params: params || {}, bypassCache, context, ...(streamed_id ? { streamed_id } : {}) },
+                id,
+            );
         });
 
     const runExecutableInClient = <T>(
@@ -238,6 +254,10 @@ export default function unigraph(url: string, browserId: string, password?: stri
         }
         // client only runs client and lambda execs
         return runExecutableInClient(uidOrExec, params, context, fnString);
+    };
+
+    const runExecutableStreamed = <T>(uidOrExec: any, params: T, callback: any) => {
+        return runExecutableInServer(uidOrExec, params, undefined, undefined, undefined, callback);
     };
 
     const dispatchCommand = (name: string, params: any, context: any) => {
@@ -733,6 +753,7 @@ export default function unigraph(url: string, browserId: string, password?: stri
             }),
         runExecutable,
         runExecutableInClient,
+        runExecutableStreamed,
         getNamespaceMapUid: (name) => {
             throw Error('Not implemented');
         },

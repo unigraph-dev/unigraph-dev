@@ -35,6 +35,7 @@ export function AutoDynamicView({
     onClick,
     shortcuts,
     setBacklinkComponent,
+    stubForceQueryFull,
     ...props
 }: AutoDynamicViewProps) {
     const [DynamicViews, setDynamicViews] = React.useState({
@@ -83,6 +84,7 @@ export function AutoDynamicView({
         object?.type?.['unigraph.id'],
         DynamicViews[object?.type?.['unigraph.id']],
         object,
+        stubForceQueryFull,
     );
     const getObjectRef = React.useRef<any>();
     getObjectRef.current = getObject_;

@@ -1,7 +1,8 @@
-const query = `(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted)) AND (NOT eq(<_hide>, true))) @recurse {
+const query = `(func: uid(res)) @filter(type(Entity) AND (NOT type(Deleted)) AND (NOT eq(<_hide>, true))) {
     uid
-    <unigraph.id>
-    expand(_userpredicate_)
+    type {
+        <unigraph.id>
+    }
 }
 frames as var(func: uid(partf)) @cascade {
     _value {

@@ -22,15 +22,6 @@
                 "editable": true
             },
             {
-                "name": "Index notes",
-                "env": "routine/js",
-                "id": "index-notes",
-                "src": "executables/indexNotes.js",
-                "periodic": "*/1 * * * *",
-                "editable": true,
-                "concurrency": 1
-            },
-            {
                 "name": "Semantic searcher",
                 "env": "component/react-jsx",
                 "id": "semantic-searcher-component",

@@ -17,6 +17,7 @@ export type AutoDynamicViewProps = {
     shortcuts?: any;
     options?: DynamicViewOptions;
     setBacklinkComponent?: any;
+    stubForceQueryFull?: boolean;
 };
 
 export type DynamicViewOptions = {
